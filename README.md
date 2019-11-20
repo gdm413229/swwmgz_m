@@ -1,14 +1,14 @@
 ### SWWM GZ
 #### Revived through Doom Tournament
 
---
+---
 
 SWWM GZ brings to GZDoom a "best of" collection of custom weapons I've made for
 Unreal Tournament, plus many new things that didn't make the cut there.
 
 This is the very first fully original add-on on top of Doom Tournament.
 
---
+---
 
 ### The weapons
 
@@ -255,7 +255,7 @@ it's already full.
 Unlike its previous incarnation in SWWM Platinum, this one doesn't have such an
 obscene pre-fire delay, so it's much easier to land a shot.
 
---
+---
 
 ### The pickups
 
@@ -358,7 +358,7 @@ Artifact.
 
 You're fucking invincible for a total of 90 seconds.
 
---
+---
 
 ### The HUD
 
@@ -406,7 +406,7 @@ smoke clouds, a targeter has been implemented, which will show the following:
 
 These components are toggleable.
 
---
+---
 
 ### The Player Classes
 

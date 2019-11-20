@@ -1,4 +1,4 @@
-### SWWM GZ
+### ![SWWM GZ](https://raw.githubusercontent.com/OrdinaryMagician/swwmgz_m/master/graphics/SWWMGZLogo.png)
 #### Revived through Doom Tournament
 
 ---
@@ -10,7 +10,7 @@ This is the very first fully original add-on on top of Doom Tournament.
 
 ---
 
-### The weapons
+### _The weapons_
 
 The arsenal this mod brings to the table is composed mainly of stupidly
 overpowered weapons, which has been my specialty for years.
@@ -21,7 +21,7 @@ so don't forget to bind those too.
 All weapons also have a quick melee attack using the Weapon State 1 button,
 this is optional but may help to have it bound too.
 
-#### Pusher (slot 1), replaces Chainsaw
+#### _Pusher (slot 1), replaces Chainsaw_
 
 What was going to be the new melee weapon in Ultra Suite 2, but it never
 happened. A pimped up jackhammer.
@@ -33,7 +33,7 @@ pushes it back out with immense force. This will pretty much pierce a hole
 through anything, plus there's a random chance you'll lose grip on the weapon
 and it'll go flying until it hits something.
 
-#### Deep Impact Airblaster (slot 1), replaces Fist
+#### _Deep Impact Airblaster (slot 1), replaces Fist_
 
 The signature SWWM melee weapon, an Impact Hammer on steroids.
 
@@ -49,7 +49,7 @@ after using secondary fire you will always be without any air for primary.
 
 Equipped by default on spawned players.
 
-#### Explodium Gun (slot 2), replaces Pistol
+#### _Explodium Gun (slot 2), replaces Pistol_
 
 Primary firearm, another staple of the series, but more volatile than ever.
 A pocket rocket, a trusty ol' gun that uses Explodium-filled bullets to wreak
@@ -67,7 +67,7 @@ to the ammo left in it.
 Equipped by default on spawned players. Cannot be dual wielded, that'd just be
 too much. Has infinite ammo.
 
-#### Spreadgun (slot 3), replaces Shotgun
+#### _Spreadgun (slot 3), replaces Shotgun_
 
 Coming from the Doom modding side of things, this gun really packs a punch, but
 is kind of unwieldy to use, and can sometimes jam.
@@ -106,7 +106,7 @@ available, with varying spawn rates:
    rest of your upper body. Unlike the others, this one is only available as a
    rare drop from boss monsters.
 
-#### Blackmann Wallbuster (slot 4), replaces Super Shotgun
+#### _Blackmann Wallbuster (slot 4), replaces Super Shotgun_
 
 A ludicrously overkill weapon, courtesy of the always-overkill Blackmann Arms.
 Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front
@@ -140,7 +140,7 @@ better as a list:
 
 People like to nickname it the "Ballbuster". You'll see why.
 
-#### Eviscerator (slot 5), replaces Chaingun
+#### _Eviscerator (slot 5), replaces Chaingun_
 
 The pleasure of shrapnel spamming. Make hot steaming pain rain upon your
 enemies.
@@ -154,7 +154,7 @@ Reload toggles between wide spread (default) and tight spread for primary.
 
 This weapon made the Unreal Engine cry, so GZDoom may suffer a lot too.
 
-#### Hellblazer (slot 6), replaces Rocket Launcher
+#### _Hellblazer (slot 6), replaces Rocket Launcher_
 
 Another signature weapon of the SWWM series. Rebranded to distance itself from
 its original inspiration.
@@ -176,7 +176,7 @@ Zoom enters scoped mode, for long range shots.
 This thing is more explosive than it looks, so if you're reading this, Icarus,
 DO NOT use it at close range.
 
-#### Legacy Sparkster (slot 7), replaces Plasma Rifle
+#### _Legacy Sparkster (slot 7), replaces Plasma Rifle_
 
 No dicking around with model numbers here. This is a legacy model that uses
 what's best described as "sentient lightning".
@@ -194,7 +194,7 @@ be even shot down.
 If the beam hits either of the other energy blobs, they will detonate with
 highly amplified damage and range.
 
-#### Blackmann-Forx Silver Bullet JET (slot 8), replaces Plasma Rifle (rare)
+#### _Blackmann-Forx Silver Bullet JET (slot 8), replaces Plasma Rifle (rare)_
 
 A lighter (43kg), higher caliber (1.150 XSB) variant of the original Silver
 Bullet, with built-in recoil compensation. This thing kills almost everything
@@ -212,7 +212,7 @@ Zoom uses the scope. Can be held to go up to 16x.
 The jet recoil compensators can potentially deal damage to yourself if you
 don't have any armor, so be careful.
 
-#### Candy Gun (slot 9), replaces BFG9000
+#### _Candy Gun (slot 9), replaces BFG9000_
 
 Coming from an old unreleased weapon mini-mod, the candy gun is like an
 explodium gun on steroids.
@@ -233,7 +233,7 @@ spare guns, by the way.
 Pickups for this weapon may come in various amounts, from single units to packs
 of 5 if you're lucky.
 
-#### Ynykron Artifact (slot 0), replaces BFG9000 (rare)
+#### _Ynykron Artifact (slot 0), replaces BFG9000 (rare)_
 
 Popularly known as the "Death Cannon". One of the four ultimate weapons
 commissioned by the mad dictator god Nedoshiaan, before his defeat.
@@ -257,7 +257,7 @@ obscene pre-fire delay, so it's much easier to land a shot.
 
 ---
 
-### The pickups
+### _The pickups_
 
 Of course some powerups are needed, too.
 
@@ -272,26 +272,26 @@ lowest tier healing items taking priority). Armor is immediately carried if you
 don't have any of that type on you, or if your existing armor drains and you
 have a spare.
 
-#### Health Nugget, replaces Health Bonus
+#### _Health Nugget, replaces Health Bonus_
 
 Health nuggets increase health by 5% up to a cap of 2000.
 
-#### Health Tetrahedron, replaces Stimpak
+#### _Health Tetrahedron, replaces Stimpak_
 
 Health tetrahedrons provide a 50% health boost up to a cap of 1000.
 
-#### Health Cube, replaces Medkit
+#### _Health Cube, replaces Medkit_
 
 Health cubes provide a 100% health boost up to a cap of 1000.
 
-#### Refresher, replaces Soulsphere
+#### _Refresher, replaces Soulsphere_
 
 This artifact provides a massive boost of health to 5000, plus a regeneration
 effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles
 as a powerup. Like other health items, the Refresher is auto-activated if
 you're about to die, though it sometimes won't be enough to save you.
 
-#### Armor Nugget, replaces Armor Bonus
+#### _Armor Nugget, replaces Armor Bonus_
 
 Cumulative armor items that can increase resistance to all damage by as much
 as you can find. Each nugget adds 5% to the total. Above 100%, damage gets
@@ -300,14 +300,14 @@ The upper cap for these is 500%.
 
 Protection decreases by a 10% of absorbed damage.
 
-#### Blast Suit, replaces Green Armor
+#### _Blast Suit, replaces Green Armor_
 
 The blast suit is a nice little light armor which provides a 75% reduction to
 damage and an additional 50% to splash damage.
 
 Can handle a total of 5000 damage before breaking.
 
-#### War Armor, replaces Blue Armor
+#### _War Armor, replaces Blue Armor_
 
 Decent armor, protects very well against all damage. Reduction factors are as
 follows:
@@ -317,13 +317,13 @@ follows:
 
 The armor can eat up a total of 10000 damage before breaking.
 
-#### Grilled Cheese Sandwich, replaces Megasphere
+#### _Grilled Cheese Sandwich, replaces Megasphere_
 
 The ultimate meal. Grants a full 10000 health and magically gives you a full
 stack of armor nuggets, a blast suit and a war armor. In addition it prevents
 you from dying at all if it autoactivates on low health.
 
-#### Ghost Artifact, replaces Blur Sphere
+#### _Ghost Artifact, replaces Blur Sphere_
 
 Actual 100% invisibility guaranteed, a relic from the old UnSX days.
 
@@ -334,7 +334,7 @@ Firing of course nullifies the effect for a while.
 
 This powerup lasts 60 seconds.
 
-#### Ragekit, replaces Berserk
+#### _Ragekit, replaces Berserk_
 
 The ragekit is a special item that has some... interesting effects.
 
@@ -343,7 +343,7 @@ the side effect of turning you into a screaming beast.
 
 Ragequit happens after 30 seconds.
 
-#### Gravity suppressor, replaces Radsuit
+#### _Gravity suppressor, replaces Radsuit_
 
 Continuing with the "replace jump boots with flight" decision in previous mods,
 this time you'll be getting a proper easy to control antigravity powerup.
@@ -351,7 +351,7 @@ this time you'll be getting a proper easy to control antigravity powerup.
 For 60 seconds, you can swim around in the air. Just be careful with height
 when the effect is about to run out.
 
-#### Fucking Invinciball, replaces Invulnerability
+#### _Fucking Invinciball, replaces Invulnerability_
 
 This thing makes you impervious to pretty much everything excluding the Ynykron
 Artifact.
@@ -360,35 +360,35 @@ You're fucking invincible for a total of 90 seconds.
 
 ---
 
-### The HUD
+### _The HUD_
 
 Pretty simplistic so it doesn't get in the way of the action. Some things may
 be configurable.
 
-#### Top left corner
+#### _Top left corner_
 
 Chat and critical messages. Max lines of each type configurable, along with
 their lifespan.
 
-#### Top right corner
+#### _Top right corner_
 
 Obituaries. Same options.
 
-#### Bottom left corner
+#### _Bottom left corner_
 
 Your health and armor, along with an inventory bar.
 
-#### Bottom border
+#### _Bottom border_
 
 Pickup messages. Can configure how many to display and how long they stay, plus
 an additional option to merge repeated messages (given a multiplier suffix).
 
-#### Bottom right corner
+#### _Bottom right corner_
 
 Current equipped weapon stats. Ammo(s) and such. Below it, the weapon
 slots.
 
-#### Targeter
+#### _Targeter_
 
 Because in the middle of the chaos that is this mod you might have a hard time
 trying to figure out where everything is in between explosions and massive
@@ -408,7 +408,7 @@ These components are toggleable.
 
 ---
 
-### The Player Classes
+### _The Player Classes_
 
 In order to save time with modeling and whatnot, there's only one player class
 with one skin: The Demolitionist. A rather ambiguous-looking fully suited up

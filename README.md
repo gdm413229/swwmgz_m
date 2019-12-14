@@ -21,6 +21,13 @@ so don't forget to bind those too.
 All weapons also have a quick melee attack using the Weapon State 1 button,
 this is optional but may help to have it bound too.
 
+If a weapon has no actions on either the reload or zoom buttons, it may be
+replaced with some special idle action, such as spinning or fiddling around
+with it.
+
+More weapons may be added in future updates, but for now these are the ones
+planned.
+
 ### Pusher (slot 1), replaces Chainsaw
 
 What was going to be the new melee weapon in Ultra Suite 2, but it never
@@ -70,20 +77,14 @@ too much. Has infinite ammo.
 ### Spreadgun (slot 3), replaces Shotgun
 
 Coming from the Doom modding side of things, this gun really packs a punch, but
-is kind of unwieldy to use, and can sometimes jam.
+is kind of unwieldy to use.
 
 Primary fire fires, duh. Depending on the loaded ammo the effects may vary.
-Note that if the gun is jammed and you keep spamming this it will eventually
-misfire and explode in your face, with varying results. It's rumored that this
-mistake was the downfall of a famous terrorist.
 
 Secondary fire switches ammo type for the next shot to be loaded.
 
 Reload unloads the current shell and loads a new one. Unspent shells are
 re-added to their respective ammo type pool.
-
-Zoom gives it a lil' whack if it's jammed, otherwise it acts as a very
-inaccurate shot.
 
 The Spreadgun uses 10 gauge ammunition (like the Quadshot), with four types
 available, with varying spawn rates:
@@ -93,11 +94,12 @@ available, with varying spawn rates:
  - Dragon's breath (white). Fiery pain in one shot for everything in front of
    you. Not very effective underwater, but still deals some small heat damage.
    Rare spawn.
- - Kinylum saltshot (cyan). Highly volatile pieces of Kinylum that leave behind
+ - Kinylum saltshot (blue). Highly volatile pieces of Kinylum that leave behind
    a trail of burning plasma. Rare spawn.
  - "Fuck your shit" round (black). A special home-made incendiary ammo type
    that only an absolute madman would have come up with. Sets everything on
    fire (potentially including yourself). Very rare spawn.
+ - "The ball" (purple). A big lead ball, 'nuff said.
  - Golden shell (self-explanatory color). An extremely rare, but very valuable
    type. Fires a sabot packed with a very dense, high-grade Explodium charge,
    the shell also contains some gold glitter, but it's just for show. Clearly
@@ -110,7 +112,7 @@ available, with varying spawn rates:
 
 A ludicrously overkill weapon, courtesy of the always-overkill Blackmann Arms.
 Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front
-of you is pretty much dead. Can only use shotshell and slugs.
+of you is pretty much dead. Can use all the same ammo types as the spreadgun.
 
 Primary fire shoots one barrel at a time.
 
@@ -220,8 +222,8 @@ explodium gun on steroids.
 Primary fire releases explosive candy bullets. The blasts are a tasty treat of
 pain.
 
-Secondary fire is a charged shot, emptying the whole mag at once. This causes
-a delicious blast of sweetness and death.
+Secondary fire is a charged shot, emptying the whole mag in the blink of an
+eye. This causes a delicious blast of sweetness and death.
 
 Reload reloads. If the current mag is not empty it will be flung at enemies
 for extra explosiveness.

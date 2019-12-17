@@ -6,7 +6,21 @@
 SWWM GZ brings to GZDoom a "best of" collection of custom weapons I've made for
 Unreal Tournament, plus many new things that didn't make the cut there.
 
-This is the very first fully original add-on on top of Doom Tournament.
+This is the very first fully original mod based on Doom Tournament code.
+
+---
+
+## The Player
+
+In order to save time with modeling and whatnot, there's only one player class
+with one skin: The Demolitionist. Some cute looking robot who deeply enjoys
+playing around with all these weapons. The model has some parts that support
+player colors, which honestly is a major advantage over the uncolored DT and
+Doomreal models. Their voice type can be configured separately from the
+player's own gender, by the way.
+
+Note: Since you're a robutt you pretty much can swim indefinitely and are also
+inmune to poison.
 
 ---
 
@@ -28,7 +42,7 @@ with it.
 More weapons may be added in future updates, but for now these are the ones
 planned.
 
-### Pusher (slot 1), replaces Chainsaw
+### Pusher (slot 1), replaces Chainsaw, Gauntlets, Timon's Axe
 
 What was going to be the new melee weapon in Ultra Suite 2, but it never
 happened. A pimped up jackhammer.
@@ -40,7 +54,7 @@ pushes it back out with immense force. This will pretty much pierce a hole
 through anything, plus there's a random chance you'll lose grip on the weapon
 and it'll go flying until it hits something.
 
-### Deep Impact Airblaster (slot 1), replaces Fist
+### Deep Impact (slot 1), replaces Fist, Staff, Hexen starting weapons
 
 The signature SWWM melee weapon, an Impact Hammer on steroids.
 
@@ -56,7 +70,7 @@ after using secondary fire you will always be without any air for primary.
 
 Equipped by default on spawned players.
 
-### Explodium Gun (slot 2), replaces Pistol
+### Explodium Gun (slot 2), replaces Pistol, Elven Wand, Hexen starting weapons
 
 Primary firearm, another staple of the series, but more volatile than ever.
 A pocket rocket, a trusty ol' gun that uses Explodium-filled bullets to wreak
@@ -74,7 +88,7 @@ to the ammo left in it.
 Equipped by default on spawned players. Cannot be dual wielded, that'd just be
 too much. Has infinite ammo.
 
-### Spreadgun (slot 3), replaces Shotgun
+### Spreadgun (slot 3), replaces Shotgun, Ethereal Crossbow, Serpent Staff
 
 Coming from the Doom modding side of things, this gun really packs a punch, but
 is kind of unwieldy to use.
@@ -86,29 +100,37 @@ Secondary fire switches ammo type for the next shot to be loaded.
 Reload unloads the current shell and loads a new one. Unspent shells are
 re-added to their respective ammo type pool.
 
-The Spreadgun uses 10 gauge ammunition (like the Quadshot), with four types
-available, with varying spawn rates:
+The Spreadgun uses 10 gauge ammunition (like the Quadshot).
+
+### 10Ga shells, replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Flechette, Chaos Device
+
+Available in the following types, with varying chances of appearing depending
+on replaced item, may also come in bundles:
  - Standard shotshell (red). Lots of tiny pellets ready to tear enemies to
-   shreds. The most common spawn.
- - Slug (green). Concentrated damage in a single, large projectile.
+   shreds. Most common.
+ - Slug (green). Concentrated damage in a single, large projectile. Common.
  - Dragon's breath (white). Fiery pain in one shot for everything in front of
    you. Not very effective underwater, but still deals some small heat damage.
-   Rare spawn.
+   Somewhat rare.
  - Kinylum saltshot (blue). Highly volatile pieces of Kinylum that leave behind
-   a trail of burning plasma. Rare spawn.
+   a trail of burning plasma. Rare.
  - "Fuck your shit" round (black). A special home-made incendiary ammo type
    that only an absolute madman would have come up with. Sets everything on
-   fire (potentially including yourself). Very rare spawn.
- - "The ball" (purple). A big lead ball, 'nuff said.
+   fire (potentially including yourself). Very rare.
+ - "The ball" (purple). A big lead ball, 'nuff said. Somewhat rare.
  - Golden shell (self-explanatory color). An extremely rare, but very valuable
    type. Fires a sabot packed with a very dense, high-grade Explodium charge,
    the shell also contains some gold glitter, but it's just for show. Clearly
    designed by someone completely insane, and definitely guaranteed to not
    fail catastrophically and blow up your gun, your hands, your arms, and the
    rest of your upper body. Unlike the others, this one is only available as a
-   rare drop from boss monsters.
+   rare drop from boss monsters, and as a rare spawn for chaos devices in
+   Heretic and Hexen.
 
-### Blackmann Wallbuster (slot 4), replaces Super Shotgun
+The two first standard types will also pop up in Hammerspace Embiggeners and
+Ammo Fabricators.
+
+### Wallbuster (slot 4), replaces SSG, Ethereal Crossbow, Frost Shards
 
 A ludicrously overkill weapon, courtesy of the always-overkill Blackmann Arms.
 Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front
@@ -142,7 +164,7 @@ better as a list:
 
 People like to nickname it the "Ballbuster". You'll see why.
 
-### Eviscerator (slot 5), replaces Chaingun
+### Eviscerator (slot 5), replaces Chaingun, Dragon Claw, Hammer of Retribution
 
 The pleasure of shrapnel spamming. Make hot steaming pain rain upon your
 enemies.
@@ -156,7 +178,12 @@ Reload toggles between wide spread (default) and tight spread for primary.
 
 This weapon made the Unreal Engine cry, so GZDoom may suffer a lot too.
 
-### Hellblazer (slot 6), replaces Rocket Launcher
+### Eviscerator shells, replaces Ammo Box, Claw Orb
+
+Little bundles of fun (in hot lead form) coming in various sizes, either single
+units or six-packs.
+
+### Hellblazer (slot 6), replaces Rocket Launcher, Phoenix Rod, Firestorm
 
 Another signature weapon of the SWWM series. Rebranded to distance itself from
 its original inspiration.
@@ -165,7 +192,17 @@ Primary fire shoots a hot flaming rocket that unleashes hell in a wide area.
 
 Secondary fire lobs it as a grenade that will bounce around.
 
-Reload changes the ammo type, there are four options:
+Reload changes the ammo type, there are four options (see ammo section below).
+
+Zoom enters scoped mode, for long range shots.
+
+This thing is more explosive than it looks, so if you're reading this, Icarus,
+DO NOT use it at close range.
+
+### Hellblazers, replaces Rockets, Flame Orb
+
+Ammo for the Hellblazer, comes in various types, and some of them can come in
+packs. There are four types:
  - Hellblazer missiles. The standard ammunition, highly explosive.
  - Hellblazer crackshots. Cluster bombs, all sorts of little bits that fly
    around after the initial blast, and have some heatseeking to them.
@@ -173,12 +210,7 @@ Reload changes the ammo type, there are four options:
    pretty much everything around itself.
  - Hellblazer warheads. Frickin' nukes, keep your distance.
 
-Zoom enters scoped mode, for long range shots.
-
-This thing is more explosive than it looks, so if you're reading this, Icarus,
-DO NOT use it at close range.
-
-### Legacy Sparkster (slot 7), replaces Plasma Rifle
+### Legacy Sparkster (slot 7), replaces Plasma Rifle, Hellstaff, Arc of Death
 
 No dicking around with model numbers here. This is a legacy model that uses
 what's best described as "sentient lightning".
@@ -196,11 +228,17 @@ be even shot down.
 If the beam hits either of the other energy blobs, they will detonate with
 highly amplified damage and range.
 
-### Blackmann-Forx Silver Bullet JET (slot 8), replaces Plasma Rifle (rare)
+### Spark Unit, replaces Cells, Runes
+
+Ammunition for the Sparkster. These capsules contain a lot of energy despite
+their small size.
+
+### Silver Bullet JET (slot 8), replaces Plasma Rifle, Hellstaff, Quietus (hilt)
 
 A lighter (43kg), higher caliber (1.150 XSB) variant of the original Silver
-Bullet, with built-in recoil compensation. This thing kills almost everything
-in one shot, provided you can aim straight.
+Bullet, with built-in recoil compensation. A joint project of Blackmann Arms
+and Forx Industries. This thing kills almost everything in one shot, provided
+you can aim straight.
 
 Primary fire shoots, duh.
 
@@ -214,7 +252,14 @@ Zoom uses the scope. Can be held to go up to 16x.
 The jet recoil compensators can potentially deal damage to yourself if you
 don't have any armor, so be careful.
 
-### Candy Gun (slot 9), replaces BFG9000
+### 1.150 XSB Bullets, replaces Cells, Runes
+
+The 1.150 caliber Extreme Super Burst bullets employ an explodium microcharge
+to be shot with enough energy to reach a relatively high, although still
+subsonic speed. They are hard to come by, so spawns are scarce, and they won't
+even pop up in Hammerspace Embiggeners, only on higher tier Fabricators.
+
+### Candy Gun (slot 9), replaces BFG9000, Firemace, Bloodscourge (stub)
 
 Coming from an old unreleased weapon mini-mod, the candy gun is like an
 explodium gun on steroids.
@@ -235,7 +280,7 @@ spare guns, by the way.
 Pickups for this weapon may come in various amounts, from single units to packs
 of 5 if you're lucky.
 
-### Ynykron Artifact (slot 0), replaces BFG9000 (rare)
+### Ynykron Artifact (slot 0), replaces BFG9000, Firemace, Wraithverge (arc)
 
 Popularly known as the "Death Cannon". One of the four ultimate weapons
 commissioned by the mad dictator god Nedoshiaan, before his defeat.
@@ -272,28 +317,28 @@ except in deathmatch, where they're activated immediately. Healing items are
 always used immediately if they can heal you or you're about to die (with the
 lowest tier healing items taking priority). Armor is immediately carried if you
 don't have any of that type on you, or if your existing armor drains and you
-have a spare.
+have a spare. Most powerups can be toggled, unless specified otherwise.
 
-### Health Nugget, replaces Health Bonus
+### Health Nugget, replaces Health Bonus, Crystal Vial
 
 Health nuggets increase health by 5% up to a cap of 2000.
 
-### Health Tetrahedron, replaces Stimpak
+### Health Tetrahedron, replaces Stimpak, Crystal Vial (Heretic)
 
 Health tetrahedrons provide a 50% health boost up to a cap of 1000.
 
-### Health Cube, replaces Medkit
+### Health Cube, replaces Medkit, Quartz Flask
 
 Health cubes provide a 100% health boost up to a cap of 1000.
 
-### Refresher, replaces Soulsphere
+### Refresher, replaces Soulsphere, Mystic Urn
 
 This artifact provides a massive boost of health to 5000, plus a regeneration
 effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles
 as a powerup. Like other health items, the Refresher is auto-activated if
 you're about to die, though it sometimes won't be enough to save you.
 
-### Armor Nugget, replaces Armor Bonus
+### Armor Nugget, replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion
 
 Cumulative armor items that can increase resistance to all damage by as much
 as you can find. Each nugget adds 5% to the total. Above 100%, damage gets
@@ -302,14 +347,14 @@ The upper cap for these is 500%.
 
 Protection decreases by a 10% of absorbed damage.
 
-### Blast Suit, replaces Green Armor
+### Blast Suit, replaces Green Armor, Silver Shield, Platinum Helm, Mesh Armor
 
 The blast suit is a nice little light armor which provides a 75% reduction to
 damage and an additional 50% to splash damage.
 
 Can handle a total of 5000 damage before breaking.
 
-### War Armor, replaces Blue Armor
+### War Armor, replaces Blue Armor, Enchanged Shield, Falcon Shield
 
 Decent armor, protects very well against all damage. Reduction factors are as
 follows:
@@ -319,13 +364,13 @@ follows:
 
 The armor can eat up a total of 10000 damage before breaking.
 
-### Grilled Cheese Sandwich, replaces Megasphere
+### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Banishment Device
 
 The ultimate meal. Grants a full 10000 health and magically gives you a full
 stack of armor nuggets, a blast suit and a war armor. In addition it prevents
 you from dying at all if it autoactivates on low health.
 
-### Ghost Artifact, replaces Blur Sphere
+### Ghost Artifact, replaces Blur Sphere, Shadowsphere, Amulet of Warding
 
 Actual 100% invisibility guaranteed, a relic from the old UnSX days.
 
@@ -334,31 +379,51 @@ still, and just slightly more visible when moving, depending on speed.
 
 Firing of course nullifies the effect for a while.
 
-This powerup lasts 60 seconds.
+This powerup lasts 60 seconds and cannot be toggled.
 
-### Ragekit, replaces Berserk
+### Ragekit, replaces Berserk, Tome of Power, Dark Servant, Dragonskin Bracers
 
 The ragekit is a special item that has some... interesting effects.
 
 Quadruples damage dealt, doubles movement speed, halves damage taken... and has
 the side effect of turning you into a screaming beast.
 
-Ragequit happens after 30 seconds.
+Ragequit happens after 30 seconds, also cannot be toggled after activation.
 
-### Gravity suppressor, replaces Radsuit
+### Gravity suppressor, replaces Radsuit, Wings of Wrath, Boots of Speed
 
 Continuing with the "replace jump boots with flight" decision in previous mods,
 this time you'll be getting a proper easy to control antigravity powerup.
 
-For 60 seconds, you can swim around in the air. Just be careful with height
-when the effect is about to run out.
+For 60 seconds, you can fly around in the air at 2x your normal walking speed.
+Just be careful with height when the effect is about to run out.
 
-### Fucking Invinciball, replaces Invulnerability
+### Fucking Invinciball, replaces Invulnerability, Ring of Invincibility, Icon of the Defender
 
 This thing makes you impervious to pretty much everything excluding the Ynykron
 Artifact.
 
-You're fucking invincible for a total of 90 seconds.
+You're fucking invincible for a total of 90 seconds, cannot be toggled.
+
+### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator
+
+Each of these you pick up increase ammo capacity by half of its base value, up
+to 10x, and also give you some extra ammo like a normal backpack.
+
+### Universal Ammo Fabricator, replaces Mana / Krater of Might in Hexen
+
+Separated into four tiers, they work pretty much like the ammo cubes in Doom
+Tournament, except they try to "balance" the total ammo given. The max tier
+fabricator is the only one capable of producing ammo for superweapons.
+
+### Lamp, replaces Lite-Amp, Torch
+
+A floating lamp companion, may attract moths. The moths will disperse and
+attack nearby enemies when toggling it off.
+
+### Omnisight, replaces Computer Map, Map Scroll
+
+Reveals the entire layout of the map and shows key locations in the HUD.
 
 ---
 
@@ -369,12 +434,27 @@ be configurable.
 
 ### Top left corner
 
-Chat and critical messages. Max lines of each type configurable, along with
-their lifespan.
+Message display, with separate queues for chat, critical messages and
+obituaries so you won't miss anything important. Max lines of each type are
+configurable, along with their lifespan.
 
 ### Top right corner
 
-Obituaries. Same options.
+Level stats and current score.
+
+The scoring system is pretty straightforward. Each thing you kill (even if not
+an enemy) will give you points according to 5x of its base health, rounded up
+to the nearest multiple of 100, plus these bonuses (in order of application):
+ * x1.25 for an overkill (enemy was gibbed or killed in one shot).
+ * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
+   combos if multiple enemies are killed within 5 seconds of each other.
+ * +1000 for killing an enemy without having taken damage since player start,
+   with extra +100 boosts for consecutive kills.
+ * +20000 if the enemy killed is a boss.
+ * +5000 if you've killed the last enemy in the map.
+
+Score is currently for show, but it'll have some functionality added later on,
+perhaps to purchase stuff in a store menu.
 
 ### Bottom left corner
 
@@ -403,18 +483,15 @@ smoke clouds, a targeter has been implemented, which will show the following:
   up below the health bar indicating the cumulative increase/decrease. The
   targeter only picks up enemies in your direct line of sight and can only show
   up to 40 individual bars, giving priority to the nearest enemies.
-* Keys: Key items will be marked and labeled, along with a little distance
-  indicator in map units.
+* Keys and map exits: If you've picked up an Omnisight, key items and any exit
+  lines will be marked and labeled, along with a little distance indicator in
+  map units. Note that this doesn't work for script-triggered exits.
 
 These components are toggleable.
 
 ---
 
-## The Player Classes
+## The End
 
-In order to save time with modeling and whatnot, there's only one player class
-with one skin: The Demolitionist. A rather ambiguous-looking fully suited up
-individual who deeply enjoys playing around with all these weapons. The model
-has some parts that support player colors, which honestly is a major advantage
-over the uncolored DT and Doomreal models. Their voice type can be configured
-separately from the player's own gender, by the way.
+This is all the information I can provide on this Readme file for now, stay
+tuned for more stuff to happen later on.

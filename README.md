@@ -12,12 +12,29 @@ This is the very first fully original mod based on Doom Tournament code.
 
 ## The Player
 
-In order to save time with modeling and whatnot, there's only one player class
-with one skin: The Demolitionist. Some cute looking robot who deeply enjoys
-playing around with all these weapons. The model has some parts that support
-player colors, which honestly is a major advantage over the uncolored DT and
-Doomreal models. Their voice type can be configured separately from the
-player's own gender, by the way.
+You are an Akari Labs Demolitionist Bot, one of the very first units, fresh off
+the factory. You are the company's greatest achievement in AI-controlled combat
+units, trained to efficiently use all sorts of weaponry, built with premium
+quality armor plating and robust but flexible joints. In order to show off your
+capabilities, your creator has decided to send you out to fight the demonic
+invasion brought upon by "those big stinkin' idiots at the UAC".
+
+Additional features:
+ - Programmable colour tags: Located around various parts of your body, allows
+   quick and easy differentiation between multiple units.
+ - Pocket Hammerspace™ containers: These will store and deploy your ammunition
+   and weapons on demand. Their capacity can be increased by finding
+   Hammerspace™ Embiggener modules.
+ - Forx JetBurst™ Units: Can be used for quick dashes in any direction, or even
+   for triple jumping.
+ - Targetting Array: Tracks nearby foes and provides basic information on their
+   stats. Compatible with Omnisight™ mapping modules for tracking key items,
+   usable objects and nearby exits.
+ - Akari Labs CuteEmotion™ Display: Equipped onto your visor to show a wide
+   range of predefined facial expressions in order to convey simple emotions
+   to others.
+ - Akari Labs LoudBoi™ Voicebox: Allows you to ｅｍｉｔ. Various voice type
+   options are available.
 
 Note: Since you're a robutt you pretty much can swim indefinitely and are also
 inmune to poison.
@@ -486,6 +503,8 @@ smoke clouds, a targeter has been implemented, which will show the following:
 * Keys and map exits: If you've picked up an Omnisight, key items and any exit
   lines will be marked and labeled, along with a little distance indicator in
   map units. Note that this doesn't work for script-triggered exits.
+* Usable/shootable switches and others: If visible, these will also show up
+  once you pick up an Omnisight.
 
 These components are toggleable.
 

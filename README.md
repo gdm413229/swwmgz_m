@@ -470,6 +470,9 @@ to the nearest multiple of 100, plus these bonuses (in order of application):
  * +20000 if the enemy killed is a boss.
  * +5000 if you've killed the last enemy in the map.
 
+You are also given +1000 points for each secret found, +5000 if it's the final
+secret. Countable items give +250 points each or +2500 if it's the final item.
+
 Score is currently for show, but it'll have some functionality added later on,
 perhaps to purchase stuff in a store menu.
 

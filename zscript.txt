@@ -1,0 +1,117 @@
+version "4.2.4"
+
+// utility code
+#include "zscript/swwm_libeye/projector.txt"
+#include "zscript/swwm_libeye/projector gl.txt"
+#include "zscript/swwm_libeye/projector planar.txt"
+#include "zscript/swwm_libeye/viewport.txt"
+#include "zscript/swwm_coordutil.zsc"
+// base code
+#include "zscript/swwm_common.zsc"
+#include "zscript/swwm_player.zsc"
+#include "zscript/swwm_inventory.zsc"
+#include "zscript/swwm_hud.zsc"
+#include "zscript/swwm_loudboi.zsc"
+// items
+#include "zscript/swwm_health.zsc"
+#include "zscript/swwm_armor.zsc"
+#include "zscript/swwm_powerup.zsc"
+#include "zscript/swwm_ammo.zsc"
+#include "zscript/swwm_jackhammer.zsc"
+#include "zscript/swwm_deepdarkimpact.zsc"
+#include "zscript/swwm_splode.zsc"
+#include "zscript/swwm_shot.zsc"
+#include "zscript/swwm_cbt.zsc"
+#include "zscript/swwm_danmaku.zsc"
+#include "zscript/swwm_blazeit.zsc"
+#include "zscript/swwm_sparkyboi.zsc"
+#include "zscript/swwm_thiccboolet.zsc"
+#include "zscript/swwm_tastytreat.zsc"
+#include "zscript/swwm_deathlydeathcannon.zsc"
+
+Class SWWMCrashHandler : StaticEventHandler
+{
+	ui bool wasinmap;
+	ui int timer;
+
+	override void UiTick()
+	{
+		if ( gamestate == GS_LEVEL )
+		{
+			wasinmap = true;
+			timer = 0;
+		}
+		else if ( (gamestate == GS_FULLCONSOLE) && (wasinmap || (timer > 0)) )
+		{
+			wasinmap = false;
+			if ( timer == 1 )
+			{
+				Console.Printf(TEXTCOLOR_GOLD.."Oopsie Woopsie!"..TEXTCOLOR_NORMAL);
+				S_Sound("crash/glass",CHAN_5|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_Sound("crash/glass",CHAN_6|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_Sound("crash/glass",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+			}
+			else if ( timer == 140 )
+			{
+				Console.Printf(TEXTCOLOR_GOLD.."Looks like GZDoom made a fucky wucky! owo"..TEXTCOLOR_NORMAL);
+				S_Sound("crash/curb",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+			}
+			else if ( timer == 350 )
+			{
+				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
+				if ( hnd && hnd.detected ) Console.Printf(TEXTCOLOR_GOLD.."Don't blame me. Shouldn't have tried running this with Brutal Doom."..TEXTCOLOR_NORMAL);
+				else Console.Printf(TEXTCOLOR_GOLD.."If you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa."..TEXTCOLOR_NORMAL);
+			}
+			timer++;
+		}
+	}
+}
+
+Class SWWMBrutalHandler : StaticEventHandler
+{
+	ui int timer;
+	ui TextureID scr;
+	bool detected;
+
+	override void OnRegister()
+	{
+		for ( int i=0; i<AllActorClasses.size(); i++ )
+		{
+			if ( (AllActorClasses[i].GetClassName() != "BrutalWeapon")
+				&& (AllActorClasses[i].GetClassName() != "BrutalDoomer") ) continue;
+			detected = true;
+			break;
+		}
+	}
+
+	override void UiTick()
+	{
+		if ( !detected ) return;
+		if ( gamestate == GS_LEVEL )
+		{
+			if ( timer == 1 )
+			{
+				S_Sound("brutal/ezmodo",CHAN_6|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_Sound("brutal/ezmodo",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+			}
+			else if ( timer == 350 ) ThrowAbortException(">Brutal Doom");
+			timer++;
+		}
+		else timer = 0;
+	}
+
+	override void WorldTick()
+	{
+		if ( !detected ) return;
+		for ( int i=0; i<MAXPLAYERS; i++ ) if ( playeringame[i] ) players[i].cheats |= CF_TOTALLYFROZEN;
+	}
+
+	override void RenderOverlay( RenderEvent e )
+	{
+		if ( !detected ) return;
+		if ( scr.IsNull() ) scr = TexMan.CheckForTexture("graphics/bdscreen.png",TexMan.Type_Any);
+		Screen.Dim("Red",(timer/350.)-.2,0,0,Screen.GetWidth(),Screen.GetHeight());
+		Screen.DrawTexture(scr,false,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,DTA_VirtualWidth,1280,DTA_VirtualHeight,960,DTA_Alpha,min(1.,timer/50.));
+		Screen.Dim("Red",(timer/70.)-3.5,0,0,Screen.GetWidth(),Screen.GetHeight());
+	}
+}

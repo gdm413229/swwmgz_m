@@ -33,8 +33,8 @@ Additional features:
  - Akari Labs CuteEmotion™ Display: Equipped onto your visor to show a wide
    range of predefined facial expressions in order to convey simple emotions
    to others.
- - Akari Labs LoudBoi™ Voicebox: Allows you to ｅｍｉｔ. Various voice type
-   options are available.
+ - Akari Labs LoudBoi™ Voicebox: Allows you to ｅｍｉｔ. Additional voice
+   options will be available through add-ons.
 
 Note: Since you're a robutt you pretty much can swim indefinitely and are also
 inmune to poison.

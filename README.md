@@ -461,7 +461,8 @@ Level stats and current score.
 
 The scoring system is pretty straightforward. Each thing you kill (even if not
 an enemy) will give you points according to 5x of its base health, rounded up
-to the nearest multiple of 100, plus these bonuses (in order of application):
+to the nearest multiple of 100 and capped to 20000, plus these bonuses (in
+order of application):
  * x1.25 for an overkill (enemy was gibbed or killed in one shot).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.
@@ -516,4 +517,5 @@ These components are toggleable.
 ## The End
 
 This is all the information I can provide on this Readme file for now, stay
-tuned for more stuff to happen later on.
+tuned for more stuff to happen later on. Please act like you didn't see what
+looks like on-disc DLC.

@@ -22,6 +22,13 @@ invasion brought upon by "those big stinkin' idiots at the UAC".
 Additional features:
  - Programmable colour tags: Located around various parts of your body, allows
    quick and easy differentiation between multiple units.
+ - Lucky Collar: A little something that your creator gives to all of her
+   creations. Reduces incoming damage by 75% when you're below 10% health.
+ - User Menu: With the press of a button, open a dedicated menu to see all your
+   stats in detail, info on carried items and weapons, and (when it's done)
+   accessing the store for buying stuff with your score points.
+ - Magnetic Utility Belt: Makes some weapons easier to reload while on the go.
+ - Keychain: For carrying all your keys around, and other valuable things.
  - Pocket Hammerspace™ containers: These will store and deploy your ammunition
    and weapons on demand. Their capacity can be increased by finding
    Hammerspace™ Embiggener modules.
@@ -34,7 +41,8 @@ Additional features:
    range of predefined facial expressions in order to convey simple emotions
    to others.
  - Akari Labs LoudBoi™ Voicebox: Allows you to ｅｍｉｔ. Additional voice
-   options will be available through add-ons.
+   options will be available through add-ons. Note that the default voice is in
+   Japanese, but subtitles will be provided when available.
 
 Note: Since you're a robutt you pretty much can swim indefinitely and are also
 inmune to poison.
@@ -56,8 +64,8 @@ If a weapon has no actions on either the reload or zoom buttons, it may be
 replaced with some special idle action, such as spinning or fiddling around
 with it.
 
-More weapons may be added in future updates, but for now these are the ones
-planned.
+For now these are all the weapons planned for the first release. More will be
+added afterwards (until then I'll tease you with some empty zscript files :P).
 
 ### Pusher (slot 1), replaces Chainsaw, Gauntlets, Timon's Axe
 
@@ -174,10 +182,9 @@ better as a list:
    barrels.
  - Press reload again to start filling it up (or cancel if there's no queue).
  - While loading shells, you can stop the reload by pressing any weapon button.
- - If the current barrel group can be loaded in one go, will use a speed
-   loader, otherwise the shells are loaded either two or one at a time.
- - The weapon has a mechanism that prevents unspent shells from being ejected,
-   so those will stay there until they're fired.
+ - For a skilled combat robot like you, reloading this should be very fast.
+ - The barrels have a mechanism that prevents unspent shells from being
+   ejected, so those will stay there until they're fired.
 
 People like to nickname it the "Ballbuster". You'll see why.
 
@@ -259,15 +266,15 @@ you can aim straight.
 
 Primary fire shoots, duh.
 
-Secondary fire toggles stationary mode, which can help with aiming. Note that
-while in this state you can't switch weapons or use melee.
+Secondary fire toggles the recoil compensators. These small jet engines can
+potentially deal damage to yourself if you don't have any armor, so be careful.
 
 Reload reloads (what else is new).
 
 Zoom uses the scope. Can be held to go up to 16x.
 
-The jet recoil compensators can potentially deal damage to yourself if you
-don't have any armor, so be careful.
+This weapon is generally not recommended for human use outside of power armor.
+Good thing you're not a human, then.
 
 ### 1.150 XSB Bullets, replaces Cells, Runes
 
@@ -318,6 +325,12 @@ it's already full.
 
 Unlike its previous incarnation in SWWM Platinum, this one doesn't have such an
 obscene pre-fire delay, so it's much easier to land a shot.
+
+### Purokonylum Crystal
+
+Additional ammo charge for the Ynykron Artifact. These don't spawn, so you'll
+have to get more ammo by finding additional weapon pickups (at least until the
+store is implemented).
 
 ---
 
@@ -474,8 +487,8 @@ order of application):
 You are also given +1000 points for each secret found, +5000 if it's the final
 secret. Countable items give +250 points each or +2500 if it's the final item.
 
-Score is currently for show, but it'll have some functionality added later on,
-perhaps to purchase stuff in a store menu.
+Score is currently for show, but after first release it'll be used for the
+in-game store feature.
 
 ### Bottom left corner
 
@@ -488,8 +501,7 @@ an additional option to merge repeated messages (given a multiplier suffix).
 
 ### Bottom right corner
 
-Current equipped weapon stats. Ammo(s) and such. Below it, the weapon
-slots.
+Current equipped weapon stats. Ammo(s) and such. Below it, the weapon slots.
 
 ### Targeter
 
@@ -517,5 +529,4 @@ These components are toggleable.
 ## The End
 
 This is all the information I can provide on this Readme file for now, stay
-tuned for more stuff to happen later on. Please act like you didn't see what
-looks like on-disc DLC.
+tuned for more stuff to happen later on.

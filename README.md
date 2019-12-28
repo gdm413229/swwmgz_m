@@ -326,7 +326,7 @@ it's already full.
 Unlike its previous incarnation in SWWM Platinum, this one doesn't have such an
 obscene pre-fire delay, so it's much easier to land a shot.
 
-### Purokonylum Crystal
+### Puronokorokinylum Crystal
 
 Additional ammo charge for the Ynykron Artifact. These don't spawn, so you'll
 have to get more ammo by finding additional weapon pickups (at least until the

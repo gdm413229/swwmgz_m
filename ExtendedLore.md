@@ -75,19 +75,21 @@ it would enter mass production and sell like hotcakes.
 ### Symnatek
 
 A manufacturer of construction tools and heavy machinery. More popular than
-Mixom, despite most people not even knowing its name.
+Mixom (at least outside the US), despite most people not even knowing its name.
 
 ### Tach-Engine Technologies
 
-Described as "the second largest tech conglomerate on Earth". Tach-Engine
-Industries covers pretty much everything, although it's most known for its work
-on fusion energy... and for its weapons (of course).
+Described as "the second largest tech conglomerate on Earth", right behind a
+certain evil international tech company known mainly for its search engine.
+Tach-Engine Technologies covers pretty much everything, although it's
+most known for its work on fusion energy... and for its weapons (of course).
 
 ### Unissix Crafts
 
 A small weapons shop run by members of the Unissix family of warriors. While
 mostly specialized in blades and hammers and whatnot, sometimes they've done
-firearms by request.
+firearms by request. It is run by Unissix Bokurou Azadeku, who also leads the
+"Unissix Tournaments", a yearly gladiatorial sporting event.
 
 ---
 
@@ -192,7 +194,8 @@ disappeared from the public eye.
 Known as the "little enterpreneur" of the Unissix family. She started the
 Unissix Tournaments after years of boredom with the lack of "thrilling, action
 packed arena combat" in bloodsports at the time, which were dominated by the
-"free-for-all battle royale in a large environment" format.
+"free-for-all battle royale in a large environment" format. She also builds all
+sorts of things through the "Unissix Crafts" brand.
 
 ---
 

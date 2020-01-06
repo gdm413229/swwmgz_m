@@ -160,7 +160,7 @@ Ammo Fabricators.
 
 A ludicrously overkill weapon, courtesy of the always-overkill Blackmann Arms.
 Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front
-of you is pretty much dead. Can use all the same ammo types as the spreadgun.
+of you is pretty much dead. Cannot use incendiary ammo types or golden shells.
 
 Primary fire shoots one barrel at a time.
 

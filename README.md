@@ -104,11 +104,12 @@ some havoc.
 Primary fire is the usual good ol' explosive shot. Has considerable knockback,
 but not really lethal damage.
 
-Secondary fire is pretty much the same but faster and less accurate.
+Secondary fire is an "explosive reload". Rather than just discarding the mag as
+usual, pulling the pin at the bottom arms it as a grenade that you can fling at
+enemies for increased damage. The yield will be proportional to the ammo left
+in it.
 
-Reload reloads (duh). If the current clip isn't empty, you'll fling it at
-enemies and it'll explode for increased damage. The yield will be proportional
-to the ammo left in it.
+Reload is just a plain ol' reload, nothing else, no explosions or anything.
 
 Equipped by default on spawned players. Cannot be dual wielded, that'd just be
 too much. Has infinite ammo.
@@ -291,18 +292,18 @@ explodium gun on steroids.
 Primary fire releases explosive candy bullets. The blasts are a tasty treat of
 pain.
 
-Secondary fire is a charged shot, emptying the whole mag in the blink of an
-eye. This causes a delicious blast of sweetness and death.
+Secondary fire works exactly like the explodium gun, the mag is armed and
+yeeted with extreme prejudice.
 
-Reload reloads. If the current mag is not empty it will be flung at enemies
-for extra explosiveness.
+Reload does what you'd expect.
 
 Zoom throws the weapon away, armed and ready to explode if it hits
 anyone or anything. The blast area for this is pretty ridiculous. You can hold
 spare guns, by the way.
 
 Pickups for this weapon may come in various amounts, from single units to packs
-of 5 if you're lucky.
+of 5 if you're lucky. Note that meleeing with this weapon is not recommended,
+as it will explode.
 
 ### Ynykron Artifact (slot 0), replaces BFG9000, Firemace, Wraithverge (arc)
 

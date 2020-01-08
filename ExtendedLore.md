@@ -76,6 +76,8 @@ it would enter mass production and sell like hotcakes.
 
 A manufacturer of construction tools and heavy machinery. More popular than
 Mixom (at least outside the US), despite most people not even knowing its name.
+Also makes basic military equipment, such as knives and other close combat
+weapons.
 
 ### Tach-Engine Technologies
 

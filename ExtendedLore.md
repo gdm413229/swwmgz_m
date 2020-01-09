@@ -501,6 +501,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2145: After a coup organized by several members of the lower castes of Hell,
   the main royal family is forced into exile. Under its new ruler, Hell decides
   to attack mankind. Doom 3 happens.
+- 2147: Reginald E. Griggs Jr. is imprisoned after countless human remains were
+  found in the basement of his summer house in Olathe.
 - 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
   After the disappearance of the "lone marine", Akari Labs deploys the first
   Demolitionist in order to combat the remaining forces of Hell on Earth.
@@ -508,6 +510,9 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   recovering from the invasion, fails. Hell attempts another invasion of Mars,
   Doom 2016 happens.
 - ~2150: The Doom Slayer assassinates the prince of Hell.
+- 2152: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
+  reveals itself. It is defeated by a single man, one John A. Bortson III.
+- 2153: Reginald E. Griggs Jr. is executed by lethal injection.
 - 2154: A group of monks discovers a mansion haunted by demons. The Doom Slayer
   is personally sent to "fix it".
 - 2156: Akari Labs succeeds in creating safe teleportation. The reaction from

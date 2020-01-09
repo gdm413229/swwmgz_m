@@ -302,8 +302,7 @@ anyone or anything. The blast area for this is pretty ridiculous. You can hold
 spare guns, by the way.
 
 Pickups for this weapon may come in various amounts, from single units to packs
-of 5 if you're lucky. Note that meleeing with this weapon is not recommended,
-as it will explode.
+of 5 if you're lucky.
 
 ### Ynykron Artifact (slot 0), replaces BFG9000, Firemace, Wraithverge (arc)
 

@@ -12,14 +12,14 @@ around since 1997 when I first started writing stories.
 
 ### Akari Labs
 
-Founded in the late 21st century by child prodigy Saya Miyamoto. Akari Labs
-advertises itself as "a fountain of innovation". A major part of the technology
-used at the time comes from here, they were the first to kickstart FTL travel,
-along with safe teleportation energy ("after the UAC first fucked it up",
-according to the founder). The labs have faced some controversy after the army
-funded "Red Oni" Supersoldier project first popped up, (even though it wasn't
-what they all expected). Recently, they've started the Demolitionist program
-in order to develop AI-driven combat bots to defend Earth from invaders.
+Founded in 2010 by child prodigy Saya Miyamoto. Akari Labs advertises itself
+as "a fountain of innovation". A major part of the technology used at the time
+comes from here, they were the first to kickstart FTL travel, along with safe
+teleportation energy ("after the UAC first fucked it up", according to the
+founder). Recently, they've started the Demolitionist program in order to
+develop AI-driven combat bots to defend Earth from invaders (SWWM GZ). The labs
+will face yet more controversy later on after the army funded "Red Oni"
+Supersoldier project pops up (UnSX 4 backstory).
 
 Another main export of Akari Labs is their "Adopt a Maid-Bot" service. It is
 entirely free, and guaranteed to provide the perfect maid for each person. From
@@ -229,14 +229,27 @@ to Nana Miyamoto, the woman who shook the country when she claimed to be
 don't seem to ever age, which only further reinforces Nana's words.
 
 Saya is often called "Not-Tomoko" around the net, in reference to a similar
-looking character from an early 21st century manga series. In terms of
-personality and looks, the resemblance is definitely there. She is well known
-for being quite blunt when talking to people, and also for being exaggeratedly
-flirty around attractive women. Her favourite colour is green, favourite animal
-is the otter, and favourite dish is pepperoni pizza. She also enjoys drone
-metal. Likes baggy clothes, refuses to wear skirts, only pants. Uses Arch,
-favourite editor is vim, favourite programming language is haskell. Her top
-"turn-ons" are well-endowed women, maids, femboys and heterochromia.
+looking character from a popular manga. In terms of personality and looks, the
+resemblance is definitely there. She is well known for being quite blunt when
+talking to people, and also for being exaggeratedly flirty around attractive
+women.
+
+Her favourite colour is green, favourite animal is the otter, and favourite
+dish is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes,
+refuses to wear skirts, only pants. Uses Arch, favourite editor is vim,
+favourite programming language is haskell. Her top "turn-ons" are well-endowed
+women, maids, femboys and heterochromia. She doesn't use deodorant or cologne,
+although people around her remark that her BO is "kind of nice actually".
+
+She has an older brother, Taro, and a younger sister, Yui. Thanks to the
+immortal blood of her mother, her aging "froze" at the age of 25, and
+absolutely hates the fact no longer growing means she's stuck being 5'5" and
+having a cup size of A.
+
+Among other hobbies, Saya really enjoys writing. Her first foray into manga,
+"My Maid is a Sex Robot", became successful enough to get an anime adaptation.
+She is also very popular on social media, and once attempted live streaming,
+but dropped it because she was "attracting creepy basement dwellers".
 
 ### Tetsuya Imanaki
 
@@ -256,7 +269,7 @@ became food for the ghouls, or worse, became one of them (Hellbound 2).
 Known as the "little enterpreneur" of the Unissix family. She builds all sorts
 of things through the "Unissix Crafts" brand and is the main supplier of
 equipment for the town. She's the mother of Zanaveth III, a self-proclaimed
-"good-evil supervillain".
+"good-evil" supervillain.
 
 In addition, she, along with other notable personalities in arms manufacturing,
 led the creation of the Unissix Tournaments after years of boredom with the
@@ -401,3 +414,159 @@ abroad from persecution.
 A dead planet on the outer rim of the X'Animen system, thought to be entirely
 barren and inhabitable, until a lone building was found, a factory, built by
 the old mechanical demigod Maester Mekes.
+
+---
+
+## A loose timeline of events
+
+This is in no way accurate, and it's hard to make much sense of all of it since
+SWWM GZ effectively blends together the Doom and Unreal universes.
+
+- ~130 BC: The town of Kereshnovka is founded by an alien race known as the
+  Qurensniv.
+- ~149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
+  to burn down Kereshnovka. A group of warriors manages to defeat him. Weakened
+  he retreats to the ghoul-infested forest, never to be seen again.
+- 1933: The Ischer family migrates to the US.
+- 1977: A member of Hell's royal family travels to Kereshnovka in order to
+  rescue Manakei, who happens to be the heir to the throne. She fails to find
+  him.
+- 1987: Dr. Häzel Hoodth dies tragically, becoming a ghoul of Kereshnovka.
+- 1994: The town of Soundless Mound becomes shrouded in thick fog for five
+  whole days. Several reports of strange happenings are made.
+- 2001: The Union Aerospace Armed Forces is formed.
+- 2004: The Imanaki Research Foundation builds its headquarters in Kereshnovka.
+- 2007: The "Ghoul hunt" begins after a high-ranking UAAF official is murdered
+  by the creatures during a business visit to the Imanaki HQ.
+- 2008: At the peak of the Ghoul hunt, an envoy of the Anarukon people is
+  attacked while attempting to kidnap Manakei. The demonic heir is lost once
+  again.
+- 2009: The "Hellbound incident". Several weeks after the end of the hunt,
+  Imanaki HQ is invaded by Anarukon soldiers. One of the janitors manages to
+  survive and put an end to the incident after traveling back through the gate
+  and coming into contact with the Anderken royal family. Some time later,
+  UAAF soldiers scour the remains of the facility, retrieving most of the
+  foundation's research documents.
+- 2010: Akari Labs is founded.
+- 2012: Munch Innovations is founded.
+- 2014: Tach-Engine Technologies is founded.
+- 2015: The UAAF rebrands itself as the UAC, having found quite a lot of
+  interest in what they recovered from Imanaki.
+- 2018: Second major incident in the town of Kereshnovka. A rogue AI known as
+  SUSAN surfaces on the northern seas, assumes control of Russia's missile
+  systems.
+- 2019: Samuel Hayden is born.
+- 2020: A group of hackers manage to temporarily take over SUSAN, use its
+  advanced computing power to run thirty parallel instances of Crysis and a
+  500-player Minecraft server. This lasts for several months.
+- 2021: The "Luna Event" happens. The first contact between humans and a
+  non-hostile alien race, the Nukuri, who had been observing our race for
+  centuries from a hidden research facility on the Moon. Following the event,
+  Nukuri forces deployed to Earth successfully neutralize SUSAN.
+- 2023: The two Koreas re-unify.
+- 2025: First expedition to Mars, led by the UAC. Scotland becomes independent.
+- 2029: Forx Aeronautics is founded, singlehandedly "fixes the economy" of the
+  UK.
+- 2038: The 32-bit UNIX time rollover happens without many notable incidents.
+- 2040: Symnatek is founded.
+- 2049: The clearly senile Dr. Locke attempts to take over the world.
+  Surrenders a couple days later during the counter-attack.
+- 2068: The Nukuri go through their seventh world war in their home planet.
+- 2073: World War 3 starts thanks to a very negatively received post on social
+  media from the president of the US regarding the Nukuri.
+- 2074: In an act of desperation, the US sells Texas back to Mexico in order to
+  gather funds for a "solution to all their problems" from Akari Labs. Military
+  contractors are immediately sent to Japan with several billion dollars. The
+  "Red Oni" project is immediately started.
+- 2075: Blackmann Arms moves back to Germany.
+- 2077: Akari Labs deploys Ibuki, the "Red Oni" super soldier, on America, but
+  it is already too late. World War 3 ends as the United States are almost
+  literally dissolved by an orbital strike. In the aftermath, the Nukuri
+  abandon Earth, never to come back.
+- 2082: Alaska becomes part of Canada.
+- 2091: Taro Miyamoto finds Ibuki, who had become a sort of living legend among
+  wastelanders for her various feats. She is brought back to Japan. As
+  promised, Saya immediately shoves her face into Ibuki's chest.
+- 2097: The Earth is invaded by a mysterious humanoid entity, who claims to be
+  the Abrahamic God. He reactivates SUSAN and leaves. Russia and China are both
+  entirely taken over by it.
+- 2099: A lone child manages to take down SUSAN.
+- 2100: The reconstruction of the United States begins.
+- 2104: The 7th Nukuri World War ends abruptly after the Mishe founders of the
+  University of Nos-Kora threaten to break their alliance with the Nukuri.
+- 2137: The United States are reformed.
+- 2140: Zanaveth III graduates in "Pancake Engineering" at the University of
+  Nos-Kora.
+- 2144: UAC's first contact with Hell.
+- 2145: After a coup organized by several members of the lower castes of Hell,
+  the main royal family is forced into exile. Under its new ruler, Hell decides
+  to attack mankind. Doom 3 happens.
+- 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
+  After the disappearance of the "lone marine", Akari Labs deploys the first
+  Demolitionist in order to combat the remaining forces of Hell on Earth.
+- 2149: Zanaveth III attempts to take over the world while it's still
+  recovering from the invasion, fails. Hell attempts another invasion of Mars,
+  Doom 2016 happens.
+- ~2150: The Doom Slayer assassinates the prince of Hell.
+- 2154: A group of monks discovers a mansion haunted by demons. The Doom Slayer
+  is personally sent to "fix it".
+- 2156: Akari Labs succeeds in creating safe teleportation. The reaction from
+  the UAC on social media is legendary.
+- 2171: Akari Labs manages to extend their teleportation technology to travel
+  between universes. The second contact with the Anarukon happens, this time
+  all going peacefully. Saya Miyamoto meets Xanai Kirin, their marriage brings
+  forth an alliance between the humans and the Anarukon.
+- 2181: An old man, who later reveals himself as Manakei, contacts Akari Labs
+  with a request to be transported to Hell. After reaching the royal throne (or
+  what was left of it), he pushes away the rotten corpse of the former prince
+  and takes his place as the true ruler of Hell. His first official act is to
+  cease the hostilities with humans.
+- 2193: Akari Labs completes the "Akari Project", resulting in humanity's first
+  entry into FTL travel.
+- 2200: Earth joins the "United Aligned Worlds", bonds with the Nukuri are
+  re-established.
+- 2201: The UAC files for bankrupcy.
+- 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
+- 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
+- 2216: The Seven Day Siege happens, the Skaarj are defeated.
+- 2241: The Mishe race disappears from the universe, leaving only the founders
+  of the University of Nos-Kora behind, who refuse to explain what happened.
+- 2250: The "Dark Alliance" is formed in the X'Animen system.
+- 2267: Green's World Rebellion.
+- 2270: The Phayder Corporation is founded, attempts to replicate the
+  immortality of the Nukuri race on humans through a nano-augmentation method
+  known as the "Necris process".
+- 2291: The Liandri Grand Tournament begins.
+- ~2304: The Phayder Corporation attacks the Twin Souls colony. UT3 happens.
+- 2307: After a whistleblower reveals the details of Liandri's involvement with
+  the Necris invasion of 2304, the corporation is dissolved.
+- 2320: A group of billionaires buy an entire island and turn it into an arena.
+  The "Battle Royale" boom starts.
+- 2407: Unissix Bokurou Azadeku devises the "Unissix Tournaments".
+- 2409: The first tournament ends with Raik L Raikishionen as champion. Thanks
+  to his popularity, he is elected as prime minister of the Nukuri Unified
+  Government.
+- 2411: In a joint attack, and with the participation of Earth, the "Dark
+  Alliance" is defeated.
+- 2415: The "New Dark Kingdom" is formed, in an attempt to reunite those who
+  were defeated in the former war. Its leader is defeated not long after.
+- 2779: The former "Warriors of the End" who had served Nedoshiaan reunite and
+  attempt to bring forth the apocalypse. Although the warriors are stopped,
+  they manage to summon SHINNOVRE the Eraser. For the first time in history, LS
+  breaks their vow to not get involved in "the affairs of mortals" and banishes
+  him. It is later revealed they they are brothers.
+- 2890: "Vault 490" starts being built in the University of Nos-Kora, it is
+  described as a "focusing device" for a weapon capable of "instantly
+  neutralizing any threat to our universe".
+- 2899: A strange humanoid creature is carried into the Vault. The Mishe
+  brothers announce that "although retrieving the weapon proved to be quite
+  difficult, everything is now ready".
+- 2900: Unissix Bokurou Azadeku dies under mysterious circumstances.
+- 2907: An unidentified terrorist group attacks the Nekuratek Advanced Arms
+  Research Facility in Nahkami, stealing several prototypes. The Hiikyan War
+  begins.
+- 2917: Following ten confusing years of battle, Hiikya is defeated by Deneva
+  Unissix, who sacrifices her own life in the final attack.
+- Indeterminate: In order to stop a massive Eldrich Abomination from corrupting
+  all of existence, the two Mishe brothers activate Vault 490. Although the
+  threat is defeated, major parts of the multiverse shatter in the process.

@@ -21,12 +21,25 @@ funded "Red Oni" Supersoldier project first popped up, (even though it wasn't
 what they all expected). Recently, they've started the Demolitionist program
 in order to develop AI-driven combat bots to defend Earth from invaders.
 
+Another main export of Akari Labs is their "Adopt a Maid-Bot" service. It is
+entirely free, and guaranteed to provide the perfect maid for each person. From
+energetic, workaholic maids that do their job without asking questions, to
+tender, motherly maids who take special care of you and encourage you to
+improve your lifestyle, that one being a very popular choice among NEETs. While
+it's not something publicly advertised, the bots are also equipped for "love",
+and miss Miyamoto winks extra hard whenever she mentions that.
+
 ### Blackmann Arms Ltd.
 
 What was initially a small father and son gunsmithing shop rapidly exploded in
-popularity and size once they moved to the States. They're mainly specialized
-in unorthodox shotguns and very high caliber rifles. Indeed, Blackmann is the
-name when it comes to big guns that can kill things very dead very fast.
+popularity and size once they moved to the States in the wake of WWII. They're
+mainly specialized in unorthodox shotguns and very high caliber rifles. Indeed,
+Blackmann is the name when it comes to big guns that can kill things very dead
+very fast.
+
+Their slogan is "if you can imagine it, we can build it", and so far there has
+never been a single weapon they couldn't build, no matter how crazy the request
+of the client was.
 
 ### Mr. BIG SHOT Industries
 
@@ -99,10 +112,17 @@ firearms by request. It is run by Unissix Bokurou Azadeku, who also leads the
 
 ### Harold Forx
 
-The owner of Forx Industries, a "self-made" millionaire who allegedly started
-his life as an orphan scavenging in junkyards and restoring old jet engines.
-Always boasts about his successes and is overall a very arrogant and obnoxious
-man.
+The owner of Forx Industries, a "self-made" millionaire who started his life as
+an orphan scavenging in junkyards and restoring old jet engines. Always boasts
+about his successes and is overall a very arrogant and obnoxious man.
+
+One story that most will not forget, was that of his attempt to close down
+Andrew Foster's orphanage, where he was raised in, in order to build a new
+factory. A long legal battle ensued, but eventually nothing came of it. Then
+one day, enraged, he decided to take matters into his own hands and walked
+right through the doors, screaming for Foster's name. Seconds later, he came
+back out, in tears, and with a bright red hand mark across his face. The
+factory was never built, and the orphanage still stands to this day.
 
 ### Hermann E. Ischer
 
@@ -116,13 +136,25 @@ at once. Most people's attention is immediately drawn to his gigantic eyebrows.
 The result of Akari Labs' "Red Oni" Supersoldier project. A tall, sexy and very
 well-endowed woman who's half snark and half charm (and also a nudist). Of
 course she was intentionally made this way by her creator, Saya Miyamoto.
-Suffice to say, her contractors weren't very happy with this... until they saw
-how she performed in the field.
+Suffice to say, the military contractors who paid big money for the project
+weren't all too happy with this... until they saw how she performed in the
+field. She was immediately sent to America to see if the situation with WW3
+could be turned around. As it so happens, she won't be very helpful, as long
+after the events of this mod, the United States fall (off-handedly mentioned in
+UnSX 4).
 
 ### Janus Locke Hoodth
 
 A mad scientist shut-in who sometimes creates "toys" that are hilariously
-deadly. Tried to take over the world once (UnSX 5), but didn't succeed.
+deadly. Younger brother to Häzel Hoodth, the "mad doctor" of Kereshnovka, who
+is rumored to have conducted all sorts of cruel experiments on humans in search
+for "the essence of immortality". After an explosion near the abandoned oil
+refinery west of the town, some of the locals have mentioned seeing an odd,
+floating figure roaming the area (It's Dark In Here).
+
+Many years into the future, after being fed up with all the negative feedback
+his products keep receiving, Locke will attempt to take over the world.
+Unfortunately for him, he will not succeed (UnSX 5).
 
 ### J.A. Tachmek-Smith
 
@@ -144,6 +176,10 @@ who holds the title of "Blackfire manipulator", for having mastered an odd form
 of pyromancy where flames absorb light and emit cold. Commissioned the creation
 of the weapon known as the "Blackfire igniter" from Unissix Crafts.
 
+There is not much else known about them personally. They tend to always stay
+out of the public eye. It is very rare for them to ever act in any situation,
+unless it is something very exceptional (UnSX 6).
+
 ### Maester Mekes
 
 Documents found in the ruins of Decade Mechanics show that this was the CEO of
@@ -161,17 +197,29 @@ empire once was. Among them the most notable are the "Nekrodero", "Ynykron",
 "Kyshyje" and "Myssup" artifacts, four weapons that would have been used by
 his personal elite knights, known as the "Warriors of World's End".
 
+After his assassination, a massive crater was found where his throne once
+stood. And the various artifacts were found nearby. No traces of life, or the
+remains of anyone were ever found, including those of Sirumat Ky, the man who
+activated the device that killed him.
+
 ### Parker Munch
 
 Some guy who can't stop inventing wacky guns. Not much is known about him
 personally. Some people say his name sounds "oddly like something I've heard
 somewhere else".
 
+Many people have attempted to dig up any information regarding who he is and
+where he came from, but all have come back empty-handed. Suffice to say, he at
+least isn't the type to attempt any sort of hostile takeover, he just likes
+to invent stuff out of boredom.
+
 ### Reubens C. Karnanaiahmani
 
 Youngest son of king Marc P. Karnanaiahmani. A prolific inventor, known for
 innovative gadgets such as the "Gravity Suppressor" or the "Hammerspace
-Container", among others.
+Container", among others. A very nerdy looking lad, though his looks are quite
+deceiving as he is also highly skilled in several martial arts, as well as
+being an excellent sharpshooter (UnSX 4).
 
 ### Saya Miyamoto
 
@@ -182,22 +230,52 @@ don't seem to ever age, which only further reinforces Nana's words.
 
 Saya is often called "Not-Tomoko" around the net, in reference to a similar
 looking character from an early 21st century manga series. In terms of
-personality and looks, the resemblance is definitely there.
+personality and looks, the resemblance is definitely there. She is well known
+for being quite blunt when talking to people, and also for being exaggeratedly
+flirty around attractive women. Her favourite colour is green, favourite animal
+is the otter, and favourite dish is pepperoni pizza. She also enjoys drone
+metal. Likes baggy clothes, refuses to wear skirts, only pants. Uses Arch,
+favourite editor is vim, favourite programming language is haskell. Her top
+"turn-ons" are well-endowed women, maids, femboys and heterochromia.
 
 ### Tetsuya Imanaki
 
 The founder of the Imanaki Research Foundation and last surviving member of the
-Imanaki family after the Onoke Mansion Murders. After the incident that led to
-the destruction of the research center on Kereshnovka, he pretty much
-disappeared from the public eye.
+Imanaki family after the Onoke Mansion Murders (Horror Show: The Scary Side).
+He spearheaded the initial expeditions to Hell during the early days of the
+foundation and even managed to strike some deals with the head of the royal
+family.
+
+After the incident that led to the destruction of the research center on
+Kereshnovka (Hellbound), he pretty much disappeared from the public eye.
+Although some say that he probably just ran away, got lost in the forest, and
+became food for the ghouls, or worse, became one of them (Hellbound 2).
 
 ### Unissix Bokurou Azadeku
 
-Known as the "little enterpreneur" of the Unissix family. She started the
-Unissix Tournaments after years of boredom with the lack of "thrilling, action
-packed arena combat" in bloodsports at the time, which were dominated by the
-"free-for-all battle royale in a large environment" format. She also builds all
-sorts of things through the "Unissix Crafts" brand.
+Known as the "little enterpreneur" of the Unissix family. She builds all sorts
+of things through the "Unissix Crafts" brand and is the main supplier of
+equipment for the town. She's the mother of Zanaveth III, a self-proclaimed
+"good-evil supervillain".
+
+In addition, she, along with other notable personalities in arms manufacturing,
+led the creation of the Unissix Tournaments after years of boredom with the
+lack of "thrilling, action packed arena combat" in bloodsports at the time,
+which were dominated by the "free-for-all battle royale in a large environment"
+format (UnSX series).
+
+Azadeku shares her name with a mythical being who is said to have been the
+"first god of the world" (Project .Blank). Her younger sister, Deneva, says
+that if she ever has a kid, she'll also give them that name (The Hiikyan War).
+
+### Zanaveth III, "The Corruptor"
+
+A "criminal mastermind" who attempts to take over the world during the events
+of Doom II (Total Madness). Her plan is to construct an army of augmented
+hellspawn that only she can control. It all falls apart when the man she picks
+for the job of gathering all the required items for this task betrays her.
+After a humiliating defeat by blowing herself up with a defective, untested
+prototype of a semi-auto Spreadgun, she goes back into hiding.
 
 ---
 
@@ -270,8 +348,8 @@ permitted and will immediately void your warranty.
 
 The term used to describe the Wallbuster's unique internal mechanisms,
 referencing how it is even more mind-blowingly insane than the G11's. The
-insane level of complexity of this weapon makes it not only very expensive, but
-also only repairable by members of the Ischer family, personally.
+ludicrous level of complexity of this weapon makes it not only very expensive,
+but also only repairable by members of the Ischer family, personally.
 
 ### Nokron, Kinylum, Purom and Puronokorokinylum
 

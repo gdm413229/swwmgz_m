@@ -16,10 +16,10 @@ Founded in 2010 by child prodigy Saya Miyamoto. Akari Labs advertises itself
 as "a fountain of innovation". A major part of the technology used at the time
 comes from here, they were the first to kickstart FTL travel, along with safe
 teleportation energy ("after the UAC first fucked it up", according to the
-founder). Recently, they've started the Demolitionist program in order to
-develop AI-driven combat bots to defend Earth from invaders (SWWM GZ). The labs
-will face yet more controversy later on after the army funded "Red Oni"
-Supersoldier project pops up (UnSX 4 backstory).
+founder). The labs once faced controversy due to the failure of the army
+funded "Red Oni" Supersoldier project (UnSX 4 backstory). Recently, they've
+started the Demolitionist program in order to develop AI-driven combat bots to
+defend Earth from invaders (SWWM GZ).
 
 Another main export of Akari Labs is their "Adopt a Maid-Bot" service. It is
 entirely free, and guaranteed to provide the perfect maid for each person. From
@@ -110,6 +110,19 @@ firearms by request. It is run by Unissix Bokurou Azadeku, who also leads the
 
 ## Individuals
 
+### Doom Marine
+
+The lone survivor of the demonic invasions of the UAC bases on the moons of
+Mars. Kind of a living legend. The events of SWWM GZ happen more or less in
+parallel to his actions during Doom 2, so if you're playing vanilla it'd be
+more or less as if you're "racing him to the finish line".
+
+### Doom Slayer
+
+An ancient warrior discovered by the UAC during an expedition to Hell. His
+armor appears similar to that of the typical UAC marine, which has led to a lot
+of wild mass guessing. He is completely unrelated to the previous character.
+
 ### Harold Forx
 
 The owner of Forx Industries, a "self-made" millionaire who started his life as
@@ -139,9 +152,8 @@ course she was intentionally made this way by her creator, Saya Miyamoto.
 Suffice to say, the military contractors who paid big money for the project
 weren't all too happy with this... until they saw how she performed in the
 field. She was immediately sent to America to see if the situation with WW3
-could be turned around. As it so happens, she won't be very helpful, as long
-after the events of this mod, the United States fall (off-handedly mentioned in
-UnSX 4).
+could be turned around. As it so happened, she wasn't very helpful, as shortly
+after deployment, the United States fell (off-handedly mentioned in UnSX 4).
 
 ### Janus Locke Hoodth
 
@@ -150,11 +162,12 @@ deadly. Younger brother to Häzel Hoodth, the "mad doctor" of Kereshnovka, who
 is rumored to have conducted all sorts of cruel experiments on humans in search
 for "the essence of immortality". After an explosion near the abandoned oil
 refinery west of the town, some of the locals have mentioned seeing an odd,
-floating figure roaming the area (It's Dark In Here).
+floating figure roaming the area (It's Dark In Here). It is said that his
+madness may have something to do with the death of his brother.
 
-Many years into the future, after being fed up with all the negative feedback
-his products keep receiving, Locke will attempt to take over the world.
-Unfortunately for him, he will not succeed (UnSX 5).
+One day, after being fed up with all the negative feedback his products keep
+receiving, Locke attempts to take over the world. Unfortunately for him, he
+doesn't succeed (UnSX 5).
 
 ### J.A. Tachmek-Smith
 
@@ -281,7 +294,7 @@ Azadeku shares her name with a mythical being who is said to have been the
 "first god of the world" (Project .Blank). Her younger sister, Deneva, says
 that if she ever has a kid, she'll also give them that name (The Hiikyan War).
 
-### Zanaveth III, "The Corruptor"
+### Zanaveth Nekuraku III, "The Corruptor"
 
 A "criminal mastermind" who attempts to take over the world during the events
 of Doom II (Total Madness). Her plan is to construct an army of augmented
@@ -320,7 +333,7 @@ Somewhat inspired by a certain other weapon designer, Blackmann Arms decided to
 jump into the big boolet bandwagon, which resulted in the "Silver Bullet"
 series of ultra-high caliber rifles. Initially starting with the .850 BIG and
 .950 BCG, they kept going, following up with the 1.050 FCB and then the 1.150
-XSG. When people thought that they couldn't go even further beyond that point,
+XSB. When people thought that they couldn't go even further beyond that point,
 they devised the 1.350 TAF, although at that point things were starting to
 become way too cumbersome (and excessive) for normal use, so they stopped.
 
@@ -422,6 +435,18 @@ the old mechanical demigod Maester Mekes.
 This is in no way accurate, and it's hard to make much sense of all of it since
 SWWM GZ effectively blends together the Doom and Unreal universes.
 
+- ????: Twenty years after the fall of the Order of the One God, a message is
+  received from an old ruined complex beyond the seas. A declaration of war
+  from the "Church of the Dreadful Lady". A single, well trained mercenary puts
+  an end to their plans, but the true masterming behind it all manages to flee.
+- ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
+  associates, stealing the Heart of D'Sparil and putting an end to the plans
+  for resurrecting him. The mansion is sold off, most of its valuables,
+  including the corporeal remains of the serpent rider, being acquired by the
+  "Cult of the Viridescent Lord".
+- ????: The three heroes who defeated Korax are called into the Winter Nexus,
+  they gather the four elemental gems and defeat the "Viridescent Lord". A
+  mysterious shadowy figure revives the corpse of D'Sparil, they disappear.
 - ~130 BC: The town of Kereshnovka is founded by an alien race known as the
   Qurensniv.
 - ~149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
@@ -432,10 +457,10 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   rescue Manakei, who happens to be the heir to the throne. She fails to find
   him.
 - 1987: Dr. Häzel Hoodth dies tragically, becoming a ghoul of Kereshnovka.
-- 1994: The town of Soundless Mound becomes shrouded in thick fog for five
-  whole days. Several reports of strange happenings are made.
 - 2001: The Union Aerospace Armed Forces is formed.
 - 2004: The Imanaki Research Foundation builds its headquarters in Kereshnovka.
+- 2005: The town of Soundless Mound becomes shrouded in thick fog for five
+  whole days. Several reports of strange happenings are made.
 - 2007: The "Ghoul hunt" begins after a high-ranking UAAF official is murdered
   by the creatures during a business visit to the Imanaki HQ.
 - 2008: At the peak of the Ghoul hunt, an envoy of the Anarukon people is
@@ -504,19 +529,37 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2147: Reginald E. Griggs Jr. is imprisoned after countless human remains were
   found in the basement of his summer house in Olathe.
 - 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
-  After the disappearance of the "lone marine", Akari Labs deploys the first
-  Demolitionist in order to combat the remaining forces of Hell on Earth.
-- 2149: Zanaveth III attempts to take over the world while it's still
-  recovering from the invasion, fails. Hell attempts another invasion of Mars,
-  Doom 2016 happens.
-- ~2150: The Doom Slayer assassinates the prince of Hell.
+  After a lone marine reaches the gates of Hell in order to shut them off from
+  the inside, Akari Labs deploys the first Demolitionist in order to combat the
+  remaining invaders on Earth. After the marine's victory against the Icon of
+  Sin, the invasion ends, but some demons still remains, so without even being
+  given a moment to rest, the marine's sent on another mission. Months later,
+  the UAC still hasn't learned anything, and one of their bases on the moons of
+  Jupiter is invaded. The now legendary "Doom marine" is sent there.
+- 2149: An UAC-owned ship en route to the Jupiter base is hijacked, Demon
+  reinforcements arrive. The marine manages to fight them off again. After the
+  incident he is decomissioned, and the Doom episodes are classified. Zanaveth
+  III attempts to take over the world while it's still recovering from the
+  invasion, fails. Hell attempts another invasion of Mars, Doom 2016 happens.
+- ~2150: The Doom Slayer assassinates the prince of Hell. The UAC loses contact
+  with him afterwards.
 - 2152: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.
-- 2153: Reginald E. Griggs Jr. is executed by lethal injection.
-- 2154: A group of monks discovers a mansion haunted by demons. The Doom Slayer
-  is personally sent to "fix it".
+- 2153: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
+  "those brats deserved it, they didn't know how to use a fucking chair lol".
 - 2156: Akari Labs succeeds in creating safe teleportation. The reaction from
   the UAC on social media is legendary.
+- 2160: Demonic forces are discovered on the old moon base, having been
+  resurrected by a "Mother Demon". Seeing as the Slayer is nowhere to be found,
+  the Doom marine is re-commissioned to stop this madness, he succeeds, but in
+  a last transmission states that he will "stay in Hell to make sure no demon
+  ever comes out again".
+- 2164: The remains of the Doom marine are found during a routine UAC
+  expedition, the Slayer is seen standing right next to them, as if paying
+  respects to a fellow warrior.
+- 2170: A group of monks discover a mansion haunted by demons, become trapped.
+  The Doom Slayer is personally sent to "fix it". A mysterious figure is seen
+  leaving the mansion afterwards.
 - 2171: Akari Labs manages to extend their teleportation technology to travel
   between universes. The second contact with the Anarukon happens, this time
   all going peacefully. Saya Miyamoto meets Xanai Kirin, their marriage brings
@@ -525,7 +568,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   with a request to be transported to Hell. After reaching the royal throne (or
   what was left of it), he pushes away the rotten corpse of the former prince
   and takes his place as the true ruler of Hell. His first official act is to
-  cease the hostilities with humans.
+  cease the hostilities with humans, declares the Doom Slayer "Guardian of the
+  Gates".
 - 2193: Akari Labs completes the "Akari Project", resulting in humanity's first
   entry into FTL travel.
 - 2200: Earth joins the "United Aligned Worlds", bonds with the Nukuri are
@@ -559,7 +603,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   attempt to bring forth the apocalypse. Although the warriors are stopped,
   they manage to summon SHINNOVRE the Eraser. For the first time in history, LS
   breaks their vow to not get involved in "the affairs of mortals" and banishes
-  him. It is later revealed they they are brothers.
+  him. It is later revealed that they are brothers.
 - 2890: "Vault 490" starts being built in the University of Nos-Kora, it is
   described as a "focusing device" for a weapon capable of "instantly
   neutralizing any threat to our universe".
@@ -575,3 +619,4 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - Indeterminate: In order to stop a massive Eldrich Abomination from corrupting
   all of existence, the two Mishe brothers activate Vault 490. Although the
   threat is defeated, major parts of the multiverse shatter in the process.
+  Project Abyss begins.

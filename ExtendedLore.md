@@ -492,8 +492,12 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2025: First expedition to Mars, led by the UAC. Scotland becomes independent.
 - 2029: Forx Aeronautics is founded, singlehandedly "fixes the economy" of the
   UK.
+- 2032: Joint expedition with the Nukuri to Sedna, revealing a gateway that
+  directly connects to their homeworld, allowing for relatively fast travel
+  between two solar systems.
 - 2038: The 32-bit UNIX time rollover happens without many notable incidents.
 - 2040: Symnatek is founded.
+- 2045: The ruins of a Decade Mechanics facility are found in Sunkaeze.
 - 2049: The clearly senile Dr. Locke attempts to take over the world.
   Surrenders a couple days later during the counter-attack.
 - 2068: The Nukuri go through their seventh world war in their home planet.
@@ -519,7 +523,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2100: The reconstruction of the United States begins.
 - 2104: The 7th Nukuri World War ends abruptly after the Mishe founders of the
   University of Nos-Kora threaten to break their alliance with the Nukuri.
-- 2137: The United States are reformed.
+- 2137: The United States are reformed, now called "Union States".
 - 2140: Zanaveth III graduates in "Pancake Engineering" at the University of
   Nos-Kora.
 - 2144: UAC's first contact with Hell.

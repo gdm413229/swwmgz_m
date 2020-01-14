@@ -545,7 +545,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   incident he is decomissioned, and the Doom episodes are classified. Zanaveth
   III attempts to take over the world while it's still recovering from the
   invasion, fails. Hell attempts another invasion of Mars, Doom 2016 happens.
-- ~2150: The Doom Slayer assassinates the prince of Hell. The UAC loses contact
+- 2151: The Doom Slayer assassinates the prince of Hell. The UAC loses contact
   with him afterwards.
 - 2152: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.

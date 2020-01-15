@@ -415,7 +415,7 @@ This powerup lasts 60 seconds and cannot be toggled.
 
 The ragekit is a special item that has some... interesting effects.
 
-Quadruples damage dealt, doubles movement speed, halves damage taken... and has
+Octuples melee damage, doubles movement speed, quarters damage taken... and has
 the side effect of turning you into a screaming beast.
 
 Ragequit happens after 30 seconds, also cannot be toggled after activation.

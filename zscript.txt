@@ -37,7 +37,7 @@ Class SWWMCrashHandler : StaticEventHandler
 
 	override void UiTick()
 	{
-		if ( gamestate == GS_LEVEL )
+		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )
 		{
 			wasinmap = true;
 			timer = 0;
@@ -48,14 +48,14 @@ Class SWWMCrashHandler : StaticEventHandler
 			if ( timer == 1 )
 			{
 				Console.Printf(TEXTCOLOR_GOLD.."Oopsie Woopsie!"..TEXTCOLOR_NORMAL);
-				S_Sound("crash/glass",CHAN_5|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
-				S_Sound("crash/glass",CHAN_6|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
-				S_Sound("crash/glass",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 140 )
 			{
 				Console.Printf(TEXTCOLOR_GOLD.."Looks like GZDoom made a fucky wucky! owo"..TEXTCOLOR_NORMAL);
-				S_Sound("crash/curb",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_StartSound("crash/curb",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 350 )
 			{
@@ -88,12 +88,12 @@ Class SWWMBrutalHandler : StaticEventHandler
 	override void UiTick()
 	{
 		if ( !detected ) return;
-		if ( gamestate == GS_LEVEL )
+		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )
 		{
 			if ( timer == 1 )
 			{
-				S_Sound("brutal/ezmodo",CHAN_6|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
-				S_Sound("brutal/ezmodo",CHAN_7|CHAN_UI|CHAN_NOPAUSE,1,ATTN_NONE);
+				S_StartSound("brutal/ezmodo",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				S_StartSound("brutal/ezmodo",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 350 ) ThrowAbortException(">Brutal Doom");
 			timer++;

@@ -219,8 +219,6 @@ Secondary fire lobs it as a grenade that will bounce around.
 
 Reload changes the ammo type, there are four options (see ammo section below).
 
-Zoom enters scoped mode, for long range shots.
-
 This thing is more explosive than it looks, so if you're reading this, Icarus,
 DO NOT use it at close range.
 

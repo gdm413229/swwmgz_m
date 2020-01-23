@@ -1,2 +1,31 @@
 // Munch Innovations Explodium Gun (from SWWM series)
 // Slot 2, replaces Pistol, Elven Wand, Hexen starting weapons
+
+// Animation test
+Class ExplodiumGun : SWWMWeapon
+{
+	Default
+	{
+		Weapon.SlotNumber 2;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 B 2 A_FullRaise();
+		XZW2 CDEFGH 2;
+		Goto Ready;
+	Ready:
+		XZW2 A 1 A_WeaponReady();
+		Wait;
+	Fire:
+		XZW2 AIJKLMNOPQRSA 1;
+		Goto Ready;
+	Deselect:
+		XZW2 ATUVWB 2;
+		XZW2 B -1 A_FullLower();
+		Stop;
+	}
+}

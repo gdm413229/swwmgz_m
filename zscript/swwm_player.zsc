@@ -1,1 +1,448 @@
 // The Demolitionist
+Class Demolitionist : PlayerPawn
+{
+	int extrajumps;
+	int last_jump_held;
+	Vector3 dashdir;
+	double dashfuel;
+	int dashcooldown;
+
+	int lastdamage;
+
+	Default
+	{
+		Speed 1;
+		Health 1000;
+		Radius 16;
+		Height 56;
+		Mass 500;
+		PainChance 255;
+		Player.MaxHealth 1000;
+		Player.DisplayName "Demolitionist";
+		Player.StartItem "ExplodiumGun";
+		Player.ViewHeight 52;
+		Player.AirCapacity 0;
+		Player.GruntSpeed 20;
+		Player.SoundClass "demolitionist";
+	}
+	action void A_Dash()
+	{
+		vel += invoker.dashdir*invoker.dashfuel;
+		player.vel = vel.xy;
+		if ( invoker.dashfuel < 0.1 ) invoker.dashfuel = 0.;
+		else invoker.dashfuel *= 0.9;
+		invoker.dashcooldown = 40;
+	}
+	action void A_BoostUp()
+	{
+		player.vel = vel.xy;
+		vel += (0,0,1)*invoker.dashfuel;
+		if ( invoker.dashfuel < 0.1 ) invoker.dashfuel = 0.;
+		else invoker.dashfuel *= 0.9;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		bNOFRICTION = InStateSequence(CurState,FindState("Dash"));
+	}
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		return lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+	}
+	override void MovePlayer()
+	{
+		if ( InStateSequence(CurState,FindState("Dash")) )
+			player.cmd.forwardmove = player.cmd.sidemove = 0;
+		Super.MovePlayer();
+		if ( !(player.cmd.forwardmove|player.cmd.sidemove) )
+			PlayIdle();
+		if ( player.onground )
+		{
+			last_jump_held = int.min;
+			extrajumps = 3;
+		}
+		Vector3 dodge = (0,0,0), x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		int fm = player.cmd.forwardmove;
+		int sm = player.cmd.sidemove;
+		if ( !(fm|sm) ) fm = 1;
+		if ( fm ) dodge += (fm>0)?X:-X;
+		if ( sm ) dodge += (sm>0)?Y:-Y;
+		if ( player.onground ) dodge.z = max(0,dodge.z);
+		dodge.z += .15;
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && player.cmd.buttons&BT_STRAFE )
+		{
+			dashdir = dodge.unit();
+			dashcooldown = 40;
+			dashfuel = 10.;
+			bOnMobj = false;
+			if ( player.cheats & CF_REVERTPLEASE )
+			{
+				player.cheats &= ~CF_REVERTPLEASE;
+				player.camera = player.mo;
+			}
+			vel *= 0;
+			player.jumptics = -1;
+			SetStateLabel("Dash");
+			last_jump_held = int.min;
+			extrajumps = max(1,extrajumps);
+		}
+		else if ( player.onground || !(level.maptime%3) )
+			dashcooldown = max(0,dashcooldown-1);
+	}
+	override void CheckJump()
+	{
+		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
+		bool walljump = LineTrace(angle-180,Radius*4,0,offsetz:height*.2);
+		if ( player.cmd.buttons&BT_JUMP )
+		{
+			if ( player.crouchoffset ) player.crouching = 1;
+			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
+			else if ( bNoGravity ) vel.z = 3.;
+			else if ( level.IsJumpingAllowed() && (last_jump_held < gametic-4) && ((extrajumps > 0) || walljump) )
+			{
+				if ( !player.onground ) extrajumps--;
+				double jumpvelz = JumpZ*35./TICRATE;
+				double jumpfac = 0;
+				for ( let p=Inv; p; p=p.Inv )
+				{
+					let pp = PowerHighJump(p);
+					if ( pp )
+					{
+						double f = pp.Strength;
+						if ( f > jumpfac ) jumpfac = f;
+					}
+				}
+				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
+				vel.z = max(0,vel.z)+jumpvelz;
+				if ( !player.onground )
+				{
+					vel.z *= 1.25;
+					// check for wall kicks
+					if ( walljump )
+					{
+						extrajumps = max(1,extrajumps);
+						vel.z *= .5;
+						vel.xy = (cos(angle),sin(angle))*20*Speed;
+					}
+				}
+				bOnMobj = false;
+				player.jumpTics = -1;
+				if ( !(player.cheats&CF_PREDICTING) )
+					A_StartSound("*jump",CHAN_BODY);
+				dashfuel = 3.;
+				SetStateLabel("Jump");
+			}
+			last_jump_held = gametic;
+		}
+	}
+	override void PlayIdle()
+	{
+		if ( player.health <= 0 ) return;
+		if ( !bNoGravity && player.onground && (waterlevel < 3) )
+		{
+			// Ground
+			if ( player.crouchdir == -1 )
+			{
+				// Crouching
+				if ( InStateSequence(CurState,FindState("CrouchMove")) )
+					SetStateLabel("Crouch");
+				else if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop"))
+					|| InStateSequence(CurState,FindState("SeeFastEnd")) )
+					SetStateLabel("StartCrouch");
+			}
+			else
+			{
+				if ( InStateSequence(CurState,FindState("Crouch"))
+					|| InStateSequence(CurState,FindState("CrouchMove")) )
+					SetStateLabel("EndCrouch");
+				else if ( InStateSequence(CurState,FindState("See")) )
+					SetStateLabel("Spawn");
+				else if ( InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop")) )
+					SetStateLabel("SeeFastEnd");
+			}
+		}
+		else if ( !bNoGravity && (waterlevel < 1) )
+		{
+			// Falling
+			if ( (InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop"))
+					|| InStateSequence(CurState,FindState("SeeFastEnd")))
+					&& (abs(pos.z-floorz) > maxstepheight) )
+				SetStateLabel("Fall");
+		}
+		else
+		{
+			// Floating
+			if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop"))
+					|| InStateSequence(CurState,FindState("SeeFastEnd"))
+					|| InStateSequence(CurState,FindState("JumpLoop"))
+					|| InStateSequence(CurState,FindState("Float"))
+					|| InStateSequence(CurState,FindState("FloatLoop")) )
+				SetStateLabel("Fall");
+		}
+	}
+	override void PlayRunning()
+	{
+		if ( player.health <= 0 ) return;
+		if ( !bNoGravity && player.onground && (waterlevel < 3) )
+		{
+			// Ground
+			if ( player.crouchdir == -1 )
+			{
+				// Crouching
+				if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop"))
+					|| InStateSequence(CurState,FindState("SeeFastEnd")) )
+					SetStateLabel("StartCrouch");
+				else if ( InStateSequence(CurState,FindState("Crouch")) )
+					SetStateLabel("CrouchMove");
+			}
+			else
+			{
+				if ( InStateSequence(CurState,FindState("Crouch"))
+					|| InStateSequence(CurState,FindState("CrouchMove")) )
+					SetStateLabel("EndCrouch");
+				else if ( player.cmd.buttons&BT_SPEED
+					&& (InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))) )
+					SetStateLabel("SeeFast");
+				else if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn")) )
+					SetStateLabel("See");
+			}
+		}
+		else if ( !bNoGravity && (waterlevel < 1) )
+		{
+			// Falling
+			PlayIdle();
+		}
+		else
+		{
+			// Floating
+			if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Turn"))
+					|| InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("SeeFast"))
+					|| InStateSequence(CurState,FindState("SeeFastLoop"))
+					|| InStateSequence(CurState,FindState("SeeFastEnd"))
+					|| InStateSequence(CurState,FindState("JumpLoop"))
+					|| InStateSequence(CurState,FindState("Fall"))
+					|| InStateSequence(CurState,FindState("FallLoop")) )
+				SetStateLabel("Float");
+		}
+	}
+	override void PlayAttacking()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump"))
+			|| InStateSequence(CurState,FindState("JumpLoop")) )
+			return;	// don't cancel dash/jump
+		if ( player.crouchdir == -1 ) SetStateLabel("CrouchMissile");
+		else SetStateLabel("Missile");
+	}
+	override void PlayAttacking2()
+	{
+		PlayAttacking();
+	}
+	action void A_DMFade()
+	{
+		if ( !deathmatch || player ) return;
+		A_FadeOut(0.03);
+	}
+	action void A_DemoPain()
+	{
+		if ( invoker.lastdamage > 300 ) A_StartSound("*pain100",CHAN_VOICE);
+		else if ( invoker.lastdamage > 50 ) A_StartSound("*pain50",CHAN_VOICE);
+		else A_StartSound("*pain25",CHAN_VOICE);
+	}
+	States
+	{
+	Spawn:
+		// normal idle
+		#### # 2;
+		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&player.cmd.yaw,"Turn");
+		Wait;
+	See:
+		// normal walking
+		#### # 2;
+		XZW1 BCDEFGHIJKLMNOPA 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
+		Goto See+1;
+	Turn:
+		#### # 8;
+		XZW1 C 1 A_JumpIf(!player||!player.cmd.yaw,"Spawn");
+		Wait;
+	SeeFast:
+		// sprinting
+		#### # 2;
+		XZW1 QRST 2;
+		Goto SeeFastLoop;
+	SeeFastLoop:
+		// keep sprinting
+		XZW1 UVWXYZ 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
+		XZW2 ABCDEFG 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
+		XZW1 T 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
+		Goto SeeFastLoop;
+	SeeFastEnd:
+		// brake
+		#### # 2;
+		XZW2 HIJKL 2;
+		Goto Spawn+1;
+	Pain:
+		// ouchy
+		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
+		XZW1 A 1 A_Pain();
+		XZW2 MNOPQ 1;
+		Goto Spawn+1;
+	Death:
+	XDeath:
+		// ded
+		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchDeath");
+		XZW1 A 2
+		{
+			A_PlayerScream();
+			A_NoBlocking();
+		}
+		XZW2 RSTUVWXYZ 2;
+		XZW3 ABCDEFG 2;
+		XZW3 H 350;
+		XZW3 H 1 A_DMFade();
+		Wait;
+	Jump:
+		// start boost
+		#### # 2;
+		XZW3 IJKLMNO 2
+		{
+			if ( (pos.z<=floorz)||bNoGravity||(waterlevel>=3) )
+				return ResolveState("JumpEnd");
+			A_BoostUp();
+			return ResolveState(null);
+		}
+		Goto JumpLoop;
+	JumpLoop:
+		// keep boost
+		XZW3 P 1
+		{
+			if ( (pos.z<=floorz)||bNoGravity||(waterlevel>=3) )
+				return ResolveState("JumpEnd");
+			A_BoostUp();
+			return ResolveState(null);
+		}
+		XZW3 P 1 A_JumpIf((vel.z<-10)&&(pos.z>(floorz+80)),1);
+		Loop;
+		#### # 4;
+		Goto FallLoop;
+	JumpEnd:
+		// stop boost
+		#### # 2;
+		XZW3 PQRSTUVW 2;
+		Goto Spawn+1;
+	Fall:
+		// start fall
+		#### # 4;
+		XZW3 XYZ 2 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		XZW4 AB 2 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		Goto FallLoop;
+	FallLoop:
+		// falling
+		XZW4 CDEFGH 3 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		Goto FallLoop;
+	FallEnd:
+		// landing
+		XZW4 CIJKLMN 2;
+		Goto Spawn+1;
+	Float:
+		// start
+		#### # 2;
+		XZW4 O 3;
+		Goto FloatLoop;
+	FloatLoop:
+		XZW4 PQRS 6;
+		Loop;
+	FloatEnd:
+		#### # 2;
+		XZW4 TUVWX 3;
+		Goto Spawn+1;
+	Dash:
+		#### # 2;
+		XZW4 O 2 A_Dash();
+		XZW4 PQRS 2 A_Dash();
+		Goto DashEnd;
+	DashEnd:
+		XZW4 TUVWX 2;
+		Goto Spawn+1;
+	Taunt:
+		#### # 3;
+		XZW4 YZ 3;
+		XZW5 ABCDEFGHIJKLM 3;
+		Goto Spawn+1;
+	Approve:
+		#### # 3;
+		XZW5 NOPQRSTUVWXYZ 3;
+		XZW6 ABCD 3;
+		Goto Spawn+1;
+	Victory:
+		#### # 3;
+		XZW6 EFGHIJKLMNOPQRSTUVW 3;
+		Goto Spawn+1;
+	Missile:
+	Melee:
+		// attacking
+		XZW1 A 2;
+		XZW6 XYZ 2;
+		XZW7 ABC 2;
+		Goto Spawn+1;
+	StartCrouch:
+		// go crouching
+		#### # 2;
+		XZW7 DEFGH 1;
+		XZW7 IJKL 2;
+		Goto Crouch+1;
+	Crouch:
+		#### # 4;
+		XZW7 M -1;
+		Stop;
+	CrouchMove:
+		XZW7 MNOPQRSTUV 2;
+		Loop;
+	CrouchMissile:
+		XZW7 M 2;
+		XZW7 WXYZ 2;
+		XZW8 AB 2;
+		Goto Crouch+1;
+	CrouchPain:
+		XZW7 M 1 A_DemoPain();
+		XZW8 CDEF 1;
+		Goto Crouch+1;
+	CrouchDeath:
+		XZW7 M 2
+		{
+			A_PlayerScream();
+			A_NoBlocking();
+		}
+		XZW8 GHIJK 2;
+		XZW8 L 350;
+		XZW8 L 1 A_DMFade();
+		Wait;
+	EndCrouch:
+		#### # 2;
+		XZW8 MNOPQRS 2;
+		Goto Spawn+1;
+	}
+}

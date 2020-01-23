@@ -21,7 +21,8 @@ invasion brought upon by "those big stinkin' idiots at the UAC".
 
 Additional features:
  - Programmable colour tags: Located around various parts of your body, allows
-   quick and easy differentiation between multiple units.
+   quick and easy differentiation between multiple units (not available due to
+   engine limitations™, so they're always green).
  - Lucky Collar: A little something that your creator gives to all of her
    creations. Reduces incoming damage by 75% when you're below 10% health.
  - User Menu: With the press of a button, open a dedicated menu to see all your

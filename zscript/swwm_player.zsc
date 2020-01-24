@@ -1,11 +1,10 @@
 // The Demolitionist
 Class Demolitionist : PlayerPawn
 {
-	int extrajumps;
 	int last_jump_held;
 	Vector3 dashdir;
-	double dashfuel;
-	int dashcooldown;
+	double dashfuel, dashboost;
+	int dashcooldown, boostcooldown, fuelcooldown;
 
 	int lastdamage;
 
@@ -24,26 +23,51 @@ Class Demolitionist : PlayerPawn
 		Player.AirCapacity 0;
 		Player.GruntSpeed 20;
 		Player.SoundClass "demolitionist";
+		+NOBLOOD;
+		+DONTGIB;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		dashfuel = 100.;
 	}
 	action void A_Dash()
 	{
-		vel += invoker.dashdir*invoker.dashfuel;
+		vel += invoker.dashdir*invoker.dashboost;
 		player.vel = vel.xy;
-		if ( invoker.dashfuel < 0.1 ) invoker.dashfuel = 0.;
-		else invoker.dashfuel *= 0.9;
+		if ( invoker.dashboost < 0.1 ) invoker.dashboost = 0.;
+		else invoker.dashboost *= 0.5;
+		invoker.dashfuel = max(0.,invoker.dashfuel-invoker.dashboost);
 		invoker.dashcooldown = 40;
+		invoker.fuelcooldown = 20;
+		if ( (invoker.dashfuel <= 0.) || (invoker.dashboost <= 0.) )
+			SetStateLabel("DashEnd");
 	}
-	action void A_BoostUp()
+	action void A_BoostUp( bool initial = false )
 	{
+		vel += (0,0,1)*invoker.dashboost;
 		player.vel = vel.xy;
-		vel += (0,0,1)*invoker.dashfuel;
-		if ( invoker.dashfuel < 0.1 ) invoker.dashfuel = 0.;
-		else invoker.dashfuel *= 0.9;
+		if ( invoker.dashboost < 0.1 ) invoker.dashboost = 0.;
+		else invoker.dashboost *= 0.9;
+		invoker.dashfuel = max(0.,invoker.dashfuel-invoker.dashboost);
+		if ( ((invoker.dashfuel <= 0.) || (invoker.dashboost <= 0.)) )
+		{
+			if ( !initial )
+			{
+				if ( pos.z>floorz ) SetStateLabel("Fall");
+				else SetStateLabel("JumpEnd");
+			}
+			return;
+		}
+		invoker.fuelcooldown = 10;
 	}
 	override void Tick()
 	{
 		Super.Tick();
 		bNOFRICTION = InStateSequence(CurState,FindState("Dash"));
+		fuelcooldown = max(0,fuelcooldown-1);
+		if ( fuelcooldown <= 0 )
+			dashfuel = min(100.,dashfuel+max(dashfuel*.01,.05));
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
@@ -56,11 +80,7 @@ Class Demolitionist : PlayerPawn
 		Super.MovePlayer();
 		if ( !(player.cmd.forwardmove|player.cmd.sidemove) )
 			PlayIdle();
-		if ( player.onground )
-		{
-			last_jump_held = int.min;
-			extrajumps = 3;
-		}
+		if ( player.onground ) last_jump_held = int.min;
 		Vector3 dodge = (0,0,0), x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		int fm = player.cmd.forwardmove;
@@ -70,11 +90,11 @@ Class Demolitionist : PlayerPawn
 		if ( sm ) dodge += (sm>0)?Y:-Y;
 		if ( player.onground ) dodge.z = max(0,dodge.z);
 		dodge.z += .15;
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && player.cmd.buttons&BT_STRAFE )
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_STRAFE )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 40;
-			dashfuel = 10.;
+			dashboost = 20.;
 			bOnMobj = false;
 			if ( player.cheats & CF_REVERTPLEASE )
 			{
@@ -85,10 +105,12 @@ Class Demolitionist : PlayerPawn
 			player.jumptics = -1;
 			SetStateLabel("Dash");
 			last_jump_held = int.min;
-			extrajumps = max(1,extrajumps);
 		}
 		else if ( player.onground || !(level.maptime%3) )
+		{
 			dashcooldown = max(0,dashcooldown-1);
+			boostcooldown = max(0,boostcooldown-1);
+		}
 	}
 	override void CheckJump()
 	{
@@ -99,9 +121,8 @@ Class Demolitionist : PlayerPawn
 			if ( player.crouchoffset ) player.crouching = 1;
 			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
 			else if ( bNoGravity ) vel.z = 3.;
-			else if ( level.IsJumpingAllowed() && (last_jump_held < gametic-4) && ((extrajumps > 0) || walljump) )
+			else if ( level.IsJumpingAllowed() && (last_jump_held < gametic-4) && (((dashfuel > 10.) && (boostcooldown <= 0)) || player.onground || walljump) )
 			{
-				if ( !player.onground ) extrajumps--;
 				double jumpvelz = JumpZ*35./TICRATE;
 				double jumpfac = 0;
 				for ( let p=Inv; p; p=p.Inv )
@@ -115,22 +136,23 @@ Class Demolitionist : PlayerPawn
 				}
 				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
 				vel.z = max(0,vel.z)+jumpvelz;
+				vel.z *= 1.25;
 				if ( !player.onground )
 				{
-					vel.z *= 1.25;
 					// check for wall kicks
 					if ( walljump )
-					{
-						extrajumps = max(1,extrajumps);
-						vel.z *= .5;
 						vel.xy = (cos(angle),sin(angle))*20*Speed;
-					}
 				}
 				bOnMobj = false;
 				player.jumpTics = -1;
 				if ( !(player.cheats&CF_PREDICTING) )
 					A_StartSound("*jump",CHAN_BODY);
-				dashfuel = 3.;
+				if ( (dashfuel > 10.) && !player.onground && !walljump )
+				{
+					dashboost = 3.;
+					boostcooldown = 5;
+				}
+				else dashboost = 0.;
 				SetStateLabel("Jump");
 			}
 			last_jump_held = gametic;
@@ -152,7 +174,9 @@ Class Demolitionist : PlayerPawn
 					|| InStateSequence(CurState,FindState("See"))
 					|| InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop"))
-					|| InStateSequence(CurState,FindState("SeeFastEnd")) )
+					|| InStateSequence(CurState,FindState("SeeFastEnd"))
+					|| InStateSequence(CurState,FindState("Float"))
+					|| InStateSequence(CurState,FindState("FloatLoop")) )
 					SetStateLabel("StartCrouch");
 			}
 			else
@@ -160,7 +184,9 @@ Class Demolitionist : PlayerPawn
 				if ( InStateSequence(CurState,FindState("Crouch"))
 					|| InStateSequence(CurState,FindState("CrouchMove")) )
 					SetStateLabel("EndCrouch");
-				else if ( InStateSequence(CurState,FindState("See")) )
+				else if ( InStateSequence(CurState,FindState("See"))
+					|| InStateSequence(CurState,FindState("Float"))
+					|| InStateSequence(CurState,FindState("FloatLoop")) )
 					SetStateLabel("Spawn");
 				else if ( InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop")) )
@@ -175,7 +201,9 @@ Class Demolitionist : PlayerPawn
 					|| InStateSequence(CurState,FindState("See"))
 					|| InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop"))
-					|| InStateSequence(CurState,FindState("SeeFastEnd")))
+					|| InStateSequence(CurState,FindState("SeeFastEnd"))
+					|| InStateSequence(CurState,FindState("Float"))
+					|| InStateSequence(CurState,FindState("FloatLoop")))
 					&& (abs(pos.z-floorz) > maxstepheight) )
 				SetStateLabel("Fall");
 		}
@@ -188,7 +216,7 @@ Class Demolitionist : PlayerPawn
 					|| InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop"))
 					|| InStateSequence(CurState,FindState("SeeFastEnd"))
-					|| InStateSequence(CurState,FindState("JumpLoop"))
+					|| InStateSequence(CurState,FindState("Jump"))
 					|| InStateSequence(CurState,FindState("Float"))
 					|| InStateSequence(CurState,FindState("FloatLoop")) )
 				SetStateLabel("Fall");
@@ -242,7 +270,7 @@ Class Demolitionist : PlayerPawn
 					|| InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop"))
 					|| InStateSequence(CurState,FindState("SeeFastEnd"))
-					|| InStateSequence(CurState,FindState("JumpLoop"))
+					|| InStateSequence(CurState,FindState("Jump"))
 					|| InStateSequence(CurState,FindState("Fall"))
 					|| InStateSequence(CurState,FindState("FallLoop")) )
 				SetStateLabel("Float");
@@ -251,8 +279,7 @@ Class Demolitionist : PlayerPawn
 	override void PlayAttacking()
 	{
 		if ( InStateSequence(CurState,FindState("Dash"))
-			|| InStateSequence(CurState,FindState("Jump"))
-			|| InStateSequence(CurState,FindState("JumpLoop")) )
+			|| InStateSequence(CurState,FindState("Jump")) )
 			return;	// don't cancel dash/jump
 		if ( player.crouchdir == -1 ) SetStateLabel("CrouchMissile");
 		else SetStateLabel("Missile");
@@ -329,25 +356,21 @@ Class Demolitionist : PlayerPawn
 		#### # 2;
 		XZW3 IJKLMNO 2
 		{
-			if ( (pos.z<=floorz)||bNoGravity||(waterlevel>=3) )
+			if ( player.onground||bNoGravity||(waterlevel>=3) )
 				return ResolveState("JumpEnd");
-			A_BoostUp();
+			A_BoostUp(true);
 			return ResolveState(null);
 		}
-		Goto JumpLoop;
-	JumpLoop:
 		// keep boost
 		XZW3 P 1
 		{
-			if ( (pos.z<=floorz)||bNoGravity||(waterlevel>=3) )
+			if ( player.onground||bNoGravity||(waterlevel>=3) )
 				return ResolveState("JumpEnd");
-			A_BoostUp();
+			A_BoostUp(false);
 			return ResolveState(null);
 		}
-		XZW3 P 1 A_JumpIf((vel.z<-10)&&(pos.z>(floorz+80)),1);
-		Loop;
-		#### # 4;
-		Goto FallLoop;
+		XZW3 P 1 A_JumpIf((vel.z<-10)&&(pos.z>(floorz+80)),"Fall");
+		Goto Jump+8;
 	JumpEnd:
 		// stop boost
 		#### # 2;
@@ -356,12 +379,12 @@ Class Demolitionist : PlayerPawn
 	Fall:
 		// start fall
 		#### # 4;
-		XZW3 XYZ 2 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
-		XZW4 AB 2 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		XZW3 XYZ 2 A_JumpIf(player.onground&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		XZW4 AB 2 A_JumpIf(player.onground&&!bNoGravity&&(waterlevel<3),"FallEnd");
 		Goto FallLoop;
 	FallLoop:
 		// falling
-		XZW4 CDEFGH 3 A_JumpIf((pos.z<=floorz)&&!bNoGravity&&(waterlevel<3),"FallEnd");
+		XZW4 CDEFGH 3 A_JumpIf(player.onground&&!bNoGravity&&(waterlevel<3),"FallEnd");
 		Goto FallLoop;
 	FallEnd:
 		// landing
@@ -383,7 +406,7 @@ Class Demolitionist : PlayerPawn
 		#### # 2;
 		XZW4 O 2 A_Dash();
 		XZW4 PQRS 2 A_Dash();
-		Goto DashEnd;
+		Goto Dash+2;
 	DashEnd:
 		XZW4 TUVWX 2;
 		Goto Spawn+1;

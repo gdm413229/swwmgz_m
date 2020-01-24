@@ -1,1 +1,138 @@
-// Base inventory code
+// Scoring
+Class SWWMCredits : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.ALWAYSPICKUP;
+		Inventory.MaxAmount 999999999;
+		Inventory.InterHubAmount 999999999;
+	}
+}
+
+// Base class for all SWWM Armors
+Class SWWMArmor : Armor
+{
+	int priority;
+
+	Property ArmorPriority : priority;
+
+	Default
+	{
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.KEEPDEPLETED;
+		+INVENTORY.ALWAYSPICKUP;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find last armor that's better than us
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'SWWMArmor') || (i == self) || (SWWMArmor(i).priority < priority) ) continue;
+			found = i;
+		}
+		if ( !found ) return;
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
+	// for subclasses
+	virtual int HandleDamage( int damage, Name damageType )
+	{
+		return damage;
+	}
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage )
+	{
+		int saved;
+		if ( (amount > 0) && !DamageTypeDefinition.IgnoreArmor(damageType) )
+		{
+			saved = HandleDamage(damage,damageType);
+			if ( amount <= saved ) saved = amount;
+			newdamage -= saved;
+			amount -= saved;
+			damage = newdamage;
+			if ( amount <= 0 )
+			{
+				if ( damage > 0 ) newdamage = ApplyDamageFactors(GetClass(),damageType,damage,damage);
+				DepleteOrDestroy();
+				return;
+			}
+		}
+		if ( damage > 0 ) newdamage = ApplyDamageFactors(GetClass(),damageType,damage,damage);
+	}
+}
+
+// Base class for all SWWM Weapons
+Class SWWMWeapon : Weapon
+{
+	override void DetachFromOwner()
+	{
+		Owner.A_StopSound(CHAN_WEAPON);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA);
+		Super.DetachFromOwner();
+	}
+	override void OwnerDied()
+	{
+		if ( Owner.player && (Owner.player.ReadyWeapon == self) )
+		{
+			Owner.A_StopSound(CHAN_WEAPON);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA);
+		}
+		A_ClearRefire();
+		Super.OwnerDied();
+	}
+	// instant raise/lower
+	action void A_FullRaise()
+	{
+		if ( !player ) return;
+		if ( player.PendingWeapon != WP_NOCHANGE )
+		{
+			player.mo.DropWeapon();
+			return;
+		}
+		if ( !player.ReadyWeapon ) return;
+		let psp = player.GetPSprite(PSP_WEAPON);
+		psp.y = WEAPONTOP;
+	}
+	action void A_FullLower()
+	{
+		if ( !player ) return;
+		if ( !player.ReadyWeapon )
+		{
+			player.mo.BringUpWeapon();
+			return;
+		}
+		let psp = player.GetPSprite(PSP_WEAPON);
+		psp.y = WEAPONBOTTOM;
+		if ( player.playerstate == PST_DEAD )
+		{
+			// Player is dead, so don't bring up a pending weapon
+			// Player is dead, so keep the weapon off screen
+			player.SetPSprite(PSP_FLASH,null);
+			psp.SetState(player.ReadyWeapon.FindState('DeadLowered'));
+			return;
+		}
+		// [RH] Clear the flash state. Only needed for Strife.
+		player.SetPSprite(PSP_FLASH,null);
+		player.mo.BringUpWeapon();
+	}
+	Default
+	{
+		Weapon.BobStyle "Alpha";
+		Weapon.BobSpeed 3.0;
+		Weapon.BobRangeX 0.5;
+		Weapon.BobRangeY 0.2;
+		Weapon.YAdjust 0;
+		+WEAPON.NOALERT;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+}

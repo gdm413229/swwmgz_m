@@ -9,8 +9,6 @@ enum ESWWMGZChannels
 	CHAN_POWERUPEXTRA = 63205,
 };
 
-const PSP_PLAYERTAG = 100;
-
 // Handler responsible for item replacements and whatever else
 Class SWWMHandler : EventHandler
 {
@@ -56,7 +54,6 @@ Class SWWMCrashHandler : StaticEventHandler
 			if ( timer == 1 )
 			{
 				Console.Printf(TEXTCOLOR_GOLD.."Oopsie Woopsie!"..TEXTCOLOR_NORMAL);
-				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
@@ -123,73 +120,5 @@ Class SWWMBrutalHandler : StaticEventHandler
 		Screen.Dim("Red",(timer/350.)-.2,0,0,Screen.GetWidth(),Screen.GetHeight());
 		Screen.DrawTexture(scr,false,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,DTA_VirtualWidth,1280,DTA_VirtualHeight,960,DTA_Alpha,min(1.,timer/50.));
 		Screen.Dim("Red",(timer/70.)-3.5,0,0,Screen.GetWidth(),Screen.GetHeight());
-	}
-}
-
-// Base class for all SWWM Weapons
-Class SWWMWeapon : Weapon
-{
-	override void DetachFromOwner()
-	{
-		Owner.A_StopSound(CHAN_WEAPON);
-		Owner.A_StopSound(CHAN_WEAPONEXTRA);
-		Super.DetachFromOwner();
-	}
-	override void OwnerDied()
-	{
-		if ( Owner.player && (Owner.player.ReadyWeapon == self) )
-		{
-			Owner.A_StopSound(CHAN_WEAPON);
-			Owner.A_StopSound(CHAN_WEAPONEXTRA);
-		}
-		A_ClearRefire();
-		Super.OwnerDied();
-	}
-	// instant raise/lower
-	action void A_FullRaise()
-	{
-		if ( !player ) return;
-		if ( player.PendingWeapon != WP_NOCHANGE )
-		{
-			player.mo.DropWeapon();
-			return;
-		}
-		if ( !player.ReadyWeapon ) return;
-		let psp = player.GetPSprite(PSP_WEAPON);
-		psp.y = WEAPONTOP;
-	}
-	action void A_FullLower()
-	{
-		if ( !player ) return;
-		if ( !player.ReadyWeapon )
-		{
-			player.mo.BringUpWeapon();
-			return;
-		}
-		let psp = player.GetPSprite(PSP_WEAPON);
-		psp.y = WEAPONBOTTOM;
-		if ( player.playerstate == PST_DEAD )
-		{
-			// Player is dead, so don't bring up a pending weapon
-			// Player is dead, so keep the weapon off screen
-			player.SetPSprite(PSP_FLASH,null);
-			player.SetPSprite(PSP_PLAYERTAG,null);
-			psp.SetState(player.ReadyWeapon.FindState('DeadLowered'));
-			return;
-		}
-		// [RH] Clear the flash state. Only needed for Strife.
-		player.SetPSprite(PSP_FLASH,null);
-		player.mo.BringUpWeapon();
-	}
-	Default
-	{
-		Weapon.BobStyle "Alpha";
-		Weapon.BobSpeed 3.0;
-		Weapon.BobRangeX 0.5;
-		Weapon.BobRangeY 0.2;
-		Weapon.YAdjust 0;
-		+WEAPON.NOALERT;
-		+FLOATBOB;
-		FloatBobStrength 0.25;
 	}
 }

@@ -247,11 +247,11 @@ resemblance is definitely there. She is well known for being quite blunt when
 talking to people, and also for being exaggeratedly flirty around attractive
 women.
 
-Her favourite colour is green, favourite animal is the otter, and favourite
-dish is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes,
-refuses to wear skirts, only pants. Uses Arch, favourite editor is vim,
-favourite programming language is haskell. Her top "turn-ons" are well-endowed
-women, maids, femboys and heterochromia. She doesn't use deodorant or cologne,
+Her favourite colour is red, favourite animal is the otter, and favourite dish
+is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes, refuses
+to wear skirts, only pants. Uses Arch, favourite editor is vim, favourite
+programming language is haskell. Her top "turn-ons" are well-endowed women,
+maids, femboys and heterochromia. She doesn't use deodorant or cologne,
 although people around her remark that her BO is "kind of nice actually".
 
 She has an older brother, Taro, and a younger sister, Yui. Thanks to the

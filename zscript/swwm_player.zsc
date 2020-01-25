@@ -5,82 +5,196 @@ Class Demolitionist : PlayerPawn
 	Vector3 dashdir;
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
+	bool dashsnd;
 
 	int lastdamage;
+	bool lastground;
+	int lastgroundtic;
+	double lastvelz, prevvelz;
+	double ssup;
+
+	transient CVar myvoice, mute;
 
 	Default
 	{
 		Speed 1;
-		Health 1000;
 		Radius 16;
 		Height 56;
 		Mass 500;
 		PainChance 255;
-		Player.MaxHealth 1000;
 		Player.DisplayName "Demolitionist";
 		Player.StartItem "ExplodiumGun";
 		Player.ViewHeight 52;
 		Player.AirCapacity 0;
 		Player.GruntSpeed 20;
 		Player.SoundClass "demolitionist";
+		DamageFactor "Drowning", 0.0;
+		DamageFactor "Poison", 0.0;
+		DamageFactor "Falling", 0.0;
 		+NOBLOOD;
 		+DONTGIB;
+		+NOICEDEATH;
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( mod == 'Dash' ) return StringTable.Localize("$O_DASH");
+		if ( mod == 'GroundPound' ) return StringTable.Localize("$O_POUND");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	override void GiveDefaultInventory()
+	{
+		Super.GiveDefaultInventory();
+		// preloaded gun
+		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
+		if ( !eg ) return;
+		eg.clipcount = 7;
+		eg.chambered = true;
 	}
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
 		dashfuel = 100.;
 	}
-	action void A_Dash()
+	void A_Dash()
 	{
-		vel += invoker.dashdir*invoker.dashboost;
+		A_AlertMonsters(800);
+		vel += dashdir*dashboost;
 		player.vel = vel.xy;
-		if ( invoker.dashboost < 0.1 ) invoker.dashboost = 0.;
-		else invoker.dashboost *= 0.5;
-		invoker.dashfuel = max(0.,invoker.dashfuel-invoker.dashboost);
-		invoker.dashcooldown = 40;
-		invoker.fuelcooldown = 20;
-		if ( (invoker.dashfuel <= 0.) || (invoker.dashboost <= 0.) )
+		if ( dashboost < 0.1 ) dashboost = 0.;
+		else dashboost *= .5;
+		dashfuel = max(0.,dashfuel-dashboost);
+		dashcooldown = 40;
+		fuelcooldown = max(60,fuelcooldown);
+		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
 			SetStateLabel("DashEnd");
 	}
-	action void A_BoostUp( bool initial = false )
+	void A_BoostUp( bool initial = false )
 	{
-		vel += (0,0,1)*invoker.dashboost;
+		A_AlertMonsters(800);
+		vel += (0,0,1)*dashboost;
 		player.vel = vel.xy;
-		if ( invoker.dashboost < 0.1 ) invoker.dashboost = 0.;
-		else invoker.dashboost *= 0.9;
-		invoker.dashfuel = max(0.,invoker.dashfuel-invoker.dashboost);
-		if ( ((invoker.dashfuel <= 0.) || (invoker.dashboost <= 0.)) )
+		if ( dashboost < 0.1 ) dashboost = 0.;
+		else
+		{
+			dashboost *= (player.cmd.buttons&BT_JUMP)?.9:.4;
+		}
+		dashfuel = max(0.,dashfuel-dashboost);
+		if ( ((dashfuel <= 0.) || (dashboost <= 0.)) )
 		{
 			if ( !initial )
 			{
-				if ( pos.z>floorz ) SetStateLabel("Fall");
-				else SetStateLabel("JumpEnd");
+				if ( player.onground ) SetStateLabel("JumpEnd");
+				else SetStateLabel("Fall");
 			}
 			return;
 		}
-		invoker.fuelcooldown = 10;
+		fuelcooldown = max(20,fuelcooldown);
+	}
+	override bool CanCollideWith( Actor other, bool passive )
+	{
+		if ( !InStateSequence(CurState,FindState("Dash")) ) return true;
+		if ( other.bSHOOTABLE && (other.mass < LARGE_MASS) && !other.bDONTTHRUST )
+		{
+			A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			other.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			other.DamageMobj(self,self,int(max(10,vel.length())),'Dash',DMG_THRUSTLESS);
+			if ( other )
+			{
+				other.vel += vel*(40./other.mass);
+				other.vel.z += vel.length()*(3./other.mass);
+			}
+		}
+		return true;
 	}
 	override void Tick()
 	{
 		Super.Tick();
+		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
+		{
+			if ( lastvelz < -30 )
+			{
+				let s = Spawn("DemolitionistShockwave",pos);
+				s.target = self;
+				s.special1 = int(-lastvelz);
+				ReactionTime = 17;
+				A_Stop();
+				A_AlertMonsters();
+				if ( player == players[consoleplayer] )
+				{
+					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.7);
+					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.4);
+				}
+			}
+			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			A_Footstep(0,true,clamp(-lastvelz*0.05,0.01,1.0));
+		}
+		lastground = player.onground;
+		lastvelz = prevvelz;
+		prevvelz = vel.z;
 		bNOFRICTION = InStateSequence(CurState,FindState("Dash"));
 		fuelcooldown = max(0,fuelcooldown-1);
+		dashcooldown = max(0,dashcooldown-1);
+		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
-			dashfuel = min(100.,dashfuel+max(dashfuel*.01,.05));
+			dashfuel = min(120.,dashfuel+max(dashfuel*.01,.05));
+		if ( (dashboost > 0.) && (InStateSequence(CurState,FindState("Dash")) || (InStateSequence(CurState,FindState("Jump")) && player.cmd.buttons&BT_JUMP)) )
+			dashsnd = true;
+		else
+		{
+			if ( dashsnd ) A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
+			dashsnd = false;
+		}
+		if ( dashboost <= 0. ) return;
+		if ( InStateSequence(CurState,FindState("Dash")) )
+		{
+			Actor a;
+			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
+			{
+				a = Spawn("DashTrail",Vec3Angle(30,angle+i*160,30));
+				a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
+				a.vel -= vel*.5;
+			}
+		}
+		else if ( InStateSequence(CurState,FindState("Jump")) )
+		{
+			Actor a;
+			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
+			{
+				a = Spawn("DashTrail",Vec3Angle(10,angle+i*160,30));
+				a.vel = .5*(RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
+				a.vel -= vel*.5;
+			}
+		}
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
+		// lucky collar
+		if ( Health < 25 ) damage /= 4;
 		return lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+	}
+	override void CalcHeight()
+	{
+		Super.CalcHeight();
+		// handle smooth step down (hacky but looks ok)
+		player.viewz += ssup;
+		ssup = max(0,(ssup*.7)-.25);
 	}
 	override void MovePlayer()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.forwardmove = player.cmd.sidemove = 0;
 		Super.MovePlayer();
+		if ( player.onground ) lastgroundtic = gametic;
+		// anchor to ground when going down steps
+		if ( !player.onground && !bNoGravity && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
+		{
+			ssup = max(0,(pos.z-floorz));
+			SetOrigin(Vec2OffsetZ(0,0,floorz),true);
+			player.onground = true;
+		}
 		if ( !(player.cmd.forwardmove|player.cmd.sidemove) )
 			PlayIdle();
-		if ( player.onground ) last_jump_held = int.min;
 		Vector3 dodge = (0,0,0), x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		int fm = player.cmd.forwardmove;
@@ -88,9 +202,13 @@ Class Demolitionist : PlayerPawn
 		if ( !(fm|sm) ) fm = 1;
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
-		if ( player.onground ) dodge.z = max(0,dodge.z);
+		if ( player.onground )
+		{
+			dodge.z = max(0,dodge.z);
+			if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
+		}
 		dodge.z += .15;
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_STRAFE )
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 40;
@@ -104,24 +222,21 @@ Class Demolitionist : PlayerPawn
 			vel *= 0;
 			player.jumptics = -1;
 			SetStateLabel("Dash");
-			last_jump_held = int.min;
-		}
-		else if ( player.onground || !(level.maptime%3) )
-		{
-			dashcooldown = max(0,dashcooldown-1);
-			boostcooldown = max(0,boostcooldown-1);
+			A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 		}
 	}
 	override void CheckJump()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
-		bool walljump = LineTrace(angle-180,Radius*4,0,offsetz:height*.2);
+		bool walljump = LineTrace(angle-180,Radius*4,0,TRF_NOSKY|TRF_THRUHITSCAN,height*.2);
 		if ( player.cmd.buttons&BT_JUMP )
 		{
 			if ( player.crouchoffset ) player.crouching = 1;
 			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
 			else if ( bNoGravity ) vel.z = 3.;
-			else if ( level.IsJumpingAllowed() && (last_jump_held < gametic-4) && (((dashfuel > 10.) && (boostcooldown <= 0)) || player.onground || walljump) )
+			else if ( level.IsJumpingAllowed()
+				&& (player.onground && (player.jumptics == 0))
+				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump)) )
 			{
 				double jumpvelz = JumpZ*35./TICRATE;
 				double jumpfac = 0;
@@ -136,7 +251,6 @@ Class Demolitionist : PlayerPawn
 				}
 				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
 				vel.z = max(0,vel.z)+jumpvelz;
-				vel.z *= 1.25;
 				if ( !player.onground )
 				{
 					// check for wall kicks
@@ -146,16 +260,21 @@ Class Demolitionist : PlayerPawn
 				bOnMobj = false;
 				player.jumpTics = -1;
 				if ( !(player.cheats&CF_PREDICTING) )
-					A_StartSound("*jump",CHAN_BODY);
+					A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
 				if ( (dashfuel > 10.) && !player.onground && !walljump )
 				{
 					dashboost = 3.;
-					boostcooldown = 5;
+					boostcooldown = 20;
+					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 				}
-				else dashboost = 0.;
+				else
+				{
+					dashboost = 0.;
+					vel.z *= 1.25;
+				}
 				SetStateLabel("Jump");
 			}
-			last_jump_held = gametic;
+			last_jump_held = level.maptime+1;
 		}
 	}
 	override void PlayIdle()
@@ -187,7 +306,10 @@ Class Demolitionist : PlayerPawn
 				else if ( InStateSequence(CurState,FindState("See"))
 					|| InStateSequence(CurState,FindState("Float"))
 					|| InStateSequence(CurState,FindState("FloatLoop")) )
+				{
 					SetStateLabel("Spawn");
+					A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+				}
 				else if ( InStateSequence(CurState,FindState("SeeFast"))
 					|| InStateSequence(CurState,FindState("SeeFastLoop")) )
 					SetStateLabel("SeeFastEnd");
@@ -253,7 +375,10 @@ Class Demolitionist : PlayerPawn
 					SetStateLabel("SeeFast");
 				else if ( InStateSequence(CurState,FindState("Spawn"))
 					|| InStateSequence(CurState,FindState("Turn")) )
+				{
 					SetStateLabel("See");
+					A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+				}
 			}
 		}
 		else if ( !bNoGravity && (waterlevel < 1) )
@@ -288,16 +413,94 @@ Class Demolitionist : PlayerPawn
 	{
 		PlayAttacking();
 	}
-	action void A_DMFade()
+	void A_DMFade()
 	{
 		if ( !deathmatch || player ) return;
 		A_FadeOut(0.03);
 	}
-	action void A_DemoPain()
+	void A_DemoPain()
 	{
-		if ( invoker.lastdamage > 300 ) A_StartSound("*pain100",CHAN_VOICE);
-		else if ( invoker.lastdamage > 50 ) A_StartSound("*pain50",CHAN_VOICE);
-		else A_StartSound("*pain25",CHAN_VOICE);
+		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
+		if ( lastdamage > 60 )
+		{
+			A_StartSound("*pain25",CHAN_VOICE);
+			if ( mute.GetInt() < 4 )
+				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+		}
+		else if ( lastdamage > 40 )
+		{
+			A_StartSound("*pain50",CHAN_VOICE);
+			if ( mute.GetInt() < 4 )
+				A_StartSound(String.Format("voice/%s/pain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+		}
+		else if ( lastdamage > 0 )
+		{
+			A_StartSound("*pain100",CHAN_VOICE);
+			if ( mute.GetInt() < 4 )
+				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+		}
+	}
+	void A_DemoScream()
+	{
+		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
+		A_PlayerScream();
+		if ( mute.GetInt() < 4 )
+			A_StartSound(String.Format("voice/%s/death",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+	}
+	override bool OnGiveSecret( bool printmsg, bool playsound )
+	{
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
+		int score = 500;
+		// last secret (this is called before counting it up, so have to subtract)
+		if ( level.found_secrets == level.total_secrets-1 ) score = 5000;
+		Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
+		if ( CheckLocalView() && (mute.GetInt() < 2) ) SWWMHandler.AddOneliner("findsecret",40);
+			GiveInventory("SWWMCredits",score);
+		return true;
+	}
+	override void AddInventory( Inventory item )
+	{
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
+		Super.AddInventory(item);
+		if ( (item is 'Weapon') && CheckLocalView() && (mute.GetInt() < 2) )
+			SWWMHandler.AddOneliner("getweapon");
+		if ( multiplayer && (item is 'Key') )
+		{
+			// share all keys in mp
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !players[i].mo || (i == PlayerNumber()) )
+					continue;
+				players[i].mo.GiveInventory(item.GetClass(),1);
+			}
+		}
+	}
+	override bool UseInventory( Inventory item )
+	{
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
+		if ( !(item is 'PuzzleItem') || (mute.GetInt() >= 2) )
+			return Super.UseInventory(item);
+		bool res = Super.UseInventory(item);
+		if ( res ) SWWMHandler.AddOneliner("puzzsucc",10);
+		else SWWMHandler.AddOneliner("puzzfail",20);
+		return res;
+	}
+	void A_Footstep( double yofs, bool run = false, double vol = .3 )
+	{
+		if ( run )
+		{
+			A_StartSound("demolitionist/run",CHAN_FOOTSTEP,CHANF_OVERLAP,vol);
+			let b = Spawn("InvisibleSplasher",(RotateVector((0,yofs*.25*radius),angle),0));
+			b.A_CheckTerrain();
+		}
+		else
+		{
+			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.5);
+			let b = Spawn("SmolInvisibleSplasher",(RotateVector((0,yofs*.25*radius),angle),0));
+			b.A_CheckTerrain();
+		}
 	}
 	States
 	{
@@ -309,33 +512,42 @@ Class Demolitionist : PlayerPawn
 	See:
 		// normal walking
 		#### # 2;
-		XZW1 BCDEFGHIJKLMNOPA 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
+		XZW1 BCD 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
+		XZW1 E 0 A_Footstep(1);
+		XZW1 EFGHIJKL 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
+		XZW1 M 0 A_Footstep(-1);
+		XZW1 MNOPA 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
 		Goto See+1;
 	Turn:
-		#### # 8;
-		XZW1 C 1 A_JumpIf(!player||!player.cmd.yaw,"Spawn");
+		#### # 8 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZW1 C 1 A_JumpIf(!player||!player.cmd.yaw,1);
 		Wait;
+		XZW1 C 3 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		Goto Spawn+1;
 	SeeFast:
 		// sprinting
-		#### # 2;
+		#### # 2 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.3);
 		XZW1 QRST 2;
 		Goto SeeFastLoop;
 	SeeFastLoop:
 		// keep sprinting
+		XZW1 U 0 A_Footstep(1,true);
 		XZW1 UVWXYZ 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
-		XZW2 ABCDEFG 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
+		XZW2 A 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
+		XZW2 B 0 A_Footstep(-1,true);
+		XZW2 BCDEFG 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
 		XZW1 T 2 A_JumpIf(player&&!(player.cmd.buttons&BT_SPEED),"SeeFastEnd");
 		Goto SeeFastLoop;
 	SeeFastEnd:
 		// brake
-		#### # 2;
+		#### # 2 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.3);
 		XZW2 HIJKL 2;
 		Goto Spawn+1;
 	Pain:
 		// ouchy
 		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
-		XZW1 A 1 A_Pain();
-		XZW2 MNOPQ 1;
+		XZW2 M 1 A_DemoPain();
+		XZW2 NOPQ 1;
 		Goto Spawn+1;
 	Death:
 	XDeath:
@@ -343,7 +555,7 @@ Class Demolitionist : PlayerPawn
 		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchDeath");
 		XZW1 A 2
 		{
-			A_PlayerScream();
+			A_DemoScream();
 			A_NoBlocking();
 		}
 		XZW2 RSTUVWXYZ 2;
@@ -433,7 +645,7 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	StartCrouch:
 		// go crouching
-		#### # 2;
+		#### # 2 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.45);
 		XZW7 DEFGH 1;
 		XZW7 IJKL 2;
 		Goto Crouch+1;
@@ -442,7 +654,11 @@ Class Demolitionist : PlayerPawn
 		XZW7 M -1;
 		Stop;
 	CrouchMove:
-		XZW7 MNOPQRSTUV 2;
+		XZW7 MN 2;
+		XZW7 O 0 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZW7 OPQRS 2;
+		XZW7 T 0 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZW7 TUV 2;
 		Loop;
 	CrouchMissile:
 		XZW7 M 2;
@@ -450,13 +666,14 @@ Class Demolitionist : PlayerPawn
 		XZW8 AB 2;
 		Goto Crouch+1;
 	CrouchPain:
-		XZW7 M 1 A_DemoPain();
-		XZW8 CDEF 1;
+		XZW7 M 1;
+		XZW8 C 1 A_DemoPain();
+		XZW8 DEF 1;
 		Goto Crouch+1;
 	CrouchDeath:
 		XZW7 M 2
 		{
-			A_PlayerScream();
+			A_DemoScream();
 			A_NoBlocking();
 		}
 		XZW8 GHIJK 2;
@@ -464,8 +681,215 @@ Class Demolitionist : PlayerPawn
 		XZW8 L 1 A_DMFade();
 		Wait;
 	EndCrouch:
-		#### # 2;
+		#### # 2 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.45);
 		XZW8 MNOPQRS 2;
 		Goto Spawn+1;
+	}
+}
+
+Class DashTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 2;
+		Height 2;
+		Scale 0.3;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SetState(FindState("Spawn")+Random[ExploS](0,7));
+		let t = Spawn("DashTrail2",pos);
+		t.vel = vel*1.2;
+		let s = Spawn("SWWMSmoke",pos);
+		s.vel = vel*.8;
+		s.SetShade(Color(1,1,1)*Random[ExploS](64,128));
+		s.special1 = Random[ExploS](2,4);
+		s.scale *= 1.4;
+		s.alpha *= .3;
+	}
+	States
+	{
+	Spawn:
+		JFLB ABCDEFGH 1 Bright
+		{
+			A_FadeOut(.2);
+			A_SetScale(scale.x*.95);
+		}
+		Loop;
+	}
+}
+
+Class DashTrail2 : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 2;
+		Height 2;
+		Scale 0.2;
+		Alpha 0.4;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SetState(FindState("Spawn")+Random[ExploS](0,7));
+	}
+	States
+	{
+	Spawn:
+		JFLR ABCDEFGH 1 Bright
+		{
+			A_FadeOut(.02);
+			A_SetScale(scale.x*1.04);
+			if ( waterlevel > 0 )
+			{
+				let b = Spawn("SWWMBubble",pos);
+				b.vel = vel;
+				b.scale *= scale.x;
+				Destroy();
+			}
+		}
+		Loop;
+	}
+}
+
+Class DemolitionistRadiusShockwaveTail : Actor
+{
+	Default
+	{
+		RenderStyle "Translucent";
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+WALLSPRITE;
+	}
+	States
+	{
+	Spawn:
+		SDST A 1
+		{
+			A_FadeOut(0.08);
+			A_SetScale(scale.x,scale.y*0.98);
+		}
+		Wait;
+	}
+}
+
+Class DemolitionistRadiusShockwave : Actor
+{
+	Default
+	{
+		RenderStyle "Translucent";
+		Speed 10;
+		DamageFunction int(20*alpha);
+		DamageType "GroundPound";
+		Radius 16;
+		Height 8;
+		Alpha 0.8;
+		Scale 1.2;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+MISSILE;
+		+STEPMISSILE;
+		+NOEXPLODEFLOOR;
+		+WALLSPRITE;
+		+RIPPER;
+	}
+	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
+	{
+		if ( damage <= 0 ) return damage;
+		if ( (target.mass < LARGE_MASS) && !target.bDONTTHRUST )
+		{
+			target.vel.xy += vel.xy.unit()*(5000./target.mass)*alpha;
+			target.vel.z += (800./target.mass)*alpha;
+		}
+		return damage;
+	}
+	States
+	{
+	Spawn:
+		SDST A 1
+		{
+			SetZ(floorz);
+			let s = Spawn("DemolitionistRadiusShockwaveTail",pos);
+			s.vel = vel*.8;
+			s.scale = scale;
+			s.alpha = alpha;
+			s.angle = angle;
+			A_FadeOut(.04);
+			A_SetScale(scale.x*1.03,scale.y*0.99);
+		}
+		Wait;
+	Death:
+		SDST A 1
+		{
+			SetZ(floorz);
+			A_FadeOut(.1);
+			A_SetScale(scale.x*1.06,scale.y*0.98);
+		}
+		Wait;
+	}
+}
+
+Class DemolitionistShockwave : Actor
+{
+	Default
+	{
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_QuakeEx(7,7,7,30,0,300+min(special1,50)*4,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:1.5);
+		if ( target.player != players[consoleplayer] )
+		{
+			A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,attenuation:.3);
+			A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,attenuation:.2,pitch:.7);
+			A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,attenuation:.1,pitch:.4);
+		}
+		target.A_Blast(BF_AFFECTBOSSES,200+min(special1*3,100),70+min(special1*2,100),10+min(special1/10,20),"SWWMNothing","");
+		A_Explode(10+min(special1/3,30),70+min(special1*2,100),XF_EXPLICITDAMAGETYPE,damagetype:'GroundPound');
+		for ( int i=0; i<360; i+=5 )
+		{
+			let r = Spawn("DemolitionistRadiusShockwave",Vec3Angle(5,i));
+			r.target = target;
+			r.angle = i;
+			r.vel.xy = (cos(i),sin(i))*r.speed;
+			r.alpha *= .1+min(special1*.03,.9);
+		}
+		for ( int i=0; i<360; i+=5 )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
+			let s = Spawn("SWWMSmoke",Vec3Angle(4,i,8));
+			s.vel = pvel+(cos(i),sin(i),0)*7.;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](1,4);
+			s.scale *= 1.5;
+			s.alpha *= .4;
+		}
+		int numpt = Random[ExploS](10,20);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 140;
+		Stop;
 	}
 }

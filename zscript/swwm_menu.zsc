@@ -1,1 +1,49 @@
 // internal "knowledge base" and more
+Class SWWMKnowledgeBaseMenu : GenericMenu
+{
+	// TODO everything, just have it be a blank menu for now
+	Font TewiFont;
+
+	override void Init( Menu parent )
+	{
+		Super.Init(parent);
+		TewiFont = Font.GetFont('TewiShaded');
+		MenuSound("menu/activate");
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		switch( mkey )
+		{
+		case MKEY_ENTER:
+		case MKEY_BACK:
+			MenuSound(GetCurrentMenu()?"menu/backup":"menu/clear");
+			Close();
+			return true;
+		}
+		return false;
+	}
+
+	override void Drawer()
+	{
+		Super.Drawer();
+		String str;
+		double hs = min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.));
+		if ( hs < 1. )
+		{
+			str = StringTable.Localize("$SWWM_TOOSMALL");
+			BrokenLines l = TewiFont.BreakLines(str,CleanWidth/2);
+			int xx, yy = (CleanHeight-l.Count()*TewiFont.GetHeight())/2;
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				xx = (CleanWidth-TewiFont.StringWidth(l.StringAt(i)))/2;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,xx,yy,l.StringAt(i),DTA_Clean,true);
+				yy += TewiFont.GetHeight();
+			}
+			return;
+		}
+		str = StringTable.Localize("$SWWM_COMINGSOON");
+		Vector2 ss = (Screen.GetWidth()/hs,Screen.GetHeight()/hs);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+}

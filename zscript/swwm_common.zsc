@@ -7,11 +7,782 @@ enum ESWWMGZChannels
 	CHAN_WEAPONEXTRA = 63203,
 	CHAN_POWERUP = 63204,
 	CHAN_POWERUPEXTRA = 63205,
+	CHAN_JETPACK = 63206
 };
+
+// One-liners
+Class SWWMOneLiner : HUDMessageBase
+{
+	String whichline;
+	int lifespan, curtime;
+	HUDFont mTewiFont;
+	transient CVar safezone;
+
+	static SWWMOneLiner Make( String whichline, int lifespan )
+	{
+		let l = new("SWWMOneLiner");
+		l.whichline = whichline;
+		l.curtime = l.lifespan = lifespan;
+		l.mTewiFont = HUDFont.Create("TewiShaded");
+		return l;
+	}
+
+	override bool Tick()
+	{
+		curtime--;
+		return (curtime<-20);
+	}
+
+	override void Draw( int bottom, int visibility )
+	{
+		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
+		int margin = safezone.GetInt();
+		Vector2 hs = StatusBar.GetHUDScale();
+		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
+		String locs = "\""..StringTable.Localize(whichline).."\"";
+		int len = mTewiFont.mFont.StringWidth(locs);
+		int h = mTewiFont.mFont.GetHeight();
+		double alph = clamp((curtime/20.)+1.,0.,1.);
+		alph *= clamp((lifespan-curtime)/10.,0.,1.);
+		Screen.Dim("Black",alph*.8,int((Screen.GetWidth()-(len+12)*hs.x)/2.),int(bottom-(margin+2+h)*hs.y),int((len+12)*hs.x),int((h+4)*hs.y));
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-(margin+h),locs,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+	}
+}
+
+// imitates UE1 light type LT_TexturePaletteOnce/LT_TexturePaletteLoop
+Class PaletteLight : DynamicLight
+{
+	Color pal[256];
+	bool IsLooping;
+
+	Default
+	{
+		Tag "Explosion";
+		DynamicLight.Type "Point";
+		Args 0,0,0,80;
+		ReactionTime 15;
+	}
+	private void UpdateLight()
+	{
+		int index = 255-((255*ReactionTime)/abs(default.ReactionTime));
+		args[LIGHT_RED] = pal[index].r;
+		args[LIGHT_GREEN] = pal[index].g;
+		args[LIGHT_BLUE] = pal[index].b;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		int lump = Wads.CheckNumForFullname(String.Format("palettes/%s.pal",GetTag()));
+		String paldat = Wads.ReadLump(lump);
+		for ( int i=0; i<256; i++ )
+		{
+			pal[i].r = paldat.ByteAt(i*3);
+			pal[i].g = paldat.ByteAt(i*3+1);
+			pal[i].b = paldat.ByteAt(i*3+2);
+		}
+		if ( ReactionTime < 0 )
+		{
+			ReactionTime = -ReactionTime;
+			IsLooping = true;
+		}
+		UpdateLight();
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		ReactionTime--;
+		if ( ReactionTime < 0 )
+		{
+			if ( !IsLooping )
+			{
+				Destroy();
+				return;
+			}
+			else ReactionTime = abs(default.ReactionTime);
+		}
+		UpdateLight();
+	}
+}
+
+// Generic particles
+Class SWWMSmoke : Actor
+{
+	Default
+	{
+		RenderStyle "Shaded";
+		StencilColor "FFFFFF";
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+THRUACTORS;
+		+NOTELEPORT;
+		+CANBOUNCEWATER;
+		-BOUNCEAUTOOFF;
+		BounceType "Hexen";
+		BounceFactor 1.0;
+		WallBounceFactor 1.0;
+		Scale 0.3;
+	}
+
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		double ang, pt;
+		scale *= FRandom[Puff](0.5,1.5);
+		alpha *= FRandom[Puff](0.5,1.5);
+		ang = FRandom[Puff](0,360);
+		pt = FRandom[Puff](-90,90);
+		vel += (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[Puff](0.2,0.8);
+		roll = Frandom[Puff](0,360);
+		scale.x *= RandomPick[Puff](-1,1);
+		scale.y *= RandomPick[Puff](-1,1);
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		vel *= 0.96;
+		vel.z += 0.01;
+		if ( waterlevel > 0 )
+		{
+			let b = Spawn("SWWMBubble",pos);
+			b.scale *= abs(scale.x);
+			b.vel = vel;
+			Destroy();
+		}
+	}
+
+	States
+	{
+	Spawn:
+		XSMK ABCDEFGHIJKLMNOPQRST 1 A_SetTics(1+special1);
+		Stop;
+	}
+}
+
+Class SWWMSmallSmoke : SWWMSmoke
+{
+	override void PostBeginPlay()
+	{
+		Actor.PostBeginPlay();
+		double ang, pt;
+		scale *= FRandom[Puff](0.1,0.3);
+		alpha *= FRandom[Puff](0.5,1.5);
+		ang = FRandom[Puff](0,360);
+		pt = FRandom[Puff](-90,90);
+		vel += (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[Puff](0.04,0.16);
+	}
+}
+Class SWWMViewSmoke : SWWMSmoke
+{
+	Vector3 ofs, vvel;
+
+	override void PostBeginPlay()
+	{
+		Actor.PostBeginPlay();
+		double ang, pt;
+		scale *= FRandom[Puff](0.1,0.3);
+		alpha *= FRandom[Puff](0.5,1.5);
+		ang = FRandom[Puff](0,360);
+		pt = FRandom[Puff](-90,90);
+		vvel += (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[Puff](0.04,0.16);
+	}
+
+	override void Tick()
+	{
+		Actor.Tick();
+		if ( !target || !target.player )
+		{
+			Destroy();
+			return;
+		}
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(target.pitch,target.angle,target.roll);
+		Vector3 origin = level.Vec3Offset(target.Vec2OffsetZ(0,0,target.player.viewz),x*ofs.x+y*ofs.y+z*ofs.z);
+		SetOrigin(origin,true);
+		bInvisible = (players[consoleplayer].camera != target);
+		if ( isFrozen() ) return;
+		ofs += vvel;
+		vvel *= 0.96;
+		vvel.z += 0.01;
+		if ( waterlevel > 0 ) Destroy();
+	}
+}
+
+Class SWWMBubble : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		Scale 0.5;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		double ang, pt;
+		scale *= FRandom[Puff](0.5,1.5);
+		ang = FRandom[Puff](0,360);
+		pt = FRandom[Puff](-90,90);
+		vel += (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[Puff](0.2,0.8);
+		if ( waterlevel <= 0 ) Destroy();
+		SetState(ResolveState("Spawn")+Random[Puff](0,19));
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		vel *= 0.96;
+		vel.z += 0.05;
+		if ( (waterlevel <= 0) || !Random[Puff](0,100) ) Destroy();
+	}
+	States
+	{
+	Spawn:
+		XBUB ABCDEFGHIJKLMNOPQRST 1;
+		Loop;
+	}
+}
+
+Class SWWMSpark : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+MISSILE;
+		+MOVEWITHSECTOR;
+		+THRUACTORS;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		BounceType "Doom";
+		BounceFactor 0.4;
+		Gravity 0.2;
+		Scale 0.05;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( waterlevel > 0 )
+		{
+			let b = Spawn("SWWMBubble",pos);
+			b.vel = vel;
+			b.scale *= 0.3;
+			Destroy();
+		}
+	}
+	States
+	{
+	Spawn:
+		BLPF A 1 Bright A_FadeOut(0.01);
+		Wait;
+	Death:
+		BLPF A 1 Bright A_FadeOut(0.05);
+		Wait;
+	}
+}
+
+Class SWWMChip : Actor
+{
+	int deadtimer;
+	double rollvel;
+
+	Default
+	{
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+MISSILE;
+		+MOVEWITHSECTOR;
+		+THRUACTORS;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		BounceType "Doom";
+		BounceFactor 0.3;
+		Gravity 0.35;
+		Scale 0.2;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		deadtimer = 0;
+		rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		frame = Random[Junk](0,5);
+		scale *= Frandom[Junk](0.8,1.2);
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		if ( InStateSequence(CurState,ResolveState("Death")) )
+		{
+			deadtimer++;
+			if ( deadtimer > 300 ) A_FadeOut(0.05);
+			return;
+		}
+	}
+	States
+	{
+	Spawn:
+		JUNK # 1
+		{
+			roll += rollvel;
+		}
+		Loop;
+	Bounce:
+		JUNK # 0
+		{
+			rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		}
+		Goto Spawn;
+	Death:
+		JUNK # -1;
+		Stop;
+	Dummy:
+		JUNK ABCDEF -1;
+		Stop;
+	}
+}
+
+Class SWWMNothing : Actor
+{
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+// Bullet trails from DT
+Class WaterHit
+{
+	Sector sect;
+	Vector3 hitpos;
+}
+
+Class InvisibleSplasher : Actor
+{
+	Default
+	{
+		VSpeed -2;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 2;
+		Stop;
+	}
+}
+Class SmolInvisibleSplasher : InvisibleSplasher
+{
+	Default
+	{
+		Mass 25;
+	}
+}
+
+Class SWWMBulletTrail : LineTracer
+{
+	Array<WaterHit> WaterHitList;
+	Array<Line> ShootThroughList;
+	Actor ignoreme;
+
+	static play void DoTrail( Actor target, Vector3 pos, Vector3 dir, int dist, int bubblechance, bool smoky = false )
+	{
+		let t = new("SWWMBulletTrail");
+		t.ignoreme = target;
+		t.WaterHitList.Clear();
+		t.ShootThroughList.Clear();
+		t.Trace(pos,level.PointInSector(pos.xy),dir,dist,0);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[0].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=5; i<t.Results.Distance; i+=10 )
+		{
+			if ( !Random[Boolet](0,bubblechance) ) continue;
+			let b = Actor.Spawn(smoky?"SWWMSmallSmoke":"SWWMBubble",level.Vec3Offset(pos,dir*i));
+			b.Scale *= FRandom[Boolet](0.4,0.6);
+		}
+		t.Destroy();
+	}
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+
+// Elastic recoil from DT
+Enum ESwingMode
+{
+	SWING_Straight,	// constant increment
+	SWING_Spring,	// bounces back after a delay
+};
+
+Class Swinger : Thinker
+{
+	Actor target;
+	Vector2 dir;
+	double inc, rmul;
+	int steps, mode, delay;
+	double str, tstr;
+	int cnt, cstate;
+
+	Enum ESwingerState
+	{
+		STATE_Initial,
+		STATE_Wait,
+		STATE_Return,
+	};
+
+	override void Tick()
+	{
+		if ( !target ) cstate = -1;
+		switch ( cstate )
+		{
+		case STATE_Initial:
+			target.A_SetAngle(target.angle+dir.x*str,SPF_INTERPOLATE);
+			target.A_SetPitch(target.pitch+dir.y*str,SPF_INTERPOLATE);
+			str += inc;
+			if ( ++cnt >= steps )
+			{
+				cnt = 0;
+				str = tstr/steps;
+				cstate = (mode==SWING_Straight)?(-1):(delay>0)?STATE_Wait:STATE_Return;
+			}
+			else tstr += str;
+			break;
+		case STATE_Wait:
+			if ( ++cnt >= delay )
+			{
+				cnt = 0;
+				cstate = STATE_Return;
+			}
+			break;
+		case STATE_Return:
+			target.A_SetAngle(target.angle-dir.x*(str/rmul),SPF_INTERPOLATE);
+			target.A_SetPitch(target.pitch-dir.y*(str/rmul),SPF_INTERPOLATE);
+			if ( ++cnt >= steps*rmul )
+			{
+				cnt = 0;
+				cstate = -1;
+			}
+			break;
+		default:
+			Destroy();
+			return;
+		}
+	}
+}
+
+// Screen flashes from DT
+Class GenericFlash : HUDMessageBase
+{
+	Color col;
+	int duration;
+	double alpha;
+	Actor cam;
+	transient CVar str;
+	GenericFlash Setup( Actor camera, Color c, int d )
+	{
+		alpha = 1.0;
+		col = c;
+		duration = d;
+		cam = camera;
+		return self;
+	}
+	override bool Tick()
+	{
+		if ( duration > 0 ) alpha -= 1./duration;
+		return (alpha<=0)||(!cam);
+	}
+	override void Draw( int bottom, int visibility )
+	{
+		if ( automapactive || (visibility != BaseStatusBar.HUDMSGLayer_UnderHUD) ) return;
+		if ( cam && (players[consoleplayer].camera != cam) ) return;
+		if ( !str ) str = CVar.GetCVar('swwm_flashstrength',players[consoleplayer]);
+		Screen.Dim(col,(col.a/255.)*alpha*str.GetFloat(),0,0,Screen.GetWidth(),Screen.GetHeight());
+	}
+}
+
+Class QueuedFlash
+{
+	Color c;
+	int duration;
+	int tic;
+	Actor cam;
+}
 
 // Handler responsible for item replacements and whatever else
 Class SWWMHandler : EventHandler
 {
+	transient String oneliner, onelinersnd;
+	transient int onelinertic, onelinerspan;
+	transient int lastlock, lastcombat;
+	transient Array<Actor> combatactors;
+	transient Array<Int> combattics;
+	transient int highesttic;
+	transient Array<QueuedFlash> flashes;
+	bool tookdamage[MAXPLAYERS];
+	int spreecount[MAXPLAYERS];
+	int lastkill[MAXPLAYERS];
+	int multilevel[MAXPLAYERS];
+
+	transient CVar mutevoice;
+
+	static int AddOneliner( String type, int delay = 5 )
+	{
+		CVar voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]);
+		int whichline;
+		int countem = 0, i = 1;
+		String testme, locme;
+		do
+		{
+			testme = String.Format("SWWM_SUBS_%s_%s%d",voicetype.GetString().MakeUpper(),type.MakeUpper(),i);
+			locme = StringTable.Localize(testme,false);
+			if ( testme != locme ) countem++;
+			i++;
+		}
+		while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
+		if ( countem == 0 ) return 0;
+		whichline = Random[DemoLines](1,countem);
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return 0;
+		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.GetString().MakeUpper(),type.MakeUpper(),whichline);
+		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype.GetString(),type,whichline);
+		hnd.onelinertic = gametic+delay;
+		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*Thinker.TICRATE);
+		return hnd.onelinertic+hnd.onelinerspan;
+	}
+
+	override void OnRegister()
+	{
+		// oneliner RNG must be relative to consoleplayer
+		SetRandomSeed[DemoLines](Random[DemoLines]()+consoleplayer);
+	}
+
+	override void WorldLoaded( WorldEvent e )
+	{
+		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
+		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) && (mutevoice.GetInt() < 3) )
+			AddOneliner("mapstart");
+	}
+
+	override void PlayerEntered( PlayerEvent e )
+	{
+		multilevel[e.playernumber] = 0;
+		lastkill[e.playernumber] = int.min;
+	}
+
+	override void WorldTick()
+	{
+		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
+		if ( onelinertic && (onelinertic < gametic) )
+		{
+			players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_LOCAL,1.,ATTN_NONE);
+			onelinertic = 0;
+			onelinerspan = 0;
+		}
+		for ( int i=0; i<flashes.size(); i++ )
+		{
+			if ( flashes[i].tic >= gametic ) continue;
+			flashes.Delete(i);
+			i--;
+		}
+		// combat tracking
+		// prune old entries
+		for ( int i=0; i<combatactors.Size(); i++ )
+		{
+			if ( combattics[i] > highesttic )
+				highesttic = combattics[i];
+			if ( combatactors[i]
+				&& (combatactors[i].Health > 0)
+				&& !combatactors[i].bKILLED
+				&& !combatactors[i].bCORPSE
+				&& (combatactors[i].target == players[consoleplayer].mo)
+				&& (combattics[i]+2000 > gametic) )
+				continue;
+			combatactors.Delete(i);
+			combattics.Delete(i);
+			i--;
+		}
+		bool enteredcombat = false;
+		// add new entries
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !a.player && !a.bIsMonster && !a.bCountKill ) continue;
+			// ignore the dead
+			if ( (a.Health <= 0) || a.bKILLED || a.bCORPSE ) continue;
+			// ignore if not targetted or either actor can't see the other
+			if ( (a.target != players[consoleplayer].mo)
+				|| !a.CheckSight(players[consoleplayer].mo)
+				|| !players[consoleplayer].mo.CheckSight(a) ) continue;
+			// is it already in?
+			bool addme = true;
+			for ( int i=0; i<combatactors.Size(); i++ )
+			{
+				if ( combatactors[i] != a ) continue;
+				addme = false;
+				combattics[i] = gametic;
+				break;
+			}
+			// add it in
+			if ( addme )
+			{
+				combatactors.Push(a);
+				combattics.Push(gametic);
+				enteredcombat = true;
+			}
+		}
+		if ( enteredcombat && (!highesttic || (gametic > highesttic+100)) && (mutevoice.GetInt() < 1) )
+			lastcombat = AddOneliner("fightstart",10);
+	}
+
+	override void WorldThingDamaged( WorldEvent e )
+	{
+		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
+		if ( e.Thing.player ) tookdamage[e.Thing.PlayerNumber()] = true;
+		if ( e.DamageSource && e.DamageSource.bISMONSTER && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+		{
+			if ( e.Thing.IsFriend(e.DamageSource) )
+			{
+				// no comment if it's a friendly (to be added)
+			}
+			else
+			{
+				// hurt comment
+				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
+					lastcombat = AddOneliner("gethit",15);
+				highesttic = gametic;
+			}
+		}
+		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
+		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill ) return;
+		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
+		{
+			int pnum = e.DamageSource.PlayerNumber();
+			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
+				multilevel[pnum]++;
+			else multilevel[pnum] = 0;
+			lastkill[pnum] = level.maptime;
+			// scoring
+			int score = min(2000,int(ceil(e.Thing.SpawnHealth()*.5)*10));
+			if ( e.Thing.Health <= e.Thing.GetGibHealth() ) score = int(score*1.25);
+			score = int(score*(1.+.5*min(multilevel[pnum],16)));
+			if ( !tookdamage[pnum] ) score += 100+50*spreecount[pnum];
+			if ( e.Thing.bBOSS ) score += 10000;
+			if ( level.killed_monsters == level.total_monsters ) score += 5000;
+			e.DamageSource.GiveInventory("SWWMCredits",score);
+			// TODO floating score for HUD
+			spreecount[pnum]++;
+			if ( e.DamageSource != players[consoleplayer].mo ) return;
+			highesttic = gametic;
+			if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
+				lastcombat = AddOneliner("scorekill",15);
+		}
+	}
+
+	override void PostUiTick()
+	{
+		if ( (gametic == onelinertic) && (oneliner != "") )
+		{
+			let l = SWWMOneLiner.Make(oneliner,onelinerspan);
+			StatusBar.AttachMessage(l,-3473);
+		}
+		for ( int i=0; i<flashes.size(); i++ )
+		{
+			if ( flashes[i].tic < gametic ) continue;
+			GenericFlash gf = new("GenericFlash").Setup(flashes[i].cam,flashes[i].c,flashes[i].duration);
+			StatusBar.AttachMessage(gf,0,BaseStatusBar.HUDMSGLayer_UnderHUD);
+		}
+	}
+
+	override void WorldLinePreActivated( WorldEvent e )
+	{
+		// oneliner on locked doors
+		if ( !e.Thing ) return;
+		int locknum = e.ActivatedLine.locknumber;
+		if ( !locknum )
+		{
+			// check the special
+			switch ( e.ActivatedLine.special )
+			{
+			case FS_Execute:
+				locknum = e.ActivatedLine.Args[2];
+				break;
+			case Door_LockedRaise:
+			case Door_Animated:
+				locknum = e.ActivatedLine.Args[3];
+				break;
+			case ACS_LockedExecute:
+			case ACS_LockedExecuteDoor:
+			case Generic_Door:
+				locknum = e.ActivatedLine.Args[4];
+				break;
+			}
+		}
+		if ( !locknum  ) return;
+		if ( e.Thing.CheckLocalView() && !e.Thing.CheckKeys(locknum,false,true) )
+		{
+			if ( (!lastlock || (gametic > lastlock+20)) && (mutevoice.GetInt() < 2) )
+				lastlock = AddOneliner("locked");
+		}
+	}
+
 	override void NetworkProcess( ConsoleEvent e )
 	{
 		if ( e.Name ~== "swwmgesture" )
@@ -32,6 +803,60 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
+	}
+
+	static void DoFlash( Actor camera, Color c, int duration )
+	{
+		QueuedFlash qf = new("QueuedFlash");
+		qf.duration = duration;
+		qf.c = c;
+		qf.tic = gametic;
+		qf.cam = camera;
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;	// not supposed to happen
+		hnd.flashes.push(qf);
+	}
+
+	// Doom's explosions aren't fully 3D
+	static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer )
+	{
+		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
+		while ( bi.Next() )
+		{
+			Actor a = bi.Thing;
+			if ( !a || !a.bSHOOTABLE || !Source.CheckSight(a,0xf) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
+				continue;
+			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
+			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);
+			double dist = max(1,dir.length());
+			double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
+			dir = dir/dist;
+			a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.mass));
+		}
+	}
+
+	// Same for this
+	static void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer )
+	{
+		if ( !Victim || !Victim.bSHOOTABLE || Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) ) return;
+		Victim.vel += HitDirection*(MomentumTransfer/(Thinker.TICRATE*Victim.Mass));
+	}
+
+	static void DoSwing( Actor target, Vector2 dir, double initial, double inc, int steps, int mode = 0, int delay = 0, double rmul = 1.0 )
+	{
+		let s = new("Swinger");
+		s.ChangeStatNum(Thinker.STAT_USER);
+		s.target = target;
+		s.dir = dir;
+		s.inc = inc;
+		s.rmul = rmul;
+		s.steps = steps;
+		s.mode = mode;
+		s.delay = delay;
+		s.cnt = 0;
+		s.cstate = 0;
+		s.str = initial;
+		s.tstr = initial;
 	}
 }
 

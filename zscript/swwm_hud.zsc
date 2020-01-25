@@ -13,11 +13,18 @@ Class SWWMStatusBar : BaseStatusBar
 	HUDFont mTewiFont;
 
 	Array<MsgLine> ChatMsgs, DeathMsgs, MiscMsgs, PickMsgs;
+	Actor targetactors[40], scoreactors[60], keyactors[10];
+	Vector3 exitpoints[10], uselines[10];
 
 	// client cvars
-	transient CVar safezone, maxchat, maxdeath, maxmisc, maxpick;
+	transient CVar safezone, maxchat[2], maxpick;
 
-	DynamicValueInterpolator HealthInter;
+	// shared stuff
+	Vector2 ss, hs;
+	int margin;
+	double FracTic;
+
+	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
 
 	override void FlushNotify()
 	{
@@ -31,7 +38,22 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		Super.Tick();
 		// prune old messages
+		// update target actors
+		// update floating scores
+		// update interpolators
 		HealthInter.Update(CPlayer.health);
+		ScoreInter.Update(CPlayer.mo.CountInv("SWWMCredits"));
+		let d = Demolitionist(CPlayer.mo);
+		if ( d )
+		{
+			FuelInter.Update(int(d.dashfuel));
+			DashInter.Update(int((40-d.dashcooldown)*3.));
+		}
+		else
+		{
+			FuelInter.Update(0);
+			DashInter.Update(0);
+		}
 	}
 
 	override void Init()
@@ -39,51 +61,138 @@ Class SWWMStatusBar : BaseStatusBar
 		Super.Init();
 		SetSize(0,640,400);
 		StatusTex = TexMan.CheckForTexture("graphics/HUD/StatusBox.png",TexMan.Type_Any);
-		DashTex = TexMan.CheckForTexture("graphics/HUD/DashIcon.png",TexMan.Type_Any);
+		DashTex = TexMan.CheckForTexture("graphics/HUD/DashBar.png",TexMan.Type_Any);
 		FuelTex = TexMan.CheckForTexture("graphics/HUD/FuelBar.png",TexMan.Type_Any);
 		HealthTex[0] = TexMan.CheckForTexture("graphics/HUD/HealthBar0.png",TexMan.Type_Any);
 		HealthTex[1] = TexMan.CheckForTexture("graphics/HUD/HealthBar1.png",TexMan.Type_Any);
 		HealthTex[2] = TexMan.CheckForTexture("graphics/HUD/HealthBar2.png",TexMan.Type_Any);
 		HealthTex[3] = TexMan.CheckForTexture("graphics/HUD/HealthBar3.png",TexMan.Type_Any);
+		ScoreTex = TexMan.CheckForTexture("graphics/HUD/ScoreBox.png",TexMan.Type_Any);
+		WeaponTex = TexMan.CheckForTexture("graphics/HUD/WeaponBox.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
-		HealthInter = DynamicValueInterpolator.Create(1000,2.5,1,32);
+		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
+		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,1000);
+		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);
+		DashInter = DynamicValueInterpolator.Create(120,.5,1,40);
+	}
+
+	private void DrawTarget()
+	{
+		// omnisight: usable highlights
+		// omnisight: key locations
+		// targetting array
+		// floating kill scores
+	}
+
+	private void DrawScore()
+	{
+		Screen.DrawTexture(ScoreTex,false,ss.x-(margin+73),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	private void DrawInventory()
+	{
+		// active items (armor / powerups)
+		// inventory box / bar
+	}
+
+	private void DrawWeapon()
+	{
+		if ( CPlayer.ReadyWeapon is 'SWWMWeapon' ) SWWMWeapon(CPlayer.ReadyWeapon).DrawWeapon(FracTic,ss.x-margin,ss.y-(margin+28),hs,ss);
+		else
+		{
+			// TODO generic display
+		}
+		Screen.DrawTexture(WeaponTex,false,ss.x-(margin+61),ss.y-(margin+29),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		double xx = ss.x-(margin+58), yy = ss.y-(margin+29);
+		for ( int i=1; i<=10; i++ )
+		{
+			int ncolor = Font.CR_WHITE;
+			if ( !CPlayer.HasWeaponsInSlot(i%10) ) ncolor = Font.CR_DARKGRAY;
+			else if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
+			else if ( (!CPlayer.PendingWeapon || (CPlayer.PendingWeapon == WP_NOCHANGE)) && CPlayer.ReadyWeapon && (CPlayer.ReadyWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
+			else
+			{
+				bool hasammo = false;
+				for ( Inventory inv=CPlayer.mo.Inv; inv; inv=inv.Inv )
+				{
+					bool dummy;
+					int slot;
+					if ( inv is 'Weapon' ) [dummy, slot] = CPlayer.weapons.LocateWeapon(Weapon(inv).GetClass());
+					if ( (slot == (i%10)) && (!Weapon(inv).Ammo1 || (Weapon(inv).Ammo1.Amount > 0)) )
+						hasammo = true;
+				}
+				if ( !hasammo ) ncolor = Font.CR_RED;
+			}
+			Screen.DrawText(mTewiFont.mFont,ncolor,xx,yy,String.Format("%d",(i%10)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += 12;
+			if ( i == 5 )
+			{
+				xx = ss.x-(margin+58);
+				yy += 14;
+			}
+		}
+	}
+
+	private void DrawStatus()
+	{
+		Screen.DrawTexture(StatusTex,false,margin,ss.y-(margin+27),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		let d = Demolitionist(CPlayer.mo);
+		int dw = DashInter.GetValue();
+		double alph = .6;
+		if ( !d || (d.dashfuel > 20) || ((gametic%10) < 5) ) alph = 1.;
+		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+21),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,dw,DTA_Alpha,alph);
+		int fw = FuelInter.GetValue();
+		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+25),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
+		int ht = clamp(HealthInter.GetValue(),0,10000);
+		int hw = min(ht,100);
+		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+		if ( ht > 100 )
+		{
+			hw = min(ht-100,100);
+			Screen.DrawTexture(HealthTex[1],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+		}
+		if ( ht > 200 )
+		{
+			hw = int(min(ht-100,400)*0.25);
+			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+		}
+		if ( ht > 500 )
+		{
+			hw = int(min(ht-500,500)*0.2);
+			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+		}
+		int hcolor = Font.CR_RED;
+		if ( ht > 500 ) hcolor = Font.CR_GOLD;
+		else if ( ht > 200 ) hcolor = Font.CR_PURPLE;
+		else if ( ht > 100 ) hcolor = Font.CR_CYAN;
+		Screen.DrawText(mTewiFont.mFont,hcolor,margin+108,ss.y-(margin+16),String.Format("%3d",clamp(ht,0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	private void DrawMessages()
+	{
+		// common message area
+		// pickup messages
 	}
 
 	override void Draw( int state, double TicFrac )
 	{
 		Super.Draw(state,TicFrac);
 		if ( (state != HUD_StatusBar) && (state != HUD_Fullscreen) ) return;
+		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
+		if ( !maxchat[0] ) maxchat[0] = CVar.GetCVar('swwm_maxshown',players[consoleplayer]);
+		if ( !maxchat[1] ) maxchat[1] = CVar.GetCVar('swwm_maxshownbig',players[consoleplayer]);
+		if ( !maxpick ) maxpick = CVar.GetCVar('swwm_maxpickup',players[consoleplayer]);
 		BeginHUD();
-		let d = Demolitionist(CPlayer.mo);
-		Vector2 hs = GetHUDScale();
-		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		Screen.DrawTexture(StatusTex,false,20,ss.y-47,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		if ( d && (((d.dashcooldown <= 0) && (d.dashfuel >= 20.)) || (gametic%8 < 4)) )
-			Screen.DrawTexture(DashTex,false,22,ss.y-45,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		int fw = d?int(d.dashfuel*1.12):0;
-		Screen.DrawTexture(FuelTex,false,42,ss.y-45,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
-		int ht = clamp(HealthInter.GetValue(),0,10000);
-		int hw = int(min(ht,1000)*0.1);
-		Screen.DrawTexture(HealthTex[0],false,22,ss.y-35,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
-		if ( ht > 1000 )
-		{
-			hw = int(min(ht-1000,1000)*0.1);
-			Screen.DrawTexture(HealthTex[1],false,22,ss.y-35,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
-		}
-		if ( ht > 2000 )
-		{
-			hw = int(min(ht-1000,4000)*0.025);
-			Screen.DrawTexture(HealthTex[2],false,22,ss.y-35,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
-		}
-		if ( ht > 5000 )
-		{
-			hw = int(min(ht-5000,5000)*0.02);
-			Screen.DrawTexture(HealthTex[2],false,22,ss.y-35,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
-		}
-		int hcolor = Font.CR_RED;
-		if ( ht > 5000 ) hcolor = Font.CR_GOLD;
-		else if ( ht > 2000 ) hcolor = Font.CR_PURPLE;
-		else if ( ht > 1000 ) hcolor = Font.CR_CYAN;
-		Screen.DrawText(mTewiFont.mFont,hcolor,128,ss.y-36,String.Format("%04d",clamp(ht,0,9999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		hs = GetHUDScale();
+		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
+		margin = clamp(safezone.GetInt(),0,40);
+		FracTic = TicFrac;
+		DrawTarget();
+		DrawScore();
+		DrawInventory();
+		DrawStatus();
+		DrawWeapon();
+		DrawMessages();
 	}
 }

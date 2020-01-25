@@ -70,6 +70,170 @@ Class SWWMArmor : Armor
 	}
 }
 
+// Base casing classes
+Class SWWMCasing : Actor
+{
+	int deadtimer, numbounces;
+	double pitchvel, anglevel;
+	double heat;
+
+	Default
+	{
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+MISSILE;
+		+MOVEWITHSECTOR;
+		+THRUACTORS;
+		+USEBOUNCESTATE;
+		+INTERPOLATEANGLES;
+		+NOTELEPORT;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		Mass 1;
+		Gravity 0.35;
+		BounceType "Hexen";
+		WallBounceFactor 0.65;
+		BounceFactor 0.65;
+		BounceSound "explodium/casing";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		deadtimer = 0;
+		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		heat = 1.0;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		if ( InStateSequence(CurState,ResolveState("Death")) )
+		{
+			deadtimer++;
+			if ( deadtimer > 300 ) A_FadeOut(0.05);
+			return;
+		}
+		heat -= 0.05;
+		if ( heat <= 0 ) return;
+		let s = Spawn("SWWMSmallSmoke",pos);
+		s.alpha *= heat;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			angle += anglevel;
+			pitch += pitchvel;
+		}
+		Loop;
+	Bounce:
+		#### # 0
+		{
+			pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+			anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+			vel = (vel.unit()+(FRandom[Junk](-.2,.2),FRandom[Junk](-.2,.2),FRandom[Junk](-.2,.2))).unit()*vel.length();
+			if ( numbounces && ((numbounces > 3) || (Random[Junk](1,20) < 17) || (vel.z > -1.4)) )
+			{
+				ClearBounce();
+				ExplodeMissile();
+			}
+			numbounces++;
+		}
+		Goto Spawn;
+	Death:
+		#### # -1
+		{
+			pitch = 0;
+			angle = FRandom[Junk](0,360);
+			roll = FRandom[Junk](0,360);
+		}
+		Stop;
+	}
+}
+
+Class SWWMBulletImpact : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		Scale 0.25;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SprayDecal("Pock",-20);
+		int numpt = int(Random[Junk](5,10)*scale.x*4);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Junk](-.8,.8),FRandom[Junk](-.8,.8),FRandom[Junk](-.8,.8))).unit()*FRandom[Junk](0.1,1.2);
+			let s = Spawn("SWWMSmoke",pos+x*2);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[Junk](128,192));
+		}
+		numpt = int(Random[Junk](3,8)*scale.x*4);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Junk](-1,1),FRandom[Junk](-1,1),FRandom[Junk](-1,1)).unit()*FRandom[Junk](2,8);
+			let s = Spawn("SWWMSpark",pos+x*2);
+			s.vel = pvel;
+		}
+		numpt = int(Random[Junk](2,5)*scale.x*4);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Junk](-1,1),FRandom[Junk](-1,1),FRandom[Junk](-1,1)).unit()*FRandom[Junk](2,8);
+			let s = Spawn("SWWMChip",pos+x*2);
+			s.vel = pvel;
+		}
+		if ( !Random[Junk](0,3) ) A_StartSound("bullet/ricochet",CHAN_VOICE,attenuation:2.5);
+		else A_StartSound("bullet/hit",CHAN_VOICE,attenuation:3.0);
+		Spawn("InvisibleSplasher",pos);
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+Class SWWMWeaponLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,224,64,150;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target )
+		{
+			Destroy();
+			return;
+		}
+		if ( target.player )
+		{
+			Vector3 x, y, z, origin;
+			[x, y, z] = swwm_CoordUtil.GetAxes(target.pitch,target.angle,target.roll);
+			origin = level.Vec3Offset(target.Vec2OffsetZ(0,0,target.player.viewz),x*12);
+			SetOrigin(origin,true);
+		}
+		else SetOrigin(target.pos,true);
+		if ( cnt++ > 2 ) Destroy();
+	}
+}
+
 // Base class for all SWWM Weapons
 Class SWWMWeapon : Weapon
 {
@@ -88,6 +252,15 @@ Class SWWMWeapon : Weapon
 		}
 		A_ClearRefire();
 		Super.OwnerDied();
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( mod == 'Melee' ) return StringTable.Localize("$O_MELEE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	// draw ammo on hud above weapon box
+	virtual ui void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
 	}
 	// instant raise/lower
 	action void A_FullRaise()
@@ -124,6 +297,64 @@ Class SWWMWeapon : Weapon
 		player.SetPSprite(PSP_FLASH,null);
 		player.mo.BringUpWeapon();
 	}
+	private action bool TryMelee( double angle, int dmg )
+	{
+		FTranslatedLineTarget t;
+		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		FLineTraceData d;
+		LineTrace(angle,DEFMELEERANGE,slope,0,player.viewheight,data:d);
+		if ( d.HitType != TRACE_HitNone )
+		{
+			bool bloodless = true;
+			if ( d.HitType == TRACE_HitActor )
+			{
+				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
+				self.angle += clamp(diff,-5.,5.);
+				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+				SWWMHandler.DoKnockback(d.HitActor,d.HitDir,dmg*1000);
+				if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
+				if ( !d.HitActor.bNOBLOOD )
+				{
+					d.HitActor.TraceBleed(dmg,invoker);
+					d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+				}
+				else bloodless = false;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+				d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation-d.HitDir*4);
+			A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12);
+			A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
+			A_AlertMonsters();
+			return true;
+		}
+		return false;
+	}
+	action void A_Melee( int dmg = 20 )
+	{
+		for ( int i=0; i<16; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
+	}
+	override void PlayUpSound( Actor origin )
+	{
+		if ( UpSound ) origin.A_StartSound(UpSound,CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	action void A_SWWMFlash( StateLabel flashlabel = null )
+	{
+		if ( !player || !player.ReadyWeapon )
+			return;
+		Weapon weap = player.ReadyWeapon;
+		State flashstate = null;
+		if ( !flashlabel )
+		{
+			if ( weap.bAltFire )
+				flashstate = weap.FindState('AltFlash');
+			if ( !flashstate )
+				flashstate = weap.FindState('Flash');
+		}
+		else flashstate = weap.FindState(flashlabel);
+		player.SetPSprite(PSP_FLASH,flashstate);
+		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE,true);
+		A_OverlayRenderStyle(PSP_FLASH,STYLE_Add);
+	}
 	Default
 	{
 		Weapon.BobStyle "Alpha";
@@ -132,6 +363,7 @@ Class SWWMWeapon : Weapon
 		Weapon.BobRangeY 0.2;
 		Weapon.YAdjust 0;
 		+WEAPON.NOALERT;
+		+WEAPON.NODEATHINPUT;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}

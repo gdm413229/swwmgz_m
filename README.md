@@ -24,7 +24,7 @@ Additional features:
    quick and easy differentiation between multiple units (not available due to
    engine limitations™, so they're always green).
  - Lucky Collar: A little something that your creator gives to all of her
-   creations. Reduces incoming damage by 75% when you're below 10% health.
+   creations. Reduces incoming damage by 75% when you're below 25% health.
  - User Menu: With the press of a button, open a dedicated menu to see all your
    stats in detail, info on carried items and weapons, and (when it's done)
    accessing the store for buying stuff with your score points.
@@ -350,19 +350,19 @@ have a spare. Most powerups can be toggled, unless specified otherwise.
 
 ### Health Nugget, replaces Health Bonus, Crystal Vial
 
-Health nuggets increase health by 5% up to a cap of 2000.
+Health nuggets increase health by 5% up to a cap of 200.
 
 ### Health Tetrahedron, replaces Stimpak, Crystal Vial (Heretic)
 
-Health tetrahedrons provide a 50% health boost up to a cap of 1000.
+Health tetrahedrons provide a 15% health boost up to a cap of 100.
 
 ### Health Cube, replaces Medkit, Quartz Flask
 
-Health cubes provide a 100% health boost up to a cap of 1000.
+Health cubes provide a 30% health boost up to a cap of 100.
 
 ### Refresher, replaces Soulsphere, Mystic Urn
 
-This artifact provides a massive boost of health to 5000, plus a regeneration
+This artifact provides a massive boost of health to 500, plus a regeneration
 effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles
 as a powerup. Like other health items, the Refresher is auto-activated if
 you're about to die, though it sometimes won't be enough to save you.
@@ -371,8 +371,8 @@ you're about to die, though it sometimes won't be enough to save you.
 
 Cumulative armor items that can increase resistance to all damage by as much
 as you can find. Each nugget adds 5% to the total. Above 100%, damage gets
-turned into additional health (up to the standard 1000% cap).
-The upper cap for these is 500%.
+turned into additional health (up to the standard 100% cap).
+The upper cap for these is 200%.
 
 Protection decreases by a 10% of absorbed damage.
 
@@ -381,7 +381,7 @@ Protection decreases by a 10% of absorbed damage.
 The blast suit is a nice little light armor which provides a 75% reduction to
 damage and an additional 50% to splash damage.
 
-Can handle a total of 5000 damage before breaking.
+Can handle a total of 500 damage before breaking.
 
 ### War Armor, replaces Blue Armor, Enchanged Shield, Falcon Shield
 
@@ -391,11 +391,11 @@ follows:
  * 80% reduction to everything else
  * 70% reduction for all splash damage (multiplicative on top of the other two)
 
-The armor can eat up a total of 10000 damage before breaking.
+The armor can eat up a total of 1000 damage before breaking.
 
 ### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Banishment Device
 
-The ultimate meal. Grants a full 10000 health and magically gives you a full
+The ultimate meal. Grants a full 1000 health and magically gives you a full
 stack of armor nuggets, a blast suit and a war armor. In addition it prevents
 you from dying at all if it autoactivates on low health.
 
@@ -472,19 +472,19 @@ configurable, along with their lifespan.
 Level stats and current score.
 
 The scoring system is pretty straightforward. Each thing you kill (even if not
-an enemy) will give you points according to 5x of its base health, rounded up
-to the nearest multiple of 100 and capped to 20000, plus these bonuses (in
-order of application):
+an enemy) will give you points according to half of its base health, rounded up
+to the nearest multiple of 10 and capped to 2000, plus these bonuses (in order
+of application):
  * x1.25 for an overkill (enemy was gibbed or killed in one shot).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.
- * +1000 for killing an enemy without having taken damage since player start,
-   with extra +100 boosts for consecutive kills.
- * +20000 if the enemy killed is a boss.
+ * +100 for killing an enemy without having taken damage since player start,
+   with extra +50 boosts for consecutive kills.
+ * +10000 if the enemy killed is a boss.
  * +5000 if you've killed the last enemy in the map.
 
-You are also given +1000 points for each secret found, +5000 if it's the final
-secret. Countable items give +250 points each or +2500 if it's the final item.
+You are also given +500 points for each secret found, +5000 if it's the final
+secret. Countable items give +25 points each or +2500 if it's the final item.
 
 Score is currently for show, but after first release it'll be used for the
 in-game store feature.
@@ -514,7 +514,8 @@ smoke clouds, a targeter has been implemented, which will show the following:
   take damage or get healed, a number (either negative or positive) will show
   up below the health bar indicating the cumulative increase/decrease. The
   targeter only picks up enemies in your direct line of sight and can only show
-  up to 40 individual bars, giving priority to the nearest enemies.
+  up to 40 individual bars, giving priority first to players, then the nearest
+  enemies.
 * Keys and map exits: If you've picked up an Omnisight, key items and any exit
   lines will be marked and labeled, along with a little distance indicator in
   map units. Note that this doesn't work for script-triggered exits.

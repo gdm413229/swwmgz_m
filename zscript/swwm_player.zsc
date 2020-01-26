@@ -6,6 +6,7 @@ Class Demolitionist : PlayerPawn
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
 	bool dashsnd;
+	bool key_reentrant;
 
 	int lastdamage;
 	bool lastground;
@@ -109,6 +110,8 @@ Class Demolitionist : PlayerPawn
 	override void Tick()
 	{
 		Super.Tick();
+		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
 		{
 			if ( lastvelz < -30 )
@@ -127,6 +130,8 @@ Class Demolitionist : PlayerPawn
 				}
 			}
 			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			if ( (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
+				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			A_Footstep(0,true,clamp(-lastvelz*0.05,0.01,1.0));
 		}
 		lastground = player.onground;
@@ -454,11 +459,15 @@ Class Demolitionist : PlayerPawn
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		int score = 500;
 		// last secret (this is called before counting it up, so have to subtract)
-		if ( level.found_secrets == level.total_secrets-1 ) score = 5000;
-		Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
+		if ( level.found_secrets == level.total_secrets-1 )
+		{
+			score = 5000;
+			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
+		}
+		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() && (mute.GetInt() < 2) ) SWWMHandler.AddOneliner("findsecret",40);
-			GiveInventory("SWWMCredits",score);
-		return true;
+		SWWMCredits.GiveCredits(player,score);
+		return false;
 	}
 	override void AddInventory( Inventory item )
 	{
@@ -466,14 +475,20 @@ Class Demolitionist : PlayerPawn
 		Super.AddInventory(item);
 		if ( (item is 'Weapon') && CheckLocalView() && (mute.GetInt() < 2) )
 			SWWMHandler.AddOneliner("getweapon");
-		if ( multiplayer && (item is 'Key') )
+		if ( (item is 'Key') && !key_reentrant )
 		{
+			// score
+			int score = 250;
+			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
+			SWWMCredits.GiveCredits(player,score);
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
 				if ( !playeringame[i] || !players[i].mo || (i == PlayerNumber()) )
 					continue;
+				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = true;
 				players[i].mo.GiveInventory(item.GetClass(),1);
+				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = false;
 			}
 		}
 	}

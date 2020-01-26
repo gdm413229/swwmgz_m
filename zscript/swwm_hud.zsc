@@ -12,37 +12,105 @@ Class SWWMStatusBar : BaseStatusBar
 		HealthTex[4], FuelTex, DashTex;
 	HUDFont mTewiFont;
 
-	Array<MsgLine> ChatMsgs, DeathMsgs, MiscMsgs, PickMsgs;
+	// "Full History" contains all messages since session start, nothing is flushed
+	// this can be accessed from a section of the knowledge base
+	Array<MsgLine> MainQueue, PickupQueue, FullHistory;
 	Actor targetactors[40], scoreactors[60], keyactors[10];
 	Vector3 exitpoints[10], uselines[10];
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol;
 
 	// shared stuff
 	Vector2 ss, hs;
 	int margin;
 	double FracTic;
+	int chatopen;
 
 	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
 
 	override void FlushNotify()
 	{
-		ChatMsgs.Clear();
-		DeathMsgs.Clear();
-		MiscMsgs.Clear();
-		PickMsgs.Clear();
+		// flush non-chat messages
+		for ( int i=0; i<MainQueue.Size(); i++ )
+		{
+			if ( MainQueue[i].type >= PRINT_CHAT ) continue;
+			MainQueue.Delete(i);
+			i--;
+		}
+	}
+
+	override bool ProcessNotify( EPrintLevel printlevel, String outline )
+	{
+		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
+		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
+		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);
+		let m = new("MsgLine");
+		m.str = outline.Left(outline.Length()-1);	// strip newline
+		m.type = printlevel;
+		m.tic = gametic;
+		// set lifespan for each type
+		if ( printlevel == PRINT_LOW ) m.tic += pickduration.GetInt();
+		else if ( printlevel <= PRINT_HIGH ) m.tic += msgduration.GetInt();
+		else m.tic += chatduration.GetInt();
+		m.rep = 1;
+		// append to full history
+		FullHistory.Push(m);
+		// ignore during intermission
+		if ( gamestate != GS_LEVEL ) return false;
+		if ( (printlevel < PRINT_LOW) || (printlevel > PRINT_TEAMCHAT) ) return true;	// we couldn't care less about these
+		if ( printlevel == PRINT_LOW )
+		{
+			// check if repeated
+			for ( int i=0; i<PickupQueue.Size(); i++ )
+			{
+				if ( PickupQueue[i].str != m.str ) continue;
+				// delete old one and add its repeats
+				m.rep += PickupQueue[i].rep;
+				PickupQueue.Delete(i);
+				break;
+			}
+			PickupQueue.Push(m);
+		}
+		else
+		{
+			// check if repeated
+			for ( int i=0; i<MainQueue.Size(); i++ )
+			{
+				if ( MainQueue[i].str != m.str ) continue;
+				// delete old one and add its repeats
+				m.rep += MainQueue[i].rep;
+				MainQueue.Delete(i);
+				break;
+			}
+			MainQueue.Push(m);
+		}
+		return true;
 	}
 
 	override void Tick()
 	{
 		Super.Tick();
 		// prune old messages
+		for ( int i=0; i<PickupQueue.Size(); i++ )
+		{
+			if ( gametic < PickupQueue[i].tic ) continue;
+			PickupQueue.Delete(i);
+			i--;
+		}
+		for ( int i=0; i<MainQueue.Size(); i++ )
+		{
+			if ( gametic < MainQueue[i].tic ) continue;
+			MainQueue.Delete(i);
+			i--;
+		}
 		// update target actors
 		// update floating scores
 		// update interpolators
 		HealthInter.Update(CPlayer.health);
-		ScoreInter.Update(CPlayer.mo.CountInv("SWWMCredits"));
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd ) ScoreInter.Update(hnd.creditsbridge[CPlayer.mo.PlayerNumber()]);
+		else ScoreInter.Update(0);
 		let d = Demolitionist(CPlayer.mo);
 		if ( d )
 		{
@@ -69,6 +137,9 @@ Class SWWMStatusBar : BaseStatusBar
 		HealthTex[3] = TexMan.CheckForTexture("graphics/HUD/HealthBar3.png",TexMan.Type_Any);
 		ScoreTex = TexMan.CheckForTexture("graphics/HUD/ScoreBox.png",TexMan.Type_Any);
 		WeaponTex = TexMan.CheckForTexture("graphics/HUD/WeaponBox.png",TexMan.Type_Any);
+		ChatTex[0] = TexMan.CheckForTexture("graphics/HUD/ChatBoxTop.png",TexMan.Type_Any);
+		ChatTex[1] = TexMan.CheckForTexture("graphics/HUD/ChatBoxLine.png",TexMan.Type_Any);
+		ChatTex[2] = TexMan.CheckForTexture("graphics/HUD/ChatBoxBottom.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
 		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,1000);
@@ -171,8 +242,95 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawMessages()
 	{
+		if ( !pickcol ) pickcol = CVar.GetCVar('msg0color',players[consoleplayer]);
+		if ( !obitcol ) obitcol = CVar.GetCVar('msg1color',players[consoleplayer]);
+		if ( !critcol ) critcol = CVar.GetCVar('msg2color',players[consoleplayer]);
+		if ( !chatcol ) chatcol = CVar.GetCVar('msg3color',players[consoleplayer]);
+		if ( !teamcol ) teamcol = CVar.GetCVar('msg4color',players[consoleplayer]);
 		// common message area
+		if ( MainQueue.Size() > 0 )
+		{
+			int mstart = max(0,MainQueue.Size()-(1+maxchat[chatopen>=gametic].GetInt()));
+			double xx = margin, yy = margin;
+			Screen.DrawTexture(ChatTex[0],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy++;
+			for ( int i=mstart; i<MainQueue.Size(); i++ )
+			{
+				int col = critcol.GetInt();
+				if ( MainQueue[i].type == PRINT_MEDIUM ) col = obitcol.GetInt();
+				else if ( MainQueue[i].type == PRINT_CHAT ) col = chatcol.GetInt();
+				else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = teamcol.GetInt();
+				String cstr = MainQueue[i].str;
+				if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
+				BrokenLines l = mTewiFont.mFont.BreakLines(cstr,361);
+				for ( int j=0; j<l.Count(); j++ )
+				{
+					Screen.DrawTexture(ChatTex[1],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(mTewiFont.mFont,col,xx+4,yy,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 13;
+				}
+			}
+			Screen.DrawTexture(ChatTex[2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
 		// pickup messages
+		if ( PickupQueue.Size() > 0 )
+		{
+			// reverse order since they're drawn bottom to top
+			int mend = max(0,PickupQueue.Size()-(1+maxpick.GetInt()));
+			double yy = ss.y-(margin+40);
+			for ( int i=PickupQueue.Size()-1; i>=mend; i-- )
+			{
+				String cstr = PickupQueue[i].str;
+				if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
+				BrokenLines l = mTewiFont.mFont.BreakLines(cstr,int(ss.x*.75));
+				for ( int j=l.Count()-1; j>=0; j-- )
+				{
+					int len = mTewiFont.mFont.StringWidth(l.StringAt(j));
+					double xx = (ss.x-len)/2.;
+					Screen.Dim("Black",.8,int((xx-6)*hs.x),int(yy*hs.y),int((len+12)*hs.x),int(15*hs.y));
+					Screen.DrawText(mTewiFont.mFont,pickcol.GetInt(),xx,yy+1,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy -= 15;
+				}
+			}
+		}
+	}
+
+	override bool DrawChat( String txt )
+	{
+		// ignore during intermission
+		if ( gamestate != GS_LEVEL ) return false;
+		chatopen = gametic+1;	// have to add 1 because DrawChat is called after everything else
+		double xx = 2;
+		double yy = ss.y-14;
+		Screen.Dim("Black",.8,0,Screen.GetHeight()-int(15*hs.y),Screen.GetWidth(),int(15*hs.y));
+		String pname = players[consoleplayer].GetUserName();
+		// strip colors
+		for ( int i=0; i<pname.CodePointCount(); i++ )
+		{
+			int remlen = 0;
+			if ( pname.GetNextCodePoint(i) != 0x1C )
+				continue;
+			remlen++;
+			if ( pname.GetNextCodePoint(i+remlen) == 0x5B )
+				while ( pname.GetNextCodePoint(i+remlen) != 0x5D )
+					remlen++;
+			remlen++;
+			pname.Remove(i,remlen);
+		}
+		String fullstr = String.Format("\cq%s\cd@\cqdemolitionist%d\cn ~ \c-wall %s%s",pname,consoleplayer+1,txt,mTewiFont.mFont.GetCursor());
+		// cut out to fit
+		int w = mTewiFont.mFont.StringWidth(fullstr);
+		if ( w > ss.x-4 )
+		{
+			// draw trailing dots
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,"...",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// shift back
+			xx -= w-(ss.x-4);
+			// draw trimmed
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,fullstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ClipLeft,int(26*hs.x));
+		}
+		else Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,fullstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		return true;
 	}
 
 	override void Draw( int state, double TicFrac )

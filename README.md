@@ -463,9 +463,12 @@ be configurable.
 
 ### Top left corner
 
-Message display, with separate queues for chat, critical messages and
-obituaries so you won't miss anything important. Max lines of each type are
-configurable, along with their lifespan.
+Message display. Can be configured to show different numbers of lines depending
+on whether the chat prompt is open. Chat messages take much longer to expire
+than others, so there's less of a chance to miss them, as they might pop back
+up when the less important ones expire. A full message history can also be read
+at any time in the Knowledge Base. Repeated messages are compressed with a
+multiplier suffix.
 
 ### Top right corner
 
@@ -495,8 +498,8 @@ Your health and armor, along with an inventory bar.
 
 ### Bottom border
 
-Pickup messages. Can configure how many to display and how long they stay, plus
-an additional option to merge repeated messages (given a multiplier suffix).
+Pickup messages. Repeated pickups will have a multiplier suffix added. Total
+lines shown are also configurable.
 
 ### Bottom right corner
 

@@ -398,6 +398,7 @@ Class ExplodiumGun : SWWMWeapon
 		p.pitch = asin(-dir.z);
 		p.vel = dir*p.speed;
 		p.vel.z += 5.;
+		p.vel += vel*.5;
 	}
 
 	action void A_DropMag( bool loaded = false )
@@ -409,6 +410,7 @@ Class ExplodiumGun : SWWMWeapon
 		c.angle = angle;
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
 	}
 
 	action void A_DropCasing()
@@ -421,6 +423,7 @@ Class ExplodiumGun : SWWMWeapon
 		c.angle = angle;
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](2,4)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
 	}
 
 	Default

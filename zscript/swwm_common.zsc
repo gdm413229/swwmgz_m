@@ -10,6 +10,50 @@ enum ESWWMGZChannels
 	CHAN_JETPACK = 63206
 };
 
+// Scoreing
+Class SWWMCredits : Thinker
+{
+	PlayerInfo myplayer;
+	int credits;
+
+	static void GiveCredits( PlayerInfo p, int amount )
+	{
+		let c = FindCredits(p);
+		if ( (c.credits+amount < c.credits) || (c.credits+amount > 999999999) ) c.credits = 999999999;
+		else c.credits += amount;
+	}
+
+	static bool TakeCredits( PlayerInfo p, int amount )
+	{
+		let c = FindCredits(p);
+		// too much!
+		if ( (c.credits-amount < 0) || (c.credits-amount > c.credits) ) return false;
+		c.credits -= amount;
+		return true;
+	}
+
+	static int GetCredits( PlayerInfo p )
+	{
+		let c = FindCredits(p);
+		return c.credits;
+	}
+
+	private static SWWMCredits FindCredits( PlayerInfo p )
+	{
+		let ti = ThinkerIterator.Create("SWWMCredits",STAT_STATIC);
+		SWWMCredits t;
+		while ( t = SWWMCredits(ti.Next()) )
+		{
+			if ( t.myplayer != p ) continue;
+			return t;
+		}
+		t = new("SWWMCredits");
+		t.ChangeStatNum(STAT_STATIC);
+		t.myplayer = p;
+		return t;
+	}
+}
+
 // One-liners
 Class SWWMOneLiner : HUDMessageBase
 {
@@ -579,6 +623,8 @@ Class SWWMHandler : EventHandler
 	int spreecount[MAXPLAYERS];
 	int lastkill[MAXPLAYERS];
 	int multilevel[MAXPLAYERS];
+	int lastitemcount[MAXPLAYERS];
+	int creditsbridge[MAXPLAYERS];	// curse the gap between play/ui
 
 	transient CVar mutevoice;
 
@@ -641,6 +687,24 @@ Class SWWMHandler : EventHandler
 			if ( flashes[i].tic >= gametic ) continue;
 			flashes.Delete(i);
 			i--;
+		}
+		// countable item scoring
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] ) continue;
+			// while we're at it, also update the bridge var for counting credits
+			creditsbridge[i] = SWWMCredits.GetCredits(players[i]);
+			if ( players[i].itemcount > lastitemcount[i] )
+			{
+				int score = 25;
+				if ( level.total_items == level.found_items )
+				{
+					score = 2500;
+					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),score);
+				}
+				SWWMCredits.GiveCredits(players[i],score);
+				lastitemcount[i] = players[i].itemcount;
+			}
 		}
 		// combat tracking
 		// prune old entries
@@ -715,6 +779,14 @@ Class SWWMHandler : EventHandler
 		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill ) return;
 		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
 		{
+			if ( e.DamageSource == players[consoleplayer].mo )
+			{
+				highesttic = gametic;
+				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
+					lastcombat = AddOneliner("scorekill",15);
+			}
+			if ( !e.Thing.default.bCountKill )	// no credits
+				return;
 			int pnum = e.DamageSource.PlayerNumber();
 			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
 				multilevel[pnum]++;
@@ -726,14 +798,14 @@ Class SWWMHandler : EventHandler
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
 			if ( !tookdamage[pnum] ) score += 100+50*spreecount[pnum];
 			if ( e.Thing.bBOSS ) score += 10000;
-			if ( level.killed_monsters == level.total_monsters ) score += 5000;
-			e.DamageSource.GiveInventory("SWWMCredits",score);
+			if ( level.killed_monsters == level.total_monsters )
+			{
+				score += 5000;
+				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER",e.DamageSource.player.GetUserName()),5000);
+			}
+			SWWMCredits.GiveCredits(e.DamageSource.player,score);
 			// TODO floating score for HUD
 			spreecount[pnum]++;
-			if ( e.DamageSource != players[consoleplayer].mo ) return;
-			highesttic = gametic;
-			if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-				lastcombat = AddOneliner("scorekill",15);
 		}
 	}
 

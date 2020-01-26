@@ -631,7 +631,8 @@ Class SWWMHandler : EventHandler
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( onelinertic && (onelinertic < gametic) )
 		{
-			players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_LOCAL,1.,ATTN_NONE);
+			if ( players[consoleplayer].health > 0 )
+				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_LOCAL,1.,ATTN_NONE);
 			onelinertic = 0;
 			onelinerspan = 0;
 		}
@@ -738,7 +739,7 @@ Class SWWMHandler : EventHandler
 
 	override void PostUiTick()
 	{
-		if ( (gametic == onelinertic) && (oneliner != "") )
+		if ( (gametic == onelinertic) && (oneliner != "") && (players[consoleplayer].health > 0) )
 		{
 			let l = SWWMOneLiner.Make(oneliner,onelinerspan);
 			StatusBar.AttachMessage(l,-3473);

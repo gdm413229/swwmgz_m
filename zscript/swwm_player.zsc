@@ -545,7 +545,7 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	Pain:
 		// ouchy
-		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
+		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
 		XZW2 M 1 A_DemoPain();
 		XZW2 NOPQ 1;
 		Goto Spawn+1;

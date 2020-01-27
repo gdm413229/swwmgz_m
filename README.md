@@ -296,12 +296,9 @@ yeeted with extreme prejudice.
 
 Reload does what you'd expect.
 
-Zoom throws the weapon away, armed and ready to explode if it hits
-anyone or anything. The blast area for this is pretty ridiculous. You can hold
-spare guns, by the way.
-
-Pickups for this weapon may come in various amounts, from single units to packs
-of 5 if you're lucky.
+Holding primary fire during the first few moments of altfire will throws the
+weapon away, armed and ready to explode if it hits anyone or anything. The
+blast area for this is pretty ridiculous. You can hold spare guns, by the way.
 
 ### Ynykron Artifact (slot 0), replaces BFG9000, Firemace, Wraithverge (arc)
 

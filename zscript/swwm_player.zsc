@@ -255,12 +255,16 @@ Class Demolitionist : PlayerPawn
 					}
 				}
 				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
-				vel.z = max(0,vel.z)+jumpvelz;
+				double pvelz = vel.z;
 				if ( !player.onground )
 				{
 					// check for wall kicks
 					if ( walljump )
+					{
+						vel.z = max(-abs(vel.z)*.1,vel.z);
+						vel.z += jumpvelz;
 						vel.xy = (cos(angle),sin(angle))*20*Speed;
+					}
 				}
 				bOnMobj = false;
 				player.jumpTics = -1;
@@ -270,12 +274,13 @@ Class Demolitionist : PlayerPawn
 				{
 					dashboost = 3.;
 					boostcooldown = 20;
+					vel.z += jumpvelz+clamp(-pvelz,0.,30.);
 					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 				}
 				else
 				{
 					dashboost = 0.;
-					vel.z *= 1.25;
+					vel.z += jumpvelz*1.25;
 				}
 				SetStateLabel("Jump");
 			}
@@ -467,7 +472,7 @@ Class Demolitionist : PlayerPawn
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() && (mute.GetInt() < 2) ) SWWMHandler.AddOneliner("findsecret",40);
 		SWWMCredits.GiveCredits(player,score);
-		return false;
+		return true;
 	}
 	override void AddInventory( Inventory item )
 	{

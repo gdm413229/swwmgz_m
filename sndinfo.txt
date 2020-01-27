@@ -1,8 +1,8 @@
 $pitchshiftrange 0
 
-crash/glass	glasscrk
-crash/curb	curb
-brutal/ezmodo	easymodo
+crash/glass	sounds/GLASSCRK.ogg
+crash/curb	sounds/CURB.ogg
+brutal/ezmodo	sounds/EASYMODO.ogg
 
 voice/default/death1      	sounds/voice/default/death1.ogg
 voice/default/death2      	sounds/voice/default/death2.ogg
@@ -257,18 +257,53 @@ explodium/slideforward	sounds/explodiumgun/expl_slideforward.ogg
 explodium/speen		sounds/explodiumgun/expl_speen.ogg
 explodium/throwmag	sounds/explodiumgun/expl_throwmag.ogg
 
-$playersound demolitionist neutral *grunt DSEMPTY
-$playeralias demolitionist neutral *pain100 demolitionist/lopain
-$playeralias demolitionist neutral *pain75 demolitionist/pain
-$playeralias demolitionist neutral *pain50 demolitionist/pain
-$playeralias demolitionist neutral *pain25 demolitionist/hipain
-$playersound demolitionist neutral *usefail DSEMPTY
-$playeralias demolitionist neutral *death demolitionist/death
-$playeralias demolitionist neutral *xdeath demolitionist/xdeath
-$playeralias demolitionist neutral *gibbed demolitionist/xdeath
-$playeralias demolitionist neutral *wimpydeath demolitionist/wdeath
-$playersound demolitionist neutral *land DSEMPTY
-$playersound demolitionist neutral *falling DSEMPTY
-$playersound demolitionist neutral *puzzfail DSEMPTY
+candygun/fire1		sounds/candygun/candy_fire1.ogg
+candygun/fire2		sounds/candygun/candy_fire2.ogg
+candygun/fire3		sounds/candygun/candy_fire3.ogg
+$random candygun/fire { candygun/fire1 candygun/fire2 candygun/fire3 }
+candygun/hit1		sounds/candygun/candy_hit1.ogg
+candygun/hit2		sounds/candygun/candy_hit2.ogg
+$random candygun/hit { candygun/hit1 candygun/hit2 }
+candygun/maghit1	sounds/candygun/candy_maghit1.ogg
+candygun/maghit2	sounds/candygun/candy_maghit2.ogg
+$random candygun/maghit { candygun/maghit1 candygun/maghit2 }
+candygun/gunhit1	sounds/candygun/candy_gunhit1.ogg
+candygun/gunhit2	sounds/candygun/candy_gunhit2.ogg
+$random candygun/gunhit { candygun/gunhit1 candygun/gunhit2 }
 
-$alias misc/keytry DSEMPTY
+$playersound demolitionist neutral *grunt	DSEMPTY
+$playeralias demolitionist neutral *pain100	demolitionist/lopain
+$playeralias demolitionist neutral *pain75	demolitionist/pain
+$playeralias demolitionist neutral *pain50	demolitionist/pain
+$playeralias demolitionist neutral *pain25	demolitionist/hipain
+$playersound demolitionist neutral *usefail	sounds/menu/failuse.ogg
+$playeralias demolitionist neutral *death	demolitionist/death
+$playeralias demolitionist neutral *xdeath	demolitionist/xdeath
+$playeralias demolitionist neutral *gibbed	demolitionist/xdeath
+$playeralias demolitionist neutral *wimpydeath	demolitionist/wdeath
+$playersound demolitionist neutral *land	DSEMPTY
+$playersound demolitionist neutral *falling	DSEMPTY
+$playersound demolitionist neutral *puzzfail	sounds/menu/failuse.ogg
+
+misc/secret		sounds/menu/findsecret.ogg
+misc/keytry		sounds/menu/failuse.ogg
+misc/w_pkup		sounds/general/wpickup.ogg
+misc/p_pkup		DSEMPTY
+misc/i_pkup		DSEMPTY
+misc/k_pkup		DSEMPTY
+misc/ammo_pkup		sounds/general/apickup.ogg
+misc/armor_pkup		DSEMPTY
+misc/health_pkup	DSEMPTY
+misc/spawn		sounds/CORK.ogg
+misc/chat		sounds/menu/chatsnd.ogg
+misc/chat2		sounds/menu/chatsnd.ogg
+
+menu/activate	sounds/hmenu/hmenu1.ogg
+menu/backup	sounds/hmenu/hmenu2.ogg
+menu/prompt	sounds/hmenu/hmenu1.ogg
+menu/cursor	sounds/hmenu/hmenu1.ogg
+menu/change	sounds/hmenu/hmenu1.ogg
+menu/invalid	sounds/hmenu/hmenu2.ogg
+menu/dismiss	sounds/hmenu/hmenu2.ogg
+menu/choose	sounds/hmenu/hmenu1.ogg
+menu/clear	sounds/hmenu/hmenu2.ogg

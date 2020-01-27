@@ -7,8 +7,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
+		if ( gamestate != GS_LEVEL )
+		{
+			// can't open this menu outside of the game
+			Close();
+			return;
+		}
 		TewiFont = Font.GetFont('TewiShaded');
-		MenuSound("menu/activate");
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )

@@ -212,7 +212,7 @@ Class SWWMOneLiner : HUDMessageBase
 {
 	String whichline;
 	int lifespan, curtime;
-	HUDFont mTewiFont;
+	transient Font TewiFont;
 	transient CVar safezone;
 
 	static SWWMOneLiner Make( String whichline, int lifespan )
@@ -220,7 +220,6 @@ Class SWWMOneLiner : HUDMessageBase
 		let l = new("SWWMOneLiner");
 		l.whichline = whichline;
 		l.curtime = l.lifespan = lifespan;
-		l.mTewiFont = HUDFont.Create("TewiShaded");
 		return l;
 	}
 
@@ -233,19 +232,20 @@ Class SWWMOneLiner : HUDMessageBase
 	override void Draw( int bottom, int visibility )
 	{
 		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		int margin = safezone.GetInt();
 		Vector2 hs = StatusBar.GetHUDScale();
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String locs = "\""..StringTable.Localize(whichline).."\"";
 		// split so it can fit
-		BrokenLines l = mTewiFont.mFont.BreakLines(locs,int(ss.x*.5));
+		BrokenLines l = TewiFont.BreakLines(locs,int(ss.x*.5));
 		int maxlen = 0;
 		for ( int i=0; i<l.Count(); i++ )
 		{
-			int len = mTewiFont.mFont.StringWidth(l.StringAt(i));
+			int len = TewiFont.StringWidth(l.StringAt(i));
 			if ( len > maxlen ) maxlen = len;
 		}
-		int h = mTewiFont.mFont.GetHeight();
+		int h = TewiFont.GetHeight();
 		int fh = h*l.Count();
 		double alph = clamp((curtime/20.)+1.,0.,1.);
 		alph *= clamp((lifespan-curtime)/10.,0.,1.);
@@ -253,8 +253,8 @@ Class SWWMOneLiner : HUDMessageBase
 		int yy = margin+fh;
 		for ( int i=0; i<l.Count(); i++ )
 		{
-			int len = mTewiFont.mFont.StringWidth(l.StringAt(i));
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			int len = TewiFont.StringWidth(l.StringAt(i));
+			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			yy -= h;
 		}
 	}

@@ -1025,10 +1025,10 @@ Class SWWMHandler : EventHandler
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
 			if ( !tookdamage[pnum] ) score += 100+50*spreecount[pnum];
 			if ( e.Thing.bBOSS ) score += 10000;
-			if ( level.killed_monsters == level.total_monsters )
+			if ( level.killed_monsters+1 == level.total_monsters )
 			{
 				score += 5000;
-				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER",e.DamageSource.player.GetUserName()),5000);
+				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),5000);
 			}
 			SWWMCredits.Give(e.DamageSource.player,score);
 			// TODO floating score for HUD

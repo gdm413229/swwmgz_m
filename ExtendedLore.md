@@ -438,7 +438,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - ????: Twenty years after the fall of the Order of the One God, a message is
   received from an old ruined complex beyond the seas. A declaration of war
   from the "Church of the Dreadful Lady". A single, well trained mercenary puts
-  an end to their plans, but the true masterming behind it all manages to flee.
+  an end to their plans, but the true mastermind behind it all manages to flee.
 - ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
   associates, stealing the Heart of D'Sparil and putting an end to the plans
   for resurrecting him. The mansion is sold off, most of its valuables,
@@ -450,7 +450,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - ~130 BC: The town of Kereshnovka is founded by an alien race known as the
   Qurensniv.
 - ~149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
-  to burn down Kereshnovka. A group of warriors manages to defeat him. Weakened
+  to burn down Kereshnovka. A group of warriors manage to defeat him. Weakened,
   he retreats to the ghoul-infested forest, never to be seen again.
 - 1933: The Ischer family migrates to the US.
 - 1977: A member of Hell's royal family travels to Kereshnovka in order to
@@ -506,7 +506,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2074: In an act of desperation, the US sells Texas back to Mexico in order to
   gather funds for a "solution to all their problems" from Akari Labs. Military
   contractors are immediately sent to Japan with several billion dollars. The
-  "Red Oni" project is immediately started.
+  "Red Oni" project is started.
 - 2075: Blackmann Arms moves back to Germany.
 - 2077: Akari Labs deploys Ibuki, the "Red Oni" super soldier, on America, but
   it is already too late. World War 3 ends as the United States are almost
@@ -536,7 +536,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   After a lone marine reaches the gates of Hell in order to shut them off from
   the inside, Akari Labs deploys the first Demolitionist in order to combat the
   remaining invaders on Earth. After the marine's victory against the Icon of
-  Sin, the invasion ends, but some demons still remains, so without even being
+  Sin, the invasion ends, but some demons still remain, so without even being
   given a moment to rest, the marine's sent on another mission. Months later,
   the UAC still hasn't learned anything, and one of their bases on the moons of
   Jupiter is invaded. The now legendary "Doom marine" is sent there.

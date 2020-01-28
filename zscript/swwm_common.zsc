@@ -10,35 +10,69 @@ enum ESWWMGZChannels
 	CHAN_JETPACK = 63206
 };
 
-// Scoreing
+// Misc. Utility code
+Class SWWMUtility
+{
+	static void StripColor( out String str )
+	{
+		int len = str.CodePointCount();
+		for ( int i=0; i<len; i++ )
+		{
+			int remlen = 0;
+			if ( str.GetNextCodePoint(i) != 0x1C )
+				continue;
+			remlen++;
+			if ( str.GetNextCodePoint(i+remlen) == 0x5B )
+				while ( str.GetNextCodePoint(i+remlen) != 0x5D )
+					remlen++;
+			remlen++;
+			str.Remove(i,remlen);
+			len -= remlen;
+		}
+	}
+}
+
+// Scoring
 Class SWWMCredits : Thinker
 {
 	PlayerInfo myplayer;
 	int credits;
 
-	static void GiveCredits( PlayerInfo p, int amount )
+	static void Give( PlayerInfo p, int amount )
 	{
-		let c = FindCredits(p);
+		let c = Find(p);
+		if ( !c ) return;
 		if ( (c.credits+amount < c.credits) || (c.credits+amount > 999999999) ) c.credits = 999999999;
 		else c.credits += amount;
 	}
 
-	static bool TakeCredits( PlayerInfo p, int amount )
+	static clearscope bool CanTake( PlayerInfo p, int amount )
 	{
-		let c = FindCredits(p);
+		let c = Find(p);
+		if ( !c ) return false;
+		// too much!
+		if ( (c.credits-amount < 0) || (c.credits-amount > c.credits) ) return false;
+		return true;
+	}
+
+	static bool Take( PlayerInfo p, int amount )
+	{
+		let c = Find(p);
+		if ( !c ) return false;
 		// too much!
 		if ( (c.credits-amount < 0) || (c.credits-amount > c.credits) ) return false;
 		c.credits -= amount;
 		return true;
 	}
 
-	static int GetCredits( PlayerInfo p )
+	static clearscope int Get( PlayerInfo p )
 	{
-		let c = FindCredits(p);
+		let c = Find(p);
+		if ( !c ) return 0;
 		return c.credits;
 	}
 
-	private static SWWMCredits FindCredits( PlayerInfo p )
+	static clearscope SWWMCredits Find( PlayerInfo p )
 	{
 		let ti = ThinkerIterator.Create("SWWMCredits",STAT_STATIC);
 		SWWMCredits t;
@@ -47,10 +81,129 @@ Class SWWMCredits : Thinker
 			if ( t.myplayer != p ) continue;
 			return t;
 		}
-		t = new("SWWMCredits");
-		t.ChangeStatNum(STAT_STATIC);
-		t.myplayer = p;
-		return t;
+		return null;
+	}
+}
+
+// Trading history between players
+Class SWWMTrade
+{
+	int timestamp, type;
+	String other, what;
+}
+
+Class SWWMTradeHistory : Thinker
+{
+	PlayerInfo myplayer;
+	Array<SWWMTrade> ent;
+
+	static void RegisterSend( PlayerInfo p, PlayerInfo other, String what )
+	{
+		let th = Find(p);
+		if ( !th ) return;
+		SWWMTrade t = new("SWWMTrade");
+		t.timestamp = gametic;
+		t.type = 0;
+		t.other = other.GetUserName();
+		t.what = what;
+		th.ent.Push(t);
+	}
+	static void RegisterReceive( PlayerInfo p, PlayerInfo other, String what )
+	{
+		let th = Find(p);
+		if ( !th ) return;
+		SWWMTrade t = new("SWWMTrade");
+		t.timestamp = gametic;
+		t.type = 1;
+		t.other = other.GetUserName();
+		t.what = what;
+		th.ent.Push(t);
+	}
+
+	static clearscope SWWMTradeHistory Find( PlayerInfo p )
+	{
+		let ti = ThinkerIterator.Create("SWWMTradeHistory",STAT_STATIC);
+		SWWMTradeHistory th;
+		while ( th = SWWMTradeHistory(ti.Next()) )
+		{
+			if ( th.myplayer != p ) continue;
+			return th;
+		}
+		return Null;
+	}
+}
+
+// Lore holder
+Class SWWMLore
+{
+	String tag, text;
+}
+
+Class SWWMLoreLibrary : Thinker
+{
+	PlayerInfo myplayer;
+	Array<SWWMLore> ent;
+
+	void DirectAdd( String ref )
+	{
+		ref.MakeUpper();
+		String tag = String.Format("SWWM_LORETAG_%s",ref);
+		String text =  String.Format("SWWM_LORETXT_%s",ref);
+		// check that it's valid
+		if ( StringTable.Localize(tag,false) == tag ) return;
+		if ( StringTable.Localize(text,false) == text ) return;
+		// check if existing
+		for ( int i=0; i<ent.Size(); i++ )
+		{
+			if ( ent[i].tag != tag ) continue;
+			return;
+		}
+		SWWMLore e = new("SWWMLore");
+		e.tag = "$"..tag;
+		e.text = "$"..text;
+		// sorted add
+		String loca = StringTable.Localize(e.tag), locb;
+		int cpa, cpb;
+		for ( int i=0; i<ent.Size(); i++ )
+		{
+			locb = StringTable.Localize(ent[i].tag);
+			bool less = false;
+			int lena = loca.CodePointCount(),
+				lenb = locb.CodePointCount();
+			int lim = min(lena,lenb);
+			for ( int j=0; j<lim; j++ )
+			{
+				cpa = loca.GetNextCodePoint(j);
+				cpb = locb.GetNextCodePoint(j);
+				if ( cpa >= cpb ) continue;
+				less = true;
+				break;
+			}
+			if ( !less ) continue;
+			ent.Insert(i,e);
+			return;
+		}
+		// append otherwise
+		ent.Push(e);
+	}
+
+	static void Add( PlayerInfo p, String ref )
+	{
+		let ll = Find(p);
+		if ( !ll ) return;
+		ll.DirectAdd(ref);
+	}
+
+	static clearscope SWWMLoreLibrary Find( PlayerInfo p )
+	{
+		let ti = ThinkerIterator.Create("SWWMLoreLibrary",STAT_STATIC);
+		SWWMLoreLibrary ll;
+		while ( ll = SWWMLoreLibrary(ti.Next()) )
+		{
+			if ( ll.myplayer != p ) continue;
+			return ll;
+		}
+		return Null;
 	}
 }
 
@@ -638,7 +791,6 @@ Class SWWMHandler : EventHandler
 	int lastkill[MAXPLAYERS];
 	int multilevel[MAXPLAYERS];
 	int lastitemcount[MAXPLAYERS];
-	int creditsbridge[MAXPLAYERS];	// curse the gap between play/ui
 
 	transient CVar mutevoice;
 
@@ -682,8 +834,70 @@ Class SWWMHandler : EventHandler
 
 	override void PlayerEntered( PlayerEvent e )
 	{
+		// create some static thinkers for this player
+		PlayerInfo p = players[e.playernumber];
+		SWWMTradeHistory th = SWWMTradeHistory.Find(p);
+		if ( !th )
+		{
+			th = new("SWWMTradeHistory");
+			th.ChangeStatNum(Thinker.STAT_STATIC);
+			th.myplayer = p;
+		}
+		SWWMCredits c = SWWMCredits.Find(p);
+		if ( !c )
+		{
+			c = new("SWWMCredits");
+			c.ChangeStatNum(Thinker.STAT_STATIC);
+			c.myplayer = p;
+		}
+		SWWMLoreLibrary l = SWWMLoreLibrary.Find(p);
+		if ( !l )
+		{
+			l = new("SWWMLoreLibrary");
+			l.ChangeStatNum(Thinker.STAT_STATIC);
+			l.myplayer = p;
+			// pre-add some lore
+			l.DirectAdd("Belt");
+			l.DirectAdd("Collar");
+			l.DirectAdd("Demolitionist");
+			l.DirectAdd("Display");
+			l.DirectAdd("Hammerspace");
+			l.DirectAdd("Ibuki");
+			l.DirectAdd("Knowledgebase");
+			l.DirectAdd("Propulsor");
+			l.DirectAdd("Saya");
+			l.DirectAdd("Voicebox");
+			if ( gameinfo.gametype&GAME_Doom )
+			{
+				l.DirectAdd("Doomguy");
+				l.DirectAdd("Earth");
+				l.DirectAdd("Hell");
+				l.DirectAdd("UAC");
+			}
+			else if ( gameinfo.gametype&GAME_Heretic )
+			{
+				l.DirectAdd("Corvus");
+				l.DirectAdd("Parthoris");
+				l.DirectAdd("SerpentRiders");
+				l.DirectAdd("Sidhe");
+			}
+			else if ( gameinfo.gametype&GAME_Hexen )
+			{
+				l.DirectAdd("Baratus");
+				l.DirectAdd("Cronos");
+				l.DirectAdd("Daedolon");
+				l.DirectAdd("Parias");
+				l.DirectAdd("SerpentRiders");
+			}
+		}
+		// reset some vars
 		multilevel[e.playernumber] = 0;
 		lastkill[e.playernumber] = int.min;
+	}
+
+	override void PlayerRespawned( PlayerEvent e )
+	{
+		PlayerEntered(e);
 	}
 
 	override void WorldTick()
@@ -706,8 +920,6 @@ Class SWWMHandler : EventHandler
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] ) continue;
-			// while we're at it, also update the bridge var for counting credits
-			creditsbridge[i] = SWWMCredits.GetCredits(players[i]);
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
 				int score = 25;
@@ -716,7 +928,7 @@ Class SWWMHandler : EventHandler
 					score = 2500;
 					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),score);
 				}
-				SWWMCredits.GiveCredits(players[i],score);
+				SWWMCredits.Give(players[i],score);
 				lastitemcount[i] = players[i].itemcount;
 			}
 		}
@@ -775,17 +987,18 @@ Class SWWMHandler : EventHandler
 	{
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( e.Thing.player ) tookdamage[e.Thing.PlayerNumber()] = true;
-		if ( e.DamageSource && e.DamageSource.bISMONSTER && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+		if ( e.DamageSource && (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+		{
+			if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
+				lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",15);
+			highesttic = gametic;
+		}
+		if ( e.DamageSource && (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
 		{
 			if ( e.Thing.IsFriend(e.DamageSource) )
 			{
-				// no comment if it's a friendly (to be added)
-			}
-			else
-			{
-				// hurt comment
 				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-					lastcombat = AddOneliner("gethit",15);
+					lastcombat = AddOneliner("hitfriend",15);
 				highesttic = gametic;
 			}
 		}
@@ -817,7 +1030,7 @@ Class SWWMHandler : EventHandler
 				score += 5000;
 				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER",e.DamageSource.player.GetUserName()),5000);
 			}
-			SWWMCredits.GiveCredits(e.DamageSource.player,score);
+			SWWMCredits.Give(e.DamageSource.player,score);
 			// TODO floating score for HUD
 			spreecount[pnum]++;
 		}
@@ -870,6 +1083,17 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	override void CheckReplacement( ReplaceEvent e )
+	{
+		if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
+		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') )
+		{
+			if ( Random[Replacements](0,1) ) e.Replacement = 'Ynykron';
+			else e.Replacement = 'CandyGun';
+		}
+		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'CandyGun';
+	}
+
 	override void NetworkProcess( ConsoleEvent e )
 	{
 		if ( e.Name ~== "swwmgesture" )
@@ -888,6 +1112,32 @@ Class SWWMHandler : EventHandler
 			default:
 				if ( mo.FindState("Taunt") ) mo.SetStateLabel("Taunt");
 				break;
+			}
+		}
+		else if ( e.Name.Left(14) ~== "swwmstoregive." )
+		{
+			Class<Inventory> item = e.Name.Mid(14);
+			if ( !item ) return;
+			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
+			{
+				players[e.Args[0]].mo.GiveInventory(item,1);
+				if ( item is 'Weapon' ) players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
+			}
+		}
+		else if ( e.Name.Left(10) ~== "swwmtrade." )
+		{
+			Class<Inventory> item = e.Name.Mid(10);
+			if ( !item ) return;
+			let def = GetDefaultByType(item);
+			if ( players[e.Args[1]].mo.GiveInventory(item,1) )
+			{
+				players[e.Args[0]].mo.TakeInventory(item,1);
+				// add to history
+				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],def.GetTag());
+				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],def.GetTag());
+				// add messages
+				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),def.GetTag(),players[e.Args[1]].GetUserName());
+				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),def.GetTag());
 			}
 		}
 	}

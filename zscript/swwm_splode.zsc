@@ -293,6 +293,13 @@ Class ExplodiumGun : SWWMWeapon
 	ui TextureID WeaponBox;
 	ui HUDFont mTewiFont;
 
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Munch");
+	}
+
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/ExplodiumDisplay.png",TexMan.Type_Any);
@@ -433,6 +440,7 @@ Class ExplodiumGun : SWWMWeapon
 		Obituary "$O_EXPLODIUM";
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
+		Stamina 600;
 	}
 	States
 	{

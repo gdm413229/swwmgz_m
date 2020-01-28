@@ -2,7 +2,25 @@
 Class SWWMKnowledgeBaseMenu : GenericMenu
 {
 	// TODO everything, just have it be a blank menu for now
+	TextureID MainWindow, TabSeparator, WindowSeparator;
 	Font TewiFont;
+	int curtab;
+	// for scrolling
+	int sel0, sel1, sel2;
+	// inventory lists
+	Array<Inventory> invlist;
+	// lore stuff
+	SWWMLoreLibrary lorelib;
+	// store prompt
+	Array<Class<Inventory> > storelist;
+	bool buying;
+	int buyitem;
+	int buyamount;
+	// trading
+	SWWMTradeHistory tradelib;
+	// temporary bottom messages, such as "not enough money"
+	String tmsg;
+	int tmsgtic;
 
 	override void Init( Menu parent )
 	{
@@ -14,6 +32,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return;
 		}
 		TewiFont = Font.GetFont('TewiShaded');
+		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_Any);
+		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_Any);
+		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_Any);
+		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
+		if ( (curtab < 0) || (curtab > 7) ) curtab = 0;
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
@@ -33,22 +56,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	{
 		Super.Drawer();
 		String str;
-		double hs = min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.));
-		if ( hs < 1. )
-		{
-			str = StringTable.Localize("$SWWM_TOOSMALL");
-			BrokenLines l = TewiFont.BreakLines(str,CleanWidth/2);
-			int xx, yy = (CleanHeight-l.Count()*TewiFont.GetHeight())/2;
-			for ( int i=0; i<l.Count(); i++ )
-			{
-				xx = (CleanWidth-TewiFont.StringWidth(l.StringAt(i)))/2;
-				Screen.DrawText(TewiFont,Font.CR_FIRE,xx,yy,l.StringAt(i),DTA_Clean,true);
-				yy += TewiFont.GetHeight();
-			}
-			return;
-		}
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		str = StringTable.Localize("$SWWM_COMINGSOON");
-		Vector2 ss = (Screen.GetWidth()/hs,Screen.GetHeight()/hs);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 }

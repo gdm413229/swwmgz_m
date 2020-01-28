@@ -1,1 +1,414 @@
 // All the ammo items go here
+
+// ============================================================================
+// Spreadgun / Wallbuster ammo
+// ============================================================================
+
+// Common code for grouped shell handling and per-amount pickup messages
+Mixin Class SWWMShellAmmo
+{
+	override string PickupMessage()
+	{
+		String tagstr = "$"..GetParentAmmo().GetClassName();
+		tagstr.MakeUpper();
+		if ( Amount > 1 )
+		{
+			tagstr = tagstr.."S";
+			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
+		}
+		return StringTable.Localize(tagstr);
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		// drop unwanted shells
+		if ( (item is 'Ammo') && (Ammo(item).GetParentAmmo() == GetParentAmmo()) )
+		{
+			int excess = Amount+item.Amount;
+			if ( excess > MaxAmount ) excess -= MaxAmount;
+			if ( excess < item.Amount )
+			{
+				// drop spares
+				for ( int i=0; i<excess; i++ )
+				{
+					let s = Spawn(GetParentAmmo(),item.pos);
+					double ang = FRandom[SpareShells](0,360);
+					s.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](1.,3.);
+					s.vel.z = FRandom[SpareShells](2,5);
+				}
+			}
+		}
+		return Super.HandlePickup(item);
+	}
+}
+
+Class RedShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 500;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 60;
+		Ammo.BackpackAmount 6;
+	}
+}
+Class RedShell2 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class RedShell4 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+Class RedShell6 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+Class RedShell8 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 8;
+	}
+}
+Class RedShell12 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 12;
+	}
+}
+
+Class GreenShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 600;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 48;
+		Ammo.BackpackAmount 4;
+	}
+}
+Class GreenShell2 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class GreenShell4 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+Class GreenShell6 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+Class GreenShell8 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+
+Class WhiteShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 900;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 24;
+		Ammo.BackpackAmount 2;
+	}
+}
+Class WhiteShell2 : WhiteShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class WhiteShell4 : WhiteShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+Class WhiteShell6 : WhiteShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+
+Class BlueShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 700;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 30;
+		Ammo.BackpackAmount 3;
+	}
+}
+Class BlueShell2 : BlueShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class BlueShell4 : BlueShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+Class BlueShell6 : BlueShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+
+Class BlackShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 1000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 2;
+	}
+}
+Class BlackShell2 : BlackShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class BlackShell4 : BlackShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+
+Class PurpleShell : Ammo
+{
+	Default
+	{
+		Stamina 800;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 24;
+		Ammo.BackpackAmount 4;
+	}
+}
+Class PurpleShell2 : PurpleShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+	}
+}
+Class PurpleShell4 : PurpleShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+	}
+}
+Class PurpleShell6 : PurpleShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+
+Class GoldShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+
+	Default
+	{
+		Stamina 120000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 6;
+		Ammo.BackpackAmount 0;
+	}
+}
+
+// ============================================================================
+// Eviscerator ammo
+// ============================================================================
+
+Class EvisceratorShell : Ammo
+{
+	Default
+	{
+		Stamina 2500;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 60;
+		Ammo.BackpackAmount 6;
+	}
+}
+
+Class EvisceratorSixPack : EvisceratorShell
+{
+	Default
+	{
+		Inventory.Amount 6;
+	}
+}
+
+// ============================================================================
+// Hellblazer ammo
+// ============================================================================
+
+Class HellblazerMissiles : Ammo
+{
+	Default
+	{
+		Stamina 6000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 12;
+		Ammo.BackpackAmount 4;
+	}
+}
+
+Class HellblazerCrackshots : Ammo
+{
+	Default
+	{
+		Stamina 8000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 8;
+		Ammo.BackpackAmount 2;
+	}
+}
+
+Class HellblazerRavagers : Ammo
+{
+	Default
+	{
+		Stamina 12000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 4;
+		Ammo.BackpackAmount 1;
+	}
+}
+
+Class HellblazerWarheads : Ammo
+{
+	Default
+	{
+		Stamina 25000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+	}
+}
+
+// ============================================================================
+// Sparkster ammo
+// ============================================================================
+
+Class SparkUnit : Ammo
+{
+	Default
+	{
+		Stamina 20000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 2;
+	}
+}
+
+// ============================================================================
+// Silver Bullet ammo
+// ============================================================================
+
+Class SilverBulletAmmo : Ammo
+{
+	Default
+	{
+		Stamina 6000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 12;
+		Ammo.BackpackAmount 1;
+	}
+}
+
+// ============================================================================
+// Candygun ammo
+// ============================================================================
+
+Class CandyGunAmmo : Ammo
+{
+	Default
+	{
+		Stamina 80000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 8;
+		Ammo.BackpackAmount 0;
+	}
+}
+
+Class CandyGunSpares : Ammo
+{
+	Default
+	{
+		Stamina 150000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 4;
+		Ammo.BackpackAmount 0;
+	}
+}
+
+// ============================================================================
+// Ynykron ammo
+// ============================================================================
+
+Class YnykronAmmo : Ammo
+{
+	Default
+	{
+		Stamina 400000;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+	}
+}

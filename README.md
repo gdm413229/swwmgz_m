@@ -400,10 +400,9 @@ you from dying at all if it autoactivates on low health.
 
 Actual 100% invisibility guaranteed, a relic from the old UnSX days.
 
-The ghost artifact is capable of turning you absolutely invisible when standing
-still, and just slightly more visible when moving, depending on speed.
-
-Firing of course nullifies the effect for a while.
+The ghost artifact is capable of turning you absolutely invisible. However, it
+does not prevent you from making noise, so it's best to use it to sneak past
+certain encounters, or prepare surprise attacks.
 
 This powerup lasts 60 seconds and cannot be toggled.
 

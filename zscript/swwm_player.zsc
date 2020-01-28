@@ -110,6 +110,7 @@ Class Demolitionist : PlayerPawn
 	override void Tick()
 	{
 		Super.Tick();
+		if ( !player ) return;
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
@@ -156,7 +157,8 @@ Class Demolitionist : PlayerPawn
 			Actor a;
 			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
 			{
-				a = Spawn("DashTrail",Vec3Angle(30,angle+i*160,30));
+				a = Spawn("DashTrail",Vec3Angle(15,angle+i*140,35));
+				a.target = self;
 				a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
 				a.vel -= vel*.5;
 			}
@@ -166,7 +168,8 @@ Class Demolitionist : PlayerPawn
 			Actor a;
 			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
 			{
-				a = Spawn("DashTrail",Vec3Angle(10,angle+i*160,30));
+				a = Spawn("DashTrail",Vec3Angle(10,angle+i*140,40));
+				a.target = self;
 				a.vel = .5*(RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
 				a.vel -= vel*.5;
 			}
@@ -289,6 +292,12 @@ Class Demolitionist : PlayerPawn
 	}
 	override void PlayIdle()
 	{
+		if ( !player )
+		{
+			if ( !InStateSequence(CurState,FindState("Spawn")) )
+				SetStateLabel("Spawn");
+			return;
+		}
 		if ( player.health <= 0 ) return;
 		if ( !bNoGravity && player.onground && (waterlevel < 3) )
 		{
@@ -356,6 +365,12 @@ Class Demolitionist : PlayerPawn
 	}
 	override void PlayRunning()
 	{
+		if ( !player )
+		{
+			if ( !InStateSequence(CurState,FindState("See")) )
+				SetStateLabel("See");
+			return;
+		}
 		if ( player.health <= 0 ) return;
 		if ( !bNoGravity && player.onground && (waterlevel < 3) )
 		{
@@ -416,7 +431,7 @@ Class Demolitionist : PlayerPawn
 		if ( InStateSequence(CurState,FindState("Dash"))
 			|| InStateSequence(CurState,FindState("Jump")) )
 			return;	// don't cancel dash/jump
-		if ( player.crouchdir == -1 ) SetStateLabel("CrouchMissile");
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchMissile");
 		else SetStateLabel("Missile");
 	}
 	override void PlayAttacking2()
@@ -435,19 +450,19 @@ Class Demolitionist : PlayerPawn
 		if ( lastdamage > 60 )
 		{
 			A_StartSound("*pain25",CHAN_VOICE);
-			if ( mute.GetInt() < 4 )
+			if ( mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 40 )
 		{
 			A_StartSound("*pain50",CHAN_VOICE);
-			if ( mute.GetInt() < 4 )
+			if ( mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/pain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 0 )
 		{
 			A_StartSound("*pain100",CHAN_VOICE);
-			if ( mute.GetInt() < 4 )
+			if ( mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 	}
@@ -456,11 +471,12 @@ Class Demolitionist : PlayerPawn
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		A_PlayerScream();
-		if ( mute.GetInt() < 4 )
+		if ( mute && myvoice && (mute.GetInt() < 4) )
 			A_StartSound(String.Format("voice/%s/death",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 	}
 	override bool OnGiveSecret( bool printmsg, bool playsound )
 	{
+		if ( !player ) return false;
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		int score = 500;
 		// last secret (this is called before counting it up, so have to subtract)
@@ -471,13 +487,16 @@ Class Demolitionist : PlayerPawn
 		}
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() && (mute.GetInt() < 2) ) SWWMHandler.AddOneliner("findsecret",40);
-		SWWMCredits.GiveCredits(player,score);
+		SWWMCredits.Give(player,score);
 		return true;
 	}
 	override void AddInventory( Inventory item )
 	{
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		Super.AddInventory(item);
+		if ( !player ) return;
+		// add lore if any
+		SWWMLoreLibrary.Add(player,item.GetClassName());
+		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( (item is 'Weapon') && CheckLocalView() && (mute.GetInt() < 2) )
 			SWWMHandler.AddOneliner("getweapon");
 		if ( (item is 'Key') && !key_reentrant )
@@ -485,7 +504,7 @@ Class Demolitionist : PlayerPawn
 			// score
 			int score = 250;
 			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
-			SWWMCredits.GiveCredits(player,score);
+			SWWMCredits.Give(player,score);
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
@@ -499,6 +518,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override bool UseInventory( Inventory item )
 	{
+		if ( !player ) return Super.UseInventory(item);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( !(item is 'PuzzleItem') || (mute.GetInt() >= 2) )
 			return Super.UseInventory(item);
@@ -521,6 +541,14 @@ Class Demolitionist : PlayerPawn
 			let b = Spawn("SmolInvisibleSplasher",(RotateVector((0,yofs*.25*radius),angle),0));
 			b.A_CheckTerrain();
 		}
+	}
+	override bool Used( Actor user )
+	{
+		if ( !(user is 'Demolitionist') || !user.player ) return false;
+		CVar othermute = CVar.GetCVar('swwm_mutevoice',user.player);
+		if ( (user.player == players[consoleplayer]) && (othermute.GetInt() < 2) )
+			SWWMHandler.AddOneliner("greet");
+		return false;
 	}
 	States
 	{
@@ -723,14 +751,21 @@ Class DashTrail : Actor
 	{
 		Super.PostBeginPlay();
 		SetState(FindState("Spawn")+Random[ExploS](0,7));
-		let t = Spawn("DashTrail2",pos);
+		let t = Spawn("DashTrail2",level.Vec3Offset(pos,vel*.3));
+		t.target = target;
 		t.vel = vel*1.2;
-		let s = Spawn("SWWMSmoke",pos);
+		let s = Spawn("SWWMSmoke",level.Vec3Offset(pos,vel*1.6));
 		s.vel = vel*.8;
 		s.SetShade(Color(1,1,1)*Random[ExploS](64,128));
 		s.special1 = Random[ExploS](2,4);
 		s.scale *= 1.4;
 		s.alpha *= .3;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		// hack
+		if ( target && (players[consoleplayer].Camera == target) ) Warp(target,pos.x,pos.y,pos.z,0,WARPF_ABSOLUTEPOSITION|WARPF_COPYINTERPOLATION);
 	}
 	States
 	{
@@ -761,6 +796,12 @@ Class DashTrail2 : Actor
 	{
 		Super.PostBeginPlay();
 		SetState(FindState("Spawn")+Random[ExploS](0,7));
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		// hack
+		if ( target && (players[consoleplayer].Camera == target) ) Warp(target,pos.x,pos.y,pos.z,0,WARPF_ABSOLUTEPOSITION|WARPF_COPYINTERPOLATION);
 	}
 	States
 	{

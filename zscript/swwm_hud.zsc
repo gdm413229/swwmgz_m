@@ -107,8 +107,7 @@ Class SWWMStatusBar : BaseStatusBar
 		// update interpolators
 		HealthInter.Update(CPlayer.health);
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( hnd ) ScoreInter.Update(hnd.creditsbridge[CPlayer.mo.PlayerNumber()]);
-		else ScoreInter.Update(0);
+		ScoreInter.Update(SWWMCredits.Get(CPlayer));
 		let d = Demolitionist(CPlayer.mo);
 		if ( d )
 		{
@@ -325,18 +324,7 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.Dim("Black",.8,0,Screen.GetHeight()-int(15*hs.y),Screen.GetWidth(),int(15*hs.y));
 		String pname = players[consoleplayer].GetUserName();
 		// strip colors
-		for ( int i=0; i<pname.CodePointCount(); i++ )
-		{
-			int remlen = 0;
-			if ( pname.GetNextCodePoint(i) != 0x1C )
-				continue;
-			remlen++;
-			if ( pname.GetNextCodePoint(i+remlen) == 0x5B )
-				while ( pname.GetNextCodePoint(i+remlen) != 0x5D )
-					remlen++;
-			remlen++;
-			pname.Remove(i,remlen);
-		}
+		SWWMUtility.StripColor(pname);
 		String fullstr = String.Format("\cq%s\cd@\cqdemolitionist%d\cn ~ \c-wall %s%s",pname,consoleplayer+1,txt,mTewiFont.mFont.GetCursor());
 		// cut out to fit
 		int w = mTewiFont.mFont.StringWidth(fullstr);

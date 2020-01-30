@@ -1172,10 +1172,15 @@ Class SWWMHandler : EventHandler
 		if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
 		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = 'Ynykron';
+			/*if ( !Random[Replacements](0,2) ) e.Replacement = 'Ynykron';
 			else */e.Replacement = 'CandyGun';
 		}
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'CandyGun';
+		else if ( (e.Replacee == 'CellPack') || (e.Replacee == 'SkullRodHefty') )
+		{
+			/*if ( Random[Replacements](0,2) ) e.Replacement = 'SilverBulletAmmo';
+			else */e.Replacement = 'CandyGunAmmo';
+		}
 	}
 
 	override void NetworkProcess( ConsoleEvent e )

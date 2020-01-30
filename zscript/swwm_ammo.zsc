@@ -380,10 +380,20 @@ Class CandyGunAmmo : Ammo
 {
 	Default
 	{
+		Tag "$T_CANDYMAG";
+		Inventory.PickupMessage "$T_CANDYMAG";
 		Stamina 80000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 8;
 		Ammo.BackpackAmount 0;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
@@ -391,6 +401,7 @@ Class CandyGunSpares : Ammo
 {
 	Default
 	{
+		Tag "$T_CANDYSPARE";
 		Stamina 150000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;

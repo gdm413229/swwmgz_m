@@ -145,12 +145,15 @@ Class CandyBeam : Actor
 	{
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
 		Vector3 pvel = .1*tdir+(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.1,.3);
-		let m = Spawn(smk,level.Vec3Offset(pos,tdir*.5));
-		m.vel = pvel;
-		m.SetShade(Color(1,1,1)*Random[ExploS](64,224));
-		m.special1 = Random[ExploS](1,3);
-		m.scale *= 1.5;
-		m.alpha *= .4;
+		if ( special2 && !Random[ExploS](0,special2) )
+		{
+			let m = Spawn(smk,level.Vec3Offset(pos,tdir*.5));
+			m.vel = pvel;
+			m.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			m.special1 = Random[ExploS](1,3);
+			m.scale *= 1.5;
+			m.alpha *= .4;
+		}
 		if ( special1 > ReactionTime )
 		{
 			let s = Spawn(pop,invoker.nextpos);
@@ -162,6 +165,7 @@ Class CandyBeam : Actor
 		b.pitch = asin(-invoker.nextdir.z);
 		b.target = target;
 		b.special1 = special1+1;
+		b.special2 = special2;
 		b.frame = frame;
 	}
 	Default
@@ -245,6 +249,7 @@ Class CandyPop : Actor
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
+				s.special2 = 3;
 				s.ReactionTime += Random[ExploS](-4,12);
 			}
 			numpt = Random[ExploS](1,3);
@@ -338,7 +343,7 @@ Class CandyMagArm : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		reactiontime = Random[ExploS](6,12);
+		reactiontime = Random[ExploS](4,7);
 		double ang, pt;
 		ang = FRandom[ExploS](0,360);
 		pt = FRandom[ExploS](-90,90);
@@ -351,17 +356,17 @@ Class CandyMagArm : Actor
 		{
 			A_CountDown();
 			Spawn("CandyMagTrail",pos);
-			SWWMHandler.DoBlast(self,50+3*reactiontime,3000+500*reactiontime);
+			SWWMHandler.DoBlast(self,50+6*reactiontime,3000+800*reactiontime);
 			double spd = vel.length();
-			vel = (vel*.1+(FRandom[ExploS](-.1,.1),FRandom[ExploS](-.1,.1),FRandom[ExploS](-.1,.1))).unit()*spd;
-			A_Explode(20+reactiontime/2,50+3*reactiontime);
+			vel = (vel*.1+(FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7))).unit()*spd;
+			A_Explode(20+reactiontime*3,50+6*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
 			s.special1 = Random[ExploS](2,7);
 			s.scale *= 2.4;
-			s.alpha *= 0.1+.4*(ReactionTime/12.);
+			s.alpha *= 0.1+.4*(ReactionTime/8.);
 			int numpt = Random[ExploS](ReactionTime-12,3);
 			for ( int i=0; i<numpt; i++ )
 			{
@@ -371,6 +376,7 @@ Class CandyMagArm : Actor
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
+				s.special2 = 3;
 				s.ReactionTime += Random[ExploS](8,20);
 			}
 		}
@@ -417,7 +423,7 @@ Class CandyMagArmBig : CandyMagArm
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		vel *= 2.;
+		vel *= 1.4;
 	}
 	States
 	{
@@ -426,18 +432,18 @@ Class CandyMagArmBig : CandyMagArm
 		{
 			ReactionTime--;
 			Spawn("CandyMagTrailBig",pos);
-			SWWMHandler.DoBlast(self,100+3*reactiontime,3000+500*reactiontime);
+			SWWMHandler.DoBlast(self,100+8*reactiontime,3000+900*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.1+(FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5))).unit()*spd;
-			A_Explode(50+reactiontime,100+3*reactiontime);
+			A_Explode(50+reactiontime*5,100+8*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
 			s.special1 = Random[ExploS](2,7);
 			s.scale *= 2.4;
-			s.alpha *= 0.1+.4*(ReactionTime/12.);
-			int numpt = Random[ExploS](ReactionTime-30,3);
+			s.alpha *= 0.1+.4*(ReactionTime/6.);
+			int numpt = Random[ExploS](ReactionTime-15,1);
 			for ( int i=0; i<numpt; i++ )
 			{
 				double ang = FRandom[ExploS](0,360);
@@ -446,11 +452,12 @@ Class CandyMagArmBig : CandyMagArm
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
+				s.special2 = 6;
 				s.ReactionTime += Random[ExploS](30,60);
 			}
 			if ( ReactionTime <= 0 )
 			{
-				numpt = Random[ExploS](3,9);
+				numpt = Random[ExploS](2,6);
 				for ( int i=0; i<numpt; i++ )
 				{
 					double ang = FRandom[ExploS](0,360);
@@ -538,7 +545,7 @@ Class CandyGunProj : Actor
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
 		}
-		numpt = int(Random[ExploS](2,3)*(1.+.4*special1));
+		numpt = int(Random[ExploS](2,4)*(1.+.4*special1));
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("CandyMagArmBig",pos);
@@ -565,10 +572,11 @@ Class CandyGunProj : Actor
 			{
 				double ang = FRandom[ExploS](0,360);
 				double pt = FRandom[ExploS](-90,90);
-				let s = Spawn("CandyBeam",pos);
+				let s = Spawn((frame>10)?"CandyBeam":"TinyCandyBeam",pos);
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
+				s.special2 = 1;
 				s.ReactionTime += Random[ExploS](-12,32)+(25-frame)/2;
 			}
 		}
@@ -611,8 +619,8 @@ Class CandyMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters();
-		SWWMHandler.DoBlast(self,200+20*special1,80000+8000*special1);
-		A_Explode(300+200*special1,200+20*special1);
+		SWWMHandler.DoBlast(self,250+25*special1,80000+8000*special1);
+		A_Explode(300+200*special1,250+25*special1);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -645,7 +653,7 @@ Class CandyMagProj : Actor
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
 		}
-		numpt = int(Random[ExploS](2,4)*(1.+.4*special1));
+		numpt = int(Random[ExploS](3,6)*(1.+.4*special1));
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("CandyMagArm",pos);
@@ -672,11 +680,12 @@ Class CandyMagProj : Actor
 			{
 				double ang = FRandom[ExploS](0,360);
 				double pt = FRandom[ExploS](-90,90);
-				let s = Spawn("CandyBeam",pos);
+				let s = Spawn((frame>15)?"CandyBeam":"TinyCandyBeam",pos);
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
-				s.ReactionTime += Random[ExploS](-12,12)+(25-frame)/2;
+				s.special2 = 2;
+				s.ReactionTime += Random[ExploS](-12,4)+(25-frame)/3;
 			}
 		}
 		Stop;
@@ -776,11 +785,11 @@ Class CandyGun : SWWMWeapon
 
 	Property ClipCount : ClipCount;
 
-	override void AttachToOwner( Actor other )
+	override Inventory CreateCopy( Actor other )
 	{
-		Super.AttachToOwner(other);
 		// additional lore
 		SWWMLoreLibrary.Add(other.player,"Munch");
+		return Super.CreateCopy(other);
 	}
 
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
@@ -946,22 +955,15 @@ Class CandyGun : SWWMWeapon
 	override bool CheckAmmo( int fireMode, bool autoSwitch, bool requireAmmo, int ammocount )
 	{
 		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
-		if ( fireMode == PrimaryFire ) return (chambered || (Ammo1.Amount > 0));
+		if ( fireMode == PrimaryFire ) return (chambered || (clipcount > 0) || (Ammo1.Amount > 0));
 		if ( fireMode == AltFire ) return (Ammo1.Amount > 0);
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
 	}
 
-	override bool HandlePickup( Inventory item )
+	override bool ReportHUDAmmo()
 	{
-		if ( item.GetClass() == GetClass())
-		{
-			if ( Ammo2.Amount < Ammo2.MaxAmount )
-				Weapon(item).AmmoGive2 = 1;
-			if ( Weapon(item).PickupForAmmo(self) )
-				item.bPickupGood = true;
-			return true;
-		}
-		return false;
+		if ( chambered || (clipcount > 0) ) return true;
+		return Super.ReportHUDAmmo();
 	}
 
 	Default
@@ -971,12 +973,14 @@ Class CandyGun : SWWMWeapon
 		Obituary "$O_CANDYGUN";
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 9;
+		Weapon.SelectionOrder 1200;
 		Stamina 70000;
 		Weapon.AmmoType1 "CandyGunAmmo";
 		Weapon.AmmoType2 "CandyGunSpares";
 		Weapon.AmmoGive1 1;
-		Weapon.AmmoGive2 0;
+		Weapon.AmmoGive2 1;
 		CandyGun.ClipCount 7;
+		+SWWMWEAPON.NOFIRSTGIVE;
 	}
 	States
 	{
@@ -1053,8 +1057,8 @@ Class CandyGun : SWWMWeapon
 	Reload:
 		XZW2 A 1
 		{
-			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
-			else if ( (invoker.Ammo1.Amount <= 0) || invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
+			if ( (invoker.Ammo1.Amount <= 0) || (invoker.clipcount >= invoker.default.clipcount) ) return ResolveState("CheckBullet");
+			else if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;

@@ -1,5 +1,5 @@
 // Base class for all SWWM Armors
-Class SWWMArmor : Armor
+Class SWWMArmor : Armor abstract
 {
 	int priority;
 
@@ -57,12 +57,12 @@ Class SWWMArmor : Armor
 }
 
 // gives armor when used
-Class SWWMSpareArmor : Inventory
+Class SWWMSpareArmor : Inventory abstract
 {
 }
 
 // Base casing classes
-Class SWWMCasing : Actor
+Class SWWMCasing : Actor abstract
 {
 	int deadtimer, numbounces;
 	double pitchvel, anglevel;
@@ -226,8 +226,27 @@ Class SWWMWeaponLight : DynamicLight
 }
 
 // Base class for all SWWM Weapons
-Class SWWMWeapon : Weapon
+Class SWWMWeapon : Weapon abstract
 {
+	private int SWeaponFlags;
+
+	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
+
+	override void AttachToOwner (Actor other)
+	{
+		Inventory.AttachToOwner(other);
+		Ammo1 = AddAmmo(Owner,AmmoType1,bNoFirstGive?0:AmmoGive1);
+		Ammo2 = AddAmmo(Owner,AmmoType2,bNoFirstGive?0:AmmoGive2);
+		SisterWeapon = AddWeapon(SisterWeaponType);
+		if ( Owner.player )
+		{
+			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch )
+				Owner.player.PendingWeapon = self;
+			if ( Owner.player.mo == players[consoleplayer].camera )
+				StatusBar.ReceivedWeapon(self);
+		}
+		GivenAsMorphWeapon = false;
+	}
 	override void DetachFromOwner()
 	{
 		Owner.A_StopSound(CHAN_WEAPON);
@@ -345,6 +364,17 @@ Class SWWMWeapon : Weapon
 		player.SetPSprite(PSP_FLASH,flashstate);
 		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE,true);
 		A_OverlayRenderStyle(PSP_FLASH,STYLE_Add);
+	}
+	// tells the SWWM HUD that this weapon has ammo available
+	virtual clearscope bool ReportHUDAmmo()
+	{
+		return (!Ammo1||(Ammo1.Amount>0)||(Ammo2&&(Ammo2.Amount>0)));
+	}
+	// tells the Embiggener that this weapon uses the specified ammo type
+	// even if it is not its primary one
+	virtual clearscope bool UsesAmmo( Class<Ammo> kind )
+	{
+		return (AmmoType1&&(kind is AmmoType1))||(AmmoType2&&(kind is AmmoType2));
 	}
 	Default
 	{

@@ -281,11 +281,11 @@ Class ExplodiumGun : SWWMWeapon
 
 	Property ClipCount : ClipCount;
 
-	override void AttachToOwner( Actor other )
+	override Inventory CreateCopy( Actor other )
 	{
-		Super.AttachToOwner(other);
 		// additional lore
 		SWWMLoreLibrary.Add(other.player,"Munch");
+		return Super.CreateCopy(other);
 	}
 
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
@@ -421,6 +421,11 @@ Class ExplodiumGun : SWWMWeapon
 		c.vel += vel*.5;
 	}
 
+	override bool ReportHUDAmmo()
+	{
+		return true;
+	}
+
 	Default
 	{
 		Tag "$T_EXPLODIUM";
@@ -428,6 +433,7 @@ Class ExplodiumGun : SWWMWeapon
 		Obituary "$O_EXPLODIUM";
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
+		Weapon.SelectionOrder 2600;
 		Stamina 600;
 		ExplodiumGun.ClipCount 7;
 	}

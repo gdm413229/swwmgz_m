@@ -20,6 +20,8 @@ Class Demolitionist : PlayerPawn
 	int cairtime;
 	Vector3 oldpos;
 
+	int lastmpain;
+
 	Default
 	{
 		Speed 1;
@@ -82,6 +84,11 @@ Class Demolitionist : PlayerPawn
 					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 					readonly<Weapon> weap = GetDefaultByType(type2);
 					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
+					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
+					{
+						isvalid = true;
+						break;
+					}
 					if ( (weap.AmmoType1 == type) || (weap.AmmoType2 == type) )
 					{
 						isvalid = true;
@@ -311,10 +318,12 @@ Class Demolitionist : PlayerPawn
 			dashsnd = true;
 		else
 		{
-			if ( dashsnd ) A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
+			if ( dashsnd )
+				A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 			dashsnd = false;
 		}
 		if ( dashboost <= 0. ) return;
+		PainChance = InStateSequence(CurState,FindState("Dash"))?0:255;
 		if ( InStateSequence(CurState,FindState("Dash")) )
 		{
 			Actor a;
@@ -325,22 +334,24 @@ Class Demolitionist : PlayerPawn
 				a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
 				a.vel -= vel*.5;
 			}
-			Vector3 dir = vel.unit();
-			double spd = vel.length();
+			Vector3 dir = vel+dashdir*dashboost;
+			double spd = dir.length();
+			dir = dir.unit();
 			// look for things we could potentially bump into
 			let bi = BlockThingsIterator.Create(self,200);
 			bool bumped = false;
-			while ( bi.Next() )
+			while ( (spd > 0) && bi.Next() )
 			{
 				a = bi.Thing;
 				if ( !a || (a == self) || !a.bSHOOTABLE || a.bTHRUACTORS ) continue;
 				Vector3 diff = level.Vec3Diff(level.Vec3Offset(pos,vel),level.Vec3Offset(a.pos,a.vel));
-				if ( (abs(diff.x) > radius+a.radius) || (abs(diff.y) > radius+a.radius) ) continue;
-				if ( (diff.z > height) || (diff.z < -a.height) ) continue;
+				if ( (abs(diff.x) > (radius+a.radius+8)) || (abs(diff.y) > (radius+a.radius+8)) ) continue;
+				if ( (diff.z > (height+8)) || (diff.z < (8-a.height)) ) continue;
 				double moveang = atan2(dir.y,dir.x);
 				Vector3 sc = level.SphericalCoords(pos,a.pos,(moveang,0));
-				if ( abs(sc.x) > 45 ) continue;
+				if ( abs(sc.x) > 60 ) continue;
 				// bosses and large monsters will stop the player
+				A_QuakeEx(1,1,1,3,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				a.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
 				if ( a.bDONTTHRUST || (a.Mass >= Mass*5) )
 				{
@@ -348,16 +359,16 @@ Class Demolitionist : PlayerPawn
 					bumped = true;
 					A_QuakeEx(3,3,3,8,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 					A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
-					vel -= dir*(5+(spd*30/mass));
+					vel -= dir*(9+(spd*30/mass));
 					vel.z += 3+(spd*(20/mass));
 				}
-				Vector3 pushdir = Vec3To(a).unit()*0.2+dir*0.8;
+				Vector3 pushdir = Vec3To(a).unit()*.1+dir*.9;
 				if ( !a.bDONTTHRUST && (a.Mass < Mass*5) )
 				{
-					a.vel += pushdir*(12+(spd*80/max(50,a.mass)));
+					a.vel += pushdir*(15+(spd*150/max(50,a.mass)));
 					a.vel.z += 5+(spd*(50/max(50,a.mass)));
 				}
-				a.DamageMobj(self,self,int(15+spd*1.5),'Dash',DMG_THRUSTLESS);
+				a.DamageMobj(self,self,int(15+spd*2.5),'Dash',DMG_THRUSTLESS);
 			}
 		}
 		else if ( InStateSequence(CurState,FindState("Jump")) )
@@ -377,7 +388,13 @@ Class Demolitionist : PlayerPawn
 		// lucky collar
 		if ( Health < 25 ) damage /= 4;
 		if ( source == self ) damage /= 2;
-		return lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		int lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
+		{
+			lastmpain = level.maptime;
+			A_DemoPain();
+		}
+		return lastdamage;
 	}
 	override void CalcHeight()
 	{
@@ -946,6 +963,7 @@ Class DashTrail : Actor
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
+		+NOTELEPORT;
 	}
 	override void PostBeginPlay()
 	{
@@ -991,6 +1009,7 @@ Class DashTrail2 : Actor
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
+		+NOTELEPORT;
 	}
 	override void PostBeginPlay()
 	{
@@ -1031,6 +1050,7 @@ Class DemolitionistRadiusShockwaveTail : Actor
 		+NOGRAVITY;
 		+DONTSPLASH;
 		+WALLSPRITE;
+		+NOTELEPORT;
 	}
 	States
 	{
@@ -1062,6 +1082,7 @@ Class DemolitionistRadiusShockwave : Actor
 		+STEPMISSILE;
 		+NOEXPLODEFLOOR;
 		+WALLSPRITE;
+		+NOTELEPORT;
 		+RIPPER;
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
@@ -1069,8 +1090,8 @@ Class DemolitionistRadiusShockwave : Actor
 		if ( damage <= 0 ) return damage;
 		if ( (target.mass < LARGE_MASS) && !target.bDONTTHRUST )
 		{
-			target.vel.xy += vel.xy.unit()*(5000./target.mass)*alpha;
-			target.vel.z += (800./target.mass)*alpha;
+			target.vel.xy += vel.xy.unit()*(5000./max(50,target.mass))*alpha;
+			target.vel.z += (800./max(50,target.mass))*alpha;
 		}
 		return damage;
 	}
@@ -1080,6 +1101,7 @@ Class DemolitionistRadiusShockwave : Actor
 		SDST A 1
 		{
 			SetZ(floorz);
+			Spawn("InvisibleSplasher",Vec3Offset(0,0,2));
 			let s = Spawn("DemolitionistRadiusShockwaveTail",pos);
 			s.vel = vel*.8;
 			s.scale = scale;
@@ -1106,6 +1128,7 @@ Class DemolitionistShockwave : Actor
 	{
 		+NOGRAVITY;
 		+NOBLOCKMAP;
+		+NOTELEPORT;
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 	}

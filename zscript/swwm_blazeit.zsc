@@ -3,8 +3,34 @@
 
 Class Hellblazer : SWWMWeapon
 {
+	int clipcount;
+
+	Property ClipCount : clipcount;
+
+	override bool UsesAmmo( Class<Ammo> kind )
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		for ( int i=0; i<4; i++ ) if ( kind is types[i] ) return true;
+		return false;
+	}
+
 	Default
 	{
+		Tag "$T_HELLBLAZER";
+		Inventory.PickupMessage "$I_HELLBLAZER";
+		Obituary "$O_HELLBLAZER";
+		Weapon.SlotNumber 6;
+		Weapon.SelectionOrder 1800;
 		Stamina 40000;
+		Weapon.AmmoType1 "HellblazerMissiles";
+		Weapon.AmmoGive1 6;
+		Hellblazer.ClipCount 6;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

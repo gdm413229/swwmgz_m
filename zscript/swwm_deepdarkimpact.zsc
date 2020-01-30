@@ -3,8 +3,41 @@
 
 Class DeepImpact : SWWMWeapon
 {
+	int clipcount;
+
+	transient ui TextureID WeaponBox;
+	transient ui HUDFont mTewiFont;
+
+	Property ClipCount : clipcount;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Locke");
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		return true;
+	}
+
 	Default
 	{
+		Tag "$T_DEEPIMPACT";
+		Inventory.PickupMessage "$I_DEEPIMPACT";
+		Obituary "$O_DEEPIMPACT";
+		Weapon.UpSound "impact/select";
+		Weapon.SlotNumber 1;
+		Weapon.SelectionOrder 3000;
 		Stamina 2000;
+		DeepImpact.ClipCount 100;
+	}
+
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

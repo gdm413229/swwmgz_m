@@ -3,8 +3,27 @@
 
 Class Sparkster : SWWMWeapon
 {
+	int clipcount;
+
+	Property ClipCount : clipcount;
+
 	Default
 	{
+		Tag "$T_SPARKSTER";
+		Inventory.PickupMessage "$I_SPARKSTER";
+		Obituary "$O_SPARKSTER";
+		Weapon.SlotNumber 7;
+		Weapon.SelectionOrder 1600;
 		Stamina 80000;
+		Weapon.AmmoType1 "SparkUnit";
+		Weapon.AmmoGive1 1;
+		Sparkster.ClipCount 8;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

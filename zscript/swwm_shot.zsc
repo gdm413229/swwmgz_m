@@ -3,8 +3,62 @@
 
 Class Spreadgun : SWWMWeapon
 {
+	bool loaded;
+	Class<Ammo> loadammo, nextammo;
+
+	transient ui TextureID WeaponBox;
+	transient ui HUDFont mTewiFont;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Blackmann");
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
+		for ( int i=0; i<7; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+		return loaded;
+	}
+
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+		{
+			if ( loaded ) return true;
+			for ( int i=0; i<7; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+			return false;
+		}
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override bool UsesAmmo( Class<Ammo> kind )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
+		for ( int i=0; i<7; i++ ) if ( kind is types[i] ) return true;
+		return false;
+	}
+
 	Default
 	{
+		Tag "$T_SPREADGUN";
+		Inventory.PickupMessage "$I_SPREADGUN";
+		Obituary "$O_SPREADGUN";
+		Weapon.UpSound "spreadgun/select";
+		Weapon.SlotNumber 3;
+		Weapon.SelectionOrder 2400;
+		Weapon.AmmoType1 "RedShell";
+		Weapon.AmmoGive1 1;
 		Stamina 10000;
+	}
+
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

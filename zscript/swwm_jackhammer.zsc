@@ -3,8 +3,38 @@
 
 Class PusherWeapon : SWWMWeapon
 {
+	int chargelevel;
+
+	transient ui TextureID WeaponBox;
+	transient ui HUDFont mTewiFont;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Locke");
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		return true;
+	}
+
 	Default
 	{
+		Tag "$T_PUSHER";
+		Inventory.PickupMessage "$I_PUSHER";
+		Obituary "$O_PUSHER";
+		Weapon.UpSound "pusher/select";
+		Weapon.SlotNumber 1;
+		Weapon.SelectionOrder 2800;
 		Stamina 5000;
+	}
+
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

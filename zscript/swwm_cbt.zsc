@@ -7,8 +7,30 @@ Class WallbusterReloadMenu : GenericMenu
 
 Class Wallbuster : SWWMWeapon
 {
+	Class<Ammo> loaded[25];
+	bool fired[25];
+	int rotation[6];
+
+	override bool UsesAmmo( Class<Ammo> kind )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		for ( int i=0; i<4; i++ ) if ( kind is types[i] ) return true;
+		return false;
+	}
+
 	Default
 	{
+		Tag "$T_WALLBUSTER";
+		Inventory.PickupMessage "$I_WALLBUSTER";
+		Obituary "$O_WALLBUSTER";
+		Weapon.SlotNumber 4;
+		Weapon.SelectionOrder 2200;
 		Stamina 15000;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

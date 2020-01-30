@@ -1,3 +1,9 @@
+vec4 ProcessLight( vec4 color )
+{
+	vec3 bright = texture(brighttex,vTexCoord.st).rgb;
+	return vec4(min(color.rgb+bright,1.),color.a);
+}
+
 vec4 ProcessTexel()
 {
 	vec4 base = getTexel(vTexCoord.st);

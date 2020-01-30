@@ -433,7 +433,7 @@ You're fucking invincible for a total of 90 seconds, cannot be toggled.
 ### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator
 
 Each of these you pick up increase ammo capacity by half of its base value, up
-to 10x, and also give you some extra ammo like a normal backpack.
+to 5x, and also give you some extra ammo like a normal backpack.
 
 ### Universal Ammo Fabricator, replaces Mana / Krater of Might in Hexen
 
@@ -441,7 +441,7 @@ Separated into four tiers, they work pretty much like the ammo cubes in Doom
 Tournament, except they try to "balance" the total ammo given. The max tier
 fabricator is the only one capable of producing ammo for superweapons.
 
-### Lamp, replaces Lite-Amp, Torch
+### Lamp, replaces Lite-Amp, Torch, Mystic Ambit Incant
 
 A floating lamp companion, may attract moths. The moths will disperse and
 attack nearby enemies when toggling it off.

@@ -625,6 +625,16 @@ Class SWWMNothing : Actor
 	}
 }
 
+Class SWWMItemFog : Actor
+{
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
 // Bullet trails from DT
 Class WaterHit
 {
@@ -1041,6 +1051,17 @@ Class SWWMHandler : EventHandler
 			lastcombat = AddOneliner("fightstart",10);
 	}
 
+	override void WorldThingDied( WorldEvent e )
+	{
+		if ( (e.Thing.default.bBOSS && !Random[GoldDrop](0,2)) || (e.Thing.default.bBOSSDEATH && !Random[GoldDrop](0,6)) )
+		{
+			let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+			double ang = FRandom[SpareShells](0,360);
+			g.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](.4,.8);
+			g.vel.z = FRandom[SpareShells](2.,4.);
+		}
+	}
+
 	override void WorldThingDamaged( WorldEvent e )
 	{
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
@@ -1169,18 +1190,201 @@ Class SWWMHandler : EventHandler
 
 	override void CheckReplacement( ReplaceEvent e )
 	{
-		if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
+		// shell types (sorted by rarity
+		static const Class<Actor> redpool[] = {"RedShell","RedShell2","RedShell4","RedShell8","RedShell12","RedShell16"};
+		static const Class<Actor> greenpool[] = {"GreenShell","GreenShell2","GreenShell4","GreenShell8","GreenShell12"};
+		static const Class<Actor> whitepool[] = {"WhiteShell","WhiteShell2","WhiteShell4","WhiteShell8"};
+		static const Class<Actor> purplepool[] = {"PurpleShell","PurpleShell2","PurpleShell4"};
+		static const Class<Actor> bluepool[] = {"BlueShell","BlueShell2","BlueShell4","BlueShell8"};
+		static const Class<Actor> blackpool[] = {"BlackShell","BlackShell2","BlackShell4"};
+		if ( (e.Replacee is 'ItemFog') ) e.Replacement = 'SWWMItemFog';
+		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') ) e.Replacement = 'PusherWeapon';
+		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
+		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
+		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') ) e.Replacement = 'Spreadgun';
+		else if ( (e.Replacee is 'SuperShotgun') || (e.Replacee is 'MWeapFrost') ) e.Replacement = 'Wallbuster';
+		else if ( e.Replacee is 'Crossbow' )
+		{
+			if ( Random[Replacements](0,2) ) e.Replacement = 'Spreadgun';
+			else e.Replacement = 'Wallbuster';
+		}
+		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeapHammer') ) e.Replacement = 'Eviscerator';
+		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'CWeapFlame') ) e.Replacement = 'Hellblazer';
+		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') )
+		{
+			if ( Random[Replacements](0,2) ) e.Replacement = 'Sparkster';
+			else e.Replacement = 'SilverBullet';
+		}
+		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = 'Sparkster';
+		else if ( e.Replacee is 'FWeaponPiece3' ) e.Replacement = 'SilverBullet';
 		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') )
 		{
-			/*if ( !Random[Replacements](0,2) ) e.Replacement = 'Ynykron';
-			else */e.Replacement = 'CandyGun';
+			if ( !Random[Replacements](0,2) ) e.Replacement = 'Ynykron';
+			else e.Replacement = 'CandyGun';
 		}
-		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'CandyGun';
+		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
+		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
+		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') || (e.Replacee is 'ArtiPoisonBag') )
+		{
+			switch( Random[Replacement](0,6) )
+			{
+			case 0:
+			case 1:
+			case 2:
+				e.Replacement = redpool[Random[Replacement](0,2)];
+				break;
+			case 3:
+			case 4:
+				e.Replacement = greenpool[Random[Replacement](0,2)];
+				break;
+			case 5:
+				e.Replacement = whitepool[Random[Replacement](0,1)];
+				break;
+			case 6:
+				e.Replacement = purplepool[0];
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
+		{
+			switch( Random[Replacement](0,10) )
+			{
+			case 0:
+			case 1:
+			case 2:
+				e.Replacement = redpool[Random[Replacement](2,3)];
+				break;
+			case 3:
+			case 4:
+				e.Replacement = greenpool[Random[Replacement](2,3)];
+				break;
+			case 5:
+			case 6:
+				e.Replacement = whitepool[Random[Replacement](1,2)];
+				break;
+			case 7:
+			case 8:
+				e.Replacement = purplepool[Random[Replacement](0,2)];
+				break;
+			case 9:
+				e.Replacement = bluepool[Random[Replacement](0,2)];
+				break;
+			case 10:
+				e.Replacement = blackpool[0];
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
+		{
+			switch( Random[Replacement](0,14) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				e.Replacement = redpool[Random[Replacement](3,5)];
+				break;
+			case 4:
+			case 5:
+			case 6:
+				e.Replacement = greenpool[Random[Replacement](3,4)];
+				break;
+			case 7:
+			case 8:
+			case 9:
+				e.Replacement = whitepool[Random[Replacement](2,3)];
+				break;
+			case 10:
+			case 11:
+				e.Replacement = purplepool[Random[Replacement](1,2)];
+				break;
+			case 12:
+			case 13:
+				e.Replacement = bluepool[Random[Replacement](2,3)];
+				break;
+			case 14:
+				e.Replacement = blackpool[Random[Replacement](0,2)];
+				break;
+			}
+		}
+		else if ( e.Replacee == 'ClipBox' )
+		{
+			if ( Random[Replacements](0,2) ) e.Replacement = 'EvisceratorShell';
+			else e.Replacement = 'EvisceratorSixPack';
+		}
+		else if ( e.Replacee == 'BlasterAmmo' ) e.Replacement = 'EvisceratorShell';
+		else if ( e.Replacee == 'BlasterHefty' ) e.Replacement = 'EvisceratorSixPack';
+		else if ( (e.Replacee == 'RocketAmmo') || (e.Replacee == 'PhoenixRodAmmo') || (e.Replacee == 'MaceAmmo') )
+		{
+			switch ( Random[Replacements](0,9) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				e.Replacement = 'HellblazerMissiles';
+				break;
+			case 4:
+			case 5:
+			case 6:
+				e.Replacement = 'HellblazerCrackshots';
+				break;
+			case 7:
+			case 8:
+				e.Replacement = 'HellblazerRavagers';
+				break;
+			case 9:
+				e.Replacement = 'HellblazerWarheads';
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'RocketBox') || (e.Replacee == 'PhoenixRodHefty') || (e.Replacee == 'MaceHefty') )
+		{
+			switch ( Random[Replacements](0,9) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				e.Replacement = 'HellblazerMissileMag';
+				break;
+			case 4:
+			case 5:
+			case 6:
+				e.Replacement = 'HellblazerCrackshotMag';
+				break;
+			case 7:
+			case 8:
+				e.Replacement = 'HellblazerRavagerMag';
+				break;
+			case 9:
+				e.Replacement = 'HellblazerWarheadMag';
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'Cell') || (e.Replacee == 'SkullRodAmmo') )
+		{
+			if ( Random[Replacements](0,3) ) e.Replacement = 'SparkUnit';
+			else e.Replacement = 'SilverBulletAmmo';
+		}
+		else if ( e.Replacee == 'ArtiTeleport' )
+		{
+			if ( Random[Replacements](0,2) ) e.Replacement = 'SWWMNothing';
+			else e.Replacement = 'GoldShell';
+		}
 		else if ( (e.Replacee == 'CellPack') || (e.Replacee == 'SkullRodHefty') )
 		{
-			/*if ( Random[Replacements](0,2) ) e.Replacement = 'SilverBulletAmmo';
-			else */e.Replacement = 'CandyGunAmmo';
+			if ( Random[Replacements](0,2) ) e.Replacement = 'SilverBulletAmmo';
+			else e.Replacement = 'CandyGunAmmo';
 		}
+		else if ( e.Replacee == 'Mana1' ) e.Replacement = 'FabricatorTier1';
+		else if ( e.Replacee == 'Mana2' ) e.Replacement = 'FabricatorTier2';
+		else if ( e.Replacee == 'Mana3' ) e.Replacement = 'FabricatorTier3';
+		else if ( e.Replacee == 'ArtiBoostMana' ) e.Replacement = 'FabricatorTier4';
+		else if ( (e.Replacee == 'Backpack') || (e.Replacee == 'BagOfHolding') || (e.Replacee == 'ArtiPork') ) e.Replacement = 'HammerspaceEmbiggener';
+		else if ( (e.Replacee == 'FWeaponPiece1') || (e.Replacee == 'FWeaponPiece2')
+			|| (e.Replacee == 'CWeaponPiece1') || (e.Replacee == 'CWeaponPiece3')
+			|| (e.Replacee == 'MWeaponPiece2') || (e.Replacee == 'MWeaponPiece3') ) e.Replacement = 'SWWMNothing';
 	}
 
 	override void NetworkProcess( ConsoleEvent e )
@@ -1219,9 +1423,11 @@ Class SWWMHandler : EventHandler
 			Class<Inventory> item = e.Name.Mid(10);
 			if ( !item ) return;
 			let def = GetDefaultByType(item);
-			if ( players[e.Args[1]].mo.GiveInventory(item,1) )
+			int amt = ((item is 'Ammo')&&Ammo(def).default.DropAmount)?Ammo(def).DropAmount:def.Amount;
+			int cap = min(amt,players[e.Args[1]].mo.CountInv(item));
+			if ( players[e.Args[1]].mo.GiveInventory(item,amt) )
 			{
-				players[e.Args[0]].mo.TakeInventory(item,1);
+				players[e.Args[0]].mo.TakeInventory(item,amt);
 				// add to history
 				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],def.GetTag());
 				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],def.GetTag());
@@ -1249,7 +1455,7 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			let i = players[e.Args[0]].mo.FindInventory(item);
 			if ( !i ) return;
-			let drop = players[e.Args[0]].mo.DropInventory(i,i.default.Amount);
+			let drop = players[e.Args[0]].mo.DropInventory(i,((i is 'Ammo')&&Ammo(i).default.DropAmount)?Ammo(i).default.DropAmount:i.default.Amount);
 			// add some random velocity so multiple drops don't get bunched together
 			if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
 		}

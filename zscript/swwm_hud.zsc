@@ -190,7 +190,12 @@ Class SWWMStatusBar : BaseStatusBar
 					bool dummy;
 					int slot;
 					if ( inv is 'Weapon' ) [dummy, slot] = CPlayer.weapons.LocateWeapon(Weapon(inv).GetClass());
-					if ( (slot == (i%10)) && (!Weapon(inv).Ammo1 || (Weapon(inv).Ammo1.Amount > 0)) )
+					if ( slot != (i%10) ) continue;
+					// CheckAmmo can't be called from ui, so we have to improvise
+					// for SWWM weapons I made a function for this at least
+					if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).ReportHUDAmmo() )
+						hasammo = true;
+					else if ( !(inv is 'SWWMWeapon') && ((!Weapon(inv).Ammo1 || (Weapon(inv).Ammo1.Amount > 0)) || (Weapon(inv).Ammo2 && (Weapon(inv).Ammo2.Amount > 0))) )
 						hasammo = true;
 				}
 				if ( !hasammo ) ncolor = Font.CR_RED;
@@ -231,7 +236,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( ht > 500 )
 		{
 			hw = int(min(ht-500,500)*0.2);
-			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
 		}
 		int hcolor = Font.CR_RED;
 		if ( ht > 500 ) hcolor = Font.CR_GOLD;

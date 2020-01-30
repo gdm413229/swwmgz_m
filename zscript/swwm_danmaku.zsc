@@ -5,6 +5,19 @@ Class Eviscerator : SWWMWeapon
 {
 	Default
 	{
+		Tag "$T_EVISCERATOR";
+		Inventory.PickupMessage "$I_EVISCERATOR";
+		Obituary "$O_EVISCERATOR";
+		Weapon.SlotNumber 5;
+		Weapon.SelectionOrder 2000;
 		Stamina 25000;
+		Weapon.AmmoType1 "EvisceratorShell";
+		Weapon.AmmoGive1 10;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

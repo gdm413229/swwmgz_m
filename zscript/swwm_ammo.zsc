@@ -1,5 +1,142 @@
 // All the ammo items go here
 
+// Common code for ammo division
+Mixin Class SWWMAmmo
+{
+	private Inventory DoDrop( Class<Inventory> type )
+	{
+		let copy = Inventory(Spawn(type,Owner.Pos,NO_REPLACE));
+		if ( !copy ) return null;
+		copy.MaxAmount = MaxAmount;
+		copy.DropTime = 30;
+		copy.bSpecial = copy.bSolid = false;
+		copy.SetOrigin(Owner.Vec3Offset(0,0,10.),false);
+		copy.Angle = Owner.Angle;
+		copy.VelFromAngle(5.);
+		copy.Vel.Z = 1.;
+		copy.Vel += Owner.Vel;
+		copy.bNoGravity = false;
+		copy.ClearCounters();
+		copy.OnDrop(Owner);
+		copy.vel += (RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),Owner.angle),FRandom[Junk](2.,5.));
+		return copy;
+	}
+
+	private bool CmpAmmo( Class<Ammo> a, Class<Ammo> b )
+	{
+		let amta = GetDefaultByType(a).Amount;
+		let amtb = GetDefaultByType(b).Amount;
+		return (amta < amtb);
+	}
+
+	override inventory CreateTossable( int amt )
+	{
+		if ( bUndroppable || bUntossable || !Owner || (Amount <= 0) || (amt == 0) )
+			return null;
+		// cap
+		amt = min(amount,amt);
+		// enumerate all subclasses
+		Array<Class<Ammo> > ammotypes;
+		ammotypes.Clear();
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			if ( AllActorClasses[i] is GetParentAmmo() )
+				ammotypes.Push((Class<Ammo>)(AllActorClasses[i]));
+		}
+		// sort from largest to smallest
+		for ( int i=0; i<ammotypes.Size(); i++ )
+		{
+			int j = 1;
+			while ( j < ammotypes.Size() )
+			{
+				int k = j;
+				while ( (k > 0) && CmpAmmo(ammotypes[k-1],ammotypes[k]) )
+				{
+					Class<Ammo> tmp = ammotypes[k];
+					ammotypes[k] = ammotypes[k-1];
+					ammotypes[k-1] = tmp;
+					k--;
+				}
+				j++;
+			}
+		}
+		// perform subdivision
+		Inventory last = null;
+		while ( amt > 0 )
+		{
+			for ( int i=0; i<ammotypes.Size(); i++ )
+			{
+				let def = GetDefaultByType(ammotypes[i]);
+				if ( amt >= def.Amount )
+				{
+					last = DoDrop(ammotypes[i]);
+					amt -= def.Amount;
+					Amount -= def.Amount;
+					break;
+				}
+			}
+		}
+		return last;
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		// drop excess ammo
+		if ( (item is 'Ammo') && (Ammo(item).GetParentAmmo() == GetParentAmmo()) )
+		{
+			int excess = Amount+item.Amount;
+			if ( excess > MaxAmount ) excess -= MaxAmount;
+			if ( excess < item.Amount )
+			{
+				// enumerate all subclasses
+				Array<Class<Ammo> > ammotypes;
+				ammotypes.Clear();
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					if ( AllActorClasses[i] is GetParentAmmo() )
+						ammotypes.Push((Class<Ammo>)(AllActorClasses[i]));
+				}
+				// sort from largest to smallest
+				for ( int i=0; i<ammotypes.Size(); i++ )
+				{
+					int j = 1;
+					while ( j < ammotypes.Size() )
+					{
+						int k = j;
+						while ( (k > 0) && CmpAmmo(ammotypes[k-1],ammotypes[k]) )
+						{
+							Class<Ammo> tmp = ammotypes[k];
+							ammotypes[k] = ammotypes[k-1];
+							ammotypes[k-1] = tmp;
+							k--;
+						}
+						j++;
+					}
+				}
+				// drop spares
+				Inventory last;
+				while ( excess > 0 )
+				{
+					for ( int i=0; i<ammotypes.Size(); i++ )
+					{
+						let def = GetDefaultByType(ammotypes[i]);
+						if ( excess >= def.Amount )
+						{
+							double ang = FRandom[Junk](0,360);
+							last = DoDrop(ammotypes[i]);
+							last.SetOrigin(item.pos,false);
+							last.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](.2,.5);
+							excess -= 16;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return Super.HandlePickup(item);
+	}
+}
+
 // ============================================================================
 // Spreadgun / Wallbuster ammo
 // ============================================================================
@@ -9,7 +146,7 @@ Mixin Class SWWMShellAmmo
 {
 	override string PickupMessage()
 	{
-		String tagstr = "$"..GetParentAmmo().GetClassName();
+		String tagstr = "$T_"..GetParentAmmo().GetClassName();
 		tagstr.MakeUpper();
 		if ( Amount > 1 )
 		{
@@ -18,40 +155,29 @@ Mixin Class SWWMShellAmmo
 		}
 		return StringTable.Localize(tagstr);
 	}
-
-	override bool HandlePickup( Inventory item )
-	{
-		// drop unwanted shells
-		if ( (item is 'Ammo') && (Ammo(item).GetParentAmmo() == GetParentAmmo()) )
-		{
-			int excess = Amount+item.Amount;
-			if ( excess > MaxAmount ) excess -= MaxAmount;
-			if ( excess < item.Amount )
-			{
-				// drop spares
-				for ( int i=0; i<excess; i++ )
-				{
-					let s = Spawn(GetParentAmmo(),item.pos);
-					double ang = FRandom[SpareShells](0,360);
-					s.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](1.,3.);
-					s.vel.z = FRandom[SpareShells](2,5);
-				}
-			}
-		}
-		return Super.HandlePickup(item);
-	}
 }
 
 Class RedShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_REDSHELLS";
 		Stamina 500;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 60;
-		Ammo.BackpackAmount 6;
+		Inventory.MaxAmount 48;
+		Ammo.BackpackAmount 8;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class RedShell2 : RedShell
@@ -68,13 +194,6 @@ Class RedShell4 : RedShell
 		Inventory.Amount 4;
 	}
 }
-Class RedShell6 : RedShell
-{
-	Default
-	{
-		Inventory.Amount 6;
-	}
-}
 Class RedShell8 : RedShell
 {
 	Default
@@ -89,17 +208,35 @@ Class RedShell12 : RedShell
 		Inventory.Amount 12;
 	}
 }
+Class RedShell16 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 16;
+	}
+}
 
 Class GreenShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_GREENSHELLS";
 		Stamina 600;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 48;
+		Inventory.MaxAmount 40;
 		Ammo.BackpackAmount 4;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class GreenShell2 : GreenShell
@@ -116,31 +253,42 @@ Class GreenShell4 : GreenShell
 		Inventory.Amount 4;
 	}
 }
-Class GreenShell6 : GreenShell
-{
-	Default
-	{
-		Inventory.Amount 6;
-	}
-}
 Class GreenShell8 : GreenShell
 {
 	Default
 	{
-		Inventory.Amount 6;
+		Inventory.Amount 8;
+	}
+}
+Class GreenShell12 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 12;
 	}
 }
 
 Class WhiteShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_WHITESHELLS";
 		Stamina 900;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 24;
+		Inventory.MaxAmount 20;
 		Ammo.BackpackAmount 2;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class WhiteShell2 : WhiteShell
@@ -157,24 +305,35 @@ Class WhiteShell4 : WhiteShell
 		Inventory.Amount 4;
 	}
 }
-Class WhiteShell6 : WhiteShell
+Class WhiteShell8 : WhiteShell
 {
 	Default
 	{
-		Inventory.Amount 6;
+		Inventory.Amount 8;
 	}
 }
 
 Class BlueShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_BLUESHELLS";
 		Stamina 700;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 30;
-		Ammo.BackpackAmount 3;
+		Inventory.MaxAmount 24;
+		Ammo.BackpackAmount 4;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class BlueShell2 : BlueShell
@@ -191,24 +350,35 @@ Class BlueShell4 : BlueShell
 		Inventory.Amount 4;
 	}
 }
-Class BlueShell6 : BlueShell
+Class BlueShell8 : BlueShell
 {
 	Default
 	{
-		Inventory.Amount 6;
+		Inventory.Amount 8;
 	}
 }
 
 Class BlackShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_BLACKSHELLS";
 		Stamina 1000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 20;
+		Inventory.MaxAmount 12;
 		Ammo.BackpackAmount 2;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class BlackShell2 : BlackShell
@@ -228,12 +398,25 @@ Class BlackShell4 : BlackShell
 
 Class PurpleShell : Ammo
 {
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_PURPLESHELLS";
 		Stamina 800;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 24;
+		Inventory.MaxAmount 20;
 		Ammo.BackpackAmount 4;
+		Ammo.DropAmount 4;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 Class PurpleShell2 : PurpleShell
@@ -250,24 +433,29 @@ Class PurpleShell4 : PurpleShell
 		Inventory.Amount 4;
 	}
 }
-Class PurpleShell6 : PurpleShell
-{
-	Default
-	{
-		Inventory.Amount 6;
-	}
-}
 
 Class GoldShell : Ammo
 {
 	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
 
 	Default
 	{
+		Tag "$T_GOLDSHELLS";
 		Stamina 120000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 6;
+		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
+		Ammo.DropAmount 1;
+		+COUNTITEM;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
@@ -277,12 +465,25 @@ Class GoldShell : Ammo
 
 Class EvisceratorShell : Ammo
 {
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_EVISHELLS";
+		Inventory.PickupMessage "$T_EVISHELL";
 		Stamina 2500;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 60;
+		Inventory.MaxAmount 30;
 		Ammo.BackpackAmount 6;
+		Ammo.DropAmount 6;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
@@ -290,6 +491,7 @@ Class EvisceratorSixPack : EvisceratorShell
 {
 	Default
 	{
+		Inventory.PickupMessage "$I_EVISHELLPAK";
 		Inventory.Amount 6;
 	}
 }
@@ -300,45 +502,129 @@ Class EvisceratorSixPack : EvisceratorShell
 
 Class HellblazerMissiles : Ammo
 {
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_HELLMISSILES";
+		Inventory.PickupMessage "$T_HELLMISSILE";
 		Stamina 6000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 12;
-		Ammo.BackpackAmount 4;
+		Inventory.MaxAmount 60;
+		Ammo.BackpackAmount 18;
+		Ammo.DropAmount 6;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerMissileMag : HellblazerMissiles
+{
+	Default
+	{
+		Inventory.PickupMessage "$T_HELLMISSILEMAG";
+		Inventory.Amount 6;
 	}
 }
 
 Class HellblazerCrackshots : Ammo
 {
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_HELLCLUSTERS";
+		Inventory.PickupMessage "$T_HELLCLUSTER";
 		Stamina 8000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
-		Ammo.BackpackAmount 2;
+		Inventory.MaxAmount 24;
+		Ammo.BackpackAmount 6;
+		Ammo.DropAmount 3;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerCrackshotMag : HellblazerCrackshots
+{
+	Default
+	{
+		Inventory.PickupMessage "$T_HELLCLUSTERMAG";
+		Inventory.Amount 3;
 	}
 }
 
 Class HellblazerRavagers : Ammo
 {
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_HELLBURNINATORS";
+		Inventory.PickupMessage "$T_HELLBURNINATOR";
 		Stamina 12000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 4;
-		Ammo.BackpackAmount 1;
+		Inventory.MaxAmount 9;
+		Ammo.BackpackAmount 3;
+		Ammo.DropAmount 3;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerRavagerMag : HellblazerRavagers
+{
+	Default
+	{
+		Inventory.PickupMessage "$T_HELLBURNINATORMAG";
+		Inventory.Amount 3;
 	}
 }
 
 Class HellblazerWarheads : Ammo
 {
+	Mixin SWWMAmmo;
+
 	Default
 	{
+		Tag "$T_HELLNUKES";
+		Inventory.PickupMessage "$T_HELLNUKE";
 		Stamina 25000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 2;
+		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
+		Ammo.DropAmount 2;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerWarheadMag : HellblazerWarheads
+{
+	Default
+	{
+		Inventory.PickupMessage "$T_HELLNUKEMAG";
+		Inventory.Amount 2;
 	}
 }
 
@@ -350,10 +636,21 @@ Class SparkUnit : Ammo
 {
 	Default
 	{
+		Tag "$T_SPARKUNIT";
+		Inventory.PickupMessage "$T_SPARKUNIT";
 		Stamina 20000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 20;
-		Ammo.BackpackAmount 2;
+		Inventory.MaxAmount 8;
+		Ammo.BackpackAmount 1;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
@@ -365,10 +662,21 @@ Class SilverBulletAmmo : Ammo
 {
 	Default
 	{
+		Tag "$T_XSBMAG";
+		Inventory.PickupMessage "$T_XSBMAG";
 		Stamina 6000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 12;
+		Inventory.MaxAmount 5;
 		Ammo.BackpackAmount 1;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
@@ -384,8 +692,9 @@ Class CandyGunAmmo : Ammo
 		Inventory.PickupMessage "$T_CANDYMAG";
 		Stamina 80000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
+		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -405,7 +714,7 @@ Class CandyGunSpares : Ammo
 		Stamina 150000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
-		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 4;
 	}
 }
 
@@ -417,9 +726,220 @@ Class YnykronAmmo : Ammo
 {
 	Default
 	{
+		Tag "$T_YNYKRONAMMO";
+		Inventory.PickupMessage "$T_YNYKRONAMMO";
 		Stamina 400000;
 		Inventory.Amount 1;
-		Inventory.MaxAmount 2;
+		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// ============================================================================
+// Ammo fabricator
+// ============================================================================
+
+Class AmmoFabricator : Inventory abstract
+{
+	int budget;
+
+	Property Budget : budget;
+
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Fabricator");
+		SWWMLoreLibrary.Add(other.player,"Cyrus");
+		return Super.CreateCopy(other);
+	}
+
+	Default
+	{
+		+INVENTORY.INVBAR;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class FabricatorTier1 : AmmoFabricator
+{
+	Default
+	{
+		Tag "$T_FABRICATOR1";
+		Inventory.PickupMessage "$T_FABRICATOR1";
+		Inventory.MaxAmount 30;
+		AmmoFabricator.Budget 5000;
+		Stamina 3000;
+	}
+}
+Class FabricatorTier2 : AmmoFabricator
+{
+	Default
+	{
+		Tag "$T_FABRICATOR2";
+		Inventory.PickupMessage "$T_FABRICATOR2";
+		Inventory.MaxAmount 20;
+		AmmoFabricator.Budget 20000;
+		Stamina 12000;
+	}
+}
+Class FabricatorTier3 : AmmoFabricator
+{
+	Default
+	{
+		Tag "$T_FABRICATOR3";
+		Inventory.PickupMessage "$T_FABRICATOR3";
+		Inventory.MaxAmount 10;
+		AmmoFabricator.Budget 500000;
+		Stamina 480000;
+	}
+}
+Class FabricatorTier4 : AmmoFabricator
+{
+	Default
+	{
+		Tag "$T_FABRICATOR4";
+		Inventory.PickupMessage "$T_FABRICATOR4";
+		Inventory.MaxAmount 5;
+		AmmoFabricator.Budget -1;
+		Stamina 1920000;
+	}
+}
+
+// ============================================================================
+// Hammerspace embiggener
+// ============================================================================
+
+Class HammerspaceEmbiggener : Inventory
+{
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Cyrus");
+		// Find every unique type of ammoitem. Give it to the player if
+		// he doesn't have it already, and increase its maximum capacity.
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let type = (class<Ammo>)(AllActorClasses[i]);
+			if ( !type || (type.GetParentClass() != 'Ammo') ) continue;
+			// check that it's for a valid weapon
+			bool isvalid = false;
+			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			{
+				let type2 = (class<Weapon>)(AllActorClasses[j]);
+				if ( !type2 ) continue;
+				let rep = GetReplacement(type2);
+				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+				readonly<Weapon> weap = GetDefaultByType(type2);
+				if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+				if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
+				{
+					isvalid = true;
+					break;
+				}
+				if ( (weap.AmmoType1 == type) || (weap.AmmoType2 == type) )
+				{
+					isvalid = true;
+					break;
+				}
+			}
+			if ( !isvalid ) continue;
+			let ammoitem = Ammo(other.FindInventory(type));
+			int amount = GetDefaultByType(type).BackpackAmount;
+			// extra ammo in baby mode and nightmare mode
+			if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
+			if ( amount < 0 ) amount = 0;
+			if ( !ammoitem )
+			{
+				// The player did not have the ammoitem. Add it.
+				ammoitem = Ammo(Spawn(type));
+				ammoitem.Amount = amount;
+				if ( ammoitem.BackpackMaxAmount != ammoitem.default.MaxAmount )
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
+					ammoitem.Amount = ammoitem.MaxAmount;
+				ammoitem.AttachToOwner(other);
+			}
+			else
+			{
+				// The player had the ammoitem. Give some more.
+				if ( ammoitem.BackpackMaxAmount != ammoitem.default.MaxAmount )
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				if ( ammoitem.Amount < ammoitem.MaxAmount )
+				{
+					ammoitem.Amount += amount;
+					if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
+						ammoitem.Amount = ammoitem.MaxAmount;
+				}
+			}
+		}
+		return Inventory.CreateCopy(other);
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		bool res = Super.HandlePickup(item);
+		if ( item.GetClass() == GetClass() )
+		{
+			// readjust ammo values to new capacity
+			for ( Inventory i=Owner.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'Ammo') ) continue;
+				if ( Ammo(i).BackpackMaxAmount != i.default.MaxAmount )
+					i.MaxAmount = int(i.Default.MaxAmount*(1+self.Amount/2.));
+				int amount = Ammo(i).BackpackAmount;
+				if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
+				i.Amount += amount;
+				if ( (i.Amount > i.MaxAmount) && !sv_unlimited_pickup )
+					i.Amount = i.MaxAmount;
+			}
+		}
+		return res;
+	}
+
+	override void DetachFromOwner()
+	{
+		// reset upgrade
+		for ( Inventory i=Owner.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'Ammo') ) continue;
+			i.MaxAmount = i.Default.MaxAmount;
+			if ( i.Amount > i.MaxAmount )
+				i.Amount = i.MaxAmount;
+		}
+	}
+
+	Default
+	{
+		Tag "$T_EMBIGGENER";
+		Inventory.PickupMessage "$T_EMBIGGENER";
+		Inventory.MaxAmount 8;
+		Inventory.InterHubAmount 8;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }

@@ -16,6 +16,10 @@ Class Demolitionist : PlayerPawn
 
 	transient CVar myvoice, mute;
 
+	SWWMStats mystats;
+	int cairtime;
+	Vector3 oldpos;
+
 	Default
 	{
 		Speed 1;
@@ -36,6 +40,159 @@ Class Demolitionist : PlayerPawn
 		+DONTGIB;
 		+NOICEDEATH;
 	}
+	// oh yay, more cheat modification
+	override void CheatGive( String name, int amount )
+	{
+		if ( !player.mo || (player.health <= 0) ) return;
+		int giveall = ALL_NO;
+		if ( name ~== "all" ) giveall = ALL_YES;
+		else if (name ~== "everything") giveall = ALL_YESYES;
+		if ( name ~== "health" )
+		{
+			if ( amount > 0 )
+			{
+				health += amount;
+				player.health = health;
+			}
+			else player.health = health = GetMaxHealth(true);
+		}
+		if ( giveall || (name ~== "backpack") )
+		{
+			// Select the correct type of backpack based on the game
+			let type = (class<Inventory>)(gameinfo.backpacktype);
+			if ( type ) GiveInventory(type,1,true);
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "ammo") )
+		{
+			// Find every unique type of ammo. Give it to the player if
+			// he doesn't have it already, and set each to its maximum.
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<Ammo>)(AllActorClasses[i]);
+				if ( !type || (type.GetParentClass() != "Ammo") )
+					continue;
+				// Only give if it's for a valid weapon, unless using "give everything"
+				bool isvalid = false;
+				for ( int j=0; j<AllActorClasses.Size(); j++ )
+				{
+					let type2 = (class<Weapon>)(AllActorClasses[j]);
+					if ( !type2 ) continue;
+					let rep = GetReplacement(type2);
+					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+					readonly<Weapon> weap = GetDefaultByType(type2);
+					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
+					if ( (weap.AmmoType1 == type) || (weap.AmmoType2 == type) )
+					{
+						isvalid = true;
+						break;
+					}
+				}
+				if ( !isvalid ) continue;
+				let ammoitem = FindInventory(type);
+				if ( !ammoitem )
+				{
+					ammoitem = Inventory(Spawn(type));
+					ammoitem.AttachToOwner(self);
+					ammoitem.Amount = ammoitem.MaxAmount;
+				}
+				else if ( ammoitem.Amount < ammoitem.MaxAmount )
+					ammoitem.Amount = ammoitem.MaxAmount;
+			}
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "armor") )
+		{
+			// Give only subclasses of SWWMArmor
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (Class<SWWMArmor>)(AllActorClasses[i]);
+				if ( !type || (type == 'SWWMArmor') ) continue;
+				if ( GetReplacement(type) == type )
+				{
+					let item = Inventory(Spawn(type));
+					item.ClearCounters();	// don't increase item counts
+					item.Amount = item.MaxAmount;
+					if ( !item.CallTryPickup(self) ) item.Destroy();
+				}
+			}
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "keys") )
+		{
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				if ( !(AllActorClasses[i] is "Key") ) continue;
+				let keyitem = GetDefaultByType(AllActorClasses[i]);
+				if ( keyitem.special1 )
+				{
+					let item = Inventory(Spawn(AllActorClasses[i]));
+					if ( !item.CallTryPickup(self) ) item.Destroy();
+				}
+			}
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "weapons") )
+		{
+			let savedpending = player.PendingWeapon;
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<Weapon>)(AllActorClasses[i]);
+				if ( !type || (type == "Weapon") ) continue;
+				// Don't give replaced weapons unless the replacement was done by Dehacked.
+				let rep = GetReplacement(type);
+				if ( (rep == type) || (rep is "DehackedPickup") )
+				{
+					// Give the weapon only if it is set in a weapon slot.
+					if ( !player.weapons.LocateWeapon(type) ) continue;
+					readonly<Weapon> def = GetDefaultByType(type);
+					if ( (giveall == ALL_YESYES) || !def.bCheatNotWeapon )
+						GiveInventory(type,1,true);
+				}
+			}
+			player.PendingWeapon = savedpending;
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "artifacts") )
+		{
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<Inventory>)(AllActorClasses[i]);
+				if ( !type ) continue;
+				let def = GetDefaultByType (type);
+				if ( def.Icon.isValid() &&
+					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") )
+				{
+					// Do not give replaced items unless using "give everything"
+					if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )
+						GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
+				}
+			}
+			if ( !giveall ) return;
+		}
+		if ( giveall || (name ~== "puzzlepieces") )
+		{
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<PuzzleItem>)(AllActorClasses[i]);
+				if ( !type ) continue;
+				let def = GetDefaultByType(type);
+				if ( !def.Icon.isValid() ) continue;
+				// Do not give replaced items unless using "give everything"
+				if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )
+					GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
+			}
+			if ( !giveall ) return;
+		}
+		if ( giveall ) return;
+		let type = name;
+		if ( !type )
+		{
+			if ( PlayerNumber() == consoleplayer )
+				A_Log(String.Format("Unknown item \"%s\"\n",name));
+		}
+		else GiveInventory(type,amount,true);
+	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
 		if ( mod == 'Dash' ) return StringTable.Localize("$O_DASH");
@@ -55,6 +212,8 @@ Class Demolitionist : PlayerPawn
 	{
 		Super.PostBeginPlay();
 		dashfuel = 100.;
+		mystats = SWWMStats.Find(player);
+		oldpos = pos;
 	}
 	void A_Dash()
 	{
@@ -63,6 +222,7 @@ Class Demolitionist : PlayerPawn
 		player.vel = vel.xy;
 		if ( dashboost < 0.1 ) dashboost = 0.;
 		else dashboost *= .5;
+		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = 40;
 		fuelcooldown = max(60,fuelcooldown);
@@ -79,6 +239,7 @@ Class Demolitionist : PlayerPawn
 		{
 			dashboost *= (player.cmd.buttons&BT_JUMP)?.9:.4;
 		}
+		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
 		if ( ((dashfuel <= 0.) || (dashboost <= 0.)) )
 		{
@@ -91,26 +252,27 @@ Class Demolitionist : PlayerPawn
 		}
 		fuelcooldown = max(20,fuelcooldown);
 	}
-	override bool CanCollideWith( Actor other, bool passive )
-	{
-		if ( !InStateSequence(CurState,FindState("Dash")) ) return true;
-		if ( other.bSHOOTABLE )
-		{
-			A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
-			other.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
-			other.DamageMobj(self,self,int(max(10,vel.length())),'Dash',DMG_THRUSTLESS);
-			if ( other && (other.mass < LARGE_MASS) && !other.bDONTTHRUST )
-			{
-				other.vel += vel*(40./other.mass);
-				other.vel.z += vel.length()*(3./other.mass);
-			}
-		}
-		return true;
-	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( !player ) return;
+		double traveldist = level.Vec3Diff(oldpos,pos).length();
+		if ( waterlevel < 3 )
+		{
+			if ( !player.onground || bNoGravity )
+			{
+				cairtime++;
+				if ( cairtime > mystats.airtime ) mystats.airtime = cairtime;
+				mystats.airdist += traveldist;
+			}
+			else
+			{
+				cairtime = 0;
+				mystats.grounddist += traveldist;
+			}
+		}
+		if ( traveldist > mystats.topspeed ) mystats.topspeed = traveldist;
+		oldpos = pos;
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
@@ -129,6 +291,7 @@ Class Demolitionist : PlayerPawn
 					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.7);
 					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.4);
 				}
+				mystats.stompcount++;
 			}
 			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
 			if ( (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
@@ -162,6 +325,40 @@ Class Demolitionist : PlayerPawn
 				a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
 				a.vel -= vel*.5;
 			}
+			Vector3 dir = vel.unit();
+			double spd = vel.length();
+			// look for things we could potentially bump into
+			let bi = BlockThingsIterator.Create(self,200);
+			bool bumped = false;
+			while ( bi.Next() )
+			{
+				a = bi.Thing;
+				if ( !a || (a == self) || !a.bSHOOTABLE || a.bTHRUACTORS ) continue;
+				Vector3 diff = level.Vec3Diff(level.Vec3Offset(pos,vel),level.Vec3Offset(a.pos,a.vel));
+				if ( (abs(diff.x) > radius+a.radius) || (abs(diff.y) > radius+a.radius) ) continue;
+				if ( (diff.z > height) || (diff.z < -a.height) ) continue;
+				double moveang = atan2(dir.y,dir.x);
+				Vector3 sc = level.SphericalCoords(pos,a.pos,(moveang,0));
+				if ( abs(sc.x) > 45 ) continue;
+				// bosses and large monsters will stop the player
+				a.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+				if ( a.bDONTTHRUST || (a.Mass >= Mass*5) )
+				{
+					if ( bumped ) continue;
+					bumped = true;
+					A_QuakeEx(3,3,3,8,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+					A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					vel -= dir*(5+(spd*30/mass));
+					vel.z += 3+(spd*(20/mass));
+				}
+				Vector3 pushdir = Vec3To(a).unit()*0.2+dir*0.8;
+				if ( !a.bDONTTHRUST && (a.Mass < Mass*5) )
+				{
+					a.vel += pushdir*(12+(spd*80/max(50,a.mass)));
+					a.vel.z += 5+(spd*(50/max(50,a.mass)));
+				}
+				a.DamageMobj(self,self,int(15+spd*1.5),'Dash',DMG_THRUSTLESS);
+			}
 		}
 		else if ( InStateSequence(CurState,FindState("Jump")) )
 		{
@@ -179,6 +376,7 @@ Class Demolitionist : PlayerPawn
 	{
 		// lucky collar
 		if ( Health < 25 ) damage /= 4;
+		if ( source == self ) damage /= 2;
 		return lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 	}
 	override void CalcHeight()
@@ -231,6 +429,7 @@ Class Demolitionist : PlayerPawn
 			player.jumptics = -1;
 			SetStateLabel("Dash");
 			A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
+			mystats.dashcount++;
 		}
 	}
 	override void CheckJump()
@@ -279,6 +478,7 @@ Class Demolitionist : PlayerPawn
 					boostcooldown = 20;
 					vel.z += jumpvelz+clamp(-pvelz,0.,30.);
 					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
+					mystats.boostcount++;
 				}
 				else
 				{
@@ -447,13 +647,13 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		if ( lastdamage > 60 )
+		if ( lastdamage > 90 )
 		{
 			A_StartSound("*pain25",CHAN_VOICE);
 			if ( mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
-		else if ( lastdamage > 40 )
+		else if ( lastdamage > 30 )
 		{
 			A_StartSound("*pain50",CHAN_VOICE);
 			if ( mute && myvoice && (mute.GetInt() < 4) )
@@ -555,7 +755,7 @@ Class Demolitionist : PlayerPawn
 	Spawn:
 		// normal idle
 		#### # 2;
-		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&player.cmd.yaw,"Turn");
+		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(abs(player.cmd.yaw)>128),"Turn");
 		Wait;
 	See:
 		// normal walking
@@ -567,10 +767,10 @@ Class Demolitionist : PlayerPawn
 		XZW1 MNOPA 2 A_JumpIf(player&&(player.cmd.buttons&BT_SPEED),"SeeFast");
 		Goto See+1;
 	Turn:
-		#### # 8 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		#### # 8 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.1);
 		XZW1 C 1 A_JumpIf(!player||!player.cmd.yaw,1);
 		Wait;
-		XZW1 C 3 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZW1 C 3 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.1);
 		Goto Spawn+1;
 	SeeFast:
 		// sprinting

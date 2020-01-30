@@ -1,11 +1,12 @@
 [default]
+SWWM_MODVER = "0.1a";
 /* MENU STUFF */
 // keybinds
 SWWM_KEYS = "SWWM GZ Bindings";
 SWWM_PRIMARYFIRE = "Primary Fire";
 SWWM_SECONDARYFIRE = "Secondary Fire";
-SWWM_TERTIARYFIRE = "Tertiary Fire / Reload";
-SWWM_QUATERNARYFIRE = "Quaternary Fire / Zoom";
+SWWM_RELOADFIRE = "Reload";
+SWWM_ZOOMFIRE = "Tertiary Fire / Zoom";
 SWWM_MELEE = "Melee Attack";
 SWWM_DASH = "Dash";
 SWWM_GESTURE1 = "Point Down";
@@ -25,16 +26,27 @@ SWWM_MUTEALL = "Everything";
 SWWM_COMINGSOON = "(coming soon)";
 SWWM_MISSTAB = "Mission";
 SWWM_STATTAB = "Stats";
-SWWM_STATUPTIME = "Uptime:";
-SWWM_STATONFOOT = "Distance on Foot:";
-SWWM_STATFLIGHT = "Distance in Air:";
-SWWM_STATBOOST = "Times Boosted:";
-SWWM_STATDASH = "Times Dashed:";
-SWWM_STATSTOMP = "Times Stomped:";
-SWWM_STATSPEED = "Top Speed:";
-SWWM_STATAIRTIME = "Longest Air Time:";
-SWWM_STATHISCORE = "Highest Score:";
+SWWM_STATUPTIME = "Uptime: ";
+SWWM_STATONFOOT = "Distance on Foot: ";
+SWWM_STATFLIGHT = "Distance in Air: ";
+SWWM_STATBOOST = "Times Boosted: ";
+SWWM_STATDASH = "Times Dashed: ";
+SWWM_STATSTOMP = "Times Stomped: ";
+SWWM_STATFUEL = "Total Fuel Usage: ";
+SWWM_STATSPEED = "Top Speed: ";
+SWWM_STATAIRTIME = "Longest Air Time: ";
+SWWM_STATKILLS = "Total Kills: ";
+SWWM_STATDEATHS = "Total Deaths: ";
+SWWM_STATDDEALT = "Total Damage Dealt: ";
+SWWM_STATTDEALT = "Highest Damage Dealt: ";
+SWWM_STATDTAKEN = "Total Damage Taken: ";
+SWWM_STATTTAKEN = "Highest Damage Taken: ";
+SWWM_STATMKILL = "Highest Kill Combo: ";
+SWWM_STATFAVWEAP = "Favorite Weapon: ";
+SWWM_STATHISCORE = "Highest Score: ";
 SWWM_INVTAB = "Inventory";
+SWWM_INVFAIL = "You can't use this right now";
+SWWM_INVNDROP = "You can't drop this";
 SWWM_KEYTAB = "Keychain";
 SWWM_KBASETAB = "Library";
 SWWM_STORETAB = "Store";
@@ -49,8 +61,10 @@ SWWM_MSGSENT = "You sent %s to %s.";
 SWWM_MSGRECV = "%s sent you %s.";
 SWWM_CHATTAB = "Chat Log";
 SWWM_MAINCONTROLS = "PgUp/PgDn: Switch Tab | Arrows: Navigate | ";
-SWWM_EXTCONTROLS = "Enter: Select | Escape: Cancel | ";
-SWWM_CHATCONTROLS = "Del: Clear | ";
+SWWM_INVCONTROLS = "Enter: Use | Backspace: Drop | ";
+SWWM_STRCONTROLS = "Enter: Buy | ";
+SWWM_TRADECONTROLS0 = "Enter: Select | ";
+SWWM_TRADECONTROLS1 = "Enter: Send | Backspace: Return | ";
 // mission entries
 SWWM_MISSION_DOOM =
 "Welcome to your first mission, Demolitionist. Since I have very little confidence in those UAC idiots, I have decided to send you up ahead to assist on the fight against the demon invaders that came to Earth, thanks to their very wonderful and very reliable teleportation experiments backfiring, which is something absolutely no one saw coming, oh no, definitely not. It's not like that hasn't happened like... several times now? If Samuel Hayden didn't have me blocked I'd be sending him all sorts of trash right now. Oh I'd love to see his reaction to this...\n"
@@ -60,23 +74,635 @@ SWWM_MISSION_DOOM =
 "By the way, we haven't been able to provide you with all the available equipment, it would've been very expensive. Instead, be on the lookout for strategically placed supplies along the way. If that sounds too videogamey, you can eat my pants, I wasn't the one who made that decision. Whatever.\n"
 "\n"
 "Saya out.";
-SWWM_MISSION_HERETIC = "Welcome to your second mission, Demolitionist. This one will be quite different, as you may see. While scouring the multiverse with our new portal technology we came across this cool little place called Parthoris. It's got elves 'n magic stuff, very fantasy-like setting, I dig it. Anyway I hope the ride wasn't too bumpy, crossing between universes and all.\n"
+SWWM_MISSION_HERETIC =
+"Welcome to your second mission, Demolitionist. This one will be quite different, as you may see. While scouring the multiverse with our new portal technology we came across this cool little place called Parthoris. It's got elves 'n magic stuff, very fantasy-like setting, I dig it. Anyway I hope the ride wasn't too bumpy, crossing between universes and all.\n"
 "\n"
 "Here's what's up: We have information that there is some sort of ongoing war between a bunch of elves and some crazy cult. Your objective is to neutralize this cult, preferably also taking out its leader, some sort of wizard dude. They call him D'Sparil and he's part of a triad of big baddies called the \"Serpent Riders\", because they ride dragons or something I guess? Guy's tall, wears red robes, and talks backwards, can't miss him. I'm sure that when you get back you'll want to transfer over to your maidbot body again, so I'll be working on a couple extensions there to make things more... \"fun\", if you catch my drift.\n"
 "\n"
 "Once again, I'm sorry that we couldn't give you all your stuff. I'm taking the blame this time, I think I screwed something up with the deployment and it got scattered all over the place. It's possible that the locals may have also moved stuff around so... good luck finding it all.\n"
 "\n"
 "Saya out.";
-SWWM_MISSION_HEXEN = "Welcome to your third mission, Demolitionist. We're sending you into another world, but this is actually related to your previous mission. First of all, yes I fucked up again, I'm sorry, really. All your stuff got lost... again, my bad. On top of that there was some sort of mixup with the ammo supplies and instead we got these weird \"Fabricator\" things from Cyrus. They do provide ammo, at least.\n"
+SWWM_MISSION_HEXEN =
+"Welcome to your third mission, Demolitionist. We're sending you into another world, but this is actually related to your previous mission. First of all, yes I fucked up again, I'm sorry, really. All your stuff got lost... again, my bad. On top of that there was some sort of mixup with the ammo supplies and instead we got these weird \"Fabricator\" things from Cyrus. They do provide ammo, at least.\n"
 "\n"
 "So yeah, you're now in the land of Cronos, more of that cool dark fantasy stuff around. It seems that some old pal of that wizard dude from last time is being a stinky ass here, and we need that sorted out before we can start studying this place in more detail. So there you go, beat the crap outta him! As a reward, we can do some more of \"that\". Just you, me, maybe Ibuki too... hnnn... and then... *heavy breathing*\n"
 "\n"
 "OK, wow... phew. Saya, focus. No hornyposting on mission statements. Anyway, more details about your target. Evil dragonish-looking dude, deep voice, and also a Serpent Rider, though I can't even begin to understand how he'd ride one. Maybe he's the one that receives the riding... u... ggdfgfhfhdfh... ok, pls no, BAD mental image, UGH. I think I'm going to need to spend a couple more hours drowning in Ibuki's tiddies to get this out of my head...\n"
 "\n"
 "Saya out.";
+SWWM_MISSION_NONE = "(no mission briefing available)";
 // lore entries
-//SWWM_LORETAG_ = "";
-//SWWM_LORETXT_ = "";
+SWWM_LORETAG_AKARILABS = "Akari Labs";
+SWWM_LORETXT_AKARILABS =
+"Name: Akari Labs\n"
+"Classification: Scientific Research Laboratory, Robotics Factory, Adoption Service\n"
+"Location: Japan\n"
+"\n"
+"Summary: Akari Labs was founded in 2010 by Saya and Taro Miyamoto. While initially just a small robot workshop, they quickly grew over time, covering more diverse fields in the process. One of the labs' most popular products are the Maidbots, life-like humanoid assistant bots that can be freely adopted by any household. The labs are also famous for the creation of Ibuki, the \"Red Oni\", a WW3 veteran supersoldier, now turned supermodel, and in recent years, her successor, the Demolitionist.\n"
+"\n"
+"Addendum: Akari Labs was one of the sponsors of the 2020 Tokyo Olympic Games. Saya's personal Maidbot singing the national anthem was one of the major highlights of the event.";
+SWWM_LORETAG_BELT = "Utility Belt";
+SWWM_LORETXT_BELT =
+"Designation: Adaptable Magnetic Utility Belt\n"
+"Manufacturer: Symnatek\n"
+"\n"
+"Summary: A simple magnetic belt, adaptable to any waist size by detaching/attaching segments.\n"
+"\n"
+"Addendum: This belt should allow you easy access to your Hammerspace containers and keychain, along with making it easier to reload certain weapons.";
+SWWM_LORETAG_BLASTSUIT = "Blast Suit";
+SWWM_LORETXT_BLASTSUIT =
+"Designation: Blast Suit\n"
+"Manufacturer: Itamex Military Supplies (subsidiary of Symnatek)\n"
+"\n"
+"Summary: A simple vest designed to protect against explosions. The main body is made of very elastic nanofabrics, and should provide adequate protection against small arms. The plating is made of a highly shock-absorbing proprietary alloy.\n"
+"\n"
+"Protection:\n"
+" - 75% reduction to all types of damage.\n"
+" - Additional 50% reduction to explosions.\n"
+"\n"
+"Durability: Can absorb a total of 5,000 units of damage before breaking.\n"
+"\n"
+"Addendum: The blast suit can be worn under other armor.";
+SWWM_LORETAG_COLLAR = "Lucky Collar";
+SWWM_LORETXT_COLLAR =
+"Designation: Lucky Collar for Demolitionist\n"
+"Manufacturer: Saya Miyamoto\n"
+"\n"
+"Summary: A very stylish fashion accessory that keeps you protected.\n"
+"\n"
+"Protection:\n"
+" - 75% reduction to all damage when below 25% health.\n"
+" - 50% reduction to all self-inflicted damage.\n"
+"\n"
+"Addendum: The collar cannot break no matter how much damage you receive.\n"
+"\n"
+"Saya's Note: I made one for Ibuki too. Looks super cute on both of you tbh.";
+SWWM_LORETAG_CRONOS = "Cronos";
+SWWM_LORETXT_CRONOS =
+"Designation: Cronos\n"
+"Classification: Collection of worlds\n"
+"\n"
+"Summary: A cluster of pocket worlds connected by strange portals. Historical research says that these were once all part of a much larger, more compact realm, but some great cataclysm happened and it all got shattered. Fortunately some \"sages\" devised a way to connect the many hubworlds together once again.\n"
+"\n"
+"Addendum: The natives are known to enjoy puzzles, sometimes to a sickening degree.\n"
+"\n"
+"Saya's Note: Yeah yeah, typical dark fantasy stuff, I get it. I'm actually quite intrigued about how those portals work, though.\n";
+SWWM_LORETAG_CYRUS = "Cyrus Enterprises";
+SWWM_LORETXT_CYRUS =
+"Designation: Cyrus Enterprises\n"
+"Classification: Tech Startup?\n"
+"\n"
+"Summary: A small company run by one Reubens C. Karnanaiahmani, son of royalty and ambassador of the Qurensniv people on Earth. Does everything all by himself, has a habit of giving things very nerdy names.\n"
+"\n"
+"Addendum: Is a big stinky nerd.\n"
+"\n"
+"Saya's Note: That exactly, I've said everything. Sure the stuff he makes is cool and all, sometimes, but good LORD the guy pisses me off with that attitude of his, guh...";
+SWWM_LORETAG_DEEPIMPACT = "Deep Impact";
+SWWM_LORETXT_DEEPIMPACT =
+"Designation: \"Deep Impact\" Airblaster\n"
+"Manufacturer: Dr. Locke's Wonderful Toys\n"
+"\n"
+"Summary: The Deep Impact is a compressed air gun, allegedly meant to be a child's toy. Its maximum pressure allows for deadly blasts of air that could cause severe internal hemorrhaging and crushing of vital organs.\n"
+"\n"
+"Primary Fire: Quick puffs of compressed air. This pocket of quickly expanding air can push away obstacles in front of the user, or, if aimed at a solid surface, allow the user to boost their jump height. It also deals considerable damage.\n"
+"\n"
+"Secondary Fire: Compresses all the air into a single shot with very considerable force. This \"air bullet\" is capable of penetrating multiple targets, digging a hole staight through their bodies. Requires a full air tank.\n"
+"\n"
+"Reloading: The lever on the side must be pulled several times in order to refill the internal air tank. Once at full capacity, a smart mechanism will lock the lever to avoid accidental overfilling.\n"
+"\n"
+"Addendum: It is unclear how exactly this even counts as a toy for children.";
+SWWM_LORETAG_DEMOLITIONIST = "Demolitionist";
+SWWM_LORETXT_DEMOLITIONIST =
+"Full Name: Akari Labs First Generation Autonomous Combat Unit\n"
+"Codename: Demolitionist\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 2148-01-20\n"
+"\n"
+"Summary: The Demolitionist is a refinement of the former Red Oni supersoldier program, an AI-controlled combat unit capable of efficiently utilizing any weaponry at its disposition. The first unit (that's you) was deployed in June of 2148 on Union States territory in order to combat the demonic invasion brought upon by the UAC's interventions on Hell.\n"
+"\n"
+"Saya's Note: Stop reading about yourself and get back to work.";
+SWWM_LORETAG_DISPLAY = "CuteEmotion";
+SWWM_LORETXT_DISPLAY =
+"Designation: CuteEmotion Display\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: One-sided display designed for use on robots. Located on the head region it can be used to convey simple facial expressions from a small library, giving a much more natural and empathetic image.\n"
+"\n"
+"Saya's Note: This makes you super cute and huggable (sorry once again for that one time Ibuki crushed you with a hug, btw, I seriously thought your chassis could handle it, but she really is hella strong).";
+SWWM_LORETAG_DOOMGUY = "Doomguy";
+SWWM_LORETXT_DOOMGUY =
+"Full Name: [CLASSIFIED]\n"
+"Codename: Doom Marine\n"
+"Nationality: American\n"
+"Date Of Birth: [CLASSIFIED]\n"
+"\n"
+"Summary: The Doom Marine (a.k.a. \"Doomguy\" is the lone survivor of the demonic invasions on the UAC bases of Phobos and Deimos. Due to his impressive track record he is appointed as the organization's \"problem solver\". At the moment of writing this, he has been tasked with fighting the demon invaders on Earth.\n"
+"\n"
+"Addendum: You have been ordered to not interact with this man, if you encounter him, please stand back and let him work.\n"
+"\n"
+"Saya's Note: Sorry about the lack of info here, those UAC goons really keep it well-guarded.";
+SWWM_LORETAG_EXPLODIUMGUN = "Explodium Gun";
+SWWM_LORETXT_EXPLODIUMGUN =
+"Designation: Explodium Gun\n"
+"Manufacturer: Munch Innovations\n"
+"\n"
+"Summary: Semi-automatic handgun designed for custom-made .387 caliber Explodium tipped bullets. Highly volatile, can clear lesser targets with ease. Each magazine holds 7 rounds.\n"
+"\n"
+"Primary Fire: Slow, accurate shooting. A direct hit is often lethal, but the splash damage can deal some fine hurt too. Aim at the feet to send smaller enemies flying.\n"
+"\n"
+"Secondary Fire: Performs an \"explosive reload\", pulling the pin on the mag to arm it as a grenade and throw it at enemies. Its yield is proportional to the number of bullets left inside. This action can only be performed when you have at least one bullet still left.\n"
+"\n"
+"Reloading: Normal reload, nothing will explode here.\n"
+"\n"
+"Addendum: Thanks to a deal between Akari Labs and Munch Innovations, you have been provided with a practically limitless supply of ammunition for this weapon, so feel free to waste away.";
+SWWM_LORETAG_FORX = "Forx Aeronautics";
+SWWM_LORETXT_FORX =
+"Name: Forx Aeronautics\n"
+"Classification: Propulsion Engine Manufacturer\n"
+"Location: United Kingdom\n"
+"\n"
+"Summary: Founded by Harold Forx in 2029, this company is credited with singlehandedly rescuing the UK from its long fall into economic ruin after Brexit. Forx Aeronautics is the #1 supplier of propulsion engines for all types of aircraft, be it commercial jet planes, or even spaceships. The only exception being the UAC, who prefer their own in-house technology. Forx has also adapted his patented jet propulsion systems for other uses, such as in the \"JetBurst Impulsor\", one of the first tuly portable jetpacks, or the \"Rapid Jet Compensator\", a recoil dampening system for high caliber firearms that permits their use outside of heavy, unwieldy power armor.\n"
+"\n"
+"Saya's Note: Hey did you hear the story about that one time he tried to mow down an orphanage and the guy who ran it gave him a smack so fucking hard he did a complete 180 and left it alone? I've seen the archived footage like a dozen times and I always lose my shit with that asshole's face when he comes out.";
+SWWM_LORETAG_HAMMERSPACE = "Hammerspace";
+SWWM_LORETXT_HAMMERSPACE =
+"Designation: Pocket Hammerspace Container\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: These devices provide the carrier with access to a dedicated off-world storage space, with practically instant deposit and withdraw times.\n"
+"\n"
+"Addendum: Hammerspace containment must not be used for living things.\n"
+"\n"
+"Saya's Note: This sounds like something out of a videogame, it's cool, sure, but did that stinky nerd really have to be a stinky nerd and call it \"Hammerspace\"?";
+SWWM_LORETAG_HELL = "Hell";
+SWWM_LORETXT_HELL =
+"Designation: Hell\n"
+"Classification: Nether realm\n"
+"\n"
+"Summary: A vast world separate from our own, inhabited by creatures that could only be described as \"demons\". This Hell was first discovered through the various interdimensional travel experiments done by Imanaki Corp back in the early 21st century, although the UAC has put a lot of effort into hiding this fact and claiming to be the first to do so instead. Their response to the UAC walking right in and attempting to steal their precious resources has been that of total annihilation. Starting from the first incidents on Mars and its moons, and now a full-fledged invasion of Earth, there is not much hope left for mankind. Unless we do something about it, that is.\n"
+"\n"
+"Saya's Note: Who would've thunk Hell is real, huh? And of course the UAC has to be the one to start this whole mess entirely out of stinking greed.\n";
+SWWM_LORETAG_IBUKI = "Miyamoto, Ibuki";
+SWWM_LORETXT_IBUKI =
+"Full Name: Ibuki Miyamoto\n"
+"Codename: Red Oni\n"
+"Nationality: Japanese\n"
+"Date of Birth: 2074-09-09\n"
+"\n"
+"Summary: Ibuki is the result of the Red Oni supersoldier program at Akari Labs, commissioned by the US government. Her purpose was to turn around the losing World War 3 that began due to a very badly received tweet from the President of the United States, an event reminiscent of the incident with Iran that the late Donald Trump had started. In a mere three years she was ready, thanks to an accelerated growth process. She's been enhanced to be effectively bulletproof, always standing strong under any circumstance, capable of handling extreme heat and cold, and trained for handling all kinds of weaponry. Much is also said about her personality, or her questionable physical traits such as the ludicrously impractical bust size, all of this which must clearly have been intentionally done by her creator and self-appointed \"mother\", Saya Miyamoto. After the end of the war she's gone through several jobs, crowning in her current one as a world-famous nude model and vlogger.\n"
+"\n"
+"Addendum: In a way, the Demolitionist project could be said to be a more economic alternative to the Red Oni program. Robots are easy to manufacture en-masse, after all.\n"
+"\n"
+"Saya's Note: Why does everyone keep bringing that up? What's the problem with me liking giga-tiddies? Like, seriously... Come on, don't kinkshame me, geez.";
+SWWM_LORETAG_LOCKE = "Hoodth, J.Locke";
+SWWM_LORETXT_LOCKE =
+"Full Name: Janus Locke Hoodth\n"
+"Nationality: Qurensniv\n"
+"Date of Birth: 1980-07-30\n"
+"\n"
+"Summary: A man who changed entirely after the loss of his older brother in 1987 during a very famous oil rig explosion near the town of Kereshnovka. Nowadays he's pretty much just a mad scientist shut-in who sometimes creates \"toys\" that are hilariously deadly. In 2049 he attempted to \"take over the world\", an event that backfired so hilariously he completely disappeared from the public eye afterwards.\n"
+"\n"
+"Saya's Note: Guy's a total nut, but these \"toys\" are very reliable weapons for you. Just be careful when using them, shit could backfire catastrophically at any moment, who knows...";
+SWWM_LORETAG_MUNCH = "Munch Innovations";
+SWWM_LORETXT_MUNCH =
+"Full Name: Munch Innovations\n"
+"Classification: Arms Manufacturer\n"
+"Location: Texas\n"
+"\n"
+"Summary: The Munch Innovations name applies to everything created by a very reclusive man, originating from a livetweeted \"invent as many guns as I can in one week\" challenge. Although most of them were quickly discarded, some of the weapons earned enough attention from various industry giants to enter mass production, the only requirement from the man was to be credited as the original creator.\n"
+"\n"
+"Addendum: Not much else is known about the man behind this mysterious company other than his name, \"Parker Munch\".\n"
+"\n"
+"Saya's Note: Why does this guy's name sound so familiar...";
+SWWM_LORETAG_PARTHORIS = "Parthoris";
+SWWM_LORETXT_PARTHORIS =
+"Designation: Parthoris\n"
+"Classification: Alternate world\n"
+"\n"
+"Summary: One of the other worlds we've discovered during the initial interportal experiments. This is a land stuck in some sort of medieval-ish, fantasy type setting. Although some of our explorers have reported sights of unusually complex technology in a certain location we haven't been able to approach.\n"
+"\n"
+"Addendum: You are our ambassador here, so I hope you make a good impression.";
+SWWM_LORETAG_PROPULSOR = "JetBurst";
+SWWM_LORETXT_PROPULSOR =
+"Designation: Forx JetBurst Impulsor\n"
+"Manufacturer: Forx Aeronautics\n"
+"\n"
+"Summary: A portable, efficient jetpack unit. Allows the user to perform short \"boosts\" in mid air, can also be used for rapid dashing and dodging. It is recommended to wear protective clothing to prevent damage from extended use (this is not necessary if you are a robot).\n"
+"\n"
+"Addendum: Its fuel supply will regenerate over time when not in use.";
+SWWM_LORETAG_SAYA = "Miyamoto, Saya";
+SWWM_LORETXT_SAYA =
+"Full Name: Saya Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1993-03-20\n"
+"\n"
+"Summary: Saya was born in 1993 to Nana and Ryuji Miyamoto. She has two siblings: An older brother, Taro, and a younger sister, Yui. As a child she already showed interest in science and technology. At the very early age of 13 she graduated in Computer Science at MIT. Her first project was an autonomous house-cleaning robot, which would later evolve into the modern Maidbot. In 2018, due to the immortality inherited from her grandmother, Princess Kaguya Houraisan, she ceased aging. However, thanks to this she has been able to keep working on everything she ever wanted. To this day, there are hundreds of different projects under her name, this includes you, the Demolitionist.\n"
+"\n"
+"Addendum: Saya is often called \"Not-Tomoko\" around the net, due to similarities to the protagonist of a popular 21st century manga series. She is well known for being quite blunt when talking to people, and also for being exaggeratedly flirty around attractive women. Her favourite colour is red, favourite animal is the otter, and favourite dish is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes, refuses to wear skirts, only pants. Uses Arch, favourite editor is vim, favourite programming language is haskell. Her top \"turn-ons\" are well-endowed women, maids, femboys and heterochromia. She doesn't use deodorant or cologne, although people around her remark that her BO is \"kind of nice actually\". Among other hobbies, Saya really enjoys writing. Her first foray into manga, \"My Maid is a Sex Robot\", became successful enough to get an anime adaptation.\n"
+"\n"
+"Saya's Note: I'm sure you enjoy reading all about me, but you have more important things to be doing, don't you think?";
+SWWM_LORETAG_SERPENTRIDERS = "Serpent Riders";
+SWWM_LORETXT_SERPENTRIDERS =
+"Designation: Serpent Riders\n"
+"Classification: Evil, definitely\n"
+"Origin: Undetermined\n"
+"\n"
+"Summary: A triad of evildoers known all over these lands. All those who've dared to fight against them haven't been very lucky. D'Sparil claimed the land of Parthoris, his many armies of undead having ravaged the land long before our arrival here. Then in the land of Cronos there's Korax, a black beast that taunts all those who challenge him. We haven't received much information on the third member, but this stuff will come eventually as we keep exploring these new worlds.\n"
+"\n"
+"Saya's Note: I'm sure you can wipe out all these idiots without any issue, they have no idea of how strong you are (or of what you are, now that I think of it, this world hardly seems to know much about our technology).";
+SWWM_LORETAG_UAC = "UAC";
+SWWM_LORETXT_UAC =
+"Name: Union Aerospace Corporation\n"
+"Classification: Military Conglomerate, Research Foundation\n"
+"Location: United States, Mars, Jupiter\n"
+"\n"
+"Summary: Founded in 2015 by Thomas Kelliher, rising from the ashes of the former Union Aerospace Armed Forces (UAAF). The UAC's rise to power began in 2025 with its famous Joint Mars Expeditions. Since the creation of \"Mars City\" and the various posts in Phobos and Deimos, the UAC has been effectively working outside of Earth law, which has caused endless controversy. Moreso after securing their position as the largest military body on Earth in the aftermath of World War 3. In recent years, their experiments in teleportation made the news after a critical failure resulted in an invasion from Hell itself, along with the disappearance of the entire moon of Deimos, and eventually resulted in the demons making their way towards Earth. Governments all across the world have their hands full trying to fend off the attackers, but despite the constant bombardment of his accounts on social media, current CEO Samuel Hayden has refused to give any explanation about this incident. The only information provided is that they \"have a man\" that can resolve this.\n"
+"\n"
+"Addendum: Many rumors surround this company. There are accusations of ritualistic practices, brainwashing, propaganda... Pretty much anything you could imagine. Don't get involved with them, especially now, after your creator decided to speak ill of the company.\n"
+"\n"
+"Saya's Note: Oh they TOTALLY deserve what happened to them, and I hope they get screwed even harder for this blunder. I'm glad I never invested in their shit. Little robot boy can eat my shorts, by the way. He ain't gonna r e s o l v e shit.";
+SWWM_LORETAG_VOICEBOX = "LoudBoi Voicebox";
+SWWM_LORETXT_VOICEBOX =
+"Designation: \"Loudboi\" Voicebox\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: A lightweight voice synthesizer for AI units. Easy to install and program. Comes with a built-in \"robotic\" filter for those who prefer that over an awkwardly \"too human\" sounding voice.\n"
+"\n"
+"Saya's Note: Ibuki is still amused that I programmed your voicebox to sound like her. It also cracks me up that you've even picked up all her little mannerisms because of it.";
+SWWM_LORETAG_SIDHE = "Sidhe";
+SWWM_LORETXT_SIDHE =
+"Designation: Sidhe\n"
+"Location: Parthoris\n"
+"\n"
+"Summary: An elf species native to this world, they have a natural bond with magic and are known to be great fighters. As the story goes they however face persecution by other groups, led mainly by the cult of D'Sparil, one of the Serpent Riders who has made the land his own.\n"
+"\n"
+"Saya's Note: How do you exactly pronounce \"Sidhe\" anyway?";
+SWWM_LORETAG_HAMMERSPACEEMBIGGENER = "H. Embiggener";
+SWWM_LORETXT_HAMMERSPACEEMBIGGENER =
+"Designation: Hammerspace Embiggener\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: These unique keys allow you to increase the maximum storage space allocated on your Hammerspace Container. Multiple keys can be used but there's a maximum limit of ten expansions per customer.\n"
+"\n"
+"Addendum: You may find these tucked away in certain spots throughout your mission.\n"
+"\n"
+"Saya's Note: Is that even a real word?";
+SWWM_LORETAG_AMMOFABRICATOR = "Ammo Fabricator";
+SWWM_LORETXT_AMMOFABRICATOR =
+"Designation: Universal Ammo Fabricator\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: Portable nanofabricators that can build any type of ammunition from scratch. Available in several tiers. The main difference being the total amount of base material provided and the complexity of the ammunition that can be crafted.\n"
+"\n"
+"Addendum: The highest tier is hard to come by, but it should have enough material for a full supply of all types of ammunition.\n"
+"\n"
+"Saya's Note: The hell is this nonsense? Well at least it works, but it's also really dumb, and they even come in fucking tiers like something out of a gacha game? Fuck off.";
+SWWM_LORETAG_GHOSTARTIFACT = "Ghost Artifact";
+SWWM_LORETXT_GHOSTARTIFACT =
+"Designation: Ghost Artifact\n"
+"Manufacturer: Decade Mechanics\n"
+"\n"
+"Summary: Cloaking device built from blueprints recovered from the abandoned facility on Sunkaeze. Generates a distortion bubble around the user that redirects outgoing photons, rendering them completely invisible.\n"
+"\n"
+"Addendum: Note that this does not muffle sound, so you can still be heard clearly while it's active.";
+SWWM_LORETAG_GRAVITYSUPPRESSOR = "Gravity Suppressor";
+SWWM_LORETXT_GRAVITYSUPPRESSOR =
+"Designation: Gravity Suppresor\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: Once attached and activated, this device negates the pull of gravity, allowing you to fly.\n"
+"\n"
+"Addendum: Note that it will be harder to brake when dashing while this is active.\n"
+"\n"
+"Saya's Note: If it really is inverting gravity then why are you still following the trajectory of the planet you're on? Just a thought.";
+SWWM_LORETAG_HEALTHGEOM = "Health Geodesics";
+SWWM_LORETXT_HEALTHGEOM =
+"Designation: Health Geodesics\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: Discovered in massive amounts within the alien ruins in Sedna. These artifacts provide healing effects when held tightly against one's chest. It is unknown how this process happens, nevertheless, they have become quite popular back on Earth, although their distribution is tightly controlled by Tach-Engine Technologies, who are still studying the artifacts.\n"
+"\n"
+"Addendum: The most common shapes for these are a tetrahedron and a cube, the former providing less healing potency than the latter.\n"
+"\n"
+"Saya's Note: I talked with the guy and you're allowed to use these, and any other things they have, so you're going to see them all over the place during your mission.";
+SWWM_LORETAG_INVINCIBALL = "Invinciball";
+SWWM_LORETXT_INVINCIBALL =
+"Designation: Total Safety Device aka \"Fucking Invinciball\""
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: For a limited time, makes the user impervious to all harm that could come to them, even if self-inflicted.\n"
+"\n"
+"Addendum: The device cannot protect against artifacts of Nedoshiaan.\n"
+"\n"
+"Saya's Note: Is that a fucking MGR reference??? Does he even know how old the first game is? That meme is like... deader than dead!";
+SWWM_LORETAG_KEYCHAIN = "Keychain";
+SWWM_LORETXT_KEYCHAIN =
+"Designation: Keychain\n"
+"Manufacturer: Saya Miyamoto\n"
+"\n"
+"Summary: A nice keychain for all your keys. Currently held keys can be checked in the Keychain tab.\n"
+"\n"
+"Saya's Note: I put some cute things in there that you might like. There's one of the bomb emoji, another of that silly \"butt bots gonna bot\" sign that you found so funny, and also a little chibi of me, so you can remember me when I'm not around. Oh, and I also put the trans flag in there, you know, as a little memento of that Q&A stream we did. I really didn't expect you to give that kind of answer, but heh, it does make sense when I think about it, you are built to defend human rights after all.";
+SWWM_LORETAG_KNOWLEDGEBASE = "Demolitionist Library";
+SWWM_LORETXT_KNOWLEDGEBASE =
+"Designation: Demolitionist Library\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: What you are currently reading. This internal knowledge base can provide you with additional information on obtained items during your mission, so be sure to check it whenever you can, as it is updated automatically.\n"
+"\n"
+"Addendum: The quality of articles may vary, this depends entirely on how motivated the editor felt when writing them.\n"
+"\n"
+"Saya's Note: Taro is the one editing all this stuff, by the way. Sometimes I help, though, and leave some of my thoughts in footnotes like this one.";
+SWWM_LORETAG_MOTHLAMP = "Lämp";
+SWWM_LORETXT_MOTHLAMP =
+"Designation: Companion Lamp\n"
+"Manufacturer: Sankai Exports Ltd.\n"
+"\n"
+"Summary: A little souvenir from the island of magic. This lamp will follow you around and light up the way. Can be toggled at will so the limited oil supply can be conserved when necessary.\n"
+"\n"
+"Addendum: Has a tendency to attract moths, though this can have some utility. The lamp is enchanted to make them hostile to nearby enemies, and when turned off they will immediately attack.\n"
+"\n"
+"Saya's Note: You know, I wish this thing attracted a certain kind of moth I really like...";
+SWWM_LORETAG_NUGGET = "Health/Armor Nugget";
+SWWM_LORETXT_NUGGET =
+"Designation: Health/Armor Nuggets\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: Small chunks of inteterminate composition found in large amounts within a cave system below the ancient ruins in Sedna. It appears that when held tightly in one's grasp, they \"melt\" into the body and either heal one's wounds or strengthen the natural resistances of their bodies, thus being divided between \"Health\" and \"Armor\" Nuggets.\n"
+"\n"
+"Addendum: Excessive usage of these materials does not appear to carry any risk.\n"
+"\n"
+"Saya's Note: This is so videogamey, wow...";
+SWWM_LORETAG_OMNISIGHT = "Omnisight";
+SWWM_LORETXT_OMNISIGHT =
+"Designation: Omnisight Mapping Unit\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: Demolitionist-compatible devices containing mapping data for the current area. Provide both a general outline for your automap and also information on certain key points for your targetting array, such as the location of access keys, contraptions you can interact with, and also the nearest exits.\n"
+"\n"
+"Saya's Note: People have died filling in the data for these, so you better pay some respects whenever you find one.";
+SWWM_LORETAG_RAGEKIT = "Ragekit";
+SWWM_LORETXT_RAGEKIT =
+"Designation: Ragekit\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: Experimental strengthening device for Demolitionists, doubles movement speed, quarters damage taken, and octuples any melee damage dealt. Adapted from technology obtained from the ruins of the Decade Mechanics facility.\n"
+"\n"
+"Addendum: While the device is active, your voicebox will emit several screaming sounds.\n"
+"\n"
+"Saya's Note: The screaming is an unintended side effect that I haven't had the time to fix. Big sorry. That's why this is classified as experimental.";
+SWWM_LORETAG_REFRESHER = "Refresher";
+SWWM_LORETXT_REFRESHER =
+"Designation: Refresher\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: These ancient relics were encountered while exploring some ancient alien ruins found in Sedna. When held tightly against one's chest, it can instantly heal any wounds or afflictions. It also appears to have strong rejuvenating effects, making even the oldest of the old feel like a kid once again. Like with other smaller healing artifacts, the nature of these effects is completely unknown and has baffled scientists for ages.\n"
+"\n"
+"Addendum: Just like the others, it can also affect machinery just as well, so you will also benefit from its use.";
+SWWM_LORETAG_GCSANDWICH = "Sandwich";
+SWWM_LORETXT_GCSANDWICH =
+"Designation: Grilled Cheese Sandwich\n"
+"Manufacturer: Nukritas 1xx\n"
+"Taste: Delicious\n"
+"\n"
+"Summary: This specific tasty sandwich has been masterfully crafted by the co-founder of the University of Nos-Kora to give absolutely anyone the most wonderful boost in health. It also provides them with all the protection they could ever want.\n"
+"\n"
+"Addendum: Can activate automatically to prevent the death of the user.\n"
+"\n"
+"Saya's Note: I swear to god, something's wrong with the world. Why the hell does this sandwich do what it does? This is stupid.";
+SWWM_LORETAG_WARARMOR = "War Armor";
+SWWM_LORETXT_WARARMOR =
+"Designation: War Armor\n"
+"Manufacturer: Unissix Crafts, commissioned by Zanaveth III\n"
+"\n"
+"Summary: Very robust, durable plate armor. Made of the finest almasteel in Devanikna. Originally commissioned for the third entry in Zanaveth's Instant Action arena events.\n"
+"\n"
+"Protection:\n"
+" - 90% reduction to heat, cold and electricity.\n"
+" - 80% reduction to all other types of damage.\n"
+" - Additional 70% reduction to explosions.\n"
+"\n"
+"Durability: Can absorb a total of 10,000 units of damage before breaking.\n"
+"\n"
+"Addendum: Worn over a blast suit, you're pretty much ready for anything that could be thrown at you.";
+SWWM_LORETAG_BIGSHOT = "Gunns, John";
+SWWM_LORETXT_BIGSHOT =
+"Full Name: John \"Bigshot\" Gunns"
+"Nationality: American\n"
+"Date Of Birth: 2110-11-12\n"
+"\n"
+"Summary: A man shrouded in mystery. Claims to be the \"son of Benellus, God of Shotguns\". He is one of the main financial backers of Blackmann Arms and has commissioned several unique weapons from them, most kept private. From his fortress in Nevada he frequently broadcasts himself talking about a coming \"apocalyptic event\" that he's been preparing for.\n"
+"\n"
+"Saya's Note: So, basically, just some crazy, I get it. But see, one of the designs from this guy was made public, and I couldn't help it but try getting my hands on that thing. I just want to see what it's like for you to handle that ballbusting hunk of metal. I've even given you enhancements to more efficiently utilize it. Any time you're using it I'll be watching, so you better give me something fun to eat popcorn with.";
+SWWM_LORETAG_BLACKMANN = "Blackmann Arms";
+SWWM_LORETXT_BLACKMANN =
+"Name: Blackmann Arms Ltd.\n"
+"Classification: Arms Designer and Manufacturer\n"
+"Location: Germany\n"
+"\n"
+"Summary: Founded in 1924 by Daniel Ischer as \"Schwarzmann Exotischwaffen\", an \"exotic weapons\" workshop in Cologne. Rose to fame when the family escaped to America in 1933. After settling in, the shop \"americanized\" itself under the current brand of \"Blackmann Arms\", and quickly rose to fame designing all sorts of ingenious weaponry for the allied forces. In current years, the company is run by Hermann E. Ischer, who has made it a personal objective that as long as any commissioned weapon can hold more than one bullet, it must have a built-in function for shooting everything as quickly as possible.\n"
+"\n"
+"Addendum: A big part of the company's funding comes from Mr. BIG SHOT Industries, which according to reports by Hermann himself, regularly commissions all sorts of ludicrous shotgun designs that no sane man would thing of using. Out of all these strictly private commissions, one sole weapon was eventually made public, the \"Wallbuster\", a 25-barrel revolving shotgun.\n"
+"\n"
+"Saya's Note: I think I cracked the code here... if the company's name references what I think it does... Oh come on. Did the founder seriously intend people to think of his dick whenever they looked at the massive guns he made? Gross.";
+SWWM_LORETAG_DECADEMECH = "Decade Mechanics";
+SWWM_LORETXT_DECADEMECH =
+"Name: Decade Mechanics\n"
+"Classification: Military Research Facility???\n"
+"Location: Sunkaeze (X'Animen outer rim)\n"
+"\n"
+"Summary: Ever since humanity was made aware of the gateway in Sedna connecting the two solar systems, many expeditions have been made to learn more of the worlds in X'Animen (name given by the governing bodies within). One major discovery that not even the natives were aware of, was that of a ruined research facility in the wasteland planet of Sunkaeze, belonging to a defunct company named \"Decade Mechanics\". Research material, blueprints and even finished, still functioning products have been found within, giving a general idea of the company's specialties. Various groups have successfully recreated items entirely off their original blueprints, some of which have been commercial successes in the military field.\n"
+"\n"
+"Addendum: The facility is said to be haunted. Many lives have been lost exploring the ruins, either due to accidents or unidentified \"hostile creatures\".";
+SWWM_LORETAG_ENGINETECH = "Tach-Engine Tech";
+SWWM_LORETXT_ENGINETECH =
+"Name: Tach-Engine Technology Institute\n"
+"Classification: Technology Conglomerate\n"
+"Location: Scotland\n"
+"\n"
+"Summary: Founded in 2014 by J.A. Tachmek-Smith, by then the \"richest man in the world\". Ever since its inception, the man has spent his fortune in research and development of many innovations for the \"betterment of mankind\". Fusion energy, improvements in waste recycling, cleaner air, etc. Tach-Engine Technologies is currently the second largest tech company on Earth, and the founder has claimed that he has no intent on \"swiping the crown off those people\", in reference to current industry titan [NAME REMOVED]. The company has also collaborated multiple times with its Nukuri counterpart, Nekuratek, though much of the knowledge exchanged couldn't be put to use due to the restrictions imposed by the UN after World War 3.\n"
+"\n"
+"Addendum: Thanks to his contact with Nekuratek, the CEO obtained access to the data retrieved from the exploration of the Decade Mechanics ruins. Shortly after this, he announced the opening a new subdivision dedicated to reproducing the works of Decade Mechanics, thus marking the company's entry into the arms race.\n"
+"\n"
+"Saya's Note: I had to remove the name of those people so I wouldn't get my butt sued clean off. You can't even imagine what they're like. The UAC is nothing compared to them.";
+SWWM_LORETAG_IMANAKI = "Imanaki Corp";
+SWWM_LORETXT_IMANAKI =
+"Name: Imanaki Research Corporation\n"
+"Classification: [CLASSIFIED]\n"
+"Location: Russia\n"
+"\n"
+"Summary: The name of a private research facility built in 2004 in the isolated town of Kereshnovka, in northern Siberia. Despite trying to keep all their work secret, a lot of information was leaked by anonymous sources. Imanaki specialized in interdimensional travel. Nothing is known about how this all started or where they got all the technology from, but they would regularly perform explorations of Hell, a great many years before the UAC. During the peak of the \"Ghoul hunt\" in the town, the facility was destroyed by invading forces from an unidentified origin. Their only target seemed to be that facility, as once the task was done, they returned to their homeworld.\n"
+"\n"
+"Addendum: There are rumors surrounding the UAC's similar forays into exploring and exploiting Hell, with the potential explanation that they have spied on the company back in their UAAF days while under contract providing armed defense to the facility.\n"
+"\n"
+"Saya's Note: Of course, the \"great and mighty\" UAC stole all their shit and claimed that research as their own. They really have no fucking shame.";
+SWWM_LORETAG_SYMNATEK = "Symnatek";
+SWWM_LORETXT_SYMNATEK =
+"Name: Symnatek\n"
+"Classification: Industrial Equipment Manufacturer\n"
+"Location: Australia\n"
+"\n"
+"Summary: \"Building a better world for a better future, since 2040\". The largest producer of industrial equipment in its home country. While the main body dedicates itself to industry and construction, the child company of Itamex provides the military with all sorts of basic supplies."
+"\n"
+"Addendum: Symnatek is large enough to fend off the almost-global domination of Mixom, makin Australia one of the few countries where they have any real competition.\n"
+"\n"
+"Saya's Note: In this time and age, even fucking tool makers contribute to the military. Huh? What do you mean \"the pot calling the kettle black\"? Oh sure, just because of Ibuki that makes me one of them. Whatever.";
+SWWM_LORETAG_UNISSIX = "Unissix, Misa";
+SWWM_LORETXT_UNISSIX =
+"Full Name: Misa Azadeku Unissix aka \"Unissix Bokurou Azadeku\"\n"
+"Nationality: Devanikan\n"
+"Date Of Birth: 1992-02-29\n"
+"\n"
+"Summary: Azadeku is the lead weapon and armor designer of the entire Unissix family. Starting at a very early age, her fascination with weponry has always been quite noticeable. Despite a strong fighting spirit, she lacks the physical prowess required to be a warrior, so she's dedicated herself entirely to her craft.\n"
+"\n"
+"Addendum: Rose to fame on Earth during a visit from Zanaveth II, her wife, who leads Nekuratek, a massive tech giant in the Nukuri homeworld.\n"
+"\n"
+"Saya's Note: I remember having some chats with her. She's got good taste, and her wife is hot af. I'm still pissy that we haven't been in contact much thanks to those American idiots causing the Nukuri to leave.";
+SWWM_LORETAG_CANDYGUN = "Candy Gun";
+SWWM_LORETXT_CANDYGUN =
+"Designation: \"Taste the Sweetness\" Candy Gun\n"
+"Manufacturer: Munch Innovations\n"
+"\n"
+"Summary: Overcharged variant of the Explodium gun. Not only the bullets, but also parts of the weapon, are made of Explodium. Mixed with strawberry-flavoured hard caramel too, which for some reason results in a festival of fireworks.\n"
+"\n"
+"Primary Fire: Single shots of explosive sweetness.\n"
+"\n"
+"Secondary Fire: Explosive reload. The yield is much more extreme so watch out for splash damage. Can only be performed if you have spare mags.\n"
+"\n"
+"Special: During the first moments of preparing an explosive reload, you can hold primary fire to keep the mag in and instead throw the whole gun as a grenade for even greater damage than just the mag. Can only be performed if you have spare guns.\n"
+"\n"
+"Reloading: Same as usual. Remember that you can keep one bullet in the chamber.\n"
+"\n"
+"Addendum: Due to the disposable nature of the Candy Gun, up to 4 additional spares can be held in your inventory.\n"
+"\n"
+"Saya's Note: I don't understand how mixing hard candy with explodium makes these fancy fireworks, but I still love every single second of it.";
+SWWM_LORETAG_EVISCERATOR = "Eviscerator";
+SWWM_LORETXT_EVISCERATOR =
+"Designation: \"Eviscerator\" High Load Flak Cannon\n"
+"Manufacturer: Mr. BIG SHOT Industries\n"
+"\n"
+"Summary: Beastly portable artillery, turns fleshy targets into fine red mist in mere instants.\n"
+"\n"
+"Primary Fire: Detonates the shell directly, spreading hot steaming metal in front of the user.\n"
+"\n"
+"Secondary Fire: Lobs the shell as a grenade, it will detonate on impact with any surface or object and release its payload in the direction it was facing when shot.\n"
+"\n"
+"Reloading: Since the weapon reloads automatically and its internal ammo box has been linked to your Hammerspace Container, the reload button instead functions as a toggle for different spread modes on the primary fire.\n"
+"\n"
+"Addendum: The metal fragments shot by this weapon will ricochet all over the place, which makes it very effective for shooting around corners.\n"
+"\n"
+"Saya's Note: Why is there an \"owo\" face scribbled on every shell? Who did this? I want answers!";
+SWWM_LORETAG_HELLBLAZER = "Hellblazer";
+SWWM_LORETXT_HELLBLAZER =
+"Designation: Hellfire Cannon Mk3 (\"Hellblazer\")\n"
+"Manufacturer: Imanaki Research Corporation\n"
+"\n"
+"Summary: Rocket Propelled Grenade launcher of simple design. Four types of ammunition are available, all of them powered by highly condensed Argent Energy. Standard grenades are pretty much what anyone would expect, Crackshots burst into a cluster of smaller grenades, Ravagers release hellish flames on a wide area, and last but not least, Warheads devastate everything in a large radius, including yourself if you don't keep your distance.\n"
+"\n"
+"Primary Fire: Shoots the loaded ammunition with its propulsion armed and ready.\n"
+"\n"
+"Secondary Fire: Lobs the loaded ammunition unarmed, as a bouncing grenade.\n"
+"\n"
+"Reloading: The reload button allows you to cycle between the four ammo types.\n"
+"\n"
+"Addendum: Only a limited number of these are in circulation since the fall of Imanaki Corp.";
+SWWM_LORETAG_PUSHERWEAPON = "Pusher";
+SWWM_LORETXT_PUSHERWEAPON =
+"Designation: \"Pusher\" Microfusion Rotary Hammer\n"
+"Manufacturer: Tach-Engine Technologies\n"
+"\n"
+"Summary: A somewhat portable rotary hammer meant for construction work. Contains an internal microfusion battery with an expected lifespan of 10,000 years.\n"
+"\n"
+"Primary Fire: Normal operation, aim the drill bit at whatever you need to break and hold the trigger.\n"
+"\n"
+"Secondary Fire: For those cases where you find some real tough material that's hard to break. Twist the secondary trigger until the drill bit has receded to what you feel is the adequate distance, then release for it to strike at the target with full force. WARNING: Inadequate grip strength during this operation may cause the device to slip off, always keep the area clear to prevent collateral damages.";
+SWWM_LORETAG_SILVERBULLET = "Silver Bullet JET";
+SWWM_LORETXT_SILVERBULLET =
+"Designation: Silver Bullet JET\n"
+"Manufacturer: Blackmann Arms Ltd., Forx Aeronautics\n"
+"\n"
+"Summary: The 1.150 XSB member of the Silver Bullet series of ultra-high caliber bolt-action rifles. Equipped with recoil compensating jets designed by Forx Aeronautics.\n"
+"\n"
+"Primary Fire: Shoot the bullet. Any small targets hit by it are pretty much dead.\n"
+"\n"
+"Secondary Fire: Toggle the recoil compensators. Disabling the recoil compensating jets is not recommended for human users not equipped with power armor or a Silver rated exoskeleton.\n"
+"\n"
+"Reloading: Reloads the weapon.\n"
+"\n"
+"Zoom: Custom-tailored adjustable telescopic sight, up to 16x. Equipped with a soft foam covering to protect the user's face during scoped fire.\n"
+"\n"
+"Addendum: The burst from the jets can cause minor damage to the user unless they are wearing protective gear.";
+SWWM_LORETAG_SPARKSTER = "Biospark Carbine";
+SWWM_LORETXT_SPARKSTER =
+"Designation: Model S-5 Biospark Carbine\n"
+"Manufacturer: Decade Mechanics\n"
+"\n"
+"Summary: Ancient energy weapon. Its internal operation is undergoing investigation by Tach-Engine Technologies for potential improvements.\n"
+"\n"
+"Primary Fire: Small blobs of stabilised energy with slight target-seeking abilities.\n"
+"\n"
+"Secondary Fire: Concentrated, penetrating beam shot.\n"
+"\n"
+"Tertiary Fire: If the loaded charge is at least at 50%, the containment capsule within will be ejected through the main barrel and detonated as a massive sphere of pure energy that tracks down nearby targets. The weapon must be reloaded afterwards.\n"
+"\n"
+"Reload: Reloads, obviously.\n"
+"\n"
+"Addendum: If the secondary beam comes in contact with an energy blob it will be detonated with increased damage and range.";
+SWWM_LORETAG_SPREADGUN = "Spreadgun";
+SWWM_LORETXT_SPREADGUN =
+"Designation: \"Rhino Stopper\" Spreadgun\n"
+"Manufacturer: Blackmann Arms Ltd.\n"
+"\n"
+"Summary: A small, single-shot break action 10Ga shotgun. Compatible with many types of cartridges.\n"
+"\n"
+"Primary Fire: Shoots the loaded shell.\n"
+"\n"
+"Secondary Fire: Selects the next ammo type to be used on reload.\n"
+"\n"
+"Reloading: Unloads the current shell and loads a new one. If the loaded shell was not spent it will be added back to its ammo pool if there's enough space, otherwise it'll be dropped on the ground.\n"
+"\n"
+"Addendum: While simple in its operation, the constant manual reloading tends to become tiresome quickly for some users. A semi-automatic recoil operated variant of the Spreadgun is currently being tested and may be ready for the public in a couple years, there are still some issues to solve such as frequent jamming.";
+SWWM_LORETAG_WALLBUSTER = "Wallbuster";
+SWWM_LORETXT_WALLBUSTER =
+"Designation: "Wallbuster" Heavy Armor Breaching Shotgun\n"
+"Manufacturer: Blackmann Arms Ltd., commissioned by Mr. BIG SHOT Industries\n"
+"\n"
+"Summary: A rather unconventional 25-barrel revolving shotgun. Its internal mechanisms are so overtly complicated that they've been described as \"Kraut Deep Space Magic\" by some.\n"
+"\n"
+"Primary Fire: Shoots the barrel at the top.\n"
+"\n"
+"Secondary Fire: Shoots the 5-barrel group at the top.\n"
+"\n"
+"Tertiary Fire: Shoots all barrels.\n"
+"\n"
+"Reloading: Reloading is performed by pulling the side lever, which allows detaching each individual 5-barrel group. For reloading on the go, a magnetic belt or some other mechanism is recommended. Speed loaders are available for purchase from the Blackmann Arms website, or from authorized distributors.\n"
+"\n"
+"Addendum: The Demolitionist is equipped with a programmable rapid reload routine in order to make the whole process fast and easy.";
+SWWM_LORETAG_YNYKRON = "Ynykron Artifact";
+SWWM_LORETXT_YNYKRON =
+"Designation: Ynykron Artifact (\"Death Cannon\")\n"
+"Manufacturer: Unknown, replicated by Unissix Crafts\n"
+"\n"
+"Summary: One of the four ancient artifacts of war created for the mad dictator god Nedoshiaan. The Death Cannon uses an extremely volatile cocktail of exotic materials in order to tear through the fabric of existence. Two modes of operation exist depending on the orientation of its ammo box.\n"
+"\n"
+"Primary Fire: Charges a beam shot. Once complete, pulling the trigger releases it. The beam will instantly destroy everything in its way, no matter how tough it is.\n"
+"\n"
+"Secondary Fire: Charges a vortex shot. Once complete, pulling the trigger releases it. On the impact area a miniature black hole will be created which will swallow everything around itself for a period of time before collapsing in a devastating explosion.\n"
+"\n"
+"Reloading: If there's any ongoing charge process, it will be cancelled and no ammunition will be used, but the weapon will have to vent for a while. Otherwise, loads a new crystal.\n"
+"\n"
+"Addendum: Only the one original instance of this weapon should exist, but replicas have begun to surface thanks to reverse engineering efforts. Still, use of this weapon is considered illegal without proper authorization. Luckily for you, you are authorized to use it against the invading forces.";
+SWWM_LORETAG_LOOTBOX = "Chance Box";
+SWWM_LORETXT_LOOTBOX =
+"Designation: Lucky Chance Box\n"
+"Manufacturer: Nukritas 1xx\n"
+"Excitement: Guaranteed\n"
+"\n"
+"Summary: Can't afford cool stuff but still want it? Then how about you get yourself one of these bad boys? Every single instance of this box is guaranteed to drop something you definitely need, your money won't go to waste.\n"
+"\n"
+"Addendum: These boxes come in several tiers, increasing the chances to get even cooler stuff.\n"
+"\n"
+"Saya's Note: Why did I let them write their own entries? Also what the fuck is this gacha bullshit?";
 /* GAME STUFF */
 // tags, pickups
 T_PUSHER = "Pusher";
@@ -183,13 +809,14 @@ SWWM_FINDKEY = "\cf%s\cf got the %s. +%d\c-";
 SWWM_LASTSECRET = "\cf%s\cf found the last secret. +%d\c-";
 SWWM_LASTITEM = "\cf%s\cf got the last item. +%d\c-";
 SWWM_LASTMONSTER = "\cf%s\cf killed the last monster. +%d\c-";
+SWWM_NEWLORE = "New entries have been added to the Library.";
 // intermission tips
 SWWM_INTERTIP1 = "The Demolitionist is immune to drowning, poison and even fall damage (excluding instant kill pits, e.g. in Hexen).";
 SWWM_INTERTIP2 = "The Explodium Gun's altfire has an explosive yield proportional to the bullets left in the clip.";
 SWWM_INTERTIP3 = "Your fuel regenerates over time, but the more you use dashing and boosting, the longer this will take.";
-SWWM_INTERTIP4 = "The Pusher will slip off your hands on altfire if it doesn't land a hit, however as a ranged attack it may still be effective.";
+SWWM_INTERTIP4 = "The Pusher has a chance to slip off your hands on altfire if it doesn't land a hit, however as a ranged attack it may still be effective.";
 SWWM_INTERTIP5 = "Spare copies of items will be stashed away in your inventory if they can't be immediately used, this even includes health and armor.";
-SWWM_INTERTIP6 = "The Omnisight makes secret hunting a breeze by highlighting any usable objects in the map.";
+SWWM_INTERTIP6 = "The Omnisight makes secret hunting a breeze by highlighting any usable walls and switches in the map.";
 SWWM_INTERTIP7 = "True to its name, the Wallbuster's tertiary fire can be used to completely obliterate doors and other obstacles.";
 SWWM_INTERTIP8 = "The Eviscerator can easily clear entire rooms and corridors, but keep in mind that some of the shrapnel might bounce right back at you if you're not careful.";
 SWWM_INTERTIP9 = "When on the move, the Silver Bullet's jet compensators will reduce most of the recoil from firing, but will also deal some damage if you're not wearing armor.";
@@ -200,6 +827,12 @@ SWWM_INTERTIP13 = "The Ynykron Artifact will instantly kill everything you aim i
 SWWM_INTERTIP14 = "Do not be deceived by the Candy Gun, it may seem like a simple recolor, but it is A LOT stronger than your starting weapon.";
 SWWM_INTERTIP15 = "The Ragekit will greatly increase the strength of your melee attacks and reduce incoming damage, but it'll also make you scream, all the time.";
 SWWM_INTERTIP16 = "You can share items with other players in multiplayer using the trading tab in your Demolitionist menu. Items that won't fit in the destination inventory will not be traded.";
+SWWM_INTERTIP17 = "The Demolitionist Menu is very helpful, do not forget to bind a key to open it.";
+SWWM_INTERTIP18 = "All weapons have a quick melee attack available through a dedicated button. With one-handed weapons you will perform a punch, and with two-handed ones a bash.";
+SWWM_INTERTIP19 = "With the right combination of dashing, boosting and wall jumping, it is perfectly possible to remain in the air for extended periods of time.";
+SWWM_INTERTIP20 = "In multiplayer, any keys you pick up will be immediately shared with other players.";
+SWWM_INTERTIP21 = "Aim for a high score! The more enemies you kill the better. Don't forget to put that cash to use at the in-game store when you can.";
+SWWM_INTERTIP22 = "Although chance boxes may sound like a terrible idea, there is a high chance to obtain very valuable items for a much lower cost.";
 
 /* SUBTITLES */
 // new weapon received
@@ -361,3 +994,5 @@ SWWM_SUBS_DEFAULT_RAGEKIT5 = "KILLLLL!!!!";
 SWWM_SUBS_DEFAULT_RAGEKIT6 = "RAAAARGH!!! BRING IT!!!";
 
 [es]
+// I probably won't be localizing this to Spanish
+

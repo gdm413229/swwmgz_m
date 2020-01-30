@@ -57,7 +57,7 @@ Class ExplodiumMagArm : Actor
 		reactiontime = Random[ExploS](10,15);
 		double ang, pt;
 		ang = FRandom[ExploS](0,360);
-		pt = FRandom[ExploS](-90,30);
+		pt = FRandom[ExploS](-90,90);
 		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](8.,20.);
 	}
 	States
@@ -66,7 +66,7 @@ Class ExplodiumMagArm : Actor
 		TNT1 A 1
 		{
 			A_CountDown();
-			Spawn("ExplodiumMagTrail",Vec3Offset(FRandom[ExploS](-4,4),FRandom[ExploS](-4,4),FRandom[ExploS](-4,4)));
+			Spawn("ExplodiumMagTrail",pos);
 			SWWMHandler.DoBlast(self,30+2*reactiontime,3000+500*reactiontime);
 			A_Explode(2+reactiontime/3,30+2*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -138,8 +138,8 @@ Class ExplodiumMagProj : Actor
 		SWWMHandler.DoBlast(self,120+30*special1,80000+8000*special1);
 		A_Explode(30+20*special1,120+30*special1);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
-		A_StartSound("explodium/maghit",CHAN_BODY,attenuation:.2);
-		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.1);
+		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
+		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
 		A_SprayDecal("BigScorch",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
@@ -176,20 +176,6 @@ Class ExplodiumMagProj : Actor
 			s.target = target;
 		}
 		Spawn("ExploLight2",pos);
-		for ( int i=0; i<special1; i++ )
-		{
-			double ang = FRandom[ExploS](0,360);
-			double pt = FRandom[ExploS](-90,90);
-			Vector3 dir = (cos(ang)+sin(ang),sin(ang)-cos(ang),sin(-pt));
-			FLineTraceData d;
-			LineTrace(atan2(dir.y,dir.x),60,asin(-dir.z),TRF_ABSPOSITION,pos.z,pos.x,pos.y,d);
-			Vector3 spawnpos = d.HitLocation;
-			if ( d.HitType != TRACE_HitNone ) spawnpos = level.Vec3Offset(spawnpos,-d.HitDir*10);
-			let s = Spawn("SWWMBulletImpact",spawnpos);
-			s.target = target;
-			s.angle = atan2(-d.HitDir.y,-d.HitDir.x);
-			s.pitch = asin(d.HitDir.z);
-		}
 	}
 	States
 	{
@@ -245,8 +231,8 @@ Class ExplodiumBulletImpact : Actor
 		SWWMHandler.DoBlast(self,120,80000);
 		A_Explode(50,120);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
-		A_StartSound("explodium/hit",CHAN_BODY,attenuation:.2);
-		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.1);
+		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
+		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);
 		A_SprayDecal("Scorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
@@ -290,8 +276,10 @@ Class ExplodiumGun : SWWMWeapon
 {
 	int clipcount;
 	bool chambered;
-	ui TextureID WeaponBox;
-	ui HUDFont mTewiFont;
+	transient ui TextureID WeaponBox;
+	transient ui HUDFont mTewiFont;
+
+	Property ClipCount : ClipCount;
 
 	override void AttachToOwner( Actor other )
 	{
@@ -441,6 +429,7 @@ Class ExplodiumGun : SWWMWeapon
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
 		Stamina 600;
+		ExplodiumGun.ClipCount 7;
 	}
 	States
 	{
@@ -455,6 +444,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW2 A 1
 		{
 			if ( (invoker.clipcount <= 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
+			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
 			else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1|WRF_ALLOWRELOAD);
 		}
 		Wait;
@@ -466,8 +456,8 @@ Class ExplodiumGun : SWWMWeapon
 		XZW2 S 2 A_DropCasing();
 		Goto Ready;
 	AltFire:
-		XZW2 A 1 A_JumpIf(invoker.clipcount<=0,"Reload");
-		XZW5 NO 1;
+		XZW2 A 2 A_JumpIf(invoker.clipcount<=0,"Reload");
+		XZW5 NO 2;
 		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 QRSTUVWXYZ 1;
 		XZW6 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
@@ -488,7 +478,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW2 A 1
 		{
 			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
-			else if ( invoker.clipcount >= 7 ) return ResolveState("CheckBullet");
+			else if ( invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
@@ -513,7 +503,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW4 ABCDE 1;
 		XZW4 F 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 GHIJKLMNOPQ 1;
-		XZW4 R 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); invoker.clipcount = 7; }
+		XZW4 R 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); invoker.clipcount = invoker.default.clipcount; }
 		XZW4 STUV 1;
 		XZW2 A 1 A_JumpIf(!invoker.chambered,"Slide");
 		Goto Ready;

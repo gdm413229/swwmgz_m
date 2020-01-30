@@ -1,8 +1,969 @@
 // Munch Innovations "Taste the Sweetness" Candy Gun (from unreleased "Weird Weapons" UT minimod)
 // Slot 9, replaces BFG9000, Firemace, Bloodscourge (stub)
 
+Class CandyCasing : SWWMCasing {}
+
+Class CandyMag : ExplodiumMag
+{
+}
+
+Class CandyMagEmpty : ExplodiumMag {}
+
+Class CandyLight : PaletteLight
+{
+	Default
+	{
+		Tag "CandyExpl";
+		ReactionTime 24;
+	}
+}
+Class CandyLight2 : PaletteLight
+{
+	Default
+	{
+		Tag "CandyExpl";
+		ReactionTime 48;
+		Args 0,0,0,120;
+	}
+}
+Class CandyLight3 : PaletteLight
+{
+	Default
+	{
+		Tag "CandyExpl";
+		ReactionTime 96;
+		Args 0,0,0,200;
+	}
+}
+Class CandyPLight : PaletteLight
+{
+	Default
+	{
+		Tag "CandyExpl";
+		ReactionTime 5;
+		Args 0,0,0,300;
+	}
+}
+Class CandyPLight2 : PaletteLight
+{
+	Default
+	{
+		Tag "CandyExpl";
+		ReactionTime 5;
+		Args 0,0,0,50;
+	}
+}
+
+Class HitListEntry
+{
+	Actor hitactor;
+	Vector3 hitlocation, x;
+	int hitdamage;
+}
+
+Class CandyBeamTracer : LineTracer
+{
+	Actor ignoreme;
+	Array<HitListEntry> hitlist;
+	Array<Line> ShootThroughList;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				hitlist.Push(ent);
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class CandyBeam : Actor
+{
+	Vector3 nextpos, nextdir;
+
+	action void A_Trace( double dist = 16. )
+	{
+		let t = new("CandyBeamTracer");
+		t.hitlist.Clear();
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		t.ShootThroughList.Clear();
+		t.Trace(pos,CurSector,x,dist,0);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+		for ( int i=0; i<t.hitlist.Size(); i++ )
+		{
+			SWWMHandler.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,12000);
+			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Explodium',DMG_THRUSTLESS);
+		}
+		Vector3 normal = -t.Results.HitVector, dir = t.Results.HitVector;
+		if ( t.Results.HitType == TRACE_HitWall )
+		{
+			normal = (t.Results.HitLine.delta.y,-t.Results.HitLine.delta.x,0).unit();
+			if ( t.Results.Side ) normal *= -1;
+			t.Results.HitLine.RemoteActivate(target,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			dir -= 2*normal*(dir dot normal);
+		}
+		else if ( t.Results.HitType == TRACE_HitFloor )
+		{
+			if ( t.Results.ffloor ) normal = -t.Results.ffloor.top.Normal;
+			else normal = t.Results.HitSector.floorplane.Normal;
+			dir -= 2*normal*(dir dot normal);
+		}
+		else if ( t.Results.HitType == TRACE_HitCeiling )
+		{
+			if ( t.Results.ffloor ) normal = -t.Results.ffloor.bottom.Normal;
+			else normal = t.Results.HitSector.ceilingplane.Normal;
+			dir -= 2*normal*(dir dot normal);
+		}
+		else
+		{
+			t.Results.HitPos = level.Vec3Offset(pos,x*dist);
+			normal *= 0;
+		}
+		double a = FRandom[Candy](0,360), s = FRandom[Candy](0.,.8);
+		invoker.nextpos = level.Vec3Offset(t.Results.HitPos,normal);
+		invoker.nextdir = (dir+cos(a)*y*s+sin(a)*z*s).unit();
+	}
+	action void A_Spread( Class<Actor> pop = "CandyPop", Class<Actor> smk = "SWWMSmoke" )
+	{
+		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
+		Vector3 pvel = .1*tdir+(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.1,.3);
+		let m = Spawn(smk,level.Vec3Offset(pos,tdir*.5));
+		m.vel = pvel;
+		m.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+		m.special1 = Random[ExploS](1,3);
+		m.scale *= 1.5;
+		m.alpha *= .4;
+		if ( special1 > ReactionTime )
+		{
+			let s = Spawn(pop,invoker.nextpos);
+			s.target = target;
+			return;
+		}
+		let b = Spawn(GetClass(),invoker.nextpos);
+		b.angle = atan2(invoker.nextdir.y,invoker.nextdir.x);
+		b.pitch = asin(-invoker.nextdir.z);
+		b.target = target;
+		b.special1 = special1+1;
+		b.frame = frame;
+	}
+	Default
+	{
+		RenderStyle "Add";
+		Alpha 0.4;
+		DamageFunction 12;
+		ReactionTime 12;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1 Bright;
+		XZW1 A 1 Bright A_Trace();
+		XZW1 A 1 Bright A_Spread();
+		XZW1 A 1 Bright A_FadeOut(.1);
+		Wait;
+	}
+}
+
+Class CandyPop : Actor
+{
+	Default
+	{
+		DamageType "Explodium";
+		RenderStyle "Add";
+		Scale 2.;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+NOTELEPORT;
+	}
+	void FlashPlayer( int str, double rad )
+	{
+		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
+		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
+		let mo = players[consoleplayer].camera;
+		Vector3 pp;
+		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
+		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
+		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
+		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
+		{
+			str = int(str*(1.-(sc.z/rad)));
+			SWWMHandler.DoFlash(mo,Color(str,250,240,255),1);
+			SWWMHandler.DoFlash(mo,Color(str,224,0,255),3);
+		}
+	}
+	States
+	{
+	Spawn:
+		BLPF B 3 NoDelay
+		{
+			A_AlertMonsters();
+			SWWMHandler.DoBlast(self,120,60000);
+			A_Explode(50,120);
+			Scale *= FRandom[ExploS](0.6,1.8);
+			Scale.x *= RandomPick[ExploS](-1,1);
+			Scale.y *= RandomPick[ExploS](-1,1);
+			roll = FRandom[Explos](0,360);
+			Spawn("CandyPLight",pos);
+			FlashPlayer(128,1200);
+			A_StartSound("candygun/hit",CHAN_VOICE,CHANF_DEFAULT,.08,.6,1.3);
+			int numpt = Random[ExploS](-3,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("TinyCandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](-4,12);
+			}
+			numpt = Random[ExploS](1,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
+				let s = Spawn("SWWMSmoke",pos);
+				s.vel = pvel;
+				s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+				s.special1 = Random[ExploS](1,3);
+				s.scale *= 2.4;
+				s.alpha *= .4;
+			}
+		}
+		Stop;
+	}
+}
+
+Class TinyCandyBeam : CandyBeam
+{
+	Default
+	{
+		ReactionTime 12;
+		DamageFunction 5;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1 Bright;
+		XZW1 A 1 Bright A_Trace(8);
+		XZW1 A 1 Bright A_Spread("TinyCandyPop","SWWMSmallSmoke");
+		XZW1 A 1 Bright A_FadeOut(.15);
+		Wait;
+	}
+}
+
+Class TinyCandyPop : CandyPop
+{
+	Default
+	{
+		Scale .5;
+	}
+	States
+	{
+	Spawn:
+		BLPF B 3 NoDelay
+		{
+			A_AlertMonsters();
+			SWWMHandler.DoBlast(self,80,32000);
+			A_Explode(20,80);
+			Scale *= FRandom[ExploS](0.6,1.8);
+			Scale.x *= RandomPick[ExploS](-1,1);
+			Scale.y *= RandomPick[ExploS](-1,1);
+			roll = FRandom[Explos](0,360);
+			Spawn("CandyPLight2",pos);
+			FlashPlayer(64,500);
+			int numpt = Random[ExploS](1,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.2,.9);
+				let s = Spawn("SWWMSmallSmoke",pos);
+				s.vel = pvel;
+				s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+				s.special1 = Random[ExploS](1,3);
+				s.scale *= 1.8;
+				s.alpha *= .4;
+			}		}
+		Stop;
+	}
+}
+
+Class CandyMagArm : Actor
+{
+	Default
+	{
+		+NOBLOCKMAP;
+		+THRUACTORS;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+MISSILE;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+NOTELEPORT;
+		-NOGRAVITY;
+		Gravity 0.35;
+		BounceFactor 1.0;
+		Radius 4;
+		Height 4;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		reactiontime = Random[ExploS](6,12);
+		double ang, pt;
+		ang = FRandom[ExploS](0,360);
+		pt = FRandom[ExploS](-90,90);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](12.,30.);
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			A_CountDown();
+			Spawn("CandyMagTrail",pos);
+			SWWMHandler.DoBlast(self,50+3*reactiontime,3000+500*reactiontime);
+			double spd = vel.length();
+			vel = (vel*.1+(FRandom[ExploS](-.1,.1),FRandom[ExploS](-.1,.1),FRandom[ExploS](-.1,.1))).unit()*spd;
+			A_Explode(20+reactiontime/2,50+3*reactiontime);
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel+vel*.2;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](2,7);
+			s.scale *= 2.4;
+			s.alpha *= 0.1+.4*(ReactionTime/12.);
+			int numpt = Random[ExploS](ReactionTime-12,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("TinyCandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](8,20);
+			}
+		}
+		Wait;
+	}
+}
+
+Class CandyMagTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		Scale 2.4;
+		Alpha 0.7;
+	}
+	States
+	{
+	Spawn:
+		XEX3 ABCDEFGHIJKLMNOPQRS 1 Bright A_SetScale(scale.x*.9);
+		Stop;
+	}
+}
+
+Class CandyMagTrailBig : CandyMagTrail
+{
+	Default
+	{
+		Scale 3.;
+	}
+	States
+	{
+	Spawn:
+		XEX3 AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSS 1 Bright A_SetScale(scale.x*.95);
+		Stop;
+	}
+}
+
+Class CandyMagArmBig : CandyMagArm
+{
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		vel *= 2.;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			ReactionTime--;
+			Spawn("CandyMagTrailBig",pos);
+			SWWMHandler.DoBlast(self,100+3*reactiontime,3000+500*reactiontime);
+			double spd = vel.length();
+			vel = (vel*.1+(FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5))).unit()*spd;
+			A_Explode(50+reactiontime,100+3*reactiontime);
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel+vel*.2;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](2,7);
+			s.scale *= 2.4;
+			s.alpha *= 0.1+.4*(ReactionTime/12.);
+			int numpt = Random[ExploS](ReactionTime-30,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("TinyCandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](30,60);
+			}
+			if ( ReactionTime <= 0 )
+			{
+				numpt = Random[ExploS](3,9);
+				for ( int i=0; i<numpt; i++ )
+				{
+					double ang = FRandom[ExploS](0,360);
+					double pt = FRandom[ExploS](-90,90);
+					let s = Spawn("CandyBeam",pos);
+					s.target = target;
+					s.angle = ang;
+					s.pitch = pt;
+					s.ReactionTime += Random[ExploS](10,30);
+				}
+				A_StartSound("candygun/maghit",CHAN_VOICE,CHANF_DEFAULT,.5,.4,1.5);
+				Destroy();
+			}
+		}
+		Wait;
+	}
+}
+
+Class CandyGunProj : Actor
+{
+	double pitchvel, anglevel;
+	Vector3 cvel;
+
+	Default
+	{
+		DamageType "Explodium";
+		Radius 6;
+		Height 6;
+		Gravity 0.5;
+		Speed 30;
+		PROJECTILE;
+		-NOGRAVITY;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+INTERPOLATEANGLES;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+	}
+	void A_BlowUp()
+	{
+		angle = atan2(cvel.y,cvel.x);
+		pitch = asin(-cvel.z);
+		bNOGRAVITY = true;
+		A_SetRenderStyle(1.,STYLE_Add);
+		Scale *= 6.+.2*special1;
+		A_AlertMonsters();
+		SWWMHandler.DoBlast(self,300+20*special1,80000+8000*special1);
+		A_Explode(1500+200*special1,300+20*special1);
+		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
+		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
+		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
+		A_SprayDecal("HugeScorch",172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](35,50);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,20);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](32,224));
+			s.special1 = Random[ExploS](1,8);
+			s.scale *= 4.;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](30,40);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,20);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](40,60);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,32);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		numpt = int(Random[ExploS](2,3)*(1.+.4*special1));
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("CandyMagArmBig",pos);
+			s.target = target;
+		}
+		Spawn("CandyLight3",pos);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			pitch += pitchvel;
+			angle += anglevel;
+			if ( vel.length() > 0. ) cvel = vel.unit();
+		}
+		Wait;
+	Death:
+		TNT1 A 0 A_BlowUp();
+		XEX3 AAABBBCCCDDDEEEFFFGGGHHHIIIJJJKKKLLLMMMNNNOOOPPPQQQRRRSSS 1 Bright
+		{
+			int numpt = Random[ExploS](-frame,6);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("CandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](-12,32)+(25-frame)/2;
+			}
+		}
+		Stop;
+	}
+}
+
+Class CandyMagProj : Actor
+{
+	double pitchvel, anglevel;
+	Vector3 cvel;
+
+	Default
+	{
+		DamageType "Explodium";
+		Radius 6;
+		Height 6;
+		Gravity 0.5;
+		Speed 30;
+		PROJECTILE;
+		-NOGRAVITY;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+INTERPOLATEANGLES;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+	}
+	void A_BlowUp()
+	{
+		angle = atan2(cvel.y,cvel.x);
+		pitch = asin(-cvel.z);
+		bNOGRAVITY = true;
+		A_SetRenderStyle(1.,STYLE_Add);
+		Scale *= 3.+.2*special1;
+		A_AlertMonsters();
+		SWWMHandler.DoBlast(self,200+20*special1,80000+8000*special1);
+		A_Explode(300+200*special1,200+20*special1);
+		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
+		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
+		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
+		A_SprayDecal("BigScorch",172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](24,40);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,12);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](1,5);
+			s.scale *= 3.2;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](20,40);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,20);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](25,60);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,32);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		numpt = int(Random[ExploS](2,4)*(1.+.4*special1));
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("CandyMagArm",pos);
+			s.target = target;
+		}
+		Spawn("CandyLight2",pos);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			pitch += pitchvel;
+			angle += anglevel;
+			if ( vel.length() > 0. ) cvel = vel.unit();
+		}
+		Wait;
+	Death:
+		TNT1 A 0 A_BlowUp();
+		XEX3 AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSS 1 Bright
+		{
+			int numpt = Random[ExploS](-frame,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("CandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](-12,12)+(25-frame)/2;
+			}
+		}
+		Stop;
+	}
+}
+
+Class CandyBulletImpact : Actor
+{
+	Default
+	{
+		DamageType "Explodium";
+		RenderStyle "Add";
+		Scale 2.;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_AlertMonsters();
+		SWWMHandler.DoBlast(self,200,48000);
+		A_Explode(300,200);
+		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
+		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
+		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);
+		A_SprayDecal("Scorch",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](15,30);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](1,3);
+			s.scale *= 2.4;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](12,16);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,6);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](10,24);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Spawn("CandyLight",pos);
+	}
+	States
+	{
+	Spawn:
+		XEX3 ABCDEFGHIJKLMNOPQRS 1 Bright
+		{
+			int numpt = Random[ExploS](-frame,6);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("TinyCandyBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](-4,8);
+			}
+		}
+		Stop;
+	}
+}
+
+Class CandyWeaponLight : SWWMWeaponLight
+{
+	Default
+	{
+		args 255,64,224,150;
+	}
+}
+
 Class CandyGun : SWWMWeapon
 {
+	int clipcount;
+	bool chambered;
+	transient ui TextureID WeaponBox;
+	transient ui HUDFont mTewiFont;
+	bool tospecial;
+
+	Property ClipCount : ClipCount;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Munch");
+	}
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/CandygunDisplay.png",TexMan.Type_Any);
+		if ( !mTewiFont ) mTewiFont = HUDFont.Create("TewiShaded");
+		Screen.DrawTexture(WeaponBox,false,bx-52,by-45,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( chambered ) Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-23,by-22,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-20,by-15,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int cx = (Ammo1.Amount>9)?49:46;
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-cx,by-19,String.Format("%d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-38,by-41,String.Format("%d",Ammo2.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	action void A_Schutt()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.chambered = invoker.clipcount;
+		invoker.clipcount = max(invoker.clipcount-1,0);
+		A_StartSound("candygun/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(5,5,5,5,0,15,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:2.);
+		A_ZoomFactor(.94,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		A_AlertMonsters();
+		A_Recoil(2.2);
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-2*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.005);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		FLineTraceData d;
+		LineTrace(atan2(dir.y,dir.x),10000,asin(-dir.z),TRF_ABSPOSITION|TRF_NOSKY,origin.z,origin.x,origin.y,d);
+		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
+		if ( d.HitType == TRACE_HitActor )
+		{
+			int dmg = 350;
+			SWWMHandler.DoKnockback(d.HitActor,d.HitDir,72000);
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			if ( d.HitActor.bNOBLOOD )
+			{
+				let p = Spawn("SWWMBulletImpact",d.HitLocation);
+				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+				p.pitch = asin(d.HitDir.z);
+			}
+			else
+			{
+				d.HitActor.TraceBleed(dmg,self);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+			}
+			let b = Spawn("CandyBulletImpact",d.HitLocation-d.HitDir*4.);
+			b.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+			b.pitch = asin(d.HitDir.z);
+			b.target = self;
+		}
+		else if ( d.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+			let b = Spawn("CandyBulletImpact",d.HitLocation+hitnormal*4.);
+			b.angle = atan2(hitnormal.y,hitnormal.x);
+			b.pitch = asin(-hitnormal.z);
+			b.target = self;
+		}
+		for ( int i=0; i<6; i++ )
+		{
+			let s = Spawn("SWWMViewSmoke",origin);
+			SWWMViewSmoke(s).ofs = (15,4.5,-3);
+			s.target = self;
+			s.alpha *= 0.5;
+		}
+	}
+
+	action void A_ThrowMag()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.01);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("CandyMagProj",origin);
+		p.special1 = invoker.special1;
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		p.vel.z += 5.;
+		p.vel += vel*.5;
+	}
+
+	action void A_ThrowGun()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+			weap.Ammo2.Amount = max(0,weap.Ammo2.Amount-1);
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.015);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("CandyGunProj",origin);
+		p.special1 = invoker.clipcount+invoker.chambered;
+		invoker.clipcount = 0;
+		invoker.chambered = false;
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		p.vel.z += 5.;
+		p.vel += vel*.5;
+	}
+
+	action void A_DropMag( bool loaded = false )
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
+		let c = Spawn(loaded?"CandyMag":"CandyMagEmpty",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	action void A_DropCasing()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+8*y-10*z);
+		let c = Spawn("CandyCasing",origin);
+		c.special1 = special1;
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](2,4)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	override bool CheckAmmo( int fireMode, bool autoSwitch, bool requireAmmo, int ammocount )
+	{
+		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
+		if ( fireMode == PrimaryFire ) return (chambered || (Ammo1.Amount > 0));
+		if ( fireMode == AltFire ) return (Ammo1.Amount > 0);
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		if ( item.GetClass() == GetClass())
+		{
+			if ( Ammo2.Amount < Ammo2.MaxAmount )
+				Weapon(item).AmmoGive2 = 1;
+			if ( Weapon(item).PickupForAmmo(self) )
+				item.bPickupGood = true;
+			return true;
+		}
+		return false;
+	}
+
 	Default
 	{
 		Tag "$T_CANDYGUN";
@@ -11,5 +972,178 @@ Class CandyGun : SWWMWeapon
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 9;
 		Stamina 70000;
+		Weapon.AmmoType1 "CandyGunAmmo";
+		Weapon.AmmoType2 "CandyGunSpares";
+		Weapon.AmmoGive1 1;
+		Weapon.AmmoGive2 0;
+		CandyGun.ClipCount 7;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 B 2 A_FullRaise();
+		XZW2 CDEFGH 2;
+		Goto Ready;
+	Ready:
+		XZW2 A 1
+		{
+			invoker.CheckAmmo(EitherFire,true);
+			if ( (invoker.clipcount <= 0) && !invoker.chambered && (invoker.Ammo1.Amount > 0) ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
+			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
+			else
+			{
+				int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+				if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) || (invoker.Ammo1.Amount > 0) || invoker.chambered ) flg |= WRF_ALLOWRELOAD;
+				if ( (invoker.Ammo1.Amount <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) ) flg |= WRF_NOSECONDARY;
+				A_WeaponReady(flg);
+			}
+		}
+		Wait;
+	Fire:
+		XZW2 A 1 A_Schutt();
+		XZW2 IJKLM 1;
+		XZW2 N 1 A_Recoil(-1.2);
+		XZW2 OPQR 1;
+		XZW2 S 2 A_DropCasing();
+		Goto Ready;
+	AltFire:
+		XZW2 A 2 A_JumpIf(invoker.clipcount<=0,"Reload");
+		XZW5 NO 2;
+		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 Q 1;
+		XZW5 R 1
+		{
+			if ( player.cmd.buttons&BT_ATTACK && (((invoker.Ammo1.Amount > 0) && (invoker.Ammo2.Amount > 0)) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+				player.SetPSprite(PSP_WEAPON,ResolveState("SpecialFire"));
+		}
+		XZW5 STUVWXYZ 1;
+		XZW6 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 B 1;
+		XZW6 C 1
+		{
+			A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.special1 = invoker.clipcount;
+			invoker.clipcount = 0;
+		}
+		XZW6 D 1 A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 EFGHIJKLMNOPRS 1;
+		XZW6 T 1 A_ThrowMag();
+		XZW6 UVWXY 2;
+		XZW6 Z 4;
+		Goto ReloadEnd;
+	SpecialFire:
+		#### # 1;
+		XZWA Z 1;
+		XZWB ABC 1;
+		XZWB D 1 A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB EFGHIJKLMNOPQR 1;
+		XZWB S 1 A_ThrowGun();
+		XZWB TUVWXYZ 2;
+		XZW1 B 0
+		{
+			invoker.PlayUpSound(self);
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+			invoker.clipcount = invoker.default.clipcount;
+		}
+		Goto Select;
+	Reload:
+		XZW2 A 1
+		{
+			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
+			else if ( (invoker.Ammo1.Amount <= 0) || invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
+			return ResolveState(null);
+		}
+		XZW2 TUVWXYZ 1;
+		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 B 1 { invoker.clipcount = 0; }
+		XZW3 C 1;
+		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 EFGH 1;
+		XZW3 I 1 A_DropMag(true);
+		Goto ReloadEnd;
+	ReloadEmpty:
+		XZW2 A 1;
+		XZW3 JKLMNOP 1;
+		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 RS 1;
+		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 UVWX 1;
+		XZW3 Y 1 A_DropMag();
+		Goto ReloadEnd;
+	ReloadEnd:
+		XZW3 Z 1;
+		XZW4 ABCDE 1;
+		XZW4 F 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 GHIJKLMNOPQ 1;
+		XZW4 R 1
+		{
+			A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.clipcount = invoker.default.clipcount;
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+		}
+		XZW4 STUV 1;
+		XZW2 A 1 A_JumpIf(!invoker.chambered,"Slide");
+		Goto Ready;
+	Slide:
+		XZW2 A 1;
+		XZW4 WXY 1;
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 BC 1;
+		XZW5 D 1 { invoker.chambered = true; invoker.clipcount--; }
+		XZW5 EFG 1;
+		XZW5 H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 IJKLM 1;
+		Goto Ready;
+	Zoom:
+		XZW2 A 1 A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		Goto Ready;
+	CheckBullet:
+		XZW2 A 1;
+		XZW7 ABCDE 1;
+		XZW7 F 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 GHIJKLMNOP 1;
+		XZW7 Q 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 RS 1;
+		Goto Ready;
+	User1:
+		XZW2 A 1;
+		XZW7 TU 1;
+	User1Hold:
+		XZW7 V 1 A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 WX 1;
+		XZW7 Y 1 A_Melee();
+		XZW7 Z 2;
+		XZW8 ABCDE 2;
+		XZW8 F 1 A_JumpIf(player.cmd.buttons&BT_USER1,"User1Hold");
+		XZW2 B 0 { invoker.PlayUpSound(self); }
+		Goto Select;
+	Zoom1:
+		XZW2 A 2 A_StartSound("explodium/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 GHIJKLMNOPQRSTUVWXYZ 2;
+		Goto Ready;
+	Zoom2:
+		XZW2 A 1 A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 ABCDEFGHIJKLMNOPQRSTUVW 1;
+		Goto Ready;
+	Deselect:
+		XZW2 A 2 A_StartSound("explodium/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWA TUVW 2;
+		XZW2 B 2;
+		XZW2 B -1 A_FullLower();
+		Stop;
+	Flash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](0,9);
+			let l = Spawn("CandyWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
 	}
 }

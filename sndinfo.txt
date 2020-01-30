@@ -280,6 +280,8 @@ explodium/slideback	sounds/explodiumgun/expl_slideback.ogg
 explodium/slideforward	sounds/explodiumgun/expl_slideforward.ogg
 explodium/speen		sounds/explodiumgun/expl_speen.ogg
 explodium/throwmag	sounds/explodiumgun/expl_throwmag.ogg
+$limit explodium/hit 32
+$limit explodium/maghit 32
 
 candygun/fire1		sounds/candygun/candy_fire1.ogg
 candygun/fire2		sounds/candygun/candy_fire2.ogg
@@ -287,13 +289,17 @@ candygun/fire3		sounds/candygun/candy_fire3.ogg
 $random candygun/fire { candygun/fire1 candygun/fire2 candygun/fire3 }
 candygun/hit1		sounds/candygun/candy_hit1.ogg
 candygun/hit2		sounds/candygun/candy_hit2.ogg
-$random candygun/hit { candygun/hit1 candygun/hit2 }
+candygun/hit3		sounds/candygun/candy_hit3.ogg
+$random candygun/hit { candygun/hit1 candygun/hit2 candygun/hit3 }
 candygun/maghit1	sounds/candygun/candy_maghit1.ogg
 candygun/maghit2	sounds/candygun/candy_maghit2.ogg
 $random candygun/maghit { candygun/maghit1 candygun/maghit2 }
 candygun/gunhit1	sounds/candygun/candy_gunhit1.ogg
 candygun/gunhit2	sounds/candygun/candy_gunhit2.ogg
 $random candygun/gunhit { candygun/gunhit1 candygun/gunhit2 }
+$limit candygun/hit 32
+$limit candygun/maghit 32
+$limit candygun/gunhit 32
 
 $playersound demolitionist neutral *grunt	DSEMPTY
 $playeralias demolitionist neutral *pain100	demolitionist/lopain
@@ -331,3 +337,12 @@ menu/invalid	sounds/hmenu/hmenu2.ogg
 menu/dismiss	sounds/hmenu/hmenu2.ogg
 menu/choose	sounds/hmenu/hmenu1.ogg
 menu/clear	sounds/hmenu/hmenu2.ogg
+
+menu/demoopen	sounds/menu/openkbase.ogg
+menu/demotab	sounds/menu/menutab.ogg
+menu/demosel	sounds/menu/menuset.ogg
+menu/demoscroll	sounds/menu/menuscroll.ogg
+menu/democlose	sounds/menu/menuclose.ogg
+
+menu/invsel	sounds/menu/invsel.ogg
+menu/noinvuse	sounds/menu/failinv.ogg

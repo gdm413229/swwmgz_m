@@ -32,6 +32,53 @@ Class SWWMUtility
 	}
 }
 
+// Stats
+Class WeaponUsage
+{
+	Class<Weapon> w;
+	int kills;
+}
+
+Class SWWMStats : Thinker
+{
+	PlayerInfo myplayer;
+	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
+		deaths,	damagedealt, damagetaken, mkill, hiscore, topdealt,
+		toptaken;
+	double grounddist, airdist, fuelusage, topspeed;
+	Array<WeaponUsage> wstats;
+	int favweapon;
+
+	void AddWeaponKill( Class<Weapon> which )
+	{
+		for ( int i=0; i<wstats.Size(); i++ )
+		{
+			if ( wstats[i].w != which ) continue;
+			wstats[i].kills++;
+			if ( (favweapon == -1) || (wstats[favweapon].kills < wstats[i].kills) ) favweapon = i;
+			return;
+		}
+		let ws = new("WeaponUsage");
+		ws.w = which;
+		ws.kills = 1;
+		wstats.Push(ws);
+		if ( (favweapon == -1) || (wstats[favweapon].kills < ws.kills) )
+			favweapon = wstats.Size()-1;
+	}
+
+	static clearscope SWWMStats Find( PlayerInfo p )
+	{
+		let ti = ThinkerIterator.Create("SWWMStats",STAT_STATIC);
+		SWWMStats t;
+		while ( t = SWWMStats(ti.Next()) )
+		{
+			if ( t.myplayer != p ) continue;
+			return t;
+		}
+		return null;
+	}
+}
+
 // Scoring
 Class SWWMCredits : Thinker
 {
@@ -44,6 +91,8 @@ Class SWWMCredits : Thinker
 		if ( !c ) return;
 		if ( (c.credits+amount < c.credits) || (c.credits+amount > 999999999) ) c.credits = 999999999;
 		else c.credits += amount;
+		let s = SWWMStats.Find(p);
+		if ( s && (c.credits > s.hiscore) ) s.hiscore = c.credits;
 	}
 
 	static clearscope bool CanTake( PlayerInfo p, int amount )
@@ -137,27 +186,32 @@ Class SWWMTradeHistory : Thinker
 Class SWWMLore
 {
 	String tag, text;
+	bool read;
 }
 
 Class SWWMLoreLibrary : Thinker
 {
 	PlayerInfo myplayer;
 	Array<SWWMLore> ent;
+	int lastaddtic;
 
 	void DirectAdd( String ref )
 	{
 		ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
-		String text =  String.Format("SWWM_LORETXT_%s",ref);
+		String text = String.Format("SWWM_LORETXT_%s",ref);
 		// check that it's valid
 		if ( StringTable.Localize(tag,false) == tag ) return;
 		if ( StringTable.Localize(text,false) == text ) return;
 		// check if existing
 		for ( int i=0; i<ent.Size(); i++ )
 		{
-			if ( ent[i].tag != tag ) continue;
+			if ( ent[i].tag != "$"..tag ) continue;
 			return;
 		}
+		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) )
+			Console.Printf(StringTable.Localize("$SWWM_NEWLORE"));
+		lastaddtic = gametic;
 		SWWMLore e = new("SWWMLore");
 		e.tag = "$"..tag;
 		e.text = "$"..text;
@@ -167,19 +221,7 @@ Class SWWMLoreLibrary : Thinker
 		for ( int i=0; i<ent.Size(); i++ )
 		{
 			locb = StringTable.Localize(ent[i].tag);
-			bool less = false;
-			int lena = loca.CodePointCount(),
-				lenb = locb.CodePointCount();
-			int lim = min(lena,lenb);
-			for ( int j=0; j<lim; j++ )
-			{
-				cpa = loca.GetNextCodePoint(j);
-				cpb = locb.GetNextCodePoint(j);
-				if ( cpa >= cpb ) continue;
-				less = true;
-				break;
-			}
-			if ( !less ) continue;
+			if ( locb < loca ) continue;
 			ent.Insert(i,e);
 			return;
 		}
@@ -832,6 +874,12 @@ Class SWWMHandler : EventHandler
 			AddOneliner("mapstart");
 	}
 
+	override void PlayerDied( PlayerEvent e )
+	{
+		let s = SWWMStats.Find(players[e.playernumber]);
+		if ( s ) s.deaths++;
+	}
+
 	override void PlayerEntered( PlayerEvent e )
 	{
 		// create some static thinkers for this player
@@ -857,38 +905,48 @@ Class SWWMHandler : EventHandler
 			l.ChangeStatNum(Thinker.STAT_STATIC);
 			l.myplayer = p;
 			// pre-add some lore
+			l.DirectAdd("AkariLabs");
 			l.DirectAdd("Belt");
 			l.DirectAdd("Collar");
+			l.DirectAdd("Cyrus");
 			l.DirectAdd("Demolitionist");
 			l.DirectAdd("Display");
+			l.DirectAdd("DeepImpact");
+			l.DirectAdd("ExplodiumGun");
+			l.DirectAdd("Forx");
 			l.DirectAdd("Hammerspace");
 			l.DirectAdd("Ibuki");
-			l.DirectAdd("Knowledgebase");
+			l.DirectAdd("Locke");
+			l.DirectAdd("Munch");
 			l.DirectAdd("Propulsor");
 			l.DirectAdd("Saya");
 			l.DirectAdd("Voicebox");
 			if ( gameinfo.gametype&GAME_Doom )
 			{
 				l.DirectAdd("Doomguy");
-				l.DirectAdd("Earth");
 				l.DirectAdd("Hell");
 				l.DirectAdd("UAC");
 			}
 			else if ( gameinfo.gametype&GAME_Heretic )
 			{
-				l.DirectAdd("Corvus");
 				l.DirectAdd("Parthoris");
 				l.DirectAdd("SerpentRiders");
 				l.DirectAdd("Sidhe");
 			}
 			else if ( gameinfo.gametype&GAME_Hexen )
 			{
-				l.DirectAdd("Baratus");
 				l.DirectAdd("Cronos");
-				l.DirectAdd("Daedolon");
-				l.DirectAdd("Parias");
 				l.DirectAdd("SerpentRiders");
 			}
+		}
+		SWWMStats s = SWWMStats.Find(p);
+		if ( !s )
+		{
+			s = new("SWWMStats");
+			s.ChangeStatNum(Thinker.STAT_STATIC);
+			s.myplayer = p;
+			s.lastspawn = gametic;
+			s.favweapon = -1;
 		}
 		// reset some vars
 		multilevel[e.playernumber] = 0;
@@ -986,26 +1044,48 @@ Class SWWMHandler : EventHandler
 	override void WorldThingDamaged( WorldEvent e )
 	{
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
-		if ( e.Thing.player ) tookdamage[e.Thing.PlayerNumber()] = true;
-		if ( e.DamageSource && (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+		if ( e.Thing.player )
 		{
-			if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-				lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",15);
-			highesttic = gametic;
+			tookdamage[e.Thing.PlayerNumber()] = true;
+			let s = SWWMStats.Find(e.Thing.player);
+			s.damagetaken += e.Damage;
+			if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
 		}
-		if ( e.DamageSource && (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
+		if ( e.DamageSource && e.DamageSource.player )
 		{
-			if ( e.Thing.IsFriend(e.DamageSource) )
+			let s = SWWMStats.Find(e.DamageSource.player);
+			s.damagedealt += e.Damage;
+			if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+		}
+		if ( e.DamageSource && (e.DamageSource != e.Thing) )
+		{
+			if ( (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
 			{
 				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-					lastcombat = AddOneliner("hitfriend",15);
+					lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",15);
 				highesttic = gametic;
+			}
+			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
+			{
+				if ( e.Thing.IsFriend(e.DamageSource) )
+				{
+					if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
+						lastcombat = AddOneliner("hitfriend",15);
+					highesttic = gametic;
+				}
 			}
 		}
 		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
 		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill ) return;
 		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
 		{
+			let s = SWWMStats.Find(e.DamageSource.player);
+			if ( s )
+			{
+				s.kills++;
+				if ( e.DamageSource.player.ReadyWeapon )
+					s.AddWeaponKill(e.DamageSource.player.ReadyWeapon.GetClass());
+			}
 			if ( e.DamageSource == players[consoleplayer].mo )
 			{
 				highesttic = gametic;
@@ -1016,8 +1096,12 @@ Class SWWMHandler : EventHandler
 				return;
 			int pnum = e.DamageSource.PlayerNumber();
 			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
+			{
 				multilevel[pnum]++;
+			}
 			else multilevel[pnum] = 0;
+			if ( s && (multilevel[pnum]+1 > s.mkill) )
+				s.mkill = multilevel[pnum]+1;
 			lastkill[pnum] = level.maptime;
 			// scoring
 			int score = min(2000,int(ceil(e.Thing.SpawnHealth()*.5)*10));
@@ -1088,8 +1172,8 @@ Class SWWMHandler : EventHandler
 		if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
 		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') )
 		{
-			if ( Random[Replacements](0,1) ) e.Replacement = 'Ynykron';
-			else e.Replacement = 'CandyGun';
+			/*if ( Random[Replacements](0,1) ) e.Replacement = 'Ynykron';
+			else */e.Replacement = 'CandyGun';
 		}
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'CandyGun';
 	}
@@ -1114,7 +1198,8 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
-		else if ( e.Name.Left(14) ~== "swwmstoregive." )
+		if ( e.IsManual ) return;
+		if ( e.Name.Left(14) ~== "swwmstoregive." )
 		{
 			Class<Inventory> item = e.Name.Mid(14);
 			if ( !item ) return;
@@ -1139,6 +1224,29 @@ Class SWWMHandler : EventHandler
 				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),def.GetTag(),players[e.Args[1]].GetUserName());
 				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),def.GetTag());
 			}
+		}
+		else if ( e.Name ~== "swwmmarkloreread" )
+		{
+			let l = SWWMLoreLibrary.Find(players[e.Args[0]]);
+			l.ent[e.Args[1]].read = true;
+		}
+		else if ( e.Name.Left(12) ~== "swwmuseitem." )
+		{
+			Class<Inventory> item = e.Name.Mid(12);
+			if ( !item ) return;
+			let i = players[e.Args[0]].mo.FindInventory(item);
+			if ( !i ) return;
+			players[e.Args[0]].mo.UseInventory(i);
+		}
+		else if ( e.Name.Left(13) ~== "swwmdropitem." )
+		{
+			Class<Inventory> item = e.Name.Mid(13);
+			if ( !item ) return;
+			let i = players[e.Args[0]].mo.FindInventory(item);
+			if ( !i ) return;
+			let drop = players[e.Args[0]].mo.DropInventory(i,i.default.Amount);
+			// add some random velocity so multiple drops don't get bunched together
+			if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
 		}
 	}
 
@@ -1168,7 +1276,7 @@ Class SWWMHandler : EventHandler
 			double dist = max(1,dir.length());
 			double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
 			dir = dir/dist;
-			a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.mass));
+			a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*max(50,a.mass)));
 		}
 	}
 
@@ -1176,7 +1284,7 @@ Class SWWMHandler : EventHandler
 	static void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer )
 	{
 		if ( !Victim || !Victim.bSHOOTABLE || Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) ) return;
-		Victim.vel += HitDirection*(MomentumTransfer/(Thinker.TICRATE*Victim.Mass));
+		Victim.vel += HitDirection*(MomentumTransfer/(Thinker.TICRATE*max(50,Victim.Mass)));
 	}
 
 	static void DoSwing( Actor target, Vector2 dir, double initial, double inc, int steps, int mode = 0, int delay = 0, double rmul = 1.0 )

@@ -238,7 +238,7 @@ Class CandyPop : Actor
 			Scale.y *= RandomPick[ExploS](-1,1);
 			roll = FRandom[Explos](0,360);
 			Spawn("CandyPLight",pos);
-			FlashPlayer(128,1200);
+			FlashPlayer(60,800);
 			A_StartSound("candygun/hit",CHAN_VOICE,CHANF_DEFAULT,.08,.6,1.3);
 			int numpt = Random[ExploS](-3,3);
 			for ( int i=0; i<numpt; i++ )
@@ -305,7 +305,7 @@ Class TinyCandyPop : CandyPop
 			Scale.y *= RandomPick[ExploS](-1,1);
 			roll = FRandom[Explos](0,360);
 			Spawn("CandyPLight2",pos);
-			FlashPlayer(64,500);
+			FlashPlayer(20,250);
 			int numpt = Random[ExploS](1,3);
 			for ( int i=0; i<numpt; i++ )
 			{
@@ -516,7 +516,7 @@ Class CandyGunProj : Actor
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
-		A_SprayDecal("HugeScorch",172);
+		A_SprayDecal("WumboScorch",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -624,7 +624,7 @@ Class CandyMagProj : Actor
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
-		A_SprayDecal("BigScorch",172);
+		A_SprayDecal("HugeScorch",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -715,7 +715,7 @@ Class CandyBulletImpact : Actor
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);
-		A_SprayDecal("Scorch",-172);
+		A_SprayDecal("BigScorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -815,6 +815,7 @@ Class CandyGun : SWWMWeapon
 		A_ZoomFactor(.94,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
 		A_SWWMFlash();
+		SWWMHandler.DoFlash(self,Color(64,224,64,255),5);
 		A_AlertMonsters();
 		A_Recoil(2.2);
 		Vector3 x, y, z, x2, y2, z2;

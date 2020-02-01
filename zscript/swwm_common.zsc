@@ -278,7 +278,9 @@ Class SWWMOneLiner : HUDMessageBase
 		int margin = safezone.GetInt();
 		Vector2 hs = StatusBar.GetHUDScale();
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		String locs = "\""..StringTable.Localize(whichline).."\"";
+		String loc = StringTable.Localize(whichline);
+		if ( loc.Length() <= 0 ) return;	// don't draw empty strings
+		String locs = "\""..loc.."\"";
 		// split so it can fit
 		BrokenLines l = TewiFont.BreakLines(locs,int(ss.x*.5));
 		int maxlen = 0;
@@ -625,7 +627,57 @@ Class SWWMNothing : Actor
 	}
 }
 
+Class PoofLight : PaletteLight
+{
+	Default
+	{
+		Tag "Yellow";
+		ReactionTime 5;
+		Args 0,0,0,60;
+	}
+}
+
 Class SWWMItemFog : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+	}
+	States
+	{
+	Spawn:
+		BLPF A 2 Bright NoDelay
+		{
+			// offset up
+			SetOrigin(Vec3Offset(0,0,16),false);
+			roll = FRandom[ExploS](0,360);
+			scale *= FRandom[ExploS](0.9,1.1);
+			scale.x *= RandomPick[ExploS](-1,1);
+			scale.y *= RandomPick[ExploS](-1,1);
+			int numpt = Random[ExploS](16,32);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
+				let s = Spawn("SWWMSmallSmoke",pos);
+				s.vel = pvel;
+				s.SetShade(Color(3,2,1)*Random[ExploS](64,85));
+				s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+				s.scale *= 3.;
+				s.alpha *= .2;
+			}
+			Spawn("PoofLight",pos);
+		}
+		BLPF A 1 Bright A_FadeOut(.3);
+		Wait;
+	}
+}
+
+Class SWWMTeleportFog : Actor
 {
 	States
 	{
@@ -646,6 +698,7 @@ Class InvisibleSplasher : Actor
 {
 	Default
 	{
+		Mass 100;
 		VSpeed -2;
 	}
 	States
@@ -926,6 +979,7 @@ Class SWWMHandler : EventHandler
 			l.DirectAdd("Forx");
 			l.DirectAdd("Hammerspace");
 			l.DirectAdd("Ibuki");
+			l.DirectAdd("KnowledgeBase");
 			l.DirectAdd("Locke");
 			l.DirectAdd("Munch");
 			l.DirectAdd("Propulsor");
@@ -1139,6 +1193,32 @@ Class SWWMHandler : EventHandler
 			// TODO floating score for HUD
 			spreecount[pnum]++;
 		}
+	}
+
+	// tempfix keys have no tags
+	override void WorldThingSpawned( WorldEvent e )
+	{
+		if ( e.Thing is 'RedCard' ) e.Thing.SetTag("$T_REDCARD");
+		else if ( e.Thing is 'BlueCard' ) e.Thing.SetTag("$T_BLUECARD");
+		else if ( e.Thing is 'YellowCard' ) e.Thing.SetTag("$T_YELLOWCARD");
+		else if ( e.Thing is 'RedSkull' ) e.Thing.SetTag("$T_REDSKULL");
+		else if ( e.Thing is 'BlueSkull' ) e.Thing.SetTag("$T_BLUESKULL");
+		else if ( e.Thing is 'YellowSkull' ) e.Thing.SetTag("$T_YELLOWSKULL");
+		else if ( e.Thing is 'KeyYellow' ) e.Thing.SetTag("$T_YELLOWKEY");
+		else if ( e.Thing is 'KeyGreen' ) e.Thing.SetTag("$T_GREENKEY");
+		else if ( e.Thing is 'KeyBlue' ) e.Thing.SetTag("$T_BLUEKEY");
+		else if ( e.Thing.GetClassName() == 'KeyRed' ) e.Thing.SetTag("$T_REDKEY");
+		else if ( e.Thing is 'KeySteel' ) e.Thing.SetTag("$T_KEYSTEEL");
+		else if ( e.Thing is 'KeyCave' ) e.Thing.SetTag("$T_KEYCAVE");
+		else if ( e.Thing is 'KeyAxe' ) e.Thing.SetTag("$T_KEYAXE");
+		else if ( e.Thing is 'KeyFire' ) e.Thing.SetTag("$T_KEYFIRE");
+		else if ( e.Thing is 'KeyEmerald' ) e.Thing.SetTag("$T_KEYEMERALD");
+		else if ( e.Thing is 'KeyDungeon' ) e.Thing.SetTag("$T_KEYDUNGEON");
+		else if ( e.Thing is 'KeySilver' ) e.Thing.SetTag("$T_KEYSILVER");
+		else if ( e.Thing is 'KeyRusted' ) e.Thing.SetTag("$T_KEYRUSTED");
+		else if ( e.Thing is 'KeyHorn' ) e.Thing.SetTag("$T_KEYHORN");
+		else if ( e.Thing is 'KeySwamp' ) e.Thing.SetTag("$T_KEYSWAMP");
+		else if ( e.Thing is 'KeyCastle' ) e.Thing.SetTag("$T_KEYCASTLE");
 	}
 
 	override void PostUiTick()
@@ -1423,8 +1503,19 @@ Class SWWMHandler : EventHandler
 			Class<Inventory> item = e.Name.Mid(10);
 			if ( !item ) return;
 			let def = GetDefaultByType(item);
-			int amt = ((item is 'Ammo')&&Ammo(def).default.DropAmount)?Ammo(def).DropAmount:def.Amount;
-			int cap = min(amt,players[e.Args[1]].mo.CountInv(item));
+			int amt = def.Amount;
+			// if it's an ammo, check the largest unit givable
+			if ( item is 'Ammo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<Ammo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
+			int ramt = players[e.Args[1]].mo.CountInv(item);
+			if ( amt > ramt ) amt = ramt;
 			if ( players[e.Args[1]].mo.GiveInventory(item,amt) )
 			{
 				players[e.Args[0]].mo.TakeInventory(item,amt);
@@ -1432,8 +1523,8 @@ Class SWWMHandler : EventHandler
 				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],def.GetTag());
 				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],def.GetTag());
 				// add messages
-				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),def.GetTag(),players[e.Args[1]].GetUserName());
-				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),def.GetTag());
+				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),amt,def.GetTag(),players[e.Args[1]].GetUserName());
+				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),amt,def.GetTag());
 			}
 		}
 		else if ( e.Name ~== "swwmmarkloreread" )
@@ -1455,9 +1546,44 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			let i = players[e.Args[0]].mo.FindInventory(item);
 			if ( !i ) return;
-			let drop = players[e.Args[0]].mo.DropInventory(i,((i is 'Ammo')&&Ammo(i).default.DropAmount)?Ammo(i).default.DropAmount:i.default.Amount);
+			int amt = i.default.Amount;
+			// if it's an ammo, check the largest unit givable
+			if ( i is 'Ammo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<Ammo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
+			if ( amt > i.Amount ) amt = i.Amount;
+			let drop = players[e.Args[0]].mo.DropInventory(i,amt);
 			// add some random velocity so multiple drops don't get bunched together
 			if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
+		}
+		else if ( e.Name ~== "swwmkoraxline" )
+		{
+			if ( consoleplayer != e.Args[1] ) return;
+			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= 3 ) return;
+			switch ( e.Args[0] )
+			{
+			case 0:
+				AddOneliner("koraxgreet",60);
+				break;
+			case 1:
+				AddOneliner("koraxblood",150);
+				break;
+			case 2:
+				AddOneliner("koraxgame",120);
+				break;
+			case 3:
+				AddOneliner("koraxworship",80);
+				break;
+			case 4:
+				AddOneliner("koraxmasters",90);
+				break;
+			}
 		}
 	}
 

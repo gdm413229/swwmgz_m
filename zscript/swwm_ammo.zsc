@@ -29,6 +29,18 @@ Mixin Class SWWMAmmo
 		return (amta < amtb);
 	}
 
+	override bool SpecialDropAction( Actor dropper )
+	{
+		if ( Amount != default.Amount )
+		{
+			// needed for positioning to work
+			Owner = dropper;
+			CreateTossable(Amount);
+			return true;
+		}
+		return false;
+	}
+
 	override inventory CreateTossable( int amt )
 	{
 		if ( bUndroppable || bUntossable || !Owner || (Amount <= 0) || (amt == 0) )
@@ -155,6 +167,12 @@ Mixin Class SWWMShellAmmo
 		}
 		return StringTable.Localize(tagstr);
 	}
+
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = max(1,Amount+Random[ShellDrop](-2,1));
+	}
 }
 
 Class RedShell : Ammo
@@ -228,7 +246,7 @@ Class GreenShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 40;
 		Ammo.BackpackAmount 4;
-		Ammo.DropAmount 4;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -280,7 +298,7 @@ Class WhiteShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
 		Ammo.BackpackAmount 2;
-		Ammo.DropAmount 4;
+		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -325,7 +343,7 @@ Class BlueShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 24;
 		Ammo.BackpackAmount 4;
-		Ammo.DropAmount 4;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -370,7 +388,7 @@ Class BlackShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 12;
 		Ammo.BackpackAmount 2;
-		Ammo.DropAmount 4;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -408,7 +426,7 @@ Class PurpleShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
 		Ammo.BackpackAmount 4;
-		Ammo.DropAmount 4;
+		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -475,7 +493,7 @@ Class EvisceratorShell : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 30;
 		Ammo.BackpackAmount 6;
-		Ammo.DropAmount 6;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -512,7 +530,7 @@ Class HellblazerMissiles : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 60;
 		Ammo.BackpackAmount 18;
-		Ammo.DropAmount 6;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -544,7 +562,7 @@ Class HellblazerCrackshots : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 24;
 		Ammo.BackpackAmount 6;
-		Ammo.DropAmount 3;
+		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -576,7 +594,7 @@ Class HellblazerRavagers : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 9;
 		Ammo.BackpackAmount 3;
-		Ammo.DropAmount 3;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -608,7 +626,7 @@ Class HellblazerWarheads : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
-		Ammo.DropAmount 2;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}

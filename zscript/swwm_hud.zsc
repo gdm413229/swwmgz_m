@@ -9,7 +9,7 @@ Class MsgLine
 Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex, InventoryTex, ChatTex[6],
-		HealthTex[4], FuelTex, DashTex;
+		HealthTex[5], FuelTex, DashTex;
 	HUDFont mTewiFont;
 
 	// "Full History" contains all messages since session start, nothing is flushed
@@ -38,6 +38,22 @@ Class SWWMStatusBar : BaseStatusBar
 			MainQueue.Delete(i);
 			i--;
 		}
+	}
+
+	override bool ProcessMidPrint( Font fnt, String msg, bool bold )
+	{
+		// check for Korax lines
+		if ( msg == StringTable.Localize("$TXT_ACS_MAP02_11_AREYO") )
+			EventHandler.SendNetworkEvent("swwmkoraxline",0,consoleplayer);
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP13_11_MYSER") )
+			EventHandler.SendNetworkEvent("swwmkoraxline",1,consoleplayer);
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP22_29_ITHIN") )
+			EventHandler.SendNetworkEvent("swwmkoraxline",2,consoleplayer);
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP27_10_THENA") )
+			EventHandler.SendNetworkEvent("swwmkoraxline",3,consoleplayer);
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP35_14_TOFAC") )
+			EventHandler.SendNetworkEvent("swwmkoraxline",4,consoleplayer);
+		return false;
 	}
 
 	override bool ProcessNotify( EPrintLevel printlevel, String outline )
@@ -91,14 +107,14 @@ Class SWWMStatusBar : BaseStatusBar
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
-			if ( gametic < (PickupQueue[i].tic+pickduration.GetInt()) ) continue;
+			if ( gametic < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
 			PickupQueue.Delete(i);
 			i--;
 		}
 		for ( int i=0; i<MainQueue.Size(); i++ )
 		{
-			if ( (MainQueue[i].type <= PRINT_HIGH) && (gametic < (MainQueue[i].tic+msgduration.GetInt())) ) continue;
-			else if ( (MainQueue[i].type > PRINT_HIGH) && (gametic < (MainQueue[i].tic+chatduration.GetInt())) ) continue;
+			if ( (MainQueue[i].type <= PRINT_HIGH) && (gametic < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
+			else if ( (MainQueue[i].type > PRINT_HIGH) && (gametic < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
 			MainQueue.Delete(i);
 			i--;
 		}
@@ -132,6 +148,7 @@ Class SWWMStatusBar : BaseStatusBar
 		HealthTex[1] = TexMan.CheckForTexture("graphics/HUD/HealthBar1.png",TexMan.Type_Any);
 		HealthTex[2] = TexMan.CheckForTexture("graphics/HUD/HealthBar2.png",TexMan.Type_Any);
 		HealthTex[3] = TexMan.CheckForTexture("graphics/HUD/HealthBar3.png",TexMan.Type_Any);
+		HealthTex[4] = TexMan.CheckForTexture("graphics/HUD/HealthBarS.png",TexMan.Type_Any);
 		ScoreTex = TexMan.CheckForTexture("graphics/HUD/ScoreBox.png",TexMan.Type_Any);
 		WeaponTex = TexMan.CheckForTexture("graphics/HUD/WeaponBox.png",TexMan.Type_Any);
 		ChatTex[0] = TexMan.CheckForTexture("graphics/HUD/ChatBoxTop.png",TexMan.Type_Any);
@@ -220,6 +237,12 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+21),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,dw,DTA_Alpha,alph);
 		int fw = FuelInter.GetValue();
 		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+25),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
+		if ( isInvulnerable() )
+		{
+			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%3d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			return;
+		}
 		int ht = clamp(HealthInter.GetValue(),0,10000);
 		int hw = min(ht,100);
 		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
@@ -272,8 +295,8 @@ Class SWWMStatusBar : BaseStatusBar
 				String cstr = MainQueue[i].str;
 				if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
 				int curtime = MainQueue[i].tic-gametic;
-				if ( MainQueue[i].type < PRINT_CHAT ) curtime += msgduration.GetInt();
-				else curtime += chatduration.GetInt();
+				if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*msgduration.GetInt();
+				else curtime += 35*chatduration.GetInt();
 				double alph = clamp(curtime/20.,0.,1.);
 				BrokenLines l = mTewiFont.mFont.BreakLines(cstr,smol?211:361);
 				for ( int j=0; j<l.Count(); j++ )
@@ -295,7 +318,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				String cstr = PickupQueue[i].str;
 				if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
-				int curtime = (PickupQueue[i].tic+pickduration.GetInt())-gametic;
+				int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-gametic;
 				double alph = clamp(curtime/20.,0.,1.);
 				BrokenLines l = mTewiFont.mFont.BreakLines(cstr,int(ss.x*.75));
 				int maxlen = 0;

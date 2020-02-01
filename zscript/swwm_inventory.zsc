@@ -321,7 +321,7 @@ Class SWWMWeapon : Weapon abstract
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 				self.angle += clamp(diff,-5.,5.);
 				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-				SWWMHandler.DoKnockback(d.HitActor,d.HitDir,dmg*1000);
+				SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*5000);
 				if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
 				if ( !d.HitActor.bNOBLOOD )
 				{

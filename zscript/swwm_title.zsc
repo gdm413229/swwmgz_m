@@ -1,0 +1,46 @@
+// Things for the titlemap
+
+Class SWWMTitleStuff : EventHandler
+{
+	transient ui TextureID tex[2];
+	transient ui Font TewiFont;
+
+	override void WorldTick()
+	{
+		if ( level.maptime == 1 ) S_ChangeMusic("music/TRAUMATI.XM");
+	}
+
+	override void RenderUnderlay( RenderEvent e )
+	{
+		if ( gamestate != GS_TITLELEVEL ) return;
+		if ( !tex[0] ) tex[0] = TexMan.CheckForTexture("graphics/UnSXLogo.png",TexMan.Type_Any);
+		if ( !tex[1] ) tex[1] = TexMan.CheckForTexture("graphics/SWWMGZLogo.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShadedInverse');
+		Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/Thinker.TICRATE)*.1,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+		double ar = Screen.GetAspectRatio();
+		Vector2 tsize = TexMan.GetScaledSize(tex[0]);
+		double sar = tsize.x/tsize.y;
+		Vector2 vsize;
+		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
+		else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
+		else vsize = tsize;
+		double alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-2,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-8,0.,1.);
+		Screen.DrawTexture(tex[0],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
+		String str = "presents";
+		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-10,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-16,0.,1.);
+		Screen.DrawText(TewiFont,Font.CR_WHITE,(160-TewiFont.StringWidth(str))/2,(100-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,160,DTA_VirtualHeight,100,DTA_Alpha,alf);
+		str = "a mod by \cxMarisa Kirisame";
+		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-18,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-24,0.,1.);
+		Screen.DrawText(TewiFont,Font.CR_WHITE,(160-TewiFont.StringWidth(str))/2,(100-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,160,DTA_VirtualHeight,100,DTA_Alpha,alf);
+		tsize = TexMan.GetScaledSize(tex[1]);
+		sar = tsize.x/tsize.y;
+		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
+		else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
+		else vsize = tsize;
+		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-26,0.,2.)*.5;
+		Screen.DrawTexture(tex[1],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
+	}
+}

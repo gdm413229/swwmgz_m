@@ -13,7 +13,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_CHAT
 	};
 
-	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH;
+	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
+		FancyBg;
 	Font TewiFont;
 	int curtab;
 	// for scrolling
@@ -55,6 +56,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return;
 		}
 		TewiFont = Font.GetFont('TewiShaded');
+		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_Any);
 		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_Any);
 		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_Any);
 		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_Any);
@@ -194,7 +196,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			invlist.Clear();
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -292,6 +294,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		Screen.DrawTexture(FancyBg,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Add,DTA_Alpha,.5);
 		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw tabs
 		double xx = 3, yy = 0;
@@ -436,7 +439,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( (invlist[i] is 'Ammo') || (invlist[i].MaxAmount > 1) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				len = TewiFont.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -480,7 +483,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				str = invlist[i].GetTag();
 				len = TewiFont.StringWidth(str);
 				if ( len > longest ) longest = len;
-				Screen.DrawText(TewiFont,(i==sel0)?Font.CR_WHITE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 369 )
 				{
@@ -506,14 +509,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			xx = 3;
 			yy = 17;
 			int ofs = max(0,sel0-27);
-			int maxw = 0;
-			// first pass, get max width
-			for ( int i=0; i<lorelib.ent.Size(); i++ )
-			{
-				str = StringTable.Localize(lorelib.ent[i].tag);
-				int w = TewiFont.StringWidth(str);
-				if ( w > maxw ) maxw = w;
-			}
 			for ( int i=ofs; i<lorelib.ent.Size(); i++ )
 			{
 				if ( yy > 379 ) break;
@@ -521,7 +516,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,(i==sel0)?Font.CR_FIRE:lorelib.ent[i].read?Font.CR_DARKGRAY:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
-			xx += maxw+2;
+			xx += TewiFont.StringWidth("********************")+2;
 			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
 			// scrollbar
@@ -591,6 +586,182 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else
 		{
 			// TODO easter egg "konami code" hidden tab
+		}
+	}
+}
+
+// voice selector
+Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
+{
+	CVar mCVar;
+	Array<String> types;
+
+	OptionMenuItemSWWMVoiceOption Init( String label, Name command, CVar graycheck = null, int center = 0 )
+	{
+		Super.Init(label,command,'',graycheck,center);
+		mCVar = CVar.FindCVar(mAction);
+		int lmp;
+		for ( lmp = Wads.FindLump("swwmvoicepack.txt"); lmp > 0; lmp = Wads.FindLump("swwmvoicepack.txt",lmp+1) )
+		{
+			Array<String> lst;
+			lst.Clear();
+			String dat = Wads.ReadLump(lmp);
+			dat.Split(lst,"\n",0);
+			for ( int i=0; i<lst.Size(); i++ )
+			{
+				if ( (lst[i].Length() <= 0) || (lst[i].GetNextCodePoint(0) == 0) || (lst[i].Left(1) == "\n") || (lst[i].Left(1) == "#") ) continue;
+				types.Push(lst[i]);
+			}
+		}
+		return self;
+	}
+
+	override bool SetString( int i, String newtext )
+	{
+		if ( i == OP_VALUES )
+		{
+			int cnt = types.Size();
+			if ( cnt >= 0 )
+			{
+				mValues = newtext;
+				int s = GetSelection();
+				if ( (s >= cnt) || (s < 0) ) s = 0;
+				SetSelection(s);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	override int GetSelection()
+	{
+		int Selection = -1;
+		int cnt = types.Size();
+		if ( (cnt > 0) && mCVar )
+		{
+			String cv = mCVar.GetString();
+			for( int i=0; i<cnt; i++ )
+			{
+				if ( cv ~== types[i] )
+				{
+					Selection = i;
+					break;
+				}
+			}
+		}
+		return Selection;
+	}
+
+	override void SetSelection( int Selection )
+	{
+		int cnt = types.Size();
+		if ( (cnt > 0) && mCVar )
+			mCVar.SetString(types[Selection]);
+	}
+
+	override int Draw( OptionMenuDescriptor desc, int y, int indent, bool selected )
+	{
+		if ( mCenter ) indent = (screen.GetWidth()/2);
+		drawLabel(indent,y,selected?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,isGrayed());
+		int Selection = GetSelection();
+		String loc;
+		if ( Selection == -1 ) loc = "Unknown";
+		else
+		{
+			String uptxt = types[Selection];
+			uptxt.MakeUpper();
+			String str = String.Format("SWWM_VOICENAME_%s",uptxt);
+			loc = StringTable.Localize(str,false);
+			if ( str == loc ) loc = types[Selection];
+		}
+		drawValue(indent,y,OptionMenuSettings.mFontColorValue,loc,isGrayed());
+		return indent;
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		int cnt = types.Size();
+		if ( cnt > 0 )
+		{
+			int Selection = GetSelection();
+			if ( mkey == Menu.MKEY_Left )
+			{
+				if ( Selection == -1 ) Selection = 0;
+				else if ( --Selection < 0 ) Selection = cnt-1;
+			}
+			else if ( (mkey == Menu.MKEY_Right) || (mkey == Menu.MKEY_Enter) )
+			{
+				if ( ++Selection >= cnt ) Selection = 0;
+			}
+			else return OptionMenuItem.MenuEvent(mkey,fromcontroller);
+			SetSelection(Selection);
+			Menu.MenuSound("menu/change");
+		}
+		else return OptionMenuItem.MenuEvent(mkey,fromcontroller);
+		return true;
+	}
+}
+
+// option menu /w tooltips
+Class SWWMOptionMenu : OptionMenu
+{
+	private String ttip;
+
+	override void Ticker()
+	{
+		Super.Ticker();
+		// fetch the tooltip for whatever's selected (if any)
+		if ( mDesc.mSelectedItem == -1 ) return;
+		String mcvar = mDesc.mItems[mDesc.mSelectedItem].GetAction();
+		mcvar.Replace(" ","_");	// need to strip whitespace for command actions
+		String locstr = String.Format("TOOLTIP_%s",mcvar);
+		ttip = StringTable.Localize(locstr,false);
+		if ( ttip == locstr ) ttip = "";
+	}
+	override void Drawer()
+	{
+		Super.Drawer();
+		if ( ttip == "" ) return;
+		// re-evaluate y to check where the cursor is
+		int cy = 0;
+		int y = mDesc.mPosition;
+		if ( y <= 0 )
+		{
+			let font = generic_ui||!mDesc.mFont?NewSmallFont:mDesc.mFont;
+			if ( font && (mDesc.mTitle.Length() > 0) )
+				y = -y+font.GetHeight();
+			else y = -y;
+		}
+		int fontheight = OptionMenuSettings.mLinespacing*CleanYfac_1;
+		y *= CleanYfac_1;
+		int lastrow = Screen.GetHeight()-OptionHeight()*CleanYfac_1;
+		for ( int i=0; ((i < mDesc.mItems.Size()) && (y <= lastrow)); i++ )
+		{
+			// Don't scroll the uppermost items
+			if ( i == mDesc.mScrollTop )
+			{
+				i += mDesc.mScrollPos;
+				if ( i >= mDesc.mItems.Size() ) break;	// skipped beyond end of menu
+			}
+			y += fontheight;
+			if ( mDesc.mSelectedItem == i )
+			{
+				cy = y;
+				break;
+			}
+		}
+		let fnt = Font.GetFont('Tewi');
+		let lines = fnt.BreakLines(ttip,CleanWidth_1-8);
+		int height = (8+fnt.GetHeight()*lines.Count())*CleanYFac_1;
+		// draw at the bottom unless the selected option could is covered by the tooltip
+		int ypos = Screen.GetHeight()-height;
+		if ( cy >= ypos ) ypos = 0;
+		Screen.Dim("Black",.75,0,ypos,Screen.GetWidth(),height);
+		ypos += 4*CleanYFac_1;
+		for ( int i=0; i<lines.Count(); i++ )
+		{
+			Screen.DrawText(fnt,Font.CR_WHITE,4*CleanXFac_1,ypos,lines.StringAt(i),DTA_CleanNoMove_1,true);
+			ypos += fnt.GetHeight()*CleanYFac_1;
 		}
 	}
 }

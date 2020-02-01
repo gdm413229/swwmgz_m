@@ -14,14 +14,54 @@ SWWM_GESTURE2 = "Thumbs Up";
 SWWM_GESTURE3 = "Victory";
 SWWM_KBASE = "Demolitionist Menu";
 // mod menu
-SWWM_MENUTITLE = "SWWM Options";
-SWWM_VOICETYPE = "Demolitionist Voice Type";
+SWWM_MTITLE = "SWWM GZ Options";
+SWWM_PTITLE = "Player Options";
+SWWM_VOICETYPE = "Demolitionist Voice Pack";
 SWWM_MUTELEVEL = "Voice Muting Level";
 SWWM_MUTENONE = "None";
 SWWM_MUTECOMBAT = "Combat Comments";
 SWWM_MUTEINTER = "Interaction Comments";
 SWWM_MUTELINERS = "Map Start Oneliners";
 SWWM_MUTEALL = "Everything";
+SWWM_OTITLE = "Visual Options";
+SWWM_FLASH = "Screen Flash Strength";
+SWWM_HUDMARGIN = "HUD Margin";
+SWWM_MAXMSG = "Max messages";
+SWWM_MAXMSGBIG = "Max messages (extended)";
+SWWM_MAXPICK = "Max pickup messages";
+SWWM_CHATLEN = "Chat message duration";
+SWWM_MSGLEN = "General message duration";
+SWWM_PICKLEN = "Pickup message duration";
+SWWM_CTITLE = "Multiplayer Options";
+SWWM_SKEYS = "Share Keys";
+SWWM_MCREDS = "SWWM GZ Credits";
+SWWM_CLEAD = "Development Lead:";
+SWWM_CASSETS = "Additional Assets:";
+SWWM_CMUSIC = "Music Tracks Used:";
+SWWM_CPATRON = "Patreon Backers:";
+SWWM_CTHANK = "Special Thanks:";
+SWWM_CDRAGON2 = "(For being a good pet dragon)";
+SWWM_CLUCY2 = "(For the Tewi font, which I've used for many many years)";
+SWWM_CKEKS2 = "(For libeye, assistance with exception handling code)";
+SWWM_CSLEDGE2 = "(For lore reasons that encouraged me to take part in the Doom modiverse)";
+SWWM_CINSP1 = "Combine Kegan, HyperUltra64, Marrub, TerminusEst13, Yholl and friends";
+SWWM_CINSP2 = "(For inspiration and also for being really cool people)";
+SWWM_CCOMMUNITY1 = "All my amazing friends from the Doom community";
+SWWM_CCOMMUNITY2 = "(For helping me keep this whole thing rolling, and for all the time we've spent together)";
+SWWM_CCOMMUNITY3 = "(Here's to many more years of Dooming. Stay awesome, everyone!)";
+SWWM_CDEVS1 = "Randi, Graf, Rachael, Mental, dpJudas and the rest of the GZDoom dev team";
+SWWM_CDEVS2 = "(For their work on the source port that brough back my faith in modding. You guys rock!)";
+TOOLTIP_SWWM_VOICETYPE = "Sets the voice pack for the player (clientside).";
+TOOLTIP_SWWM_MUTEPLAYER = "Control what gets muted, if you'd rather have a more silent protagonist.";
+TOOLTIP_SWWM_FLASHSTRENGTH = "Screen flashes usually happen when firing some weapons, you can lower this if these effects are harmful for you.";
+TOOLTIP_SWWM_HUDMARGIN = "Margin around HUD elements, in (scaled) pixels.";
+TOOLTIP_SWWM_MAXSHOWN = "Maximum messages (not lines) shown in the top left part of the HUD.";
+TOOLTIP_SWWM_MAXSHOWNBIG = "Like the option above, but when the chat prompt is open.";
+TOOLTIP_SWWM_MAXPICKUP = "Maximum pickup messages visible at any time.";
+TOOLTIP_SWWM_CHATDURATION = "Duration of chat messages in seconds.";
+TOOLTIP_SWWM_MSGDURATION = "Duration of obituaries and other messages in seconds.";
+TOOLTIP_SWWM_PICKDURATION = "Duration of pickup messages in seconds.";
+TOOLTIP_SWWM_SHAREKEYS = "When this is enabled, picking up a key item will send a copy to all other players.";
 // knowledge base
 SWWM_COMINGSOON = "(coming soon)";
 SWWM_MISSTAB = "Mission";
@@ -57,8 +97,8 @@ SWWM_TRADEFULL = "They can't hold more of that";
 SWWM_TRADEHIST = "History";
 SWWM_TRADETO = "Sent to";
 SWWM_TRADEFROM = "Received from";
-SWWM_MSGSENT = "You sent %s to %s.";
-SWWM_MSGRECV = "%s sent you %s.";
+SWWM_MSGSENT = "You sent %dx %s to %s.";
+SWWM_MSGRECV = "%s sent you %dx %s.";
 SWWM_CHATTAB = "Chat Log";
 SWWM_MAINCONTROLS = "PgUp/PgDn: Switch Tab | Arrows: Navigate | ";
 SWWM_INVCONTROLS = "Enter: Use | Backspace: Drop | ";
@@ -181,7 +221,7 @@ SWWM_LORETXT_DEMOLITIONIST =
 "Summary: The Demolitionist is a refinement of the former Red Oni supersoldier program, an AI-controlled combat unit capable of efficiently utilizing any weaponry at its disposition. The first unit (that's you) was deployed in June of 2148 on Union States territory in order to combat the demonic invasion brought upon by the UAC's interventions on Hell.\n"
 "\n"
 "Saya's Note: Stop reading about yourself and get back to work.";
-SWWM_LORETAG_DISPLAY = "CuteEmotion";
+SWWM_LORETAG_DISPLAY = "CuteEmotion Display";
 SWWM_LORETXT_DISPLAY =
 "Designation: CuteEmotion Display\n"
 "Manufacturer: Akari Labs\n"
@@ -231,7 +271,7 @@ SWWM_LORETXT_HAMMERSPACE =
 "\n"
 "Summary: These devices provide the carrier with access to a dedicated off-world storage space, with practically instant deposit and withdraw times.\n"
 "\n"
-"Addendum: Hammerspace containment must not be used for living things.\n"
+"Addendum: Use of Hammerspace containment for storing living beings is not allowed and will immediately void your warranty.\n"
 "\n"
 "Saya's Note: This sounds like something out of a videogame, it's cool, sure, but did that stinky nerd really have to be a stinky nerd and call it \"Hammerspace\"?";
 SWWM_LORETAG_HELL = "Hell";
@@ -254,7 +294,7 @@ SWWM_LORETXT_IBUKI =
 "Addendum: In a way, the Demolitionist project could be said to be a more economic alternative to the Red Oni program. Robots are easy to manufacture en-masse, after all.\n"
 "\n"
 "Saya's Note: Why does everyone keep bringing that up? What's the problem with me liking giga-tiddies? Like, seriously... Come on, don't kinkshame me, geez.";
-SWWM_LORETAG_LOCKE = "Hoodth, J.Locke";
+SWWM_LORETAG_LOCKE = "Dr. Locke";
 SWWM_LORETXT_LOCKE =
 "Full Name: Janus Locke Hoodth\n"
 "Nationality: Qurensniv\n"
@@ -282,7 +322,7 @@ SWWM_LORETXT_PARTHORIS =
 "Summary: One of the other worlds we've discovered during the initial interportal experiments. This is a land stuck in some sort of medieval-ish, fantasy type setting. Although some of our explorers have reported sights of unusually complex technology in a certain location we haven't been able to approach.\n"
 "\n"
 "Addendum: You are our ambassador here, so I hope you make a good impression.";
-SWWM_LORETAG_PROPULSOR = "JetBurst";
+SWWM_LORETAG_PROPULSOR = "JetBurst Impulsor";
 SWWM_LORETXT_PROPULSOR =
 "Designation: Forx JetBurst Impulsor\n"
 "Manufacturer: Forx Aeronautics\n"
@@ -316,14 +356,14 @@ SWWM_LORETXT_UAC =
 "Classification: Military Conglomerate, Research Foundation\n"
 "Location: United States, Mars, Jupiter\n"
 "\n"
-"Summary: Founded in 2015 by Thomas Kelliher, rising from the ashes of the former Union Aerospace Armed Forces (UAAF). The UAC's rise to power began in 2025 with its famous Joint Mars Expeditions. Since the creation of \"Mars City\" and the various posts in Phobos and Deimos, the UAC has been effectively working outside of Earth law, which has caused endless controversy. Moreso after securing their position as the largest military body on Earth in the aftermath of World War 3. In recent years, their experiments in teleportation made the news after a critical failure resulted in an invasion from Hell itself, along with the disappearance of the entire moon of Deimos, and eventually resulted in the demons making their way towards Earth. Governments all across the world have their hands full trying to fend off the attackers, but despite the constant bombardment of his accounts on social media, current CEO Samuel Hayden has refused to give any explanation about this incident. The only information provided is that they \"have a man\" that can resolve this.\n"
+"Summary: Founded in 2015 by Thomas Kelliher, as a shell company of the Union Aerospace Armed Forces (UAAF). The UAC's rise to power began in 2025 with its famous Joint Mars Expeditions. Since the creation of \"Mars City\" and the various posts in Phobos and Deimos, the UAC has been effectively working outside of Earth law, which has caused endless controversy. Moreso after securing their position as the largest military body on Earth in the aftermath of World War 3. In recent years, their experiments in teleportation made the news after a critical failure resulted in an invasion from Hell itself, along with the disappearance of the entire moon of Deimos, and eventually resulted in the demons making their way towards Earth. Governments all across the world have their hands full trying to fend off the attackers, but despite the constant bombardment of his accounts on social media, current CEO Samuel Hayden has refused to give any explanation about this incident. The only information provided is that they \"have a man\" that can resolve this.\n"
 "\n"
 "Addendum: Many rumors surround this company. There are accusations of ritualistic practices, brainwashing, propaganda... Pretty much anything you could imagine. Don't get involved with them, especially now, after your creator decided to speak ill of the company.\n"
 "\n"
 "Saya's Note: Oh they TOTALLY deserve what happened to them, and I hope they get screwed even harder for this blunder. I'm glad I never invested in their shit. Little robot boy can eat my shorts, by the way. He ain't gonna r e s o l v e shit.";
-SWWM_LORETAG_VOICEBOX = "LoudBoi Voicebox";
+SWWM_LORETAG_VOICEBOX = "Loudboi Voicebox";
 SWWM_LORETXT_VOICEBOX =
-"Designation: \"Loudboi\" Voicebox\n"
+"Designation: Loudboi Voicebox\n"
 "Manufacturer: Akari Labs\n"
 "\n"
 "Summary: A lightweight voice synthesizer for AI units. Easy to install and program. Comes with a built-in \"robotic\" filter for those who prefer that over an awkwardly \"too human\" sounding voice.\n"
@@ -337,7 +377,7 @@ SWWM_LORETXT_SIDHE =
 "Summary: An elf species native to this world, they have a natural bond with magic and are known to be great fighters. As the story goes they however face persecution by other groups, led mainly by the cult of D'Sparil, one of the Serpent Riders who has made the land his own.\n"
 "\n"
 "Saya's Note: How do you exactly pronounce \"Sidhe\" anyway?";
-SWWM_LORETAG_HAMMERSPACEEMBIGGENER = "H. Embiggener";
+SWWM_LORETAG_HAMMERSPACEEMBIGGENER = "Hs. Embiggener";
 SWWM_LORETXT_HAMMERSPACEEMBIGGENER =
 "Designation: Hammerspace Embiggener\n"
 "Manufacturer: Cyrus Enterprises\n"
@@ -403,7 +443,7 @@ SWWM_LORETXT_KEYCHAIN =
 "Summary: A nice keychain for all your keys. Currently held keys can be checked in the Keychain tab.\n"
 "\n"
 "Saya's Note: I put some cute things in there that you might like. There's one of the bomb emoji, another of that silly \"butt bots gonna bot\" sign that you found so funny, and also a little chibi of me, so you can remember me when I'm not around. Oh, and I also put the trans flag in there, you know, as a little memento of that Q&A stream we did. I really didn't expect you to give that kind of answer, but heh, it does make sense when I think about it, you are built to defend human rights after all.";
-SWWM_LORETAG_KNOWLEDGEBASE = "Demolitionist Library";
+SWWM_LORETAG_KNOWLEDGEBASE = "Library";
 SWWM_LORETXT_KNOWLEDGEBASE =
 "Designation: Demolitionist Library\n"
 "Manufacturer: Akari Labs\n"
@@ -423,7 +463,7 @@ SWWM_LORETXT_MOTHLAMP =
 "Addendum: Has a tendency to attract moths, though this can have some utility. The lamp is enchanted to make them hostile to nearby enemies, and when turned off they will immediately attack.\n"
 "\n"
 "Saya's Note: You know, I wish this thing attracted a certain kind of moth I really like...";
-SWWM_LORETAG_NUGGET = "Health/Armor Nugget";
+SWWM_LORETAG_NUGGET = "Health/Armor Nuggets";
 SWWM_LORETXT_NUGGET =
 "Designation: Health/Armor Nuggets\n"
 "Manufacturer: Unknown\n"
@@ -485,7 +525,7 @@ SWWM_LORETXT_WARARMOR =
 "Durability: Can absorb a total of 10,000 units of damage before breaking.\n"
 "\n"
 "Addendum: Worn over a blast suit, you're pretty much ready for anything that could be thrown at you.";
-SWWM_LORETAG_BIGSHOT = "Gunns, John";
+SWWM_LORETAG_BIGSHOT = "Mr. BIG SHOT";
 SWWM_LORETXT_BIGSHOT =
 "Full Name: John \"Bigshot\" Gunns"
 "Nationality: American\n"
@@ -514,7 +554,7 @@ SWWM_LORETXT_DECADEMECH =
 "Summary: Ever since humanity was made aware of the gateway in Sedna connecting the two solar systems, many expeditions have been made to learn more of the worlds in X'Animen (name given by the governing bodies within). One major discovery that not even the natives were aware of, was that of a ruined research facility in the wasteland planet of Sunkaeze, belonging to a defunct company named \"Decade Mechanics\". Research material, blueprints and even finished, still functioning products have been found within, giving a general idea of the company's specialties. Various groups have successfully recreated items entirely off their original blueprints, some of which have been commercial successes in the military field.\n"
 "\n"
 "Addendum: The facility is said to be haunted. Many lives have been lost exploring the ruins, either due to accidents or unidentified \"hostile creatures\".";
-SWWM_LORETAG_ENGINETECH = "Tach-Engine Tech";
+SWWM_LORETAG_ENGINETECH = "Tach-Engine";
 SWWM_LORETXT_ENGINETECH =
 "Name: Tach-Engine Technology Institute\n"
 "Classification: Technology Conglomerate\n"
@@ -547,13 +587,13 @@ SWWM_LORETXT_SYMNATEK =
 "Addendum: Symnatek is large enough to fend off the almost-global domination of Mixom, makin Australia one of the few countries where they have any real competition.\n"
 "\n"
 "Saya's Note: In this time and age, even fucking tool makers contribute to the military. Huh? What do you mean \"the pot calling the kettle black\"? Oh sure, just because of Ibuki that makes me one of them. Whatever.";
-SWWM_LORETAG_UNISSIX = "Unissix, Misa";
+SWWM_LORETAG_UNISSIX = "Unissix, Misa A.";
 SWWM_LORETXT_UNISSIX =
 "Full Name: Misa Azadeku Unissix aka \"Unissix Bokurou Azadeku\"\n"
 "Nationality: Devanikan\n"
 "Date Of Birth: 1992-02-29\n"
 "\n"
-"Summary: Azadeku is the lead weapon and armor designer of the entire Unissix family. Starting at a very early age, her fascination with weponry has always been quite noticeable. Despite a strong fighting spirit, she lacks the physical prowess required to be a warrior, so she's dedicated herself entirely to her craft.\n"
+"Summary: Misa is the lead weapon and armor designer of the entire Unissix family. Starting at a very early age, her fascination with weponry has always been quite noticeable. Despite a strong fighting spirit, she lacks the physical prowess required to be a warrior, so she's dedicated herself entirely to her craft.\n"
 "\n"
 "Addendum: Rose to fame on Earth during a visit from Zanaveth II, her wife, who leads Nekuratek, a massive tech giant in the Nukuri homeworld.\n"
 "\n"
@@ -692,7 +732,7 @@ SWWM_LORETXT_YNYKRON =
 "Reloading: If there's any ongoing charge process, it will be cancelled and no ammunition will be used, but the weapon will have to vent for a while. Otherwise, loads a new crystal.\n"
 "\n"
 "Addendum: Only the one original instance of this weapon should exist, but replicas have begun to surface thanks to reverse engineering efforts. Still, use of this weapon is considered illegal without proper authorization. Luckily for you, you are authorized to use it against the invading forces.";
-SWWM_LORETAG_LOOTBOX = "Chance Box";
+SWWM_LORETAG_LOOTBOX = "Lucky Chancebox";
 SWWM_LORETXT_LOOTBOX =
 "Designation: Lucky Chance Box\n"
 "Manufacturer: Nukritas 1xx\n"
@@ -783,6 +823,28 @@ T_RAGEKIT = "Ragekit";
 T_REFRESHER = "Refresher";
 T_SANDWICH = "Grilled Cheese Sandwich";
 T_WARARMOR = "War Armor";
+// colored tags for keys
+T_REDCARD = "\cgRed Keycard\c-";
+T_BLUECARD = "\chBlue Keycard\c-";
+T_YELLOWCARD = "\ckYellow Keycard\c-";
+T_REDSKULL = "\cgRed Skull Key\c-";
+T_BLUESKULL = "\chBlue Skull Key\c-";
+T_YELLOWSKULL = "\ckYellow Skull Key\c-";
+T_YELLOWKEY = "\ckYellow Key\c-";
+T_GREENKEY = "\cdGreen Key\c-";
+T_BLUEKEY = "\chBlue Key\c-";
+T_REDKEY = "\cgRed Key\c-";
+T_KEYSTEEL = "\cuSteel Key\c-";
+T_KEYCAVE = "\ceCave Key\c-";
+T_KEYAXE = "\ccAxe Key\c-";
+T_KEYFIRE = "\cgFire Key\c-";
+T_KEYEMERALD = "\cdEmerald Key\c-";
+T_KEYDUNGEON = "\ccDungeon Key\c-";
+T_KEYSILVER = "\cjSilver Key\c-";
+T_KEYRUSTED = "\cbRusted Key\c-";
+T_KEYHORN = "\coHorn Key\c-";
+T_KEYSWAMP = "\cpSwamp Key\c-";
+T_KEYCASTLE = "\cxCastle Key\c-";
 // obituaries
 O_PUSHER = "%k opened some air holes into %o.";
 O_DEEPIMPACT = "%o was impacted deeply by %k.";
@@ -846,6 +908,8 @@ SWWM_INTERTIP21 = "Aim for a high score! The more enemies you kill the better. D
 SWWM_INTERTIP22 = "Although chance boxes may sound like a terrible idea, there is a high chance to obtain very valuable items for a much lower cost.";
 
 /* SUBTITLES */
+// voice name
+SWWM_VOICENAME_DEFAULT = "Demolitionist";
 // new weapon received
 SWWM_SUBS_DEFAULT_GETWEAPON1 = "Not bad... Not bad at all...";
 SWWM_SUBS_DEFAULT_GETWEAPON2 = "Good find...";
@@ -1003,6 +1067,72 @@ SWWM_SUBS_DEFAULT_RAGEKIT3 = "FUCKFUCKFUCCKKKK!!";
 SWWM_SUBS_DEFAULT_RAGEKIT4 = "AAAAAAAAAARGH!!!!";
 SWWM_SUBS_DEFAULT_RAGEKIT5 = "KILLLLL!!!!";
 SWWM_SUBS_DEFAULT_RAGEKIT6 = "RAAAARGH!!! BRING IT!!!";
+// --- comebacks for korax hub lines ---
+// "Greetings mortal, are you ready to die?"
+SWWM_SUBS_DEFAULT_KORAXGREET1 = "Oh boy. That's it. I'm outta here";
+SWWM_SUBS_DEFAULT_KORAXGREET2 = "Great... That's just great.";
+SWWM_SUBS_DEFAULT_KORAXGREET3 = "I don't want whatever you're selling.";
+SWWM_SUBS_DEFAULT_KORAXGREET4 = "You're... not really my type.";
+SWWM_SUBS_DEFAULT_KORAXGREET5 = "The first word that comes to my mind is 'ugly'.";
+SWWM_SUBS_DEFAULT_KORAXGREET6 = "You look like something that was left in the fridge for too long.";
+SWWM_SUBS_DEFAULT_KORAXGREET7 = "I can see coming here was a mistake.";
+SWWM_SUBS_DEFAULT_KORAXGREET8 = "I'm not comfortable being watched so closely.";
+SWWM_SUBS_DEFAULT_KORAXGREET9 = "Nice attitude...";
+SWWM_SUBS_DEFAULT_KORAXGREET10 = "I could ask you the same question.";
+SWWM_SUBS_DEFAULT_KORAXGREET11 = "I was about to ask you the same thing.";
+SWWM_SUBS_DEFAULT_KORAXGREET12 = "I'm just looking for the mayonnaise. Maybe you could grab it for me. Second shelf, right next to the pudding.";
+SWWM_SUBS_DEFAULT_KORAXGREET13 = "I'm here to pick up an order. Two large pepperoni and a calzone. Name is 'Fuck you'.";
+// "My servants can smell your blood, human"
+SWWM_SUBS_DEFAULT_KORAXBLOOD1 = "Creep.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD2 = "That's good to know.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD3 = "Whatever you say.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD4 = "I don't think so.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD5 = "Um... yeah... I don't think so...";
+SWWM_SUBS_DEFAULT_KORAXBLOOD6 = "If you say so.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD7 = "I don't care.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD8 = "Whatever. Not like I care anyway.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD9 = "I don't really give a shit.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD10 = "Like I give a shit...";
+SWWM_SUBS_DEFAULT_KORAXBLOOD11 = "I think you're confusing me with someone who gives a shit.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD12 = "I'm not so sure about that.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD13 = "Just shut up.";
+// "You have played this game too long, mortal, I think I shall remove you from the board"
+SWWM_SUBS_DEFAULT_KORAXGAME1 = "I really don't care.";
+SWWM_SUBS_DEFAULT_KORAXGAME2 = "Go fuck yourself.";
+SWWM_SUBS_DEFAULT_KORAXGAME3 = "Oh, go cough up a hairball.";
+SWWM_SUBS_DEFAULT_KORAXGAME4 = "Not gonna happen.";
+SWWM_SUBS_DEFAULT_KORAXGAME5 = "Your threats don't scare me.";
+SWWM_SUBS_DEFAULT_KORAXGAME6 = "Not a chance.";
+SWWM_SUBS_DEFAULT_KORAXGAME7 = "I don't take kindly to threats.";
+SWWM_SUBS_DEFAULT_KORAXGAME8 = "Anything else I should know?";
+SWWM_SUBS_DEFAULT_KORAXGAME9 = "Shut up...";
+SWWM_SUBS_DEFAULT_KORAXGAME10 = "No one talks to me like that. Screw you.";
+SWWM_SUBS_DEFAULT_KORAXGAME11 = "You won't talk when you're dead.";
+SWWM_SUBS_DEFAULT_KORAXGAME12 = "I'd like to see you try.";
+SWWM_SUBS_DEFAULT_KORAXGAME13 = "Oh, please try.";
+SWWM_SUBS_DEFAULT_KORAXGAME14 = "I don't know what you're talking about, and I don't care.";
+// "Worship me and I may be yet merciful, then again, maybe not"
+SWWM_SUBS_DEFAULT_KORAXWORSHIP1 = "What?";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP2 = "What a scumbag...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP3 = "Pompous ass...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP4 = "Someone's a little full of himself.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP5 = "So full of yourself...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP6 = "I've heard enough of your bullshit.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP7 = "Blah, blah, blah...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP8 = "What? I can't hear you over this ringing in my ears.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP9 = "You must think I'm an idiot.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP10 = "Do I look like an idiot?";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP11 = "You have an awfully high opinion of yourself.";
+// "Are you strong enough to face your own masters?"
+SWWM_SUBS_DEFAULT_KORAXMASTERS1 = "Can we move this along? I've got places to be.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS2 = "I don't appreciate people telling me what to do.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS3 = "Uh... yes, that's right.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS4 = "Suppose I've got nothing better to do.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS5 = "I'm asking myself the same thing.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS6 = "None of your damn business.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS7 = "Yes, I am.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS8 = "That's none of your business.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS9 = "Just shut up already...";
 
 [es]
 // I probably won't be localizing this to Spanish

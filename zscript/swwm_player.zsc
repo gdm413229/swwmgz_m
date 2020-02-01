@@ -62,7 +62,8 @@ Class Demolitionist : PlayerPawn
 		{
 			// Select the correct type of backpack based on the game
 			let type = (class<Inventory>)(gameinfo.backpacktype);
-			if ( type ) GiveInventory(type,1,true);
+			let def = GetDefaultByType(type);
+			if ( type ) GiveInventory(type,def.MaxAmount,true);
 			if ( !giveall ) return;
 		}
 		if ( giveall || (name ~== "ammo") )
@@ -301,7 +302,7 @@ Class Demolitionist : PlayerPawn
 				mystats.stompcount++;
 			}
 			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
-			if ( (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
+			if ( (player == players[consoleplayer]) && (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			A_Footstep(0,true,clamp(-lastvelz*0.05,0.01,1.0));
 		}
@@ -667,19 +668,19 @@ Class Demolitionist : PlayerPawn
 		if ( lastdamage > 90 )
 		{
 			A_StartSound("*pain25",CHAN_VOICE);
-			if ( mute && myvoice && (mute.GetInt() < 4) )
+			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 30 )
 		{
 			A_StartSound("*pain50",CHAN_VOICE);
-			if ( mute && myvoice && (mute.GetInt() < 4) )
+			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/pain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 0 )
 		{
 			A_StartSound("*pain100",CHAN_VOICE);
-			if ( mute && myvoice && (mute.GetInt() < 4) )
+			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 	}
@@ -688,7 +689,7 @@ Class Demolitionist : PlayerPawn
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		A_PlayerScream();
-		if ( mute && myvoice && (mute.GetInt() < 4) )
+		if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 			A_StartSound(String.Format("voice/%s/death",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 	}
 	override bool OnGiveSecret( bool printmsg, bool playsound )
@@ -722,6 +723,7 @@ Class Demolitionist : PlayerPawn
 			int score = 250;
 			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
 			SWWMCredits.Give(player,score);
+			if ( !swwm_sharekeys ) return;
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
@@ -749,13 +751,13 @@ Class Demolitionist : PlayerPawn
 		if ( run )
 		{
 			A_StartSound("demolitionist/run",CHAN_FOOTSTEP,CHANF_OVERLAP,vol);
-			let b = Spawn("InvisibleSplasher",(RotateVector((0,yofs*.25*radius),angle),0));
+			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
 		}
 		else
 		{
 			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.5);
-			let b = Spawn("SmolInvisibleSplasher",(RotateVector((0,yofs*.25*radius),angle),0));
+			let b = Spawn("SmolInvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
 		}
 	}

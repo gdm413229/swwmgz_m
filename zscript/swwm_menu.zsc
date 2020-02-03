@@ -518,18 +518,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			xx += TewiFont.StringWidth("********************")+2;
 			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			xx += 4;
+			xx += 3;
 			// scrollbar
 			if ( lorelib.ent.Size() > 27 )
 			{
-				int szr = lorelib.ent.Size()-27;
-				yy = floor((szr-sel0)*(353./szr))+17;
+				int szr = lorelib.ent.Size()-28;
+				yy = floor((ofs)*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				xx += 6;
-				Screen.DrawTexture(WindowSeparator,false,origin.x+xx+8,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				xx += 4;
+				xx += 5;
+				Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx += 3;
 			}
-			xx += 3;
+			xx += 4;
 			// draw the entry text
 			str = StringTable.Localize(lorelib.ent[sel0].text);
 			BrokenLines l = TewiFont.BreakLines(str,int(634-xx));

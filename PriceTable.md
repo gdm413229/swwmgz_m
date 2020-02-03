@@ -74,13 +74,14 @@ be purchased from the store, they have to be found in maps.
   ------------- | -----
   Health Nugget	| 1200
   H.Tetrahedron	| 3000
-  H.Cube	| 8000
+  H.Cube	| 5000
   Refresher	| 60000
   Armor Nugget	| 1000
   Blast Suit	| 15000
   War Armor	| 50000
   Ghost Arti.	| 20000
   Gravity Supp.	| 16000
+  Sandwich	| 80000
   Invinciball	| 150000
   Ragekit	| 120000
   Lämp		| 12000

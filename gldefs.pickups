@@ -1,0 +1,102 @@
+HardwareShader Texture "models/Nugget_Armor.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Nugget_mask.png"
+	Texture "envtex" "models/greenmap.png"
+	Texture "brighttex" "models/Nugget_mask.png"
+}
+HardwareShader Texture "models/Nugget.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Nugget_mask.png"
+	Texture "envtex" "models/blumap.png"
+	Texture "brighttex" "models/Nugget_mask.png"
+}
+HardwareShader Texture "models/TetraHealth.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/TetraHealth_mask.png"
+	Texture "envtex" "models/blumap.png"
+	Texture "brighttex" "models/TetraHealth_mask.png"
+}
+HardwareShader Texture "models/CubeHealth.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/CubeHealth_mask.png"
+	Texture "envtex" "models/blumap.png"
+	Texture "brighttex" "models/CubeHealth_mask.png"
+}
+HardwareShader Texture "models/Refresher.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Refresher_mask.png"
+	Texture "envtex" "models/purpmap.png"
+	Texture "brighttex" "models/Refresher_mask.png"
+}
+Brightmap Texture "models/GhostArtifact.png"
+{
+	Map "models/GhostArtifact_bright.png"
+}
+
+PointLight ARMORNUGGETLIGHT
+{
+	Color 0.4 0.7 0.2
+	Size 12
+	Offset 0 16 0
+	Attenuate 1
+}
+Object ArmorNuggetItem
+{
+	Frame "XZW1" { light "ARMORNUGGETLIGHT" }
+}
+PointLight HEALTHNUGGETLIGHT
+{
+	Color 0.1 0.3 0.7
+	Size 12
+	Offset 0 16 0
+	Attenuate 1
+}
+Object HealthNuggetItem
+{
+	Frame "XZW1" { light "HEALTHNUGGETLIGHT" }
+}
+
+PointLight GEOMHEALTHLIGHT
+{
+	Color 0.2 0.4 1.0
+	Size 30
+	Offset 0 16 0
+	Attenuate 1
+}
+Object TetraHealthItem
+{
+	Frame "XZW1" { light "GEOMHEALTHLIGHT" }
+}
+Object CubeHealthItem
+{
+	Frame "XZW1" { light "GEOMHEALTHLIGHT" }
+}
+
+PointLight REFRESHERLIGHT
+{
+	Color 0.7 0.2 1.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object RefresherItem
+{
+	Frame "XZW1" { light "REFRESHERLIGHT" }
+}
+
+PointLight GHOSTARTILIGHT
+{
+	Color 0.8 0.6 1.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object GhostArtifact
+{
+	Frame "XZW1" { light "GHOSTARTILIGHT" }
+}

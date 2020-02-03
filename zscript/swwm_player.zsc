@@ -124,6 +124,19 @@ Class Demolitionist : PlayerPawn
 					if ( !item.CallTryPickup(self) ) item.Destroy();
 				}
 			}
+			// Also give spares
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (Class<SWWMSpareArmor>)(AllActorClasses[i]);
+				if ( !type || (type == 'SWWMSpareArmor') ) continue;
+				if ( GetReplacement(type) == type )
+				{
+					let item = Inventory(Spawn(type));
+					item.ClearCounters();	// don't increase item counts
+					item.Amount = item.MaxAmount;
+					if ( !item.CallTryPickup(self) ) item.Destroy();
+				}
+			}
 			if ( !giveall ) return;
 		}
 		if ( giveall || (name ~== "keys") )
@@ -225,11 +238,14 @@ Class Demolitionist : PlayerPawn
 	}
 	void A_Dash()
 	{
-		A_AlertMonsters(800);
 		vel += dashdir*dashboost;
 		player.vel = vel.xy;
 		if ( dashboost < 0.1 ) dashboost = 0.;
-		else dashboost *= .5;
+		else
+		{
+			A_AlertMonsters(800);
+			dashboost *= .5;
+		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = 40;
@@ -239,12 +255,12 @@ Class Demolitionist : PlayerPawn
 	}
 	void A_BoostUp( bool initial = false )
 	{
-		A_AlertMonsters(800);
 		vel += (0,0,1)*dashboost;
 		player.vel = vel.xy;
 		if ( dashboost < 0.1 ) dashboost = 0.;
 		else
 		{
+			A_AlertMonsters(800);
 			dashboost *= (player.cmd.buttons&BT_JUMP)?.9:.4;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
@@ -739,11 +755,16 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( !player ) return Super.UseInventory(item);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		if ( !(item is 'PuzzleItem') || (mute.GetInt() >= 2) )
-			return Super.UseInventory(item);
 		bool res = Super.UseInventory(item);
-		if ( res ) SWWMHandler.AddOneliner("puzzsucc",10);
-		else SWWMHandler.AddOneliner("puzzfail",20);
+		if ( CheckLocalView() )
+		{
+			if ( !res && !(item is 'Weapon') ) A_StartSound("menu/noinvuse",CHAN_ITEM);
+			if ( (item is 'PuzzleItem') && (mute.GetInt() < 2) )
+			{
+				if ( res ) SWWMHandler.AddOneliner("puzzsucc",10);
+				else SWWMHandler.AddOneliner("puzzfail",20);
+			}
+		}
 		return res;
 	}
 	void A_Footstep( double yofs, bool run = false, double vol = .3 )

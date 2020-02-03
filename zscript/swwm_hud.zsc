@@ -27,6 +27,8 @@ Class SWWMStatusBar : BaseStatusBar
 	double FracTic;
 	int chatopen;
 
+	bool justselected;
+
 	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
 
 	override void FlushNotify()
@@ -100,10 +102,22 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override void Tick()
 	{
+		Super.Tick();
+		if ( CPlayer.inventorytics >= (5*Thinker.TICRATE)-1 )
+		{
+			if ( CPlayer.mo.InvSel )
+				S_StartSound("menu/demoscroll",CHAN_BODY,CHANF_UI|CHANF_MAYBE_LOCAL);
+		}
+		if ( CPlayer.inventorytics > 0 ) justselected = false;
+		else
+		{
+			if ( !justselected && CPlayer.mo.InvSel )
+				S_StartSound("menu/democlose",CHAN_BODY,CHANF_UI|CHANF_MAYBE_LOCAL);
+			justselected = true;
+		}
 		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
 		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
 		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);
-		Super.Tick();
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
@@ -157,6 +171,7 @@ Class SWWMStatusBar : BaseStatusBar
 		ChatTex[3] = TexMan.CheckForTexture("graphics/HUD/ChatBoxTop_Smol.png",TexMan.Type_Any);
 		ChatTex[4] = TexMan.CheckForTexture("graphics/HUD/ChatBoxLine_Smol.png",TexMan.Type_Any);
 		ChatTex[5] = TexMan.CheckForTexture("graphics/HUD/ChatBoxBottom_Smol.png",TexMan.Type_Any);
+		InventoryTex = TexMan.CheckForTexture("graphics/HUD/InventoryBox.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
 		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,1000);
@@ -178,10 +193,90 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
+	private void DrawInvIcon( Inventory i, double xx, double yy, double alpha = 1., bool forceamt = false )
+	{
+		if ( !i ) return;
+		Vector2 scl = TexMan.GetScaledSize(i.Icon);
+		double mscl = 30./max(scl.x,scl.y);
+		double dw = (ss.x/mscl), dh = (ss.y/mscl);
+		double dx = (xx+(30-scl.x*mscl)/2)/mscl, dy = (yy+(30-scl.y*mscl)/2)/mscl;
+		if ( i is 'Powerup' )
+		{
+			Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
+			String nstr = String.Format("%ds",Powerup(i).EffectTics/Thinker.TICRATE);
+			int len = mTewiFont.mFont.StringWidth(nstr);
+				Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha);
+			return;
+		}
+		Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
+		if ( (i.Amount > 1) || forceamt )
+		{
+			String nstr;
+			if ( (i.Amount > 99999) && !forceamt ) nstr = "99999";
+			else nstr = String.Format("%d",i.Amount);
+			int len = mTewiFont.mFont.StringWidth(nstr);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha);
+		}
+	}
+
 	private void DrawInventory()
 	{
 		// active items (armor / powerups)
+		double xx = margin;
+		double yy = ss.y-(margin+60);
+		if ( CPlayer.mo.InvSel && !isInventoryBarVisible() ) yy -= 34;
+		bool drewarmor = false;
+		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
+		{
+			if ( (i.Amount <= 0) || (!(i is 'SWWMArmor') && !(i is 'BasicArmor')) ) continue;
+			DrawInvIcon(i,xx,yy,forceamt:true);
+			yy -= 34;
+			drewarmor = true;
+		}
+		yy = ss.y-(margin+60);
+		if ( drewarmor ) xx += 40;
+		else if ( CPlayer.mo.InvSel && !isInventoryBarVisible() ) yy -= 34;
+		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'Powerup') || (Powerup(i).EffectTics <= 0) || !(Powerup(i).Icon) ) continue;
+			DrawInvIcon(i,xx,yy);
+			yy -= 34;
+		}
 		// inventory box / bar
+		if ( !CPlayer.mo.InvSel ) return;
+		if ( isInventoryBarVisible() )
+		{
+			Array<Inventory> bar;
+			bar.Clear();
+			for ( Inventory i=CPlayer.mo.FirstInv(); i; i=i.NextInv() ) bar.Push(i);
+			int ps = bar.Find(CPlayer.mo.InvSel);
+			Inventory prev[2], next[2];
+			if ( bar.Size() > 1 )
+			{
+				if ( ps+1 >= bar.Size() ) next[0] = bar[0];
+				else next[0] = bar[ps+1];
+				if ( ps-1 < 0 ) prev[0] = bar[bar.Size()-1];
+				else prev[0] = bar[ps-1];
+			}
+			if ( bar.Size() > 2 )
+			{
+				if ( ps+2 >= bar.Size() ) next[1] = bar[(ps+2)-bar.Size()];
+				else next[1] = bar[ps+2];
+				if ( ps-2 < 0 ) prev[1] = bar[bar.Size()+(ps-2)];
+				else prev[1] = bar[ps-2];
+			}
+			xx = (ss.x-34)/2;
+			yy = (ss.y+64)/2;
+			Screen.DrawTexture(InventoryTex,false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			DrawInvIcon(CPlayer.mo.InvSel,xx+2,yy+2);
+			DrawInvIcon(prev[0],xx-32,yy+2,2./3.);
+			DrawInvIcon(prev[1],xx-66,yy+2,1./3.);
+			DrawInvIcon(next[0],xx+36,yy+2,2./3.);
+			DrawInvIcon(next[1],xx+70,yy+2,1./3.);
+			return;
+		}
+		Screen.DrawTexture(InventoryTex,false,margin,ss.y-(margin+61),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		DrawInvIcon(CPlayer.mo.InvSel,margin+2,ss.y-(margin+59));
 	}
 
 	private void DrawWeapon()
@@ -367,6 +462,11 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		else Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,fullstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		return true;
+	}
+
+	override void DrawPowerups()
+	{
+		// don't do anything
 	}
 
 	override void Draw( int state, double TicFrac )

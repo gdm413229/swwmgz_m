@@ -309,6 +309,20 @@ demolitionist/bump2	sounds/demolitionist/demobump2.ogg
 demolitionist/bump3	sounds/demolitionist/demobump3.ogg
 $random demolitionist/bump { demolitionist/bump1 demolitionist/bump2 demolitionist/bump3 }
 
+$playersound demolitionist neutral *grunt	DSEMPTY
+$playeralias demolitionist neutral *pain100	demolitionist/lopain
+$playeralias demolitionist neutral *pain75	demolitionist/pain
+$playeralias demolitionist neutral *pain50	demolitionist/pain
+$playeralias demolitionist neutral *pain25	demolitionist/hipain
+$playersound demolitionist neutral *usefail	sounds/menu/failuse.ogg
+$playeralias demolitionist neutral *death	demolitionist/death
+$playeralias demolitionist neutral *xdeath	demolitionist/xdeath
+$playeralias demolitionist neutral *gibbed	demolitionist/xdeath
+$playeralias demolitionist neutral *wimpydeath	demolitionist/wdeath
+$playersound demolitionist neutral *land	DSEMPTY
+$playersound demolitionist neutral *falling	DSEMPTY
+$playersound demolitionist neutral *puzzfail	sounds/menu/failuse.ogg
+
 explodium/casing1	sounds/explodiumgun/expl_case1.ogg
 explodium/casing2	sounds/explodiumgun/expl_case2.ogg
 explodium/casing3	sounds/explodiumgun/expl_case3.ogg
@@ -361,19 +375,16 @@ $limit candygun/hit 32
 $limit candygun/maghit 32
 $limit candygun/gunhit 32
 
-$playersound demolitionist neutral *grunt	DSEMPTY
-$playeralias demolitionist neutral *pain100	demolitionist/lopain
-$playeralias demolitionist neutral *pain75	demolitionist/pain
-$playeralias demolitionist neutral *pain50	demolitionist/pain
-$playeralias demolitionist neutral *pain25	demolitionist/hipain
-$playersound demolitionist neutral *usefail	sounds/menu/failuse.ogg
-$playeralias demolitionist neutral *death	demolitionist/death
-$playeralias demolitionist neutral *xdeath	demolitionist/xdeath
-$playeralias demolitionist neutral *gibbed	demolitionist/xdeath
-$playeralias demolitionist neutral *wimpydeath	demolitionist/wdeath
-$playersound demolitionist neutral *land	DSEMPTY
-$playersound demolitionist neutral *falling	DSEMPTY
-$playersound demolitionist neutral *puzzfail	sounds/menu/failuse.ogg
+chancebox/explode1	sounds/items/lootexpl1.ogg
+chancebox/explode2	sounds/items/lootexpl2.ogg
+chancebox/explode3	sounds/items/lootexpl3.ogg
+$random chancebox/explode { chancebox/explode1 chancebox/explode2 chancebox/explode3 }
+chancebox/land1		sounds/items/lootland1.ogg
+chancebox/land2		sounds/items/lootland2.ogg
+chancebox/land3		sounds/items/lootland3.ogg
+$random chancebox/land { chancebox/land1 chancebox/land2 chancebox/land3 }
+chancebox/drumroll	sounds/DRUMROLL.ogg
+chancebox/tada		sounds/TADA.ogg
 
 misc/secret		sounds/menu/findsecret.ogg
 misc/keytry		sounds/menu/failuse.ogg
@@ -388,6 +399,15 @@ misc/spawn		sounds/CORK.ogg
 misc/teleport		sounds/general/teleport.ogg
 misc/chat		sounds/menu/chatsnd.ogg
 misc/chat2		sounds/menu/chatsnd.ogg
+
+armor/blastsuit	sounds/items/blastsuit.ogg
+armor/wararmor	sounds/items/wararmor.ogg
+
+powerup/refresher	sounds/items/refresh.ogg
+powerup/sandwich	sounds/CORK.ogg
+powerup/ghost		sounds/items/CloakOn.ogg
+powerup/ghostact	sounds/items/CloakLoop3.ogg
+powerup/ghostend	sounds/items/CloakOff.ogg
 
 menu/activate	sounds/hmenu/hmenu1.ogg
 menu/backup	sounds/hmenu/hmenu2.ogg
@@ -405,5 +425,4 @@ menu/demosel	sounds/menu/menuset.ogg
 menu/demoscroll	sounds/menu/menuscroll.ogg
 menu/democlose	sounds/menu/menuclose.ogg
 
-menu/invsel	sounds/menu/invsel.ogg
 menu/noinvuse	sounds/menu/failinv.ogg

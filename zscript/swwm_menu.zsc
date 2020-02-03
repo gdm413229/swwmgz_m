@@ -196,7 +196,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			invlist.Clear();
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -446,10 +446,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				int clscol = (i==sel0)?Font.CR_WHITE:Font.CR_DARKGRAY;
 				if ( invlist[i] is 'Weapon' ) clscol = (i==sel0)?Font.CR_YELLOW:Font.FindFontColor('DarkYellow');
 				else if ( invlist[i] is 'Ammo' ) clscol = (i==sel0)?Font.CR_ORANGE:Font.FindFontColor('DarkOrange');
-				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') ) clscol = (i==sel0)?Font.CR_RED:Font.CR_DARKRED;
+				else if ( (invlist[i] is 'PowerupGiver') || invlist[i].bBIGPOWERUP ) clscol = (i==sel0)?Font.CR_PURPLE:Font.FindFontColor('DarkPurple');
+				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = (i==sel0)?Font.CR_RED:Font.CR_DARKRED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = (i==sel0)?Font.CR_GREEN:Font.CR_DARKGREEN;
 				else if ( invlist[i] is 'PuzzleItem' ) clscol = (i==sel0)?Font.CR_LIGHTBLUE:Font.CR_BLUE;
-				else if ( invlist[i] is 'PowerupGiver' ) clscol = (i==sel0)?Font.CR_PURPLE:Font.FindFontColor('DarkPurple');
 				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 16;
 				if ( yy >= 369 )

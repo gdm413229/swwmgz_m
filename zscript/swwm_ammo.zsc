@@ -7,7 +7,6 @@ Mixin Class SWWMAmmo
 	{
 		let copy = Inventory(Spawn(type,Owner.Pos,NO_REPLACE));
 		if ( !copy ) return null;
-		copy.MaxAmount = MaxAmount;
 		copy.DropTime = 30;
 		copy.bSpecial = copy.bSolid = false;
 		copy.SetOrigin(Owner.Vec3Offset(0,0,10.),false);
@@ -137,8 +136,8 @@ Mixin Class SWWMAmmo
 							double ang = FRandom[Junk](0,360);
 							last = DoDrop(ammotypes[i]);
 							last.SetOrigin(item.pos,false);
-							last.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](.2,.5);
-							excess -= 16;
+							last.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](2,5);
+							excess -= def.Amount;
 							break;
 						}
 					}
@@ -492,7 +491,7 @@ Class EvisceratorShell : Ammo
 		Stamina 2500;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 30;
-		Ammo.BackpackAmount 6;
+		Ammo.BackpackAmount 3;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -529,7 +528,7 @@ Class HellblazerMissiles : Ammo
 		Stamina 6000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 60;
-		Ammo.BackpackAmount 18;
+		Ammo.BackpackAmount 3;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -561,7 +560,7 @@ Class HellblazerCrackshots : Ammo
 		Stamina 8000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 24;
-		Ammo.BackpackAmount 6;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -593,7 +592,7 @@ Class HellblazerRavagers : Ammo
 		Stamina 12000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 9;
-		Ammo.BackpackAmount 3;
+		Ammo.BackpackAmount 1;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -784,6 +783,8 @@ Class AmmoFabricator : Inventory abstract
 	{
 		+INVENTORY.INVBAR;
 		+FLOATBOB;
+		Inventory.MaxAmount 32;
+		Inventory.InterHubAmount 32;
 		FloatBobStrength 0.25;
 	}
 	States

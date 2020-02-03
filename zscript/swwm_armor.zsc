@@ -1,1 +1,146 @@
 // All the armor items go here
+Class ArmorNugget : SWWMArmor
+{
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_ArmorNugget.png";
+		Inventory.Amount 5;
+		Inventory.MaxAmount 200;
+		Inventory.InterHubAmount 200;
+		SWWMArmor.ArmorPriority 10;
+		SWWMArmor.DrainFactor .1;
+		SWWMArmor.GiverArmor "ArmorNuggetItem";
+	}
+
+	override int HandleDamage( int damage, Name damageType, int flags )
+	{
+		double factor = amount*.01;
+		return int(ceil(damage*factor));
+	}
+}
+Class ArmorNuggetItem : SWWMSpareArmor
+{
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Nugget");
+		return Super.CreateCopy(other);
+	}
+	Default
+	{
+		Tag "$T_NUGGETA";
+		Inventory.Icon "graphics/HUD/Icons/I_ArmorNugget.png";
+		Inventory.PickupMessage "$T_NUGGETA";
+		Inventory.MaxAmount int.max;
+		Inventory.InterHubAmount int.max;
+		Inventory.UseSound "misc/armor_pkup";
+		SWWMSpareArmor.GiveArmor "ArmorNugget";
+		+INVENTORY.ALWAYSPICKUP;
+		+COUNTITEM;
+	}
+	States
+	{
+	Spawn:
+		XZW1 # -1 NoDelay
+		{
+			frame = Random[Nugget](0,7);
+		}
+		Stop;
+	Dummy:
+		XZW1 ABCDEFGH -1;
+		Stop;
+	}
+}
+
+Class BlastSuit : SWWMArmor
+{
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_BlastSuit.png";
+		Inventory.Amount 500;
+		Inventory.MaxAmount 500;
+		Inventory.InterHubAmount 500;
+		SWWMArmor.ArmorPriority 2;
+		SWWMArmor.DrainFactor 1.;
+		SWWMArmor.DrainMessage "$D_BLASTSUIT";
+		SWWMArmor.GiverArmor "BlastSuitItem";
+	}
+
+	override int HandleDamage( int damage, Name damageType, int flags )
+	{
+		double factor = .75;
+		if ( flags&DMG_EXPLOSION ) factor = 1.-(1.-factor)*.5;
+		return int(ceil(damage*factor));
+	}
+}
+Class BlastSuitItem : SWWMSpareArmor
+{
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"BlastSuit");
+		return Super.CreateCopy(other);
+	}
+	Default
+	{
+		Tag "$T_BLASTSUIT";
+		Inventory.Icon "graphics/HUD/Icons/I_BlastSuit.png";
+		Inventory.PickupMessage "$T_BLASTSUIT";
+		Inventory.UseSound "armor/blastsuit";
+		SWWMSpareArmor.GiveArmor "BlastSuit";
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class WarArmor : SWWMArmor
+{
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_WarArmor.png";
+		Inventory.Amount 1000;
+		Inventory.MaxAmount 1000;
+		Inventory.InterHubAmount 1000;
+		SWWMArmor.ArmorPriority 6;
+		SWWMArmor.DrainFactor 1.0;
+		SWWMArmor.DrainMessage "$D_WARARMOR";
+		SWWMArmor.GiverArmor "WarArmorItem";
+	}
+
+	override int HandleDamage( int damage, Name damageType, int flags )
+	{
+		double factor;
+		// should be enough "elemental" damage types I guess
+		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Lightning') || (damageType == 'Wind') || (damageType == 'Water') ) factor = .9;
+		else factor = .8;
+		if ( flags&DMG_EXPLOSION ) factor = 1.-(1.-factor)*.7;
+		return int(ceil(damage*factor));
+	}
+}
+Class WarArmorItem : SWWMSpareArmor
+{
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"WarArmor");
+		return Super.CreateCopy(other);
+	}
+	Default
+	{
+		Tag "$T_WARARMOR";
+		Inventory.Icon "graphics/HUD/Icons/I_WarArmor.png";
+		Inventory.PickupMessage "$T_WARARMOR";
+		Inventory.UseSound "armor/wararmor";
+		SWWMSpareArmor.GiveArmor "WarArmor";
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

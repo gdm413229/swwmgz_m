@@ -1,0 +1,53 @@
+HardwareShader Texture "models/Chancebox.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Chancebox_mask.png"
+	Texture "envtex" "models/silvermap.png"
+	Texture "brighttex" "models/Chancebox_bright.png"
+}
+HardwareShader Texture "models/Chancebox_Tier2.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Chancebox_mask.png"
+	Texture "envtex" "models/silvermap.png"
+	Texture "brighttex" "models/Chancebox_bright.png"
+}
+HardwareShader Texture "models/Chancebox_Tier3.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Chancebox_mask.png"
+	Texture "envtex" "models/silvermap.png"
+	Texture "brighttex" "models/Chancebox_bright.png"
+}
+HardwareShader Texture "models/Chancebox_Tier4.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/Chancebox_mask.png"
+	Texture "envtex" "models/goldmap.png"
+	Texture "brighttex" "models/Chancebox_bright.png"
+}
+
+PointLight CHANCELIGHT
+{
+	Color 1.0 0.7 0.2
+	Size 50
+	Offset 0 16 0
+	Attenuate 1
+}
+
+Object DroppedChanceboxTier1
+{
+	Frame "XZW2" { light "CHANCELIGHT" }
+}
+Object DroppedChanceboxTier2
+{
+	Frame "XZW2" { light "CHANCELIGHT" }
+}
+Object DroppedChanceboxTier3
+{
+	Frame "XZW2" { light "CHANCELIGHT" }
+}
+Object DroppedChanceboxTier4
+{
+	Frame "XZW2" { light "CHANCELIGHT" }
+}

@@ -129,7 +129,7 @@ re-added to their respective ammo type pool.
 
 The Spreadgun uses 10 gauge ammunition (like the Quadshot).
 
-### 10Ga shells, replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Flechette, Chaos Device
+### 10Ga shells, replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Flechette, Chaos Device/Banishment Device
 
 Available in the following types, with varying chances of appearing depending
 on replaced item, may also come in bundles:
@@ -151,8 +151,8 @@ on replaced item, may also come in bundles:
    designed by someone completely insane, and definitely guaranteed to not
    fail catastrophically and blow up your gun, your hands, your arms, and the
    rest of your upper body. Unlike the others, this one is only available as a
-   rare drop from boss monsters, and as a rare spawn for chaos devices in
-   Heretic and Hexen.
+   rare drop from boss monsters, and as a rare spawn for chaos/banishment
+   devices in Heretic and Hexen.
 
 The two first standard types will also pop up in Hammerspace Embiggeners and
 Ammo Fabricators.
@@ -349,7 +349,7 @@ have a spare. Most powerups can be toggled, unless specified otherwise.
 
 Health nuggets increase health by 5% up to a cap of 200.
 
-### Health Tetrahedron, replaces Stimpak, Crystal Vial (Heretic)
+### Health Tetrahedron, replaces Stimpak, Quartz Flask
 
 Health tetrahedrons provide a 15% health boost up to a cap of 100.
 
@@ -373,14 +373,14 @@ The upper cap for these is 200%.
 
 Protection decreases by a 10% of absorbed damage.
 
-### Blast Suit, replaces Green Armor, Silver Shield, Platinum Helm, Mesh Armor
+### Blast Suit, replaces Green Armor, Silver Shield, Mesh Armor
 
 The blast suit is a nice little light armor which provides a 75% reduction to
 damage and an additional 50% to splash damage.
 
 Can handle a total of 500 damage before breaking.
 
-### War Armor, replaces Blue Armor, Enchanged Shield, Falcon Shield
+### War Armor, replaces Blue Armor, Enchanted Shield, Falcon Shield
 
 Decent armor, protects very well against all damage. Reduction factors are as
 follows:
@@ -390,7 +390,7 @@ follows:
 
 The armor can eat up a total of 1000 damage before breaking.
 
-### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Banishment Device
+### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Platinum Helm
 
 The ultimate meal. Grants a full 1000 health and magically gives you a full
 stack of armor nuggets, a blast suit and a war armor. In addition it prevents

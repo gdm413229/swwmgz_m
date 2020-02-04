@@ -41,6 +41,10 @@ Brightmap Texture "models/Gravity.png"
 {
 	Map "models/Gravity_bright.png"
 }
+Brightmap Texture "models/Ragekit.png"
+{
+	Map "models/Ragekit_bright.png"
+}
 
 PointLight ARMORNUGGETLIGHT
 {
@@ -115,4 +119,28 @@ PointLight GRAVITYLIGHT
 Object GravitySuppressor
 {
 	Frame "XZW1" { light "GRAVITYLIGHT" }
+}
+
+PointLight INVINCIBALLLIGHT
+{
+	Color 0.8 0.2 0.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object FuckingInvinciball
+{
+	Frame "XZW1" { light "INVINCIBALLLIGHT" }
+}
+
+PointLight RAGELIGHT
+{
+	Color 1.0 0.1 0.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object Ragekit
+{
+	Frame "XZW1" { light "RAGELIGHT" }
 }

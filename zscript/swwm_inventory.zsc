@@ -1,4 +1,18 @@
 // Base class for all SWWM Armors
+Mixin Class SWWMAutoUseFix
+{
+	override bool HandlePickup( Inventory item )
+	{
+		bool res = Super.HandlePickup(item);
+		if ( res && (item.GetClass() == item.GetClass()) )
+		{
+			if ( Use(true) ) Amount--;
+			if ( Amount <= 0 ) DepleteOrDestroy();
+		}
+		return res;
+	}
+}
+
 Class SWWMArmor : Armor abstract
 {
 	int priority;
@@ -18,6 +32,7 @@ Class SWWMArmor : Armor abstract
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.KEEPDEPLETED;
 		+INVENTORY.ALWAYSPICKUP;
+		SWWMArmor.DrainFactor 1.;
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -47,6 +62,8 @@ Class SWWMArmor : Armor abstract
 		int saved;
 		if ( (amount > 0) && !DamageTypeDefinition.IgnoreArmor(damageType) && (damage > 0) )
 		{
+			SWWMHandler.DoFlash(Owner,Color(int(clamp(damage*.15,1,16)),255,224,192),3);
+			Owner.A_StartSound("armor/hit",CHAN_BODY,CHANF_DEFAULT,clamp(damage*.03,0.,1.),2.5);
 			saved = HandleDamage(damage,damageType,flags);
 			if ( amount <= int(ceil(saved*reduction)) ) saved = amount;
 			newdamage -= saved;
@@ -59,7 +76,7 @@ Class SWWMArmor : Armor abstract
 				if ( Owner.CountInv(parent) > 0 )
 				{
 					Amount = default.Amount;
-					if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEM,CHANF_DEFAULT,.6);
+					if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 					Owner.TakeInventory(parent,1);
 				}
 				else
@@ -77,6 +94,8 @@ Class SWWMArmor : Armor abstract
 // gives armor when used
 Class SWWMSpareArmor : Inventory abstract
 {
+	Mixin SWWMAutoUseFix;
+
 	Class<SWWMArmor> giveme;
 
 	Property GiveArmor : giveme;
@@ -87,7 +106,7 @@ Class SWWMSpareArmor : Inventory abstract
 		if ( !cur || (cur.Amount < cur.MaxAmount) )
 		{
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
-			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEM,CHANF_DEFAULT,.6);
+			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 			SWWMHandler.DoFlash(Owner,Color(48,96,255,64),5);
 			return true;
 		}
@@ -108,6 +127,8 @@ Class SWWMSpareArmor : Inventory abstract
 
 Class SWWMHealth : Inventory abstract
 {
+	Mixin SWWMAutoUseFix;
+
 	// can't use the Health class for whatever reason
 	// nice parser you got there I guess?
 	Class<Inventory> giveme;
@@ -117,7 +138,7 @@ Class SWWMHealth : Inventory abstract
 	override bool Use( bool pickup )
 	{
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
-		if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEM,CHANF_DEFAULT,.6);
+		if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 		SWWMHandler.DoFlash(Owner,Color(48,64,128,255),5);
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 		return true;
@@ -127,17 +148,22 @@ Class SWWMHealth : Inventory abstract
 	{
 	}
 
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Amount <= 0 ) DepleteOrDestroy();
+	}
+
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
 		if ( passive && (Owner.Health-damage <= 0) )
 		{
-			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEM,CHANF_DEFAULT,.6);
+			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
 				newdamage = max(0,damage-GetDefaultByType(giveme).Amount);
 				AutoUseExtra();
 				Amount--;
-				if ( Amount <= 0 ) DepleteOrDestroy();
 			}
 		}
 		else newdamage = damage;
@@ -416,7 +442,7 @@ Class SWWMWeapon : Weapon abstract
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 				self.angle += clamp(diff,-5.,5.);
 				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-				SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*5000);
+				SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
 				if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
 				if ( !d.HitActor.bNOBLOOD )
 				{
@@ -434,7 +460,7 @@ Class SWWMWeapon : Weapon abstract
 		}
 		return false;
 	}
-	action void A_Melee( int dmg = 20 )
+	action void A_Melee( int dmg = 40 )
 	{
 		for ( int i=0; i<16; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
 	}

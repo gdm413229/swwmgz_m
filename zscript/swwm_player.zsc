@@ -346,8 +346,8 @@ Class Demolitionist : PlayerPawn
 				A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 			dashsnd = false;
 		}
-		if ( dashboost <= 0. ) return;
 		PainChance = InStateSequence(CurState,FindState("Dash"))?0:255;
+		if ( dashboost <= 0. ) return;
 		if ( InStateSequence(CurState,FindState("Dash")) )
 		{
 			Actor a;

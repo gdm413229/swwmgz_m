@@ -347,7 +347,7 @@ have a spare. Most powerups can be toggled, unless specified otherwise.
 
 ### Health Nugget, replaces Health Bonus, Crystal Vial
 
-Health nuggets increase health by 5% up to a cap of 200.
+Health nuggets increase health by 1% up to a cap of 200.
 
 ### Health Tetrahedron, replaces Stimpak, Quartz Flask
 
@@ -367,7 +367,7 @@ you're about to die, though it sometimes won't be enough to save you.
 ### Armor Nugget, replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion
 
 Cumulative armor items that can increase resistance to all damage by as much
-as you can find. Each nugget adds 5% to the total. Above 100%, damage gets
+as you can find. Each nugget adds 1% to the total. Above 100%, damage gets
 turned into additional health (up to the standard 100% cap).
 The upper cap for these is 200%.
 
@@ -378,7 +378,7 @@ Protection decreases by a 10% of absorbed damage.
 The blast suit is a nice little light armor which provides a 75% reduction to
 damage and an additional 50% to splash damage.
 
-Can handle a total of 500 damage before breaking.
+Can handle a total of 200 damage before breaking.
 
 ### War Armor, replaces Blue Armor, Enchanted Shield, Falcon Shield
 
@@ -388,7 +388,7 @@ follows:
  * 80% reduction to everything else
  * 70% reduction for all splash damage (multiplicative on top of the other two)
 
-The armor can eat up a total of 1000 damage before breaking.
+The armor can eat up a total of 600 damage before breaking.
 
 ### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Platinum Helm
 
@@ -413,7 +413,7 @@ The ragekit is a special item that has some... interesting effects.
 Octuples melee damage, doubles movement speed, quarters damage taken... and has
 the side effect of turning you into a screaming beast.
 
-Ragequit happens after 30 seconds, also cannot be toggled after activation.
+Ragequit happens after 30 seconds.
 
 ### Gravity suppressor, replaces Radsuit, Wings of Wrath, Boots of Speed
 
@@ -428,7 +428,7 @@ Just be careful with height when the effect is about to run out.
 This thing makes you impervious to pretty much everything excluding the Ynykron
 Artifact.
 
-You're fucking invincible for a total of 90 seconds, cannot be toggled.
+You're fucking invincible for a total of 90 seconds.
 
 ### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator
 

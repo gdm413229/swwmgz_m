@@ -7,7 +7,8 @@ enum ESWWMGZChannels
 	CHAN_WEAPONEXTRA = 63203,
 	CHAN_POWERUP = 63204,
 	CHAN_POWERUPEXTRA = 63205,
-	CHAN_JETPACK = 63206
+	CHAN_JETPACK = 63206,
+	CHAN_ITEMEXTRA = 63207
 };
 
 // Misc. Utility code
@@ -881,6 +882,12 @@ Class QueuedFlash
 	Actor cam;
 }
 
+Class LastLine
+{
+	String type;
+	int lineno;
+}
+
 // Handler responsible for item replacements and whatever else
 Class SWWMHandler : EventHandler
 {
@@ -891,6 +898,7 @@ Class SWWMHandler : EventHandler
 	transient Array<Int> combattics;
 	transient int highesttic;
 	transient Array<QueuedFlash> flashes;
+	transient Array<LastLine> lastlines;
 	bool tookdamage[MAXPLAYERS];
 	int spreecount[MAXPLAYERS];
 	int lastkill[MAXPLAYERS];
@@ -901,7 +909,11 @@ Class SWWMHandler : EventHandler
 
 	static int AddOneliner( String type, int delay = 5 )
 	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return 0;
 		CVar voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]);
+		// suppress non-rage comments when ragekit is active, only screaming allowed
+		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
 		int whichline;
 		int countem = 0, i = 1;
 		String testme, locme;
@@ -914,9 +926,29 @@ Class SWWMHandler : EventHandler
 		}
 		while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
 		if ( countem == 0 ) return 0;
-		whichline = Random[DemoLines](1,countem);
-		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( !hnd ) return 0;
+		// check last line so we don't repeat
+		int last = 0, ent;
+		for ( int i=0; i<hnd.lastlines.Size(); i++ )
+		{
+			if ( hnd.lastlines[i].type != type ) continue;
+			last = hnd.lastlines[i].lineno;
+			ent = i;
+			break;
+		}
+		if ( last > 0 )
+		{
+			whichline = Random[DemoLines](1,countem-1);
+			if ( whichline >= last ) whichline++;
+			hnd.lastlines[ent].lineno = whichline;
+		}
+		else
+		{
+			whichline = Random[DemoLines](1,countem);
+			let lst = new("LastLine");
+			lst.type = type;
+			lst.lineno = whichline;
+			hnd.lastlines.Push(lst);
+		}
 		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.GetString().MakeUpper(),type.MakeUpper(),whichline);
 		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype.GetString(),type,whichline);
 		hnd.onelinertic = gametic+delay;
@@ -1490,6 +1522,8 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'Megasphere') || (e.Replacee == 'ArtiEgg') || (e.Replacee == 'PlatinumHelm') ) e.Replacement = 'GrilledCheeseSandwich';
 		else if ( (e.Replacee == 'Blursphere') || (e.Replacee == 'ArtiInvisibility') || (e.Replacee == 'AmuletOfWarding') ) e.Replacement = 'GhostArtifact';
 		else if ( (e.Replacee == 'Radsuit') || (e.Replacee == 'ArtiFly') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'GravitySuppressor';
+		else if ( (e.Replacee == 'InvulnerabilitySphere') || (e.Replacee == 'ArtiInvulnerability') || (e.Replacee == 'ArtiInvulnerability2') ) e.Replacement = 'FuckingInvinciball';
+		else if ( (e.Replacee == 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiBoostArmor') ) e.Replacement = 'Ragekit';
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
 	}

@@ -1195,30 +1195,41 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	private void DoKeyTagFix( Actor a )
+	{
+		if ( a is 'RedCard' ) a.SetTag("$T_REDCARD");
+		else if ( a is 'BlueCard' ) a.SetTag("$T_BLUECARD");
+		else if ( a is 'YellowCard' ) a.SetTag("$T_YELLOWCARD");
+		else if ( a is 'RedSkull' ) a.SetTag("$T_REDSKULL");
+		else if ( a is 'BlueSkull' ) a.SetTag("$T_BLUESKULL");
+		else if ( a is 'YellowSkull' ) a.SetTag("$T_YELLOWSKULL");
+		else if ( a is 'KeyYellow' ) a.SetTag("$T_YELLOWKEY");
+		else if ( a is 'KeyGreen' ) a.SetTag("$T_GREENKEY");
+		else if ( a is 'KeyBlue' ) a.SetTag("$T_BLUEKEY");
+		else if ( a.GetClassName() == 'KeyRed' ) a.SetTag("$T_REDKEY");
+		else if ( a is 'KeySteel' ) a.SetTag("$T_KEYSTEEL");
+		else if ( a is 'KeyCave' ) a.SetTag("$T_KEYCAVE");
+		else if ( a is 'KeyAxe' ) a.SetTag("$T_KEYAXE");
+		else if ( a is 'KeyFire' ) a.SetTag("$T_KEYFIRE");
+		else if ( a is 'KeyEmerald' ) a.SetTag("$T_KEYEMERALD");
+		else if ( a is 'KeyDungeon' ) a.SetTag("$T_KEYDUNGEON");
+		else if ( a is 'KeySilver' ) a.SetTag("$T_KEYSILVER");
+		else if ( a is 'KeyRusted' ) a.SetTag("$T_KEYRUSTED");
+		else if ( a is 'KeyHorn' ) a.SetTag("$T_KEYHORN");
+		else if ( a is 'KeySwamp' ) a.SetTag("$T_KEYSWAMP");
+		else if ( a is 'KeyCastle' ) a.SetTag("$T_KEYCASTLE");
+	}
+
+	static void KeyTagFix( Actor a )
+	{
+		let hnd = SWWMHandler(Find("SWWMHandler"));
+		if ( hnd ) hnd.DoKeyTagFix(a);
+	}
+
 	// tempfix keys have no tags
 	override void WorldThingSpawned( WorldEvent e )
 	{
-		if ( e.Thing is 'RedCard' ) e.Thing.SetTag("$T_REDCARD");
-		else if ( e.Thing is 'BlueCard' ) e.Thing.SetTag("$T_BLUECARD");
-		else if ( e.Thing is 'YellowCard' ) e.Thing.SetTag("$T_YELLOWCARD");
-		else if ( e.Thing is 'RedSkull' ) e.Thing.SetTag("$T_REDSKULL");
-		else if ( e.Thing is 'BlueSkull' ) e.Thing.SetTag("$T_BLUESKULL");
-		else if ( e.Thing is 'YellowSkull' ) e.Thing.SetTag("$T_YELLOWSKULL");
-		else if ( e.Thing is 'KeyYellow' ) e.Thing.SetTag("$T_YELLOWKEY");
-		else if ( e.Thing is 'KeyGreen' ) e.Thing.SetTag("$T_GREENKEY");
-		else if ( e.Thing is 'KeyBlue' ) e.Thing.SetTag("$T_BLUEKEY");
-		else if ( e.Thing.GetClassName() == 'KeyRed' ) e.Thing.SetTag("$T_REDKEY");
-		else if ( e.Thing is 'KeySteel' ) e.Thing.SetTag("$T_KEYSTEEL");
-		else if ( e.Thing is 'KeyCave' ) e.Thing.SetTag("$T_KEYCAVE");
-		else if ( e.Thing is 'KeyAxe' ) e.Thing.SetTag("$T_KEYAXE");
-		else if ( e.Thing is 'KeyFire' ) e.Thing.SetTag("$T_KEYFIRE");
-		else if ( e.Thing is 'KeyEmerald' ) e.Thing.SetTag("$T_KEYEMERALD");
-		else if ( e.Thing is 'KeyDungeon' ) e.Thing.SetTag("$T_KEYDUNGEON");
-		else if ( e.Thing is 'KeySilver' ) e.Thing.SetTag("$T_KEYSILVER");
-		else if ( e.Thing is 'KeyRusted' ) e.Thing.SetTag("$T_KEYRUSTED");
-		else if ( e.Thing is 'KeyHorn' ) e.Thing.SetTag("$T_KEYHORN");
-		else if ( e.Thing is 'KeySwamp' ) e.Thing.SetTag("$T_KEYSWAMP");
-		else if ( e.Thing is 'KeyCastle' ) e.Thing.SetTag("$T_KEYCASTLE");
+		if ( e.Thing is 'Key' ) DoKeyTagFix(e.Thing);
 	}
 
 	override void PostUiTick()
@@ -1478,6 +1489,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'Soulsphere') || (e.Replacee == 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';
 		else if ( (e.Replacee == 'Megasphere') || (e.Replacee == 'ArtiEgg') || (e.Replacee == 'PlatinumHelm') ) e.Replacement = 'GrilledCheeseSandwich';
 		else if ( (e.Replacee == 'Blursphere') || (e.Replacee == 'ArtiInvisibility') || (e.Replacee == 'AmuletOfWarding') ) e.Replacement = 'GhostArtifact';
+		else if ( (e.Replacee == 'Radsuit') || (e.Replacee == 'ArtiFly') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'GravitySuppressor';
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
 	}

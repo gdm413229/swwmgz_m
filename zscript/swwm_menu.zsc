@@ -10,7 +10,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_LIBRARY,
 		TAB_STORE,
 		TAB_TRADING,
-		TAB_CHAT
+		TAB_CHAT,
+		TAB_SECRET
 	};
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
@@ -45,6 +46,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int lastuseamt;
 	int checkuse;
 	int checkdrop;
+	// seeeeecret
+	int kcode;
 
 	override void Init( Menu parent )
 	{
@@ -75,6 +78,38 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
 	{
+		switch ( kcode )
+		{
+		case 0:
+		case 1:
+			if ( mkey == MKEY_UP ) kcode++;
+			else kcode = 0;
+			break;
+		case 2:
+		case 3:
+			if ( mkey == MKEY_DOWN ) kcode++;
+			else kcode = 0;
+			break;
+		case 4:
+		case 6:
+			if ( mkey == MKEY_LEFT ) kcode++;
+			else kcode = 0;
+			break;
+		case 5:
+		case 7:
+			if ( mkey == MKEY_RIGHT ) kcode++;
+			else kcode = 0;
+			break;
+		case 10:
+			if ( mkey == MKEY_ENTER )
+			{
+				MenuSound("misc/secret");
+				curtab = TAB_SECRET;
+			}
+		default:
+			kcode = 0;
+			break;
+		}
 		switch ( mkey )
 		{
 		case MKEY_BACK:
@@ -270,6 +305,21 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		switch ( ev.type )
 		{
 		case UIEvent.Type_KeyDown:
+			switch ( kcode )
+			{
+			case 8:
+				if ( ev.keystring ~== "B" )
+					kcode++;
+				else kcode = 0;
+				break;
+			case 9:
+				if ( ev.keystring ~== "A" ) kcode++;
+				else kcode = 0;
+				break;
+			default:
+				kcode = 0;
+				break;
+			}
 			if( (ikey[0] && (ev.keystring == mkey[0])) || (ikey[1] && (ev.keystring == mkey[1])) )
 			{
 				MenuSound("menu/democlose");
@@ -301,9 +351,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		static const string tabnames[] =
 		{
 			"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB"
+			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
+			"$SWWM_SECRETTAB"
 		};
-		for ( int i=0; i<8; i++ )
+		int mx = (curtab==TAB_SECRET)?9:8;
+		for ( int i=0; i<mx; i++ )
 		{
 			str = StringTable.Localize(tabnames[i]);
 			Screen.DrawText(TewiFont,curtab==i?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -583,9 +635,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else
+		else if ( curtab == TAB_SECRET )
 		{
 			// TODO easter egg "konami code" hidden tab
+			str = StringTable.Localize("$SWWM_COMINGSOON");
+			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 	}
 }

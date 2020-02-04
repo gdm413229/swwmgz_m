@@ -128,7 +128,7 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.InitEffect();
 		if ( !Owner ) return;
-		Owner.bNOTARGET = true;
+		DoEffect();
 	}
 	override void EndEffect()
 	{
@@ -143,6 +143,7 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.DoEffect();
 		if ( !Owner ) return;
+		Owner.bNOTARGET = true;
 		if ( !snd ) snd = Spawn("GhostSnd",Owner.pos);
 		snd.target = Owner;
 		snd.master = self;
@@ -213,7 +214,7 @@ Class GhostArtifact : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		A_StartSound(UseSound,CHAN_ITEM);
+		Owner.A_StartSound(UseSound,CHAN_ITEM);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
 		if ( g ) g.EffectTics = g.default.EffectTics;
 		else Owner.GiveInventory("GhostPower",1);
@@ -229,6 +230,129 @@ Class GhostArtifact : Inventory
 		tracer.FloatBobPhase = FloatBobPhase;
 	}
 
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class GravSnd : Actor
+{
+	Default
+	{
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target || !master )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.pos,true);
+		if ( players[consoleplayer].Camera == target )
+		{
+			A_SoundVolume(CHAN_VOICE,0.);
+			A_SoundVolume(CHAN_7,.7);
+		}
+		else
+		{
+			A_SoundVolume(CHAN_VOICE,.2);
+			A_SoundVolume(CHAN_7,0.);
+		}
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("powerup/gravityact",CHAN_VOICE,CHANF_LOOPING,.2,1.5);
+		A_StartSound("powerup/gravityact",CHAN_7,CHANF_LOOPING,.7,ATTN_NONE);
+	}
+	override void OnDestroy()
+	{
+		Super.OnDestroy();
+		A_StopSound(CHAN_VOICE);
+		A_StopSound(CHAN_7);
+	}
+}
+
+Class GravityPower : Powerup
+{
+	Actor snd;
+
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_Gravity.png";
+		Powerup.Duration -60;
+	}
+
+	override void InitEffect()
+	{
+		Super.InitEffect();
+		if ( !Owner ) return;
+		DoEffect();
+		if ( Owner.pos.z <= Owner.floorz )
+			Owner.vel.z = 1;
+	}
+	override void EndEffect()
+	{
+		Super.EndEffect();
+		if ( !Owner ) return;
+		if ( !Owner.bFLYCHEAT )
+		{
+			Owner.bFLY = false;
+			Owner.bNOGRAVITY = false;
+			if ( Owner.pos.z > Owner.floorz ) Owner.player.centering = true;
+		}
+		Owner.A_StartSound("powerup/gravityend",CHAN_ITEM);
+		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GRAVITYS"));
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner ) return;
+		Owner.bFLY = true;
+		Owner.bNOGRAVITY = true;
+		if ( !snd ) snd = Spawn("GravSnd",Owner.pos);
+		snd.target = Owner;
+		snd.master = self;
+	}
+
+}
+
+Class GravitySuppressor : Inventory
+{
+	override bool Use( bool pickup )
+	{
+		if ( pickup && !deathmatch ) return false;
+		Owner.A_StartSound(UseSound,CHAN_ITEM);
+		let g = GravityPower(Owner.FindInventory("GravityPower"));
+		if ( g ) g.EffectTics = g.default.EffectTics;
+		else Owner.GiveInventory("GravityPower",1);
+		return true;
+	}
+	Default
+	{
+		Tag "$T_GRAVITYS";
+		Stamina 16000;
+		Inventory.Icon "graphics/HUD/Icons/I_Gravity.png";
+		Inventory.PickupSound "misc/p_pkup";
+		Inventory.UseSound "powerup/gravity";
+		Inventory.PickupMessage "$T_GRAVITYS";
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
+		+INVENTORY.ALWAYSPICKUP;
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.INVBAR;
+		+COUNTITEM;
+		+INVENTORY.BIGPOWERUP;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
 	States
 	{
 	Spawn:

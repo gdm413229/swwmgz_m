@@ -457,7 +457,7 @@ Class SWWMWeapon : Weapon abstract
 		}
 		else flashstate = weap.FindState(flashlabel);
 		player.SetPSprite(PSP_FLASH,flashstate);
-		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE,true);
+		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
 		A_OverlayRenderStyle(PSP_FLASH,STYLE_Add);
 	}
 	// tells the SWWM HUD that this weapon has ammo available

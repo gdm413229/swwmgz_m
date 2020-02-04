@@ -6,6 +6,7 @@ Class Demolitionist : PlayerPawn
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
 	bool dashsnd;
+	bool sendtoground;
 	bool key_reentrant;
 
 	int lastdamage;
@@ -21,6 +22,8 @@ Class Demolitionist : PlayerPawn
 	Vector3 oldpos;
 
 	int lastmpain;
+
+	double guideangle, guidepitch, guideroll;
 
 	Default
 	{
@@ -48,15 +51,15 @@ Class Demolitionist : PlayerPawn
 		if ( !player.mo || (player.health <= 0) ) return;
 		int giveall = ALL_NO;
 		if ( name ~== "all" ) giveall = ALL_YES;
-		else if (name ~== "everything") giveall = ALL_YESYES;
-		if ( name ~== "health" )
+		else if ( name ~== "everything" ) giveall = ALL_YESYES;
+		if ( giveall || (name ~== "health") )
 		{
 			if ( amount > 0 )
 			{
-				health += amount;
+				health = min(health+amount,1000);
 				player.health = health;
 			}
-			else player.health = health = GetMaxHealth(true);
+			else player.health = health = 1000;
 		}
 		if ( giveall || (name ~== "backpack") )
 		{
@@ -144,10 +147,14 @@ Class Demolitionist : PlayerPawn
 			for ( int i=0; i<AllActorClasses.Size(); i++ )
 			{
 				if ( !(AllActorClasses[i] is "Key") ) continue;
+				// clean up redundant keys
+				if ( !(gameinfo.gametype&GAME_CHEX) && ((AllActorClasses[i] is 'ChexRedCard') || (AllActorClasses[i] is 'ChexBlueCard') || (AllActorClasses[i] is 'ChexYellowCard')) ) continue;
+				else if ( (gameinfo.gametype&GAME_CHEX) && !(AllActorClasses[i] is 'ChexRedCard') && !(AllActorClasses[i] is 'ChexBlueCard') && !(AllActorClasses[i] is 'ChexYellowCard') ) continue;
 				let keyitem = GetDefaultByType(AllActorClasses[i]);
 				if ( keyitem.special1 )
 				{
 					let item = Inventory(Spawn(AllActorClasses[i]));
+					SWWMHandler.KeyTagFix(item);
 					if ( !item.CallTryPickup(self) ) item.Destroy();
 				}
 			}
@@ -182,7 +189,7 @@ Class Demolitionist : PlayerPawn
 				if ( !type ) continue;
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
-					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") )
+					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )
 				{
 					// Do not give replaced items unless using "give everything"
 					if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )
@@ -325,7 +332,7 @@ Class Demolitionist : PlayerPawn
 		lastground = player.onground;
 		lastvelz = prevvelz;
 		prevvelz = vel.z;
-		bNOFRICTION = InStateSequence(CurState,FindState("Dash"));
+		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat||(player.cheats&CF_NOCLIP2)))||InStateSequence(CurState,FindState("Dash")));
 		fuelcooldown = max(0,fuelcooldown-1);
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
@@ -420,20 +427,106 @@ Class Demolitionist : PlayerPawn
 		player.viewz += ssup;
 		ssup = max(0,(ssup*.7)-.25);
 	}
+	override void CheckPitch()
+	{
+		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+			return;	// handled in moveplayer
+		Super.CheckPitch();
+	}
+	override void CheckMoveUpDown()
+	{
+		if ( InStateSequence(CurState,FindState("Dash")) )
+			player.cmd.upmove = 0;
+		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		{
+			double fs = TweakSpeeds(1.,0.);
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+			Vector3 accel;
+			if ( (player.cmd.upmove == -32768) || sendtoground )
+			{
+				sendtoground = true;
+				player.centering = true;
+				accel = (0,0,-4096);
+			}
+			else accel = z*player.cmd.upmove*8.;
+			accel *= fs/128.;
+			vel = vel+accel/TICRATE;
+			if ( sendtoground ) vel.xy *= .6;
+			if ( (pos.z <= floorz) || bOnMobj ) sendtoground = false;
+			if ( vel.length() > 50. )
+				vel = vel.unit()*50.;
+			return;
+		}
+		else sendtoground = false;
+		Super.CheckMoveUpDown();
+	}
 	override void MovePlayer()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.forwardmove = player.cmd.sidemove = 0;
-		Super.MovePlayer();
+		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		{
+			player.onground = false;
+			if ( player.turnticks )
+			{
+				player.turnticks--;
+				guideangle = (180./TURN180_TICKS);
+			}
+			else guideangle += .2*player.cmd.yaw*(360./65536.);
+			guidepitch -= .2*player.cmd.pitch*(360./65536.);
+			if ( player.centering )
+			{
+				guidepitch = clamp(deltaangle(pitch,0),-3.,3.);
+				guideroll = clamp(deltaangle(roll,0),-3.,3.);
+			}
+			swwm_Quat orient = swwm_Quat.create_euler(pitch,angle,roll);
+			swwm_Quat angles = swwm_Quat.create_euler(guidepitch,guideangle,guideroll);
+			orient = orient.qmul(angles);
+			double npitch, nangle, nroll;
+			[npitch, nangle, nroll] = orient.to_euler();
+			angle = nangle;
+			pitch = npitch;
+			roll = nroll;
+			if ( (abs(roll) <= 0.) && (abs(pitch) <= 0.) ) player.centering = false;
+			double fs = TweakSpeeds(1.,0.);
+			fs *= max(abs(player.cmd.forwardmove/12800.),abs(player.cmd.sidemove/10240.));
+			if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+			Vector3 accel = x*player.cmd.forwardmove+y*player.cmd.sidemove+z*player.cmd.upmove;
+			accel *= fs/128.;
+			vel = vel+accel/TICRATE;
+			if ( vel.length() > 50. )
+				vel = vel.unit()*50.;
+			vel *= .99;
+			player.vel = (1,1)*vel.length();
+			player.jumptics = -2;
+			if ( !(player.cheats & CF_PREDICTING) && (player.cmd.forwardmove|player.cmd.sidemove) )
+				PlayRunning();
+			if ( player.cheats&CF_REVERTPLEASE )
+			{
+				player.cheats &= ~CF_REVERTPLEASE;
+				player.camera = player.mo;
+			}
+		}
+		else
+		{
+			Super.MovePlayer();
+			if ( abs(roll) > 0. ) roll += clamp(deltaangle(roll,0),-3.,3.);
+		}
+		guideangle *= .9;
+		guidepitch *= .9;
+		guideroll *= .9;
 		if ( player.onground ) lastgroundtic = gametic;
 		// anchor to ground when going down steps
-		if ( !player.onground && !bNoGravity && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
+		if ( !player.onground && !bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
 		{
 			ssup = max(0,(pos.z-floorz));
 			SetOrigin(Vec2OffsetZ(0,0,floorz),true);
 			player.onground = true;
 		}
-		if ( !(player.cmd.forwardmove|player.cmd.sidemove) )
+		if ( !(player.cheats & CF_PREDICTING) && !(player.cmd.forwardmove|player.cmd.sidemove) )
 			PlayIdle();
 		Vector3 dodge = (0,0,0), x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -442,12 +535,10 @@ Class Demolitionist : PlayerPawn
 		if ( !(fm|sm) ) fm = 1;
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
-		if ( player.onground )
-		{
-			dodge.z = max(0,dodge.z);
-			if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
-		}
-		dodge.z += .15;
+		if ( player.onground ) dodge.z = max(0,dodge.z);
+		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
+		if ( (waterlevel < 2) && !(bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+			dodge.z += .15;
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 )
 		{
 			dashdir = dodge.unit();
@@ -474,7 +565,7 @@ Class Demolitionist : PlayerPawn
 		{
 			if ( player.crouchoffset ) player.crouching = 1;
 			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
-			else if ( bNoGravity ) vel.z = 3.;
+			else if ( bFly || bFlyCheat || (player.cheats&CF_NOCLIP2) ) return;
 			else if ( level.IsJumpingAllowed()
 				&& (player.onground && (player.jumptics == 0))
 				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump)) )
@@ -795,7 +886,7 @@ Class Demolitionist : PlayerPawn
 	Spawn:
 		// normal idle
 		#### # 2;
-		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(abs(player.cmd.yaw)>128),"Turn");
+		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(abs(player.cmd.yaw|player.cmd.pitch)>128),"Turn");
 		Wait;
 	See:
 		// normal walking
@@ -808,7 +899,7 @@ Class Demolitionist : PlayerPawn
 		Goto See+1;
 	Turn:
 		#### # 8 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.1);
-		XZW1 C 1 A_JumpIf(!player||!player.cmd.yaw,1);
+		XZW1 C 1 A_JumpIf(!player||!(player.cmd.yaw|player.cmd.pitch),1);
 		Wait;
 		XZW1 C 3 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.1);
 		Goto Spawn+1;

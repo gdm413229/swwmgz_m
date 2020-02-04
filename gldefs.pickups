@@ -37,6 +37,10 @@ Brightmap Texture "models/GhostArtifact.png"
 {
 	Map "models/GhostArtifact_bright.png"
 }
+Brightmap Texture "models/Gravity.png"
+{
+	Map "models/Gravity_bright.png"
+}
 
 PointLight ARMORNUGGETLIGHT
 {
@@ -99,4 +103,16 @@ PointLight GHOSTARTILIGHT
 Object GhostArtifact
 {
 	Frame "XZW1" { light "GHOSTARTILIGHT" }
+}
+
+PointLight GRAVITYLIGHT
+{
+	Color 0.3 0.8 1.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object GravitySuppressor
+{
+	Frame "XZW1" { light "GRAVITYLIGHT" }
 }

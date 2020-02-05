@@ -767,9 +767,10 @@ Class YnykronAmmo : Ammo
 
 Class AmmoFabricator : Inventory abstract
 {
-	int budget;
+	int budget, pertype;
 
 	Property Budget : budget;
+	Property PerType : pertype;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -779,10 +780,80 @@ Class AmmoFabricator : Inventory abstract
 		return Super.CreateCopy(other);
 	}
 
+	bool FabricateAmmo()
+	{
+		Array<Class<Ammo> > available;
+		// populate ammo production list
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let a = (Class<Ammo>)(AllActorClasses[i]);
+			// only direct descendants of ammo with a set price below our budget
+			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
+			let def = GetDefaultByType(a);
+			if ( !(def.Stamina) || (def.Stamina > budget) ) continue;
+			available.Push(a);
+		}
+		// start from lowest to highest needed until we fill the inventory or run out of budget
+		bool given = false;
+		int consumed = 0;
+		String fabstr = "";
+		bool comma = false;
+		for ( int i=0; i<available.Size(); i++ )
+		{
+			int amt, lim;
+			int cnt = 0;
+			Ammo cur = Ammo(Owner.FindInventory(available[i]));
+			if ( cur )
+			{
+				amt = cur.Amount;
+				lim = cur.MaxAmount;
+			}
+			else
+			{
+				cur = Ammo(Spawn(available[i]));
+				amt = cur.Amount = 0;
+				lim = cur.MaxAmount;
+				cur.AttachToOwner(Owner);
+			}
+			while ( (amt < lim) && (consumed+cur.default.Stamina < budget) && (cnt < pertype) )
+			{
+				consumed += cur.default.Stamina;
+				amt = ++cur.Amount;
+				cnt++;
+				given = true;
+			}
+			if ( cnt > 0 )
+			{
+				if ( comma ) fabstr.AppendFormat(", %dx %s",cnt,cur.GetTag());
+				else fabstr.AppendFormat("%dx %s",cnt,cur.GetTag());
+				comma = true;
+			}
+		}
+		if ( given ) PrintPickupMessage(true,fabstr);
+		return given;
+	}
+
+	override bool Use( bool pickup )
+	{
+		bool shouldautouse = false;
+		if ( swwm_enforceautouseammo == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautouseammo == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autouseammo',Owner.player).GetBool();
+		if ( pickup && !shouldautouse ) return false;
+		if ( FabricateAmmo() )
+		{
+			Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			return true;
+		}
+		return false;
+	}
+
 	Default
 	{
 		+INVENTORY.INVBAR;
+		+INVENTORY.AUTOACTIVATE;
 		+FLOATBOB;
+		Inventory.UseSound "fabricator/use";
 		Inventory.MaxAmount 32;
 		Inventory.InterHubAmount 32;
 		FloatBobStrength 0.25;
@@ -803,7 +874,8 @@ Class FabricatorTier1 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
 		Inventory.MaxAmount 30;
-		AmmoFabricator.Budget 5000;
+		AmmoFabricator.Budget 10000;
+		AmmoFabricator.PerType 4;
 		Stamina 3000;
 	}
 }
@@ -815,7 +887,8 @@ Class FabricatorTier2 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
 		Inventory.MaxAmount 20;
-		AmmoFabricator.Budget 20000;
+		AmmoFabricator.Budget 25000;
+		AmmoFabricator.PerType 8;
 		Stamina 12000;
 	}
 }
@@ -828,6 +901,7 @@ Class FabricatorTier3 : AmmoFabricator
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
 		AmmoFabricator.Budget 500000;
+		AmmoFabricator.PerType 16;
 		Stamina 480000;
 	}
 }
@@ -839,7 +913,9 @@ Class FabricatorTier4 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator4.png";
 		Inventory.PickupMessage "$T_FABRICATOR4";
 		Inventory.MaxAmount 5;
-		AmmoFabricator.Budget -1;
+		AmmoFabricator.Budget int.max;
+		AmmoFabricator.PerType int.max;
+		-INVENTORY.AUTOACTIVATE;
 		Stamina 1920000;
 	}
 }

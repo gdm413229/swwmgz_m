@@ -594,7 +594,7 @@ Class RagekitPower : Powerup
 		if ( !(level.maptime%30) )
 		{
 			SWWMHandler.DoFlash(Owner,Color(16,255,0,0),5);
-			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )
+			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",5);
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 		}
@@ -671,13 +671,18 @@ Class Omnisight : Inventory
 {
 	override bool Use( bool pickup )
 	{
-		level.allmap = true;
+		if ( !level.allmap )
+		{
+			Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			level.allmap = true;
+		}
 		// not used up, must be kept for the targetting features to work
 		return false;
 	}
 	Default
 	{
 		Tag "$T_OMNISIGHT";
+		Inventory.UseSound "powerup/omnisight";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.PickupMessage "$I_OMNISIGHT";
 		Inventory.MaxAmount 1;
@@ -701,10 +706,249 @@ Class Omnisight : Inventory
 
 Class LampMoth : Actor
 {
+	Actor lamp;
+	Vector3 trail, ofs;
+	int lifespan;
+
+	Default
+	{
+		Tag "$T_MOTH";
+		Radius 1;
+		Height 2;
+		Speed 2;
+		DamageFunction 1;
+		MeleeRange 16;
+		Mass 10;
+		Health 10;
+		DeathSound "moth/die";
+		BloodColor "20 10 10";
+		MONSTER;
+		-COUNTKILL;
+		+THRUACTORS;
+		+NOGRAVITY;
+		+NOTELEPORT;
+		+FLOAT;
+		+NOPAIN;
+		+FRIENDLY;
+		+LOOKALLAROUND;
+		+QUICKTORETALIATE;
+		+INTERPOLATEANGLES;
+	}
+	override string GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( master && master.player ) return String.Format(StringTable.Localize("$O_MOTH"),master.player.GetUserName());
+		return StringTable.Localize("$O_MOTH2");
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOPING,.15,4.,FRandom[Moth](.8,1.2));
+		if ( master && master.player ) SetFriendPlayer(master.player);
+		else bFRIENDLY = false;
+	}
+	bool isEntranced()
+	{
+		if ( !lamp )
+		{
+			// look for nearby lamps
+			let bi = BlockThingsIterator.Create(self,250);
+			double mindist = 250.;
+			while ( bi.Next() )
+			{
+				if ( !bi.Thing || !(bi.Thing is 'CompanionLamp') ) continue;
+				Actor a = bi.Thing;
+				double dist = Distance3D(a);
+				if ( (a.frame == 0) || (dist > mindist) && !CheckSight(a) ) continue;
+				mindist = dist;
+				lamp = a;
+				master = a.target;
+				if ( CompanionLamp(lamp).moff.Find(self) == -1 )
+					CompanionLamp(lamp).moff.Push(self);
+				if ( master && master.player ) SetFriendPlayer(master.player);
+				else bFRIENDLY = false;
+			}
+		}
+		if ( !lamp || (lamp.frame == 0) || (Distance3D(lamp) > 250) || !CheckSight(lamp) ) return false;
+		return true;
+	}
+	void A_SmoothWander()
+	{
+		if ( level.Vec3Diff(pos,trail).length() < speed )
+		{
+			double ang = FRandom[Moth](0,360);
+			double pt = FRandom[Moth](-30,30);
+			double dist = FRandom[Moth](20,40);
+			ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+		}
+		Vector3 newpos = level.Vec3Offset(pos,ofs);
+		if ( level.IsPointInLevel(newpos) ) trail = newpos;
+		if ( vel.length() > 0 )
+		{
+			Vector3 uvel = vel.unit();
+			angle += Clamp(deltaangle(angle,atan2(uvel.y,uvel.x)),-5.,5.);
+			pitch += Clamp(deltaangle(pitch,asin(-uvel.z)),-5.,5.);
+		}
+		vel *= .8;
+		Vector3 dir = level.Vec3Diff(pos,trail);
+		if ( dir.length() > 0 ) vel += dir.unit()*clamp(dir.length()*.05,.4*speed,.5*speed);
+	}
+	void A_SmoothChase()
+	{
+		if ( !target || (target.Health <= 0) )
+		{
+			A_ClearTarget();
+			SetStateLabel("Spawn");
+			return;
+		}
+		if ( CheckMeleeRange() )
+		{
+			SetStateLabel("Melee");
+			return;
+		}
+		Vector3 dest = target.Vec3Offset(0,0,target.height*.75);
+		Vector3 dir = level.Vec3Diff(pos,dest);
+		Vector3 dirunit = dir.unit();
+		FLineTraceData d;
+		LineTrace(atan2(dirunit.y,dirunit.x),dir.length(),asin(-dirunit.z),data:d);
+		if ( (d.HitType != TRACE_HitActor) && (d.HitActor != target) )
+		{
+			A_Chase();
+			return;
+		}
+		if ( vel.length() > 0 )
+		{
+			Vector3 uvel = vel.unit();
+			angle = atan2(uvel.y,uvel.x);
+			pitch = asin(-uvel.z);
+		}
+		vel *= .8;
+		if ( dir.length() > 0 ) vel += dir.unit()*clamp(dir.length()*.02,.3*speed,2.*speed);
+	}
+	void A_FollowLamp()
+	{
+		if ( !lamp )
+		{
+			SetStateLabel("Spawn");
+			return;
+		}
+		double dst = level.Vec3Diff(pos,trail).length();
+		if ( (dst < speed) || (dst > 50) )
+		{
+			double ang = FRandom[Moth](0,360);
+			double pt = FRandom[Moth](-30,30);
+			double dist = FRandom[Moth](20,30);
+			ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+		}
+		Vector3 newpos = level.Vec3Offset(lamp.Vec3Offset(0,0,lamp.height/2),ofs);
+		if ( level.IsPointInLevel(newpos) ) trail = newpos;
+		if ( vel.length() > 0 )
+		{
+			Vector3 uvel = vel.unit();
+			angle = atan2(uvel.y,uvel.x);
+			pitch = asin(-uvel.z);
+		}
+		vel *= .8;
+		Vector3 dir = level.Vec3Diff(pos,trail);
+		if ( dir.length() > 0 ) vel += dir.unit()*clamp(dir.length()*.02,.4*speed,2.*speed);
+		Vector3 diff = level.Vec3Diff(pos,lamp.pos);
+		if ( (diff.x > -8) && (diff.x < 8) && (diff.y > -8) && (diff.y < 8) && (diff.z > -4) && (diff.z < lamp.height+4) )
+		{
+			if ( diff.x < 0 ) vel.x -= .2;
+			else vel.x += .2;
+			if ( diff.y < 0 ) vel.y -= .2;
+			else vel.y += .2;
+			if ( diff.z < 0 ) vel.z -= .2;
+			else vel.z += .2;
+		}
+	}
+	void A_SmoothMove()
+	{
+		if ( vel.length() > 0 )
+		{
+			Vector3 uvel = vel.unit();
+			angle = atan2(uvel.y,uvel.x);
+			pitch = asin(-uvel.z);
+		}
+		vel *= .8;
+	}
+	void A_Scrape()
+	{
+		if ( CheckMeleeRange() )
+		{
+			A_FaceTarget(0,0);
+			lifespan -= 5;
+			Vector3 awaydir = level.Vec3Diff(target.Vec3Offset(0,0,target.height),pos).unit();
+			vel += awaydir*32.;
+			int dmg = target.DamageMobj(self,self,GetMissileDamage(0,0),'Melee',Random[Moth](0,8)?DMG_NO_PAIN:0);
+			if ( !target.bNOBLOOD )
+			{
+				target.TraceBleed(dmg,self);
+				target.SpawnBlood(pos,atan2(awaydir.y,awaydir.x)+180,dmg);
+			}
+			A_StartSound("moth/scrape",CHAN_WEAPON,CHANF_OVERLAP,.2,2.5);
+			DamageMobj(target,target,1,'Melee');
+		}
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() || isEntranced() )
+		{
+			lifespan = 100;
+			return;
+		}
+		if ( target && (target.Health > 0) ) lifespan = max(20,lifespan);
+		lifespan--;
+		if ( lifespan <= 0 )
+		{
+			let s = Spawn("SWWMSmallSmoke",pos);
+			s.alpha *= .3;
+			Destroy();
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 B 0 A_JumpIf(isEntranced(),"See.Entranced");
+		XZW1 BC 1
+		{
+			A_SmoothWander();
+			A_Look();
+		}
+		Loop;
+	See:	// go for enemies
+		XZW1 B 0 A_JumpIf(isEntranced(),"See.Entranced");
+		XZW1 BC 1 A_SmoothChase();
+		Loop;
+	See.Entranced:	// follow the lamp
+		XZW1 B 0 A_JumpIf(!isEntranced(),"Spawn");
+		XZW1 BC 1 A_FollowLamp();
+		Loop;
+	Melee:
+		XZW1 B 0 A_Scrape();
+		XZW1 BCBC 1 A_SmoothMove();
+		Goto See;
+	Death:
+		TNT1 A 1
+		{
+			A_StartSound("moth/die",CHAN_VOICE,CHANF_OVERLAP,.6,2.5);
+			let s = Spawn("SWWMSmallSmoke",pos);
+			s.alpha *= .3;
+		}
+		Stop;
+	}
 }
 
 Class LampMoth2 : LampMoth
 {
+	Default
+	{
+		Tag "$T_WMOTH";
+		DamageFunction 3;
+		Speed 3;
+		Scale 1.5;
+		Health 100;
+	}
 }
 
 Class LampMashiro : Actor abstract
@@ -761,20 +1005,46 @@ Class CompanionLamp : Actor
 	Default
 	{
 		+NOGRAVITY;
-		+NOCLIP;
 		+SHOOTABLE;
+		+NOTELEPORT;
 		+NODAMAGE;
 		+NOBLOOD;
 		+DONTSPLASH;
-		+FLOATBOB;
 		+INTERPOLATEANGLES;
+		+LOOKALLAROUND;
 		Radius 4;
-		Height 8;
-		FloatBobStrength 0.5;
+		Height 16;
 	}
-	action void A_Moth()
+	// random chance to spawn moths
+	void A_Moth()
 	{
-		// random chance to spawn moths
+		// count up
+		for ( int i=0; i<moff.Size(); i++ )
+		{
+			if ( moff[i] && (moff[i].lamp == self) && moff[i].isEntranced() ) continue;
+			moff.Delete(i);
+			i--;
+		}
+		if ( (GetAge()%35) || Random[Moth](0,9) || (moff.Size() >= 30) ) return;
+		// spawn a moth at a random offset
+		double ang = FRandom[Moth](0,360);
+		double pt = FRandom[Moth](-30,30);
+		double dist = FRandom[Moth](10,30);
+		Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+		Vector3 spawnpos = level.Vec3Offset(Vec3Offset(0,0,height/2),ofs);
+		if ( !level.IsPointInLevel(spawnpos) ) return;
+		let m = LampMoth(Spawn(Random[Moth](0,9)?"LampMoth":"LampMoth2",spawnpos));
+		if ( !m.TestMobjLocation() )
+		{
+			m.Destroy();
+			return;
+		}
+		let s = Spawn("SWWMSmallSmoke",m.pos);
+		s.alpha *= .3;
+		m.master = target;
+		m.lamp = self;
+		m.trail = m.pos;
+		moff.Push(m);
 	}
 	override void PostBeginPlay()
 	{
@@ -784,7 +1054,23 @@ Class CompanionLamp : Actor
 			Destroy();
 			return;
 		}
+		Spawn("SWWMItemFog",pos);
 		Trail = pos;
+	}
+	// the stupidest thing ever, it's called BlockingLine but it's not always blocking us
+	private bool BlockingLineIsBlocking()
+	{
+		if ( !BlockingLine ) return false;
+		// one-sided
+		if ( !BlockingLine.sidedef[1] ) return true;
+		// blocks us
+		if ( BlockingLine.flags&(Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING) ) return true;
+		return false;
+	}
+	private int WhichBlockingLineSide()
+	{
+		if ( !BlockingLine ) return 0;
+		return ((pos.y-BlockingLine.v1.p.y)*BlockingLine.delta.x+(BlockingLine.v1.p.x-pos.x)*BlockingLine.delta.y > double.epsilon);
 	}
 	override void Tick()
 	{
@@ -794,28 +1080,95 @@ Class CompanionLamp : Actor
 			Destroy();
 			return;
 		}
+		if ( isFrozen() ) return;
 		// update trailing position
 		bool foundspot = false;
-		for ( int i=0; i<180; i++ )
+		for ( int i=0; i<180; i+=5 )
 		{
 			for ( int j=1; j>=-1; j-=2 )
 			{
 				double ang = (target.angle-180)+i*j;
-				Vector3 testpos = target.Vec3Offset(cos(ang)*32,sin(ang)*32,target.height-8);
+				Vector3 testpos = level.Vec3Offset(target.pos,(cos(ang)*32,sin(ang)*32,target.height-8+1.5*sin(level.maptime*3.)));
 				if ( !level.IsPointInLevel(testpos) ) continue;
+				Vector3 oldpos = pos;
+				Vector3 oldprev = prev;
+				Actor oldblockingmobj = blockingmobj;
+				Line oldblockingline = blockingline;
+				Sector oldblockingfloor = blockingfloor, oldblockingceiling = blockingceiling;
+				SetOrigin(testpos,false);
+				if ( !TestMobjLocation() || BlockingLineIsBlocking() || BlockingFloor || BlockingCeiling )
+				{
+					SetOrigin(oldpos,false);
+					prev = oldprev;
+					blockingmobj = oldblockingmobj;
+					blockingline = oldblockingline;
+					blockingfloor = oldblockingfloor;
+					blockingceiling = oldblockingceiling;
+					continue;
+				}
+				SetOrigin(oldpos,false);
+				prev = oldprev;
+				blockingmobj = oldblockingmobj;
+				blockingline = oldblockingline;
+				blockingfloor = oldblockingfloor;
+				blockingceiling = oldblockingceiling;
 				Trail = testpos;
 				foundspot = true;
 			}
 			// check at most for a 45 degree offset
 			if ( foundspot && (i > 45) ) break;
 		}
+		Vector3 diff = level.Vec3Diff(pos,target.pos);
+		if ( (diff.length() > 400) || !CheckSight(target) )
+		{
+			Actor f = Spawn("SWWMItemFog",pos);
+			f.A_StartSound("lamp/disappear",CHAN_VOICE);
+			SetOrigin(trail,false);
+			angle = AngleTo(target);
+			vel *= 0.;
+			f = Spawn("SWWMItemFog",pos);
+			f.A_StartSound("lamp/appear",CHAN_VOICE);
+			return;
+		}
 		angle += Clamp(deltaangle(angle,AngleTo(target)),-5.,5.);
 		vel *= .8;
-		Vector3 newpos = Trail;
-		Vector3 dir = level.Vec3Diff(pos,newpos);
-		if ( dir.length() > 0 )
-			vel += dir.unit()*min(dir.length()*.05,20.);
-		Vector3 diff = pos-target.pos;
+		bool blocked = false;
+		if ( BlockingLine && BlockingLineIsBlocking() )
+		{
+			// push away from wall
+			Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			if ( !WhichBlockingLineSide() ) normal *= -1;
+			vel += 4.*normal;
+			blocked = true;
+		}
+		if ( BlockingFloor )
+		{
+			// push away from floor
+			Vector3 normal = BlockingFloor.floorplane.Normal;
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				normal = -BlockingFloor.Get3DFLoor(i).top.Normal;
+				break;
+			}
+			vel += 4.*normal;
+			blocked = true;
+		}
+		if ( BlockingCeiling )
+		{
+			// push away from ceiling
+			Vector3 normal = BlockingCeiling.ceilingplane.Normal;
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				normal = -BlockingCeiling.Get3DFloor(i).bottom.Normal;
+				break;
+			}
+			vel += 4.*normal;
+			blocked = true;
+		}
 		if ( (diff.x > -16) && (diff.x < 16) && (diff.y > -16) && (diff.y < 16) && (diff.z > -16) && (diff.z < target.height+8) )
 		{
 			if ( diff.x < 0 ) vel.x -= .2;
@@ -824,16 +1177,38 @@ Class CompanionLamp : Actor
 			else vel.y += .2;
 			if ( diff.z < 0 ) vel.z -= .2;
 			else vel.z += .2;
+			blocked = true;
 		}
+		if ( blocked ) return;
+		Vector3 dir = level.Vec3Diff(pos,trail);
+		if ( dir.length() > 0 )
+			vel += dir.unit()*min(dir.length()*.05,20.);
 	}
 	States
 	{
 	Spawn:
-		XZW1 A 1 A_JumpIf(SWWMLamp(master)&&SWWMLamp(master).bActive,1);
+		XZW1 A 1
+		{
+			if ( SWWMLamp(master) && SWWMLamp(master).bActive )
+			{
+				A_StartSound("lamp/on",CHAN_ITEMEXTRA);
+				return ResolveState("Active");
+			}
+			return ResolveState(null);
+		}
 		Wait;
-		XZW1 B 0 A_JumpIf(!SWWMLamp(master)||!SWWMLamp(master).bActive,"Spawn");
-		XZW1 B 1 A_Moth();
-		Loop;
+	Active:
+		XZW1 B 1
+		{
+			A_Moth();
+			if ( !SWWMLamp(master) || !SWWMLamp(master).bActive )
+			{
+				A_StartSound("lamp/off",CHAN_ITEMEXTRA);
+				return ResolveState("Spawn");
+			}
+			return ResolveState(null);
+		}
+		Wait;
 	}
 }
 
@@ -849,7 +1224,7 @@ Class SWWMLamp : Inventory
 	override Inventory CreateCopy( Actor other )
 	{
 		// additional lore
-		SWWMLoreLibrary.Add(other.player,"Lamp");
+		SWWMLoreLibrary.Add(other.player,"MothLamp");
 		return Super.CreateCopy(other);
 	}
 	override bool HandlePickup( Inventory item )
@@ -877,8 +1252,10 @@ Class SWWMLamp : Inventory
 			thelamp = Spawn("CompanionLamp",Owner.Vec3Offset(cos(Owner.angle-180)*32,sin(Owner.angle-180)*32,Owner.height-8));
 			thelamp.target = Owner;
 			thelamp.master = self;
+			let f = Spawn("SWWMItemFog",thelamp.pos);
+			f.A_StartSound("lamp/appear",CHAN_VOICE);
 		}
-		if ( bActive && !(level.maptime%35) ) Charge--;
+		if ( bActive && !(level.maptime%35) && !isFrozen() ) Charge--;
 		if ( Charge <= 0 )
 		{
 			Amount--;
@@ -888,7 +1265,12 @@ Class SWWMLamp : Inventory
 	override void DetachFromOwner()
 	{
 		Super.DetachFromOwner();
-		if ( thelamp ) thelamp.Destroy();
+		if ( thelamp )
+		{
+			let f = Spawn("SWWMItemFog",thelamp.pos);
+			f.A_StartSound("lamp/disappear",CHAN_VOICE);
+			thelamp.Destroy();
+		}
 		Icon = default.Icon;
 		bActive = false;
 	}

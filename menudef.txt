@@ -6,6 +6,12 @@ OptionValue "SWWMVoice"
 	3, "$SWWM_MUTELINERS"
 	4, "$SWWM_MUTEALL"
 }
+OptionValue "SWWMEnforce"
+{
+	-1, "$SWWM_FORCEDISABLE"
+	0, "$SWWM_USERSET"
+	1, "$SWWM_FORCEENABLE"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -25,8 +31,16 @@ OptionMenu "SWWMOptionMenu"
 	Slider "$SWWM_MSGLEN", "swwm_msgduration", 1, 30, 1, 0
 	Slider "$SWWM_PICKLEN", "swwm_pickduration", 1, 30, 1, 0
 	StaticText " "
+	StaticText "$SWWM_ITITLE", "Gold"
+	Option "$SWWM_ARMORUSE", "swwm_autousearmor", "YesNo"
+	Option "$SWWM_HEALTHUSE", "swwm_autousehealth", "YesNo"
+	Option "$SWWM_AMMOUSE", "swwm_autouseammo", "YesNo"
+	StaticText " "
 	StaticText "$SWWM_CTITLE", "Gold"
 	Option "$SWWM_SKEYS", "swwm_sharekeys", "YesNo"
+	Option "$SWWM_SVARMORUSE", "swwm_enforceautousearmor", "SWWMEnforce"
+	Option "$SWWM_SVHEALTHUSE", "swwm_enforceautousehealth", "SWWMEnforce"
+	Option "$SWWM_SVAMMOUSE", "swwm_enforceautouseammo", "SWWMEnforce"
 }
 OptionMenu "SWWMCreditsMenu"
 {
@@ -38,7 +52,7 @@ OptionMenu "SWWMCreditsMenu"
 	StaticText " "
 	StaticText "$SWWM_CASSETS", "Red"
 	StaticText " "
-	StaticText "Bethesda Softworks", "Gold"
+	StaticText "Bethesda Game Studios", "Gold"
 	StaticText "Fallout: New Vegas", "White"
 	StaticText "Fallout 4", "White"
 	StaticText " "

@@ -99,6 +99,11 @@ Class SWWMSpareArmor : Inventory abstract
 
 	override bool Use( bool pickup )
 	{
+		bool shouldautouse = false;
+		if ( swwm_enforceautousearmor == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousearmor == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
+		if ( pickup && !shouldautouse ) return false;
 		let cur = Owner.FindInventory(giveme);
 		if ( !cur || (cur.Amount < cur.MaxAmount) )
 		{
@@ -134,6 +139,11 @@ Class SWWMHealth : Inventory abstract
 
 	override bool Use( bool pickup )
 	{
+		bool shouldautouse = false;
+		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
+		if ( pickup && !shouldautouse ) return false;
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
 		if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 		SWWMHandler.DoFlash(Owner,Color(48,64,128,255),5);

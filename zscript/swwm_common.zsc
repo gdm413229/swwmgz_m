@@ -913,7 +913,7 @@ Class SWWMHandler : EventHandler
 		if ( !hnd ) return 0;
 		CVar voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]);
 		// suppress non-rage comments when ragekit is active, only screaming allowed
-		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
+		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) ) return 0;
 		int whichline;
 		int countem = 0, i = 1;
 		String testme, locme;
@@ -1052,6 +1052,14 @@ Class SWWMHandler : EventHandler
 	override void PlayerRespawned( PlayerEvent e )
 	{
 		PlayerEntered(e);
+	}
+
+	override void WorldThingRevived( WorldEvent e )
+	{
+		if ( !(e.Thing is 'PlayerPawn') ) return;
+		// reset uptime since player had just died
+		SWWMStats s = SWWMStats.Find(e.Thing.player);
+		if ( s ) s.lastspawn = gametic;
 	}
 
 	override void WorldTick()
@@ -1520,8 +1528,8 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'Soulsphere') || (e.Replacee == 'ArtiSuperHealth') )
 		{
-			if ( gameinfo.gametype&GAME_Heretic ) e.Replacement = 'RefresherItem';
-			else e.Replacement = 'CubeHealthItem';
+			if ( gameinfo.gametype&GAME_Hexen ) e.Replacement = 'CubeHealthItem';
+			else e.Replacement = 'RefresherItem';
 		}
 		else if ( e.Replacee == 'ArtiHealingRadius' ) e.Replacement = 'RefresherItem';
 		else if ( (e.Replacee == 'Megasphere') || (e.Replacee == 'ArtiEgg') || (e.Replacee == 'PlatinumHelm') ) e.Replacement = 'GrilledCheeseSandwich';

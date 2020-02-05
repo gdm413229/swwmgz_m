@@ -32,8 +32,15 @@ SWWM_MAXPICK = "Max pickup messages";
 SWWM_CHATLEN = "Chat message duration";
 SWWM_MSGLEN = "General message duration";
 SWWM_PICKLEN = "Pickup message duration";
+SWWM_ITITLE = "Item Options";
+SWWM_ARMORUSE = "Automatically Use Armor";
+SWWM_HEALTHUSE = "Automatically Use Health";
+SWWM_AMMOUSE = "Automatically Use Fabricators";
 SWWM_CTITLE = "Multiplayer Options";
 SWWM_SKEYS = "Share Keys";
+SWWM_SVARMORUSE = "Enforce Armor Auto-Use";
+SWWM_SVHEALTHUSE = "Enforce Health Auto-Use";
+SWWM_SVAMMOUSE = "Enforce Fabricator Auto-Use";
 SWWM_MCREDS = "SWWM GZ Credits";
 SWWM_CLEAD = "Development Lead:";
 SWWM_CASSETS = "Additional Assets:";
@@ -50,9 +57,12 @@ SWWM_CCOMMUNITY1 = "All my amazing friends from the Doom community";
 SWWM_CCOMMUNITY2 = "(For helping me keep this whole thing rolling, and for all the time we've spent together)";
 SWWM_CCOMMUNITY3 = "(Here's to many more years of Dooming. Stay awesome, everyone!)";
 SWWM_CDEVS1 = "Randi, Graf, Rachael, Mental, dpJudas and the rest of the GZDoom dev team";
-SWWM_CDEVS2 = "(For their work on the source port that brough back my faith in modding. You guys rock!)";
+SWWM_CDEVS2 = "(For their work on the source port that brought back my faith in modding. You guys rock!)";
+SWWM_FORCEDISABLE = "Force Disable";
+SWWM_USERSET = "User Set";
+SWWM_FORCEENABLE = "Force Enable";
 TOOLTIP_SWWM_VOICETYPE = "Sets the voice pack for the player (clientside).";
-TOOLTIP_SWWM_MUTEPLAYER = "Control what gets muted, if you'd rather have a more silent protagonist.";
+TOOLTIP_SWWM_MUTEVOICE = "Control what gets muted, if you'd rather have a more silent protagonist.";
 TOOLTIP_SWWM_FLASHSTRENGTH = "Screen flashes usually happen when firing some weapons, you can lower this if these effects are harmful for you.";
 TOOLTIP_SWWM_HUDMARGIN = "Margin around HUD elements, in (scaled) pixels.";
 TOOLTIP_SWWM_MAXSHOWN = "Maximum messages (not lines) shown in the top left part of the HUD.";
@@ -62,6 +72,12 @@ TOOLTIP_SWWM_CHATDURATION = "Duration of chat messages in seconds.";
 TOOLTIP_SWWM_MSGDURATION = "Duration of obituaries and other messages in seconds.";
 TOOLTIP_SWWM_PICKDURATION = "Duration of pickup messages in seconds.";
 TOOLTIP_SWWM_SHAREKEYS = "When this is enabled, picking up a key item will send a copy to all other players.";
+TOOLTIP_SWWM_AUTOUSEARMOR = "When enabled, new armor items are automatically worn when picked up.";
+TOOLTIP_SWWM_AUTOUSEHEALTH = "When enabled, health items are automatically used if they can heal. This excludes Refreshers since they count as powerups.";
+TOOLTIP_SWWM_AUTOUSEAMMO = "When enabled, ammo fabricators are automatically used on pickup. This excludes Tier 4 fabricators since they count as powerups.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEARMOR = "Enforce a specific armor auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEHEALTH = "Enforce a specific health auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEAMMO = "Enforce a specific ammo fabricator auto-use setting for all players, or respects per-player settings.";
 // knowledge base
 SWWM_COMINGSOON = "(coming soon)";
 SWWM_MISSTAB = "Mission";
@@ -389,8 +405,8 @@ SWWM_LORETXT_HAMMERSPACEEMBIGGENER =
 "Addendum: You may find these tucked away in certain spots throughout your mission.\n"
 "\n"
 "Saya's Note: Is that even a real word?";
-SWWM_LORETAG_AMMOFABRICATOR = "Ammo Fabricator";
-SWWM_LORETXT_AMMOFABRICATOR =
+SWWM_LORETAG_FABRICATOR = "Ammo Fabricator";
+SWWM_LORETXT_FABRICATOR =
 "Designation: Universal Ammo Fabricator\n"
 "Manufacturer: Cyrus Enterprises\n"
 "\n"
@@ -818,7 +834,8 @@ T_INVINCIBALL = "Fuckin' Invinciball";
 T_LAMP = "Lämp";
 I_LAMP = "Companion Lamp";
 T_MOTH = "Moth";
-T_MASHIRO = "White Moth";
+T_WMOTH = "White Moth";
+T_MASHIRO = "Mashiro";
 T_NUGGETH = "Health Nugget";
 T_NUGGETA = "Armor Nugget";
 T_OMNISIGHT = "Omnisight";
@@ -871,7 +888,15 @@ O_YNYKRONALT = "%o was spaghettified by %k.";
 O_POUND = "%o was very impressed by %k's landing.";
 O_DASH = "%o was discombobulated by a very fast moving %k.";
 O_MELEE = "%o was K.O.'d by %k.";
-O_LAMP = "%o was assaulted by %k's moths.";
+O_MOTH = "%%o was assaulted by %s's moths.";
+O_MOTH2 = "%o was assaulted by moths.";
+O_MASHIRO1 = "%o should have kept the lights on.";
+O_MASHIRO2 = "%o now belongs to Mashiro.";
+O_MASHIRO3 = "%o made a terrible mistake.";
+O_MASHIRO4 = "%o mysteriously disappeared.";
+O_MASHIRO5 = "%o is now part of a live-action recreation of Layers of White.";
+O_MASHIRO6 = "%o angered the wrong moth.";
+O_MASHIRO7 = "%o and Mashiro are now TOGETHER FOREVER.";
 // misc
 D_BLASTSUIT = "The Blast Suit broke down.";
 D_GHOSTARTI = "The Ghost Artifact ran out of energy.";

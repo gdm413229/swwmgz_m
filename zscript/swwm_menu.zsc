@@ -52,9 +52,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
-		if ( gamestate != GS_LEVEL )
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) )
 		{
-			// can't open this menu outside of the game
+			// can't open this menu outside of the game or if dead
 			Close();
 			return;
 		}
@@ -201,8 +201,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( invlist[sel0] is 'Ammo' ) return true;
 				lastuse = invlist[sel0].GetClass();
 				lastuseamt = invlist[sel0].Amount;
-				// don't check weapons
-				if ( !(invlist[sel0] is 'Weapon') )
+				// don't check weapons (or the lamp)
+				if ( !(invlist[sel0] is 'Weapon') && !(invlist[sel0] is 'SWWMLamp') )
 					checkuse = gametic+1;
 				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer);
 			}
@@ -223,6 +223,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	override void Ticker()
 	{
 		Super.Ticker();
+		if ( players[consoleplayer].Health <= 0 )
+		{
+			// ded
+			MenuSound("menu/democlose");
+			Close();
+			return;
+		}
 		// mark lore entries as read
 		if ( (curtab == TAB_LIBRARY) && (lorelib.ent.Size() > 0) && !lorelib.ent[sel0].read )
 			EventHandler.SendNetworkEvent("swwmmarkloreread",consoleplayer,sel0);

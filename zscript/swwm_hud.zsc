@@ -27,8 +27,6 @@ Class SWWMStatusBar : BaseStatusBar
 	double FracTic;
 	int chatopen;
 
-	bool justselected;
-
 	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
 
 	override void FlushNotify()
@@ -103,18 +101,6 @@ Class SWWMStatusBar : BaseStatusBar
 	override void Tick()
 	{
 		Super.Tick();
-		if ( CPlayer.inventorytics >= (5*Thinker.TICRATE)-1 )
-		{
-			if ( CPlayer.mo.InvSel )
-				S_StartSound("menu/demoscroll",CHAN_BODY,CHANF_UI|CHANF_MAYBE_LOCAL);
-		}
-		if ( CPlayer.inventorytics > 0 ) justselected = false;
-		else
-		{
-			if ( !justselected && CPlayer.mo.InvSel )
-				S_StartSound("menu/democlose",CHAN_BODY,CHANF_UI|CHANF_MAYBE_LOCAL);
-			justselected = true;
-		}
 		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
 		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
 		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);

@@ -16,12 +16,10 @@ Mixin Class SWWMAutoUseFix
 Class SWWMArmor : Armor abstract
 {
 	int priority;
-	double reduction;
 	String drainmsg;
 	Class<SWWMSpareArmor> parent;
 
 	Property ArmorPriority : priority;
-	Property DrainFactor : reduction;
 	Property DrainMessage : drainmsg;
 	Property GiverArmor : parent;
 
@@ -32,7 +30,6 @@ Class SWWMArmor : Armor abstract
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.KEEPDEPLETED;
 		+INVENTORY.ALWAYSPICKUP;
-		SWWMArmor.DrainFactor 1.;
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -65,10 +62,10 @@ Class SWWMArmor : Armor abstract
 			SWWMHandler.DoFlash(Owner,Color(int(clamp(damage*.15,1,16)),255,224,192),3);
 			Owner.A_StartSound("armor/hit",CHAN_BODY,CHANF_DEFAULT,clamp(damage*.03,0.,1.),2.5);
 			saved = HandleDamage(damage,damageType,flags);
-			if ( amount <= int(ceil(saved*reduction)) ) saved = amount;
+			if ( amount <= saved ) saved = amount;
 			newdamage -= saved;
 			if ( newdamage < 0 ) Owner.GiveBody(abs(newdamage));
-			amount -= int(ceil(saved*reduction));
+			amount -= saved;
 			damage = newdamage;
 			if ( amount <= 0 )
 			{
@@ -161,7 +158,9 @@ Class SWWMHealth : Inventory abstract
 			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
-				newdamage = max(0,damage-GetDefaultByType(giveme).Amount);
+				newdamage = damage-GetDefaultByType(giveme).Amount;
+				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
+				newdamage = max(0,newdamage);
 				AutoUseExtra();
 				Amount--;
 			}

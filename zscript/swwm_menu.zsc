@@ -15,7 +15,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	};
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
-		FancyBg;
+		FancyBg, EasterEgg;
 	Font TewiFont;
 	int curtab;
 	// for scrolling
@@ -59,11 +59,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return;
 		}
 		TewiFont = Font.GetFont('TewiShaded');
-		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_Any);
-		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_Any);
-		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_Any);
-		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_Any);
-		WindowSeparatorH = TexMan.CheckForTexture("graphics/KBase/WindowSeparatorH.png",TexMan.Type_Any);
+		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_MiscPatch);
+		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_MiscPatch);
+		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_MiscPatch);
+		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_MiscPatch);
+		WindowSeparatorH = TexMan.CheckForTexture("graphics/KBase/WindowSeparatorH.png",TexMan.Type_MiscPatch);
+		EasterEgg = TexMan.CheckForTexture("graphics/KBase/Drawing.png",TexMan.Type_MiscPatch);
 		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
 		if ( (curtab < 0) || (curtab > 7) ) curtab = 0;
 		MenuSound("menu/demoopen");
@@ -637,9 +638,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_SECRET )
 		{
-			// TODO easter egg "konami code" hidden tab
-			str = StringTable.Localize("$SWWM_COMINGSOON");
-			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// hidden secret tab
+			Screen.DrawTexture(EasterEgg,false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			str = StringTable.Localize("$SWWM_TODEMO");
+			Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+(640-TewiFont.StringWidth(str))/2.,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 	}
 }

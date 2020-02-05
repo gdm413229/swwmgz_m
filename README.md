@@ -347,31 +347,29 @@ have a spare. Most powerups can be toggled, unless specified otherwise.
 
 ### Health Nugget, replaces Health Bonus, Crystal Vial
 
-Health nuggets increase health by 1% up to a cap of 200.
+Health nuggets increase health by 5% up to a cap of 200.
 
 ### Health Tetrahedron, replaces Stimpak, Quartz Flask
 
 Health tetrahedrons provide a 15% health boost up to a cap of 100.
 
-### Health Cube, replaces Medkit, Quartz Flask
+### Health Cube, replaces Medkit, Mystic Urn (Hexen), Quartz Flask (Heretic)
 
 Health cubes provide a 30% health boost up to a cap of 100.
 
-### Refresher, replaces Soulsphere, Mystic Urn
+### Refresher, replaces Soulsphere, Mystic Urn (Heretic), Mystic Ambit Incant
 
 This artifact provides a massive boost of health to 500, plus a regeneration
-effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles
+effect that heals 5% every 2 seconds, for up to 60 seconds, thus it doubles
 as a powerup. Like other health items, the Refresher is auto-activated if
 you're about to die, though it sometimes won't be enough to save you.
 
 ### Armor Nugget, replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion
 
 Cumulative armor items that can increase resistance to all damage by as much
-as you can find. Each nugget adds 1% to the total. Above 100%, damage gets
+as you can find. Each nugget adds 5% to the total. Above 100%, damage gets
 turned into additional health (up to the standard 100% cap).
 The upper cap for these is 200%.
-
-Protection decreases by a 10% of absorbed damage.
 
 ### Blast Suit, replaces Green Armor, Silver Shield, Mesh Armor
 
@@ -428,7 +426,7 @@ Just be careful with height when the effect is about to run out.
 This thing makes you impervious to pretty much everything excluding the Ynykron
 Artifact.
 
-You're fucking invincible for a total of 90 seconds.
+You're fucking invincible for a total of 30 seconds.
 
 ### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator
 
@@ -441,7 +439,7 @@ Separated into four tiers, they work pretty much like the ammo cubes in Doom
 Tournament, except they try to "balance" the total ammo given. The max tier
 fabricator is the only one capable of producing ammo for superweapons.
 
-### Lamp, replaces Lite-Amp, Torch, Mystic Ambit Incant
+### Lamp, replaces Lite-Amp, Torch
 
 A floating lamp companion, may attract moths. The moths will disperse and
 attack nearby enemies when toggling it off.

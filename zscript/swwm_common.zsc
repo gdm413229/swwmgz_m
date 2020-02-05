@@ -1515,15 +1515,22 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee == 'Medikit' ) e.Replacement = 'CubeHealthItem';
 		else if ( e.Replacee == 'ArtiHealth' )
 		{
-			if ( Random[Replacements](0,1) ) e.Replacement = 'CubeHealthItem';
+			if ( gameinfo.gametype&GAME_Heretic && Random[Replacements](0,1) ) e.Replacement = 'CubeHealthItem';
 			else e.Replacement = 'TetraHealthItem';
 		}
-		else if ( (e.Replacee == 'Soulsphere') || (e.Replacee == 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';
+		else if ( (e.Replacee == 'Soulsphere') || (e.Replacee == 'ArtiSuperHealth') )
+		{
+			if ( gameinfo.gametype&GAME_Heretic ) e.Replacement = 'RefresherItem';
+			else e.Replacement = 'CubeHealthItem';
+		}
+		else if ( e.Replacee == 'ArtiHealingRadius' ) e.Replacement = 'RefresherItem';
 		else if ( (e.Replacee == 'Megasphere') || (e.Replacee == 'ArtiEgg') || (e.Replacee == 'PlatinumHelm') ) e.Replacement = 'GrilledCheeseSandwich';
 		else if ( (e.Replacee == 'Blursphere') || (e.Replacee == 'ArtiInvisibility') || (e.Replacee == 'AmuletOfWarding') ) e.Replacement = 'GhostArtifact';
 		else if ( (e.Replacee == 'Radsuit') || (e.Replacee == 'ArtiFly') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'GravitySuppressor';
 		else if ( (e.Replacee == 'InvulnerabilitySphere') || (e.Replacee == 'ArtiInvulnerability') || (e.Replacee == 'ArtiInvulnerability2') ) e.Replacement = 'FuckingInvinciball';
 		else if ( (e.Replacee == 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiBoostArmor') ) e.Replacement = 'Ragekit';
+		else if ( (e.Replacee == 'AllMap') || (e.Replacee == 'SuperMap') ) e.Replacement = 'Omnisight';
+		else if ( (e.Replacee == 'Infrared') || (e.Replacee == 'ArtiTorch') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiBoostArmor') ) e.Replacement = 'SWWMLamp';
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
 	}

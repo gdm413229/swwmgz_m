@@ -45,6 +45,14 @@ Brightmap Texture "models/Ragekit.png"
 {
 	Map "models/Ragekit_bright.png"
 }
+Brightmap Texture "models/Omnisight.png"
+{
+	Map "models/Omnisight_bright.png"
+}
+Brightmap Texture "models/Lamp.png"
+{
+	Map "models/Lamp_bright.png"
+}
 
 PointLight ARMORNUGGETLIGHT
 {
@@ -143,4 +151,18 @@ PointLight RAGELIGHT
 Object Ragekit
 {
 	Frame "XZW1" { light "RAGELIGHT" }
+}
+
+FlickerLight2 LAMPLIGHT
+{
+	Color 0.6 1.0 0.7
+	Size 240
+	SecondarySize 248
+	Interval 0.1
+	Offset 0 8 0
+	Attenuate 1
+}
+Object CompanionLamp
+{
+	Frame "XZW1B" { light "LAMPLIGHT" }
 }

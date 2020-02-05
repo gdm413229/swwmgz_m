@@ -3,7 +3,7 @@ Class HealthNugget : Health
 {
 	Default
 	{
-		Inventory.Amount 1;
+		Inventory.Amount 5;
 		Inventory.MaxAmount 200;
 	}
 }
@@ -53,7 +53,7 @@ Class RefresherRegen : Powerup
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Refresher.png";
 		Powerup.Duration -60;
-		Powerup.Strength 10;
+		Powerup.Strength 5;
 	}
 
 	override void EndEffect()
@@ -65,7 +65,7 @@ Class RefresherRegen : Powerup
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner && (Owner.health > 0) && !(EffectTics%175) )
+		if ( Owner && (Owner.health > 0) && !(EffectTics%70) )
 		{
 			if ( Owner.GiveBody(int(Strength),500) )
 			{

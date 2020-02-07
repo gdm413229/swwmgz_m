@@ -277,7 +277,7 @@ Class ExplodiumGun : SWWMWeapon
 	int clipcount;
 	bool chambered;
 	transient ui TextureID WeaponBox;
-	transient ui HUDFont mTewiFont;
+	transient ui Font TewiFont;
 
 	Property ClipCount : ClipCount;
 
@@ -291,10 +291,10 @@ Class ExplodiumGun : SWWMWeapon
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/ExplodiumDisplay.png",TexMan.Type_Any);
-		if ( !mTewiFont ) mTewiFont = HUDFont.Create("TewiShaded");
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		Screen.DrawTexture(WeaponBox,false,bx-25,by-23,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		if ( chambered ) Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-23,by-22,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
-		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,bx-20,by-15,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-23,by-22,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-20,by-15,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	action void A_Schutt()

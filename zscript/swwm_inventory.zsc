@@ -148,6 +148,7 @@ Class SWWMHealth : Inventory abstract
 		if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 		SWWMHandler.DoFlash(Owner,Color(48,64,128,255),5);
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
+		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 		return true;
 	}
 
@@ -402,6 +403,10 @@ Class SWWMWeapon : Weapon abstract
 	virtual ui void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 	}
+	// HUD-side ticking
+	virtual ui void HudTick()
+	{
+	}
 	// instant raise/lower
 	action void A_FullRaise()
 	{
@@ -450,8 +455,20 @@ Class SWWMWeapon : Weapon abstract
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 				self.angle += clamp(diff,-5.,5.);
-				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 				SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
+				if ( CountInv("RagekitPower") )
+				{
+					invoker.bEXTREMEDEATH = true;
+					invoker.bNOEXTREMEDEATH = false;
+				}
+				else
+				{
+					invoker.bEXTREMEDEATH = false;
+					invoker.bNOEXTREMEDEATH = true;
+				}
+				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+				invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
+				invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 				if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
 				if ( !d.HitActor.bNOBLOOD )
 				{

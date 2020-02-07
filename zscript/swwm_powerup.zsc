@@ -15,6 +15,7 @@ Class GrilledCheeseSandwich : Inventory
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		Owner.GiveBody(1000,1000);
+		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 		let n = Owner.FindInventory("ArmorNugget");
 		if ( !n ) Owner.GiveInventory("ArmorNugget",GetDefaultByType("ArmorNugget").MaxAmount);
 		else n.Amount = n.MaxAmount;
@@ -742,7 +743,7 @@ Class LampMoth : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOPING,.15,4.,FRandom[Moth](.8,1.2));
+		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOPING,.02,4.,FRandom[Moth](.8,1.2));
 		if ( master && master.player ) SetFriendPlayer(master.player);
 		else bFRIENDLY = false;
 	}
@@ -1004,6 +1005,7 @@ Class CompanionLamp : Actor
 
 	Default
 	{
+		Tag "$T_LAMP";
 		+NOGRAVITY;
 		+SHOOTABLE;
 		+NOTELEPORT;
@@ -1012,6 +1014,7 @@ Class CompanionLamp : Actor
 		+DONTSPLASH;
 		+INTERPOLATEANGLES;
 		+LOOKALLAROUND;
+		+FRIENDLY;
 		Radius 4;
 		Height 16;
 	}
@@ -1119,7 +1122,7 @@ Class CompanionLamp : Actor
 			if ( foundspot && (i > 45) ) break;
 		}
 		Vector3 diff = level.Vec3Diff(pos,target.pos);
-		if ( (diff.length() > 400) || !CheckSight(target) )
+		if ( diff.length() > 400 )
 		{
 			Actor f = Spawn("SWWMItemFog",pos);
 			f.A_StartSound("lamp/disappear",CHAN_VOICE);
@@ -1249,7 +1252,7 @@ Class SWWMLamp : Inventory
 		Super.DoEffect();
 		if ( !thelamp )
 		{
-			thelamp = Spawn("CompanionLamp",Owner.Vec3Offset(cos(Owner.angle-180)*32,sin(Owner.angle-180)*32,Owner.height-8));
+			thelamp = Spawn("CompanionLamp",Owner.Vec3Offset(cos(Owner.angle)*20,sin(Owner.angle)*20,24));
 			thelamp.target = Owner;
 			thelamp.master = self;
 			let f = Spawn("SWWMItemFog",thelamp.pos);

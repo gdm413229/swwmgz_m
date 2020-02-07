@@ -250,6 +250,124 @@ Class SWWMLoreLibrary : Thinker
 	}
 }
 
+// floating scores
+Class SWWMScoreObj : Thinker
+{
+	int tcolor;
+	int score;
+	Vector3 pos;
+	int lifespan, initialspan;
+	int starttic, seed, seed2;
+
+	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD )
+	{
+		let o = new("SWWMScoreObj");
+		o.ChangeStatNum(STAT_USER);
+		o.score = score;
+		o.pos = pos;
+		o.lifespan = o.initialspan = 60;
+		o.tcolor = tcolor;
+		o.starttic = gametic;
+		o.seed = Random[ScoreBits]();
+		o.seed2 = Random[ScoreBits]();
+		return o;
+	}
+
+	override void Tick()
+	{
+		lifespan--;
+		if ( lifespan <= 0 ) Destroy();
+	}
+}
+
+enum EInterestType
+{
+	INT_Key,
+	INT_Exit,
+	INT_Usable
+};
+
+Class SWWMInterest : Thinker
+{
+	int type;
+	Key trackedkey;
+	Line trackedline;
+	Vector3 pos;
+
+	static SWWMInterest Spawn( Vector3 pos = (0,0,0), Key thekey = null, Line theline = null )
+	{
+		if ( (!thekey && !theline) || (thekey && theline) ) return null;
+		let i = new("SWWMInterest");
+		i.ChangeStatNum(STAT_USER);
+		i.trackedkey = thekey;
+		i.trackedline = theline;
+		if ( thekey ) i.type = INT_Key;
+		else if ( (theline.special == Exit_Normal) || (theline.special == Exit_Secret) || (theline.special == Teleport_EndGame) || (theline.special == Teleport_NewMap) )
+			i.type = INT_Exit;
+		else i.type = INT_Usable;
+		i.pos = thekey?thekey.Vec3Offset(0,0,thekey.height/2):pos;
+		return i;
+	}
+
+	override void Tick()
+	{
+		// update
+		if ( (type == INT_Key) && (!trackedkey || trackedkey.Owner) ) Destroy();
+		else if ( trackedkey ) pos = trackedkey.Vec3Offset(0,0,trackedkey.height/2);
+		else if ( (type == INT_Usable) && !trackedline.special ) Destroy();
+	}
+}
+
+// enemy combat tracker
+Class SWWMCombatTracker : Thinker
+{
+	Actor mytarget;
+	String mytag;
+	int updated, lasthealth, maxhealth;
+	transient DynamicValueInterpolator intp;
+	Vector3 pos, prevpos;
+
+	static SWWMCombatTracker Spawn( Actor target )
+	{
+		let t = new("SWWMCombatTracker");
+		t.ChangeStatNum(STAT_USER);
+		t.mytarget = target;
+		t.mytag = target.player?target.player.GetUserName():target.GetTag();
+		t.lasthealth = t.maxhealth = target.health;
+		t.updated = int.min;
+		t.pos = level.Vec3Offset(target.pos,(0,0,target.default.height));
+		t.prevpos = level.Vec3Offset(target.prev,(0,0,target.default.height));
+		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
+		return t;
+	}
+
+	override void Tick()
+	{
+		// update
+		if ( mytarget )
+		{
+			pos = level.Vec3Offset(mytarget.pos,(0,0,mytarget.default.height));
+			prevpos = level.Vec3Offset(mytarget.prev,(0,0,mytarget.default.height));
+		}
+		if ( !mytarget || (mytarget.Health <= 0) )
+		{
+			// we're done
+			if ( updated > gametic ) updated = gametic;
+			lasthealth = 0;
+			intp.Update(lasthealth);
+			if ( gametic > updated+35 ) Destroy();
+			return;
+		}
+		mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
+		int newhealth = mytarget.Health;
+		if ( newhealth != lasthealth ) updated = gametic+35;
+		if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) ) updated = gametic+70;
+		if ( mytarget.IsFriend(players[consoleplayer].mo) ) updated = gametic;
+		lasthealth = newhealth;
+		intp.Update(lasthealth);
+	}
+}
+
 // One-liners
 Class SWWMOneLiner : HUDMessageBase
 {
@@ -678,13 +796,51 @@ Class SWWMItemFog : Actor
 	}
 }
 
+Class TeleLight : PaletteLight
+{
+	Default
+	{
+		Tag "ImpactWav";
+		ReactionTime 10;
+		Args 0,0,0,150;
+	}
+}
+
 Class SWWMTeleportFog : Actor
 {
+
+	Default
+	{
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SetOrigin(Vec3Offset(0,0,28),false);
+		A_StartSound("misc/teleport",CHAN_VOICE);
+		Spawn("TeleLight",pos);
+	}
 	States
 	{
 	Spawn:
-		TNT1 A 1;
-		Stop;
+		TNT1 A 1
+		{
+			int numpt = int(Random[ExploS](16,32)*alpha);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8)*alpha;
+				let s = Spawn("SWWMSmallSmoke",pos);
+				s.vel = pvel;
+				s.SetShade(Color(1,2,3)*int(Random[ExploS](64,85)*alpha));
+				s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+				s.scale *= 3.*alpha;
+				s.alpha *= alpha;
+			}
+			A_FadeOut();
+		}
+		Wait;
 	}
 }
 
@@ -967,6 +1123,64 @@ Class SWWMHandler : EventHandler
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) && (mutevoice.GetInt() < 3) )
 			AddOneliner("mapstart");
+		if ( !e.IsSaveGame && !e.IsReopen )
+		{
+			// for skipping over merged exit lines (sharing vertices)
+			Array<int> skipme;
+			skipme.Clear();
+			// find exit lines, and use lines that aren't exits
+			for ( int i=0; i<level.lines.Size(); i++ )
+			{
+				Line l = level.lines[i];
+				if ( skipme.Find(l.Index()) > skipme.Size() ) continue;
+				Vector3 al, ah, bl, bh;
+				// TODO properly center on the usable part
+				al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
+				ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
+				bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
+				bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
+				Vector3 lpos = (al+ah+bl+bh)*.25;
+				if ( (l.special == Exit_Normal) || (l.special == Exit_Secret) || (l.special == Teleport_EndGame) || (l.special == Teleport_NewMap) )
+				{
+					// look for connected lines
+					int xcnt = 1;
+					if ( l.frontsector )
+					{
+						for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
+						{
+							let l2 = l.frontsector.Lines[j];
+							if ( (l2 == l) || (l2.special != l.special) ) continue;
+							skipme.Push(l2.Index());
+							xcnt++;
+							al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
+							ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
+							bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
+							bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
+							lpos += (al+ah+bl+bh)*.25;
+						}
+					}
+					if ( l.backsector )
+					{
+						for ( int j=0; j<l.backsector.Lines.Size(); j++ )
+						{
+							let l2 = l.backsector.Lines[j];
+							if ( (l2 == l) || (l2.special != l.special) ) continue;
+							skipme.Push(l2.Index());
+							xcnt++;
+							al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
+							ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
+							bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
+							bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
+							lpos += (al+ah+bl+bh)*.25;
+						}
+					}
+					lpos /= xcnt;
+					SWWMInterest.Spawn(lpos,theline:l);
+				}
+				else if ( l.special && (l.activation&(SPAC_Use|SPAC_Impact)) )
+					SWWMInterest.Spawn(lpos,theline:l);
+			}
+		}
 	}
 
 	override void PlayerDied( PlayerEvent e )
@@ -1159,6 +1373,8 @@ Class SWWMHandler : EventHandler
 	override void WorldThingDamaged( WorldEvent e )
 	{
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
+		if ( e.Damage > 0 )
+			SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED);
 		if ( e.Thing.player )
 		{
 			tookdamage[e.Thing.PlayerNumber()] = true;
@@ -1182,7 +1398,8 @@ Class SWWMHandler : EventHandler
 			}
 			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
 			{
-				if ( e.Thing.IsFriend(e.DamageSource) )
+				// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
+				if ( e.Thing.IsFriend(e.DamageSource) && !(e.Thing is 'LampMoth') )
 				{
 					if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
 						lastcombat = AddOneliner("hitfriend",15);
@@ -1224,13 +1441,14 @@ Class SWWMHandler : EventHandler
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
 			if ( !tookdamage[pnum] ) score += 100+50*spreecount[pnum];
 			if ( e.Thing.bBOSS ) score += 10000;
+			SWWMCredits.Give(e.DamageSource.player,score);
+			if ( e.DamageSource.player == players[consoleplayer] )
+				SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			if ( level.killed_monsters+1 == level.total_monsters )
 			{
-				score += 5000;
+				SWWMCredits.Give(e.DamageSource.player,5000);
 				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),5000);
 			}
-			SWWMCredits.Give(e.DamageSource.player,score);
-			// TODO floating score for HUD
 			spreecount[pnum]++;
 		}
 	}
@@ -1260,16 +1478,21 @@ Class SWWMHandler : EventHandler
 		else if ( a is 'KeyCastle' ) a.SetTag("$T_KEYCASTLE");
 	}
 
+	// tempfix keys have no tags
 	static void KeyTagFix( Actor a )
 	{
 		let hnd = SWWMHandler(Find("SWWMHandler"));
 		if ( hnd ) hnd.DoKeyTagFix(a);
 	}
 
-	// tempfix keys have no tags
 	override void WorldThingSpawned( WorldEvent e )
 	{
-		if ( e.Thing is 'Key' ) DoKeyTagFix(e.Thing);
+		if ( e.Thing is 'Key' )
+		{
+			DoKeyTagFix(e.Thing);
+			SWWMInterest.Spawn(thekey:Key(e.Thing));
+		}
+		if ( e.Thing.bSHOOTABLE && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}
 
 	override void PostUiTick()
@@ -1284,6 +1507,19 @@ Class SWWMHandler : EventHandler
 			if ( flashes[i].tic < gametic ) continue;
 			GenericFlash gf = new("GenericFlash").Setup(flashes[i].cam,flashes[i].c,flashes[i].duration);
 			StatusBar.AttachMessage(gf,0,BaseStatusBar.HUDMSGLayer_UnderHUD);
+		}
+	}
+
+	override void WorldLineActivated( WorldEvent e )
+	{
+		if ( e.Thing.player != players[consoleplayer] ) return;
+		// remove lines that have been already used by the local player
+		let ti = ThinkerIterator.Create("SWWMInterest",Thinker.STAT_USER);
+		SWWMInterest i;
+		while ( i = SWWMInterest(ti.Next()) )
+		{
+			if ( (i.type != INT_Usable) || (i.trackedline != e.ActivatedLine) ) continue;
+			i.Destroy();
 		}
 	}
 
@@ -1661,6 +1897,14 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
+	}
+
+	// stuff for hud
+	override void RenderUnderlay( RenderEvent e )
+	{
+		if ( !statusbar || !(statusbar is 'SWWMStatusBar') ) return;
+		SWWMStatusBar(statusbar).viewpos = e.viewpos;
+		SWWMStatusBar(statusbar).viewrot = (e.viewangle,e.viewpitch,e.viewroll);
 	}
 
 	static void DoFlash( Actor camera, Color c, int duration )

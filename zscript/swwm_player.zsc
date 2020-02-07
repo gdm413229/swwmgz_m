@@ -15,7 +15,7 @@ Class Demolitionist : PlayerPawn
 	double lastvelz, prevvelz;
 	double ssup;
 
-	transient CVar myvoice, mute;
+	transient CVar myvoice, mute, fly6dof;
 
 	SWWMStats mystats;
 	int cairtime;
@@ -439,7 +439,7 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.upmove = 0;
-		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
 		{
 			double fs = TweakSpeeds(1.,0.);
 			Vector3 x, y, z;
@@ -467,7 +467,7 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.forwardmove = player.cmd.sidemove = 0;
-		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		if ( (waterlevel < 2) && (bFly || bFlyCheat) )
 		{
 			player.onground = false;
 			if ( player.turnticks )
@@ -477,20 +477,32 @@ Class Demolitionist : PlayerPawn
 			}
 			else guideangle += .2*player.cmd.yaw*(360./65536.);
 			guidepitch -= .2*player.cmd.pitch*(360./65536.);
-			if ( player.centering )
+			if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',players[consoleplayer]);
+			if ( player.centering ) guidepitch = clamp(deltaangle(pitch,0),-3.,3.);
+			if ( player.centering || !fly6dof.GetBool() ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
+			if ( fly6dof.GetBool() )
 			{
-				guidepitch = clamp(deltaangle(pitch,0),-3.,3.);
-				guideroll = clamp(deltaangle(roll,0),-3.,3.);
+				swwm_Quat orient = swwm_Quat.create_euler(pitch,angle,roll);
+				swwm_Quat angles = swwm_Quat.create_euler(guidepitch,guideangle,guideroll);
+				orient = orient.qmul(angles);
+				double npitch, nangle, nroll;
+				[npitch, nangle, nroll] = orient.to_euler();
+				angle = nangle;
+				pitch = npitch;
+				roll = nroll;
 			}
-			swwm_Quat orient = swwm_Quat.create_euler(pitch,angle,roll);
-			swwm_Quat angles = swwm_Quat.create_euler(guidepitch,guideangle,guideroll);
-			orient = orient.qmul(angles);
-			double npitch, nangle, nroll;
-			[npitch, nangle, nroll] = orient.to_euler();
-			angle = nangle;
-			pitch = npitch;
-			roll = nroll;
-			if ( (abs(roll) <= 0.) && (abs(pitch) <= 0.) ) player.centering = false;
+			else
+			{
+				angle += guideangle;
+				pitch += guidepitch;
+				pitch = clamp(pitch,player.MinPitch,player.MaxPitch);
+				roll += guideroll;
+			}
+			if ( (abs(roll) <= 1./65536.) && (abs(pitch) <= 1./65536.) )
+			{
+				guideroll = guidepitch = roll = pitch = 0.;
+				player.centering = false;
+			}
 			double fs = TweakSpeeds(1.,0.);
 			fs *= max(abs(player.cmd.forwardmove/12800.),abs(player.cmd.sidemove/10240.));
 			if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
@@ -522,7 +534,7 @@ Class Demolitionist : PlayerPawn
 		guideroll *= .9;
 		if ( player.onground ) lastgroundtic = gametic;
 		// anchor to ground when going down steps
-		if ( !player.onground && !bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
+		if ( !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
 		{
 			ssup = max(0,(pos.z-floorz));
 			SetOrigin(Vec2OffsetZ(0,0,floorz),true);
@@ -539,9 +551,9 @@ Class Demolitionist : PlayerPawn
 		if ( sm ) dodge += (sm>0)?Y:-Y;
 		if ( player.onground ) dodge.z = max(0,dodge.z);
 		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
-		if ( (waterlevel < 2) && !(bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
 			dodge.z += .15;
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 )
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && level.IsJumpingAllowed() )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 40;
@@ -562,15 +574,17 @@ Class Demolitionist : PlayerPawn
 	override void CheckJump()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
-		bool walljump = LineTrace(angle-180,Radius*4,0,TRF_NOSKY|TRF_THRUHITSCAN,height*.2);
+		bool walljump = LineTrace(angle-180,Radius*2,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,height*.2);
+		bool wallclimb = LineTrace(angle,Radius*2,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,height*.2);
 		if ( player.cmd.buttons&BT_JUMP )
 		{
 			if ( player.crouchoffset ) player.crouching = 1;
 			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
-			else if ( bFly || bFlyCheat || (player.cheats&CF_NOCLIP2) ) return;
+			else if ( bFly || bFlyCheat ) return;
+			else if ( bNoGravity ) vel.z = 3;
 			else if ( level.IsJumpingAllowed()
-				&& (player.onground && (player.jumptics == 0))
-				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump)) )
+				&& ((player.onground && (player.jumptics == 0))
+				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
 			{
 				double jumpvelz = JumpZ*35./TICRATE;
 				double jumpfac = 0;
@@ -587,19 +601,25 @@ Class Demolitionist : PlayerPawn
 				double pvelz = vel.z;
 				if ( !player.onground )
 				{
-					// check for wall kicks
+					// check for wall stuff
 					if ( walljump )
 					{
 						vel.z = max(-abs(vel.z)*.1,vel.z);
 						vel.z += jumpvelz;
 						vel.xy = (cos(angle),sin(angle))*20*Speed;
 					}
+					else if ( wallclimb )
+					{
+						vel.z = max(-abs(vel.z)*.1,vel.z);
+						vel.z += jumpvelz;
+						vel.xy = (cos(angle),sin(angle))*5*Speed;
+					}
 				}
 				bOnMobj = false;
 				player.jumpTics = -1;
 				if ( !(player.cheats&CF_PREDICTING) )
 					A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
-				if ( (dashfuel > 10.) && !player.onground && !walljump )
+				if ( (dashfuel > 10.) && !player.onground && !walljump && !wallclimb )
 				{
 					dashboost = 3.;
 					boostcooldown = 20;

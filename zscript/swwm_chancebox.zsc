@@ -16,6 +16,7 @@ Class Chancebox : Inventory abstract
 	override bool Use( bool pickup )
 	{
 		if ( pickup ) return false;
+		Console.Printf("\cgTHESE ITEMS ARE NOT YET FULLY IMPLEMENTED\c-");
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(Owner.pitch,Owner.angle,Owner.roll);
 		Vector3 origin = level.Vec3Offset(Owner.Vec2OffsetZ(0,0,Owner.player.viewz),x*20-z*8);
@@ -287,7 +288,7 @@ Class ChanceboxTier1 : Chancebox
 		Tag "$T_LOOTBOX1";
 		Inventory.PickupMessage "$T_LOOTBOX1";
 		Inventory.Icon "graphics/HUD/Icons/I_Chancebox1.png";
-		Stamina 1000;
+		Stamina 1500;
 		Chancebox.DropClass "DroppedChanceboxTier1";
 	}
 }
@@ -298,7 +299,7 @@ Class ChanceboxTier2 : Chancebox
 		Tag "$T_LOOTBOX2";
 		Inventory.PickupMessage "$T_LOOTBOX2";
 		Inventory.Icon "graphics/HUD/Icons/I_Chancebox2.png";
-		Stamina 10000;
+		Stamina 9000;
 		Chancebox.DropClass "DroppedChanceboxTier2";
 	}
 }
@@ -309,7 +310,7 @@ Class ChanceboxTier3 : Chancebox
 		Tag "$T_LOOTBOX3";
 		Inventory.PickupMessage "$T_LOOTBOX3";
 		Inventory.Icon "graphics/HUD/Icons/I_Chancebox3.png";
-		Stamina 100000;
+		Stamina 60000;
 		Chancebox.DropClass "DroppedChanceboxTier3";
 	}
 }
@@ -320,7 +321,7 @@ Class ChanceboxTier4 : Chancebox
 		Tag "$T_LOOTBOX4";
 		Inventory.PickupMessage "$T_LOOTBOX4";
 		Inventory.Icon "graphics/HUD/Icons/I_Chancebox4.png";
-		Stamina 1000000;
+		Stamina 1500000;
 		Chancebox.DropClass "DroppedChanceboxTier4";
 	}
 }

@@ -459,7 +459,7 @@ Class GoldShell : Ammo
 	Default
 	{
 		Tag "$T_GOLDSHELLS";
-		Stamina 120000;
+		Stamina 0;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
@@ -728,7 +728,7 @@ Class CandyGunSpares : Ammo
 	Default
 	{
 		Tag "$T_CANDYSPARE";
-		Stamina 150000;
+		Stamina 600000;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
 		Ammo.BackpackMaxAmount 4;
@@ -874,7 +874,7 @@ Class FabricatorTier1 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
 		Inventory.MaxAmount 30;
-		AmmoFabricator.Budget 10000;
+		AmmoFabricator.Budget 2000;
 		AmmoFabricator.PerType 4;
 		Stamina 3000;
 	}
@@ -887,7 +887,7 @@ Class FabricatorTier2 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
 		Inventory.MaxAmount 20;
-		AmmoFabricator.Budget 25000;
+		AmmoFabricator.Budget 15000;
 		AmmoFabricator.PerType 8;
 		Stamina 12000;
 	}
@@ -900,9 +900,9 @@ Class FabricatorTier3 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
-		AmmoFabricator.Budget 500000;
+		AmmoFabricator.Budget 100000;
 		AmmoFabricator.PerType 16;
-		Stamina 480000;
+		Stamina 150000;
 	}
 }
 Class FabricatorTier4 : AmmoFabricator
@@ -1032,6 +1032,8 @@ Class HammerspaceEmbiggener : Inventory
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.ALWAYSPICKUP;
+		+COUNTITEM;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}

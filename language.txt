@@ -61,6 +61,12 @@ SWWM_CDEVS2 = "(For their work on the source port that brought back my faith in 
 SWWM_FORCEDISABLE = "Force Disable";
 SWWM_USERSET = "User Set";
 SWWM_FORCEENABLE = "Force Enable";
+SWWM_6DOF = "6DOF Flight";
+SWWM_TARGET = "Show Healthbars";
+SWWM_TARGETTAG = "Show Monster Names";
+SWWM_DAMNUMS = "Show Damage/Heal Numbers";
+SWWM_SCORENUMS = "Show Score Numbers";
+SWWM_SCOREBONUS = "Show Score Bonuses";
 TOOLTIP_SWWM_VOICETYPE = "Sets the voice pack for the player (clientside).";
 TOOLTIP_SWWM_MUTEVOICE = "Control what gets muted, if you'd rather have a more silent protagonist.";
 TOOLTIP_SWWM_FLASHSTRENGTH = "Screen flashes usually happen when firing some weapons, you can lower this if these effects are harmful for you.";
@@ -78,6 +84,12 @@ TOOLTIP_SWWM_AUTOUSEAMMO = "When enabled, ammo fabricators are automatically use
 TOOLTIP_SWWM_ENFORCEAUTOUSEARMOR = "Enforce a specific armor auto-use setting for all players, or respects per-player settings.";
 TOOLTIP_SWWM_ENFORCEAUTOUSEHEALTH = "Enforce a specific health auto-use setting for all players, or respects per-player settings.";
 TOOLTIP_SWWM_ENFORCEAUTOUSEAMMO = "Enforce a specific ammo fabricator auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_FLY6DOF = "Enable 6DOF movement when flying. Disable if this feature causes any discomfort.";
+TOOLTIP_SWWM_TARGETER = "Show enemy/player healthbars. Disable if you'd prefer to use another mod for this, such as Target Spy.";
+TOOLTIP_SWWM_TARGETTAGS = "Show enemy names above their healthbars.";
+TOOLTIP_SWWM_HEALTHNUMS = "Show damage/healing numbers. Disable if you'd prefer to use another mod for this, such as DamNums.";
+TOOLTIP_SWWM_SCORENUMS = "Show score kill numbers.";
+TOOLTIP_SWWM_SCOREBONUS = "Show additional bonus strings above score numbers (e.g.: multikill counters).";
 // knowledge base
 SWWM_COMINGSOON = "(coming soon)";
 SWWM_MISSTAB = "Mission";
@@ -108,11 +120,13 @@ SWWM_KBASETAB = "Library";
 SWWM_STORETAB = "Store";
 SWWM_STOREFULL = "You can't hold more of that";
 SWWM_STOREMUNS = "You don't have enough money";
+SWWM_NOSTORE = "(there is nothing left to buy)";
 SWWM_TRADETAB = "Trading";
 SWWM_TRADEFULL = "They can't hold more of that";
 SWWM_TRADEHIST = "History";
 SWWM_TRADETO = "Sent to";
 SWWM_TRADEFROM = "Received from";
+SWWM_NOTRADE = "(there is no one to trade with)";
 SWWM_MSGSENT = "You sent %dx %s to %s.";
 SWWM_MSGRECV = "%s sent you %dx %s.";
 SWWM_CHATTAB = "Chat Log";
@@ -868,6 +882,92 @@ T_KEYRUSTED = "\cbRusted Key\c-";
 T_KEYHORN = "\coHorn Key\c-";
 T_KEYSWAMP = "\cpSwamp Key\c-";
 T_KEYCASTLE = "\cxCastle Key\c-";
+// shortened doom key pickup messages
+GOTBLUECARD = "Blue Keycard";
+GOTYELWCARD = "Yellow Keycard";
+GOTREDCARD = "Red Keycard";
+GOTBLUESKULL = "Blue Skull Key";
+GOTYELWSKULL = "Yellow Skull Key";
+GOTREDSKULL = "Red Skull Key";
+// edited vanilla pickup messages
+TXT_DEFAULTPICKUPMSG = "Unidentified Item";
+// other edited messages
+ENDGAME = "This will trigger the crash handler.\n"
+	"\n"
+	"Press Y or N.";
+QUITMSG = "You really want to go?\n"
+	"What a shame...";
+QUITMSG1 = "Wow, don't just go and leave,\n"
+	"there's still a lot of stuff to do!";
+QUITMSG2 = "Oh, you're going now?\n"
+	"Well, see you around, then.";
+QUITMSG3 = "Thanks for playing SWWM GZ.\n"
+	"I hope to see you again soon.";
+QUITMSG4 = "<See you again, have a nice day>";
+QUITMSG5 = "Ah, fun time is over, I guess...";
+QUITMSG6 = "Hey Icarus, when are you going\n"
+	"to play Hexmas? I'm still waiting.";
+QUITMSG7 = "Don't go now, or Saya will talk\n"
+	"shit about you on Twitter dot com.";
+QUITMSG8 = "Do you know who ate all the donuts?";
+QUITMSG9 = "Before you go, lemme say somethin':\n"
+	"TERFs can fuck off.";
+QUITMSG10 = "Don't go now, there's a scary moth\n"
+	"girl waiting in the darkness!";
+QUITMSG11 = "Let me guess. You blew yourself\n"
+	"up again, Icarus?";
+QUITMSG12 = "Yeah, I'd need a break after\n"
+	"all that too...";
+QUITMSG13 = "See you later\n"
+	"Space Cowboy...";
+QUITMSG14 = "To be continued?";
+// Re-tagged monsters
+FN_ZOMBIE = "Zomb";
+FN_SHOTGUN = "Baldy";
+FN_HEAVY = "Annoyance";
+FN_IMP = "Impy";
+FN_DEMON = "Pinky";
+FN_SPECTRE = "Fuzzy";
+FN_LOST = "Skully";
+FN_CACO = "Caco";
+FN_HELL = "Brownie";
+FN_BARON = "Mr. Grah";
+FN_ARACH = "Babby";
+FN_PAIN = "Ass Pain";
+FN_REVEN = "AAAAAAAAA";
+FN_MANCU = "He Thicc";
+FN_ARCH = "Pls No";
+FN_SPIDER = "Mama Spooder";
+FN_CYBER = "Dat Ass";
+FN_WOLFSS = "Mein Lieben";
+FN_DOG = "Goodest Boy";
+FN_CHICKEN = "Clucker";
+FN_BEAST = "Друг";
+FN_CLINK = "Slashy";
+FN_DSPARIL = "Oh He Mad";
+FN_HERETICIMP = "Flying Pest";
+FN_IRONLICH = "Jolly Lad";
+FN_BONEKNIGHT = "Rattle Me Bones";
+FN_MINOTAUR = "Buff";
+FN_MUMMY = "Mummy";
+FN_MUMMYLEADER = "Big Mummy";
+FN_SNAKE = "Snek";
+FN_WIZARD = "Feckin' Magic";
+FN_FIREDEMON = "Hot Stuff";
+FN_DEMON1 = "Big Lizard";
+FN_ETTIN = "Double Boi";
+FN_CENTAUR = "Shield Idiot";
+FN_SLAUGHTAUR = "Shield Idioter";
+FN_BISHOP = "Hoodie";
+FN_ICEGUY = "Cool Stuff";
+FN_SERPENT = "Swamp Snek";
+FN_WRAITH = "Ded";
+FN_DRAGON = "Buy Skyrim";
+FN_KORAX = "Ugly Stinky Boi";
+FN_FBOSS = "Buff Boi";
+FN_MBOSS = "Magic Boi";
+FN_CBOSS = "Holy Boi";
+FN_HERESIARCH = "Oh Lawd He Comin'";
 // obituaries
 O_PUSHER = "%k opened some air holes into %o.";
 O_DEEPIMPACT = "%o was impacted deeply by %k.";
@@ -899,6 +999,28 @@ O_MASHIRO4 = "%o mysteriously disappeared.";
 O_MASHIRO5 = "%o is now part of a live-action recreation of Layers of White.";
 O_MASHIRO6 = "%o angered the wrong moth.";
 O_MASHIRO7 = "%o and Mashiro are now TOGETHER FOREVER.";
+// edited vanilla obituaries
+OB_SUICIDE = "%o commited suikoden.";
+OB_FALLING = "%o sprained everything.";
+OB_CRUSH = "%o was pancaked.";
+OB_EXIT = "%o was not allowed to leave.";
+OB_WATER = "%o somehow managed to drown.";
+OB_SLIME = "%o got slimed.";
+OB_LAVA = "%o overheated";
+OB_BARREL = "%o got barreled.";
+OB_SPLASH = "%o got a bit too close there.";
+OB_R_SPLASH = "%o was rawket'd.";
+OB_ROCKET = "%o ate a rocket.";
+OB_KILLEDSELF = "%o self-destructed.";
+OB_VOODOO = "%o telefragged %hself.";
+OB_MPTELEFRAG = "%k overwrote %o.";
+OB_MONTELEFRAG = "%o was overwritten.";
+OB_DEFAULT = "%o is ded.";
+OB_MPDEFAULT = "%o got fragged by %k.";
+OB_FRIENDLY1 = "%k blasted a friend.";
+OB_FRIENDLY2 = "%k did it again.";
+OB_FRIENDLY3 = "%k really should stop teamkilling,";
+OB_FRIENDLY4 = "%k definitely has lost it.";
 // misc
 D_BLASTSUIT = "The Blast Suit broke down.";
 D_GHOSTARTI = "The Ghost Artifact ran out of energy.";
@@ -909,9 +1031,11 @@ D_RAGEKIT = "The Ragekit has ragequit.";
 D_REFRESHER = "The Refresher boost has ended.";
 D_WARARMOR = "The War Armor is no more.";
 // targetter
-SWWM_USABLE = "Usable";
-SWWM_SHOOTABLE = "Shootable";
-SWWM_BOTHUSE = "Usable / Shootable";
+SWWM_OVERKILL = "Overkill";
+SWWM_MULTIKILL = "Multi Kill";
+SWWM_SPREEKILL = "Killing Spree";
+SWWM_BOSSKILL = "Boss Kill";
+SWWM_MAX = "MAX";
 SWWM_EXIT = "Exit: ";
 SWWM_NEXIT = "Exit";
 SWWM_SEXIT = "Secret Exit";

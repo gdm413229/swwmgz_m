@@ -29,6 +29,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	SWWMLoreLibrary lorelib;
 	// store stuff
 	Array<Class<Inventory> > storelist;
+	Array<int> storeunits;
 	// trading
 	SWWMTradeHistory tradelib;
 	// chat history total line count (includes breaks)
@@ -153,6 +154,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 >= invlist.Size() )
 					sel0 = 0;
 			}
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				sel0++;
+				if ( sel0 >= storelist.Size() )
+					sel0 = 0;
+			}
 			return true;
 		case MKEY_UP:
 			if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
@@ -174,6 +182,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 < 0 )
 					sel0 = invlist.Size()-1;
 			}
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				sel0--;
+				if ( sel0 < 0 )
+					sel0 = storelist.Size()-1;
+			}
 			return true;
 		case MKEY_RIGHT:
 			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 21) )
@@ -183,9 +198,24 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 >= invlist.Size() ) sel0 = invlist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
+			{
+				int oldsel = sel0;
+				sel0 += 22;
+				if ( sel0 >= storelist.Size() ) sel0 = storelist.Size()-1;
+				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
+			}
 			return true;
 		case MKEY_LEFT:
 			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 21) )
+			{
+				if ( sel0-22 >= 0 )
+				{
+					MenuSound("menu/demoscroll");
+					sel0 -= 22;
+				}
+			}
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
 			{
 				if ( sel0-22 >= 0 )
 				{
@@ -206,6 +236,41 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					checkuse = gametic+1;
 				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer);
 			}
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) )
+			{
+				int moni = SWWMCredits.Get(players[consoleplayer]);
+				let itm = GetDefaultByType(storelist[sel0]);
+				let amt = storeunits[sel0];
+				int price = int(itm.Stamina*(1.+.5*(amt-1)));
+				if ( moni < price )
+				{
+					MenuSound("menu/noinvuse");
+					tmsg = StringTable.Localize("$SWWM_STOREMUNS");
+					tmsgtic = gametic+35;
+					return true;
+				}
+				let cur = players[consoleplayer].mo.FindInventory(storelist[sel0]);
+				int camt, max;
+				if ( cur )
+				{
+					camt = cur.Amount;
+					max = cur.MaxAmount;
+				}
+				else
+				{
+					camt = 0;
+					max = itm.MaxAmount;
+				}
+				if ( camt >= max )
+				{
+					MenuSound("menu/noinvuse");
+					tmsg = StringTable.Localize("$SWWM_STOREFULL");
+					tmsgtic = gametic+35;
+					return true;
+				}
+				EventHandler.SendNetworkEvent(String.Format("swwmstoregive.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
+				MenuSound("menu/buyinv");
+			}
 			return true;
 		case MKEY_CLEAR:
 			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) )
@@ -218,6 +283,42 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		}
 		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	private bool CmpInventory( Inventory a, Inventory b )
+	{
+		int ta = 0, tb = 0;
+		if ( a is 'Weapon' ) ta = 2;
+		else if ( (a is 'Ammo') || (a is 'BackpackItem') || (a is 'HammerspaceEmbiggener') ) ta = 3;
+		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || a.bBIGPOWERUP ) ta = -3;
+		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = -2;
+		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = -1;
+		else if ( a is 'PuzzleItem' ) ta = 1;
+		if ( b is 'Weapon' ) tb = 2;
+		else if ( (b is 'Ammo') || (b is 'BackpackItem') || (b is 'HammerspaceEmbiggener') ) tb = 3;
+		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || b.bBIGPOWERUP ) tb = -3;
+		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = -2;
+		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = -1;
+		else if ( b is 'PuzzleItem' ) tb = 1;
+		return ta > tb;
+	}
+
+	private bool CmpInventoryClass( Class<Inventory> a, Class<Inventory> b )
+	{
+		int ta = 0, tb = 0;
+		let da = GetDefaultByType(a);
+		let db = GetDefaultByType(b);
+		if ( a is 'Weapon' ) ta = 2;
+		else if ( a is 'Ammo' ) ta = 1;
+		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || da.bBIGPOWERUP ) ta = 3;
+		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = 5;
+		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = 4;
+		if ( b is 'Weapon' ) tb = 2;
+		else if ( b is 'Ammo' ) tb = 1;
+		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || db.bBIGPOWERUP ) tb = 3;
+		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 5;
+		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 4;
+		return ta < tb;
 	}
 
 	override void Ticker()
@@ -253,6 +354,23 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( greater ) continue;
 				invlist.Push(inv);
 			}
+			// re-sort by category
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				int j = 1;
+				while ( j < invlist.Size() )
+				{
+					int k = j;
+					while ( (k > 0) && CmpInventory(invlist[k-1],invlist[k]) )
+					{
+						Inventory tmp = invlist[k];
+						invlist[k] = invlist[k-1];
+						invlist[k-1] = tmp;
+						k--;
+					}
+					j++;
+				}
+			}
 		}
 		else if ( curtab == TAB_KEYS )
 		{
@@ -272,6 +390,100 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				}
 				if ( greater ) continue;
 				invlist.Push(inv);
+			}
+		}
+		else if ( curtab == TAB_STORE )
+		{
+			storelist.Clear();
+			storeunits.Clear();
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (Class<Inventory>)(AllActorClasses[i]);
+				if ( !type ) continue;
+				// skip chanceboxes, since they're not yet implemented
+				if ( type is 'Chancebox' ) continue;
+				// skip maxed items
+				let cur = players[consoleplayer].mo.FindInventory(type);
+				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
+				// ignore ammo for weapons not owned
+				bool notownedammo = false;
+				if ( type is 'Ammo' )
+				{
+					notownedammo = true;
+					let amo = (Class<Ammo>)(type);
+					for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.inv )
+					{
+						if ( !(inv is 'Weapon') ) continue;
+						if ( (Weapon(inv).AmmoType1 == amo) || (Weapon(inv).AmmoType2 == amo) )
+						{
+							notownedammo = false;
+							break;
+						}
+						if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).UsesAmmo(amo) )
+						{
+							notownedammo = false;
+							break;
+						}
+					}
+				}
+				if ( notownedammo ) continue;
+				let inv = GetDefaultByType(type);
+				// skip unimplemented weapons
+				if ( type is 'Weapon' )
+				{
+					let ready = inv.FindState("Ready");
+					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				}
+				// ignore child ammos
+				if ( (type is 'Ammo') && (type.GetParentClass() != 'Ammo') ) continue;
+				if ( inv.Stamina <= 0 ) continue;
+				int amt = inv.Amount;
+				if ( type is 'Ammo' )
+				{
+					// get the largest child pickup amount
+					for ( int j=0; j<AllActorClasses.Size(); j++ )
+					{
+						let type2 = (Class<Ammo>)(AllActorClasses[j]);
+						if ( !type2 || (type2.GetParentClass() != type) ) continue;
+						let inv2 = GetDefaultByType(type2);
+						if ( inv2.Amount > amt ) amt = inv2.Amount;
+					}
+				}
+				int price = int(inv.Stamina*(1.+.5*(amt-1)));
+				bool greater = false;
+				for ( int j=0; j<storelist.Size(); j++ )
+				{
+					let inv2 = GetDefaultByType(storelist[j]);
+					int price2 = int(inv2.Stamina*(1.+.5*(storeunits[j]-1)));
+					if ( price > price2 ) continue;
+					greater = true;
+					storelist.Insert(j,type);
+					storeunits.Insert(j,amt);
+					break;
+				}
+				if ( greater ) continue;
+				storelist.Push(type);
+				storeunits.Push(amt);
+			}
+			// re-sort by category
+			for ( int i=0; i<storelist.Size(); i++ )
+			{
+				int j = 1;
+				while ( j < storelist.Size() )
+				{
+					int k = j;
+					while ( (k > 0) && CmpInventoryClass(storelist[k-1],storelist[k]) )
+					{
+						Class<Inventory> tmp = storelist[k];
+						storelist[k] = storelist[k-1];
+						storelist[k-1] = tmp;
+						int tmpi = storeunits[k];
+						storeunits[k] = storeunits[k-1];
+						storeunits[k-1] = tmpi;
+						k--;
+					}
+					j++;
+				}
 			}
 		}
 		// check if use succeeded
@@ -371,7 +583,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
 		}
-		str = String.Format("\cg¥\c-%09d",SWWMCredits.Get(players[consoleplayer]));
+		int muns = SWWMCredits.Get(players[consoleplayer]);
+		str = String.Format("\cg¥\c-%09d",muns);
 		xx = 637-TewiFont.StringWidth(str);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw bottom messages
@@ -503,14 +716,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else str = invlist[i].GetTag();
 				len = TewiFont.StringWidth(str);
 				if ( len > longest ) longest = len;
-				int clscol = (i==sel0)?Font.CR_WHITE:Font.CR_DARKGRAY;
-				if ( invlist[i] is 'Weapon' ) clscol = (i==sel0)?Font.CR_YELLOW:Font.FindFontColor('DarkYellow');
-				else if ( invlist[i] is 'Ammo' ) clscol = (i==sel0)?Font.CR_ORANGE:Font.FindFontColor('DarkOrange');
-				else if ( (invlist[i] is 'PowerupGiver') || invlist[i].bBIGPOWERUP ) clscol = (i==sel0)?Font.CR_PURPLE:Font.FindFontColor('DarkPurple');
-				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = (i==sel0)?Font.CR_RED:Font.CR_DARKRED;
-				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = (i==sel0)?Font.CR_GREEN:Font.CR_DARKGREEN;
-				else if ( invlist[i] is 'PuzzleItem' ) clscol = (i==sel0)?Font.CR_LIGHTBLUE:Font.CR_BLUE;
-				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				int clscol = Font.CR_WHITE;
+				if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
+				else if ( (invlist[i] is 'Ammo') || (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_BROWN;
+				else if ( (invlist[i] is 'PowerupGiver') || (invlist[i] is 'AmmoFabricator') || invlist[i].bBIGPOWERUP ) clscol = Font.CR_PURPLE;
+				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
+				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
+				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
+				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 369 )
 				{
@@ -543,7 +756,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				str = invlist[i].GetTag();
 				len = TewiFont.StringWidth(str);
 				if ( len > longest ) longest = len;
-				Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 369 )
 				{
@@ -602,8 +815,75 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_STORE )
 		{
-			str = StringTable.Localize("$SWWM_COMINGSOON");
-			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( storelist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOSTORE");
+				Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			// draw all the stuff in the store
+			xx = 9;
+			yy = 23;
+			int longest = 0, len;
+			int ofs = int(floor(max(0,sel0-22)/22.)*22);
+			int cols = 1;
+			int collen[2];
+			for ( int i=ofs; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				else str = def.GetTag();
+				len = TewiFont.StringWidth(str);
+				if ( len > longest ) longest = len;
+				collen[cols-1] = longest;
+				int clscol = Font.CR_WHITE;
+				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
+				else if ( storelist[i] is 'Ammo' ) clscol = Font.CR_BROWN;
+				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
+				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
+				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
+				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 369 )
+				{
+					xx += longest+96;
+					yy = 23;
+					longest = 0;
+					cols++;
+					if ( cols > 2 ) break;
+				}
+			}
+			xx = 9;
+			yy = 23;
+			cols = 1;
+			for ( int i=ofs; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				int price = int(def.Stamina*(1.+.5*(storeunits[i]-1)));
+				str = String.Format("¥%d",price);
+				len = TewiFont.StringWidth(str);
+				int clscol = Font.CR_FIRE;
+				if ( price > muns ) clscol = Font.CR_BLACK;
+				Screen.DrawText(TewiFont,clscol,origin.x+xx+collen[cols-1]+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 369 )
+				{
+					xx += collen[cols-1]+96;
+					yy = 23;
+					cols++;
+					if ( cols > 2 ) break;
+				}
+			}
+			if ( storelist.Size() > 43 )
+			{
+				// draw scrollbar
+				int szr = (storelist.Size()/22)-1;
+				xx = floor((ofs/22)*(630./szr))+2;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 		else if ( curtab == TAB_TRADING )
 		{

@@ -255,11 +255,13 @@ Class SWWMScoreObj : Thinker
 {
 	int tcolor;
 	int score;
+	String str;
 	Vector3 pos;
 	int lifespan, initialspan;
 	int starttic, seed, seed2;
+	int ofs;
 
-	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD )
+	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, String str = "", int ofs = 0 )
 	{
 		let o = new("SWWMScoreObj");
 		o.ChangeStatNum(STAT_USER);
@@ -268,8 +270,10 @@ Class SWWMScoreObj : Thinker
 		o.lifespan = o.initialspan = 60;
 		o.tcolor = tcolor;
 		o.starttic = gametic;
+		o.str = str;
 		o.seed = Random[ScoreBits]();
 		o.seed2 = Random[ScoreBits]();
+		o.ofs = ofs;
 		return o;
 	}
 
@@ -283,8 +287,7 @@ Class SWWMScoreObj : Thinker
 enum EInterestType
 {
 	INT_Key,
-	INT_Exit,
-	INT_Usable
+	INT_Exit
 };
 
 Class SWWMInterest : Thinker
@@ -302,9 +305,12 @@ Class SWWMInterest : Thinker
 		i.trackedkey = thekey;
 		i.trackedline = theline;
 		if ( thekey ) i.type = INT_Key;
-		else if ( (theline.special == Exit_Normal) || (theline.special == Exit_Secret) || (theline.special == Teleport_EndGame) || (theline.special == Teleport_NewMap) )
-			i.type = INT_Exit;
-		else i.type = INT_Usable;
+		else if ( theline ) i.type = INT_Exit;
+		else
+		{
+			i.Destroy();
+			return null;
+		}
 		i.pos = thekey?thekey.Vec3Offset(0,0,thekey.height/2):pos;
 		return i;
 	}
@@ -314,7 +320,6 @@ Class SWWMInterest : Thinker
 		// update
 		if ( (type == INT_Key) && (!trackedkey || trackedkey.Owner) ) Destroy();
 		else if ( trackedkey ) pos = trackedkey.Vec3Offset(0,0,trackedkey.height/2);
-		else if ( (type == INT_Usable) && !trackedline.special ) Destroy();
 	}
 }
 
@@ -324,20 +329,31 @@ Class SWWMCombatTracker : Thinker
 	Actor mytarget;
 	String mytag;
 	int updated, lasthealth, maxhealth;
-	transient DynamicValueInterpolator intp;
+	DynamicValueInterpolator intp;
 	Vector3 pos, prevpos;
+	PlayerInfo myplayer;
 
 	static SWWMCombatTracker Spawn( Actor target )
 	{
-		let t = new("SWWMCombatTracker");
+		let ti = ThinkerIterator.Create("SWWMCombatTracker",STAT_USER);
+		SWWMCombatTracker t;
+		while ( t = SWWMCombatTracker(ti.Next()) )
+		{
+			if ( t.mytarget != target ) continue;
+			return t;
+		}
+		t = new("SWWMCombatTracker");
 		t.ChangeStatNum(STAT_USER);
 		t.mytarget = target;
-		t.mytag = target.player?target.player.GetUserName():target.GetTag();
+		if ( target.player || target.bISMONSTER )
+			t.mytag = target.player?target.player.GetUserName():target.GetTag();
+		else t.mytag = "";
 		t.lasthealth = t.maxhealth = target.health;
 		t.updated = int.min;
 		t.pos = level.Vec3Offset(target.pos,(0,0,target.default.height));
 		t.prevpos = level.Vec3Offset(target.prev,(0,0,target.default.height));
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
+		t.myplayer = target.player;
 		return t;
 	}
 
@@ -352,17 +368,23 @@ Class SWWMCombatTracker : Thinker
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
 			// we're done
-			if ( updated > gametic ) updated = gametic;
+			if ( updated > level.maptime ) updated = level.maptime;
 			lasthealth = 0;
 			intp.Update(lasthealth);
-			if ( gametic > updated+35 ) Destroy();
+			if ( level.maptime > updated+35 ) Destroy();
 			return;
 		}
-		mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
+		if ( mytarget.player || mytarget.bISMONSTER )
+			mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
+		else mytag = "";
 		int newhealth = mytarget.Health;
-		if ( newhealth != lasthealth ) updated = gametic+35;
-		if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) ) updated = gametic+70;
-		if ( mytarget.IsFriend(players[consoleplayer].mo) ) updated = gametic;
+		if ( newhealth != lasthealth ) updated = level.maptime+35;
+		if ( mytarget.bISMONSTER || mytarget.player )
+		{
+			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) ) updated = level.maptime+70;
+			if ( mytarget.player ) updated = level.maptime+35;
+			if ( players[consoleplayer].mo.CheckSight(mytarget) && ((mytarget.Vec3To(players[consoleplayer].mo).length() < 600) || (players[consoleplayer].mo.AimTarget() == mytarget)) ) updated = level.maptime;
+		}
 		lasthealth = newhealth;
 		intp.Update(lasthealth);
 	}
@@ -1115,7 +1137,82 @@ Class SWWMHandler : EventHandler
 	override void OnRegister()
 	{
 		// oneliner RNG must be relative to consoleplayer
-		SetRandomSeed[DemoLines](Random[DemoLines]()+consoleplayer);
+		SetRandomSeed[DemoLines](Random[DemoLines]()+consoleplayer+MSTime());
+	}
+
+	private static Vector3 UseLinePos( Line l )
+	{
+		Vector3 al, ah, bl, bh;
+		if ( !l.sidedef[1] )
+		{
+			// just the whole line
+			al = (l.v1.p,l.frontsector.floorplane.ZatPoint(l.v1.p));
+			ah = (l.v1.p,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
+			bl = (l.v2.p,l.frontsector.floorplane.ZatPoint(l.v2.p));
+			bh = (l.v2.p,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
+			return (al+ah+bl+bh)*.25;
+		}
+		SecPlane highestfloor, lowestfloor, lowestceiling, highestceiling;
+		if ( (l.frontsector.floorplane.ZatPoint(l.v1.p) > l.backsector.floorplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.floorplane.ZatPoint(l.v2.p) > l.backsector.floorplane.ZatPoint(l.v2.p)) )
+		{
+			highestfloor = l.frontsector.floorplane;
+			lowestfloor = l.backsector.floorplane;
+		}
+		else
+		{
+			highestfloor = l.backsector.floorplane;
+			lowestfloor = l.frontsector.floorplane;
+		}
+		if ( (l.frontsector.ceilingplane.ZatPoint(l.v1.p) < l.backsector.ceilingplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.ceilingplane.ZatPoint(l.v2.p) < l.backsector.ceilingplane.ZatPoint(l.v2.p)) )
+		{
+			lowestceiling = l.frontsector.ceilingplane;
+			highestceiling = l.backsector.ceilingplane;
+		}
+		else
+		{
+			lowestceiling = l.backsector.ceilingplane;
+			highestceiling = l.frontsector.ceilingplane;
+		}
+		// try to guess what the part that triggers this is
+		if ( l.Activation&SPAC_Cross )
+		{
+			// pick the "intersection"
+			al = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+			ah = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+			bl = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+			bh = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+			return (al+ah+bl+bh)*.25;
+		}
+		// check if lower part available
+		al = (l.v1.p,lowestfloor.ZatPoint(l.v1.p));
+		ah = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+		bl = (l.v2.p,lowestfloor.ZatPoint(l.v2.p));
+		bh = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+		if ( (al-ah).length() > 0 && (bl-bh).length() > 0 )
+			return (al+ah+bl+bh)*.25;
+		// check if upper part available
+		al = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+		ah = (l.v1.p,highestceiling.ZatPoint(l.v1.p));
+		bl = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+		bh = (l.v2.p,highestceiling.ZatPoint(l.v2.p));
+		if ( (al-ah).length() > 0 && (bl-bh).length() > 0 )
+			return (al+ah+bl+bh)*.25;
+		// TODO check for any 3d floors
+		for ( int i=0; i<l.frontsector.Get3DFloorCount(); i++ )
+		{
+		}
+		for ( int i=0; i<l.backsector.Get3DFloorCount(); i++ )
+		{
+		}
+		// TODO check for midtex
+		// just use the intersection
+		al = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+		ah = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+		bl = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+		bh = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+		return (al+ah+bl+bh)*.25;
 	}
 
 	override void WorldLoaded( WorldEvent e )
@@ -1132,54 +1229,45 @@ Class SWWMHandler : EventHandler
 			for ( int i=0; i<level.lines.Size(); i++ )
 			{
 				Line l = level.lines[i];
-				if ( skipme.Find(l.Index()) > skipme.Size() ) continue;
-				Vector3 al, ah, bl, bh;
-				// TODO properly center on the usable part
-				al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
-				ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
-				bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
-				bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
-				Vector3 lpos = (al+ah+bl+bh)*.25;
-				if ( (l.special == Exit_Normal) || (l.special == Exit_Secret) || (l.special == Teleport_EndGame) || (l.special == Teleport_NewMap) )
+				if ( (l.special != Exit_Normal) && (l.special != Exit_Secret) && (l.special != Teleport_EndGame) && (l.special != Teleport_NewMap) )
+					continue;
+				if ( skipme.Find(l.Index()) < skipme.Size() ) continue;
+				Vector3 lpos = UseLinePos(l);
+				// look for connected lines
+				int xcnt = 1;
+				if ( l.frontsector )
 				{
-					// look for connected lines
-					int xcnt = 1;
-					if ( l.frontsector )
+					for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
 					{
-						for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
-						{
-							let l2 = l.frontsector.Lines[j];
-							if ( (l2 == l) || (l2.special != l.special) ) continue;
-							skipme.Push(l2.Index());
-							xcnt++;
-							al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
-							ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
-							bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
-							bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
-							lpos += (al+ah+bl+bh)*.25;
-						}
+						let l2 = l.frontsector.Lines[j];
+						if ( (l2 == l) || (l2.special != l.special) ) continue;
+						skipme.Push(l2.Index());
+						xcnt++;
+						lpos += UseLinePos(l2);
 					}
-					if ( l.backsector )
-					{
-						for ( int j=0; j<l.backsector.Lines.Size(); j++ )
-						{
-							let l2 = l.backsector.Lines[j];
-							if ( (l2 == l) || (l2.special != l.special) ) continue;
-							skipme.Push(l2.Index());
-							xcnt++;
-							al = (l.v1.p.x,l.v1.p.y,l.frontsector.floorplane.ZatPoint(l.v1.p));
-							ah = (l.v1.p.x,l.v1.p.y,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
-							bl = (l.v2.p.x,l.v2.p.y,l.frontsector.floorplane.ZatPoint(l.v2.p));
-							bh = (l.v2.p.x,l.v2.p.y,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
-							lpos += (al+ah+bl+bh)*.25;
-						}
-					}
-					lpos /= xcnt;
-					SWWMInterest.Spawn(lpos,theline:l);
 				}
-				else if ( l.special && (l.activation&(SPAC_Use|SPAC_Impact)) )
-					SWWMInterest.Spawn(lpos,theline:l);
+				if ( l.backsector )
+				{
+					for ( int j=0; j<l.backsector.Lines.Size(); j++ )
+					{
+						let l2 = l.backsector.Lines[j];
+						if ( (l2 == l) || (l2.special != l.special) ) continue;
+						skipme.Push(l2.Index());
+						xcnt++;
+						lpos += UseLinePos(l2);
+					}
+				}
+				lpos /= xcnt;
+				SWWMInterest.Spawn(lpos,theline:l);
 			}
+		}
+		else if ( e.IsSaveGame || e.IsReopen )
+		{
+			// clear all floating numbers
+			let ti = ThinkerIterator.Create("SWWMScoreObj",Thinker.STAT_USER);
+			Thinker t;
+			while ( t = ti.Next() )
+				t.Destroy();
 		}
 	}
 
@@ -1260,7 +1348,11 @@ Class SWWMHandler : EventHandler
 		}
 		// reset some vars
 		multilevel[e.playernumber] = 0;
+		spreecount[e.playernumber] = 0;
+		tookdamage[e.playernumber] = false;
 		lastkill[e.playernumber] = int.min;
+		// reset combat tracker
+		SWWMCombatTracker.Spawn(players[e.playernumber].mo);
 	}
 
 	override void PlayerRespawned( PlayerEvent e )
@@ -1271,6 +1363,14 @@ Class SWWMHandler : EventHandler
 	override void WorldThingRevived( WorldEvent e )
 	{
 		if ( !(e.Thing is 'PlayerPawn') ) return;
+		// reset some vars
+		if ( e.Thing.playernumber() != -1 )
+		{
+			multilevel[e.Thing.playernumber()] = 0;
+			spreecount[e.Thing.playernumber()] = 0;
+			tookdamage[e.Thing.playernumber()] = false;
+			lastkill[e.Thing.playernumber()] = int.min;
+		}
 		// reset uptime since player had just died
 		SWWMStats s = SWWMStats.Find(e.Thing.player);
 		if ( s ) s.lastspawn = gametic;
@@ -1298,11 +1398,11 @@ Class SWWMHandler : EventHandler
 			if ( !playeringame[i] ) continue;
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
-				int score = 25;
+				int score = 25*(players[i].itemcount-lastitemcount[i]);
 				if ( level.total_items == level.found_items )
 				{
-					score = 2500;
-					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),score);
+					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),2000);
+					score += 2475;
 				}
 				SWWMCredits.Give(players[i],score);
 				lastitemcount[i] = players[i].itemcount;
@@ -1428,19 +1528,35 @@ Class SWWMHandler : EventHandler
 				return;
 			int pnum = e.DamageSource.PlayerNumber();
 			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
-			{
 				multilevel[pnum]++;
-			}
 			else multilevel[pnum] = 0;
 			if ( s && (multilevel[pnum]+1 > s.mkill) )
 				s.mkill = multilevel[pnum]+1;
 			lastkill[pnum] = level.maptime;
 			// scoring
 			int score = min(2000,int(ceil(e.Thing.SpawnHealth()*.5)*10));
-			if ( e.Thing.Health <= e.Thing.GetGibHealth() ) score = int(score*1.25);
+			int ofs = 0;
+			if ( e.Thing.Health <= e.Thing.GetGibHealth() )
+			{
+				score = int(score*1.25);
+				if ( e.DamageSource.player == players[consoleplayer] )
+					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_OVERKILL",ofs+=13);
+			}
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
-			if ( !tookdamage[pnum] ) score += 100+50*spreecount[pnum];
-			if ( e.Thing.bBOSS ) score += 10000;
+			if ( (multilevel[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
+				SWWMScoreObj.Spawn((multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1),e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_MULTIKILL",ofs+=13);
+			if ( !tookdamage[pnum] )
+			{
+				score += 100+50*spreecount[pnum];
+				if ( (spreecount[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
+					SWWMScoreObj.Spawn(spreecount[pnum]+1,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_SPREEKILL",ofs+=13);
+			}
+			if ( e.Thing.bBOSS )
+			{
+				score += 10000;
+				if ( e.DamageSource.player == players[consoleplayer] )
+					SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",ofs+=13);
+			}
 			SWWMCredits.Give(e.DamageSource.player,score);
 			if ( e.DamageSource.player == players[consoleplayer] )
 				SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
@@ -1507,19 +1623,6 @@ Class SWWMHandler : EventHandler
 			if ( flashes[i].tic < gametic ) continue;
 			GenericFlash gf = new("GenericFlash").Setup(flashes[i].cam,flashes[i].c,flashes[i].duration);
 			StatusBar.AttachMessage(gf,0,BaseStatusBar.HUDMSGLayer_UnderHUD);
-		}
-	}
-
-	override void WorldLineActivated( WorldEvent e )
-	{
-		if ( e.Thing.player != players[consoleplayer] ) return;
-		// remove lines that have been already used by the local player
-		let ti = ThinkerIterator.Create("SWWMInterest",Thinker.STAT_USER);
-		SWWMInterest i;
-		while ( i = SWWMInterest(ti.Next()) )
-		{
-			if ( (i.type != INT_Usable) || (i.trackedline != e.ActivatedLine) ) continue;
-			i.Destroy();
 		}
 	}
 
@@ -1806,7 +1909,7 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
 			{
-				players[e.Args[0]].mo.GiveInventory(item,1);
+				players[e.Args[0]].mo.GiveInventory(item,e.Args[2]);
 				if ( item is 'Weapon' ) players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
 			}
 		}
@@ -1909,6 +2012,8 @@ Class SWWMHandler : EventHandler
 
 	static void DoFlash( Actor camera, Color c, int duration )
 	{
+		// don't flash when paused
+		if ( menuactive && (menuactive != Menu.OnNoPause) ) return;
 		QueuedFlash qf = new("QueuedFlash");
 		qf.duration = duration;
 		qf.c = c;

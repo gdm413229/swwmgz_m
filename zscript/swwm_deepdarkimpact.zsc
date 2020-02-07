@@ -180,9 +180,9 @@ Class DeepImpact : SWWMWeapon
 	double charge;
 	bool charging;
 
-	transient ui TextureID WeaponBox;
-	transient ui Font TewiFont;
+	transient ui TextureID WeaponBox, AmmoBar;
 	transient ui DynamicValueInterpolator ChargeInter;
+	transient ui Font TewiFont;
 
 	Property ClipCount : clipcount;
 
@@ -195,10 +195,14 @@ Class DeepImpact : SWWMWeapon
 
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
-		//if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/DeepImpactDisplay.png",TexMan.Type_Any);
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/DeepImpactDisplay.png",TexMan.Type_Any);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
-		//Screen.DrawTexture(WeaponBox,false,bx-25,by-23,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-58,by-14,String.Format("Air: %3d%%",ChargeInter?ChargeInter.GetValue():clipcount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( !AmmoBar ) AmmoBar = TexMan.CheckForTexture("graphics/HUD/DeepImpactBar.png",TexMan.Type_Any);
+		Screen.DrawTexture(WeaponBox,false,bx-37,by-55,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int chg = clamp(ChargeInter?ChargeInter.GetValue():clipcount,0,100);
+		int ct = int(((by-3)-(chg*50./100.))*hs.y);
+		Screen.DrawTexture(AmmoBar,false,bx-8,by-53,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ClipTop,ct);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-36,by-14,String.Format("%3d%%",chg),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	override void HudTick()
@@ -392,7 +396,7 @@ Class DeepImpact : SWWMWeapon
 		Weapon.UpSound "deepimpact/select";
 		Weapon.SlotNumber 1;
 		Weapon.SelectionOrder 3000;
-		Stamina 2000;
+		Stamina 6000;
 		DeepImpact.ClipCount 100;
 	}
 

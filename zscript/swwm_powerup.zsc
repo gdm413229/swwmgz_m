@@ -54,7 +54,7 @@ Class GrilledCheeseSandwich : Inventory
 	Default
 	{
 		Tag "$T_SANDWICH";
-		Stamina 80000;
+		Stamina 800000;
 		Inventory.Icon "graphics/HUD/Icons/I_Sandwich.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/sandwich";
@@ -205,7 +205,7 @@ Class GhostArtifact : Inventory
 	Default
 	{
 		Tag "$T_GHOSTARTI";
-		Stamina 20000;
+		Stamina 120000;
 		Inventory.Icon "graphics/HUD/Icons/I_Ghost.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/ghost";
@@ -350,7 +350,7 @@ Class GravitySuppressor : Inventory
 	Default
 	{
 		Tag "$T_GRAVITYS";
-		Stamina 16000;
+		Stamina 150000;
 		Inventory.Icon "graphics/HUD/Icons/I_Gravity.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/gravity";
@@ -468,7 +468,7 @@ Class FuckingInvinciball : Inventory
 	Default
 	{
 		Tag "$T_INVINCIBALL";
-		Stamina 150000;
+		Stamina 640000;
 		Inventory.Icon "graphics/HUD/Icons/I_Invinciball.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/invinciball";
@@ -645,7 +645,7 @@ Class Ragekit : Inventory
 	Default
 	{
 		Tag "$T_RAGEKIT";
-		Stamina 120000;
+		Stamina 500000;
 		Inventory.Icon "graphics/HUD/Icons/I_Ragekit.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/ragekit";
@@ -734,6 +734,7 @@ Class LampMoth : Actor
 		+LOOKALLAROUND;
 		+QUICKTORETALIATE;
 		+INTERPOLATEANGLES;
+		+NOBLOCKMONST;
 	}
 	override string GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
@@ -1015,6 +1016,7 @@ Class CompanionLamp : Actor
 		+INTERPOLATEANGLES;
 		+LOOKALLAROUND;
 		+FRIENDLY;
+		+NOBLOCKMONST;
 		Radius 4;
 		Height 16;
 	}
@@ -1234,7 +1236,29 @@ Class SWWMLamp : Inventory
 	{
 		// add charge
 		if ( item.GetClass() == GetClass() )
-			Charge = min(default.Charge,Charge+SWWMLamp(item).Charge);
+		{
+			if ( Charge > 0 )
+			{
+				int AddCharge = Charge+SWWMLamp(item).Charge;
+				Charge = min(Default.Charge,AddCharge);
+				// if there's charge to spare, increase amount
+				if ( AddCharge > Charge )
+				{
+					if ( (Amount > 0) && (Amount+item.Amount < 0) ) Amount = int.max;
+					Amount = min(MaxAmount,Amount+item.Amount);
+					Charge = AddCharge-Charge;
+				}
+			}
+			else
+			{
+				if ( (Amount > 0) && (Amount+item.Amount < 0) ) Amount = int.max;
+				// new copy, increase and take its charge
+				Amount = min(MaxAmount,Amount+item.Amount);
+				Charge = SWWMLamp(item).Charge;
+			}
+			item.bPickupGood = true;
+			return true;
+		}
 		return Super.HandlePickup(item);
 	}
 	override bool Use( bool pickup )
@@ -1263,6 +1287,7 @@ Class SWWMLamp : Inventory
 		{
 			Amount--;
 			if ( Amount <= 0 ) DepleteOrDestroy();
+			else Charge = default.Charge;
 		}
 	}
 	override void DetachFromOwner()
@@ -1277,6 +1302,10 @@ Class SWWMLamp : Inventory
 		Icon = default.Icon;
 		bActive = false;
 	}
+	clearscope bool isBlinking()
+	{
+		return ( (Charge < 10) && (level.maptime&8) );
+	}
 	Default
 	{
 		Tag "$T_LAMP";
@@ -1284,8 +1313,8 @@ Class SWWMLamp : Inventory
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.PickupMessage "$I_LAMP";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 1;
-		Inventory.InterHubAmount 1;
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -1294,6 +1323,7 @@ Class SWWMLamp : Inventory
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		SWWMLamp.Charge 100;
+		Stamina 70000;
 	}
 	States
 	{

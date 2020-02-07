@@ -91,8 +91,8 @@ Class HealthNuggetItem : SWWMHealth
 		Stamina 1200;
 		Inventory.Icon "graphics/HUD/Icons/I_HealthNugget.png";
 		Inventory.PickupMessage "$T_NUGGETH";
-		Inventory.MaxAmount 50;
-		Inventory.InterHubAmount 50;
+		Inventory.MaxAmount 100;
+		Inventory.InterHubAmount 100;
 		SWWMHealth.GiveHealth "HealthNugget";
 		+INVENTORY.ALWAYSPICKUP;
 		+COUNTITEM;
@@ -125,8 +125,8 @@ Class TetraHealthItem : SWWMHealth
 		Stamina 3000;
 		Inventory.Icon "graphics/HUD/Icons/I_HealthTetra.png";
 		Inventory.PickupMessage "$T_TETRAHEALTH";
-		Inventory.MaxAmount 20;
-		Inventory.InterHubAmount 20;
+		Inventory.MaxAmount 60;
+		Inventory.InterHubAmount 60;
 		SWWMHealth.GiveHealth "TetraHealth";
 	}
 	States
@@ -147,11 +147,11 @@ Class CubeHealthItem : SWWMHealth
 	Default
 	{
 		Tag "$T_CUBEHEALTH";
-		Stamina 5000;
+		Stamina 8000;
 		Inventory.Icon "graphics/HUD/Icons/I_HealthCube.png";
 		Inventory.PickupMessage "$T_CUBEHEALTH";
-		Inventory.MaxAmount 10;
-		Inventory.InterHubAmount 10;
+		Inventory.MaxAmount 20;
+		Inventory.InterHubAmount 20;
 		SWWMHealth.GiveHealth "CubeHealth";
 	}
 	States
@@ -183,12 +183,10 @@ Class RefresherItem : SWWMHealth
 	Default
 	{
 		Tag "$T_REFRESHER";
-		Stamina 60000;
+		Stamina 160000;
 		Inventory.Icon "graphics/HUD/Icons/I_Refresher.png";
 		Inventory.PickupMessage "$T_REFRESHER";
 		Inventory.PickupSound "misc/p_pkup";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
 		SWWMHealth.GiveHealth "RefresherHealth";
 		+COUNTITEM;
 		+INVENTORY.BIGPOWERUP;

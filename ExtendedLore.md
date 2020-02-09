@@ -545,8 +545,9 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   incident he is decomissioned, and the Doom episodes are classified. Zanaveth
   III attempts to take over the world while it's still recovering from the
   invasion, fails. Hell attempts another invasion of Mars, Doom 2016 happens.
-- 2151: The Doom Slayer assassinates the prince of Hell. The UAC loses contact
-  with him afterwards.
+- 2150: The fight against the last remaining Demons on Earth continues. Doom
+  Eternal happens.
+- 2151: The UAC loses contact with the Slayer.
 - 2152: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.
 - 2153: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
@@ -562,8 +563,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   expedition, the Slayer is seen standing right next to them, as if paying
   respects to a fellow warrior.
 - 2170: A group of monks discover a mansion haunted by demons, become trapped.
-  The Doom Slayer is personally sent to "fix it". A mysterious figure is seen
-  leaving the mansion afterwards.
+  The Doom Slayer heads in to "fix things". A mysterious figure is seen leaving
+  the mansion afterwards.
 - 2171: Akari Labs manages to extend their teleportation technology to travel
   between universes. The second contact with the Anarukon happens, this time
   all going peacefully. Saya Miyamoto meets Xanai Kirin, their marriage brings
@@ -578,7 +579,7 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   entry into FTL travel.
 - 2200: Earth joins the "United Aligned Worlds", bonds with the Nukuri are
   re-established.
-- 2201: The UAC files for bankrupcy.
+- 2201: The UAC files for bankruptcy.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
@@ -596,9 +597,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2320: A group of billionaires buy an entire island and turn it into an arena.
   The "Battle Royale" boom starts.
 - 2407: Unissix Bokurou Azadeku devises the "Unissix Tournaments".
-- 2409: The first tournament ends with Raik L Raikishionen as champion. Thanks
-  to his popularity, he is elected as prime minister of the Nukuri Unified
-  Government.
+- 2409: The first tournament ends with Raik L Raikishionen, prime minister of
+  the Nukuri Unified Government, as champion.
 - 2411: In a joint attack, and with the participation of Earth, the "Dark
   Alliance" is defeated.
 - 2415: The "New Dark Kingdom" is formed, in an attempt to reunite those who
@@ -607,14 +607,16 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   attempt to bring forth the apocalypse. Although the warriors are stopped,
   they manage to summon SHINNOVRE the Eraser. For the first time in history, LS
   breaks their vow to not get involved in "the affairs of mortals" and banishes
-  him. It is later revealed that they are brothers.
+  their brother.
 - 2890: "Vault 490" starts being built in the University of Nos-Kora, it is
   described as a "focusing device" for a weapon capable of "instantly
   neutralizing any threat to our universe".
 - 2899: A strange humanoid creature is carried into the Vault. The Mishe
   brothers announce that "although retrieving the weapon proved to be quite
   difficult, everything is now ready".
-- 2900: Unissix Bokurou Azadeku dies under mysterious circumstances.
+- 2900: Unissix Bokurou Azadeku dies under mysterious circumstances. Hours
+  later, she is seen alive once again, although her appearance has changed
+  dramatically.
 - 2907: An unidentified terrorist group attacks the Nekuratek Advanced Arms
   Research Facility in Nahkami, stealing several prototypes. The Hiikyan War
   begins.

@@ -10,7 +10,7 @@ Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex, InventoryTex, ChatTex[6],
 		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5];
-	HUDFont mTewiFont;
+	HUDFont mTewiFont, mMiniwiFont;
 
 	// "Full History" contains all messages since session start, nothing is flushed
 	// this can be accessed from a section of the knowledge base
@@ -44,6 +44,12 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override void FlushNotify()
 	{
+		if ( level.maptime <= 1 )		{
+			// flush ALL messages
+			MainQueue.Clear();
+			PickupQueue.Clear();
+			return;
+		}
 		// flush non-chat messages
 		for ( int i=0; i<MainQueue.Size(); i++ )
 		{
@@ -74,7 +80,7 @@ Class SWWMStatusBar : BaseStatusBar
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline
 		m.type = printlevel;
-		m.tic = gametic;
+		m.tic = level.maptime;
 		m.rep = 1;
 		// append chat messages to full history
 		if ( (printlevel == PRINT_CHAT) || (printlevel == PRINT_TEAMCHAT) )
@@ -174,14 +180,14 @@ Class SWWMStatusBar : BaseStatusBar
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
-			if ( gametic < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
+			if ( level.maptime < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
 			PickupQueue.Delete(i);
 			i--;
 		}
 		for ( int i=0; i<MainQueue.Size(); i++ )
 		{
-			if ( (MainQueue[i].type <= PRINT_HIGH) && (gametic < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
-			else if ( (MainQueue[i].type > PRINT_HIGH) && (gametic < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
+			if ( (MainQueue[i].type <= PRINT_HIGH) && (level.maptime < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
+			else if ( (MainQueue[i].type > PRINT_HIGH) && (level.maptime < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
 			MainQueue.Delete(i);
 			i--;
 		}
@@ -222,7 +228,7 @@ Class SWWMStatusBar : BaseStatusBar
 			// ignore player unless chasecamming
 			if ( (ct.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 			if ( ct.myplayer && deathmatch ) continue;	// no players in dm
-			if ( gametic > ct.updated+35 ) continue;
+			if ( level.maptime > ct.updated+35 ) continue;
 			targets.Push(ct);
 		}
 		// sort by distance (give priority to players)
@@ -321,6 +327,7 @@ Class SWWMStatusBar : BaseStatusBar
 		EnemyHTex[3] = TexMan.CheckForTexture("graphics/HUD/EnemyBar3.png",TexMan.Type_Any);
 		EnemyHTex[4] = TexMan.CheckForTexture("graphics/HUD/EnemyBarS.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
+		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
 		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,1000);
 		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);
@@ -364,9 +371,9 @@ Class SWWMStatusBar : BaseStatusBar
 						tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
 					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 				}
-				Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,(vpos.x-hs.x*mTewiFont.mFont.StringWidth(tag)/2.)/hs.x,(vpos.y-hs.y*mTewiFont.mFont.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(mMiniwiFont.mFont,Font.CR_WHITE,(vpos.x-hs.x*mMiniwiFont.mFont.StringWidth(tag)/2.)/hs.x,(vpos.y-hs.y*mMiniwiFont.mFont.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
-				Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,(vpos.x-hs.x*mTewiFont.mFont.StringWidth(tag)/2.)/hs.x,(vpos.y+hs.y*mTewiFont.mFont.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(mMiniwiFont.mFont,Font.CR_WHITE,(vpos.x-hs.x*mMiniwiFont.mFont.StringWidth(tag)/2.)/hs.x,(vpos.y+hs.y*mMiniwiFont.mFont.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
 		// targetting array
@@ -385,7 +392,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Vector2 barpos = vpos-(barsiz/2.);
 			barpos.y -= 16.;
 			if ( targettag.GetBool() || targets[i].myplayer && (tag != "") )
-				Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(mTewiFont.mFont.StringWidth(tag)*hs.x)/2.)/hs.x,(barpos.y-13*hs.y-barsiz.y/2.)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(mMiniwiFont.mFont,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(mMiniwiFont.mFont.StringWidth(tag)*hs.x)/2.)/hs.x,(barpos.y-mMiniwiFont.mFont.GetHeight()*hs.y)/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hs.x,barpos.y/hs.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			int ht = clamp(targets[i].intp.GetValue(),0,targets[i].maxhealth*10);
 			int hw = int((min(ht,targets[i].maxhealth)*50.)/targets[i].maxhealth);
@@ -436,7 +443,7 @@ Class SWWMStatusBar : BaseStatusBar
 				if ( initspd < 0 && initspd > -32 ) initspd = -32;
 				int boostup = 64+scoreobjects[i].seed2/2;
 				fo.x = (.05*initspd)*((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**.8);
-				fo.y = -((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**1.5)+boostup*sin((90./scoreobjects[i].initialspan)*(gametic+fractic-scoreobjects[i].starttic));
+				fo.y = -((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**1.5)+boostup*sin((90./scoreobjects[i].initialspan)*(level.maptime+fractic-scoreobjects[i].starttic));
 			}
 			else if ( scoreobjects[i].tcolor == Font.CR_GREEN )
 			{
@@ -446,11 +453,11 @@ Class SWWMStatusBar : BaseStatusBar
 				if ( initspd < 0 && initspd > -32 ) initspd = -32;
 				int boostup = 16+scoreobjects[i].seed2/4;
 				fo.x = (.15*initspd)*((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**.6);
-				fo.y = ((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**1.2)-boostup*sin((90./scoreobjects[i].initialspan)*(gametic+fractic-scoreobjects[i].starttic));
+				fo.y = ((scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic))**1.2)-boostup*sin((90./scoreobjects[i].initialspan)*(level.maptime+fractic-scoreobjects[i].starttic));
 			}
-			else fo.y = scoreobjects[i].initialspan-(scoreobjects[i].lifespan+fractic);	// score rises linearly
-			fo.y += scoreobjects[i].ofs;
-			Screen.DrawText(mTewiFont.mFont,scoreobjects[i].tcolor,(vpos.x-hs.x*(fo.x+mTewiFont.mFont.StringWidth(tag)/2.))/hs.x,(vpos.y-hs.y*(fo.y+(mTewiFont.mFont.GetHeight()/2.)))/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			else fo.y = scoreobjects[i].initialspan-(scoreobjects[i].lifespan-fractic);	// score rises linearly
+			fo.y += scoreobjects[i].ofs*mMiniwiFont.mFont.GetHeight();
+			Screen.DrawText(mMiniwiFont.mFont,scoreobjects[i].tcolor,(vpos.x-hs.x*(fo.x+mMiniwiFont.mFont.StringWidth(tag)/2.))/hs.x,(vpos.y-hs.y*(fo.y+(mMiniwiFont.mFont.GetHeight()/2.)))/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 		}
 	}
 
@@ -689,7 +696,7 @@ Class SWWMStatusBar : BaseStatusBar
 				else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = teamcol.GetInt();
 				String cstr = MainQueue[i].str;
 				if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
-				int curtime = MainQueue[i].tic-gametic;
+				int curtime = MainQueue[i].tic-level.maptime;
 				if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*msgduration.GetInt();
 				else curtime += 35*chatduration.GetInt();
 				double alph = clamp(curtime/20.,0.,1.);
@@ -713,7 +720,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				String cstr = PickupQueue[i].str;
 				if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
-				int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-gametic;
+				int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-level.maptime;
 				double alph = clamp(curtime/20.,0.,1.);
 				BrokenLines l = mTewiFont.mFont.BreakLines(cstr,int(ss.x*.75));
 				int maxlen = 0;

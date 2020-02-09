@@ -120,7 +120,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEUP:
 			MenuSound("menu/demotab");
-			curtab = (curtab-1)&7;
+			if ( (curtab <= 0) || (curtab > 7) ) curtab = 7;
+			else curtab--;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = 0;
 			sub = false;
@@ -128,7 +129,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEDOWN:
 			MenuSound("menu/demotab");
-			curtab = (curtab+1)&7;
+			if ( curtab < 7 ) curtab++;
+			else curtab = 0;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = 0;
 			sub = false;
@@ -402,6 +404,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( !type ) continue;
 				// skip chanceboxes, since they're not yet implemented
 				if ( type is 'Chancebox' ) continue;
+				// no fabricators outside of hexen, otherwise no ammo
+				if ( (gameinfo.gametype&GAME_Hexen) && (type is 'Ammo') ) continue;
+				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;

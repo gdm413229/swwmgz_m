@@ -269,7 +269,7 @@ Class SWWMScoreObj : Thinker
 		o.pos = pos;
 		o.lifespan = o.initialspan = 60;
 		o.tcolor = tcolor;
-		o.starttic = gametic;
+		o.starttic = level.maptime;
 		o.str = str;
 		o.seed = Random[ScoreBits]();
 		o.seed2 = Random[ScoreBits]();
@@ -1540,22 +1540,22 @@ Class SWWMHandler : EventHandler
 			{
 				score = int(score*1.25);
 				if ( e.DamageSource.player == players[consoleplayer] )
-					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_OVERKILL",ofs+=13);
+					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_OVERKILL",++ofs);
 			}
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
 			if ( (multilevel[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
-				SWWMScoreObj.Spawn((multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1),e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_MULTIKILL",ofs+=13);
+				SWWMScoreObj.Spawn((multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1),e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_MULTIKILL",++ofs);
 			if ( !tookdamage[pnum] )
 			{
 				score += 100+50*spreecount[pnum];
 				if ( (spreecount[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
-					SWWMScoreObj.Spawn(spreecount[pnum]+1,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_SPREEKILL",ofs+=13);
+					SWWMScoreObj.Spawn(spreecount[pnum]+1,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_SPREEKILL",++ofs);
 			}
 			if ( e.Thing.bBOSS )
 			{
 				score += 10000;
 				if ( e.DamageSource.player == players[consoleplayer] )
-					SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",ofs+=13);
+					SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",++ofs);
 			}
 			SWWMCredits.Give(e.DamageSource.player,score);
 			if ( e.DamageSource.player == players[consoleplayer] )

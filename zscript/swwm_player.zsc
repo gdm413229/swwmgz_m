@@ -844,7 +844,7 @@ Class Demolitionist : PlayerPawn
 		// add lore if any
 		SWWMLoreLibrary.Add(player,item.GetClassName());
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		if ( (item is 'Weapon') && CheckLocalView() && (mute.GetInt() < 2) )
+		if ( (item is 'Weapon') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() && (mute.GetInt() < 2) )
 			SWWMHandler.AddOneliner("getweapon");
 		if ( (item is 'Key') && !key_reentrant )
 		{

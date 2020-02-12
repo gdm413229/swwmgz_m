@@ -75,21 +75,21 @@ happened. A pimped up jackhammer.
 
 Primary fire drills at whatever you're facing.
 
-Secondary fire pulls the drill head back all the way in, then on button release
+Secondary fire pulls the drill bit back all the way in, then on button release
 pushes it back out with immense force. This will pretty much pierce a hole
-through anything, plus there's a random chance you'll lose grip on the weapon
-and it'll go flying until it hits something.
+through anything, but if you miss there's a chance you'll lose grip on the
+weapon and it'll go flying until it hits something.
 
 ### Deep Impact (slot 1), replaces Fist, Staff, Hexen starting weapons
 
 The signature SWWM melee weapon, an Impact Hammer on steroids.
 
 Primary fire is your usual compressed air push, you can use it to deflect
-projectiles, push away enemies, or help yourself jump higher.
+projectiles or push away enemies that block your path.
 
-Secondary fire is now hold-to-charge. The device compresses air as hard as it
-can, then releases a massive airblast at Mach 3 that will tear apart everything
-on its way.
+Secondary fire is a charged shot. The device compresses air as hard as it can,
+then releases a massive airblast at Mach 3 that will tear apart everything on
+its way.
 
 Reload pumps up more compressed air, for use by the primary fire. Note that
 after using secondary fire you will always be without any air for primary.

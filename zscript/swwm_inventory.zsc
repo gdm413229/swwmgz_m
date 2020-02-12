@@ -449,40 +449,36 @@ Class SWWMWeapon : Weapon abstract
 		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
 		LineTrace(angle,DEFMELEERANGE,slope,0,player.viewheight,data:d);
-		if ( d.HitType != TRACE_HitNone )
+		if ( d.HitType == TRACE_HitActor )
 		{
 			bool bloodless = true;
-			if ( d.HitType == TRACE_HitActor )
+			double diff = deltaangle(self.angle,AngleTo(d.HitActor));
+			self.angle += clamp(diff,-5.,5.);
+			SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
+			if ( CountInv("RagekitPower") )
 			{
-				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
-				self.angle += clamp(diff,-5.,5.);
-				SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
-				if ( CountInv("RagekitPower") )
-				{
-					invoker.bEXTREMEDEATH = true;
-					invoker.bNOEXTREMEDEATH = false;
-				}
-				else
-				{
-					invoker.bEXTREMEDEATH = false;
-					invoker.bNOEXTREMEDEATH = true;
-				}
-				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-				invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
-				invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
-				if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
-				if ( !d.HitActor.bNOBLOOD )
-				{
-					d.HitActor.TraceBleed(dmg,invoker);
-					d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
-				}
-				else bloodless = false;
+				invoker.bEXTREMEDEATH = true;
+				invoker.bNOEXTREMEDEATH = false;
 			}
-			else if ( d.HitType == TRACE_HitWall )
-				d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation-d.HitDir*4);
+			else
+			{
+				invoker.bEXTREMEDEATH = false;
+				invoker.bNOEXTREMEDEATH = true;
+			}
+			d.HitActor.DaggerAlert(self);
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
+			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
+			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
+			if ( !d.HitActor.bNOBLOOD )
+			{
+				d.HitActor.TraceBleed(dmg,invoker);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+			}
+			else bloodless = false;
 			A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12);
 			A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
-			A_AlertMonsters();
+			A_AlertMonsters(300);
 			return true;
 		}
 		return false;
@@ -490,6 +486,17 @@ Class SWWMWeapon : Weapon abstract
 	action void A_Melee( int dmg = 40 )
 	{
 		for ( int i=0; i<16; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
+		// check for walls instead
+		FTranslatedLineTarget t;
+		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		FLineTraceData d;
+		LineTrace(angle,DEFMELEERANGE,slope,TRF_THRUACTORS,player.viewheight,data:d);
+		if ( d.HitType == TRACE_HitNone ) return;
+		if ( d.HitType == TRACE_HitWall )
+			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation-d.HitDir*4);
+		A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12);
+		A_StartSound("demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
+		A_AlertMonsters(100);
 	}
 	override void PlayUpSound( Actor origin )
 	{

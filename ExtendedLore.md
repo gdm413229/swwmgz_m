@@ -256,8 +256,8 @@ although people around her remark that her BO is "kind of nice actually".
 
 She has an older brother, Taro, and a younger sister, Yui. Thanks to the
 immortal blood of her mother, her aging "froze" at the age of 25, and
-absolutely hates the fact no longer growing means she's stuck being 5'5" and
-having a cup size of A.
+absolutely hates the fact no longer growing means she's stuck being 5 feet and
+having a cup size of B.
 
 Among other hobbies, Saya really enjoys writing. Her first foray into manga,
 "My Maid is a Sex Robot", became successful enough to get an anime adaptation.

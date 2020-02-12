@@ -48,7 +48,18 @@ Class SWWMStats : Thinker
 		toptaken;
 	double grounddist, airdist, fuelusage, topspeed;
 	Array<WeaponUsage> wstats;
+	Array<Class<Weapon> > alreadygot;
 	int favweapon;
+
+	bool GotWeapon( Class<Weapon> which )
+	{
+		for ( int i=0; i<alreadygot.Size(); i++ )
+		{
+			if ( alreadygot[i] == which ) return true;
+		}
+		alreadygot.Push(which);
+		return false;
+	}
 
 	void AddWeaponKill( Class<Weapon> which )
 	{
@@ -1382,7 +1393,7 @@ Class SWWMHandler : EventHandler
 		if ( onelinertic && (onelinertic < gametic) )
 		{
 			if ( players[consoleplayer].health > 0 )
-				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_LOCAL,1.,ATTN_NONE);
+				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
 			onelinertic = 0;
 			onelinerspan = 0;
 		}
@@ -1608,7 +1619,7 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
-		if ( e.Thing.bSHOOTABLE && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
+		if ( (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}
 
 	override void PostUiTick()

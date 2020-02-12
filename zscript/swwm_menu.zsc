@@ -137,7 +137,20 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			invlist.Clear();
 			return true;
 		case MKEY_DOWN:
-			if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
+			if ( curtab == TAB_MISSION )
+			{
+				String str = StringTable.Localize("$SWWM_MISSION_NONE");
+				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
+				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
+				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				BrokenLines l = TewiFont.BreakLines(str,620);
+				if ( (l.Count() > 27) && (sel0 < l.Count()-28) )
+				{
+					MenuSound("menu/demoscroll");
+					sel0++;
+				}
+			}
+			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
 				sel0--;
@@ -165,7 +178,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_UP:
-			if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
+			if ( curtab == TAB_MISSION )
+			{
+				if ( sel0 > 0 )
+				{
+					MenuSound("menu/demoscroll");
+					sel0--;
+				}
+			}
+			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
 			{
 				MenuSound("menu/demoscroll");
 				sel0++;
@@ -624,13 +645,24 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
 			else str = StringTable.Localize("$SWWM_MISSION_NONE");
-			BrokenLines l = TewiFont.BreakLines(str,628);
+			BrokenLines l = TewiFont.BreakLines(str,620);
 			xx = 6;
 			yy = 17;
-			for ( int i=0; i<l.Count(); i++ )
+			int ofs = clamp(sel0,0,l.Count()-28);
+			for ( int i=ofs; i<l.Count(); i++ )
 			{
+				if ( yy > 379 ) break;
 				Screen.DrawText(TewiFont,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
+			}
+			// scrollbar
+			if ( l.Count() > 27 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = l.Count()-28;
+				yy = floor(ofs*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
 		else if ( curtab == TAB_STATS )

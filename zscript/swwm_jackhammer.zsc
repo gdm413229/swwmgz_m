@@ -115,6 +115,8 @@ Class PusherProjectile : Actor
 		+DONTBOUNCEONSHOOTABLES;
 		-BOUNCEAUTOOFF;
 		+NODAMAGETHRUST;
+		-BOUNCEONUNRIPPABLES;
+		-ALLOWBOUNCEONACTORS;
 		+RIPPER;
 		-NOGRAVITY;
 	}
@@ -238,8 +240,9 @@ Class PusherProjectile : Actor
 			let p = Spawn("BigPusherImpact",d.HitLocation+HitNormal*4);
 			p.angle = atan2(HitNormal.y,HitNormal.x);
 			p.pitch = asin(-HitNormal.z);
+			bNOGRAVITY = true;
 		}
-		bNOGRAVITY = true;
+		else pitch = 0;
 		bSPECIAL = true;
 		A_SetSize(20,16);
 		A_ChangeLinkFlags(0);
@@ -247,7 +250,7 @@ Class PusherProjectile : Actor
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
-		if ( target == lasthit ) return damage;
+		if ( target == lasthit ) return 0;
 		lasthit = target;
 		if ( target.bNOBLOOD ) A_StartSound("pusher/althit",CHAN_WEAPON,CHANF_OVERLAP);
 		else A_StartSound("pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);

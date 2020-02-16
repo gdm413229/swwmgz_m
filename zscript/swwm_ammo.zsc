@@ -776,7 +776,6 @@ Class AmmoFabricator : Inventory abstract
 	{
 		// additional lore
 		SWWMLoreLibrary.Add(other.player,"Fabricator");
-		SWWMLoreLibrary.Add(other.player,"Cyrus");
 		return Super.CreateCopy(other);
 	}
 
@@ -928,8 +927,6 @@ Class HammerspaceEmbiggener : Inventory
 {
 	override Inventory CreateCopy( Actor other )
 	{
-		// additional lore
-		SWWMLoreLibrary.Add(other.player,"Cyrus");
 		// Find every unique type of ammoitem. Give it to the player if
 		// he doesn't have it already, and increase its maximum capacity.
 		for ( int i=0; i<AllActorClasses.Size(); i++ )

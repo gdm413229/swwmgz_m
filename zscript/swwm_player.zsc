@@ -232,9 +232,13 @@ Class Demolitionist : PlayerPawn
 	override void GiveDefaultInventory()
 	{
 		Super.GiveDefaultInventory();
+
 		// preloaded gun
+		let dp = DeepImpact(FindInventory("DeepImpact"));
+		if ( dp ) SWWMLoreLibrary.Add(player,"DeepImpact");
 		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
 		if ( !eg ) return;
+		SWWMLoreLibrary.Add(player,"ExplodiumGun");
 		eg.clipcount = 7;
 		eg.chambered = true;
 	}

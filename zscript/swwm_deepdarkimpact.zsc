@@ -186,13 +186,6 @@ Class DeepImpact : SWWMWeapon
 
 	Property ClipCount : clipcount;
 
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// additional lore
-		SWWMLoreLibrary.Add(other.player,"Locke");
-	}
-
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/DeepImpactDisplay.png",TexMan.Type_Any);

@@ -439,14 +439,17 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   received from an old ruined complex beyond the seas. A declaration of war
   from the "Church of the Dreadful Lady". A single, well trained mercenary puts
   an end to their plans, but the true mastermind behind it all manages to flee.
+
 - ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
   associates, stealing the Heart of D'Sparil and putting an end to the plans
   for resurrecting him. The mansion is sold off, most of its valuables,
-  including the corporeal remains of the serpent rider, being acquired by the
-  "Cult of the Viridescent Lord".
+  including the corporeal remains of the serpent rider, being passed around,
+  until being eventually acquired by the "Cult of the Viridescent Lord".
+
 - ????: The three heroes who defeated Korax are called into the Winter Nexus,
   they gather the four elemental gems and defeat the "Viridescent Lord". A
   mysterious shadowy figure revives the corpse of D'Sparil, they disappear.
+
 - ~130 BC: The town of Kereshnovka is founded by an alien race known as the
   Qurensniv.
 - ~149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
@@ -545,16 +548,12 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   incident he is decomissioned, and the Doom episodes are classified. Zanaveth
   III attempts to take over the world while it's still recovering from the
   invasion, fails. Hell attempts another invasion of Mars, Doom 2016 happens.
-- 2150: The fight against the last remaining Demons on Earth continues. Doom
-  Eternal happens.
-- 2151: The UAC loses contact with the Slayer.
-- 2152: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
-  reveals itself. It is defeated by a single man, one John A. Bortson III.
-- 2153: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
-  "those brats deserved it, they didn't know how to use a fucking chair lol".
+- 2150~2151: The fight against the last remaining Demons on Earth continues.
+  Doom Eternal happens. After defeating |BIG SPOILER HERE| contact with him is
+  lost completely.
 - 2156: Akari Labs succeeds in creating safe teleportation. The reaction from
   the UAC on social media is legendary.
-- 2160: Demonic forces are discovered on the old moon base, having been
+- 2160: Demonic forces are discovered on several old UAC bases, having been
   resurrected by a "Mother Demon". Seeing as the Slayer is nowhere to be found,
   the Doom marine is re-commissioned to stop this madness, he succeeds, but in
   a last transmission states that he will "stay in Hell to make sure no demon
@@ -569,6 +568,10 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   between universes. The second contact with the Anarukon happens, this time
   all going peacefully. Saya Miyamoto meets Xanai Kirin, their marriage brings
   forth an alliance between the humans and the Anarukon.
+- 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
+  reveals itself. It is defeated by a single man, one John A. Bortson III.
+- 2175: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
+  "those brats deserved it, they didn't know how to use a fucking chair lol".
 - 2181: An old man, who later reveals himself as Manakei, contacts Akari Labs
   with a request to be transported to Hell. After reaching the royal throne (or
   what was left of it), he pushes away the rotten corpse of the former prince
@@ -578,14 +581,14 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2193: Akari Labs completes the "Akari Project", resulting in humanity's first
   entry into FTL travel.
 - 2200: Earth joins the "United Aligned Worlds", bonds with the Nukuri are
-  re-established.
+  re-established, their technology adopted once again by all countries.
 - 2201: The UAC files for bankruptcy.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
-- 2250: The "Dark Alliance" is formed in the X'Animen system.
+- 2250: The "Dark Alliance" is formed within X'Animen Coalition territory.
 - 2267: Green's World Rebellion.
 - 2270: The Phayder Corporation is founded, attempts to replicate the
   immortality of the Nukuri race on humans through a nano-augmentation method
@@ -622,7 +625,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   begins.
 - 2917: Following ten confusing years of battle, Hiikya is defeated by Deneva
   Unissix, who sacrifices her own life in the final attack.
-- Indeterminate: In order to stop a massive Eldrich Abomination from corrupting
-  all of existence, the two Mishe brothers activate Vault 490. Although the
-  threat is defeated, major parts of the multiverse shatter in the process.
-  Project Abyss begins.
+
+- ????: In order to stop a massive Eldrich Abomination from corrupting all of
+  existence, the two Mishe brothers activate Vault 490. Although the threat is
+  defeated, major parts of the multiverse shatter in the process. Project Abyss
+  begins.

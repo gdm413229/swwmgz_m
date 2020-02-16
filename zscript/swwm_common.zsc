@@ -195,9 +195,17 @@ Class SWWMTradeHistory : Thinker
 }
 
 // Lore holder
+enum ELoreTab
+{
+	LORE_ITEM,
+	LORE_PEOPLE,
+	LORE_LORE	// lol
+};
+
 Class SWWMLore
 {
-	String tag, text;
+	String tag, text, assoc;
+	int tab;
 	bool read;
 }
 
@@ -207,26 +215,75 @@ Class SWWMLoreLibrary : Thinker
 	Array<SWWMLore> ent;
 	int lastaddtic;
 
-	void DirectAdd( String ref )
+	bool DirectAdd( String ref )
 	{
+		// restrictions
+		if ( !(gameinfo.gametype&GAME_Raven) )
+		{
+			if ( ref ~== "Doomslayer" ) return true;	// not witnessed
+		}
+		if ( !(gameinfo.gametype&GAME_Hexen) )
+		{
+			if ( ref ~== "Kirin" ) return true;	// not met
+		}
 		ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
+		String tab = String.Format("SWWM_LORETAB_%s",ref);
 		String text = String.Format("SWWM_LORETXT_%s",ref);
+		String assoc = String.Format("SWWM_LOREREL_%s",ref);
+		// redirects
+		if ( gameinfo.gametype&GAME_Raven )
+		{
+			if ( text ~== "SWWM_LORETXT_UAC" )
+				text = "SWWM_LORETXT_UAC2";	// uac ded
+			else if ( text ~== "SWWM_LORETXT_HELL" )
+				text = "SWWM_LORETXT_HELL2";	// invasion was a thing of the past
+		}
+		if ( gameinfo.gametype&GAME_Hexen )
+		{
+			if ( text ~== "SWWM_LORETXT_SAYA" )
+				text = "SWWM_LORETXT_SAYA2";	// married kirin
+			else if ( text ~== "SWWM_LORETXT_HELL2" )
+				text = "SWWM_LORETXT_HELL3";	// mention the return of manakei
+		}
 		// check that it's valid
-		if ( StringTable.Localize(tag,false) == tag ) return;
-		if ( StringTable.Localize(text,false) == text ) return;
+		if ( StringTable.Localize(tag,false) == tag ) return false;
+		if ( StringTable.Localize(tab,false) == tab ) return false;
+		if ( StringTable.Localize(text,false) == text ) return false;
 		// check if existing
 		for ( int i=0; i<ent.Size(); i++ )
 		{
 			if ( ent[i].tag != "$"..tag ) continue;
-			return;
+			return true;
 		}
-		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) )
-			Console.Printf(StringTable.Localize("$SWWM_NEWLORE"));
-		lastaddtic = gametic;
 		SWWMLore e = new("SWWMLore");
 		e.tag = "$"..tag;
+		if ( StringTable.Localize(e.tag) == "" )
+		{
+			Console.Printf("Entry \"%s\" has an empty tag.",ref);
+			return true;
+		}
+		String ttab = StringTable.Localize(tab,false);
+		if ( ttab ~== "People" ) e.tab = LORE_PEOPLE;
+		else if ( ttab ~== "Lore" ) e.tab = LORE_LORE;
+		else if ( ttab ~== "Item" ) e.tab = LORE_ITEM;
+		else
+		{
+			Console.Printf("Entry \"%s\" has an incorrect tab setting of \"%s\".",ref,ttab);
+			return true;
+		}
 		e.text = "$"..text;
+		if ( StringTable.Localize(e.text) == "" )
+		{
+			Console.Printf("Entry \"%s\" has empty text.",ref);
+			return true;
+		}
+		e.assoc = "$"..assoc;
+		e.read = false;
+		// "new lore" message
+		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) && (!menuactive || (menuactive == Menu.OnNoPause)) )
+			Console.Printf(StringTable.Localize("$SWWM_NEWLORE"));
+		lastaddtic = gametic;
 		// sorted add
 		String loca = StringTable.Localize(e.tag), locb;
 		int cpa, cpb;
@@ -235,17 +292,52 @@ Class SWWMLoreLibrary : Thinker
 			locb = StringTable.Localize(ent[i].tag);
 			if ( locb < loca ) continue;
 			ent.Insert(i,e);
-			return;
+			return true;
 		}
 		// append otherwise
 		ent.Push(e);
+		return true;
 	}
 
 	static void Add( PlayerInfo p, String ref )
 	{
-		let ll = Find(p);
-		if ( !ll ) return;
+		SWWMLoreLibrary ll = Find(p);
+		if ( !ll )
+		{
+			ll = new("SWWMLoreLibrary");
+			ll.ChangeStatNum(STAT_STATIC);
+			ll.myplayer = p;
+		}
 		ll.DirectAdd(ref);
+	}
+
+	void MarkRead( int idx )
+	{
+		if ( (idx < 0) || (idx >= ent.Size()) ) return;
+		if ( !ent[idx].read )
+		{
+			ent[idx].read = true;
+			// add associated entries
+			Array<String> rel;
+			rel.Clear();
+			String assocstr = StringTable.Localize(ent[idx].assoc);
+			assocstr.Split(rel,";",0);
+			for ( int i=0; i<rel.Size(); i++ )
+			{
+				if ( (rel[i] != "") && !DirectAdd(rel[i]) )
+					Console.Printf("Related entry \"%s\" not found, please update LANGUAGE.txt",rel[i]);
+			}
+		}
+	}
+
+	clearscope int FindEntry( String tag )
+	{
+		for ( int i=0; i<ent.Size(); i++ )
+		{
+			if ( ent[i].tag ~== tag )
+				return i;
+		}
+		return -1;
 	}
 
 	static clearscope SWWMLoreLibrary Find( PlayerInfo p )
@@ -1312,42 +1404,20 @@ Class SWWMHandler : EventHandler
 			l = new("SWWMLoreLibrary");
 			l.ChangeStatNum(Thinker.STAT_STATIC);
 			l.myplayer = p;
-			// pre-add some lore
-			l.DirectAdd("AkariLabs");
-			l.DirectAdd("Belt");
-			l.DirectAdd("Collar");
-			l.DirectAdd("Cyrus");
-			l.DirectAdd("Demolitionist");
-			l.DirectAdd("Display");
-			l.DirectAdd("DeepImpact");
-			l.DirectAdd("ExplodiumGun");
-			l.DirectAdd("Forx");
-			l.DirectAdd("Hammerspace");
-			l.DirectAdd("Ibuki");
-			l.DirectAdd("KnowledgeBase");
-			l.DirectAdd("Locke");
-			l.DirectAdd("Munch");
-			l.DirectAdd("Propulsor");
-			l.DirectAdd("Saya");
-			l.DirectAdd("Voicebox");
-			if ( gameinfo.gametype&GAME_Doom )
-			{
-				l.DirectAdd("Doomguy");
-				l.DirectAdd("Hell");
-				l.DirectAdd("UAC");
-			}
-			else if ( gameinfo.gametype&GAME_Heretic )
-			{
-				l.DirectAdd("Parthoris");
-				l.DirectAdd("SerpentRiders");
-				l.DirectAdd("Sidhe");
-			}
-			else if ( gameinfo.gametype&GAME_Hexen )
-			{
-				l.DirectAdd("Cronos");
-				l.DirectAdd("SerpentRiders");
-			}
 		}
+		// pre-add some entries to start with
+		l.DirectAdd("Demolitionist");
+		l.DirectAdd("KnowledgeBase");
+		l.DirectAdd("Saya");
+		l.DirectAdd("UAC");
+		if ( gameinfo.gametype&GAME_Raven )
+		{
+			l.DirectAdd("Parthoris");
+			l.DirectAdd("SerpentRiders");
+			l.DirectAdd("Sidhe");
+		}
+		if ( gameinfo.gametype&GAME_Hexen )
+			l.DirectAdd("Cronos");
 		SWWMStats s = SWWMStats.Find(p);
 		if ( !s )
 		{
@@ -1953,10 +2023,11 @@ Class SWWMHandler : EventHandler
 				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),amt,def.GetTag());
 			}
 		}
-		else if ( e.Name ~== "swwmmarkloreread" )
+		else if ( e.Name.Left(17) ~== "swwmmarkloreread." )
 		{
 			let l = SWWMLoreLibrary.Find(players[e.Args[0]]);
-			l.ent[e.Args[1]].read = true;
+			let idx = l.FindEntry(e.Name.Mid(17));
+			l.MarkRead(idx);
 		}
 		else if ( e.Name.Left(12) ~== "swwmuseitem." )
 		{

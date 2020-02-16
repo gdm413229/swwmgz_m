@@ -292,13 +292,6 @@ Class PusherWeapon : SWWMWeapon
 	transient ui TextureID WeaponBox, ChargeBar;
 	transient ui DynamicValueInterpolator ChargeInter;
 
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// additional lore
-		SWWMLoreLibrary.Add(other.player,"EngineTech");
-	}
-
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/PusherDisplay.png",TexMan.Type_Any);

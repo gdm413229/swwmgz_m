@@ -9,13 +9,6 @@ Class Spreadgun : SWWMWeapon
 	transient ui TextureID WeaponBox;
 	transient ui HUDFont mTewiFont;
 
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// additional lore
-		SWWMLoreLibrary.Add(other.player,"Blackmann");
-	}
-
 	override bool ReportHUDAmmo()
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};

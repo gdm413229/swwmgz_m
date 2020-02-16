@@ -281,13 +281,6 @@ Class ExplodiumGun : SWWMWeapon
 
 	Property ClipCount : ClipCount;
 
-	override Inventory CreateCopy( Actor other )
-	{
-		// additional lore
-		SWWMLoreLibrary.Add(other.player,"Munch");
-		return Super.CreateCopy(other);
-	}
-
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/ExplodiumDisplay.png",TexMan.Type_Any);

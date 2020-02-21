@@ -226,7 +226,7 @@ Class SWWMLoreLibrary : Thinker
 		{
 			if ( ref ~== "Kirin" ) return true;	// not met
 		}
-		ref.MakeUpper();
+		ref = ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
 		String tab = String.Format("SWWM_LORETAB_%s",ref);
 		String text = String.Format("SWWM_LORETXT_%s",ref);
@@ -238,6 +238,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_UAC2";	// uac ded
 			else if ( text ~== "SWWM_LORETXT_HELL" )
 				text = "SWWM_LORETXT_HELL2";	// invasion was a thing of the past
+			else if ( text ~== "SWWM_LORETXT_NANA" )
+				text = "SWWM_LORETXT_NANA2";	// demo met nana
 		}
 		if ( gameinfo.gametype&GAME_Hexen )
 		{
@@ -484,7 +486,7 @@ Class SWWMCombatTracker : Thinker
 		else mytag = "";
 		int newhealth = mytarget.Health;
 		if ( newhealth != lasthealth ) updated = level.maptime+35;
-		if ( mytarget.bISMONSTER || mytarget.player )
+		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
 			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) ) updated = level.maptime+70;
 			if ( mytarget.player ) updated = level.maptime+35;

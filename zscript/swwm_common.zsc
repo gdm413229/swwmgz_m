@@ -1175,6 +1175,36 @@ Class LastLine
 	int lineno;
 }
 
+// Korax instakill handler
+Class UglyBoyGetsFuckedUp : Thinker
+{
+	bool wedone;
+
+	override void Tick()
+	{
+		if ( wedone ) return;
+		if ( level.killed_monsters < level.total_monsters )
+		{
+			// stop portal door
+			int sidx = level.CreateSectorTagIterator(145).Next();
+			if ( sidx == -1 ) return;
+			Sector door = level.Sectors[sidx];
+			let ti = ThinkerIterator.Create("SectorEffect");
+			SectorEffect se;
+			while ( se = SectorEffect(ti.Next()) )
+			{
+				if ( se.GetSector() != door ) continue;
+				se.Destroy();
+				door.StopSoundSequence(CHAN_VOICE);
+			}
+			return;
+		}
+		wedone = true;
+		level.ExecuteSpecial(Door_Open,null,null,false,145,8);
+		Destroy();
+	}
+}
+
 // Handler responsible for item replacements and whatever else
 Class SWWMHandler : EventHandler
 {
@@ -1566,6 +1596,14 @@ Class SWWMHandler : EventHandler
 			lastcombat = AddOneliner("fightstart",1,10);
 	}
 
+	private bool HexenMap40()
+	{
+		if ( level.GetChecksum() ~== "2A6C4235B942467D25FD50D5B313E67A" ) return true;	// 1.1
+		if ( level.GetChecksum() ~== "1C5DE5A921DEE405E98E7E09D9829387" ) return true;	// 1.0
+		if ( level.GetChecksum() ~== "EFAFE59092DE5E613562ACF52B86C37F" ) return true;	// beta
+		return false;
+	}
+
 	override void WorldThingDied( WorldEvent e )
 	{
 		if ( (e.Thing.default.bBOSS && !Random[GoldDrop](0,2)) || (e.Thing.default.bBOSSDEATH && !Random[GoldDrop](0,6)) )
@@ -1574,6 +1612,27 @@ Class SWWMHandler : EventHandler
 			double ang = FRandom[SpareShells](0,360);
 			g.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](.4,.8);
 			g.vel.z = FRandom[SpareShells](2.,4.);
+		}
+		// Korax instakill
+		if ( (e.Thing is 'Korax') && !e.Thing.special2 && HexenMap40() )
+		{
+			e.Thing.special2 = 1;
+			// terminate the monster closet scripts, open all the
+			// doors ourselves
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,220);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,220);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,221);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,255);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,10,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,11,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,12,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,13,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,14,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,10,16);
+			// keep the portal closed, you can't leave unless you
+			// kill everyone else
+			let t = new("UglyBoyGetsFuckedUp");
+			t.ChangeStatNum(Thinker.STAT_USER);
 		}
 	}
 

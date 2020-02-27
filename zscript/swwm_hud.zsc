@@ -44,7 +44,8 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override void FlushNotify()
 	{
-		if ( level.maptime <= 1 )		{
+		if ( level.maptime <= 1 )
+		{
 			// flush ALL messages
 			MainQueue.Clear();
 			PickupQueue.Clear();
@@ -157,7 +158,8 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private bool CmpInterest( SWWMInterest a, SWWMInterest b )
 	{
-		return a.type < b.type;	}
+		return a.type < b.type;
+	}
 
 	private bool CmpDist( Vector3 a, Vector3 b )
 	{
@@ -222,13 +224,15 @@ Class SWWMStatusBar : BaseStatusBar
 		targets.Clear();
 		let ti = ThinkerIterator.Create("SWWMCombatTracker",Thinker.STAT_USER);
 		SWWMCombatTracker ct;
+		int extratime = 35;
+		if ( CPlayer.mo.FindInventory("Omnisight") ) extratime += 105;
 		while ( ct = SWWMCombatTracker(ti.Next()) )
 		{
 			if ( !targetter.GetBool() ) break;
 			// ignore player unless chasecamming
 			if ( (ct.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 			if ( ct.myplayer && deathmatch ) continue;	// no players in dm
-			if ( level.maptime > ct.updated+35 ) continue;
+			if ( level.maptime > ct.updated+extratime ) continue;
 			targets.Push(ct);
 		}
 		// sort by distance (give priority to players)
@@ -353,9 +357,10 @@ Class SWWMStatusBar : BaseStatusBar
 		proj.Reorient(ViewPos,ViewRot);
 		proj.BeginProjection();
 		Vector3 vdir = (cos(ViewRot.x)*cos(ViewRot.y),sin(ViewRot.x)*cos(ViewRot.y),-sin(ViewRot.y));
+		bool thesight = !!CPlayer.mo.FindInventory("Omnisight");
 		// points of interest
 		String tag;
-		if ( CPlayer.mo.FindInventory("Omnisight") )
+		if ( thesight )
 		{
 			for ( int i=0; i<interesting.Size(); i++ )
 			{
@@ -385,7 +390,9 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !proj.IsInFront() ) continue;
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			tag = targets[i].mytag;
-			double alph = ((targets[i].updated+35)-level.maptime)/35.;
+			int mtime = 35;
+			if ( thesight && (targets[i].lasthealth > 0) ) mtime += 105;
+			double alph = clamp(((targets[i].updated+mtime)-level.maptime)/35.,0.,1.);
 			Vector2 barsiz = TexMan.GetScaledSize(EnemyBTex);
 			barsiz.x *= hs.x;
 			barsiz.y *= hs.y;

@@ -340,7 +340,7 @@ Class Demolitionist : PlayerPawn
 		lastground = player.onground;
 		lastvelz = prevvelz;
 		prevvelz = vel.z;
-		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat||(player.cheats&CF_NOCLIP2)))||InStateSequence(CurState,FindState("Dash")));
+		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat&&!(player.cheats&CF_NOCLIP2)))||InStateSequence(CurState,FindState("Dash")));
 		fuelcooldown = max(0,fuelcooldown-1);
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
@@ -437,7 +437,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override void CheckPitch()
 	{
-		if ( (waterlevel < 2) && (bFly || bFlyCheat || (player.cheats&CF_NOCLIP2)) )
+		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
 			return;	// handled in moveplayer
 		Super.CheckPitch();
 	}
@@ -473,7 +473,7 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.forwardmove = player.cmd.sidemove = 0;
-		if ( (waterlevel < 2) && (bFly || bFlyCheat) )
+		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
 		{
 			player.onground = false;
 			if ( player.turnticks )

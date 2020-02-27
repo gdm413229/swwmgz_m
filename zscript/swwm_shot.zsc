@@ -302,6 +302,7 @@ Class Spreadgun : SWWMWeapon
 {
 	bool fired;	// shell was used
 	Class<Ammo> loadammo, nextammo;	// currently loaded shell, next shell to load
+	double srecoil;
 
 	transient ui TextureID WeaponBox, AmmoIcon[7], LoadedIcon[7];
 	transient ui Font TewiFont;
@@ -582,6 +583,8 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
 				}
+				A_Recoil(2.);
+				invoker.srecoil = -.8;
 				break;
 			case 2:
 				Console.Printf("\cg// TODO Dragon's Breath\c-");
@@ -636,6 +639,8 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
+				A_Recoil(1.4);
+				invoker.srecoil = -.5;
 				break;
 			}
 			break;
@@ -786,7 +791,9 @@ Class Spreadgun : SWWMWeapon
 			A_FireShell();
 			return ResolveState(null);
 		}
-		XZW2 RSTU 1;
+		XZW2 RS 1;
+		XZW2 T 1 A_Recoil(invoker.srecoil);
+		XZW2 U 1;
 		XZW2 VWXY 2;
 		Goto ReadyFired;
 	AltFire:

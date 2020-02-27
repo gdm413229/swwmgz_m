@@ -22,7 +22,7 @@ Class PusherImpact : Actor
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
-			Vector3 pvel = (-x+(FRandom[Pusher](-.8,.8),FRandom[Pusher](-.8,.8),FRandom[Pusher](-.8,.8))).unit()*FRandom[Pusher](.1,1.2);
+			Vector3 pvel = (x+(FRandom[Pusher](-.8,.8),FRandom[Pusher](-.8,.8),FRandom[Pusher](-.8,.8))).unit()*FRandom[Pusher](.1,1.2);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[Pusher](128,192));

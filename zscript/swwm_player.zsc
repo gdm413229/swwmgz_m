@@ -1,7 +1,7 @@
 // The Demolitionist
 Class Demolitionist : PlayerPawn
 {
-	int last_jump_held;
+	int last_jump_held, last_boost;
 	Vector3 dashdir;
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
@@ -225,6 +225,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
+		if ( mod == 'Jump' ) return StringTable.Localize("$O_JUMP");
 		if ( mod == 'Dash' ) return StringTable.Localize("$O_DASH");
 		if ( mod == 'GroundPound' ) return StringTable.Localize("$O_POUND");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
@@ -275,6 +276,7 @@ Class Demolitionist : PlayerPawn
 		{
 			A_AlertMonsters(800);
 			dashboost *= (player.cmd.buttons&BT_JUMP)?.9:.4;
+			last_boost = level.maptime+1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
@@ -531,6 +533,19 @@ Class Demolitionist : PlayerPawn
 		else
 		{
 			Super.MovePlayer();
+			// override air control because we REALLY need the extra mobility
+			if ( !player.onground && !bNOGRAVITY && (waterlevel < 2) )
+			{
+				double fs = TweakSpeeds(1.,0.);
+				fs *= max(abs(player.cmd.forwardmove/12800.),abs(player.cmd.sidemove/10240.));
+				if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
+				Vector3 accel = (RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle),0);
+				accel *= fs/960.;
+				double spd = vel.length();
+				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
+				else vel = vel+accel/TICRATE;
+				player.jumptics = -2;
+			}
 			if ( abs(roll) > 0. ) roll += clamp(deltaangle(roll,0),-3.,3.);
 		}
 		guideangle *= .9;
@@ -568,7 +583,7 @@ Class Demolitionist : PlayerPawn
 				player.cheats &= ~CF_REVERTPLEASE;
 				player.camera = player.mo;
 			}
-			vel *= 0;
+			vel.z += clamp(-vel.z*.4,0.,30.);
 			player.jumptics = -1;
 			SetStateLabel("Dash");
 			A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
@@ -578,8 +593,53 @@ Class Demolitionist : PlayerPawn
 	override void CheckJump()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
-		bool walljump = LineTrace(angle-180,Radius*2,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,height*.2);
-		bool wallclimb = LineTrace(angle,Radius*2,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,height*.2);
+		Vector2 walldir = (cos(angle),sin(angle));
+		bool walljump = false, wallclimb = false;
+		FLineTraceData d;
+		Actor jumpactor = null;
+		for ( int i=-4; i<int(height*.8); i++ )
+		{
+			if ( !wallclimb )
+			{
+				for ( int k=0; k<30; k+=10 )
+				{
+					for ( int j=-1; j<=1; j+=2 )
+					{
+						double ang = angle+k*j;
+						wallclimb = LineTrace(ang,Radius+12,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,i,data:d);
+						if ( wallclimb )
+						{
+							jumpactor = d.HitActor;
+							walldir = (walldir*.7+(cos(ang),sin(ang))*.3);
+							break;
+						}
+					}
+					if ( wallclimb ) break;
+				}
+				if ( wallclimb ) break;
+			}
+			if ( wallclimb ) break;
+			if ( !walljump )
+			{
+				for ( int k=0; k<60; k+=10 )
+				{
+					for ( int j=-1; j<=1; j+=2 )
+					{
+						double ang = (angle-180)+k*j;
+						walljump = LineTrace(ang,Radius+12,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,i,data:d);
+						if ( walljump )
+						{
+							jumpactor = d.HitActor;
+							walldir = (walldir*.7+(cos(ang+180),sin(ang+180))*.3);
+							break;
+						}
+					}
+					if ( walljump ) break;
+				}
+				if ( walljump ) break;
+			}
+			if ( walljump ) break;
+		}
 		if ( player.cmd.buttons&BT_JUMP )
 		{
 			if ( player.crouchoffset ) player.crouching = 1;
@@ -590,6 +650,7 @@ Class Demolitionist : PlayerPawn
 				&& ((player.onground && (player.jumptics == 0))
 				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
 			{
+				if ( !player.onground && (level.maptime < last_boost+8) ) return;
 				double jumpvelz = JumpZ*35./TICRATE;
 				double jumpfac = 0;
 				for ( let p=Inv; p; p=p.Inv )
@@ -603,21 +664,27 @@ Class Demolitionist : PlayerPawn
 				}
 				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
 				double pvelz = vel.z;
-				if ( !player.onground )
+				if ( !player.onground && !(player.cheats&CF_PREDICTING) )
 				{
 					// check for wall stuff
 					if ( walljump )
 					{
-						vel.z = max(-abs(vel.z)*.1,vel.z);
-						vel.z += jumpvelz;
-						vel.xy = (cos(angle),sin(angle))*20*Speed;
+						if ( vel.z < 10. )
+							vel.z += jumpvelz+clamp(-pvelz*.6,0.,30.);
+						vel.xy += walldir*20*Speed;
 					}
 					else if ( wallclimb )
 					{
-						vel.z = max(-abs(vel.z)*.1,vel.z);
-						vel.z += jumpvelz;
-						vel.xy = (cos(angle),sin(angle))*5*Speed;
+						if ( vel.z < 10. )
+							vel.z += jumpvelz+clamp(-pvelz*.8,0.,30.);
+						vel.xy += walldir*5*Speed;
 					}
+					if ( jumpactor && jumpactor.bSHOOTABLE )
+					{
+						SWWMHandler.DoKnockback(jumpactor,(-walldir,0),12000);
+						jumpactor.DamageMobj(self,self,10,'Jump');
+					}
+					if ( walljump || wallclimb ) A_StartSound("demolitionist/kick",CHAN_FOOTSTEP,CHANF_OVERLAP);
 				}
 				bOnMobj = false;
 				player.jumpTics = -1;
@@ -627,16 +694,19 @@ Class Demolitionist : PlayerPawn
 				{
 					dashboost = 3.;
 					boostcooldown = 20;
-					vel.z += jumpvelz+clamp(-pvelz,0.,30.);
+					if ( vel.z < 10. )
+						vel.z += jumpvelz+clamp(-pvelz*.4,0.,30.);
 					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 					mystats.boostcount++;
 				}
 				else
 				{
 					dashboost = 0.;
-					vel.z += jumpvelz*1.25;
+					if ( vel.z < 10. )
+						vel.z += jumpvelz*1.25;
 				}
 				SetStateLabel("Jump");
+				if ( !player.onground ) last_boost = level.maptime+1;
 			}
 			last_jump_held = level.maptime+1;
 		}
@@ -819,6 +889,7 @@ Class Demolitionist : PlayerPawn
 	}
 	void A_DemoScream()
 	{
+		A_StopSound(CHAN_DEMOVOICE);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		A_PlayerScream();
@@ -828,7 +899,6 @@ Class Demolitionist : PlayerPawn
 	override bool OnGiveSecret( bool printmsg, bool playsound )
 	{
 		if ( !player ) return false;
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		int score = 500;
 		// last secret (this is called before counting it up, so have to subtract)
 		if ( level.found_secrets == level.total_secrets-1 )
@@ -837,7 +907,7 @@ Class Demolitionist : PlayerPawn
 			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
 		}
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
-		if ( CheckLocalView() && (mute.GetInt() < 2) ) SWWMHandler.AddOneliner("findsecret",40);
+		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);
 		SWWMCredits.Give(player,score);
 		return true;
 	}
@@ -847,9 +917,8 @@ Class Demolitionist : PlayerPawn
 		if ( !player ) return;
 		// add lore if any
 		SWWMLoreLibrary.Add(player,item.GetClassName());
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		if ( (item is 'Weapon') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() && (mute.GetInt() < 2) )
-			SWWMHandler.AddOneliner("getweapon");
+		if ( (item is 'Weapon') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
+			SWWMHandler.AddOneliner("getweapon",2);
 		if ( (item is 'Key') && !key_reentrant )
 		{
 			// score
@@ -871,15 +940,14 @@ Class Demolitionist : PlayerPawn
 	override bool UseInventory( Inventory item )
 	{
 		if ( !player ) return Super.UseInventory(item);
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		bool res = Super.UseInventory(item);
 		if ( CheckLocalView() )
 		{
 			if ( !res && !(item is 'Weapon') ) A_StartSound("menu/noinvuse",CHAN_ITEM);
-			if ( (item is 'PuzzleItem') && (mute.GetInt() < 2) )
+			if ( item is 'PuzzleItem' )
 			{
-				if ( res ) SWWMHandler.AddOneliner("puzzsucc",10);
-				else SWWMHandler.AddOneliner("puzzfail",20);
+				if ( res ) SWWMHandler.AddOneliner("puzzsucc",2,10);
+				else SWWMHandler.AddOneliner("puzzfail",2,20);
 			}
 		}
 		return res;
@@ -902,9 +970,11 @@ Class Demolitionist : PlayerPawn
 	override bool Used( Actor user )
 	{
 		if ( !(user is 'Demolitionist') || !user.player ) return false;
-		CVar othermute = CVar.GetCVar('swwm_mutevoice',user.player);
-		if ( (user.player == players[consoleplayer]) && (othermute.GetInt() < 2) )
-			SWWMHandler.AddOneliner("greet");
+		if ( (user.player == players[consoleplayer]) && (health > 0) )
+		{
+			SWWMHandler.AddOneliner("greet",2);
+			return true;
+		}
 		return false;
 	}
 	States

@@ -252,7 +252,7 @@ Class PusherProjectile : Actor
 	{
 		if ( target == lasthit ) return 0;
 		lasthit = target;
-		if ( target.bNOBLOOD ) A_StartSound("pusher/althit",CHAN_WEAPON,CHANF_OVERLAP);
+		if ( target.bNOBLOOD || target.bINVULNERABLE ) A_StartSound("pusher/althit",CHAN_WEAPON,CHANF_OVERLAP);
 		else A_StartSound("pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
 		target.A_QuakeEx(6,6,6,10,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.7);
 		SWWMHandler.DoKnockback(target,vel.unit(),85000);
@@ -339,7 +339,7 @@ Class PusherWeapon : SWWMWeapon
 				SWWMHandler.DoKnockback(d.HitActor,d.HitDir,8500);
 				d.HitActor.A_QuakeEx(4,4,4,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.1);
 				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Tenderize',DMG_THRUSTLESS);
-				if ( d.HitActor.bNOBLOOD )
+				if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
 				{
 					let p = Spawn("PusherImpact",d.HitLocation-d.HitDir*4);
 					p.angle = atan2(-d.HitDir.y,-d.HitDir.x);
@@ -421,7 +421,7 @@ Class PusherWeapon : SWWMWeapon
 				SWWMHandler.DoKnockback(d.HitActor,d.HitDir,85000);
 				d.HitActor.A_QuakeEx(9,9,9,15,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.1);
 				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Tenderize',DMG_THRUSTLESS);
-				if ( d.HitActor.bNOBLOOD )
+				if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
 				{
 					let p = Spawn("BigPusherImpact",d.HitLocation-d.HitDir*4);
 					p.angle = atan2(-d.HitDir.y,-d.HitDir.x);

@@ -515,6 +515,7 @@ Class SWWMOneLiner : HUDMessageBase
 
 	override bool Tick()
 	{
+		if ( players[consoleplayer].Health <= 0 ) curtime = int.min;
 		curtime--;
 		return (curtime<-20);
 	}
@@ -818,6 +819,7 @@ Class SWWMChip : Actor
 		+INTERPOLATEANGLES;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
 		BounceType "Doom";
 		BounceFactor 0.3;
 		Gravity 0.35;
@@ -1019,14 +1021,14 @@ Class SWWMBulletTrail : LineTracer
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
-			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[0].hitpos);
+			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
 			b.A_CheckTerrain();
 		}
 		for ( int i=5; i<t.Results.Distance; i+=10 )
 		{
 			if ( !Random[Boolet](0,bubblechance) ) continue;
 			let b = Actor.Spawn(smoky?"SWWMSmallSmoke":"SWWMBubble",level.Vec3Offset(pos,dir*i));
-			b.Scale *= FRandom[Boolet](0.4,0.6);
+			b.Scale *= FRandom[Boolet](.4,.6);
 		}
 		t.Destroy();
 	}
@@ -1177,7 +1179,7 @@ Class LastLine
 Class SWWMHandler : EventHandler
 {
 	transient String oneliner, onelinersnd;
-	transient int onelinertic, onelinerspan;
+	transient int onelinertic, onelinerspan, onelinerlevel;
 	transient int lastlock, lastcombat;
 	transient Array<Actor> combatactors;
 	transient Array<Int> combattics;
@@ -1192,25 +1194,40 @@ Class SWWMHandler : EventHandler
 
 	transient CVar mutevoice;
 
-	static int AddOneliner( String type, int delay = 5 )
+	static int AddOneliner( String type, int level, int delay = 5 )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return 0;
-		CVar voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]);
+		String voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]).GetString();
 		// suppress non-rage comments when ragekit is active, only screaming allowed
-		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) ) return 0;
+		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
 		int whichline;
 		int countem = 0, i = 1;
 		String testme, locme;
 		do
 		{
-			testme = String.Format("SWWM_SUBS_%s_%s%d",voicetype.GetString().MakeUpper(),type.MakeUpper(),i);
+			testme = String.Format("SWWM_SUBS_%s_%s%d",voicetype.MakeUpper(),type.MakeUpper(),i);
 			locme = StringTable.Localize(testme,false);
 			if ( testme != locme ) countem++;
 			i++;
 		}
 		while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
-		if ( countem == 0 ) return 0;
+		if ( countem == 0 )
+		{
+			if ( voicetype ~== "default" ) return 0;
+			// retry with the default voicetype
+			voicetype = "default";
+			i = 1;
+			do
+			{
+				testme = String.Format("SWWM_SUBS_DEFAULT_%s%d",type.MakeUpper(),i);
+				locme = StringTable.Localize(testme,false);
+				if ( testme != locme ) countem++;
+				i++;
+			}
+			while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
+			if ( countem == 0 ) return 0;
+		}
 		// check last line so we don't repeat
 		int last = 0, ent;
 		for ( int i=0; i<hnd.lastlines.Size(); i++ )
@@ -1234,10 +1251,11 @@ Class SWWMHandler : EventHandler
 			lst.lineno = whichline;
 			hnd.lastlines.Push(lst);
 		}
-		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.GetString().MakeUpper(),type.MakeUpper(),whichline);
-		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype.GetString(),type,whichline);
+		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.MakeUpper(),type.MakeUpper(),whichline);
+		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype,type,whichline);
 		hnd.onelinertic = gametic+delay;
 		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*Thinker.TICRATE);
+		hnd.onelinerlevel = level;
 		return hnd.onelinertic+hnd.onelinerspan;
 	}
 
@@ -1325,8 +1343,8 @@ Class SWWMHandler : EventHandler
 	override void WorldLoaded( WorldEvent e )
 	{
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
-		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) && (mutevoice.GetInt() < 3) )
-			AddOneliner("mapstart");
+		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
+			AddOneliner("mapstart",3);
 		if ( !e.IsSaveGame && !e.IsReopen )
 		{
 			// for skipping over merged exit lines (sharing vertices)
@@ -1467,7 +1485,11 @@ Class SWWMHandler : EventHandler
 		if ( onelinertic && (onelinertic < gametic) )
 		{
 			if ( players[consoleplayer].health > 0 )
-				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
+			{
+				if ( onelinerlevel > mutevoice.GetInt() )
+					players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
+				SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
+			}
 			onelinertic = 0;
 			onelinerspan = 0;
 		}
@@ -1540,8 +1562,8 @@ Class SWWMHandler : EventHandler
 				enteredcombat = true;
 			}
 		}
-		if ( enteredcombat && (!highesttic || (gametic > highesttic+100)) && (mutevoice.GetInt() < 1) )
-			lastcombat = AddOneliner("fightstart",10);
+		if ( enteredcombat && (!highesttic || (gametic > highesttic+100)) )
+			lastcombat = AddOneliner("fightstart",1,10);
 	}
 
 	override void WorldThingDied( WorldEvent e )
@@ -1557,7 +1579,6 @@ Class SWWMHandler : EventHandler
 
 	override void WorldThingDamaged( WorldEvent e )
 	{
-		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( e.Damage > 0 )
 			SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED);
 		if ( e.Thing.player )
@@ -1577,8 +1598,8 @@ Class SWWMHandler : EventHandler
 		{
 			if ( (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
 			{
-				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-					lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",15);
+				if ( !lastcombat || (gametic > lastcombat+20) )
+					lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",1,15);
 				highesttic = gametic;
 			}
 			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
@@ -1586,8 +1607,8 @@ Class SWWMHandler : EventHandler
 				// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
 				if ( e.Thing.IsFriend(e.DamageSource) && !(e.Thing is 'LampMoth') )
 				{
-					if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-						lastcombat = AddOneliner("hitfriend",15);
+					if ( !lastcombat || (gametic > lastcombat+20) )
+						lastcombat = AddOneliner("hitfriend",1,15);
 					highesttic = gametic;
 				}
 			}
@@ -1606,8 +1627,8 @@ Class SWWMHandler : EventHandler
 			if ( e.DamageSource == players[consoleplayer].mo )
 			{
 				highesttic = gametic;
-				if ( (!lastcombat || (gametic > lastcombat+20)) && (mutevoice.GetInt() < 1) )
-					lastcombat = AddOneliner("scorekill",15);
+				if ( !lastcombat || (gametic > lastcombat+20) )
+					lastcombat = AddOneliner("scorekill",1,15);
 			}
 			if ( !e.Thing.default.bCountKill )	// no credits
 				return;
@@ -1621,7 +1642,7 @@ Class SWWMHandler : EventHandler
 			// scoring
 			int score = min(2000,int(ceil(e.Thing.SpawnHealth()*.5)*10));
 			int ofs = 0;
-			if ( e.Thing.Health <= e.Thing.GetGibHealth() )
+			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH)) && !e.DamageSource.bNOEXTREMEDEATH && !(e.Inflictor && e.Inflictor.bNOEXTREMEDEATH) )
 			{
 				score = int(score*1.25);
 				if ( e.DamageSource.player == players[consoleplayer] )
@@ -1640,7 +1661,7 @@ Class SWWMHandler : EventHandler
 			{
 				score += 10000;
 				if ( e.DamageSource.player == players[consoleplayer] )
-					SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",++ofs);
+					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",++ofs);
 			}
 			SWWMCredits.Give(e.DamageSource.player,score);
 			if ( e.DamageSource.player == players[consoleplayer] )
@@ -1702,6 +1723,7 @@ Class SWWMHandler : EventHandler
 		{
 			let l = SWWMOneLiner.Make(oneliner,onelinerspan);
 			StatusBar.AttachMessage(l,-3473);
+			SendNetworkEvent("swwmremotelinertxt."..oneliner,consoleplayer,onelinerlevel);
 		}
 		for ( int i=0; i<flashes.size(); i++ )
 		{
@@ -1738,8 +1760,8 @@ Class SWWMHandler : EventHandler
 		if ( !locknum  ) return;
 		if ( e.Thing.CheckLocalView() && !e.Thing.CheckKeys(locknum,false,true) )
 		{
-			if ( (!lastlock || (gametic > lastlock+20)) && (mutevoice.GetInt() < 2) )
-				lastlock = AddOneliner("locked");
+			if ( !lastlock || (gametic > lastlock+20) )
+				lastlock = AddOneliner("locked",2);
 		}
 	}
 
@@ -2066,25 +2088,40 @@ Class SWWMHandler : EventHandler
 		else if ( e.Name ~== "swwmkoraxline" )
 		{
 			if ( consoleplayer != e.Args[1] ) return;
-			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= 3 ) return;
 			switch ( e.Args[0] )
 			{
 			case 0:
-				AddOneliner("koraxgreet",60);
+				AddOneliner("koraxgreet",3,60);
 				break;
 			case 1:
-				AddOneliner("koraxblood",150);
+				AddOneliner("koraxblood",3,150);
 				break;
 			case 2:
-				AddOneliner("koraxgame",120);
+				AddOneliner("koraxgame",3,120);
 				break;
 			case 3:
-				AddOneliner("koraxworship",80);
+				AddOneliner("koraxworship",3,80);
 				break;
 			case 4:
-				AddOneliner("koraxmasters",90);
+				AddOneliner("koraxmasters",3,90);
 				break;
 			}
+		}
+		else if ( e.Name.Left(16) ~== "swwmremoteliner." )
+		{
+			if ( consoleplayer == e.Args[0] ) return;
+			if ( !CVar.GetCVar('swwm_othervoice',players[consoleplayer]).GetBool() ) return;
+			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= e.Args[1] ) return;
+			players[e.Args[0]].mo.A_StartSound(e.Name.Mid(16),CHAN_DEMOVOICE,attenuation:.5);
+		}
+		else if ( e.Name.Left(19) ~== "swwmremotelinertxt." )
+		{
+			if ( consoleplayer == e.Args[0] ) return;
+			if ( !CVar.GetCVar('swwm_othervoice',players[consoleplayer]).GetBool() ) return;
+			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= e.Args[1] ) return;
+			double dist = players[consoleplayer].Camera.Distance3D(players[e.Args[0]].mo);
+			if ( dist < 2000 )
+				Console.Printf("\cx%s\cx: %s\c-",players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(19)));
 		}
 	}
 

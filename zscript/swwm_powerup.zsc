@@ -576,7 +576,7 @@ Class RagekitPower : Powerup
 		Super.InitEffect();
 		if ( !Owner ) return;
 		if ( Owner.player == players[consoleplayer] )
-			lastrage = SWWMHandler.AddOneliner("ragekit",20);
+			lastrage = SWWMHandler.AddOneliner("ragekit",2,20);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
@@ -596,7 +596,7 @@ Class RagekitPower : Powerup
 		{
 			SWWMHandler.DoFlash(Owner,Color(16,255,0,0),5);
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
-				lastrage = SWWMHandler.AddOneliner("ragekit",5);
+				lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 		}
 	}
@@ -619,7 +619,7 @@ Class RagekitPower : Powerup
 				SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
 				Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 				if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )
-					lastrage = SWWMHandler.AddOneliner("ragekit",5);
+					lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
 				Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
 				lasteffect = level.maptime;
 			}
@@ -747,6 +747,12 @@ Class LampMoth : Actor
 		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOPING,.02,4.,FRandom[Moth](.8,1.2));
 		if ( master && master.player ) SetFriendPlayer(master.player);
 		else bFRIENDLY = false;
+	}
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		// no hurt moff
+		if ( source && IsFriend(source) ) damage = 0;
+		return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 	}
 	bool isEntranced()
 	{
@@ -880,7 +886,7 @@ Class LampMoth : Actor
 			A_FaceTarget(0,0);
 			lifespan -= 5;
 			Vector3 awaydir = level.Vec3Diff(target.Vec3Offset(0,0,target.height),pos).unit();
-			vel += awaydir*32.;
+			vel += awaydir*8.;
 			int dmg = target.DamageMobj(self,self,GetMissileDamage(0,0),'Melee',Random[Moth](0,8)?DMG_NO_PAIN:0);
 			if ( !target.bNOBLOOD )
 			{
@@ -1003,6 +1009,7 @@ Class CompanionLamp : Actor
 {
 	Vector3 Trail;
 	Array<LampMoth> moff;
+	Actor parent;
 
 	Default
 	{
@@ -1046,7 +1053,7 @@ Class CompanionLamp : Actor
 		}
 		let s = Spawn("SWWMSmallSmoke",m.pos);
 		s.alpha *= .3;
-		m.master = target;
+		m.master = parent;
 		m.lamp = self;
 		m.trail = m.pos;
 		moff.Push(m);
@@ -1054,7 +1061,7 @@ Class CompanionLamp : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		if ( !target || !SWWMLamp(master) )
+		if ( !parent || !SWWMLamp(master) )
 		{
 			Destroy();
 			return;
@@ -1080,7 +1087,7 @@ Class CompanionLamp : Actor
 	override void Tick()
 	{
 		Super.Tick();
-		if ( !target || !SWWMLamp(master) )
+		if ( !parent || !SWWMLamp(master) )
 		{
 			Destroy();
 			return;
@@ -1092,8 +1099,8 @@ Class CompanionLamp : Actor
 		{
 			for ( int j=1; j>=-1; j-=2 )
 			{
-				double ang = (target.angle-180)+i*j;
-				Vector3 testpos = level.Vec3Offset(target.pos,(cos(ang)*32,sin(ang)*32,target.height-8+1.5*sin(level.maptime*3.)));
+				double ang = (parent.angle-180)+i*j;
+				Vector3 testpos = level.Vec3Offset(parent.pos,(cos(ang)*32,sin(ang)*32,parent.height-8+1.5*sin(level.maptime*3.)));
 				if ( !level.IsPointInLevel(testpos) ) continue;
 				Vector3 oldpos = pos;
 				Vector3 oldprev = prev;
@@ -1123,19 +1130,19 @@ Class CompanionLamp : Actor
 			// check at most for a 45 degree offset
 			if ( foundspot && (i > 45) ) break;
 		}
-		Vector3 diff = level.Vec3Diff(pos,target.pos);
+		Vector3 diff = level.Vec3Diff(pos,parent.pos);
 		if ( diff.length() > 400 )
 		{
 			Actor f = Spawn("SWWMItemFog",pos);
 			f.A_StartSound("lamp/disappear",CHAN_VOICE);
 			SetOrigin(trail,false);
-			angle = AngleTo(target);
+			angle = AngleTo(parent);
 			vel *= 0.;
 			f = Spawn("SWWMItemFog",pos);
 			f.A_StartSound("lamp/appear",CHAN_VOICE);
 			return;
 		}
-		angle += Clamp(deltaangle(angle,AngleTo(target)),-5.,5.);
+		angle += Clamp(deltaangle(angle,AngleTo(parent)),-5.,5.);
 		vel *= .8;
 		bool blocked = false;
 		if ( BlockingLine && BlockingLineIsBlocking() )
@@ -1174,7 +1181,7 @@ Class CompanionLamp : Actor
 			vel += 4.*normal;
 			blocked = true;
 		}
-		if ( (diff.x > -16) && (diff.x < 16) && (diff.y > -16) && (diff.y < 16) && (diff.z > -16) && (diff.z < target.height+8) )
+		if ( (diff.x > -16) && (diff.x < 16) && (diff.y > -16) && (diff.y < 16) && (diff.z > -16) && (diff.z < parent.height+8) )
 		{
 			if ( diff.x < 0 ) vel.x -= .2;
 			else vel.x += .2;
@@ -1277,7 +1284,7 @@ Class SWWMLamp : Inventory
 		if ( !thelamp )
 		{
 			thelamp = Spawn("CompanionLamp",Owner.Vec3Offset(cos(Owner.angle)*20,sin(Owner.angle)*20,24));
-			thelamp.target = Owner;
+			CompanionLamp(thelamp).parent = Owner;
 			thelamp.master = self;
 			let f = Spawn("SWWMItemFog",thelamp.pos);
 			f.A_StartSound("lamp/appear",CHAN_VOICE);

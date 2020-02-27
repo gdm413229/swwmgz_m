@@ -269,9 +269,8 @@ Class SWWMCasing : Actor abstract
 	Death:
 		#### # -1
 		{
-			pitch = 0;
+			pitch = roll = 0;
 			angle = FRandom[Junk](0,360);
-			roll = FRandom[Junk](0,360);
 		}
 		Stop;
 	}
@@ -470,7 +469,7 @@ Class SWWMWeapon : Weapon abstract
 			invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
-			if ( !d.HitActor.bNOBLOOD )
+			if ( !d.HitActor.bNOBLOOD && !d.HitActor.bINVULNERABLE )
 			{
 				d.HitActor.TraceBleed(dmg,invoker);
 				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
@@ -530,6 +529,14 @@ Class SWWMWeapon : Weapon abstract
 	virtual clearscope bool UsesAmmo( Class<Ammo> kind )
 	{
 		return (AmmoType1&&(kind is AmmoType1))||(AmmoType2&&(kind is AmmoType2));
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		if ( (AmmoGive1 <= 0) && (default.AmmoGive1 > 0) )
+			AmmoGive1 = 1;
+		if ( (AmmoGive2 <= 0) && (default.AmmoGive2 > 0) )
+			AmmoGive2 = 1;
 	}
 	Default
 	{

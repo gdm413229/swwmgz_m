@@ -1,6 +1,303 @@
 // Blackmann "Rhino Stopper" Spreadgun (from Instant Action 3, also planned for Zanaveth Ultra Suite 2)
 // Slot 3, replaces Shotgun, Ethereal Crossbow, Serpent Staff
 
+Class RedShellCasing : SWWMCasing
+{
+	Default
+	{
+		BounceSound "spreadgun/casing";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		heat = 0;
+	}
+}
+Class GreenShellCasing : RedShellCasing {}
+Class WhiteShellCasing : RedShellCasing {}
+Class BlueShellCasing : RedShellCasing {}
+Class BlackShellCasing : RedShellCasing {}
+Class PurpleShellCasing : RedShellCasing {}
+Class GoldShellCasing : RedShellCasing
+{
+	Default
+	{
+		BounceSound "spreadgun/gcasing";
+	}
+}
+
+Class SWWMDamageAccumulator : Thinker
+{
+	Actor victim, inflictor, source;
+	Array<Int> amounts;
+	int total;
+	Name type;
+	bool dontgib;
+
+	override void Tick()
+	{
+		Super.Tick();
+		// so many damn safeguards in this
+		if ( !victim )
+		{
+			Destroy();
+			return;
+		}
+		int gibhealth = victim.GetGibHealth();
+		// おまえはもう死んでいる
+		if ( (victim.health-total <= gibhealth) && !dontgib )
+		{
+			// safeguard for inflictors that have somehow ceased to exist, which apparently STILL CAN HAPPEN
+			if ( inflictor ) inflictor.bEXTREMEDEATH = true;
+			else type = 'Extreme';
+		}
+		// make sure accumulation isn't reentrant
+		// 何？
+		for ( int i=0; i<amounts.Size(); i++ )
+		{
+			if ( !victim ) break;
+			victim.DamageMobj(inflictor,source,amounts[i],type,DMG_THRUSTLESS);
+		}
+		// clean up
+		if ( inflictor ) inflictor.bEXTREMEDEATH = false;
+		Destroy();
+	}
+
+	static void Accumulate( Actor victim, int amount, Actor inflictor, Actor source, Name type, bool dontgib = false )
+	{
+		if ( !victim ) return;
+		let ti = ThinkerIterator.Create("SWWMDamageAccumulator",STAT_USER);
+		SWWMDamageAccumulator a, match = null;
+		while ( a = SWWMDamageAccumulator(ti.Next()) )
+		{
+			if ( a.victim != victim ) continue;
+			match = a;
+			break;
+		}
+		if ( !match )
+		{
+			match = new("SWWMDamageAccumulator");
+			match.ChangeStatNum(STAT_USER);
+			match.victim = victim;
+			match.amounts.Clear();
+		}
+		match.amounts.Push(amount);
+		match.total += amount;
+		match.inflictor = inflictor;
+		match.source = source;
+		match.type = type;
+		match.dontgib = dontgib;
+	}
+
+	static clearscope int GetAmount( Actor victim )
+	{
+		let ti = ThinkerIterator.Create("SWWMDamageAccumulator",STAT_USER);
+		SWWMDamageAccumulator a, match = null;
+		while ( a = SWWMDamageAccumulator(ti.Next()) )
+		{
+			if ( a.victim != victim ) continue;
+			return a.total;
+		}
+		return 0;
+	}
+}
+
+Class SpreadgunTracer : LineTracer
+{
+	Actor ignoreme;
+	Array<HitListEntry> hitlist;
+	Array<Line> shootthroughlist;
+	Array<WaterHit> waterhitlist;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				int amt = SWWMDamageAccumulator.GetAmount(Results.HitActor);
+				// getgibhealth isn't clearscope, fuck
+				int gibhealth = -int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
+				if ( Results.HitActor.GibHealth != int.min ) gibhealth = -abs(Results.HitActor.GibHealth);
+				// if gibbed, go through without dealing more damage
+				if ( Results.HitActor.health-amt <= gibhealth ) return TRACE_Skip;
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				hitlist.Push(ent);
+				// go right on through if dead
+				if ( Results.HitActor.health-amt <= 0 ) return TRACE_Skip;
+				// stap
+				return TRACE_Abort;
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class SpreadSlugTracer : SpreadgunTracer
+{
+	double penetration;	// please don't laugh
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
+				hitlist.Push(ent);
+				penetration = max(0,penetration-ent.hitdamage);
+				if ( penetration <= 0 ) return TRACE_Abort;
+				return TRACE_Skip;
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class SpreadImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("spreadgun/pellet",CHAN_VOICE,CHANF_DEFAULT,.4,4.);
+		A_SprayDecal("TinyBulletChip",-20);
+		int numpt = Random[Spreadgun](-2,2);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (-x+(FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8))).unit()*FRandom[Spreadgun](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= .6;
+			s.special1 = Random[Spreadgun](0,1);
+			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+		}
+		numpt = Random[Spreadgun](-3,3);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Spreadgun](-2,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class SlugImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("spreadgun/slug",CHAN_VOICE,CHANF_DEFAULT,1.,2.);
+		A_SprayDecal("BulletChip",-20);
+		int numpt = Random[Spreadgun](6,12);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (-x+(FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8))).unit()*FRandom[Spreadgun](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.special1 = Random[Spreadgun](0,2);
+			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+		}
+		numpt = Random[Spreadgun](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Spreadgun](10,15);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
 Class Spreadgun : SWWMWeapon
 {
 	bool fired;	// shell was used
@@ -8,6 +305,18 @@ Class Spreadgun : SWWMWeapon
 
 	transient ui TextureID WeaponBox, AmmoIcon[7], LoadedIcon[7];
 	transient ui Font TewiFont;
+
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( loadammo is 'RedShell' ) return StringTable.Localize("$O_SPREADGUN_RED");
+		if ( loadammo is 'GreenShell' ) return StringTable.Localize("$O_SPREADGUN_GREEN");
+		if ( loadammo is 'WhiteShell' ) return StringTable.Localize("$O_SPREADGUN_WHITE");
+		if ( loadammo is 'BlueShell' ) return StringTable.Localize("$O_SPREADGUN_BLUE");
+		if ( loadammo is 'BlackShell' ) return StringTable.Localize("$O_SPREADGUN_BLACK");
+		if ( loadammo is 'PurpleShell' ) return StringTable.Localize("$O_SPREADGUN_PURPLE");
+		if ( loadammo is 'GoldShell' ) return StringTable.Localize("$O_SPREADGUN_GOLD");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
 
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
@@ -122,6 +431,7 @@ Class Spreadgun : SWWMWeapon
 	action void A_DropShell()
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
+		static const Class<Actor> casetypes[] = {"RedShellCasing","GreenShellCasing","WhiteShellCasing","BlueShellCasing","BlackShellCasing","PurpleShellCasing","GoldShellCasing"};
 		if ( !invoker.fired )
 		{
 			for ( int i=0; i<7; i++ )
@@ -131,7 +441,81 @@ Class Spreadgun : SWWMWeapon
 				break;
 			}
 		}
-		else Console.Printf("// TODO drop spent shell");
+		else
+		{
+			for ( int i=0; i<7; i++ )
+			{
+				if ( invoker.loadammo != types[i] ) continue;
+				Vector3 x, y, z;
+				[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+				Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-10*z);
+				let c = Spawn(casetypes[i],origin);
+				c.angle = angle;
+				c.pitch = pitch;
+				c.vel = x*FRandom[Junk](-.2,.2)+y*FRandom[Junk](-.2,.2)-(0,0,FRandom[Junk](2,3));
+				c.vel += vel*.5;
+				break;
+			}
+		}
+	}
+
+	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false )
+	{
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Spawn(large?"InvisibleSplasher":"SmolInvisibleSplasher",t.WaterHitList[i].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=5; i<t.Results.Distance; i+=10 )
+		{
+			if ( !Random[Boolet](0,bc) ) continue;
+			let b = Actor.Spawn("SWWMBubble",level.Vec3Offset(origin,dir*i));
+			b.Scale *= FRandom[Boolet](.1,.3);
+		}
+		for ( int i=0; i<t.HitList.Size(); i++ )
+		{
+			int realdmg = dmg?dmg:t.HitList[i].HitDamage;
+			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large);
+			SWWMHandler.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),mm*FRandom[Spreadgun](0.4,1.2));
+			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE )
+			{
+				let p = Spawn(impact,t.HitList[i].HitLocation);
+				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;
+				p.pitch = asin(t.HitList[i].x.z);
+			}
+			else
+			{
+				t.HitList[i].HitActor.TraceBleed(realdmg,self);
+				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_BODY,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_BODY,CHANF_OVERLAP,.4,4.);
+			}
+		}
+		if ( t.Results.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -t.Results.HitVector;
+			if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.top.Normal;
+				else hitnormal = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.bottom.Normal;
+				else hitnormal = t.Results.HitSector.ceilingplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+				if ( !t.Results.Side ) hitnormal *= -1;
+			}
+			let p = Spawn(impact,t.Results.HitPos+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+		}
 	}
 
 	action void A_FireShell()
@@ -142,7 +526,6 @@ Class Spreadgun : SWWMWeapon
 		static const int louds[] = {800,1000,1100,1200,1400,600,2500};
 		static const int quakes[] = {3,4,2,4,3,1,6};
 		static const Color cols[] = {Color(40,255,192,64),Color(36,255,192,80),Color(64,255,160,32),Color(48,32,176,255),Color(72,255,128,16),Color(24,255,224,96),Color(96,255,224,16)};
-		Console.Printf("// TODO fire shell");
 		for ( int i=0; i<7; i++ )
 		{
 			if ( invoker.loadammo != types[i] ) continue;
@@ -153,6 +536,108 @@ Class Spreadgun : SWWMWeapon
 			A_ZoomFactor(1.+quakes[i]*.04,ZOOM_INSTANT);
 			A_ZoomFactor(1.);
 			SWWMHandler.DoFlash(self,cols[i],5);
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+			Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-2*z);
+			Vector3 x2, y2, z2;
+			[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+			double a, s;
+			Vector3 dir;
+			SpreadgunTracer st;
+			SpreadSlugTracer sst;
+			switch ( i )
+			{
+			case 1:
+				sst = new("SpreadSlugTracer");
+				sst.ignoreme = self;
+				sst.penetration = 250.;
+				a = FRandom[Spreadgun](0,360);
+				s = FRandom[Spreadgun](0,.01);
+				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+				sst.hitlist.Clear();
+				sst.shootthroughlist.Clear();
+				sst.waterhitlist.Clear();
+				sst.Trace(origin,level.PointInSector(origin.xy),dir,8000.,0);
+				ProcessTraceHit(sst,origin,dir,0,12000,"SlugImpact",1,true);
+				for ( int i=0; i<3; i++ )
+				{
+					let s = Spawn("SWWMViewSmoke",origin);
+					SWWMViewSmoke(s).ofs = (15,3,-3);
+					s.target = self;
+					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+					s.alpha *= 0.5;
+				}
+				for ( int i=0; i<6; i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.scale *= .8;
+					s.alpha *= .3;
+					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+					s.vel += vel*.5+x*FRandom[Spreadgun](3.,5.);
+				}
+				for ( int i=0; i<10; i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .2;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
+				}
+				break;
+			case 2:
+				Console.Printf("\cg// TODO Dragon's Breath\c-");
+				break;
+			case 3:
+				Console.Printf("\cg// TODO Kinylum Saltshot\c-");
+				break;
+			case 4:
+				Console.Printf("\cg// TODO Napalm Rounds\c-");
+				break;
+			case 5:
+				Console.Printf("\cg// TODO The Ball\c-");
+				break;
+			case 6:
+				Console.Printf("\cg// TODO Golden Shell\c-");
+				break;
+			default:
+				st = new("SpreadgunTracer");
+				st.ignoreme = self;
+				for ( int j=0; j<30; j++ )
+				{
+					a = FRandom[Spreadgun](0,360);
+					s = FRandom[Spreadgun](0,.22);
+					dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+					st.hitlist.Clear();
+					st.shootthroughlist.Clear();
+					st.waterhitlist.Clear();
+					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,0);
+					ProcessTraceHit(st,origin,dir,6,7000,bc:5);
+				}
+				for ( int i=0; i<9; i++ )
+				{
+					let s = Spawn("SWWMViewSmoke",origin);
+					SWWMViewSmoke(s).ofs = (15,3,-3);
+					s.target = self;
+					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+					s.alpha *= .2;
+				}
+				for ( int i=0; i<16; i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.special1 = 1;
+					s.scale *= .9;
+					s.alpha *= .3;
+					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+					s.vel += vel*.5+x*FRandom[Spreadgun](3.,5.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
+				}
+				for ( int i=0; i<20; i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .3;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
+				}
+				break;
+			}
 			break;
 		}
 		A_StartSound("spreadgun/hammer",CHAN_WEAPON,CHANF_OVERLAP);
@@ -185,7 +670,6 @@ Class Spreadgun : SWWMWeapon
 			Ammo a = Ammo(other.FindInventory(types[i]));
 			if ( !a ) continue;
 			nextammo = types[i];
-			Ammo1 = a;
 			return;
 		}
 		nextammo = AmmoType1;
@@ -206,17 +690,21 @@ Class Spreadgun : SWWMWeapon
 			int ridx;
 			if ( rev )
 			{
-				ridx = (cur-i)%7;
-				if ( ridx < 0 ) ridx = 6;
+				ridx = cur-i;
+				if ( ridx < 0 ) break;
 			}
 			else ridx = (i+cur+1)%7;
 			if ( CountInv(types[ridx]) <= 0 ) continue;
 			next = ridx;
 			break;
 		}
+		if ( rev && (invoker.nextammo == types[next]) )
+		{
+			A_SwitchAmmoType(false);	// recheck forward
+			return;
+		}
 		if ( invoker.nextammo != types[next] ) A_StartSound("misc/invchange",CHAN_WEAPONEXTRA,CHANF_UI|CHANF_LOCAL);
 		invoker.nextammo = types[next];
-		invoker.Ammo1 = Ammo(FindInventory(invoker.nextammo));
 		A_WeaponReady(WRF_NOFIRE);
 	}
 
@@ -532,25 +1020,67 @@ Class Spreadgun : SWWMWeapon
 		XZWK FGHI 2;
 		Goto ReadyFired;
 	FlashRed:
-		XZWZ A 2 Bright;
+		XZWZ A 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = 120;
+			l.target = self;
+		}
 		Stop;
 	FlashGreen:
-		XZWZ B 2 Bright;
+		XZWZ B 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = 90;
+			l.target = self;
+		}
 		Stop;
 	FlashWhite:
-		XZWZ C 2 Bright;
+		XZWZ C 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[1] = 176;
+			l.args[2] = 32;
+			l.args[3] = 160;
+			l.target = self;
+		}
 		Stop;
 	FlashBlue:
-		XZWZ D 2 Bright;
+		XZWZ D 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[0] = 96;
+			l.args[1] = 224;
+			l.args[2] = 255;
+			l.args[3] = 160;
+			l.target = self;
+		}
 		Stop;
 	FlashBlack:
-		XZWZ E 2 Bright;
+		XZWZ E 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[1] = 144;
+			l.args[2] = 16;
+			l.args[3] = 280;
+			l.target = self;
+		}
 		Stop;
 	FlashPurple:
-		XZWZ F 2 Bright;
+		XZWZ F 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = 60;
+			l.target = self;
+		}
 		Stop;
 	FlashGold:
-		XZWZ G 2 Bright;
+		XZWZ G 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = 300;
+			l.target = self;
+		}
 		Stop;
 	}
 }

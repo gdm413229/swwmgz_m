@@ -6,6 +6,9 @@
 SWWM GZ brings to GZDoom a "best of" collection of custom weapons I've made for
 Unreal Tournament, plus many new things that didn't make the cut there.
 
+It also features A LOT of lore from the UnSX multiverse. I pretty much went
+wild here with all the stuff you can read.
+
 This is the very first fully original mod based on Doom Tournament code.
 
 ---
@@ -26,18 +29,19 @@ Additional features:
  - Lucky Collar: A little something that your creator gives to all of her
    creations. Reduces incoming damage by 75% when you're below 25% health.
  - User Menu: With the press of a button, open a dedicated menu to see all your
-   stats in detail, info on carried items and weapons, and (when it's done)
-   accessing the store for buying stuff with your score points.
+   stats in detail, info on carried items and weapons, check out a grand
+   library of information on things you come across, and access the store for
+   buying extra items with your score points.
  - Magnetic Utility Belt: Makes some weapons easier to reload while on the go.
  - Keychain: For carrying all your keys around, and other valuable things.
  - Pocket Hammerspace™ containers: These will store and deploy your ammunition
-   and weapons on demand. Their capacity can be increased by finding
-   Hammerspace™ Embiggener modules.
+   and weapons on demand. The capacity for ammo storage can be increased by
+   finding Hammerspace™ Embiggener modules.
  - Forx JetBurst™ Units: Can be used for quick dashes in any direction, or even
-   for triple jumping.
+   for short bursts of flight.
  - Targetting Array: Tracks nearby foes and provides basic information on their
-   stats. Compatible with Omnisight™ mapping modules for tracking key items,
-   usable objects and nearby exits.
+   health. Compatible with Omnisight™ mapping modules for tracking key items
+   and nearby exits.
  - Akari Labs CuteEmotion™ Display: Equipped onto your visor to show a wide
    range of predefined facial expressions in order to convey simple emotions
    to others.
@@ -457,16 +461,16 @@ be configurable.
 
 ### Top left corner
 
-Message display. Can be configured to show different numbers of lines depending
-on whether the chat prompt is open. Chat messages take much longer to expire
-than others, so there's less of a chance to miss them, as they might pop back
-up when the less important ones expire. A full message history can also be read
-at any time in the Knowledge Base. Repeated messages are compressed with a
-multiplier suffix.
+Message display. Can be configured to show different numbers of messages
+depending on whether the chat prompt is open. Chat messages take much longer to
+expire than others, so there's less of a chance to miss them, as they might pop
+back up when the less important ones expire. A full chat history can also be
+read at any time in the Demolitionist Menu. Repeated messages are compressed
+with a multiplier suffix.
 
 ### Top right corner
 
-Level stats and current score.
+Current score.
 
 The scoring system is pretty straightforward. Each thing you kill (even if not
 an enemy) will give you points according to half of its base health, rounded up
@@ -475,25 +479,28 @@ of application):
  * x1.25 for an overkill (enemy was gibbed or killed in one shot).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.
- * +100 for killing an enemy without having taken damage since player start,
-   with extra +50 boosts for consecutive kills.
+ * +100 for killing an enemy without having taken damage since last spawn, with
+   extra +50 boosts for consecutive kills.
  * +10000 if the enemy killed is a boss.
  * +5000 if you've killed the last enemy in the map.
 
 You are also given +500 points for each secret found, +5000 if it's the final
 secret. Countable items give +25 points each or +2500 if it's the final item.
 
-Score is currently for show, but after first release it'll be used for the
-in-game store feature.
+Score can be used to buy items on the in-game store, and it is preserved
+between hubs.
+
+In Doom and Heretic, collected keys will be displayed below the score box.
 
 ### Bottom left corner
 
-Your health and armor, along with an inventory bar.
+Your health, armor and fuel, along with an inventory bar, and all active
+armors and powerups (with their respective durability/duration).
 
 ### Bottom border
 
 Pickup messages. Repeated pickups will have a multiplier suffix added. Total
-lines shown are also configurable.
+messages shown are also configurable.
 
 ### Bottom right corner
 
@@ -506,18 +513,16 @@ trying to figure out where everything is in between explosions and massive
 smoke clouds, a targeter has been implemented, which will show the following:
 
 * Players and monsters: Draws an identificative label and a health bar. The bar
-  only measures their health up to default limits, so overhealed players will
-  show up with a full bar until their health drops down below 1000. When they
-  take damage or get healed, a number (either negative or positive) will show
-  up below the health bar indicating the cumulative increase/decrease. The
-  targeter only picks up enemies in your direct line of sight and can only show
-  up to 40 individual bars, giving priority first to players, then the nearest
-  enemies.
+  can display overhealing on players, and also indicate when someone is
+  invulnerable. When they take damage or get healed, numbers (either red or
+  green) will pop up around them. The targeter only picks up enemies in your
+  direct line of sight, gradually fading once you lose sight of them, and can
+  only display up to 40 individual bars, giving priority first to players, then
+  the nearest enemies. The Omnisight increases the time out-of-sight targets
+  remain targetted.
 * Keys and map exits: If you've picked up an Omnisight, key items and any exit
   lines will be marked and labeled, along with a little distance indicator in
   map units. Note that this doesn't work for script-triggered exits.
-* Usable/shootable switches and others: If visible, these will also show up
-  once you pick up an Omnisight.
 
 These components are toggleable.
 

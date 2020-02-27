@@ -158,9 +158,6 @@ on replaced item, may also come in bundles:
    rare drop from boss monsters, and as a rare spawn for chaos/banishment
    devices in Heretic and Hexen.
 
-The two first standard types will also pop up in Hammerspace Embiggeners and
-Ammo Fabricators.
-
 ### Wallbuster (slot 4), replaces SSG, Ethereal Crossbow, Frost Shards
 
 A ludicrously overkill weapon, courtesy of the always-overkill Blackmann Arms.

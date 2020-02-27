@@ -443,8 +443,9 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
   associates, stealing the Heart of D'Sparil and putting an end to the plans
   for resurrecting him. The mansion is sold off, most of its valuables,
-  including the corporeal remains of the serpent rider, being passed around,
-  until being eventually acquired by the "Cult of the Viridescent Lord".
+  including the corporeal remains of the serpent rider, passed around among
+  several parties, until being eventually acquired by the "Cult of the
+  Viridescent Lord".
 
 - ????: The three heroes who defeated Korax are called into the Winter Nexus,
   they gather the four elemental gems and defeat the "Viridescent Lord". A

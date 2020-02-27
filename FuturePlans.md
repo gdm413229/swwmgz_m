@@ -15,11 +15,10 @@ after the first release.
   - Per-monster kill tracker in stats tab
   - Music player with a selection of Saya's favourite tracks
   - Pong minigame
+* Actually make a fancy titlemap
+* Mod trailer
 * Additional HUD stuff
   - Minimap with radar like in SWWM Z
 * Character and item images for the library
 * Full Mashiro model for Lämp easter egg
-* Option to hear other players' voice lines
-* Localization
-  - Spanish
-  - Japanese???
+* Japanese Localization???

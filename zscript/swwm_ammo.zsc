@@ -767,10 +767,11 @@ Class YnykronAmmo : Ammo
 
 Class AmmoFabricator : Inventory abstract
 {
-	int budget, pertype;
+	int budget, pertype, maxunitprice;
 
 	Property Budget : budget;
 	Property PerType : pertype;
+	Property MaxUnitPrice : maxunitprice;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -786,10 +787,10 @@ Class AmmoFabricator : Inventory abstract
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
 			let a = (Class<Ammo>)(AllActorClasses[i]);
-			// only direct descendants of ammo with a set price below our budget
+			// only direct descendants of ammo with a set price below our max unit price
 			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
 			let def = GetDefaultByType(a);
-			if ( !(def.Stamina) || (def.Stamina > budget) ) continue;
+			if ( !(def.Stamina) || (def.Stamina > maxunitprice) ) continue;
 			available.Push(a);
 		}
 		// start from lowest to highest needed until we fill the inventory or run out of budget
@@ -873,8 +874,9 @@ Class FabricatorTier1 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
 		Inventory.MaxAmount 30;
-		AmmoFabricator.Budget 2000;
+		AmmoFabricator.Budget 5000;
 		AmmoFabricator.PerType 2;
+		AmmoFabricator.MaxUnitPrice 2500;
 		Stamina 3000;
 	}
 }
@@ -888,6 +890,7 @@ Class FabricatorTier2 : AmmoFabricator
 		Inventory.MaxAmount 20;
 		AmmoFabricator.Budget 15000;
 		AmmoFabricator.PerType 4;
+		AmmoFabricator.MaxUnitPrice 10000;
 		Stamina 12000;
 	}
 }
@@ -899,8 +902,9 @@ Class FabricatorTier3 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
-		AmmoFabricator.Budget 100000;
+		AmmoFabricator.Budget 120000;
 		AmmoFabricator.PerType 8;
+		AmmoFabricator.MaxUnitPrice 80000;
 		Stamina 150000;
 	}
 }

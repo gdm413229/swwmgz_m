@@ -605,6 +605,7 @@ Class PaletteLight : DynamicLight
 			}
 			else ReactionTime = abs(default.ReactionTime);
 		}
+		if ( target ) SetOrigin(target.pos,true);
 		UpdateLight();
 	}
 }
@@ -1486,6 +1487,13 @@ Class SWWMHandler : EventHandler
 		lastkill[e.playernumber] = int.min;
 		// reset combat tracker
 		SWWMCombatTracker.Spawn(players[e.playernumber].mo);
+		// initialize some player vars
+		if ( p.mo is 'Demolitionist' )
+		{
+			Demolitionist(p.mo).dashfuel = 100.;
+			Demolitionist(p.mo).last_boost = 0;
+			Demolitionist(p.mo).last_kick = 0;
+		}
 	}
 
 	override void PlayerRespawned( PlayerEvent e )
@@ -1503,6 +1511,13 @@ Class SWWMHandler : EventHandler
 			spreecount[e.Thing.playernumber()] = 0;
 			tookdamage[e.Thing.playernumber()] = false;
 			lastkill[e.Thing.playernumber()] = int.min;
+			// initialize some player vars
+			if ( e.Thing is 'Demolitionist' )
+			{
+				Demolitionist(e.Thing).dashfuel = 100.;
+				Demolitionist(e.Thing).last_boost = 0;
+				Demolitionist(e.Thing).last_kick = 0;
+			}
 		}
 		// reset uptime since player had just died
 		SWWMStats s = SWWMStats.Find(e.Thing.player);
@@ -2207,13 +2222,13 @@ Class SWWMHandler : EventHandler
 	}
 
 	// Doom's explosions aren't fully 3D
-	static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer )
+	static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer, Actor ignoreme = null )
 	{
 		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
 		while ( bi.Next() )
 		{
 			Actor a = bi.Thing;
-			if ( !a || !a.bSHOOTABLE || !Source.CheckSight(a,0xf) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
+			if ( !a || (a == ignoreme) || !a.bSHOOTABLE || !Source.CheckSight(a,0xf) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
 				continue;
 			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
 			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);

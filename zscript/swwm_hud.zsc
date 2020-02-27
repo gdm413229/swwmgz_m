@@ -217,43 +217,43 @@ Class SWWMStatusBar : BaseStatusBar
 					j++;
 				}
 			}
-			// trim size, for render performance
-			if ( interesting.Size() > 20 ) interesting.Resize(20);
 		}
 		// update target stuff
 		targets.Clear();
-		let ti = ThinkerIterator.Create("SWWMCombatTracker",Thinker.STAT_USER);
-		SWWMCombatTracker ct;
-		int extratime = 35;
-		if ( CPlayer.mo.FindInventory("Omnisight") ) extratime += 105;
-		while ( ct = SWWMCombatTracker(ti.Next()) )
+		if ( targetter.GetBool() )
 		{
-			if ( !targetter.GetBool() ) break;
-			// ignore player unless chasecamming
-			if ( (ct.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
-			if ( ct.myplayer && deathmatch ) continue;	// no players in dm
-			if ( level.maptime > ct.updated+extratime ) continue;
-			targets.Push(ct);
-		}
-		// sort by distance (give priority to players)
-		for ( int i=0; i<targets.Size(); i++ )
-		{
-			int j = 1;
-			while ( j < targets.Size() )
+			let ti = ThinkerIterator.Create("SWWMCombatTracker",Thinker.STAT_USER);
+			SWWMCombatTracker ct;
+			int extratime = 35;
+			if ( CPlayer.mo.FindInventory("Omnisight") ) extratime += 105;
+			while ( ct = SWWMCombatTracker(ti.Next()) )
 			{
-				int k = j;
-				while ( (k > 0) && (CmpTarget(targets[k-1],targets[k]) || CmpDist(targets[k-1].pos,targets[k].pos)) )
-				{
-					SWWMCombatTracker tmp = targets[k];
-					targets[k] = targets[k-1];
-					targets[k-1] = tmp;
-					k--;
-				}
-				j++;
+				// ignore player unless chasecamming
+				if ( (ct.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
+				if ( ct.myplayer && deathmatch ) continue;	// no players in dm
+				if ( level.maptime > ct.updated+extratime ) continue;
+				targets.Push(ct);
 			}
+			// sort by distance (give priority to players)
+			for ( int i=0; i<targets.Size(); i++ )
+			{
+				int j = 1;
+				while ( j < targets.Size() )
+				{
+					int k = j;
+					while ( (k > 0) && (CmpTarget(targets[k-1],targets[k]) || CmpDist(targets[k-1].pos,targets[k].pos)) )
+					{
+						SWWMCombatTracker tmp = targets[k];
+						targets[k] = targets[k-1];
+						targets[k-1] = tmp;
+						k--;
+					}
+					j++;
+				}
+			}
+			// trim size, to unclutter
+			if ( targets.Size() > 40 ) targets.Resize(40);
 		}
-		// trim size, for render performance
-		if ( targets.Size() > 40 ) targets.Resize(40);
 		// update floating scores
 		scoreobjects.Clear();
 		let si = ThinkerIterator.Create("SWWMScoreObj",Thinker.STAT_USER);
@@ -263,6 +263,8 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( ((so.tcolor == Font.CR_RED) || (so.tcolor == Font.CR_GREEN)) && (!healthnums.GetBool() || (level.Vec3Diff(viewpos,so.pos).length() > 2000)) ) continue;
 			else if ( !scorenums.GetBool() || ((so.tcolor != Font.CR_GOLD) && !scorebonus.GetBool()) ) continue;
 			scoreobjects.Push(so);
+			// prevent slowdowns if hurting too many enemies at once
+			if ( scoreobjects.Size() >= 100 ) break;
 		}
 		// sort by distance
 		for ( int i=0; i<scoreobjects.Size(); i++ )
@@ -281,8 +283,6 @@ Class SWWMStatusBar : BaseStatusBar
 				j++;
 			}
 		}
-		// trim size, for render performance
-		if ( scoreobjects.Size() > 60 ) scoreobjects.Resize(60);
 		// update interpolators
 		HealthInter.Update(CPlayer.health);
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -403,7 +403,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hs.x,barpos.y/hs.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			int ht = clamp(targets[i].intp.GetValue(),0,targets[i].maxhealth*10);
 			int hw = int((min(ht,targets[i].maxhealth)*50.)/targets[i].maxhealth);
-			if ( targets[i].mytarget && (targets[i].mytarget.bInvulnerable || (targets[i].myplayer && (targets[i].myplayer.cheats&(CF_GODMODE|CF_GODMODE2)))) )
+			if ( targets[i].mytarget && (targets[i].mytarget.bInvulnerable || (targets[i].myplayer && (targets[i].myplayer.cheats&(CF_GODMODE|CF_GODMODE2))) || targets[i].mytarget.FindInventory("InvinciballPower")) )
 			{
 				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hs.x)/hs.x,(barpos.y+2*hs.y)/hs.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
 				continue;
@@ -648,10 +648,10 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+25),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
 		int ht = clamp(HealthInter.GetValue(),0,10000);
 		int hw = min(ht,100);
-		if ( isInvulnerable() )
+		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
 		{
 			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%3d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%3d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			return;
 		}
 		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);

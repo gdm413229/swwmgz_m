@@ -394,10 +394,50 @@ Class InvinciballLight : PointLightAttenuated
 		bDORMANT = Powerup(master).isBlinking();
 	}
 }
+Class InvinciSnd : Actor
+{
+	Default
+	{
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target || !master )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.pos,true);
+		if ( players[consoleplayer].Camera == target )
+		{
+			A_SoundVolume(CHAN_VOICE,0.);
+			A_SoundVolume(CHAN_7,.8);
+		}
+		else
+		{
+			A_SoundVolume(CHAN_VOICE,.4);
+			A_SoundVolume(CHAN_7,0.);
+		}
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("powerup/invinciballact",CHAN_VOICE,CHANF_LOOPING,.4,1.5);
+		A_StartSound("powerup/invinciballact",CHAN_7,CHANF_LOOPING,.8,ATTN_NONE);
+	}
+	override void OnDestroy()
+	{
+		Super.OnDestroy();
+		A_StopSound(CHAN_VOICE);
+		A_StopSound(CHAN_7);
+	}
+}
 
 Class InvinciballPower : Powerup
 {
-	Actor l;
+	Actor l, snd;
 	int lasteffect;
 
 	Default
@@ -415,6 +455,15 @@ Class InvinciballPower : Powerup
 		l = Spawn("InvinciballLight",Owner.pos);
 		l.target = Owner;
 		l.master = self;
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner ) return;
+		if ( !snd ) snd = Spawn("InvinciSnd",Owner.pos);
+		snd.target = Owner;
+		snd.master = self;
 	}
 
 	override void EndEffect()

@@ -445,9 +445,9 @@ Class SWWMWeapon : Weapon abstract
 	private action bool TryMelee( double angle, int dmg )
 	{
 		FTranslatedLineTarget t;
-		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		double slope = AimLineAttack(angle,2*DEFMELEERANGE,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
-		LineTrace(angle,DEFMELEERANGE,slope,0,player.viewheight,data:d);
+		LineTrace(angle,2*DEFMELEERANGE,slope,0,player.viewheight,data:d);
 		if ( d.HitType == TRACE_HitActor )
 		{
 			bool bloodless = true;
@@ -484,7 +484,8 @@ Class SWWMWeapon : Weapon abstract
 	}
 	action void A_Melee( int dmg = 40 )
 	{
-		for ( int i=0; i<16; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
+		int maxang = CountInv("RagekitPower")?24:12;
+		for ( int i=0; i<maxang; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
 		// check for walls instead
 		FTranslatedLineTarget t;
 		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);

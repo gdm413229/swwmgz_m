@@ -1,7 +1,7 @@
 // The Demolitionist
 Class Demolitionist : PlayerPawn
 {
-	int last_jump_held, last_boost;
+	int last_jump_held, last_boost, last_kick;
 	Vector3 dashdir;
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
@@ -233,7 +233,6 @@ Class Demolitionist : PlayerPawn
 	override void GiveDefaultInventory()
 	{
 		Super.GiveDefaultInventory();
-
 		// preloaded gun
 		let dp = DeepImpact(FindInventory("DeepImpact"));
 		if ( dp ) SWWMLoreLibrary.Add(player,"DeepImpact");
@@ -246,7 +245,6 @@ Class Demolitionist : PlayerPawn
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		dashfuel = 100.;
 		mystats = SWWMStats.Find(player);
 		oldpos = pos;
 	}
@@ -650,7 +648,8 @@ Class Demolitionist : PlayerPawn
 				&& ((player.onground && (player.jumptics == 0))
 				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
 			{
-				if ( !player.onground && (level.maptime < last_boost+8) ) return;
+				if ( !player.onground && (((walljump || wallclimb) && (level.maptime < last_kick+8)) || (!(walljump || wallclimb) && (level.maptime < last_boost+8))) )
+					return;
 				double jumpvelz = JumpZ*35./TICRATE;
 				double jumpfac = 0;
 				for ( let p=Inv; p; p=p.Inv )
@@ -684,7 +683,11 @@ Class Demolitionist : PlayerPawn
 						SWWMHandler.DoKnockback(jumpactor,(-walldir,0),12000);
 						jumpactor.DamageMobj(self,self,10,'Jump');
 					}
-					if ( walljump || wallclimb ) A_StartSound("demolitionist/kick",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					if ( walljump || wallclimb )
+					{
+						A_StartSound("demolitionist/kick",CHAN_FOOTSTEP,CHANF_OVERLAP);
+						last_kick = level.maptime+1;
+					}
 				}
 				bOnMobj = false;
 				player.jumpTics = -1;
@@ -698,6 +701,7 @@ Class Demolitionist : PlayerPawn
 						vel.z += jumpvelz+clamp(-pvelz*.4,0.,30.);
 					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 					mystats.boostcount++;
+					last_boost = level.maptime+1;
 				}
 				else
 				{
@@ -706,7 +710,6 @@ Class Demolitionist : PlayerPawn
 						vel.z += jumpvelz*1.25;
 				}
 				SetStateLabel("Jump");
-				if ( !player.onground ) last_boost = level.maptime+1;
 			}
 			last_jump_held = level.maptime+1;
 		}

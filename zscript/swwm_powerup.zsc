@@ -136,6 +136,7 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.InitEffect();
 		if ( !Owner ) return;
+		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
 		DoEffect();
 	}
 	override void EndEffect()
@@ -144,6 +145,7 @@ Class GhostPower : PowerInvisibility
 		if ( !Owner ) return;
 		Owner.bNOTARGET = false;
 		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA);
+		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GHOSTARTI"));
 	}
 
@@ -334,6 +336,14 @@ Class GravityPower : Powerup
 
 }
 
+Class GravityX : GhostArtifactX
+{
+	Default
+	{
+		RenderStyle "Normal";
+	}
+}
+
 Class GravitySuppressor : Inventory
 {
 	Mixin SWWMAutoUseFix;
@@ -347,6 +357,15 @@ Class GravitySuppressor : Inventory
 		else Owner.GiveInventory("GravityPower",1);
 		return true;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		tracer = Spawn("GravityX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
+	}
+
 	Default
 	{
 		Tag "$T_GRAVITYS";
@@ -439,6 +458,7 @@ Class InvinciballPower : Powerup
 {
 	Actor l, snd;
 	int lasteffect;
+	transient int lastpulse;
 
 	Default
 	{
@@ -455,6 +475,8 @@ Class InvinciballPower : Powerup
 		l = Spawn("InvinciballLight",Owner.pos);
 		l.target = Owner;
 		l.master = self;
+		lastpulse = max(lastpulse,gametic+35);
+		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
 	}
 
 	override void DoEffect()
@@ -471,6 +493,7 @@ Class InvinciballPower : Powerup
 		Super.EndEffect();
 		if ( !Owner ) return;
 		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA);
+		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_INVINCIBALL"));
 	}
 
@@ -489,8 +512,17 @@ Class InvinciballPower : Powerup
 				SWWMHandler.DoFlash(Owner,Color(64,255,64,0),15);
 				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP);
 				lasteffect = level.maptime;
+				lastpulse = max(lastpulse,gametic+20);
 			}
 		}
+	}
+}
+
+Class InvinciballX : GhostArtifactX
+{
+	Default
+	{
+		RenderStyle "Normal";
 	}
 }
 
@@ -510,10 +542,24 @@ Class FuckingInvinciball : Inventory
 		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		Owner.A_StartSound("misc/sundowner",CHAN_POWERUPEXTRA);
 		let i = InvinciballPower(Owner.FindInventory("InvinciballPower"));
-		if ( i ) i.EffectTics = i.default.EffectTics;
+		if ( i )
+		{
+			i.EffectTics = i.default.EffectTics;
+			i.lastpulse = max(i.lastpulse,gametic+35);
+			SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
+		}
 		else Owner.GiveInventory("InvinciballPower",1);
 		return true;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		tracer = Spawn("InvinciballX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
+	}
+
 	Default
 	{
 		Tag "$T_INVINCIBALL";
@@ -607,6 +653,7 @@ Class RagekitPower : Powerup
 {
 	Actor l, snd;
 	int lasteffect, lastrage;
+	transient int lastpulse;
 
 	override double GetSpeedFactor()
 	{
@@ -629,6 +676,7 @@ Class RagekitPower : Powerup
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
+		lastpulse = max(lastpulse,gametic+35);
 		l = Spawn("RagekitLight",Owner.pos);
 		l.target = Owner;
 		l.master = self;
@@ -647,6 +695,7 @@ Class RagekitPower : Powerup
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
+			lastpulse = max(lastpulse,gametic+10);
 		}
 	}
 
@@ -655,6 +704,8 @@ Class RagekitPower : Powerup
 		Super.EndEffect();
 		if ( !Owner ) return;
 		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA);
+		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
+		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_RAGEKIT"));
 	}
 
@@ -671,10 +722,19 @@ Class RagekitPower : Powerup
 					lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
 				Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
 				lasteffect = level.maptime;
+				lastpulse = max(lastpulse,gametic+35);
 			}
 		}
 		else if ( passive )
 			newdamage = damage/4;
+	}
+}
+
+Class RagekitX : GhostArtifactX
+{
+	Default
+	{
+		RenderStyle "Normal";
 	}
 }
 
@@ -687,10 +747,25 @@ Class Ragekit : Inventory
 		if ( pickup && !deathmatch ) return false;
 		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let r = RagekitPower(Owner.FindInventory("RagekitPower"));
-		if ( r ) r.EffectTics = r.default.EffectTics;
+		if ( r )
+		{
+			r.EffectTics = r.default.EffectTics;
+			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
+			Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
+			r.lastpulse = max(r.lastpulse,gametic+35);
+		}
 		else Owner.GiveInventory("RagekitPower",1);
 		return true;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		tracer = Spawn("RagekitX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
+	}
+
 	Default
 	{
 		Tag "$T_RAGEKIT";

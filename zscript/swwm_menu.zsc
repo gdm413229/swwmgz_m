@@ -306,7 +306,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_ENTER:
-			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) )
+			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
 			{
 				// can't use this
 				if ( invlist[sel0] is 'Ammo' ) return true;
@@ -317,7 +317,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					checkuse = gametic+1;
 				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer);
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) )
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
 			{
 				int moni = SWWMCredits.Get(players[consoleplayer]);
 				let itm = GetDefaultByType(storelist[sel0]);
@@ -359,7 +359,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					MenuSound("menu/democlose");
 					sub = false;
 				}
-				else if ( lorelist.Size() > 0 )
+				else if ( (lorelist.Size() > 0) && (sel0 < lorelist.Size()) )
 				{
 					// mark as read
 					if ( !lorelist[sel0].read )
@@ -440,7 +440,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )

@@ -525,7 +525,7 @@ Class SaltLight : PaletteLight
 	{
 		Tag "SaltTail";
 		ReactionTime 30;
-		Args 0,0,0,80;
+		Args 0,0,0,120;
 	}
 }
 Class SaltLight2 : PaletteLight
@@ -534,7 +534,7 @@ Class SaltLight2 : PaletteLight
 	{
 		Tag "SaltExpl";
 		ReactionTime 30;
-		Args 0,0,0,80;
+		Args 0,0,0,70;
 	}
 }
 
@@ -543,7 +543,7 @@ Class SaltImpact : Actor
 	Default
 	{
 		Obituary "$O_SPREADGUN_BLUE";
-		DamageType "Salt";
+		DamageType "Electricity";
 		RenderStyle "Add";
 		Radius 0.1;
 		Height 0;
@@ -614,7 +614,7 @@ Class SaltBeam : Actor
 	Default
 	{
 		Obituary "$O_SPREADGUN_BLUE";
-		DamageType "Salt";
+		DamageType "Electricity";
 		RenderStyle "Add";
 		Radius 0.1;
 		Height 0;
@@ -645,7 +645,7 @@ Class SaltBeam : Actor
 			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
 			b.A_CheckTerrain();
 		}
-		for ( int i=8; i<t.Results.Distance; i+=16 )
+		for ( int i=16; i<t.Results.Distance; i+=32 )
 		{
 			if ( !Random[Spreadgun](0,Stamina) ) continue;
 			let b = Actor.Spawn("SWWMSmoke",level.Vec3Offset(pos,x*i));
@@ -688,8 +688,16 @@ Class SaltBeam : Actor
 			}
 			return;
 		}
+		else if ( (args[0] > 20) && !Random[Spreadgun](0,800/args[0]) )
+		{
+			let i = Spawn("SaltImpact",level.Vec3Offset(pos,x*32));
+			i.angle = atan2(x.y,x.x);
+			i.pitch = asin(-x.z);
+			i.target = target;
+			return;
+		}
 		// next beam
-		if ( !(special2%2) && !Random[Spreadgun](0,2) )
+		if ( !(special2%2) && !Random[Spreadgun](0,4) )
 			Spawn("SaltLight",level.Vec3Offset(pos,x*16));
 		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*32));
 		double a = FRandom[Spreadgun](0,360), s = FRandom[Spreadgun](0,.06);
@@ -698,6 +706,7 @@ Class SaltBeam : Actor
 		next.pitch = asin(-dir.z);
 		next.target = target;
 		next.special2 = (special2+1)%10;
+		next.args[0] = args[0]+1;
 		next.SetStateLabel("TrailSpawn");
 	}
 
@@ -714,10 +723,10 @@ Class SaltBeam : Actor
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,GetAge()/10) == 0 )
 		{
-			SWWMHandler.DoBlast(self,48,5000,target);
-			A_Explode(5,48,0);
+			SWWMHandler.DoBlast(self,64,5000,target);
+			A_Explode(5,64,0);
 		}
-		if ( (special2 || GetAge()) && !special1 ) SpreadOut();
+		if ( ((special2%5) || GetAge()) && !special1 ) SpreadOut();
 	}
 
 	States
@@ -1311,8 +1320,7 @@ Class Spreadgun : SWWMWeapon
 	{
 		Super.ModifyDropAmount(dropamount);
 		// toss some ammo while we're at it
-		let am = (Class<Ammo>)(GetReplacement("Shell"));
-		A_DropItem(am,Random[Spreadgun](3,5));
+		A_DropItem(Random[Spreadgun](0,2)?"RedShell":"GreenShell",Random[Spreadgun](1,3));
 	}
 
 	Default

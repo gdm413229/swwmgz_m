@@ -19,11 +19,20 @@ Class Demolitionist : PlayerPawn
 
 	SWWMStats mystats;
 	int cairtime;
-	Vector3 oldpos;
 
 	int lastmpain;
 
 	double guideangle, guidepitch, guideroll;
+
+	enum EUnderType
+	{
+		UNDER_NONE,
+		UNDER_WATER,
+		UNDER_SLIME,
+		UNDER_LAVA
+	};
+
+	int lastunder;
 
 	Default
 	{
@@ -246,7 +255,6 @@ Class Demolitionist : PlayerPawn
 	{
 		Super.PostBeginPlay();
 		mystats = SWWMStats.Find(player);
-		oldpos = pos;
 		lastground = true;
 	}
 	void A_Dash()
@@ -290,12 +298,87 @@ Class Demolitionist : PlayerPawn
 		}
 		fuelcooldown = max(20,fuelcooldown);
 	}
+	void CheckUnderwaterAmb( bool restore = false )
+	{
+		Vector3 headpos = Vec3Offset(0,0,player.viewheight);
+		Vector3 centerpos = Vec3Offset(0,0,height/2);
+		Sector headregion = null;
+		if ( CurSector.moreflags&Sector.SECMF_UNDERWATER ) // check underwater sector
+			headregion = CurSector;
+		else if ( CurSector.heightsec ) // check height transfer
+		{
+			let hsec = CurSector.heightsec;
+			double fh = hsec.floorplane.ZAtPoint(pos.xy);
+			if ( pos.z < fh )
+			{
+				if ( headpos.z <= fh )
+					headregion = hsec;
+			}
+			else if ( !(hsec.moreflags&Sector.SECMF_FAKEFLOORONLY) && (headpos.z > hsec.ceilingplane.ZAtPoint(pos.xy)) )
+				headregion = hsec;
+		}
+		else // check 3D floors
+		{
+			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			{
+				let ff = CurSector.Get3DFloor(i);
+				if ( !(ff.flags&F3DFloor.FF_EXISTS) || (ff.flags&F3DFloor.FF_SOLID) || (!(ff.flags&F3DFloor.FF_SWIMMABLE) && (ff.alpha == 0)) ) continue;
+				double ff_bottom = ff.bottom.ZAtPoint(pos.xy);
+				double ff_top = ff.top.ZAtPoint(pos.xy);
+				if ( (ff_top <= pos.z) || (ff_bottom > centerpos.z) ) continue;
+				if ( headpos.z <= ff_top )
+				{
+					headregion = ff.model;
+				}
+				break;
+			}
+		}
+		int curunder = UNDER_NONE;
+		if ( headregion )
+		{
+			switch ( headregion.damagetype )
+			{
+			case 'Fire':
+			case 'Lava':
+				curunder = UNDER_LAVA;
+				break;
+			case 'Slime':
+			case 'Poison':
+			case 'PoisonCloud':
+				curunder = UNDER_SLIME;
+				break;
+			case 'Ice':
+			case 'Drowning':
+			default:
+				curunder = UNDER_WATER;
+				break;
+			}
+		}
+		if ( (curunder != lastunder) || restore )
+		{
+			static const string undersnd[] = {"","misc/underwater","misc/underslime","misc/underlava"};
+			static const string entersnd[] = {"","misc/waterenter","misc/slimeenter","misc/lavaenter"};
+			static const string exitsnd[] = {"","misc/waterexit","misc/slimeexit","misc/lavaexit"};
+			A_StopSound(CHAN_AMBEXTRA);
+			if ( curunder > UNDER_NONE )
+			{
+				A_StartSound(undersnd[curunder],CHAN_AMBEXTRA,CHANF_LOOPING|CHANF_UI);
+				if ( !restore && (players[consoleplayer].Camera == self) )
+					A_StartSound(entersnd[curunder],CHAN_FOOTSTEP,CHANF_OVERLAP|CHANF_UI);
+			}
+			if ( !restore && (lastunder > UNDER_NONE) && (players[consoleplayer].Camera == self) )
+				A_StartSound(exitsnd[lastunder],CHAN_FOOTSTEP,CHANF_OVERLAP|CHANF_UI);
+		}
+		if ( curunder > UNDER_NONE )
+			A_SoundVolume(CHAN_AMBEXTRA,(players[consoleplayer].Camera==self)?1.:0.);
+		lastunder = curunder;
+	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( !player ) return;
-		double traveldist = level.Vec3Diff(oldpos,pos).length();
-		if ( waterlevel < 3 )
+		double traveldist = level.Vec3Diff(prev,pos).length();
+		if ( waterlevel < 2 )
 		{
 			if ( !player.onground || bNoGravity )
 			{
@@ -309,8 +392,8 @@ Class Demolitionist : PlayerPawn
 				mystats.grounddist += traveldist;
 			}
 		}
-		if ( traveldist > mystats.topspeed ) mystats.topspeed = traveldist;
-		oldpos = pos;
+		CheckUnderwaterAmb();
+		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
@@ -334,7 +417,8 @@ Class Demolitionist : PlayerPawn
 			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
 			if ( (player == players[consoleplayer]) && (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
-			A_Footstep(0,true,clamp(-lastvelz*0.05,0.01,1.0));
+			if ( lastvelz < -1 )
+				A_Footstep(0,true,clamp(-lastvelz*0.05,0.0,1.0));
 		}
 		lastground = player.onground;
 		lastvelz = prevvelz;
@@ -381,7 +465,7 @@ Class Demolitionist : PlayerPawn
 				double moveang = atan2(dir.y,dir.x);
 				Vector3 sc = level.SphericalCoords(pos,a.pos,(moveang,0));
 				if ( abs(sc.x) > 60 ) continue;
-				// bosses and large monsters will stop the player
+				// large monsters will stop the player
 				A_QuakeEx(1,1,1,3,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				a.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
 				if ( a.bDONTTHRUST || (a.Mass >= Mass*5) )
@@ -714,6 +798,11 @@ Class Demolitionist : PlayerPawn
 			}
 			last_jump_held = level.maptime+1;
 		}
+	}
+	override void DeathThink()
+	{
+		// TODO reboot mechanic, death camera that doesn't move body
+		Super.DeathThink();
 	}
 	override void PlayIdle()
 	{

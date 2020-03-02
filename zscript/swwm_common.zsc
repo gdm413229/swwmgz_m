@@ -1,14 +1,15 @@
 // common code goes here
 enum ESWWMGZChannels
 {
-	CHAN_YOUDONEFUCKEDUP = 63200,
-	CHAN_DEMOVOICE = 63201,
-	CHAN_FOOTSTEP = 63202,
-	CHAN_WEAPONEXTRA = 63203,
-	CHAN_POWERUP = 63204,
-	CHAN_POWERUPEXTRA = 63205,
-	CHAN_JETPACK = 63206,
-	CHAN_ITEMEXTRA = 63207
+	CHAN_YOUDONEFUCKEDUP = 63200,	// exception handler
+	CHAN_DEMOVOICE = 63201,	// demolitionist voices
+	CHAN_FOOTSTEP = 63202,	// footstep sounds and others
+	CHAN_WEAPONEXTRA = 63203,	// additional weapon sounds (usually loops)
+	CHAN_POWERUP = 63204,	// powerup sounds
+	CHAN_POWERUPEXTRA = 63205,	// additional powerup sounds
+	CHAN_JETPACK = 63206,	// jetpack sound
+	CHAN_ITEMEXTRA = 63207,	// additional item sounds
+	CHAN_AMBEXTRA = 63208	// player ambience when submerged
 };
 
 // Misc. Utility code
@@ -367,6 +368,8 @@ Class SWWMScoreObj : Thinker
 	int lifespan, initialspan;
 	int starttic, seed, seed2;
 	int ofs;
+	SWWMScoreObj prev, next;
+	bool damnum;
 
 	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, String str = "", int ofs = 0 )
 	{
@@ -381,7 +384,54 @@ Class SWWMScoreObj : Thinker
 		o.seed = Random[ScoreBits]();
 		o.seed2 = Random[ScoreBits]();
 		o.ofs = ofs;
+		o.damnum = (tcolor == Font.CR_RED) || (tcolor == Font.CR_GREEN);
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			if ( o.damnum )
+			{
+				o.next = hnd.damnums;
+				if ( hnd.damnums ) hnd.damnums.prev = o;
+				hnd.damnums = o;
+				hnd.damnums_cnt++;
+			}
+			else
+			{
+				o.next = hnd.scorenums;
+				if ( hnd.scorenums ) hnd.scorenums.prev = o;
+				hnd.scorenums = o;
+				hnd.scorenums_cnt++;
+			}
+		}
 		return o;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			if ( damnum )
+			{
+				hnd.damnums_cnt--;
+				if ( !prev ) hnd.damnums = next;
+			}
+			else
+			{
+				hnd.scorenums_cnt--;
+				if ( !prev ) hnd.scorenums = next;
+			}
+			if ( !prev )
+			{
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
 	}
 
 	override void Tick()
@@ -403,6 +453,7 @@ Class SWWMInterest : Thinker
 	Key trackedkey;
 	Line trackedline;
 	Vector3 pos;
+	SWWMInterest prev, next;
 
 	static SWWMInterest Spawn( Vector3 pos = (0,0,0), Key thekey = null, Line theline = null )
 	{
@@ -419,7 +470,35 @@ Class SWWMInterest : Thinker
 			return null;
 		}
 		i.pos = thekey?thekey.Vec3Offset(0,0,thekey.height/2):pos;
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			i.next = hnd.intpoints;
+			if ( hnd.intpoints ) hnd.intpoints.prev = i;
+			hnd.intpoints = i;
+			hnd.intpoints_cnt++;
+		}
 		return i;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.intpoints_cnt--;
+			if ( !prev )
+			{
+				hnd.intpoints = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
 	}
 
 	override void Tick()
@@ -439,6 +518,7 @@ Class SWWMCombatTracker : Thinker
 	DynamicValueInterpolator intp;
 	Vector3 pos, prevpos;
 	PlayerInfo myplayer;
+	SWWMCombatTracker prev, next;
 
 	static SWWMCombatTracker Spawn( Actor target )
 	{
@@ -461,7 +541,35 @@ Class SWWMCombatTracker : Thinker
 		t.prevpos = level.Vec3Offset(target.prev,(0,0,target.default.height));
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			t.next = hnd.trackers;
+			if ( hnd.trackers ) hnd.trackers.prev = t;
+			hnd.trackers = t;
+			hnd.trackers_cnt++;
+		}
 		return t;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.trackers_cnt--;
+			if ( !prev )
+			{
+				hnd.trackers = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
 	}
 
 	override void Tick()
@@ -1217,6 +1325,10 @@ Class SWWMHandler : EventHandler
 	transient int highesttic;
 	transient Array<QueuedFlash> flashes;
 	transient Array<LastLine> lastlines;
+	SWWMCombatTracker trackers;
+	SWWMScoreObj scorenums, damnums;
+	SWWMInterest intpoints;
+	int trackers_cnt, scorenums_cnt, damnums_cnt, intpoints_cnt;
 	bool tookdamage[MAXPLAYERS];
 	int spreecount[MAXPLAYERS];
 	int lastkill[MAXPLAYERS];
@@ -1224,6 +1336,7 @@ Class SWWMHandler : EventHandler
 	int lastitemcount[MAXPLAYERS];
 
 	transient CVar mutevoice;
+	transient ui CVar useshaders;
 
 	static int AddOneliner( String type, int level, int delay = 5 )
 	{
@@ -1420,10 +1533,16 @@ Class SWWMHandler : EventHandler
 		else if ( e.IsSaveGame || e.IsReopen )
 		{
 			// clear all floating numbers
-			let ti = ThinkerIterator.Create("SWWMScoreObj",Thinker.STAT_USER);
-			Thinker t;
-			while ( t = ti.Next() )
-				t.Destroy();
+			for ( SWWMScoreObj sc=scorenums; sc; sc=sc.Next )
+				sc.lifespan = 0;
+			for ( SWWMScoreObj sc=damnums; sc; sc=sc.Next )
+				sc.lifespan = 0;
+			// restore underwater sounds for players
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || (players[i].mo is 'Demolitionist') ) continue;
+				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
+			}
 		}
 	}
 
@@ -1876,74 +1995,7 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
-		else if ( e.Replacee is 'ArtiPoisonBag' )
-		{
-			switch( Random[Replacement](0,6) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				e.Replacement = redpool[!Random[Replacement](0,2)];
-				break;
-			case 3:
-			case 4:
-				e.Replacement = greenpool[!Random[Replacement](0,2)];
-				break;
-			default:
-				e.Replacement = 'SWWMNothing';
-			}
-		}
-		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') )
-		{
-			switch( Random[Replacement](0,6) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				e.Replacement = redpool[Random[Replacement](0,2)];
-				break;
-			case 3:
-			case 4:
-				e.Replacement = greenpool[Random[Replacement](0,2)];
-				break;
-			case 5:
-				e.Replacement = whitepool[Random[Replacement](0,1)];
-				break;
-			case 6:
-				e.Replacement = purplepool[0];
-				break;
-			}
-		}
-		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
-		{
-			switch( Random[Replacement](0,10) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				e.Replacement = redpool[Random[Replacement](2,3)];
-				break;
-			case 3:
-			case 4:
-				e.Replacement = greenpool[Random[Replacement](2,3)];
-				break;
-			case 5:
-			case 6:
-				e.Replacement = whitepool[Random[Replacement](1,2)];
-				break;
-			case 7:
-			case 8:
-				e.Replacement = purplepool[Random[Replacement](0,2)];
-				break;
-			case 9:
-				e.Replacement = bluepool[Random[Replacement](0,2)];
-				break;
-			case 10:
-				e.Replacement = blackpool[0];
-				break;
-			}
-		}
-		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
+		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') || (e.Replacee is 'ArtiPoisonBag') )
 		{
 			switch( Random[Replacement](0,14) )
 			{
@@ -1951,27 +2003,87 @@ Class SWWMHandler : EventHandler
 			case 1:
 			case 2:
 			case 3:
-				e.Replacement = redpool[Random[Replacement](3,5)];
+				e.Replacement = redpool[Random[Replacement](0,1)];
 				break;
 			case 4:
 			case 5:
 			case 6:
-				e.Replacement = greenpool[Random[Replacement](3,4)];
+				e.Replacement = greenpool[Random[Replacement](0,1)];
+				break;
+			case 7:
+				e.Replacement = purplepool[0];
+				break;
+			case 8:
+				e.Replacement = purplepool[0];
+				break;
+			default:
+				e.Replacement = 'SWWMNothing';
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
+		{
+			switch( Random[Replacement](0,14) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				e.Replacement = redpool[Random[Replacement](1,2)];
+				break;
+			case 4:
+			case 5:
+			case 6:
+				e.Replacement = greenpool[Random[Replacement](1,2)];
+				break;
+			case 7:
+			case 8:
+				e.Replacement = whitepool[Random[Replacement](0,1)];
+				break;
+			case 9:
+			case 10:
+			case 11:
+				e.Replacement = purplepool[Random[Replacement](0,1)];
+				break;
+			case 12:
+			case 13:
+				e.Replacement = bluepool[Random[Replacement](0,2)];
+				break;
+			case 14:
+				e.Replacement = blackpool[0];
+				break;
+			}
+		}
+		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
+		{
+			switch( Random[Replacement](0,15) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				e.Replacement = redpool[Random[Replacement](2,5)];
+				break;
+			case 4:
+			case 5:
+			case 6:
+				e.Replacement = greenpool[Random[Replacement](2,4)];
 				break;
 			case 7:
 			case 8:
 			case 9:
-				e.Replacement = whitepool[Random[Replacement](2,3)];
+				e.Replacement = whitepool[Random[Replacement](1,3)];
 				break;
 			case 10:
 			case 11:
+			case 12:
 				e.Replacement = purplepool[Random[Replacement](1,2)];
 				break;
-			case 12:
 			case 13:
+			case 14:
 				e.Replacement = bluepool[Random[Replacement](2,3)];
 				break;
-			case 14:
+			case 15:
 				e.Replacement = blackpool[Random[Replacement](0,2)];
 				break;
 			}
@@ -2222,6 +2334,36 @@ Class SWWMHandler : EventHandler
 		if ( !statusbar || !(statusbar is 'SWWMStatusBar') ) return;
 		SWWMStatusBar(statusbar).viewpos = e.viewpos;
 		SWWMStatusBar(statusbar).viewrot = (e.viewangle,e.viewpitch,e.viewroll);
+	}
+
+	// various shaders
+	override void RenderOverlay( RenderEvent e )
+	{
+		PlayerInfo p = players[consoleplayer];
+		if ( !useshaders ) useshaders = CVar.GetCVar('swwm_shaders',p);
+		let mo = p.mo;
+		if ( !mo ) return;
+		bool pc = (p.camera == mo);
+		let rage = RagekitPower(mo.FindInventory("RagekitPower"));
+		if ( pc && rage && useshaders.GetBool() )
+		{
+			Shader.SetEnabled(p,"RagekitShader",true);
+			Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+			double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"RagekitShader","xtrastr",xstrastr**2.);
+		}
+		else Shader.SetEnabled(p,"RagekitShader",false);
+		let ghost = GhostPower(mo.FindInventory("GhostPower"));
+		if ( pc && ghost && useshaders.GetBool() ) Shader.SetEnabled(p,"GhostShader",true);
+		else Shader.SetEnabled(p,"GhostShader",false);
+		let sunny = InvinciballPower(mo.FindInventory("InvinciballPower"));
+		if ( pc && sunny && useshaders.GetBool() )
+		{
+			Shader.SetEnabled(p,"InvinciShader",true);
+			double str = max(0,sunny.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"InvinciShader","str",str);
+		}
+		else Shader.SetEnabled(p,"InvinciShader",false);
 	}
 
 	static void DoFlash( Actor camera, Color c, int duration )

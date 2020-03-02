@@ -931,6 +931,7 @@ Class HammerspaceEmbiggener : Inventory
 {
 	override Inventory CreateCopy( Actor other )
 	{
+		other.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 		// Find every unique type of ammoitem. Give it to the player if
 		// he doesn't have it already, and increase its maximum capacity.
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
@@ -996,6 +997,7 @@ Class HammerspaceEmbiggener : Inventory
 		bool res = Super.HandlePickup(item);
 		if ( item.GetClass() == GetClass() )
 		{
+			Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 			// readjust ammo values to new capacity
 			for ( Inventory i=Owner.Inv; i; i=i.Inv )
 			{

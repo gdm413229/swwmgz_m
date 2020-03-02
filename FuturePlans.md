@@ -13,12 +13,19 @@ after the first release.
   - Super Happy Fun Ball (SWWM Z)
 * Additional Demolitionist Menu features
   - Per-monster kill tracker in stats tab
-  - Music player with a selection of Saya's favourite tracks
+  - Radio
   - Pong minigame
+  - Selling items at the store
+* Fanart on the intermission screen
+* 4komas on the intermission screen
 * Actually make a fancy titlemap
 * Mod trailer
 * Additional HUD stuff
   - Minimap with radar like in SWWM Z
+  - Fake livestream chat, with dynamic reactions to all sorts of stuff
 * Character and item images for the library
 * Full Mashiro model for Lämp easter egg
+* Summonable Ibuki companion (w/ optional "stream friendly" clothing)
+* Saya model, for scenes or something idk
 * Japanese Localization???
+* Strife support, with rewritten dialogue

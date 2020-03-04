@@ -1266,36 +1266,58 @@ Class TheBall : Actor
 			return 1;
 		// check if we should rip or bounce
 		// girthitude
-		double girth = (victim.radius+victim.height)/2.*max(50,victim.mass);
+		double girth = (victim.radius+victim.height)/2.*max(50,victim.mass)*(victim.health/double(victim.GetSpawnHealth()));
 		// how hard this damn thing is going to slam
 		double slamforce = vel.length()*350.+heat*120;
-		SWWMHandler.DoKnockback(victim,vel.unit(),slamforce);
-		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && victim.bSHOOTABLE);
 		int dmg = int(vel.length()*4.2+heat*80);
+		bool is_schutt = victim.bSHOOTABLE;
+		// critical hit!
+		if ( is_schutt && !Random[Spreadgun](0,9) )
+		{
+			Spawn("SWWMItemFog",pos);
+			A_StartSound("misc/clonk",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+			victim.A_StartSound("misc/clonk",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			slamforce *= 4;
+			dmg *= 4;
+			vel *= 1.1;
+			let numpt = Random[Spreadgun](40,50);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,8);
+				let s = Spawn("SWWMSpark",pos);
+				s.scale *= 3.;
+				s.alpha *= .2;
+				s.vel = pvel;
+			}
+		}
+		SWWMHandler.DoKnockback(victim,vel.unit(),slamforce);
+		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && is_schutt);
 		dmg = victim.DamageMobj(self,target,dmg,'Concussion',DMG_THRUSTLESS);
 		Vector3 dir = -vel.unit();
 		// slam jam
 		if ( bleeds )
 		{
-			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/40.)**.5);
-			victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/40.)**.5);
+			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
 			victim.TraceBleed(dmg,self);
 			SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
 		}
 		else
 		{
-			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/40.)**.5);
-			victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/40.)**.5);
-			if ( vel.length() > 15 )
+			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( vel.length() > 15. )
 			{
 				let s = Spawn("BallImpact",pos);
 				s.angle = atan2(dir.y,dir.x);
 				s.pitch = asin(-dir.z);
 			}
 		}
-		if ( slamforce > girth )
+		// only rip shootables
+		if ( (slamforce > girth) && is_schutt )
 		{
-			vel *= .8;
+			vel *= .7;
 			return 1;
 		}
 		// force bounce
@@ -1379,11 +1401,13 @@ Class TheBall : Actor
 			if ( !BlockingMobj.bINVULNERABLE && !BlockingMobj.bNOBLOOD )
 				bcefact *= .6;
 		}
-		vel = bcefact*((vel dot HitNormal)*HitNormal*-1.2+vel);
+		vel = (vel dot HitNormal)*HitNormal*FRandom[Spreadgun](-1.8,-1.)+vel;
+		vel += (FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4));
+		vel *= bcefact;
 		// slam jam
 		if ( !BlockingMobj )
 		{
-			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,max(0.,(vel.length()/60.-.1))**.5);
+			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,max(0.,(vel.length()/30.-.2))**.5);
 			if ( vel.length() > 15 )
 			{
 				let s = Spawn("BallImpact",pos);

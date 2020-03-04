@@ -48,6 +48,12 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override void FlushNotify()
 	{
+		// flush interpolators (useful since this virtual gets called
+		// when loading saves, too)
+		HealthInter.Reset(CPlayer.Health);
+		ScoreInter.Reset(SWWMCredits.Get(CPlayer));
+		FuelInter.Reset((CPlayer.mo is 'Demolitionist')?int(Demolitionist(CPlayer.mo).dashfuel):0);
+		DashInter.Reset((CPlayer.mo is 'Demolitionist')?int((40-Demolitionist(CPlayer.mo).dashcooldown)*3.):0);
 		if ( level.maptime <= 1 )
 		{
 			// flush ALL messages
@@ -683,12 +689,12 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		if ( ht > 200 )
 		{
-			hw = int(min(ht-100,400)*0.25);
+			hw = int(min(ht-200,300)/3.);
 			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
 		}
 		if ( ht > 500 )
 		{
-			hw = int(min(ht-500,500)*0.2);
+			hw = int(min(ht-500,500)/5.);
 			Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
 		}
 		int hcolor = Font.CR_RED;
@@ -804,6 +810,50 @@ Class SWWMStatusBar : BaseStatusBar
 		// don't do anything
 	}
 
+	private void DrawDeath()
+	{
+		// death prompt
+		let demo = Demolitionist(CPlayer.mo);
+		if ( !demo || (CPlayer.Health > 0) ) return;
+		String str;
+		double alph;
+		int len;
+		double xx, yy;
+		if ( demo.player.viewheight <= 6 )
+		{
+			Screen.Dim("Black",min(demo.deadtimer/80.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+			alph = clamp((demo.deadtimer-60)/60.,0.,1.);
+			str = String.Format(StringTable.Localize("$SWWM_URDED"),CPlayer.GetUserName());
+			len = mTewiFont.mFont.StringWidth(str);
+			xx = (ss.x-len)/2.;
+			yy = (ss.y-mTewiFont.mFont.GetHeight()*4)/2.;
+			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			alph = clamp((demo.deadtimer-120)/60.,0.,1.);
+			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
+			len = mTewiFont.mFont.StringWidth(str);
+			xx = (ss.x-len)/2.;
+			yy = ss.y/2.;
+			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			if ( !swwm_revive )
+				return;
+			alph = clamp((demo.deadtimer-200)/60.,0.,1.);
+			str = String.Format(StringTable.Localize("$SWWM_URDED3"),CPlayer.GetUserName());
+			len = mTewiFont.mFont.StringWidth(str);
+			xx = (ss.x-len)/2.;
+			yy = (ss.y+mTewiFont.mFont.GetHeight()*2)/2.;
+			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			if ( demo.revivefail > level.maptime )
+			{
+				str = StringTable.Localize("$SWWM_REFAIL");
+				len = mTewiFont.mFont.StringWidth(str);
+				xx = (ss.x-len)/2.;
+				yy = ss.y-30;
+				if ( (gametic%12) < 6 )
+					Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+	}
+
 	override void Draw( int state, double TicFrac )
 	{
 		Super.Draw(state,TicFrac);
@@ -823,5 +873,6 @@ Class SWWMStatusBar : BaseStatusBar
 		DrawStatus();
 		DrawWeapon();
 		DrawMessages();
+		DrawDeath();
 	}
 }

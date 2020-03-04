@@ -374,20 +374,20 @@ The upper cap for these is 200%.
 
 ### Blast Suit, replaces Green Armor, Silver Shield, Mesh Armor
 
-The blast suit is a nice little light armor which provides a 75% reduction to
+The blast suit is a nice little light armor which provides a 30% reduction to
 damage and an additional 50% to splash damage.
 
-Can handle a total of 200 damage before breaking.
+Can handle a total of 150 damage before breaking.
 
 ### War Armor, replaces Blue Armor, Enchanted Shield, Falcon Shield
 
 Decent armor, protects very well against all damage. Reduction factors are as
 follows:
- * 90% reduction for elemental (fire, ice, electric, etc.)
- * 80% reduction to everything else
+ * 80% reduction for elemental (fire, ice, electric, etc.)
+ * 50% reduction to everything else
  * 70% reduction for all splash damage (multiplicative on top of the other two)
 
-The armor can eat up a total of 600 damage before breaking.
+The armor can eat up a total of 250 damage before breaking.
 
 ### Grilled Cheese Sandwich, replaces Megasphere, Morph Ovum, Platinum Helm
 

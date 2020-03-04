@@ -2,13 +2,13 @@
    Complex grain shader ported over from MariENB
    (C)2012-2018 Marisa Kirisame
 */
-const float nf = 0.000005;
+const float nf = 0.00001;
 const vec3 nm1 = vec3(2.05,3.11,2.22);
 const float nk = 0.04;
 const vec3 nm2 = vec3(4.25,9.42,6.29);
-const float ns = -0.08;
-const float np = 3.95;
-const float bnp = 1.7;
+const float ns = -0.28;
+const float np = 2.1;
+const float bnp = 0.7;
 
 #define darkmask(a,b) (a>0.5)?(2.0*a*(0.5+b)):(1.0-2.0*(1.0-a)*(1.0-((0.5+b))))
 
@@ -52,8 +52,8 @@ void main()
 {
 	vec2 coord = TexCoord;
 	vec4 res = texture(InputTexture,coord);
-	/*vec2 sfact = max(vec2(320.0,200.0),textureSize(InputTexture,0)*0.5);
-	coord = floor(coord*sfact)/sfact;*/
+	vec2 sfact = max(vec2(640.0,400.0),textureSize(InputTexture,0)*0.5);
+	coord = floor(coord*sfact)/sfact;
 	res.rgb = grain(res.rgb,coord);
 	FragColor = res;
 }

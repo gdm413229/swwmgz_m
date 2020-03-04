@@ -13,7 +13,7 @@ Class ArmorNugget : SWWMArmor
 
 	override int HandleDamage( int damage, Name damageType, int flags )
 	{
-		double factor = amount*.01;
+		double factor = amount*.1;
 		return int(ceil(damage*factor));
 	}
 }
@@ -57,9 +57,9 @@ Class BlastSuit : SWWMArmor
 	Default
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_BlastSuit.png";
-		Inventory.Amount 200;
-		Inventory.MaxAmount 200;
-		Inventory.InterHubAmount 200;
+		Inventory.Amount 150;
+		Inventory.MaxAmount 150;
+		Inventory.InterHubAmount 150;
 		SWWMArmor.ArmorPriority 2;
 		SWWMArmor.DrainMessage "$D_BLASTSUIT";
 		SWWMArmor.GiverArmor "BlastSuitItem";
@@ -67,7 +67,7 @@ Class BlastSuit : SWWMArmor
 
 	override int HandleDamage( int damage, Name damageType, int flags )
 	{
-		double factor = .75;
+		double factor = .3;
 		if ( flags&DMG_EXPLOSION ) factor = 1.-(1.-factor)*.5;
 		return int(ceil(damage*factor));
 	}
@@ -102,9 +102,9 @@ Class WarArmor : SWWMArmor
 	Default
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_WarArmor.png";
-		Inventory.Amount 600;
-		Inventory.MaxAmount 600;
-		Inventory.InterHubAmount 600;
+		Inventory.Amount 250;
+		Inventory.MaxAmount 250;
+		Inventory.InterHubAmount 250;
 		SWWMArmor.ArmorPriority 6;
 		SWWMArmor.DrainMessage "$D_WARARMOR";
 		SWWMArmor.GiverArmor "WarArmorItem";
@@ -114,8 +114,8 @@ Class WarArmor : SWWMArmor
 	{
 		double factor;
 		// should be enough "elemental" damage types I guess
-		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Lightning') || (damageType == 'Wind') || (damageType == 'Water') ) factor = .9;
-		else factor = .8;
+		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Lightning') || (damageType == 'Wind') || (damageType == 'Water') ) factor = .8;
+		else factor = .5;
 		if ( flags&DMG_EXPLOSION ) factor = 1.-(1.-factor)*.7;
 		return int(ceil(damage*factor));
 	}

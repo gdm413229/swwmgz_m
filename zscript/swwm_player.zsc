@@ -9,7 +9,7 @@ Class Demolitionist : PlayerPawn
 	bool sendtoground;
 	bool key_reentrant;
 
-	int lastdamage;
+	int lastdamage, lastdamagetic;
 	bool lastground;
 	int lastgroundtic;
 	double lastvelz, prevvelz;
@@ -33,6 +33,7 @@ Class Demolitionist : PlayerPawn
 	};
 
 	int lastunder;
+	int deadtimer, revivefail;
 
 	Default
 	{
@@ -503,7 +504,8 @@ Class Demolitionist : PlayerPawn
 		// lucky collar
 		if ( Health < 25 ) damage /= 4;
 		if ( source == self ) damage /= 2;
-		int lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage,10,80));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
 		{
 			lastmpain = level.maptime;
@@ -627,7 +629,6 @@ Class Demolitionist : PlayerPawn
 				double spd = vel.length();
 				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
 				else vel = vel+accel/TICRATE;
-				player.jumptics = -2;
 			}
 			if ( abs(roll) > 0. ) roll += clamp(deltaangle(roll,0),-3.,3.);
 		}
@@ -635,7 +636,7 @@ Class Demolitionist : PlayerPawn
 		guidepitch *= .9;
 		guideroll *= .9;
 		// anchor to ground when going down steps
-		if ( !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
+		if ( lastground && !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
 		{
 			ssup = max(0,(pos.z-floorz));
 			SetOrigin(Vec2OffsetZ(0,0,floorz),true);
@@ -801,8 +802,78 @@ Class Demolitionist : PlayerPawn
 	}
 	override void DeathThink()
 	{
-		// TODO reboot mechanic, death camera that doesn't move body
-		Super.DeathThink();
+		player.Uncrouch();
+		TickPSprites();
+		player.onground = (pos.Z<=floorz);
+		// ded (demo-chan falls faster tho)
+		player.deltaviewheight = 0;
+		if ( player.viewheight > 6 ) player.viewheight -= 3;
+		if ( player.viewheight < 6 ) player.viewheight = 6;
+		// center pitch
+		double dpitch = clamp(deltaangle(pitch,0),-6,6);
+		if ( abs(dpitch) < 3. ) pitch = 0.;
+		else pitch += dpitch;
+		// add roll
+		double droll = clamp(deltaangle(roll,50)*.5,-5,5);
+		if ( abs(droll) < 2. ) roll = 50.;
+		else roll += droll;
+		player.mo.CalcHeight();
+		if ( player.damagecount ) player.damagecount--;
+		if ( player.poisoncount ) player.poisoncount--;
+		if ( player.viewheight <= 6 )
+		{
+			deadtimer++;
+			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
+			{
+				// standard behaviour, respawn normally
+				if ( (Level.maptime >= player.respawn_time) || ((player.cmd.buttons&BT_USE) && !player.Bot) )
+				{
+					player.cls = null;
+					player.playerstate = PST_REBORN;
+					if ( special1 > 2 ) special1 = 0;
+				}
+			}
+			else if ( (player.cmd.buttons&BT_USE) && (deadtimer > 150) )
+			{
+				// reload save
+				player.cls = null;
+				player.playerstate = PST_ENTER;
+				if ( special1 > 2 ) special1 = 0;
+			}
+			else if ( (player.cmd.buttons&BT_ATTACK) && (deadtimer > 150) && swwm_revive )
+			{
+				// reboot (if possible)
+				if ( !FindInventory("ReviveCooldown") )
+				{
+					player.Resurrect();
+					roll = 0;
+					let s = Spawn("DemolitionistShockwave",pos);
+					s.target = self;
+					s.special1 = 30;
+					ReactionTime = 17;
+					A_Stop();
+					A_AlertMonsters();
+					if ( player == players[consoleplayer] )
+					{
+						A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
+						A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.7);
+						A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.4);
+					}
+					SWWMHandler.DoFlash(self,Color(255,255,255,255),10);
+					SWWMHandler.DoFlash(self,Color(255,128,192,255),30);
+					if ( special1 > 2 ) special1 = 0;
+					if ( swwm_revivecooldown > 0 )
+						GiveInventory("ReviveCooldown",1);
+				}
+				else
+				{
+					A_StartSound("*usefail",CHAN_ITEM,CHANF_UI|CHANF_LOCAL);
+					SWWMHandler.DoFlash(self,Color(64,255,0,0),30);
+					revivefail = level.maptime+20;
+				}
+			}
+		}
+		else deadtimer = 0;
 	}
 	override void PlayIdle()
 	{
@@ -1480,3 +1551,38 @@ Class DemolitionistShockwave : Actor
 		Stop;
 	}
 }
+
+Class ReviveCooldown : Powerup
+{
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_Revive.png";
+		Powerup.Duration -30;
+	}
+
+	override void Tick()
+	{
+		if ( !Owner ) Destroy();
+		if ( Owner.Health <= 0 ) return;	// timer does not go down when dead
+		if ( (EffectTics == 0) || ((EffectTics > 0) && (--EffectTics == 0)) )
+			Destroy ();
+	}
+	override void InitEffect()
+	{
+		Super.InitEffect();
+		// adjust the duration
+		EffectTics = max(0,swwm_revivecooldown)*Thinker.TICRATE;
+	}
+	override void EndEffect()
+	{
+		Super.EndEffect();
+		if ( !Owner ) return;
+		Owner.A_StartSound("demolitionist/revive",CHAN_ITEMEXTRA);
+		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_REFAIL"));
+	}
+	override void OwnerDied()
+	{
+		// do nothing, this "powerup" is preserved on death
+	}
+}
+

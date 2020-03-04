@@ -430,7 +430,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		if ( players[consoleplayer].Health <= 0 )
 		{
 			// ded
-			MenuSound("menu/democlose");
 			Close();
 			return;
 		}
@@ -440,7 +439,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -796,9 +795,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			xx = 9;
 			yy = 23;
 			// wish I could use macros for this
-			int thour = ((gametic-stats.lastspawn)/(3600*Thinker.TICRATE));
-			int tmin = ((gametic-stats.lastspawn)/(60*Thinker.TICRATE))%60;
-			int tsec = ((gametic-stats.lastspawn)/Thinker.TICRATE)%60;
+			int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
+			int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
+			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
 			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
 			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
@@ -850,6 +849,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += 16;
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
 			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));

@@ -46,7 +46,7 @@ Class SWWMStats : Thinker
 	PlayerInfo myplayer;
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
 		deaths,	damagedealt, damagetaken, mkill, hiscore, topdealt,
-		toptaken;
+		toptaken, skill;
 	double grounddist, airdist, fuelusage, topspeed;
 	Array<WeaponUsage> wstats;
 	Array<Class<Weapon> > alreadygot;
@@ -596,8 +596,11 @@ Class SWWMCombatTracker : Thinker
 		if ( newhealth != lasthealth ) updated = level.maptime+35;
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
+			// enemies within 2000mu that have us as target
 			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) ) updated = level.maptime+70;
-			if ( mytarget.player ) updated = level.maptime+35;
+			// players (but not voodoo dolls), always visible in sp/coop
+			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
+			// enemies we're directly aiming at within 600mu
 			if ( players[consoleplayer].mo.CheckSight(mytarget) && ((mytarget.Vec3To(players[consoleplayer].mo).length() < 600) || (players[consoleplayer].mo.AimTarget() == mytarget)) ) updated = level.maptime;
 		}
 		lasthealth = newhealth;
@@ -1544,6 +1547,12 @@ Class SWWMHandler : EventHandler
 				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
 			}
 		}
+		PlayerInfo p = players[consoleplayer];
+		Shader.SetEnabled(p,"RagekitShader",false);
+		Shader.SetEnabled(p,"GhostShader",false);
+		Shader.SetEnabled(p,"InvinciShader",false);
+		Shader.SetEnabled(p,"Glitch",false);
+		Shader.SetEnabled(p,"Grain",false);
 	}
 
 	override void PlayerDied( PlayerEvent e )
@@ -1596,7 +1605,7 @@ Class SWWMHandler : EventHandler
 			s = new("SWWMStats");
 			s.ChangeStatNum(Thinker.STAT_STATIC);
 			s.myplayer = p;
-			s.lastspawn = gametic;
+			s.lastspawn = level.totaltime;
 			s.favweapon = -1;
 		}
 		// reset some vars
@@ -1640,7 +1649,7 @@ Class SWWMHandler : EventHandler
 		}
 		// reset uptime since player had just died
 		SWWMStats s = SWWMStats.Find(e.Thing.player);
-		if ( s ) s.lastspawn = gametic;
+		if ( s ) s.lastspawn = level.totaltime;
 	}
 
 	override void WorldTick()
@@ -1865,6 +1874,8 @@ Class SWWMHandler : EventHandler
 				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),5000);
 			}
 			spreecount[pnum]++;
+			if ( s && spreecount[pnum] > s.skill )
+				s.skill = spreecount[pnum];
 		}
 	}
 
@@ -2002,7 +2013,6 @@ Class SWWMHandler : EventHandler
 			case 0:
 			case 1:
 			case 2:
-			case 3:
 				e.Replacement = redpool[Random[Replacement](0,1)];
 				break;
 			case 4:
@@ -2023,67 +2033,65 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
-			switch( Random[Replacement](0,14) )
+			switch( Random[Replacement](0,13) )
 			{
 			case 0:
 			case 1:
 			case 2:
-			case 3:
 				e.Replacement = redpool[Random[Replacement](1,2)];
 				break;
+			case 3:
 			case 4:
 			case 5:
-			case 6:
 				e.Replacement = greenpool[Random[Replacement](1,2)];
 				break;
+			case 6:
 			case 7:
-			case 8:
 				e.Replacement = whitepool[Random[Replacement](0,1)];
 				break;
+			case 8:
 			case 9:
 			case 10:
-			case 11:
 				e.Replacement = purplepool[Random[Replacement](0,1)];
 				break;
+			case 11:
 			case 12:
-			case 13:
 				e.Replacement = bluepool[Random[Replacement](0,2)];
 				break;
-			case 14:
+			case 13:
 				e.Replacement = blackpool[0];
 				break;
 			}
 		}
 		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
 		{
-			switch( Random[Replacement](0,15) )
+			switch( Random[Replacement](0,14) )
 			{
 			case 0:
 			case 1:
 			case 2:
-			case 3:
 				e.Replacement = redpool[Random[Replacement](2,5)];
 				break;
+			case 3:
 			case 4:
 			case 5:
-			case 6:
 				e.Replacement = greenpool[Random[Replacement](2,4)];
 				break;
+			case 6:
 			case 7:
 			case 8:
-			case 9:
 				e.Replacement = whitepool[Random[Replacement](1,3)];
 				break;
+			case 9:
 			case 10:
 			case 11:
-			case 12:
 				e.Replacement = purplepool[Random[Replacement](1,2)];
 				break;
+			case 12:
 			case 13:
-			case 14:
 				e.Replacement = bluepool[Random[Replacement](2,3)];
 				break;
-			case 15:
+			case 14:
 				e.Replacement = blackpool[Random[Replacement](0,2)];
 				break;
 			}
@@ -2364,6 +2372,27 @@ Class SWWMHandler : EventHandler
 			Shader.SetUniform1f(p,"InvinciShader","str",str);
 		}
 		else Shader.SetEnabled(p,"InvinciShader",false);
+		if ( pc && (mo is 'Demolitionist') )
+		{
+			let demo = Demolitionist(mo);
+			Shader.SetEnabled(p,"Glitch",true);
+			Shader.SetEnabled(p,"Grain",true);
+			Shader.SetUniform1f(p,"Glitch","Timer",(gametic+e.FracTic)/Thinker.TICRATE);
+			Shader.SetUniform1f(p,"Grain","Timer",(gametic+e.FracTic)/Thinker.TICRATE);
+			int lastdmg = (demo.Health>0)?demo.lastdamage:Random[Flicker](60,80);
+			int lastdmgtic = (demo.Health>0)?demo.lastdamagetic:(gametic+Random[Flicker](30,20));
+			double noiz = min(lastdmg*.3*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.7);
+			Shader.SetUniform1f(p,"Grain","ni",noiz);
+			noiz = min(lastdmg*.16*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.8);
+			Shader.SetUniform1f(p,"Glitch","str1",noiz);
+			noiz = min(lastdmg*.12*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),3.5);
+			Shader.SetUniform1f(p,"Glitch","str2",noiz);
+		}
+		else
+		{
+			Shader.SetEnabled(p,"Glitch",false);
+			Shader.SetEnabled(p,"Grain",false);
+		}
 	}
 
 	static void DoFlash( Actor camera, Color c, int duration )

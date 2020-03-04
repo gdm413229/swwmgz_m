@@ -106,7 +106,7 @@ Class SWWMSpareArmor : Inventory abstract
 		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
 		if ( pickup && !shouldautouse ) return false;
 		let cur = Owner.FindInventory(giveme);
-		if ( !cur || (cur.Amount < cur.MaxAmount) )
+		if ( !cur || (cur.Amount <= 0) )
 		{
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
@@ -356,6 +356,94 @@ Class SWWMWeaponLight : DynamicLight
 	}
 }
 
+Class PunchImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_QuakeEx(2,2,2,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
+		A_StartSound("demolitionist/punch",CHAN_VOICE);
+		A_SprayDecal("WallCrack",-20);
+		int numpt = Random[Ponch](5,10);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Ponch](-.8,.8),FRandom[Ponch](-.8,.8),FRandom[Ponch](-.8,.8))).unit()*FRandom[Ponch](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[Ponch](128,192));
+		}
+		numpt = Random[Ponch](4,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Ponch](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class BigPunchImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_QuakeEx(8,8,8,18,0,600,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:.9);
+		A_StartSound("pusher/althit",CHAN_VOICE);
+		A_SprayDecal("BigWallCrack",-20);
+		int numpt = Random[Ponch](9,16);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Ponch](-.8,.8),FRandom[Ponch](-.8,.8),FRandom[Ponch](-.8,.8))).unit()*FRandom[Ponch](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[Ponch](128,192));
+		}
+		numpt = Random[Ponch](9,15);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Ponch](9,16);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
 // Base class for all SWWM Weapons
 Class SWWMWeapon : Weapon abstract
 {
@@ -363,7 +451,7 @@ Class SWWMWeapon : Weapon abstract
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 
-	override void AttachToOwner (Actor other)
+	override void AttachToOwner( Actor other )
 	{
 		Inventory.AttachToOwner(other);
 		Ammo1 = AddAmmo(Owner,AmmoType1,bNoFirstGive?0:AmmoGive1);
@@ -445,16 +533,17 @@ Class SWWMWeapon : Weapon abstract
 	private action bool TryMelee( double angle, int dmg )
 	{
 		FTranslatedLineTarget t;
-		double slope = AimLineAttack(angle,2*DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		double slope = AimLineAttack(angle,1.5*DEFMELEERANGE,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
-		LineTrace(angle,2*DEFMELEERANGE,slope,0,player.viewheight,data:d);
+		LineTrace(angle,1.5*DEFMELEERANGE,slope,0,player.viewheight,data:d);
+		bool raging = CountInv("RagekitPower");
 		if ( d.HitType == TRACE_HitActor )
 		{
 			bool bloodless = true;
 			double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 			self.angle += clamp(diff,-5.,5.);
 			SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
-			if ( CountInv("RagekitPower") )
+			if ( raging )
 			{
 				invoker.bEXTREMEDEATH = true;
 				invoker.bNOEXTREMEDEATH = false;
@@ -468,15 +557,22 @@ Class SWWMWeapon : Weapon abstract
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
-			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(2,2,2,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
+			int quakin = raging?8:2;
+			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
 			if ( !d.HitActor.bNOBLOOD && !d.HitActor.bINVULNERABLE )
 			{
 				d.HitActor.TraceBleed(dmg,invoker);
 				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+				bloodless = false;
 			}
-			else bloodless = false;
-			A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12);
-			A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
+			else
+			{
+				let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation);
+				p.angle = atan2(-d.HitDir.y,-d.HitDir.x);
+			}
+			A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
+			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
+			else A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
 			A_AlertMonsters(300);
 			return true;
 		}
@@ -484,7 +580,8 @@ Class SWWMWeapon : Weapon abstract
 	}
 	action void A_Melee( int dmg = 40 )
 	{
-		int maxang = CountInv("RagekitPower")?24:12;
+		bool raging = CountInv("RagekitPower");
+		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
 		// check for walls instead
 		FTranslatedLineTarget t;
@@ -492,10 +589,29 @@ Class SWWMWeapon : Weapon abstract
 		FLineTraceData d;
 		LineTrace(angle,DEFMELEERANGE,slope,TRF_THRUACTORS,player.viewheight,data:d);
 		if ( d.HitType == TRACE_HitNone ) return;
-		if ( d.HitType == TRACE_HitWall )
-			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation-d.HitDir*4);
-		A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12);
-		A_StartSound("demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
+		Vector3 HitNormal = -d.HitDir;
+		if ( d.HitType == TRACE_HitFloor )
+		{
+			if ( d.Hit3DFloor ) HitNormal = -d.Hit3DFloor.top.Normal;
+			else HitNormal = d.HitSector.floorplane.Normal;
+		}
+		else if ( d.HitType == TRACE_HitCeiling )
+		{
+			if ( d.Hit3DFloor ) HitNormal = -d.Hit3DFloor.bottom.Normal;
+			else HitNormal = d.HitSector.ceilingplane.Normal;
+		}
+		else if ( d.HitType == TRACE_HitWall )
+		{
+			HitNormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+			if ( !d.LineSide ) HitNormal *= -1;
+			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation+HitNormal*4);
+		}
+		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
+		p.angle = atan2(HitNormal.y,HitNormal.x);
+		p.pitch = asin(-HitNormal.z);
+		int quakin = raging?4:1;
+		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
+		A_StartSound(raging?"pusher/althit":"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(100);
 	}
 	override void PlayUpSound( Actor origin )

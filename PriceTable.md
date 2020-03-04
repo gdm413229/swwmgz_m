@@ -73,6 +73,7 @@ be purchased from the store, they have to be found in maps.
   Item          | Price
   ------------- | -----
   Health Nugget	| 1200
+  Froggy Chair	| 1440
   H.Tetrahedron	| 3000
   H.Cube	| 8000
   Refresher	| 160000

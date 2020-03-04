@@ -70,6 +70,9 @@ SWWM_SCOREBONUS = "Show Score Bonuses";
 SWWM_EARBUSTER = "Reduce Wallbuster Loudness";
 SWWM_SHADERS = "Use Screen Shaders";
 SWWM_OTHERVOICE = "Co-op Voice";
+SWWM_REVIVE = "Emergency Reboot System";
+SWWM_REVIVECOOLDOWN = "Reboot Cooldown";
+SWWM_UNLIMITED = "Unlimited";
 TOOLTIP_SWWM_VOICETYPE = "Sets the voice pack for the player.";
 TOOLTIP_SWWM_MUTEVOICE = "Control what gets muted, if you'd rather have a more silent protagonist.";
 TOOLTIP_SWWM_FLASHSTRENGTH = "Screen flashes usually happen when firing some weapons, you can lower this if these effects are harmful for you.";
@@ -96,6 +99,8 @@ TOOLTIP_SWWM_SCOREBONUS = "Show additional bonus strings above score numbers (e.
 TOOLTIP_SWWM_EARBUSTER = "The Wallbuster's firing sounds may be painfully loud at times. This setting will limit the loudness to something more bearable.";
 TOOLTIP_SWWM_SHADERS = "Use postprocess shaders for things like powerups and the Silver Bullet scope. You can disable this if you'd prefer something lighter on the eyes.";
 TOOLTIP_SWWM_OTHERVOICE = "Allows you to hear other player's voice lines, provided you're close enough.";
+TOOLTIP_SWWM_REVIVE = "Allows the player to get back up after dying by pressing Fire. Has a configurable cooldown.";
+TOOLTIP_SWWM_REVIVECOOLDOWN = "Time in seconds of downtime after using a reboot, where if you die again, you can't get back up. Set to 0 to allow unlimited reboots.";
 // knowledge base
 SWWM_COMINGSOON = "(coming soon)";
 SWWM_MISSTAB = "Mission";
@@ -116,6 +121,7 @@ SWWM_STATTDEALT = "Highest Damage Dealt: ";
 SWWM_STATDTAKEN = "Total Damage Taken: ";
 SWWM_STATTTAKEN = "Highest Damage Taken: ";
 SWWM_STATMKILL = "Highest Kill Combo: ";
+SWWM_STATSKILL = "Longest Untouchable Spree: ";
 SWWM_STATFAVWEAP = "Favorite Weapon: ";
 SWWM_STATHISCORE = "Highest Score: ";
 SWWM_INVTAB = "Inventory";
@@ -305,10 +311,10 @@ SWWM_LORETXT_BLASTSUIT =
 "Summary: A simple vest designed to protect against explosions. The main body is made of very elastic nanofabrics, and should provide adequate protection against small arms. The plating is made of a highly shock-absorbing proprietary alloy.\n"
 "\n"
 "Protection:\n"
-" - 75% reduction to all types of damage.\n"
+" - 30% reduction to all types of damage.\n"
 " - Additional 50% reduction to explosions.\n"
 "\n"
-"Durability: Can absorb a total of 200 units of damage before breaking.\n"
+"Durability: Can absorb a total of 150 units of damage before breaking.\n"
 "\n"
 "Addendum: The blast suit can be worn under other armor.";
 SWWM_LORETAG_CANDYGUN = "Candy Gun";
@@ -1347,11 +1353,11 @@ SWWM_LORETXT_WARARMOR =
 "Summary: Very robust, durable plate armor. Made of the finest almasteel in Devanikna. Originally commissioned for the third entry in Zanaveth's Instant Action arena events.\n"
 "\n"
 "Protection:\n"
-" - 90% reduction to heat, cold, electricity, slime and other elemental types.\n"
-" - 80% reduction to all other types of damage.\n"
+" - 80% reduction to heat, cold, electricity, slime and other elemental types.\n"
+" - 50% reduction to all other types of damage.\n"
 " - Additional 70% reduction to explosions.\n"
 "\n"
-"Durability: Can absorb a total of 600 units of damage before breaking.\n"
+"Durability: Can absorb a total of 250 units of damage before breaking.\n"
 "\n"
 "Addendum: Worn over a blast suit, you're pretty much ready for anything that could be thrown at you.";
 SWWM_LORETAG_YNYKRON = "Ynykron Artifact";
@@ -1690,6 +1696,11 @@ D_INVINCIBALL = "You are no longer invincible.";
 D_RAGEKIT = "The Ragekit has ragequit.";
 D_REFRESHER = "The Refresher boost has ended.";
 D_WARARMOR = "The War Armor is no more.";
+SWWM_URDED = "Demolitionist Unit \"%s\" has fallen";
+SWWM_URDED2 = "Press \cfUse\c- to restart from the most recent save";
+SWWM_URDED3 = "...or press \cfFire\c- to attempt an emergency reboot";
+SWWM_REFAIL = "EMERGENCY REBOOT FAILED - NOT ENOUGH AUXILIARY POWER AVAILABLE";
+D_REFAIL = "The Emergency Reboot System has recharged completely.";
 // targetter
 SWWM_OVERKILL = "Overkill";
 SWWM_MULTIKILL = "Multi Kill";
@@ -2028,6 +2039,9 @@ SWWM_SCOREBONUS = "Mostrar Bonificaciones de Puntuación";
 SWWM_EARBUSTER = "Reducir Estruendo del Wallbuster";
 SWWM_SHADERS = "Usar Shaders de Pantalla";
 SWWM_OTHERVOICE = "Voz en Cooperativo";
+SWWM_REVIVE = "Sistema de Reinicio de Emergencia";
+SWWM_REVIVECOOLDOWN = "Tiempo de recarga de Reinicio";
+SWWM_UNLIMITED = "Ilimitado";
 TOOLTIP_SWWM_VOICETYPE = "Selecciona el pack de voz para el jugador.";
 TOOLTIP_SWWM_MUTEVOICE = "Controla lo que se mutea, si prefieres tener un protagonista más silencioso.";
 TOOLTIP_SWWM_FLASHSTRENGTH = "Los destellos en pantalla suelen ocurrir al disparar algunas armas, puedes reducirlo si este tipo de effectos te causan malestar.";
@@ -2054,6 +2068,8 @@ TOOLTIP_SWWM_SCOREBONUS = "Muestra textos de bonificación extra sobre los punto
 TOOLTIP_SWWM_EARBUSTER = "Los sonidos de disparo del Wallbuster pueden a veces ser dolorosamente estridentes. Esta opción limitará la intensidad a un valor más soportable.";
 TOOLTIP_SWWM_SHADERS = "Usa shaders de postprocesado para cosas como powerups y la mira del Silver Bullet. Puedes desactivar esto si prefieres algo más ligero para la vista.";
 TOOLTIP_SWWM_OTHERVOICE = "Te permite oír los comentarios de voz de otros jugadores, si estás lo suficientemente cerca.";
+TOOLTIP_SWWM_REVIVE = "Permite al jugador volver a levantarse tras morir pulsando Fuego. Tiene un cooldown configurable.";
+TOOLTIP_SWWM_REVIVECOOLDOWN = "Tiempo en segundos tras reiniciar, durante el cual si mueres otra vez, no puedes volver a levantarte. Pon a 0 para permitir reinicios ilimitados.";
 // knowledge base
 SWWM_COMINGSOON = "(próximamente)";
 SWWM_MISSTAB = "Misión";
@@ -2074,6 +2090,7 @@ SWWM_STATTDEALT = "Mayor Daño Infligido: ";
 SWWM_STATDTAKEN = "Daño Total Recibido: ";
 SWWM_STATTTAKEN = "Mayor Daño Recibido: ";
 SWWM_STATMKILL = "Mayor Racha: ";
+SWWM_STATSKILL = "Mayor Racha Intocable: ";
 SWWM_STATFAVWEAP = "Arma Favorita: ";
 SWWM_STATHISCORE = "Puntuación Máxima: ";
 SWWM_INVTAB = "Inventario";
@@ -2243,10 +2260,10 @@ SWWM_LORETXT_BLASTSUIT =
 "Resumen: Un simple chaleco diseñado para proteger contra explosiones. El cuerpo principal está hecho de nanotejidos muy elásticos, y deberían proveer de una protección decente contra armamento ligero. El blindaje está hecho de una aleación propietaria altamente resistente al impacto.\n"
 "\n"
 "Protección:\n"
-" - Reducción de un 75% contra todo tipo de daños.\n"
+" - Reducción de un 30% contra todo tipo de daños.\n"
 " - Reducción adicional de un 50% contra explosiones.\n"
 "\n"
-"Durabilidad: Puede absorber un total de 200 unidades de daño antes de romperse.\n"
+"Durabilidad: Puede absorber un total de 150 unidades de daño antes de romperse.\n"
 "\n"
 "Apéndice: El chaleco se puede llevar por debajo de otras armaduras.";
 SWWM_LORETAG_CANDYGUN = "Pistola Caramelo";
@@ -3043,7 +3060,7 @@ SWWM_LORETXT_UAC2 =
 "\n"
 "Apéndice: La compañía cayó en el control de los demonios durante la invasión (aunque algunos dicen que esto pudo ser el caso mucho antes del evento), y actualmente sigue recuperándose. Sin embargo no hay muchas esperanzas por una recuperación completa, ya que muchos de sus empleados siguen marchándose.\n"
 "\n"
-"Nota de Saya: Si es que me da un gusto de cojones ver caer a este asqueroso gigante. Tío, todo lo de la invasión fue horrible, sabes. Pero me alegro de que al menos hubieramos podido ayudar, aunque no fuera nada comparado con lo que el tal Slayer hizo...";
+"Nota de Saya: Si es que me da un gusto de cojones ver caer a este asqueroso gigante. Tía, todo lo de la invasión fue horrible, sabes. Pero me alegro de que al menos hubieramos podido ayudar, aunque no fuera nada comparado con lo que el tal Slayer hizo...";
 SWWM_LORETXT_UNISSIX =
 "Nombre Completo: Misa Azadeku Unissix, o \"Unissix Bokurou Azadeku\"\n"
 "Nacionalidad: Devanikana\n"
@@ -3087,11 +3104,11 @@ SWWM_LORETXT_WARARMOR =
 "Resumen: Armadura robusta y durable. Hecha con el mejor almacero de Devanikna. Originalmente encargada para la tercera entrada en los eventos Instant Action de Zanaveth.\n"
 "\n"
 "Protección:\n"
-" - Reducción del 90% contra calor, frío, electricidad, lodo y otros tipos elementales.\n"
-" - Reducción del 80% de todos los demás tipos de daño.\n"
+" - Reducción del 80% contra calor, frío, electricidad, lodo y otros tipos elementales.\n"
+" - Reducción del 50% de todos los demás tipos de daño.\n"
 " - Reducción adicional del 70% al daño por explosión.\n"
 "\n"
-"Durabilidad: Puede absorber un total de 600 unidades de daño antes de romperse.\n"
+"Durabilidad: Puede absorber un total de 250 unidades de daño antes de romperse.\n"
 "\n"
 "Apéndice: Combinado con un chaleco antiexplosivos, estás preparada para todo lo que te puedan soltar encima.";
 SWWM_LORETAG_YNYKRON = "Artefacto Ynykron";
@@ -3116,7 +3133,7 @@ SWWM_LORETXT_WHITESCAR =
 "\n"
 "Resumen: En Junio de 2073, el Presidente de los Estados Unidos realizó unos comentarios muy ofensivos sobre los Nukuri, que en aquel momento estaban pasando por su séptima Guerra Mundial. No fueron muy bien recibidos. Muchos Nukuri anteriormente asentados en la Tierra emigraron en protesta, el emperador de Nahkami tuvo muchas cosas que decir, y la bola siguió pasándose. En poco tiempo, el conflicto llegó a su punto de ebullición, y el Imperio Nukuri declaró la guerra a los EEUU, listo para lanzar un ataque directo como \"castigo por su insolencia\". Se desplegaron unidades de tierra en 2074, y así empezó la guerra. Hubo muchas bajas en ambos bandos, en su intento de \"matar a la bestia desde dentro\", sin embargo, en solo tres años más, el país entero había caído. Al presidente se le dieron dos opciones: o bien disculparse públicamente por sus palabras contra el Imperio Nukuri, o si no ver como la ira del Emperador cae sobre su gente. Rechazó esta proposición, y se ordenó la retirada de todas las fuerzas Nukuri en el área. Entonces, ocurrió: Con un destello de luz cegadora, un ataque orbital alcanzó varias grandes ciudades Estadounidenses, reduciéndolas a cenizas. La mayoría de la gente que se encontraba bajo techo pudo sobrevivir, los demás no tuvieron tanta suerte.\n"
 "\n"
-"Apéndice: Al llegar las noticias de lo que ocurrió en la tierra, estallaron las protestas por todo el Imperio Nukuri, avivando aun más las llamas de la Séptima Guerra Mundial. El caos continuó durante casi 30 años, hasta que los fundadores de la Universidad de Nos-Kora intervinieron, y pusieron fin a la guerra ellos solos. Su ultimátum fue tomado muy en serio, y así una reforma masiva comenzó, empezando con la retirada forzosa del Emperador y su consiguiente exilio, sin derecho a volver jamás. La reforma llegó a su climax en 2108, con la formación del Gobierno Nukuri Unificado. A pesar de todo esto, las relaciones con los Nukuri nunca se han recuperado, con la excepción de algunos países todavía aliados, como Escocia y Japón.\n"
+"Apéndice: Al llegar las noticias de lo que ocurrió en la Tierra, estallaron las protestas por todo el Imperio Nukuri, avivando aun más las llamas de la Séptima Guerra Mundial. El caos continuó durante casi 30 años, hasta que los fundadores de la Universidad de Nos-Kora intervinieron, y pusieron fin a la guerra ellos solos. Su ultimátum fue tomado muy en serio, y así una reforma masiva comenzó, empezando con la retirada forzosa del Emperador y su consiguiente exilio, sin derecho a volver jamás. La reforma llegó a su climax en 2108, con la formación del Gobierno Nukuri Unificado. A pesar de todo esto, las relaciones con los Nukuri nunca se han recuperado, con la excepción de algunos países todavía aliados, como Escocia y Japón.\n"
 "\n"
 "Nota de Saya: Dios es que este fue uno de los momentos más oscuros de la historia. Me jode muchísimo pensar en ello otra vez, sobre todo despues de que Zana-sama me contara como fue todo al otro lado. Los Nukuri no eran gente muy pacífica en aquellos tiempos, pero solo por que el tío que mandaba era un puto supervillano megalomaníaco asqueroso, es que joder, achicharrar los Estados Unidos por UNOS TWITS. Casi todo dios ahí se puso en su contra cuando pasó. El muy capullo es que firmó su propia sentencia de muerte, vamos. Y encima lo de que los dos frikis esos fueran y... ACABARAN la guerra por su cuenta. Madre de dios, espero no cabrearlos nunca.";
 SWWM_LORETXT_XANIMEN =
@@ -3183,7 +3200,7 @@ T_GREENSHELLS = "Slugs";
 T_WHITESHELL = "Cartucho Dragon's Breath";
 T_WHITESHELLS = "Cartuchos Dragon's Breath";
 T_BLUESHELL = "Cartucho de Sal de Kinylum";
-T_BLUESHELLS = "Cartucho de Sal Kinylum";
+T_BLUESHELLS = "Cartucho de Sal de Kinylum";
 T_BLACKSHELL = "Cartucho de Napalm";
 T_BLACKSHELLS = "Cartuchos de Napalm";
 T_PURPLESHELL = "Cartucho de Bola de Plomo";
@@ -3400,6 +3417,11 @@ D_INVINCIBALL = "Ya no eres invencible.";
 D_RAGEKIT = "El Ragekit ha hecho ragequit.";
 D_REFRESHER = "El boost del Refrescador ha terminado.";
 D_WARARMOR = "La Armadura de Guerra ya no da para más.";
+SWWM_URDED = "La Unidad Demolicionista \"%s\" ha caído";
+SWWM_URDED2 = "Pulsa \cfUsar\c- para reiniciar desde la última partida guardada";
+SWWM_URDED3 = "...o pulsa \cfDisparar\c- para intentar un reinicio de emergencia";
+SWWM_REFAIL = "REINICIO DE EMERGENCIA FALLIDO - NO HAY SUFICIENTE POTENCIA AUXILIAR DISPONIBLE";
+D_REFAIL = "El Sistema de Reinicio de Emergencia se ha recargado completamente.";
 // targetter
 SWWM_MULTIKILL = "Racha";
 SWWM_SPREEKILL = "Intocable";

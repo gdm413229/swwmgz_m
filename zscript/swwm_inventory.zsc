@@ -106,7 +106,7 @@ Class SWWMSpareArmor : Inventory abstract
 		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
 		if ( pickup && !shouldautouse ) return false;
 		let cur = Owner.FindInventory(giveme);
-		if ( !cur || (cur.Amount <= 0) )
+		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (Amount+cur.Amount <= cur.MaxAmount) )
 		{
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);

@@ -822,35 +822,36 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( demo.player.viewheight <= 6 )
 		{
 			Screen.Dim("Black",min(demo.deadtimer/80.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+			if ( demo.revivefail > level.maptime )
+			{
+				Screen.Dim("Red",clamp((demo.revivefail-level.maptime)/60.,0.,.2),0,0,Screen.GetWidth(),Screen.GetHeight());
+				str = StringTable.Localize("$SWWM_REFAIL");
+				len = mTewiFont.mFont.StringWidth(str);
+				xx = (ss.x-len)/2.;
+				yy = ss.y-48;
+				if ( (gametic%16) < 8 )
+					Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 			alph = clamp((demo.deadtimer-60)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED"),CPlayer.GetUserName());
 			len = mTewiFont.mFont.StringWidth(str);
 			xx = (ss.x-len)/2.;
 			yy = (ss.y-mTewiFont.mFont.GetHeight()*4)/2.;
 			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			alph = clamp((demo.deadtimer-120)/60.,0.,1.);
+			alph = clamp((demo.deadtimer-140)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
 			len = mTewiFont.mFont.StringWidth(str);
 			xx = (ss.x-len)/2.;
 			yy = ss.y/2.;
-			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			if ( !swwm_revive )
 				return;
-			alph = clamp((demo.deadtimer-200)/60.,0.,1.);
+			alph = clamp((demo.deadtimer-160)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED3"),CPlayer.GetUserName());
 			len = mTewiFont.mFont.StringWidth(str);
 			xx = (ss.x-len)/2.;
 			yy = (ss.y+mTewiFont.mFont.GetHeight()*2)/2.;
-			Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			if ( demo.revivefail > level.maptime )
-			{
-				str = StringTable.Localize("$SWWM_REFAIL");
-				len = mTewiFont.mFont.StringWidth(str);
-				xx = (ss.x-len)/2.;
-				yy = ss.y-30;
-				if ( (gametic%12) < 6 )
-					Screen.DrawText(mTewiFont.mFont,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			}
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 		}
 	}
 

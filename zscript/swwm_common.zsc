@@ -2381,11 +2381,11 @@ Class SWWMHandler : EventHandler
 			Shader.SetUniform1f(p,"Grain","Timer",(gametic+e.FracTic)/Thinker.TICRATE);
 			int lastdmg = (demo.Health>0)?demo.lastdamage:Random[Flicker](60,80);
 			int lastdmgtic = (demo.Health>0)?demo.lastdamagetic:(gametic+Random[Flicker](30,20));
-			double noiz = min(lastdmg*.3*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.7);
+			double noiz = min(lastdmg*.09*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.5);
 			Shader.SetUniform1f(p,"Grain","ni",noiz);
-			noiz = min(lastdmg*.16*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.8);
+			noiz = min(lastdmg*.08*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.8);
 			Shader.SetUniform1f(p,"Glitch","str1",noiz);
-			noiz = min(lastdmg*.12*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),3.5);
+			noiz = min(lastdmg*.03*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),3.5);
 			Shader.SetUniform1f(p,"Glitch","str2",noiz);
 		}
 		else

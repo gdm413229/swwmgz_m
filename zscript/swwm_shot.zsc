@@ -1277,13 +1277,15 @@ Class TheBall : Actor
 		// slam jam
 		if ( bleeds )
 		{
-			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/75.)**.5);
+			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/40.)**.5);
+			victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/40.)**.5);
 			victim.TraceBleed(dmg,self);
 			SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
 		}
 		else
 		{
-			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/75.)**.5);
+			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/40.)**.5);
+			victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/40.)**.5);
 			if ( vel.length() > 15 )
 			{
 				let s = Spawn("BallImpact",pos);

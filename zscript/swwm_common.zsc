@@ -613,8 +613,8 @@ Class SWWMOneLiner : HUDMessageBase
 {
 	String whichline;
 	int lifespan, curtime;
-	transient Font TewiFont;
-	transient CVar safezone;
+	transient Font TewiFont, MPlusFont;
+	transient CVar safezone, lang;
 
 	static SWWMOneLiner Make( String whichline, int lifespan )
 	{
@@ -634,22 +634,26 @@ Class SWWMOneLiner : HUDMessageBase
 	override void Draw( int bottom, int visibility )
 	{
 		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
 		int margin = safezone.GetInt();
 		Vector2 hs = StatusBar.GetHUDScale();
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String loc = StringTable.Localize(whichline);
 		if ( loc.Length() <= 0 ) return;	// don't draw empty strings
-		String locs = "\""..loc.."\"";
+		String locs = StringTable.Localize("$SWWM_LQUOTE")..loc..StringTable.Localize("$SWWM_RQUOTE");
+		Font fnt = TewiFont;
+		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
 		// split so it can fit
-		BrokenLines l = TewiFont.BreakLines(locs,int(ss.x*.5));
+		BrokenLines l = fnt.BreakLines(locs,int(ss.x*.5));
 		int maxlen = 0;
 		for ( int i=0; i<l.Count(); i++ )
 		{
-			int len = TewiFont.StringWidth(l.StringAt(i));
+			int len = fnt.StringWidth(l.StringAt(i));
 			if ( len > maxlen ) maxlen = len;
 		}
-		int h = TewiFont.GetHeight();
+		int h = fnt.GetHeight();
 		int fh = h*l.Count();
 		double alph = clamp((curtime/20.)+1.,0.,1.);
 		alph *= clamp((lifespan-curtime)/10.,0.,1.);
@@ -657,8 +661,8 @@ Class SWWMOneLiner : HUDMessageBase
 		int yy = margin+fh;
 		for ( int i=0; i<l.Count(); i++ )
 		{
-			int len = TewiFont.StringWidth(l.StringAt(i));
-			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			int len = fnt.StringWidth(l.StringAt(i));
+			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			yy -= h;
 		}
 	}

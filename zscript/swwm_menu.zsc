@@ -11,13 +11,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_STORE,
 		TAB_TRADING,
 		TAB_CHAT,
-		TAB_SECRET
+		TAB_SECRET,
+		TAB_HELP
 	};
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
-		FancyBg, EasterEgg, LoreSeparator;
-	Font TewiFont;
-	int curtab;
+		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
+	transient CVar lang;
+	transient Font TewiFont, MPlusFont;
+	int curtab, oldtab;
 	// for scrolling
 	bool sub;
 	int sel0, sel1, sel2;
@@ -52,6 +54,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	// seeeeecret
 	int kcode;
 
+	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	Font LangFont( Font req )
+	{
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		return req;
+	}
+
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
@@ -62,6 +72,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return;
 		}
 		TewiFont = Font.GetFont('TewiShaded');
+		MPlusFont = Font.GetFont('MPlusShaded');
 		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_MiscPatch);
 		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_MiscPatch);
 		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_MiscPatch);
@@ -69,6 +80,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		WindowSeparatorH = TexMan.CheckForTexture("graphics/KBase/WindowSeparatorH.png",TexMan.Type_MiscPatch);
 		EasterEgg = TexMan.CheckForTexture("graphics/KBase/Drawing.png",TexMan.Type_MiscPatch);
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
+		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
 		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
 		if ( (curtab < 0) || (curtab > 7) ) curtab = 0;
 		MenuSound("menu/demoopen");
@@ -80,10 +92,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		lorelib = SWWMLoreLibrary.Find(players[consoleplayer]);
 		oldloresiz = lorelib.ent.Size();
 		stats = SWWMStats.Find(players[consoleplayer]);
+		tmsg = "$SWWM_MAINCONTROLS";
+		tmsgtic = gametic+70;
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
 	{
+		Font fnt = LangFont(TewiFont);
 		switch ( kcode )
 		{
 		case 0:
@@ -149,14 +164,25 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			storeunits.Clear();
 			return true;
 		case MKEY_DOWN:
-			if ( curtab == TAB_MISSION )
+			if ( curtab == TAB_HELP )
+			{
+				String str = StringTable.Localize("$SWWM_HELPTXT");
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
+				{
+					MenuSound("menu/demoscroll");
+					sel0++;
+				}
+			}
+			else if ( curtab == TAB_MISSION )
 			{
 				String str = StringTable.Localize("$SWWM_MISSION_NONE");
 				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
 				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
-				BrokenLines l = TewiFont.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = TewiFont.BreakLines(str,620);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
 				{
 					MenuSound("menu/demoscroll");
@@ -172,11 +198,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( sub )
 				{
-					int ofs = TewiFont.StringWidth("********************")+12;
-					if ( lorelist.Size() > 26 ) ofs += 8;
 					String str = StringTable.Localize(lorelist[sel0].text);
-					BrokenLines l = TewiFont.BreakLines(str,635-ofs);
-					if ( l.Count() > 28 ) l = TewiFont.BreakLines(str,626-ofs);
+					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
 					if ( (l.Count() > 28) && (sel2 < l.Count()-28) )
 					{
 						MenuSound("menu/demoscroll");
@@ -207,7 +233,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_UP:
-			if ( curtab == TAB_MISSION )
+			if ( curtab == TAB_HELP )
+			{
+				if ( sel0 > 0 )
+				{
+					MenuSound("menu/demoscroll");
+					sel0--;
+				}
+			}
+			else if ( curtab == TAB_MISSION )
 			{
 				if ( sel0 > 0 )
 				{
@@ -656,6 +690,24 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		switch ( ev.type )
 		{
 		case UIEvent.Type_KeyDown:
+			if ( ev.keychar == UiEvent.Key_F1 )
+			{
+				if ( curtab == TAB_HELP )
+					curtab = oldtab;
+				else
+				{
+					oldtab = curtab;
+					curtab = TAB_HELP;
+				}
+				sel0 = sel1 = sel2 = 0;
+				sub = false;
+				invlist.Clear();
+				lorelist.Clear();
+				storelist.Clear();
+				storeunits.Clear();
+				MenuSound("menu/demotab");
+				return true;
+			}
 			switch ( kcode )
 			{
 			case 8:
@@ -691,6 +743,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	override void Drawer()
 	{
 		Super.Drawer();
+		Font fnt = LangFont(TewiFont);
 		String str;
 		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
@@ -703,18 +756,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
 			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
-			"$SWWM_SECRETTAB"
+			"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 		};
 		static const string ltabnames[] =
 		{
 			"$SWWM_LORETAB0", "$SWWM_LORETAB1", "$SWWM_LORETAB2"
 		};
-		int mx = (curtab==TAB_SECRET)?9:8;
+		int mx = (curtab>7)?9:8;
 		for ( int i=0; i<mx; i++ )
 		{
-			str = StringTable.Localize(tabnames[i]);
-			Screen.DrawText(TewiFont,curtab==i?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			xx += TewiFont.StringWidth(str)+2;
+			str = StringTable.Localize(tabnames[(i>7)?curtab:i]);
+			Screen.DrawText(fnt,((i>7)||(curtab==i))?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += fnt.StringWidth(str)+2;
 			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
 		}
@@ -723,45 +776,16 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		xx = 637-TewiFont.StringWidth(str);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw bottom messages
-		if ( gametic < tmsgtic ) str = StringTable.Localize(tmsg);
-		else
-		{
-			str = StringTable.Localize("$SWWM_MAINCONTROLS");
-			switch ( curtab )
-			{
-			case TAB_INVENTORY:
-				str = str..StringTable.Localize("$SWWM_LISTCONTROLS")..StringTable.Localize("$SWWM_INVCONTROLS");
-				break;
-			case TAB_KEYS:
-				str = str..StringTable.Localize("$SWWM_LISTCONTROLS");
-				break;
-			case TAB_MISSION:
-			case TAB_CHAT:
-				str = str..StringTable.Localize("$SWWM_TEXTCONTROLS");
-				break;
-			case TAB_STORE:
-				str = str..StringTable.Localize("$SWWM_LISTCONTROLS")..StringTable.Localize("$SWWM_STRCONTROLS");
-				break;
-			case TAB_TRADING:
-				if ( sub )
-				{
-					if ( sel1 == -1 ) str = str..StringTable.Localize("$SWWM_TEXTCONTROLS")..StringTable.Localize("$SWWM_TRADECONTROLS2");
-					else str = str..StringTable.Localize("$SWWM_LISTCONTROLS")..StringTable.Localize("$SWWM_TRADECONTROLS1");
-				}
-				else str = str..StringTable.Localize("$SWWM_TEXTCONTROLS")..StringTable.Localize("$SWWM_TRADECONTROLS0");
-				break;
-			case TAB_LIBRARY:
-				if ( sub ) str = str..StringTable.Localize("$SWWM_TEXTCONTROLS")..StringTable.Localize("$SWWM_LORECONTROLS1");
-				else str = str..StringTable.Localize("$SWWM_TEXTCONTROLS")..StringTable.Localize("$SWWM_LORECONTROLS0");
-				break;
-			}
-		}
-		xx = 4;
 		yy = 386;
-		Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( gametic < tmsgtic )
+		{
+			str = StringTable.Localize(tmsg);
+			xx = 4;
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
 		str = String.Format("DemolitionOS %s",StringTable.Localize("$SWWM_MODVER"));
-		xx = 637-TewiFont.StringWidth(str);
-		Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		xx = 637-fnt.StringWidth(str);
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw contents
 		if ( curtab == TAB_MISSION )
 		{
@@ -769,15 +793,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
 			else str = StringTable.Localize("$SWWM_MISSION_NONE");
-			BrokenLines l = TewiFont.BreakLines(str,629);
-			if ( l.Count() > 28 ) l = TewiFont.BreakLines(str,620);
+			BrokenLines l = fnt.BreakLines(str,629);
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;
 			yy = 17;
 			int ofs = clamp(sel0,0,max(0,l.Count()-28));
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy >= 370 ) break;
-				Screen.DrawText(TewiFont,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
 			// scrollbar
@@ -799,60 +823,60 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
 			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
 			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.);
 			else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.);
 			else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%g\cul\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/6.);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%g\cukm/h\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE));
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			thour = (stats.airtime/(3600*Thinker.TICRATE));
 			tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
 			tsec = (stats.airtime/Thinker.TICRATE)%60;
 			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
 			if ( stats.favweapon == -1 ) str = str.."N/A";
@@ -861,10 +885,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
 				str = str..def.GetTag();
 			}
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 		}
 		else if ( curtab == TAB_INVENTORY )
@@ -879,7 +903,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( !invlist[i] ) continue;
 				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
-				len = TewiFont.StringWidth(str);
+				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
@@ -888,7 +912,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
-				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -919,9 +943,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
-				len = TewiFont.StringWidth(str);
+				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
-				Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -947,8 +971,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			yy = 14;
 			// draw the category
 			str = StringTable.Localize(ltabnames[sel1]);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,"<                  >",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx+(TewiFont.StringWidth("********************")-TewiFont.StringWidth(str))/2,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,"<",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx+fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-6,origin.y+yy,">",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+(fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-fnt.StringWidth(str))/2,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			// draw "unread" indicators on sides
 			int ltab = sel1-1;
 			if ( ltab < 0 ) ltab = 2;
@@ -960,9 +985,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( lorelib.ent[i].tab == ltab ) lunread |= !lorelib.ent[i].read;
 				if ( lorelib.ent[i].tab == rtab ) runread |= !lorelib.ent[i].read;
 			}
-			if ( lunread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx,origin.y+yy," ‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			if ( runread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx,origin.y+yy,"                  ‼ ",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawTexture(LoreSeparator,false,origin.x,origin.y+27,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( lunread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+6,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( runread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-12,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture((lang.GetString()~=="jp")?LoreSeparatorW:LoreSeparator,false,origin.x,origin.y+27,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 18;
 			// draw the current entries
 			int ofs = max(0,sel0-26);
@@ -970,11 +995,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( yy > 370 ) break;
 				str = StringTable.Localize(lorelist[i].tag);
-				if ( !lorelist[i].read ) str = str.." \cf‼\c-";
-				Screen.DrawText(TewiFont,(i==sel0)?Font.CR_FIRE:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				int len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,(i==sel0)?Font.CR_FIRE:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				if ( !lorelist[i].read )
+					Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+len,origin.y+yy," ‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
-			xx += TewiFont.StringWidth("********************")+2;
+			xx += fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+2;
 			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 3;
 			// scrollbar
@@ -992,18 +1019,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( !sub )
 			{
 				str = StringTable.Localize("$SWWM_LOREUNSEL");
-				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx+((634-xx)-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			str = StringTable.Localize(lorelist[sel0].text);
-			BrokenLines l = TewiFont.BreakLines(str,int(635-xx));
-			if ( l.Count() > 28 ) l = TewiFont.BreakLines(str,int(626-xx));
+			BrokenLines l = fnt.BreakLines(str,int(635-xx));
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
 			yy = 17;
 			ofs = clamp(sel2,0,max(0,l.Count()-28));
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy > 370 ) break;
-				Screen.DrawText(TewiFont,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
 			// scrollbar
@@ -1021,7 +1048,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( storelist.Size() <= 0 )
 			{
 				str = StringTable.Localize("$SWWM_NOSTORE");
-				Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			// draw all the stuff in the store
@@ -1037,7 +1064,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				let def = GetDefaultByType(storelist[i]);
 				if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 				else str = def.GetTag();
-				len = TewiFont.StringWidth(str);
+				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
 				collen[cols-1] = longest;
 				int clscol = Font.CR_WHITE;
@@ -1046,7 +1073,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
 				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
-				Screen.DrawText(TewiFont,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -1091,7 +1118,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else if ( curtab == TAB_TRADING )
 		{
 			str = StringTable.Localize("$SWWM_COMINGSOON");
-			Screen.DrawText(TewiFont,Font.CR_FIRE,(ss.x-TewiFont.StringWidth(str))/2.,(ss.y-TewiFont.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 		else if ( curtab == TAB_CHAT )
 		{
@@ -1108,12 +1135,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				int tmin = (bar.FullHistory[i].tic/(60*Thinker.TICRATE))%60;
 				int tsec = (bar.FullHistory[i].tic/Thinker.TICRATE)%60;
 				str = String.Format("\cu[\c-%02d\cu:\c-%02d\cu:\c-%02d\cu]\c- ",thour,tmin,tsec);
-				BrokenLines l = TewiFont.BreakLines(bar.FullHistory[i].str,626-margin);
+				BrokenLines l = fnt.BreakLines(bar.FullHistory[i].str,626-margin);
 				double by = yy-13*l.Count();
 				if ( by < 17 ) break;
 				Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+by,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				for ( int j=0; j<l.Count(); j++ )
-					Screen.DrawText(TewiFont,col,origin.x+xx+margin,origin.y+by+j*13,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,col,origin.x+xx+margin,origin.y+by+j*13,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy = by;
 			}
 			// scrollbar
@@ -1128,10 +1155,37 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_SECRET )
 		{
-			// hidden secret tab
 			Screen.DrawTexture(EasterEgg,false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			str = StringTable.Localize("$SWWM_TODEMO");
-			Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+(640-TewiFont.StringWidth(str))/2.,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2.,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+		else if ( curtab == TAB_HELP )
+		{
+			// help tab
+			int k1, k2;
+			[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
+			String kstr = bindings.NameKeys(k1,k2);
+			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+			BrokenLines l = fnt.BreakLines(str,629);
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+			xx = 6;
+			yy = 17;
+			int ofs = clamp(sel0,0,max(0,l.Count()-28));
+			for ( int i=ofs; i<l.Count(); i++ )
+			{
+				if ( yy >= 370 ) break;
+				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 13;
+			}
+			// scrollbar
+			if ( l.Count() > 28 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = l.Count()-28;
+				yy = floor(ofs*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 	}
 }
@@ -1252,6 +1306,8 @@ Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
 Class SWWMOptionMenu : OptionMenu
 {
 	private String ttip;
+	transient CVar lang;
+	transient Font TewiFont, MPlusFont;
 
 	override void Ticker()
 	{
@@ -1296,7 +1352,11 @@ Class SWWMOptionMenu : OptionMenu
 				break;
 			}
 		}
-		let fnt = Font.GetFont('Tewi');
+		if ( !TewiFont ) TewiFont = Font.GetFont('Tewi');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlus');
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		Font fnt = TewiFont;
+		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
 		let lines = fnt.BreakLines(ttip,CleanWidth_1-8);
 		int height = (8+fnt.GetHeight()*lines.Count())*CleanYFac_1;
 		// draw at the bottom unless the selected option could is covered by the tooltip

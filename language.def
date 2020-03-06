@@ -1,0 +1,2334 @@
+// English (odd personal GB/US mix, I kinda have a problem with that)
+[default]
+SWWM_MODVER = "0.1a";
+/* MENU STUFF */
+// keybinds
+SWWM_KEYS = "SWWM GZ Bindings";
+SWWM_PRIMARYFIRE = "Primary Fire";
+SWWM_SECONDARYFIRE = "Secondary Fire";
+SWWM_RELOADFIRE = "Reload";
+SWWM_ZOOMFIRE = "Tertiary Fire / Zoom";
+SWWM_MELEE = "Melee Attack";
+SWWM_DASH = "Dash";
+SWWM_GESTURE1 = "Point Down";
+SWWM_GESTURE2 = "Thumbs Up";
+SWWM_GESTURE3 = "Victory";
+SWWM_KBASE = "Demolitionist Menu";
+// mod menu
+SWWM_MTITLE = "SWWM GZ Options";
+SWWM_PTITLE = "Player Options";
+SWWM_VOICETYPE = "Demolitionist Voice Pack";
+SWWM_MUTELEVEL = "Voice Muting Level";
+SWWM_MUTENONE = "None";
+SWWM_MUTECOMBAT = "Combat Comments";
+SWWM_MUTEINTER = "Interaction Comments";
+SWWM_MUTELINERS = "Map Start Oneliners";
+SWWM_MUTEALL = "Everything";
+SWWM_OTITLE = "Visual Options";
+SWWM_FLASH = "Screen Flash Strength";
+SWWM_HUDMARGIN = "HUD Margin";
+SWWM_MAXMSG = "Max Messages";
+SWWM_MAXMSGBIG = "Max Messages (Extended)";
+SWWM_MAXPICK = "Max Pickup Messages";
+SWWM_CHATLEN = "Chat Message Duration";
+SWWM_MSGLEN = "General Message Duration";
+SWWM_PICKLEN = "Pickup Message Duration";
+SWWM_ITITLE = "Item Options";
+SWWM_ARMORUSE = "Automatically Use Armor";
+SWWM_HEALTHUSE = "Automatically Use Health";
+SWWM_AMMOUSE = "Automatically Use Fabricators";
+SWWM_CTITLE = "Multiplayer Options";
+SWWM_SKEYS = "Share Keys";
+SWWM_SVARMORUSE = "Enforce Armor Auto-Use";
+SWWM_SVHEALTHUSE = "Enforce Health Auto-Use";
+SWWM_SVAMMOUSE = "Enforce Fabricator Auto-Use";
+SWWM_MCREDS = "SWWM GZ Credits";
+SWWM_CLEAD = "Development Lead:";
+SWWM_CASSETS = "Additional Assets:";
+SWWM_CMUSIC = "Music Tracks Used:";
+SWWM_CPATRON = "Patreon Backers:";
+SWWM_CTHANK = "Special Thanks:";
+SWWM_CDRAGON2 = "(For being a good pet dragon)";
+SWWM_CLUCY2 = "(For the Tewi font, which I've used for many many years)";
+SWWM_CKEKS2 = "(For libeye, assistance with exception handling code)";
+SWWM_CSLEDGE2 = "(For lore reasons that encouraged me to take part in the Doom modiverse)";
+SWWM_CINSP1 = "Combine Kegan, HyperUltra64, Marrub, TerminusEst13, Yholl and friends";
+SWWM_CINSP2 = "(For inspiration and also for being really cool people)";
+SWWM_CCOMMUNITY1 = "All my amazing friends from the Doom community";
+SWWM_CCOMMUNITY2 = "(For helping me keep this whole thing rolling, and for all the time we've spent together)";
+SWWM_CCOMMUNITY3 = "(Here's to many more years of Dooming. Stay awesome, everyone!)";
+SWWM_CDEVS1 = "Randi, Graf, Rachael, Mental, dpJudas and the rest of the GZDoom dev team";
+SWWM_CDEVS2 = "(For their work on the source port that brought back my faith in modding. You guys rock!)";
+SWWM_FORCEDISABLE = "Force Disable";
+SWWM_USERSET = "User Set";
+SWWM_FORCEENABLE = "Force Enable";
+SWWM_6DOF = "6DOF Flight";
+SWWM_TARGET = "Show Healthbars";
+SWWM_TARGETTAG = "Show Monster Names";
+SWWM_DAMNUMS = "Show Damage/Heal Numbers";
+SWWM_SCORENUMS = "Show Score Numbers";
+SWWM_SCOREBONUS = "Show Score Bonuses";
+SWWM_EARBUSTER = "Reduce Wallbuster Loudness";
+SWWM_SHADERS = "Use Screen Shaders";
+SWWM_OTHERVOICE = "Co-op Voice";
+SWWM_REVIVE = "Emergency Reboot System";
+SWWM_REVIVECOOLDOWN = "Reboot Cooldown";
+SWWM_UNLIMITED = "Unlimited";
+TOOLTIP_SWWM_VOICETYPE = "Sets the voice pack for the player.";
+TOOLTIP_SWWM_MUTEVOICE = "Control what gets muted, if you'd rather have a more silent protagonist.";
+TOOLTIP_SWWM_FLASHSTRENGTH = "Screen flashes usually happen when firing some weapons, you can lower this if these effects are harmful for you.";
+TOOLTIP_SWWM_HUDMARGIN = "Margin around HUD elements, in (scaled) pixels.";
+TOOLTIP_SWWM_MAXSHOWN = "Maximum messages (not lines) shown in the top left part of the HUD.";
+TOOLTIP_SWWM_MAXSHOWNBIG = "Like the option above, but when the chat prompt is open.";
+TOOLTIP_SWWM_MAXPICKUP = "Maximum pickup messages visible at any time.";
+TOOLTIP_SWWM_CHATDURATION = "Duration of chat messages in seconds.";
+TOOLTIP_SWWM_MSGDURATION = "Duration of obituaries and other messages in seconds.";
+TOOLTIP_SWWM_PICKDURATION = "Duration of pickup messages in seconds.";
+TOOLTIP_SWWM_SHAREKEYS = "When this is enabled, picking up a key item will send a copy to all other players.";
+TOOLTIP_SWWM_AUTOUSEARMOR = "When enabled, new armor items are automatically worn when picked up.";
+TOOLTIP_SWWM_AUTOUSEHEALTH = "When enabled, health items are automatically used if they can heal. This excludes Refreshers since they count as powerups.";
+TOOLTIP_SWWM_AUTOUSEAMMO = "When enabled, ammo fabricators are automatically used on pickup. This excludes Tier 4 fabricators since they count as powerups.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEARMOR = "Enforce a specific armor auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEHEALTH = "Enforce a specific health auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_ENFORCEAUTOUSEAMMO = "Enforce a specific ammo fabricator auto-use setting for all players, or respects per-player settings.";
+TOOLTIP_SWWM_FLY6DOF = "Enable 6DOF movement when flying. Disable if this feature causes any discomfort.";
+TOOLTIP_SWWM_TARGETER = "Show enemy/player healthbars. Disable if you'd prefer to use another mod for this, such as Target Spy.";
+TOOLTIP_SWWM_TARGETTAGS = "Show enemy names above their healthbars.";
+TOOLTIP_SWWM_HEALTHNUMS = "Show damage/healing numbers. Disable if you'd prefer to use another mod for this, such as DamNums.";
+TOOLTIP_SWWM_SCORENUMS = "Show score kill numbers.";
+TOOLTIP_SWWM_SCOREBONUS = "Show additional bonus strings above score numbers (e.g.: multikill counters).";
+TOOLTIP_SWWM_EARBUSTER = "The Wallbuster's firing sounds may be painfully loud at times. This setting will limit the loudness to something more bearable.";
+TOOLTIP_SWWM_SHADERS = "Use postprocess shaders for things like powerups and the Silver Bullet scope. You can disable this if you'd prefer something lighter on the eyes.";
+TOOLTIP_SWWM_OTHERVOICE = "Allows you to hear other player's voice lines, provided you're close enough.";
+TOOLTIP_SWWM_REVIVE = "Allows the player to get back up after dying by pressing Fire. Has a configurable cooldown.";
+TOOLTIP_SWWM_REVIVECOOLDOWN = "Time in seconds of downtime after using a reboot, where if you die again, you can't get back up. Set to 0 to allow unlimited reboots.";
+// knowledge base
+SWWM_COMINGSOON = "(coming soon)";
+SWWM_MISSTAB = "Mission";
+SWWM_STATTAB = "Stats";
+SWWM_STATUPTIME = "Uptime: ";
+SWWM_STATONFOOT = "Distance on Foot: ";
+SWWM_STATFLIGHT = "Distance in Air: ";
+SWWM_STATBOOST = "Times Boosted: ";
+SWWM_STATDASH = "Times Dashed: ";
+SWWM_STATSTOMP = "Times Stomped: ";
+SWWM_STATFUEL = "Total Fuel Usage: ";
+SWWM_STATSPEED = "Top Speed: ";
+SWWM_STATAIRTIME = "Longest Air Time: ";
+SWWM_STATKILLS = "Total Kills: ";
+SWWM_STATDEATHS = "Total Deaths: ";
+SWWM_STATDDEALT = "Total Damage Dealt: ";
+SWWM_STATTDEALT = "Highest Damage Dealt: ";
+SWWM_STATDTAKEN = "Total Damage Taken: ";
+SWWM_STATTTAKEN = "Highest Damage Taken: ";
+SWWM_STATMKILL = "Highest Kill Combo: ";
+SWWM_STATSKILL = "Longest Untouchable Spree: ";
+SWWM_STATFAVWEAP = "Favorite Weapon: ";
+SWWM_STATHISCORE = "Highest Score: ";
+SWWM_INVTAB = "Inventory";
+SWWM_INVFAIL = "You can't use this right now";
+SWWM_INVNDROP = "You can't drop this";
+SWWM_KEYTAB = "Keychain";
+SWWM_KBASETAB = "Library";
+SWWM_STORETAB = "Store";
+SWWM_STOREFULL = "You can't hold more of that";
+SWWM_STOREMUNS = "You don't have enough money";
+SWWM_NOSTORE = "(there is nothing left to buy)";
+SWWM_TRADETAB = "Trading";
+SWWM_TRADEFULL = "They can't hold more of that";
+SWWM_TRADEHIST = "History";
+SWWM_TRADETO = "Sent to";
+SWWM_TRADEFROM = "Received from";
+SWWM_NOTRADE = "(there is no one to trade with)";
+SWWM_MSGSENT = "You sent %dx %s to %s.";
+SWWM_MSGRECV = "%s sent you %dx %s.";
+SWWM_CHATTAB = "Chat Log";
+SWWM_SECRETTAB = "Secret";
+SWWM_TODEMO = "To Demo-chan, from Ibuki and Saya \cg♥\c-";
+SWWM_MAINCONTROLS = "Press F1 to see controls";
+SWWM_LOREUNSEL = "(no entry chosen)";
+SWWM_LORETAB0 = "Items";
+SWWM_LORETAB1 = "People";
+SWWM_LORETAB2 = "Lore";
+SWWM_HELPTAB = "Help";
+SWWM_HELPTXT =
+"\cxDemolitionist Menu - Basic Controls\c-\n"
+"\cx---------------------------------\c-\n"
+"\n"
+"\cf%s:\c- Open/Close Demolitionist menu\n"
+"\cfPageUp/PageDown:\c- Switch tabs\n"
+"\cfF1:\c- Open/Close help tab\n"
+"\n"
+"\cxMission Tab - Controls\c-\n"
+"\cx--------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Scroll\n"
+"\n"
+"\cxInventory Tab - Controls\c-\n"
+"\cx----------------------\c-\n"
+"\n"
+"\cfArrow Keys:\c- Navigate\n"
+"\cfEnter:\c- Use selected item\n"
+"\cfBackspace:\c- Drop selected item\n"
+"\n"
+"\cxKeychain Tab - Controls\c-\n"
+"\cx---------------------\c-\n"
+"\n"
+"\cfArrow Keys:\c- Navigate\n"
+"\n"
+"\cxLibrary Tab - Controls (Main)\c-\n"
+"\cx---------------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Scroll through entries\n"
+"\cfLeft/Right:\c- Switch category\n"
+"\cfEnter:\c- Open entry\n"
+"\n"
+"\cxLibrary Tab - Controls (Entry Open)\c-\n"
+"\cx---------------------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Scroll\n"
+"\cfBackspace:\c- Return to entry list\n"
+"\n"
+"\cxStore Tab - Controls\c-\n"
+"\cx------------------\c-\n"
+"\n"
+"\cfArrow Keys:\c- Navigate\n"
+"\cfEnter:\c- Buy\n"
+//"\cfBackspace:\c- Sell\n"
+"\n"
+"\cxTrading Tab - Controls (Main)\c-\n"
+"\cx---------------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Navigate\n"
+"\cfEnter:\c- Select option\n"
+"\n"
+"\cxTrading Tab - Controls (Trade)\c-\n"
+"\cx----------------------------\c-\n"
+"\n"
+"\cfArrow Keys:\c- Navigate\n"
+"\cfEnter:\c- Send item\n"
+"\cfBackspace:\c- Return\n"
+"\n"
+"\cxTrading Tab - Controls (History)\c-\n"
+"\cx------------------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Scroll\n"
+"\cfBackspace:\c- Return\n"
+"\n"
+"\cxChat Log Tab - Controls\c-\n"
+"\cx---------------------\c-\n"
+"\n"
+"\cfUp/Down:\c- Scroll";
+// mission entries
+SWWM_MISSION_DOOM =
+"Welcome to your first mission, Demolitionist. I'll be very direct here, the situation is very fucked. Things don't look good at all. Those fucking UAC idiots have done their worst and now we're paying for it. FUCK... THE... UAC... Seriously. If Samuel Hayden didn't have me blocked I'd be sending him all sorts of shit right now, you can't even begin to imagine HOW fucking pissed I am...\n"
+"\n"
+"It all happened so fast that... we didn't really have much time to prepare for it. Half of Earth got entirely taken over now. It's all mostly just the western countries, with the epicenter on Union States territory, where you'll be deployed. What pisses me off the most is that they didn't even stop at just going for us, no, they hit the Lunar capital too. It could have been our chance to contact the Nukuri and ask for help, but now we're on our own. We... have to do our best to fight these damn things, all by ourselves. That's where you come in.\n"
+"\n"
+"It is your mission to put an end to this, there are people out there fighting, we don't know how many, who still haven't been evacuated. It's Hell on Earth thanks to the amazing and great UAC shoving their stinky-ass fingers into what they shouldn't. Do they even know... How many of my friends I've lost... all the thousands, tens of thousands or even more, that just... couldn't make it. WW3 was nothing compared to this. It's just... ugh... And the fucker has the BALLS to just go and act like everything's fine and will be fixed soon. I want to punch that smart-ass robot... damn it.\n"
+"\n"
+"*sigh*\n"
+"\n"
+"Enough grieving... it's all about the mission now. I know there's still hope. Me and a couple others have joined up to make this happen, you're going to save those people. It'll be hard, I know, but you can do it, that's why I built you. If there's even a chance that you'll succeed, I want to tell you that I will personally reward you, Demo-chan. I'm not going to give you any details, I want it to be a surprise.\n"
+"\n"
+"We haven't been able to provide you with all the available equipment, there was no time for that. Instead, be on the lookout for strategically placed supplies along the way (hopefully the demons won't touch the stuff). I know that sounds kind of videogamey, and if I hear you complain you can eat my pants, I wasn't the one who made that decision. Whatever.\n"
+"\n"
+"You are our last hope, so fight, Demo-chan, fight for those you want to protect, for all of us... Make those bastards pay.\n"
+"\n"
+"Saya out.";
+SWWM_MISSION_HERETIC =
+"Welcome to your second mission, Demolitionist. While things have calmed down over here, we've been able to resume our work on the Akari Project. You know, the important one I've wanted to work on all my life. So far it's been a success, and you'll be the first to take part in the exploration of other worlds. We've scoured the multiverse for all sorts of interesting places, and this one in particular caught our eye. It is called Parthoris, it's a realm of magic and elves and stuff, I dig it. Anyway, I hope the ride wasn't too bumpy, we haven't fine-tuned that yet.\n"
+"\n"
+"Here's the situation: This place was divided in seven kingdoms, and all was good™ until some evildoer wizard of sorts popped up and brainwashed everyone. The only ones who resisted were the elves, the Sidhe (how do you even pronounce that). I don't like where this is going already, and I would hate to see a repeat of what we went through, so you're here to put a stop to it.\n"
+"\n"
+"Your objective is a man called D'Sparil. He's a member of a triad of crazy-ass evil sorcerers called the \"Serpent Riders\". Guy's tall, wears red robes, and talks backwards, can't miss him. He commands armies of undead and shit, nothing you can't deal with, I'm sure. First of all, you'll need to make contact with the Sidhe survivors, see if you can gather any more information on where to go and what to do. Maybe once it's all over we can probably form an alliance or something, and hopefully they won't be pissed that we use wooden furniture.\n"
+"\n"
+"I'm sure, that once you come back you'll want to transfer over to your maidbot body again, so I'll be working on a couple \"extensions\" there to make things more... \"fun\", if you catch my drift. Oh, I'm in the mood for something long... and hard... right now, yes...\n"
+"\n"
+"So... uh... horniness aside, I'm sorry that we couldn't give you all your stuff. I'm taking the blame this time, I think I screwed something up with the deployment and it got scattered all over the place. It's possible that the locals may have moved it around so... good luck finding it all.\n"
+"\n"
+"Go get 'em, Demo-chan. Kick some wizard ass.\n"
+"\n"
+"Saya out.";
+SWWM_MISSION_HEXEN =
+"Welcome to your... ah screw this.\n"
+"\n"
+"Heya, Demo-chan. It's time for another adventure! Remember that wizard you beat up last time? We've tracked down the next big baddie buddy of his, and you're gonna kick his ass too, oh yeah.\n"
+"\n"
+"Welcome to Cronos. This place used to be nice, until that guy came in stomping around with his armies. Like the wizard dude, this fucker even got some of the locals on their side. Your target is called Korax, like the raven, huh, y'know, \"Corvus Corax\"... ah, forget it.\n"
+"\n"
+"So the thing is, I'd like you to step in and take him out. Do NOT listen to anything he says, as I bet he'll probably try to get to you too. He's big, ugly, and doesn't look much like the type who'd be capable of riding a serpent, so maybe... he's the one who gets a riding... oh wait no, that doesn't sound very... UGH... baaaaad mental image, holy fuck. Where are Ibuki's tiddies when you need 'em, they're the best at making me forget about everything.\n"
+"\n"
+"I know you'll want a nice reward for this so, here's what I have in mind. How about some more of that \"fun\" we had last time, hm? You, me, maybe Ibuki and Maidbot too... and I wonder... if Kirin-kun also... hnnn... and then... *heavy breathing*\n"
+"\n"
+"OK, wow... phew. Saya, focus. No hornyposting on mission statments, not again. Anyway, bad-ish news??? We got a mixup on the ammo stuff and instead we got these weirdass \"Fabricator\" things from that nerdo. They do provide ammo, at least. As usual, your equipment will be strategically placed here and there, since we couldn't just... send you in with ALL of it at once, again. I don't know why nerdo boy insists on doing things like this. Does he really want everything to be so... ugh... videogamey?\n"
+"\n"
+"Well, whatever. Go, Demo-chan, show 'em what you got!\n"
+"\n"
+"Saya out.";
+SWWM_MISSION_NONE = "(no mission briefing available)";
+// lore entries
+SWWM_LORETAG_AKARILABS = "Akari Labs";
+SWWM_LORETAB_AKARILABS = "People";
+SWWM_LOREREL_AKARILABS = "Saya;Taro;Maidbot;Ibuki;WhiteScar;Demolitionist";
+SWWM_LORETXT_AKARILABS =
+"Name: Akari Labs\n"
+"Classification: Scientific Research Laboratory, Robotics Factory, Adoption Service\n"
+"Location: Kasukabe, Saitama Prefecture, Japan\n"
+"\n"
+"Summary: Akari Labs, the Fountain of Innovation, was founded in 2010 by Saya and Taro Miyamoto. While initially just a small robot workshop, they quickly grew over time, covering more diverse fields in the process. One of the labs' most popular products are the Maidbots, life-like humanoid assistant bots that can be freely adopted by any household: \"from energetic, workaholic maids that do their job without asking questions, to tender, motherly maids who take special care of you and encourage you to improve your lifestyle\". The labs are also famous for the creation of Ibuki, the \"Red Oni\", a WW3 veteran supersoldier, now turned supermodel, and in recent years, her successor, the Demolitionist.\n"
+"\n"
+"Addendum: Akari Labs was one of the sponsors of the 2020 Tokyo Olympic Games. Saya's personal Maidbot singing the national anthem was one of the major highlights of the event.";
+SWWM_LORETAG_ANARUKON = "Anarukon";
+SWWM_LORETAB_ANARUKON = "Lore";
+SWWM_LOREREL_ANARUKON = "Gods;Novoskhana;Hell;Saya;Kirin";
+SWWM_LORETXT_ANARUKON =
+"Name: Anarukon\n"
+"Classification: Immortal beings\n"
+"Location: Various\n"
+"\n"
+"Summary: The Anarukon are a race of immortal beings created by a god known as Noskas Kurenai (in their tongue, \"Father of Eternity\"). They are entirely unkillable, able to recover even if burned to ashes. While most of the population is in the Empire of Novoskhana, other groups split off from it following major disagreements with the empire's policies.\n"
+"\n"
+"Addendum: The Anarukon are the humanoid race with the highest ratio of individuals who don't conform to the sex or gender binaries according to a recent census. Approximately 40% of the population falls under the \"intersex\" classification, and only 30% of the total population could be considered \"cisgender\". A study by Mosse Anderken traced this to a mutation in the Anarukon genome that appeared many years after the creation of the empire.\n"
+"\n"
+"Saya's Note: More stuff about gods here. Really not joking around, they ARE real.";
+SWWM_LORETXT_ANARUKON2 =
+"Name: Anarukon\n"
+"Classification: Immortal beings\n"
+"Location: Various\n"
+"\n"
+"Summary: The Anarukon are a race of immortal beings created by a god known as Noskas Kurenai (in their tongue, \"Father of Eternity\"). They are entirely unkillable, able to recover even if burned to ashes. While most of the population is in the Empire of Novoskhana, other groups split off from it following major disagreements with the empire's policies. Among them the most notable are the Eternal Kingdom, founded by Noskas Kurenai himself and led by Queen Andreki Anderken, and the Rust Empire, founded by Syrakha Yanikov and led by Child Emperor Kirin Xanai.\n"
+"\n"
+"Addendum: The Anarukon are the humanoid race with the highest ratio of individuals who don't conform to the sex or gender binaries according to a recent census. Approximately 40% of the population falls under the \"intersex\" classification, and only 30% of the total population could be considered \"cisgender\". A study by Mosse Anderken traced this to a mutation in the Anarukon genome that appeared many years after the creation of the empire.\n"
+"\n"
+"Saya's Note: You know... I met Andreki once, after my wedding with Kirin-kun. I seriously thought she was just a little kid, god damn that was embarrassing... I also met some of her relatives, like this witchy looking lady... her aunt I think? I couldn't stare at her for too long, it made me anxious. T-there was also uhhh... her mom, really hardcore looking badass gutsy warrior mommy, another aunt who apparently likes to go around in a creepy costume and uses a voice changer to sound all evil, she was the most fun to talk to. I also met the GOD in all caps himself, the \"Father of Eternity\"... oh boy the tension when he was looking at me... but it was fine because turns out he's a real softly lol. Ahhh... it was so fun finally getting to meet these people after having only ever read about them, and oh boy don't even get me started on what it's like to be married to one, huhu. Finally, an immortal cutie just for me... and hot daaaamn he's a big cutie... and a beast in bed, uheheheheheh~";
+SWWM_LORETAG_ARGENT = "Argent Energy";
+SWWM_LORETAB_ARGENT = "Lore";
+SWWM_LOREREL_ARGENT = "UAC;Hell;Saya;Nukuri;NokronKiny";
+SWWM_LORETXT_ARGENT =
+"Name: Argent Energy\n"
+"Classification: Pure source of energy\n"
+"Location: Hell\n"
+"\n"
+"Summary: An almost limitless source of pure energy found by the UAC in Mars, and further tracked down to Hell itself. The corporation has worked hard to turn raw Argent Plasma into a clean and efficient alternative to other sources of energy that are no longer viable.\n"
+"\n"
+"Addendum: The true nature of this energy is not very well known, but due to its natural origin on Hell some have wildly theorized that it may be the souls of the dead.\n"
+"\n"
+"Saya's Notes: Or maybe it's Demon Cummies. Who knows, who cares... sure, this stuff is revolutionary and whatnot, but you can't just go around stealing shit from Hell and expect to not have anyone notice and call a fucking army onto your sorry ass, which is EXACTLY what happened. I very much prefer to keep using the stuff the Nukuri gave us. Nokron+Kinylum fusion is much safer and cleaner, and sure, it might not have the A M A Z I N G power output of Argent Energy, but at least you're not going to get ripped to shreds by demons for using it.";
+SWWM_LORETAG_ASHLEY = "Knox, Ashley";
+SWWM_LORETAB_ASHLEY = "People";
+SWWM_LOREREL_ASHLEY = "Yui;Saya";
+SWWM_LORETXT_ASHLEY =
+"Full Name: Ashley Knox\n"
+"Nationality: British\n"
+"Date Of Birth: 1887-10-31\n"
+"\n"
+"Summary: Ashley was born in 1887 in London, to Yrikha Yanikov and Maxwell A. Knox. She has two younger siblings, Viola and Adrian, and a single son, Christopher. Ashley is most known for being the lead guitarist and singer of \"The Black Rat's Coven\", a Gothic Rock band composed entirely of witches that has toured all across the world. She is also a masterful painter and sculptor, with some of her works selling for millions.\n"
+"\n"
+"Addendum: Shortly after the birth of her son in 1989, Ashley divorced her then-husband Fredrik Steiner. Many years later, during a concert in Japan in 2020, she met Yui Miyamoto, whom she married only a few days after the fact. Ashley regrets not having noticed sooner that she prefers women.\n"
+"\n"
+"Saya's Note: Bless this lesbian, amen. Ohhh... Ashley-san is simply amazing, I absolutely love her music, and it's really cool that we get invited to her concerts and stuff whenever. Also she hugged me once and HNNN that felt just amazinggggg!!! Ahhhh.... soft witch tiddy... ♥";
+SWWM_LORETAG_BELT = "Utility Belt";
+SWWM_LORETAB_BELT = "Item";
+SWWM_LOREREL_BELT = "Symnatek;Hammerspace;Keychain";
+SWWM_LORETXT_BELT =
+"Designation: Adaptable Magnetic Utility Belt\n"
+"Manufacturer: Symnatek\n"
+"\n"
+"Summary: A simple magnetic belt, adaptable to any waist size by detaching/attaching segments. Its magnetic force is enough to keep any objects tightly attached no matter the force of impact the user faces.\n"
+"\n"
+"Addendum: This belt should allow you easy access to your Hammerspace containers and keychain, along with making it easier to reload certain weapons.";
+SWWM_LORETAG_BIGSHOT = "Mr. BIG SHOT";
+SWWM_LORETAB_BIGSHOT = "People";
+SWWM_LOREREL_BIGSHOT = "Blackmann;Saya";
+SWWM_LORETXT_BIGSHOT =
+"Full Name: John \"Bigshot\" Gunns\n"
+"Nationality: American\n"
+"Date Of Birth: 2110-11-12\n"
+"\n"
+"Summary: A man shrouded in mystery. Claims to be the \"son of Benellus, God of Shotguns\". He is one of the main financial backers of Blackmann Arms and has commissioned several unique weapons from them, most kept private. From his fortress in Nevada he frequently broadcasts himself talking about a coming \"apocalyptic event\" that he's been preparing for.\n"
+"\n"
+"Saya's Note: So, basically, just some crazy, I get it. But see, one of the designs from this guy was made public, and I couldn't help it but try getting my hands on that thing. I just want to see what it's like for you to handle that ballbusting hunk of metal. I've even given you enhancements to more efficiently utilize it. Any time you're using it I'll be watching, so you better give me something fun to eat popcorn with.";
+SWWM_LORETAG_BLACKMANN = "Blackmann Arms";
+SWWM_LORETAB_BLACKMANN = "People";
+SWWM_LOREREL_BLACKMANN = "BigShot;Wallbuster;Saya";
+SWWM_LORETXT_BLACKMANN =
+"Name: Blackmann Arms Ltd.\n"
+"Classification: Arms Designer and Manufacturer\n"
+"Location: Cologne, Germany\n"
+"\n"
+"Summary: Founded in 1924 by Daniel Ischer as \"Schwarzmann Exotischwaffen\", an \"exotic weapons\" workshop in Cologne. Their slogan is \"if you can imagine it, we can build it\". Rose to fame when the family escaped to America in 1933. After settling in, the shop \"americanized\" itself under the current brand of \"Blackmann Arms\", and quickly rose to fame designing all sorts of ingenious weaponry for the allied forces. During WW3 they moved back to Germany, where they've stayed to this day. The company is currently run by Hermann E. Ischer, great-great-grandson of the original founder, who has made it a personal goal that as long as any commissioned weapon can hold more than one bullet, it must have a built-in function for shooting everything as quickly as possible.\n"
+"\n"
+"Addendum: A big part of the company's funding comes from Mr. BIG SHOT Industries, which according to reports by Hermann himself, regularly commissions all sorts of ludicrous shotgun designs that no sane man would think of using. Out of all these strictly private commissions, one sole weapon was eventually made public, the \"Wallbuster\", a 25-barrel revolving shotgun.\n"
+"\n"
+"Saya's Note: I think I cracked the code here... if the company's name references what I think it does... Oh come on. Did the founder seriously intend people to think of his DICK whenever they looked at the massive guns he made? GROSS.";
+SWWM_LORETAG_BLASTSUIT = "Blast Suit";
+SWWM_LORETAB_BLASTSUIT = "Item";
+SWWM_LOREREL_BLASTSUIT = "Symnatek";
+SWWM_LORETXT_BLASTSUIT =
+"Designation: Blast Suit\n"
+"Manufacturer: Itamex Military Supplies (subsidiary of Symnatek)\n"
+"\n"
+"Summary: A simple vest designed to protect against explosions. The main body is made of very elastic nanofabrics, and should provide adequate protection against small arms. The plating is made of a highly shock-absorbing proprietary alloy.\n"
+"\n"
+"Protection:\n"
+" - 30% reduction to all types of damage.\n"
+" - Additional 50% reduction to explosions.\n"
+"\n"
+"Durability: Can absorb a total of 150 units of damage before breaking.\n"
+"\n"
+"Addendum: The blast suit can be worn under other armor.";
+SWWM_LORETAG_CANDYGUN = "Candy Gun";
+SWWM_LORETAB_CANDYGUN = "Item";
+SWWM_LOREREL_CANDYGUN = "ExplodiumGun;Munch;Explodium;Saya";
+SWWM_LORETXT_CANDYGUN =
+"Designation: \"Taste the Sweetness\" Candy Gun\n"
+"Manufacturer: Munch Innovations\n"
+"\n"
+"Summary: Overcharged variant of the Explodium gun. Not only the bullets, but also parts of the weapon, are made of Explodium. Mixed with strawberry-flavoured hard caramel and pop rocks too, which for some reason results in a festival of fireworks.\n"
+"\n"
+"Primary Fire: Single shots of explosive sweetness. If the direct blast doesn't kill something, the additional crackles and pops might.\n"
+"\n"
+"Secondary Fire: Explosive reload. The yield is much more extreme so watch out for splash damage. Can only be performed if you have spare mags.\n"
+"\n"
+"Special: During the first moments of preparing an explosive reload, you can hold primary fire to keep the mag in and instead throw the whole gun as a grenade for even greater damage than just the mag. Can only be performed if you have at least one spare gun and mag.\n"
+"\n"
+"Reloading: Same as usual. Remember that you can keep one bullet in the chamber.\n"
+"\n"
+"Addendum: Due to the disposable nature of the Candy Gun, up to 4 additional spares can be held in your inventory.\n"
+"\n"
+"Saya's Note: I don't understand how mixing hard candy with explodium does this, but I still love every single second of it. Ahhh... makes me real nostalgic. How about we go watch some real fireworks after you're done saving the world?";
+SWWM_LORETAG_COLLAR = "Lucky Collar";
+SWWM_LORETAB_COLLAR = "Item";
+SWWM_LOREREL_COLLAR = "Demolitionist;Saya;Ibuki;Yui;Ashley";
+SWWM_LORETXT_COLLAR =
+"Designation: Lucky Collar for Demolitionist\n"
+"Manufacturer: Saya Miyamoto\n"
+"\n"
+"Summary: A very stylish fashion accessory, personally crafted by Saya, with much love and care, and infused with some borrowed magical energy that will keep the wearer protected.\n"
+"\n"
+"Protection:\n"
+" - 75% reduction to all damage when below 25% health.\n"
+" - 50% reduction to all self-inflicted damage.\n"
+"\n"
+"Addendum: The collar cannot break no matter how much damage you receive.\n"
+"\n"
+"Saya's Note: I made one for Ibuki too. Looks super cute on both of you tbh. I swear this isn't some BDSM thing. Also holy fuck if Yui's big tiddy goth gf can do some magic.";
+SWWM_LORETAG_CRONOS = "Cronos";
+SWWM_LORETAB_CRONOS = "Lore";
+SWWM_LOREREL_CRONOS = "SerpentRiders;Saya";
+SWWM_LORETXT_CRONOS =
+"Name: Cronos\n"
+"Classification: Collection of worlds\n"
+"\n"
+"Summary: A cluster of pocket worlds connected by strange portals. Historical research says that these were once all part of a much larger world, but some great cataclysm happened and it all got shattered. Fortunately some \"sages\" devised a way to connect the many hubworlds together once again. We've also been informed that there are three major organizations at work here, but they're not friendly at all, since they've allied with a Serpent Rider. You may have to confront their leaders before facing the one pulling the strings.\n"
+"\n"
+"Addendum: The natives are known to enjoy puzzles, sometimes to a sickening degree.\n"
+"\n"
+"Saya's Note: Yeah yeah, typical dark fantasy stuff, I get it, \"this all used to be a field of daisies before\" and then shit hits the fan. I'm actually quite intrigued about how those portals work, though.\n";
+SWWM_LORETAG_CYRUS = "Cyrus Enterprises";
+SWWM_LORETAB_CYRUS = "People";
+SWWM_LOREREL_CYRUS = "Kereshnovka;Saya";
+SWWM_LORETXT_CYRUS =
+"Name: Cyrus Enterprises\n"
+"Classification: Tech Startup?\n"
+"Location: Kopo Island, Kereshnovka, Russia\n"
+"\n"
+"Summary: A small company run by one Reubens C. Karnanaiahmani, son of royalty and ambassador of the Qurensniv people on Earth. Does everything all by himself, has a habit of giving things very nerdy names.\n"
+"\n"
+"Addendum: Apart from delving in advanced technology, Reubens is also a ten times Ko-Ron-Jai champion (Qurensniv martial arts), and a renowned sharpshooter, capable of splitting a single matchstick in half from 1km away, with deadly precision.\n"
+"\n"
+"Saya's Note: He's also a big stinky nerd. That exactly, I've said everything. Sure the stuff he makes is cool and all, sometimes, but good LORD the guy pisses me off with that attitude of his, guh...";
+SWWM_LORETAG_DECADEMECH = "Decade Mechanics";
+SWWM_LORETAB_DECADEMECH = "Lore";
+SWWM_LOREREL_DECADEMECH = "Sunkaeze;XAnimen";
+SWWM_LORETXT_DECADEMECH =
+"Name: Decade Mechanics\n"
+"Classification: Military Research Facility???\n"
+"Location: Sunkaeze, Xathar outer rim, X'Animen Coalition\n"
+"\n"
+"Summary: Ever since humanity was made aware of the gateway in Sedna connecting the two solar systems, many expeditions have been made to learn more of the worlds in X'Animen (name given by the governing bodies within). One major discovery that not even the natives were aware of, was that of a ruined research facility in the wasteland planet of Sunkaeze, belonging to a defunct company named \"Decade Mechanics\", run by the long-dead mechanical demigod Maester Mekes. Research material, blueprints and even finished, still functioning products have been found within, giving a general idea of what this facility was specialized in. Various groups have successfully recreated items entirely off their original blueprints, some of which have been commercial successes in the military field.\n"
+"\n"
+"Addendum: The ruins are also said to be haunted. Many lives have been lost exploring them, either due to accidents or unidentified \"hostile spectral creatures\" some have taken to call \"angels of death\".";
+SWWM_LORETAG_DEEPIMPACT = "Deep Impact";
+SWWM_LORETAB_DEEPIMPACT = "Item";
+SWWM_LOREREL_DEEPIMPACT = "Locke";
+SWWM_LORETXT_DEEPIMPACT =
+"Designation: \"Deep Impact\" Airblaster\n"
+"Manufacturer: Dr. Locke's Wonderful Toys\n"
+"\n"
+"Summary: The Deep Impact is a compressed air gun, allegedly meant to be a child's toy. Its maximum pressure allows for deadly blasts of air that could cause severe internal hemorrhaging and crushing of vital organs.\n"
+"\n"
+"Primary Fire: Quick puffs of compressed air. Pushes away enemies and projectiles, while also dealing some damage.\n"
+"\n"
+"Secondary Fire: Compresses all the air into a single highly destructive shot. This \"air bullet\" is capable of penetrating multiple targets, digging a hole staight through their bodies. Requires a full air tank.\n"
+"\n"
+"Reloading: The lever on the side must be pulled several times in order to refill the internal air tank. Once at full capacity, a smart mechanism will lock the lever to avoid accidental overfilling.\n"
+"\n"
+"Addendum: It is unclear how exactly this even counts as a toy for children.";
+SWWM_LORETAG_DEMOLITIONIST = "Demolitionist";
+SWWM_LORETAB_DEMOLITIONIST = "People";
+SWWM_LOREREL_DEMOLITIONIST = "AkariLabs;Ibuki;Saya;Zanaveth2;Hell;UAC;Nekuratek;Belt;Collar;Keychain;Propulsor;Hammerspace";
+SWWM_LORETXT_DEMOLITIONIST =
+"Full Name: Akari Labs First Generation Autonomous Combat Unit\n"
+"Codename: Demolitionist\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 2148-01-20\n"
+"\n"
+"Summary: The Demolitionist is a refinement of the former Red Oni supersoldier program, an AI-controlled combat unit capable of efficiently utilizing any weaponry at its disposition. It is equipped with a portable JetBurst Impulsor unit, allowing it to perform rapid mid-air boosts and dashes, it also comes equipped with two Hammerspace containers, for easy access to carried weapons and ammunition, the two, along with a keychain, being attached to a Magnetic Utility Belt. Its AI core is built on the same technology as Akari Labs' maidbots, the Nekuronbot AI framework, provided as a gift of friendship between Saya and Zanaveth II, the current head of Nekuratek. Thanks to this technology, the Demolitionist is barely indistinguishable from a real person in its behaviour and emotional response, which makes interaction with civilians more comforting. The first unit was deployed in June of 2148 on Union States territory in order to combat the demonic invasion brought upon by the UAC's interventions on Hell.\n"
+"\n"
+"Addendum: Many more details are known about the first Demolitionist thanks to a Q&A session livestreamed by Saya Miyamoto. The unit's full name is \"Demo Miyamoto\", as given by Saya herself. They identify as non-binary, and remark that along with they/them, she/her pronouns are also acceptable. Personality-wise, they can be described as \"quite chatty\", fond of joking around and trying to put a smile on people's faces, but also very serious and determined in their desire to protect those in need. Demo also wears a \"Lucky Collar\" as a token of friendship from Saya, though most people remark that it looks like some sort of BDSM accessory.\n"
+"\n"
+"Saya's Note: Have you finished reading about yourself? Yes, Demo-chan, I know you are reading this. OooOOOooOo~, spooky isn't it? Get back to work, you silly robutt.";
+SWWM_LORETAG_DEVANIKNA = "Devanikna";
+SWWM_LORETAB_DEVANIKNA = "Lore";
+SWWM_LOREREL_DEVANIKNA = "Unissix;Saya";
+SWWM_LORETXT_DEVANIKNA =
+"Name: Devanikna\n"
+"Classification: Land of warriors\n"
+"Location: Ixxeney, Xathar system\n"
+"\n"
+"Summary: The Devanikan are a race of fierce warriors, said to descend from dragons (in their language, \"Devanikan\" means \"Dragonblood\"). They are divided in several clans, with one of them, the Unissix, leading the others.\n"
+"\n"
+"Addendum: These people are fond of adventuring and slaying beasts, many clan members having quite a lot of tales to tell of their exploits. Deneva Unissix, older sister of Misa Unissix, is currently one of the most well known warriors, having been the one to finally defeat Mero The Destructor, a mighty, hulking golem built by the Shadow Prince Kuro Noroko who for centuries had spread terror across Ixxeney.\n"
+"\n"
+"Saya's Note: Misa's people are cool af. They kinda make me think of this one old JRPG series I played many many years ago, it had to do with people of dragon blood too... uh... forgot what it was called... oh well. Cool Dragon warriors, fuck yeah.";
+SWWM_LORETAG_DISPLAY = "CuteEmotion Display";
+SWWM_LORETAB_DISPLAY = "Item";
+SWWM_LOREREL_DISPLAY = "AkariLabs;Demolitionist;Ibuki;Saya";
+SWWM_LORETXT_DISPLAY =
+"Designation: CuteEmotion Display\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: One-sided display designed for use on robots. Located on the head region it can be used to convey simple readable facial expressions selected from an user-configurable library of images that can be associated with any sort of emotion the AI may want to convey, whether it's happy or sad, excited or bored, calm or angered... The possibilities are endless.\n"
+"\n"
+"Saya's Note: This makes you super cute and huggable (sorry once again for that one time Ibuki crushed you with a hug, btw, I seriously thought your chassis could handle it, but she really is hella strong).";
+SWWM_LORETAG_DOOMGUY = "Doomguy";
+SWWM_LORETAB_DOOMGUY = "People";
+SWWM_LOREREL_DOOMGUY = "UAC;Hell;Saya";
+SWWM_LORETXT_DOOMGUY =
+"Full Name: [CLASSIFIED]\n"
+"Codename: Doom Marine\n"
+"Nationality: American\n"
+"Date Of Birth: [CLASSIFIED]\n"
+"\n"
+"Summary: The Doom Marine (a.k.a. \"Doomguy\") is the lone survivor of the demonic invasions on the UAC bases of Phobos and Deimos, and is seen as kind of a legendary figure by many. Due to his impressive track record he has also been appointed as the organization's \"problem solver\". At the moment of writing this, he has been tasked with fighting the demon invaders on Earth.\n"
+"\n"
+"Addendum: You have been ordered to not interact with this man, if you encounter him, please stand back and let him work.\n"
+"\n"
+"Saya's Note: Sorry about the lack of info here, those UAC goons really keep it well-guarded. At least I heard he likes bunnies, so if the worst happens just pretend to be one and he might not shoot you on sight.";
+SWWM_LORETAG_DOOMSLAYER = "Doom Slayer";
+SWWM_LORETAB_DOOMSLAYER = "People";
+SWWM_LOREREL_DOOMSLAYER = "Hell;UAC;Doomguy;Saya;Yui;Ashley";
+SWWM_LORETXT_DOOMSLAYER =
+"Full Name: Unknown\n"
+"Codename: Doom Slayer\n"
+"Nationality: Unknown\n"
+"Date of Birth: Unknown\n"
+"\n"
+"Summary: The Slayer is a living legend for all of humanity. A single man who put the final nail in the coffin for the Demon invasion on Earth. Initially found by the UAC, encased in a massive stone sarcophagus, this man jumped straight into action in 2149, during an invasion on Mars City, and ever since then never stopped killing demons wherever he went. The UAC has attempted to turn him to their side, several times, but he answers to no one and always works independently.\n"
+"\n"
+"Addendum: The Slayer has a side most people don't know about. He's an avid collector, and has been witnessed picking up several things during his time in Earth, including various literary and film works, videogames, collectable figurines, musical instruments, etc. He apparently loves rabbits, too, a trait shared with the Doom Marine.\n"
+"\n"
+"Saya's Note: Heh, the bane of the UAC, right there. This dude was a life saver back during the Hell invasion. It kinda happened while you were recovering, so I guess you didn't see it, but holy fuck he KICKED SOME ASS right there, oh boy. I actually tried to contact him, maybe share some of our stuff for his slayin', but it didn't go very well. The Wallbuster especially pissed him off, guess he didn't have the patience to reload it, heh. I THINK however that he still has that guitar signed by Yui's gf, boy that was quite something when it happened, like from what Ashley-san told us, he walked up to her with this kick-ass looking guitar and a permanent marker. He didn't say a single word, but she knew what she had to do. Dude was just... nervous af while she signed it, and then ran away hugging it. It's... hard to imagine that guy acting like that... welp.";
+SWWM_LORETAG_ELLEN = "Yanikov, Elena XVI";
+SWWM_LORETAB_ELLEN = "People";
+SWWM_LOREREL_ELLEN = "Ibuki;Taro;Ashley;Saya";
+SWWM_LORETXT_ELLEN =
+"Full Name: Elena \"Ellen\" Yanikov XVI\n"
+"Nationality: American\n"
+"Date of Birth: 2066-06-06\n"
+"\n"
+"Summary: Ellen is the current youngest member of a long-running lineage of immortal mischievous maidens all named \"Elena Yanikov\", started by the first daughter of Erana Yanikov in 1703. She is an avid urban explorer, and spent most of her teenage years scavenging the wasteland of the former United States after WW3. This is how she eventually got to meet Ibuki Miyamoto, and through her, Taro Miyamoto, who is now her husband.\n"
+"\n"
+"Addendum: Within Ellen's family, only the women seem to inherit immortality, all the men eventually grow old and die. Ellen is distantly related to Gothic Rock singer/guitarist Ashley Knox, as her father, Gottfried Steiner, is the grandson of her ex-husband. She also is one quarter demon through her grandfather, Cytho Valathor.\n"
+"\n"
+"Saya's Note: She's such a troll sometimes... When she pranks ya, she goes HARD. My ass is still sore from last time. Hm? What happened? Ah... it's too embarrassing to talk about...";
+SWWM_LORETAG_ENGINETECH = "Tach-Engine";
+SWWM_LORETAB_ENGINETECH = "People";
+SWWM_LOREREL_ENGINETECH = "UAC;Nukuri;DecadeMech;Sunkaeze;Saya;Nekuratek";
+SWWM_LORETXT_ENGINETECH =
+"Name: Tach-Engine Technology Institute\n"
+"Classification: Technology Conglomerate\n"
+"Location: Perth, Scotland\n"
+"\n"
+"Summary: Founded in 2014 by J.A. Tachmek-Smith, by then the \"richest man in the world\". Ever since its inception, the man has spent his fortune in research and development of many innovations for the \"betterment of mankind\". Fusion energy, improvements in waste recycling, cleaner air, etc. Tach-Engine Technologies is currently the second largest tech company on Earth, much to the displeasure of the UAC, who previously held that position, however its undying founder has claimed that he has no intent on \"swiping the crown off those people\", in reference to current industry titan [NAME REMOVED].\n"
+"\n"
+"Addendum: The company had also collaborated multiple times with its Nukuri counterpart, Nekuratek. In 2045, they were given access to Nekuratek's research material from an exploration of the ruined Decade Mechanics facility in Sunkaeze. Shortly after this, the founder announced the opening a new subdivision dedicated to reproducing the works of the defunct company, thus marking Tach-Engine's entry into the arms race.\n"
+"\n"
+"Saya's Note: It's always neat to meet other immortals, especially if they're THOUSANDS of years old, wow. Like, this guy is basically an ancient Egyptian king that got dethroned and cursed with immortality or something, crazy stuff. By the way, I had to remove the name of those people so I wouldn't get my butt sued clean off. You can't even imagine what they're like. The UAC is nothing compared to them.";
+SWWM_LORETAG_EVISCERATOR = "Eviscerator";
+SWWM_LORETAB_EVISCERATOR = "Item";
+SWWM_LOREREL_EVISCERATOR = "BigShot;Hammerspace;Saya";
+SWWM_LORETXT_EVISCERATOR =
+"Designation: \"Eviscerator\" High Load Flak Cannon\n"
+"Manufacturer: Mr. BIG SHOT Industries\n"
+"\n"
+"Summary: Beastly portable artillery, turns fleshy targets into fine red mist in mere instants. Quite deadly for both its targets and also users not familiar with its operation.\n"
+"\n"
+"Primary Fire: Detonates the shell directly, spreading hot steaming metal in front of the user.\n"
+"\n"
+"Secondary Fire: Lobs the shell as a grenade, it will detonate on impact with any surface or object and release its payload in the direction it was facing when shot.\n"
+"\n"
+"Reloading: Since the weapon reloads automatically and its internal ammo box has been linked to your Hammerspace Container, the reload button instead functions as a toggle for two spread modes on the primary fire.\n"
+"\n"
+"Addendum: The metal fragments shot by this weapon will ricochet all over the place, which makes it very effective for shooting around corners.\n"
+"\n"
+"Saya's Note: Why is there an \"owo\" face scribbled on every shell? Who did this? I want answers!";
+SWWM_LORETAG_EXPLODIUM = "Explodium";
+SWWM_LORETAB_EXPLODIUM = "Lore";
+SWWM_LOREREL_EXPLODIUM = "Munch;Saya";
+SWWM_LORETXT_EXPLODIUM =
+"Name: Explodium\n"
+"Classification: Highly explosive material\n"
+"\n"
+"Summary: Devised by Parker Munch during the early stages of his weapon invention spree. It is a mixture of highly volatile elements that combusts violently when ignited or struck. A single gram of the stuff has the explosive yield of a standard issue hand-grenade.\n"
+"\n"
+"Addendum: The usage of this substance is highly regulated due to the dangers posed by its misuse. It's rumored that \"small bombs\" are often sold in black markets and used for assassinations.\n"
+"\n"
+"Saya's Note: FUCKING CALLED IT. So the \"small bombs\" theory could have been correct! And people laughed at me... HA! Now I'm the one who laughs, losers.";
+SWWM_LORETAG_EXPLODIUMGUN = "Explodium Gun";
+SWWM_LORETAB_EXPLODIUMGUN = "Item";
+SWWM_LOREREL_EXPLODIUMGUN = "Explodium;Munch;Saya";
+SWWM_LORETXT_EXPLODIUMGUN =
+"Designation: Explodium Gun\n"
+"Manufacturer: Munch Innovations\n"
+"\n"
+"Summary: Semi-automatic handgun designed for custom-made .387 caliber Explodium tipped bullets. Highly volatile, can clear lesser targets with ease. Each magazine holds 7 rounds.\n"
+"\n"
+"Primary Fire: Slow, accurate shooting. A direct hit is often lethal, but the splash damage can deal some fine hurt too. Aim at the feet to send smaller enemies flying.\n"
+"\n"
+"Secondary Fire: Performs an \"explosive reload\", pulling the pin on the mag to arm it as a grenade and throw it at enemies. Its yield is proportional to the number of bullets left inside. This action can only be performed when you have at least one bullet still left.\n"
+"\n"
+"Reloading: Normal reload, nothing will explode here.\n"
+"\n"
+"Addendum: Thanks to a deal between Akari Labs and Munch Innovations, you have been provided with a practically limitless supply of ammunition for this weapon, so feel free to waste away.\n"
+"\n"
+"Saya's Note: This one's on my main, level three-eighty-seven... Eeeh? What do you mean you don't get that reference?\n";
+SWWM_LORETAG_FABRICATOR = "Ammo Fabricator";
+SWWM_LORETAB_FABRICATOR = "Item";
+SWWM_LOREREL_FABRICATOR = "Cyrus;Saya";
+SWWM_LORETXT_FABRICATOR =
+"Designation: Universal Ammo Fabricator\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: Portable nanofabricators that can build any type of ammunition from scratch. Available in several tiers. The main difference being the total amount of base material provided and the complexity of the ammunition that can be crafted.\n"
+"\n"
+"Addendum: The highest tier is hard to come by, but it should have enough material for a full supply of all types of ammunition.\n"
+"\n"
+"Saya's Note: The hell is this nonsense? Well at least it works, but it's also really dumb, and they even come in fucking tiers like something out of a gacha game? That goddamn nerd... Is he actively trying to piss me off?";
+SWWM_LORETAG_FORX = "Forx Aeronautics";
+SWWM_LORETAB_FORX = "People";
+SWWM_LOREREL_FORX = "Propulsor;Saya;UAC";
+SWWM_LORETXT_FORX =
+"Name: Forx Aeronautics\n"
+"Classification: Propulsion Engine Manufacturer\n"
+"Location: Kent, England\n"
+"\n"
+"Summary: Founded by Harold Forx in 2029, this company is credited with singlehandedly rescuing England from its long fall into economic ruin after Brexit and the Scottish independence. Forx Aeronautics is the #1 supplier of propulsion engines for all types of aircraft, be it commercial jet planes, or even spaceships. The only exception being the UAC, who prefer their own in-house technology. Forx has also adapted his patented jet propulsion systems for other uses, such as in the \"JetBurst Impulsor\", one of the first tuly portable jetpacks, or the \"Rapid Jet Compensator\", a recoil dampening system for high caliber firearms that permits their use outside of heavy, unwieldy power armor.\n"
+"\n"
+"Saya's Note: Hey did you hear the story about that one time he tried to mow down an orphanage and the guy who ran it smacked him so fucking hard he did a complete 180 and ran away crying? I've seen the archived footage like a dozen times and I always lose my shit with that asshole's face when he comes out.";
+SWWM_LORETAG_GENSOKYO = "Gensokyo";
+SWWM_LORETAB_GENSOKYO = "Lore";
+SWWM_LOREREL_GENSOKYO = "Saya";
+SWWM_LORETXT_GENSOKYO =
+"Name: Gensokyo\n"
+"Classification: Isolated Enclave\n"
+"Location: Japan\n"
+"\n"
+"Summary: Gensokyo is an isolated pocket of space located somewhere in Japan. It is entirely hidden from the outside world, although there are ways to get in and out. It is home to many a mythical creature. Not much else is known about it.\n"
+"\n"
+"Saya's Note: I've gone there a couple times to visit grandma, it's full of weird people, like this one old hag that's always interested in me for some reason. She goes around with a fox girl and a cat girl.";
+SWWM_LORETAG_GHOSTARTIFACT = "Ghost Artifact";
+SWWM_LORETAB_GHOSTARTIFACT = "Item";
+SWWM_LOREREL_GHOSTARTIFACT = "DecadeMech;Sunkaeze";
+SWWM_LORETXT_GHOSTARTIFACT =
+"Designation: Ghost Artifact\n"
+"Manufacturer: Decade Mechanics\n"
+"\n"
+"Summary: Cloaking device built from blueprints recovered from the abandoned facility on Sunkaeze. Generates a distortion bubble around the user that redirects outgoing photons, rendering them completely invisible.\n"
+"\n"
+"Addendum: Note that this does not muffle sound, so you can still be heard clearly while it's active.";
+SWWM_LORETAG_GHOULHUNT = "Ghoul Hunt";
+SWWM_LORETAB_GHOULHUNT = "Lore";
+SWWM_LOREREL_GHOULHUNT = "Kereshnovka;Imanaki;Anarukon;";
+SWWM_LORETXT_GHOULHUNT =
+"Name: The Ghoul Hunt\n"
+"Classification: Interdimensional Conflict\n"
+"Timeframe: 2007-2009\n"
+"\n"
+"Summary: An incident in Kereshnovka where a high ranking UAAF official was found murdered in the town. The blame was put on the local ghouls, and a hunt began for them. At the same time, an envoy of the Anarukon was in the area trying to seize one of the ghouls for unknown reasons, and got caught in the crossfire. This last action resulted in the Imanaki HQ being invaded by Anarukon soldiers and subsequently destroyed.\n"
+"\n"
+"Addendum: The \"ghoul\" that they were trying to find was later found out to be Manakei, current heir to the throne of Hell, who had gone missing well over a millenium ago after being summoned into the town by a mad druid.\n"
+"\n"
+"Saya's Note: Info for this stuff is kind of messy, and I don't really know either what exactly is up with all of this. Bigass mess of scattered info. I'd try to get more out of it, but that'd mean asking nerdo for help.";
+SWWM_LORETAG_GODS = "Gods";
+SWWM_LORETAB_GODS = "Lore";
+SWWM_LOREREL_GODS = "Ashley";
+SWWM_LORETXT_GODS =
+"Name: Gods\n"
+"Classification: Exactly that\n"
+"Location: All over the world\n"
+"\n"
+"Summary: For as long as man was sapient, religion has always been a thing. Mankind has always wondered if some supreme being created us all. The answer to this question may not be exactly what they expected. Gods are as real as any other person, and no different than one, even. Very physical entities that live out there, and often interact with mortals.\n"
+"\n"
+"Addendum: There are countless gods and demigods scattered all over the universe, some of them may even live among us, without anyone really noticing.\n"
+"\n"
+"Saya's Note: Alright so listen here, I did mention this in another entry, but I know for a fact that gods are real and I've even met one once. The drummer from Ashley-san's band, her name's Mykka. She's like, an actual, real god. She showed me her powers... it was like being in a dream... she could do ANYTHING. Then she showed me this huge-ass diagram full of all sorts of crazy names, it was her whole family tree, going all the way back to the beginning of time. She pointed at one name in particular, \"Anakauser\", and said: \"this is the one that protects your world\". We talked for hours about all this stuff... There's all sorts of things out there, the universe is much larger and complex than we could ever imagine... my mind was blown right there, and still is now.";
+SWWM_LORETAG_GRAVITYSUPPRESSOR = "Gravity Suppressor";
+SWWM_LORETAB_GRAVITYSUPPRESSOR = "Item";
+SWWM_LOREREL_GRAVITYSUPPRESSOR = "Cyrus;Saya";
+SWWM_LORETXT_GRAVITYSUPPRESSOR =
+"Designation: Gravity Suppresor\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: Once attached and activated, this device negates the pull of gravity, allowing you to fly. While in the air, your acceleration is greatly increased.\n"
+"\n"
+"Addendum: Due to the lack of a proper gravitational pull, it might be more difficult to orient oneself when in the air, or perform sharp movements.\n"
+"\n"
+"Saya's Note: If it really is inverting gravity then why are you still following the trajectory of the planet you're on? Just a thought.";
+SWWM_LORETAG_HAMMERSPACE = "Hammerspace";
+SWWM_LORETAB_HAMMERSPACE = "Item";
+SWWM_LOREREL_HAMMERSPACE = "Cyrus;Saya";
+SWWM_LORETXT_HAMMERSPACE =
+"Designation: Pocket Hammerspace Container\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: These devices provide the carrier with access to a dedicated off-world storage space, with practically instant deposit and withdraw times. You have been provided with two separate spaces, one for your items and weapons, and one entirely dedicated to carried ammunition.\n"
+"\n"
+"Addendum: Use of Hammerspace containment for storing living beings is not allowed and will immediately void your warranty.\n"
+"\n"
+"Saya's Note: This sounds like something out of a videogame, it's cool, sure, but did that stinky nerd really have to be a stinky nerd and call it \"Hammerspace\"?";
+SWWM_LORETAG_HAMMERSPACEEMBIGGENER = "Hs. Embiggener";
+SWWM_LORETAB_HAMMERSPACEEMBIGGENER = "Item";
+SWWM_LOREREL_HAMMERSPACEEMBIGGENER = "Cyrus;Hammerspace;Saya";
+SWWM_LORETXT_HAMMERSPACEEMBIGGENER =
+"Designation: Hammerspace Embiggener\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: These unique keys allow you to increase the maximum storage space allocated on your Hammerspace Container. Multiple keys can be used but there's a maximum limit of eight expansions per customer.\n"
+"\n"
+"Addendum: By contract only your ammo supply space can be expanded.\n"
+"\n"
+"Saya's Note: Is that even a real word?";
+SWWM_LORETAG_HAYDEN = "Hayden, Samuel";
+SWWM_LORETAB_HAYDEN = "People";
+SWWM_LOREREL_HAYDEN = "UAC;Argent;Hell;Saya";
+SWWM_LORETXT_HAYDEN =
+"Full Name: Samuel Hayden\n"
+"Nationality: American\n"
+"Date Of Birth: 2019, exact date unknown\n"
+"\n"
+"Summary: A self-appointed \"intellectual and philanthropist\" from a rich family, recruited into the UAC due to his achievements at the Global Science Council. His discovery of Argent Energy led to him taking the position of CEO. In 2145 he led the first manned expedition to Hell, only a year after the initial contact.\n"
+"\n"
+"Addendum: In 2127, in an attempt to save himself from an incurable cancer, he transferred his consciousness to a robotic body.\n"
+"\n"
+"Saya's Note: \"Philanthropist\" my butt. This guy is the most obnoxious, pedantic, assholish, snobbish, rich-bastard-asshole of an asshole of a stinking piece of junk robot that has ever walked the Earth, or Mars, or Hell. The fucker even has me blocked on Twitter because he KNOWS what I think of him and his stupid-ass UAC, and all the bullshit he's done for the \"betterment of mankind\" has only brought us pain and suffering. If I could I'd just... go there and kick his shiny metal ass, and show him what I think of him going around using Demon Cummies to solve the energy crisis.";
+SWWM_LORETAG_HEALTHGEOM = "Health Geodesics";
+SWWM_LORETAB_HEALTHGEOM = "Item";
+SWWM_LOREREL_HEALTHGEOM = "EngineTech;Saya;";
+SWWM_LORETXT_HEALTHGEOM =
+"Designation: Health Geodesics\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: Discovered in massive amounts within the alien ruins in Sedna. These artifacts provide healing effects when held tightly against one's chest. It is unknown how this process happens, nevertheless, they have become quite popular back on Earth, although their distribution is tightly controlled by Tach-Engine Technologies, who are still studying the artifacts.\n"
+"\n"
+"Addendum: The most common shapes for these are a tetrahedron and a cube, the former providing less healing potency than the latter.\n"
+"\n"
+"Saya's Note: I talked with the guy and you're allowed to use these, and any other things they have, so you're going to see them all over the place during your mission.";
+SWWM_LORETAG_HELL = "Hell";
+SWWM_LORETAB_HELL = "Lore";
+SWWM_LOREREL_HELL = "Imanaki;UAC;Saya;Ellen;Doomslayer";
+SWWM_LORETXT_HELL =
+"Name: Hell\n"
+"Classification: Nether realm\n"
+"\n"
+"Summary: A vast world separate from our own, inhabited by creatures that could only be described as \"demons\". This Hell was first discovered through the various interdimensional travel experiments done by Imanaki Corp back in the early 21st century, although the UAC has put a lot of effort into hiding this fact and claiming to be the first to do so instead. Their response to the UAC walking right in and attempting to steal their precious resources has been that of total annihilation. Starting from the first incidents on Mars and its moons, and now a full-fledged invasion of Earth, there is not much hope left for mankind. Unless we do something about it, that is.\n"
+"\n"
+"Addendum: The current rulers of Hell are not legitimately recognized by most of the population, as they forcibly took over when the true Royal Family gave them more power than they should. Hell used to be a much quieter place before their hostile takeover, relatively peaceful, even, apart from some rare incursions by other nations who saw them as enemies. The various generals of Hell's armies desired more power, to fight back those pesky invaders, and so Prince Akusei gave it to them, a terrible mistake he regrets to this day.\n"
+"\n"
+"Saya's Note: I know quite a lot about Hell's history thanks to Cytho-sama, Ellen-chan's grandfather. He tells us lots of stories about his life back there. It's intriguing that, in a way, they are not ALL bad, and I bet the good people in there also have it rough seeing what their armies do to us. Stuff like this... it's much more common than one may think. You can't really paint one whole nation as \"the enemy\", there are many innocent people in there who want none of it, who actively reject and denounce what's happening...\n";
+SWWM_LORETXT_HELL2 =
+"Name: Hell\n"
+"Classification: Nether realm\n"
+"\n"
+"Summary: A vast world separate from our own, inhabited by creatures that could only be described as \"demons\". This Hell was first discovered through the various interdimensional travel experiments done by Imanaki Corp back in the early 21st century, although the UAC has put a lot of effort into hiding this fact and claiming to be the first to do so instead. Their response to the UAC walking right in and attempting to steal their precious resources was that of total annihilation. Starting from the first incidents on Mars and its moons, then a full-fledged invasion of Earth. Had it not been for the Doom Slayer's actions, humanity would have perished.\n"
+"\n"
+"Addendum: The rulers of Hell at the time were not legitimately recognized by most of the population, as they had forcibly taken over when the true Royal Family gave them more power than they should. Hell used to be a much quieter place before their hostile takeover, relatively peaceful, even, apart from some rare incursions by other nations who saw them as enemies. The various generals of Hell's armies desired more power, to fight back those pesky invaders, and so Prince Akusei gave it to them, a terrible mistake he regrets to this day.\n"
+"\n"
+"Saya's Note: I know quite a lot about Hell's history thanks to Cytho-sama, Ellen-chan's grandfather. He tells us lots of stories about his life back there. It's intriguing that, in a way, they are not ALL bad, and I bet the good people in there also had it rough seeing what their armies did to us. Stuff like this... it's much more common than one may think. You can't really paint one whole nation as \"the enemy\", there are many innocent people in there who want none of it, who actively reject and denounce what's happening...\n";
+SWWM_LORETXT_HELL3 =
+"Name: Hell\n"
+"Classification: Nether realm\n"
+"\n"
+"Summary: A vast world separate from our own, inhabited by creatures that could only be described as \"demons\". This Hell was first discovered through the various interdimensional travel experiments done by Imanaki Corp back in the early 21st century, although the UAC has put a lot of effort into hiding this fact and claiming to be the first to do so instead. Their response to the UAC walking right in and attempting to steal their precious resources was that of total annihilation. Starting from the first incidents on Mars and its moons, then a full-fledged invasion of Earth. Had it not been for the Doom Slayer's actions, humanity would have perished.\n"
+"\n"
+"Addendum: The rulers of Hell at the time were not legitimately recognized by most of the population, as they had forcibly taken over when the true Royal Family gave them more power than they should. Hell used to be a much quieter place before their hostile takeover, relatively peaceful, even, apart from some rare incursions by other nations who saw them as enemies. The various generals of Hell's armies desired more power, to fight back those pesky invaders, and so Prince Akusei gave it to them, a terrible mistake he regrets to this day. Since 2181, with the return of prince Manakei thanks to Saya Miyamoto, things are slowly going back to normal in the realm, as the Demons continue to rebuild their home.\n"
+"\n"
+"Saya's Note: I know quite a lot about Hell's history thanks to Cytho-sama, Ellen-chan's grandfather. He tells us lots of stories about his life back there. It's intriguing that, in a way, they are not ALL bad, and I bet the good people in there also had it rough seeing what their armies did to us. Stuff like this... it's much more common than one may think. You can't really paint one whole nation as \"the enemy\", there are many innocent people in there who want none of it, who actively reject and denounce what's happening...\n";
+SWWM_LORETAG_HELLBLAZER = "Hellblazer";
+SWWM_LORETAB_HELLBLAZER = "Item";
+SWWM_LOREREL_HELLBLAZER = "Imanaki;UAC;Argent";
+SWWM_LORETXT_HELLBLAZER =
+"Designation: Hellfire Cannon Mk3 (\"Hellblazer\")\n"
+"Manufacturer: Imanaki Research Corporation\n"
+"\n"
+"Summary: Rocket Propelled Grenade launcher of simple design. Four types of ammunition are available, all of them powered by highly condensed Argent Energy. Standard grenades are pretty much what anyone would expect, Crackshots burst into a cluster of smaller grenades, Ravagers release hellish flames on a wide area, and last but not least, Warheads devastate everything in a large radius, including yourself if you don't keep your distance.\n"
+"\n"
+"Primary Fire: Shoots the loaded ammunition with its propulsion armed and ready.\n"
+"\n"
+"Secondary Fire: Lobs the loaded ammunition unarmed, as a bouncing grenade.\n"
+"\n"
+"Reloading: The reload button allows you to cycle between the four ammo types.\n"
+"\n"
+"Addendum: Only a limited number of these are in circulation since the fall of Imanaki Corp. The UAC has attempted to reproduce the weapon, with varying results.";
+SWWM_LORETAG_IBUKI = "Miyamoto, Ibuki";
+SWWM_LORETAB_IBUKI = "People";
+SWWM_LOREREL_IBUKI = "AkariLabs;WhiteScar;Taro;Saya";
+SWWM_LORETXT_IBUKI =
+"Full Name: Ibuki Miyamoto\n"
+"Codename: Red Oni\n"
+"Nationality: Japanese\n"
+"Date of Birth: 2074-09-09\n"
+"\n"
+"Summary: Ibuki is the result of the Red Oni supersoldier program at Akari Labs, commissioned by the US government. Her purpose was to turn the tides on the losing World War 3 that began due to a very badly received tweet from the President of the United States, an event reminiscent of the incident with Iran that the late Donald Trump had started. In a mere three years she was ready, thanks to an accelerated growth process. She's been enhanced to be effectively bulletproof, always standing strong under any circumstance, capable of handling extreme heat and cold, and trained for handling all kinds of weaponry. Despite all this, not long after she was deployed, the US were struck by an orbital strike, this event was known as the \"White Scar\". For years Ibuki wandered the wastelands, until she was finally retrieved by Taro Miyamoto and brought back to Japan.\n"
+"\n"
+"Addendum: Much is also said about her personality, or her questionable physical traits such as the ludicrously impractical bust size, all of this which must clearly have been intentionally done by her creator and self-appointed \"mother\", Saya Miyamoto. After the end of the war she's gone through several jobs, crowning in her current one as a world-famous nude model and vlogger.\n"
+"\n"
+"Saya's Note: Why does everyone keep bringing that up? What's the problem with me liking giga-tiddies? Like, seriously... Come on, don't kinkshame me, geez.";
+SWWM_LORETAG_IMANAKI = "Imanaki Corp";
+SWWM_LORETAB_IMANAKI = "People";
+SWWM_LOREREL_IMANAKI = "ImanakiT;Kereshnovka;UAC;Hell;GhoulHunt;Saya";
+SWWM_LORETXT_IMANAKI =
+"Name: Imanaki Research Corporation\n"
+"Classification: [CLASSIFIED]\n"
+"Location: Kereshnovka, Russia\n"
+"\n"
+"Summary: The name of a private research facility built in 2004 by Tetsuya Imanaki in the isolated town of Kereshnovka, in northern Siberia. Despite trying to keep all their work secret, a lot of information was leaked by anonymous sources. Imanaki specialized in interdimensional travel. Nothing is known about how this all started or where they got all the technology from, but they would regularly perform explorations of Hell, a great many years before the UAC. During the peak of the \"Ghoul hunt\" in the town, the facility was destroyed by invading forces from an unidentified origin. Their only target seemed to be that facility, as once the task was done, they returned to their homeworld.\n"
+"\n"
+"Addendum: There are rumors surrounding the UAC's similar forays into exploring and exploiting Hell, with the potential explanation that they have spied on the company back in their UAAF days while under contract providing armed defense to the facility.\n"
+"\n"
+"Saya's Note: Of course, the \"great and mighty\" UAC stole all their shit and claimed that research as their own. They really have no fucking shame.";
+SWWM_LORETAG_IMANAKIT = "Imanaki, Tetsuya";
+SWWM_LORETAB_IMANAKIT = "People";
+SWWM_LOREREL_IMANAKIT = "Onoke;Saya";
+SWWM_LORETXT_IMANAKIT =
+"Full Name: Tetsuya Imanaki\n"
+"Nationality: [CLASIFIED]\n"
+"Date Of Birth: [CLASSIFIED]\n"
+"\n"
+"Summary: CEO of Imanaki Corp, last surviving member of the Imanaki family following the Onoke Mansion Murders of 2003.\n"
+"\n"
+"Addendum: No further information available.\n"
+"\n"
+"Saya's Note: Couldn't find jack shit about this guy. It's like everything got erased.";
+SWWM_LORETAG_INVINCIBALL = "Invinciball";
+SWWM_LORETAB_INVINCIBALL = "Item";
+SWWM_LOREREL_INVINCIBALL = "Cyrus;Nedoshiaan;Saya";
+SWWM_LORETXT_INVINCIBALL =
+"Designation: Total Safety Device aka \"Fucking Invinciball\"\n"
+"Manufacturer: Cyrus Enterprises\n"
+"\n"
+"Summary: For a limited time, makes the user impervious to all harm that could come to them, even if self-inflicted.\n"
+"\n"
+"Addendum: The device cannot protect against artifacts of Nedoshiaan, it is impossible.\n"
+"\n"
+"Saya's Note: Is that a fucking MGR reference??? Does he even know how old the first game is? That meme is like... deader than dead!";
+SWWM_LORETAG_KERESHNOVKA = "Kereshnovka";
+SWWM_LORETAB_KERESHNOVKA = "Lore";
+SWWM_LOREREL_KERESHNOVKA = "Cyrus;Saya";
+SWWM_LORETXT_KERESHNOVKA =
+"Name: Kereshnovka\n"
+"Classification: Small City\n"
+"Location: Siberia\n"
+"\n"
+"Summary: Kereshnovka is a city located somewhere in the north-central bounds of Siberia. Its exact location cannot be properly pinpointed as it appears to exist within some sort of isolated pocket space that defies the laws of time and space. It is inhabited almost entirely by members of the Qurensniv race, who fled their home planet escaping persecution by a mad dictator. It is also home to Cyrus Enterprises, a famous tech startup.\n"
+"\n"
+"Addendum: The city's surroundings are inhabited by strange creatures known as \"ghouls\", who only appear to attack foreigners.\n"
+"\n"
+"Saya's Note: I know all about the history there, that \"mad dictator\" the article mentions is nerdo's dad. Old fart got his brains scrambled and went all sorts of crazy and murder-happy, people ran off as fast as they could to avoid being executed for the slightest sign of defiance. How the fuck does that shit even happen and will it happen to nerdo too? I sure hope not...";
+SWWM_LORETAG_KEYCHAIN = "Keychain";
+SWWM_LORETAB_KEYCHAIN = "Item";
+SWWM_LOREREL_KEYCHAIN = "Saya;Demolitionist";
+SWWM_LORETXT_KEYCHAIN =
+"Designation: Keychain\n"
+"Manufacturer: Saya Miyamoto\n"
+"\n"
+"Summary: A nice keychain for all your keys. Currently held keys can be checked in the Keychain tab.\n"
+"\n"
+"Saya's Note: I put some cute things in there that you might like. There's one of the bomb emoji, another of that silly \"butt bots gonna bot\" sign that you found so funny, and also a little chibi of me, so I'll always be with you when you're out in the wild. Oh, and I also put the trans flag in there, you know, as a little memento of that Q&A stream we did. I really didn't expect you to give that kind of answer, but heh, it does make sense when I think about it, you are built to defend human rights after all. I'm so proud of you, Demo-chan...";
+SWWM_LORETAG_KIRIN = "Xanai, Kirin";
+SWWM_LORETAB_KIRIN = "People";
+SWWM_LOREREL_KIRIN = "Anarukon;Novoskhana;Saya;Imanaki";
+SWWM_LORETXT_KIRIN =
+"Full Name: Kirin Xanai, Child Emperor of the Great Rust Empire\n"
+"Nationality: Akkouxhei\n"
+"Date Of Birth: 2080-04-13\n"
+"\n"
+"Summary: Kirin Xanai is the current head of the Rust Empire of Akkou, one of the many offshoots of the Empire of Novoskhana who branched off in protest of the Eternal Empress's aggressive policies. He is a very down-to-earth leader and sees himself as \"just like any other guy\". The previously struggling land of Akkou has faced great prosperity since the Rust Empire was formed, with the Xanai family being seen as a blessing from the gods. Kirin is very fond of making friends with people, and is absolutely adorable.\n"
+"\n"
+"Addendum: Due to being from one of the major branches of Anarukon royalty, his engagement to Saya Miyamoto (♥) opened up many opportunities for an alliance with humans, and served to heal the wounds previously caused by Imanaki Corp's intrusions.\n"
+"\n"
+"Saya's Note: Ahhh... Kirin-kun, you're so cute~... You make me the happiest girl in the world!!!";
+SWWM_LORETAG_KNOWLEDGEBASE = "Library";
+SWWM_LORETAB_KNOWLEDGEBASE = "Item";
+SWWM_LOREREL_KNOWLEDGEBASE = "Demolitionist;AkariLabs;Taro;Saya";
+SWWM_LORETXT_KNOWLEDGEBASE =
+"Designation: Demolitionist Library\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: What you are currently reading. This internal knowledge base can provide you with additional information on obtained items during your mission, so be sure to check it whenever you can, as it is updated automatically.\n"
+"\n"
+"Addendum: The quality of articles may vary, this depends entirely on how motivated the editor felt when writing them.\n"
+"\n"
+"Saya's Note: Taro is the one editing all this stuff, by the way. Sometimes I help, though, and leave some of my thoughts in footnotes like this one.";
+SWWM_LORETAG_MOTHLAMP = "Lämp";
+SWWM_LORETAB_MOTHLAMP = "Item";
+SWWM_LOREREL_MOTHLAMP = "Sankaideriha;Saya";
+SWWM_LORETXT_MOTHLAMP =
+"Designation: Companion Lamp\n"
+"Manufacturer: Sankai Exports Ltd.\n"
+"\n"
+"Summary: A little souvenir from the island of magic. This lamp will follow you around and light up the way. Can be toggled at will so the limited oil supply can be conserved when necessary.\n"
+"\n"
+"Addendum: Has a tendency to attract moths, though this can have some utility. The lamp is enchanted to make them hostile to nearby enemies, and when turned off they will immediately attack.\n"
+"\n"
+"Saya's Note: You know, I wish this thing attracted a certain kind of moth I really like... The lady laughed at me and said that \"maybe\". I... really hope she's right... but at the same time I think I might regret this?";
+SWWM_LORETAG_LOCKE = "Dr. Locke";
+SWWM_LORETAB_LOCKE = "People";
+SWWM_LOREREL_LOCKE = "Kereshnovka;Saya";
+SWWM_LORETXT_LOCKE =
+"Full Name: Janus Locke Hoodth\n"
+"Nationality: Qurensniv\n"
+"Date of Birth: 1980-07-30\n"
+"\n"
+"Summary: Younger brother of Häzel Hoodth, the \"mad doctor\" of Kereshnovka known for his inhuman experiments in order to search for the \"essence of immortality\". The young man changed entirely after Häzel's death in 1987, in an oil rig explosion near the town. While trying to follow on his brother's steps, on the side he also runs \"Dr. Locke's Wonderful Toys\" in order to earn some cash, although not many people really buy said toys, since they are hilariously deadly. In 2049 he attempted to \"take over the world\", an event that backfired so hilariously he completely disappeared from the public eye afterwards.\n"
+"\n"
+"Saya's Note: Guy's a total nut, but these \"toys\" are very reliable weapons for you. Just be careful when using them, shit could backfire catastrophically at any moment, who knows...";
+SWWM_LORETAG_LOOTBOX = "Lucky Chancebox";
+SWWM_LORETAB_LOOTBOX = "Item";
+SWWM_LOREREL_LOOTBOX = "NosKora;Saya";
+SWWM_LORETXT_LOOTBOX =
+"Designation: Lucky Chance Box\n"
+"Manufacturer: Nukritas 1xx\n"
+"Excitement: Guaranteed\n"
+"\n"
+"Summary: Can't afford something but still want it? Then how about you get yourself one of these bad boys? Every single instance of this box is guaranteed to drop something worth more than what you've invested, so your money won't go to waste.\n"
+"\n"
+"Addendum: These boxes come in several tiers, increasing the chances to get even cooler stuff. Be on the lookout for the LEGENDARY GOLDEN CHANCEBOX, as it may give you absolutely wondrous rewards!\n"
+"\n"
+"Saya's Note: Why did I let them write their own entries? Also what the fuck is this gacha bullshit?";
+SWWM_LORETAG_LUNA = "Luna Event";
+SWWM_LORETAB_LUNA = "Lore";
+SWWM_LOREREL_LUNA = "Nukuri;WhiteScar;Saya";
+SWWM_LORETXT_LUNA =
+"Name: Luna Event\n"
+"Classification: Alien Contact\n"
+"Date: February 2021\n"
+"\n"
+"Summary: Name given to the first contact between humans and the Nukuri race, who had been observing us for centuries from within a hidden research facility on the Moon. This was something that Nikita Kunau, head of human studies, had planned for many years. Following the announcement, the Nukuri would begin to make themselves at home among us.\n"
+"\n"
+"Addendum: The alliance with the Nukuri provided a major boost in scientific advancements for the human race, thanks to their much more advanced technology becoming available to us. Unfortunately, all this came to an end when WW3 happened.\n"
+"\n"
+"Saya's Note: Man, I miss those days. Back then you'd see all sorts of Nukuri cuties in the street, and I'd pretty much hang out with Zana-sama every weekend. Nowadays with the \"White Scar\" treaty in effect, life just sucks.";
+SWWM_LORETAG_MAIDBOT = "Miyamoto, Maidbot";
+SWWM_LORETAB_MAIDBOT = "People";
+SWWM_LOREREL_MAIDBOT = "";
+SWWM_LORETXT_MAIDBOT =
+"Full Name: Maidbot Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 2017-07-07\n"
+"\n"
+"Summary: The first maidbot ever created by Saya, with all others being based on her. Although Maidbot works for the Miyamotos as a servant, she is also considered part of the family, and lives with them, even having her own bedroom. On the side, she's had a successful career as a J-Pop singer and idol, under the nickname of \"Meidobot\".\n"
+"\n"
+"Addendum: Maidbot was once fitted into an experimental \"combat body\" in order to assist the Red Oni in her mission on the US. She proved effective, but was not comfortable with the task and preferred to go back to being a normal girl afterwards.\n"
+"\n"
+"Saya's Note: You know... all my maidbots, are fully equipped, hm? You know what I mean there... they're fully capable of \"loving\". Maidbot is no exception herself, and let me tell you... it feels like heaven to do things with her... ♥";
+SWWM_LORETAG_MIXOM = "Mixom";
+SWWM_LORETAB_MIXOM = "People";
+SWWM_LOREREL_MIXOM = "UAC;Symnatek;Saya";
+SWWM_LORETXT_MIXOM =
+"Name: Mixom Tools\n"
+"Classification: Industrial Equipment Manufacturer\n"
+"Location: Japan\n"
+"\n"
+"Summary: The largest supplier of industrial equipment on Earth, with coverage almost worldwide (excluding Australia, Symnatek's home turf). They're long time partners with the UAC, having produced most of their basic equipment and infrastructure.\n"
+"\n"
+"Addendum: Mixom has a rival company known as Moxim, who often claims to provide superior products. They frequently make the news due to attempts to sue each other over this.\n"
+"\n"
+"Saya's Note: You can't walk two steps without seeing the Mixom logo on something. They are fucking everywhere... Hell, all the screws in your body are Mixom branded.";
+SWWM_LORETAG_MUNCH = "Munch Innovations";
+SWWM_LORETAB_MUNCH = "People";
+SWWM_LOREREL_MUNCH = "Saya";
+SWWM_LORETXT_MUNCH =
+"Full Name: Munch Innovations\n"
+"Classification: Arms Manufacturer\n"
+"Location: Texas\n"
+"\n"
+"Summary: The Munch Innovations name applies to everything created by a very reclusive man, originating from a livetweeted \"invent as many guns as I can in one week\" challenge. Although most of them were quickly discarded, some of the weapons earned enough attention from various industry giants to enter mass production, the only requirement from the man was to be credited as the original creator.\n"
+"\n"
+"Addendum: Not much else is known about the man other than his name, \"Parker Munch\".\n"
+"\n"
+"Saya's Note: Why does this guy's name sound so familiar...";
+SWWM_LORETAG_NANA = "Miyamoto, Nana";
+SWWM_LORETAB_NANA = "People";
+SWWM_LOREREL_NANA = "Ryuji;Saya;Gensokyo";
+SWWM_LORETXT_NANA =
+"Full Name: Nana Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1907-07-07\n"
+"\n"
+"Summary: Nana was born in Gensokyo as the sole daughter of Kaguya Houraisan, former princess of the Lunar Capital. Due to the effects of the Hourai elixir she inherited her parents' immortality, which would further spread to her own children. It is unclear who her other parent is, but most point at Fujiwara no Mokou, Kaguya's long-time rival. During the 60's, Nana met a young Ryuji Miyamoto, who had fled the Human Village and made his way into Eientei. They became close friends and the young boy made a promise to marry her when he grew up, this came to happen in 1973, with both of them leaving Gensokyo to form a family of their own.\n"
+"\n"
+"Addendum: Nana has a wide variety of hobbies, including painting, woodworking, cooking and mixed martial arts. She has also appeared in many talk shows over the years, due to her fame as a descendant of Lunarian royalty.\n"
+"\n"
+"Saya's Note: You haven't met her yet, Demo-chan, but I'm sure she'll like you. Don't be put off by how scary she looks, she's nice and kind and is definitely not going to perform CBT on the nearest guy, unlike Kaguya-obaasan.";
+SWWM_LORETXT_NANA2 =
+"Full Name: Nana Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1907-07-07\n"
+"\n"
+"Summary: Nana was born in Gensokyo as the sole daughter of Kaguya Houraisan, former princess of the Lunar Capital. Due to the effects of the Hourai elixir she inherited her parents' immortality, which would further spread to her own children. It is unclear who her other parent is, but most point at Fujiwara no Mokou, Kaguya's long-time rival. During the 60's, Nana met a young Ryuji Miyamoto, who had fled the Human Village and made his way into Eientei. They became close friends and the young boy made a promise to marry her when he grew up, this came to happen in 1973, with both of them leaving Gensokyo to form a family of their own.\n"
+"\n"
+"Addendum: Nana has a wide variety of hobbies, including painting, woodworking, cooking and mixed martial arts. She has also appeared in many talk shows over the years, due to her fame as a descendant of Lunarian royalty.\n"
+"\n"
+"Saya's Note: Okaa-san is so happy that you're out there doing good work. It was nice to see that she likes you. I did tell you, after all. By the way I did see that, you know, when she hugged you, I saw it, yes. She hasn't really tried to see other guys after dad was gone... But I think that maybe... she likes you kind of in a different way, y'know...";
+SWWM_LORETAG_NEDOSHIAAN = "Nedoshiaan";
+SWWM_LORETAB_NEDOSHIAAN = "Lore";
+SWWM_LOREREL_NEDOSHIAAN = "Devanikna;Unissix;Saya";
+SWWM_LORETXT_NEDOSHIAAN =
+"Name: Nedoshiaan\n"
+"Classification: Dead Planet\n"
+"Location: Undisclosed\n"
+"\n"
+"Summary: A dead world once belonging to a mad dictator of the same name. The stories say that he was slain by one of his own most trusted associates, in a suicidal attack, and the resulting blast is what originated the massive crater that reaches deep into the planet's frozen core. An expedition by Devanikan adventurers resulted in the discovery of several artifacts at the very bottom of the crater, the so-called \"Artifacts of Nedoshiaan\", weapons designed for the ultimate destruction. Currently, these are still in possession of the Dragonblood Clan head family, and their use and reproduction is tightly controlled.\n"
+"\n"
+"Addendum: Of all the four artifacts, two of them were successfully replicated by Misa Unissix. But only one has been deemed acceptable for use, as the other operates under circumstances that make it a crime against all life.\n"
+"\n"
+"Saya's Note: Gosh... finding out more stuff about alien worlds out there, the universe is so much bigger than we ever knew... it's just... feckin' mindblowing, this stuff. Also props to Misa for letting us use one of those guns. Shit's better than the UAC's prized BFG.";
+SWWM_LORETAG_NEKURATEK = "Nekuratek";
+SWWM_LORETAB_NEKURATEK = "People";
+SWWM_LOREREL_NEKURATEK = "Nukuri;Zanaveth2;Saya";
+SWWM_LORETXT_NEKURATEK =
+"Name: Nekuraku Tekkanosei\n"
+"Classification: Electronics Megacorp\n"
+"Location: Nahkami\n"
+"\n"
+"Summary: Nekuratek was founded by Zanata Nekuraku I in 1744, as Nekuraku Rafana Sakosai (Nekuraku Arms Manufactory), it quickly became the main provider of weaponry for the Nukuri Empire. Following the death of Zanata I in 1870, the company's leadership was transferred to her granddaughter Zanata II, who decided to further expand into other fields, such as robotics and information technology, and gradually began to cut down on the fabrication of weaponry. Since the fall of the empire, the company is dedicated entirely to robotics and computing, with their old arms manufactory division being split off and led by Zanata II's son Zanaveth I. The last transfer of leadership was to Zanaveth II in 2128.\n"
+"\n"
+"Addendum: Nekuratek is most famous for the creation of the Nekern Architecture, a human-compatible hardware platform that powers all Nukuri systems, and the Nekuronbot AI, a lifelike, highly expandable artificial intelligence framework that's been used for various things, from personal assistant bots to self-driving vehicles.\n"
+"\n"
+"Saya's Note: Good people to work with, especially Zana-sama. She's a lot more outgoing than her predecessor, that's for sure, and much cuter, too, heheh...";
+SWWM_LORETAG_NOKRONKINY = "Nokron & Kinylum";
+SWWM_LORETAB_NOKRONKINY = "Lore";
+SWWM_LOREREL_NOKRONKINY = "Nukuri;WhiteScar;UAC;Argent;Saya";
+SWWM_LORETXT_NOKRONKINY =
+"Name: Nokron, Kinylum\n"
+"Classification: Exotic elements\n"
+"\n"
+"Summary: Two of the most common \"exotic\" elements that coexist with common matter in our universe. Quite rare in our own galaxy, but fairly common in others. Nokron and Kinylum have the special characteristic of reaching a plasma state at relatively low temperatures (approximately 30000℃), and are quite useful in the creation of efficient fusion reactors.\n"
+"\n"
+"Saya's Note: A damn blessing of the Nukuri to teach us how to use this stuff. But only countries that didn't sign that \"White Scar\" shit can use it, so the rest of the world just... got desperate and ate up the UAC's Demon Cummies. You can see how that turned out...";
+SWWM_LORETAG_NOSKORA = "Nos-Kora";
+SWWM_LORETAB_NOSKORA = "People";
+SWWM_LOREREL_NOSKORA = "Nukuri;Saya;";
+SWWM_LORETXT_NOSKORA =
+"Name: University of Nos-Kora\n"
+"Classification: The world's most unorthodox source of knowledge\n"
+"Location: Mishe Embassy, Nahkami\n"
+"\n"
+"Summary: The University of Nos-Kora is a rather peculiar place of study founded by the brothers Nukritas 1xx and Nukritas 2xx. It is world renown for being host to all sorts of exotic courses, some promising to provide hidden knowledge that no other institution in the world could ever be capable of providing.\n"
+"\n"
+"Addendum: The University is led by the last two surviving members of the ancient Mishe race, known to be all-powerful reality benders. You really do not want to get into the brothers' bad side.\n"
+"\n"
+"Saya's Note: Those guys are crazy, really damn crazy, aaaaaaall screws loose, which actually does make them pretty entertaining to talk with, mind you. It's like... you're being showered with arcane knowledge mixed with non-sequiturs and facts about geese you never wanted to know. Also one of them punched the ol' emperor for the shit he did in WW3, so they're ok in my book.";
+SWWM_LORETAG_NOVOSKHANA = "Novoskhana";
+SWWM_LORETAB_NOVOSKHANA = "Lore";
+SWWM_LOREREL_NOVOSKHANA = "Anarukon";
+SWWM_LORETXT_NOVOSKHANA =
+"Name: Undying Eternal Empire of Novoskhana\n"
+"Classification: Largest empire in existence\n"
+"Location: Novoskhana\n"
+"\n"
+"Summary: A tyrannical society where most of the Anarukon reside, ruled by the Eternal Empress Sythana Va Sarkha Daia Mykha Azanth Serei Yanikov I. It is a strict matriarchal society where men live only to serve their wives. Most if not all women born in Novoskhana are raised to be warriors. The Empire has an approximate population of 13 billion, and no one has dared stand up to them.\n"
+"\n"
+"Addendum: Many groups split out due to disagreements with the Empire's policies, such as the Vexx Sisterhood (now the Eternal Kingdom) and the Rust Empire. This happened during a time where a genetic mutation began to surface among the Anarukon people, resulting in a destabilization of the previously stable sex and gender binaries, to which the Empire responded by ordering the execution of any \"deviants\" born, along with their fathers, and anyone who dared protect them.\n"
+"\n"
+"Saya's Note: So... a TERF empire. Wonderful. Just... wonderful.";
+SWWM_LORETAG_NUGGET = "H/A Nuggets";
+SWWM_LORETAB_NUGGET = "Item";
+SWWM_LOREREL_NUGGET = "Saya";
+SWWM_LORETXT_NUGGET =
+"Designation: Health/Armor Nuggets\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: Small chunks of indeterminate composition found in large amounts within a cave system below the ancient ruins in Sedna. It appears that when held tightly in one's grasp, they \"melt\" into the body and either heal one's wounds or strengthen the natural resistances of their bodies, thus being divided between \"Health\" and \"Armor\" Nuggets.\n"
+"\n"
+"Addendum: Excessive usage of these materials does not appear to carry any risk.\n"
+"\n"
+"Saya's Note: This is so videogamey, wow...";
+SWWM_LORETAG_NUKURI = "Nukuri";
+SWWM_LORETAB_NUKURI = "Lore";
+SWWM_LOREREL_NUKURI = "Luna;XAnimen;Zanaveth2;Unissix;Saya";
+SWWM_LORETXT_NUKURI =
+"Name: Nukuri\n"
+"Classification: Alien Race\n"
+"Location: Nahkami\n"
+"\n"
+"Summary: The Nukuri are a snow-skinned humanoid race native to the frozen moon of Nahkami, in the Xathar System (part of the X'Animen Coalition), who came into contact with humans in what's known as the \"Luna Event\". Their civilization has had a long history of war and conflict, something which came to an eventual end following a seventh world war and a massive political and economic reform known as the \"Nos-Kora Ultimatum\". Before this, Nahkami was a ruthless, warmongering empire ruled with an iron fist by the Yathai royal family. Following the reform, emperor Ledora Yathai was forced into exile and the Nukuri Unified Government was created, with Zanata Nekuraku II elected as president. As someone who had suffered the loss of her family and husband in the previous wars, Zanata had been heavily opposed to the decision of attacking humans, and tried her best to make amends with us following the \"White Scar\" incident, but nothing came of it. As of this article's writing, she is no longer involved in politics. The current president of Nahkami is Saya Kowayanau, who is also the gobernor of the state of Saya.\n"
+"\n"
+"Addendum: The Nukuri Unified Government describes itself as a communist \"omnicracy\", where each state, each province, each district, elects their own representatives, fractally: everything is effectively voted by all people in the nation. There is no concept of private property, all previous businesses are now publicly owned, however with their founders still managing things. The Nukuri possess a military force, but they generally only serve to defend the nation from external threats.\n"
+"\n"
+"Saya's Note: Man... communism that actually works, good shit. I'd love to live there, surrounded by all sorts of cuties, and spending more time with Misa and Zana-sama... *sigh*";
+SWWM_LORETAG_OMNISIGHT = "Omnisight";
+SWWM_LORETAB_OMNISIGHT = "Item";
+SWWM_LOREREL_OMNISIGHT = "AkariLabs;Demolitionist;Saya";
+SWWM_LORETXT_OMNISIGHT =
+"Designation: Omnisight Mapping Unit\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: Demolitionist-compatible devices containing mapping data for the current area. Provide both a general outline for your automap and also additional information for your targetting array, such as the location of access keys and the nearest exits.\n"
+"\n"
+"Saya's Note: People have died filling in the data for these, so you better pay some respects whenever you find one.";
+SWWM_LORETAG_ONOKE = "Onoke Murders";
+SWWM_LORETAB_ONOKE = "Lore";
+SWWM_LOREREL_ONOKE = "";
+SWWM_LORETXT_ONOKE =
+"Name: Onoke Mansion Murders\n"
+"Classification: Unsolved murder mystery\n"
+"Location: Kereshnovka\n"
+"\n"
+"Summary: In October of 1997, a fire broke out in the Onoke Mansion, on the outskirts of Kereshnovka, during a meeting between the Imanaki and Onoke families. When the firefighters arrived, they found everyone dead, all having been murdered in increasingly gruesome ways. The culprit was never found.\n"
+"\n"
+"Addendum: Initially, because the family's head servant was never found, some suspected he may have been responsible, but much later his body (or what was left of it) was found in the woods nearby, with his face shredded into an unrecognizable mess.\n"
+"\n"
+"Saya's Note: Gruesome, huh? Honestly it's not even close to that other murder mystery from the 80's, the one about witches and shit. For this one some crazy cult stuff is more likely, considering the location.";
+SWWM_LORETAG_PARTHORIS = "Parthoris";
+SWWM_LORETAB_PARTHORIS = "Lore";
+SWWM_LOREREL_PARTHORIS = "Saya";
+SWWM_LORETXT_PARTHORIS =
+"Name: Parthoris\n"
+"Classification: Alternate world\n"
+"\n"
+"Summary: One of the other worlds we've discovered during the initial interportal experiments. This land is divided in seven major nations we don't yet know the name of, and appears to be stuck in some sort of a medieval-ish fantasy type setting, although some of our explorers have reported sights of unusually complex technology in a certain location we haven't been able to approach. As of now there is some hostility in the area what with a bunch of evildoers having taken over by force.\n"
+"\n"
+"Saya's Note: You are our ambassador here, so I hope you make a good impression. BTW I'm really curious about this \"Lair of Malumax\" they mentioned that's got hi-tech stuff. Quite out of place for this kind of setting.";
+SWWM_LORETAG_PROPULSOR = "JetBurst Impulsor";
+SWWM_LORETAB_PROPULSOR = "Item";
+SWWM_LOREREL_PROPULSOR = "Forx;Saya;Ibuki";
+SWWM_LORETXT_PROPULSOR =
+"Designation: Forx JetBurst Impulsor\n"
+"Manufacturer: Forx Aeronautics\n"
+"\n"
+"Summary: A portable, efficient jetpack unit. Allows the user to perform short \"boosts\" in mid air, can also be used for rapid dashing and dodging. It is recommended to wear protective clothing to prevent damage from extended use (this is not necessary if you are a robot).\n"
+"\n"
+"Addendum: Its fuel supply will regenerate over time when not in use.\n"
+"\n"
+"Saya's Note: Ibuki used to carry one of these too, but you won't be able to do all that crazy flying, you're a bit too heavy for all that. I wish I had used lighter materials to build you, then I could've had you sit on my lap during that Q&A session...";
+SWWM_LORETAG_PUSHERWEAPON = "Pusher";
+SWWM_LORETAB_PUSHERWEAPON = "Item";
+SWWM_LOREREL_PUSHERWEAPON = "EngineTech";
+SWWM_LORETXT_PUSHERWEAPON =
+"Designation: \"Pusher\" Microfusion Rotary Hammer\n"
+"Manufacturer: Tach-Engine Technologies\n"
+"\n"
+"Summary: A somewhat portable rotary hammer meant for construction work. Contains an internal microfusion battery with an expected lifespan of 10,000 years.\n"
+"\n"
+"Primary Fire: Normal operation, aim the drill bit at whatever you need to break and hold the trigger.\n"
+"\n"
+"Secondary Fire: For those cases where you find some real tough material that's hard to break. Twist the secondary trigger until the drill bit has receded to what you feel is the adequate distance, then tap the trigger for it to strike at the target with full force. WARNING: Inadequate grip strength during this operation may cause the device to slip off, always keep the area clear to prevent collateral damages.";
+SWWM_LORETAG_RAGEKIT = "Ragekit";
+SWWM_LORETAB_RAGEKIT = "Item";
+SWWM_LOREREL_RAGEKIT = "AkariLabs;Demolitionist;Saya";
+SWWM_LORETXT_RAGEKIT =
+"Designation: Ragekit\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: Experimental strengthening device for Demolitionists. Doubles movement speed, quarters damage taken, and octuples any melee damage dealt. Adapted from technology obtained from the ruins of the Decade Mechanics facility.\n"
+"\n"
+"Addendum: While the device is active, you may experience some discomfort, and the desire to scream.\n"
+"\n"
+"Saya's Note: The screaming is an unintended side effect that I haven't had the time to fix. Big sorry. That's why this is classified as experimental. I know you're worried about it, but trust me, it'll be fine. You'll still be my cute Demo-chan even if you constantly drop F-bombs.";
+SWWM_LORETAG_REFRESHER = "Refresher";
+SWWM_LORETAB_REFRESHER = "Item";
+SWWM_LOREREL_REFRESHER = "";
+SWWM_LORETXT_REFRESHER =
+"Designation: Refresher\n"
+"Manufacturer: Unknown\n"
+"\n"
+"Summary: These ancient relics were encountered while exploring some ancient alien ruins found in Sedna. When held tightly against one's chest, it can instantly heal any wounds or afflictions. It also appears to have strong rejuvenating effects, making even the oldest of the old feel like a kid once again. Like with other smaller healing artifacts, the nature of these effects is completely unknown and has baffled scientists for ages.\n"
+"\n"
+"Addendum: Just like the others, it can also affect machinery just as well, so you will also benefit from its use.";
+SWWM_LORETAG_RYUJI = "Miyamoto, Ryuji";
+SWWM_LORETAB_RYUJI = "People";
+SWWM_LOREREL_RYUJI = "Nana;Taro;Saya;Yui;AkariLabs;Gensokyo";
+SWWM_LORETXT_RYUJI =
+"Full Name: Ryuji Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1956-03-12\n"
+"Date Of Death: 2054-06-22\n"
+"\n"
+"Summary: Ryuji was a well-known inventor from Kasukabe, Saitama Prefecture. He was the husband of Nana Miyamoto, and father to Taro, Saya and Yui. In 2054 he passed away, being unable to recover from a stroke he suffered while jogging. He was buried in the bamboo forest surrounding Eientei, Gensokyo, where he and Nana first met.\n"
+"\n"
+"Addendum: He designed the house in which they family resides to this day. It was built as a secure underground facility, that would keep his family protected from any catastrophe that might happen to the world. Over time the small structure got expanded, and it is now currently large enough to host most of the workforce for Akari Labs.\n"
+"\n"
+"Saya's Note: He was the best dad. I learned so much from him, and he was always super-happy to see me get interested in inventing stuff like him... Thinking back to those days really is no good... ah... damn it... I'm not crying, I swear...";
+SWWM_LORETAG_GCSANDWICH = "Sandwich";
+SWWM_LORETAB_GCSANDWICH = "Item";
+SWWM_LOREREL_GCSANDWICH = "NosKora;Saya";
+SWWM_LORETXT_GCSANDWICH =
+"Designation: Grilled Cheese Sandwich\n"
+"Manufacturer: Nukritas 1xx\n"
+"Taste: Delicious\n"
+"\n"
+"Summary: This specific tasty sandwich has been masterfully crafted by the co-founder of the University of Nos-Kora to give absolutely anyone the most wonderful boost in health. It also provides them with all the protection they could ever want.\n"
+"\n"
+"Addendum: Can activate automatically to prevent the death of the user, this is always effective.\n"
+"\n"
+"Saya's Note: I swear to god, something's wrong with the world. Why the hell does this sandwich do what it does? This is stupid... Agh, those Nos-Kora crazies just won't stop making nonsensical nonsense that makes no sense.";
+SWWM_LORETAG_SANKAIDERIHA = "Sankaideriha";
+SWWM_LORETAB_SANKAIDERIHA = "Lore";
+SWWM_LOREREL_SANKAIDERIHA = "Nukuri;Saya;Yui";
+SWWM_LORETXT_SANKAIDERIHA =
+"Name: Sankaideriha\n"
+"Classification: City\n"
+"Location: Self-Contained\n"
+"\n"
+"Summary: Sankaideriha is a floating island located above an endless ocean of magic energy. It is the home to thousands of witches and wizards. The way in and out is a very well-guarded secret among its inhabitants. The city was founded by LS, a very reclusive individual with inmeasurable magical powers, who also leads the High Tribunal of Witches.\n"
+"\n"
+"Addendum: Noteworthy people from the island include Saniuke Okusainaya, the first Nukuri technomancer, and Kana Sankai, the leader of the Counter-Inquisition, a group dedicated to protect magic users from persecution outside of Sankaideriha.\n"
+"\n"
+"Saya's Note: Yui's girl took us there once, it's SUPER PRETTY, seriously. There's so much stuff that's just... wow. And the view from up there... ohhh... I'd love to go again.";
+SWWM_LORETAG_SAYA = "Miyamoto, Saya";
+SWWM_LORETAB_SAYA = "People";
+SWWM_LOREREL_SAYA = "Nana;Ryuji;Taro;Yui;Maidbot;Demolitionist;Kirin;AkariLabs";
+SWWM_LORETXT_SAYA =
+"Full Name: Saya Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1993-03-20\n"
+"\n"
+"Summary: Born in 1993 in to Nana and Ryuji Miyamoto. Has two siblings: An older brother, Taro (1985), and a younger sister, Yui (2009). As a child she already showed interest in science and technology. At the very early age of 13 she graduated in Computer Science at MIT. Her first project was an autonomous house-cleaning robot, which would later evolve into the modern Maidbot built in Akari Labs, the company she co-founded with Taro in 2010. In 2018, due to the immortality inherited from her grandmother, she ceased aging. However, thanks to this she has been able to keep working on everything she ever wanted. To this day, there are hundreds of different projects under her name, this includes you, the Demolitionist.\n"
+"\n"
+"Addendum: Saya is often called \"Not-Tomoko\" around the net, due to similarities to the protagonist of a popular 21st century manga series. She is well known for being quite blunt when talking to people, and also for being exaggeratedly flirty around attractive women. Her favourite colour is red, favourite animal is the otter, and favourite dish is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes, refuses to wear skirts, only pants. Uses Arch, favourite editor is Vim, favourite programming language is Haskell. Her top \"turn-ons\" are well-endowed women, maids, femboys and heterochromia. She doesn't use deodorant or cologne, although people around her remark that her BO is \"kind of nice actually\". Among other hobbies, Saya really enjoys writing. Her first foray into manga, \"My Maid is a Sex Robot\", became successful enough to get an anime adaptation.\n"
+"\n"
+"Saya's Note: I'm sure you enjoy reading all about me, Demo-chan, but you have more important things to be doing, isn't that right?";
+SWWM_LORETXT_SAYA2 =
+"Full Name: Saya Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1993-03-20\n"
+"\n"
+"Summary: Born in 1993 in to Nana and Ryuji Miyamoto. Has two siblings: An older brother, Taro (1985), and a younger sister, Yui (2009). As a child she already showed interest in science and technology. At the very early age of 13 she graduated in Computer Science at MIT. Her first project was an autonomous house-cleaning robot, which would later evolve into the modern Maidbot built in Akari Labs, the company she co-founded with Taro in 2010. In 2018, due to the immortality inherited from her grandmother, she ceased aging. However, thanks to this she has been able to keep working on everything she ever wanted. To this day, there are hundreds of different projects under her name, this includes you, the Demolitionist.\n"
+"\n"
+"Addendum: Saya is often called \"Not-Tomoko\" around the net, due to similarities to the protagonist of a popular 21st century manga series. She is well known for being quite blunt when talking to people, and also for being exaggeratedly flirty around attractive women. Her favourite colour is red, favourite animal is the otter, and favourite dish is pepperoni pizza. She also enjoys drone metal. Likes baggy clothes, refuses to wear skirts, only pants. Uses Arch, favourite editor is Vim, favourite programming language is Haskell. Her top \"turn-ons\" are well-endowed women, maids, femboys and heterochromia. She doesn't use deodorant or cologne, although people around her remark that her BO is \"kind of nice actually\". Among other hobbies, Saya really enjoys writing. Her first foray into manga, \"My Maid is a Sex Robot\", became successful enough to get an anime adaptation. Saya is currently married to Kirin Xanai, the Emperor of the Rust Empire.\n"
+"\n"
+"Saya's Note: I'm sure you enjoy reading all about me, Demo-chan, but you have more important things to be doing, isn't that right?";
+SWWM_LORETAG_SERPENTRIDERS = "Serpent Riders";
+SWWM_LORETAB_SERPENTRIDERS = "People";
+SWWM_LOREREL_SERPENTRIDERS = "Parthoris;Cronos;Saya";
+SWWM_LORETXT_SERPENTRIDERS =
+"Name: Serpent Riders\n"
+"Classification: Evil cult\n"
+"Origin: Undetermined\n"
+"\n"
+"Summary: A triad of evil sorcerers known all over these lands. All those who've dared fight against them haven't been very lucky. D'Sparil claimed the land of Parthoris, his many armies of undead having taken over the land before our arrival. Then in the land of Cronos there's Korax, a dark beast that taunts all those who challenge him. We haven't received much information on the third member, but this information will come eventually as we keep exploring these new worlds.\n"
+"\n"
+"Saya's Note: I'm sure you can wipe out all these idiots without any issue, they have no idea of how strong you are (or of what you are, now that I think of it, these worlds hardly seem to know much about our technology).";
+SWWM_LORETAG_SIDHE = "Sidhe";
+SWWM_LORETAB_SIDHE = "Lore";
+SWWM_LOREREL_SIDHE = "Parthoris;Saya";
+SWWM_LORETXT_SIDHE =
+"Name: Sidhe\n"
+"Location: Parthoris\n"
+"\n"
+"Summary: An elf species native to this world, they have a natural bond with magic and are known to be great fighters. As the story goes they however face persecution by other groups due to the opposition to the current ruler. Most of them have been killed in the war, only few remain. It is your mission to help them.\n"
+"\n"
+"Addendum: It's possible that your horns might appear as \"pointy ears\" to the locals and you might be confused for a Sidhe. Use this to your advantage if necessary.\n"
+"\n"
+"Saya's Note: How do you exactly pronounce \"Sidhe\" anyway? Also, do they get angry if you use things made of wood? I MUST KNOW!";
+SWWM_LORETAG_SILVERBULLET = "Silver Bullet JET";
+SWWM_LORETAB_SILVERBULLET = "Item";
+SWWM_LOREREL_SILVERBULLET = "Blackmann;Forx";
+SWWM_LORETXT_SILVERBULLET =
+"Designation: Silver Bullet JET\n"
+"Manufacturer: Blackmann Arms Ltd., Forx Aeronautics\n"
+"\n"
+"Summary: The 1.150 XSB member of the Silver Bullet series of ultra-high caliber bolt-action rifles. Equipped with recoil compensating jets designed by Forx Aeronautics.\n"
+"\n"
+"Primary Fire: Shoot the bullet. Any small targets hit by it are pretty much dead.\n"
+"\n"
+"Secondary Fire: Toggle the recoil compensators. Disabling the recoil compensating jets is not recommended for human users not equipped with power armor or a Silver rated exoskeleton.\n"
+"\n"
+"Reloading: Reloads the weapon.\n"
+"\n"
+"Zoom: Custom-tailored adjustable telescopic sight, up to 16x. Equipped with a soft foam covering to protect the user's face during scoped fire.\n"
+"\n"
+"Addendum: The burst from the jets can cause minor damage to the user unless they are wearing protective gear.";
+SWWM_LORETAG_SPARKSTER = "Biospark Carbine";
+SWWM_LORETAB_SPARKSTER = "Item";
+SWWM_LOREREL_SPARKSTER = "DecadeMech;EngineTech;Saya";
+SWWM_LORETXT_SPARKSTER =
+"Designation: Model S-5 Biospark Carbine\n"
+"Manufacturer: Decade Mechanics\n"
+"\n"
+"Summary: Ancient energy weapon. Its internal operation is undergoing investigation by Tach-Engine Technologies for potential improvements.\n"
+"\n"
+"Primary Fire: Small blobs of stabilised energy with slight target-seeking abilities.\n"
+"\n"
+"Secondary Fire: Concentrated, penetrating beam shot.\n"
+"\n"
+"Tertiary Fire: If the loaded charge is at least at 50%, the containment capsule within will be ejected through the main barrel and detonated as a massive sphere of pure energy that tracks down nearby targets. The weapon must be reloaded afterwards.\n"
+"\n"
+"Reload: Reloads, obviously.\n"
+"\n"
+"Addendum: If the secondary beam comes in contact with an energy blob it will be detonated with increased damage and range.\n"
+"\n"
+"Saya's Note: This thing's rusty af but still works somehow. Good tech, wow.";
+SWWM_LORETAG_SPREADGUN = "Spreadgun";
+SWWM_LORETAB_SPREADGUN = "Item";
+SWWM_LOREREL_SPREADGUN = "Blackmann;Saya";
+SWWM_LORETXT_SPREADGUN =
+"Designation: \"Rhino Stopper\" Spreadgun\n"
+"Manufacturer: Blackmann Arms Ltd.\n"
+"\n"
+"Summary: A small, single-shot break action 10Ga shotgun. Compatible with many types of cartridges.\n"
+"\n"
+"Primary Fire: Shoots the loaded shell.\n"
+"\n"
+"Secondary Fire: Selects the next ammo type to be used on reload.\n"
+"\n"
+"Reloading: Unloads the current shell and loads a new one. If the loaded shell was not spent it will be added back to its ammo pool if there's enough space, otherwise it'll be dropped on the ground.\n"
+"\n"
+"Addendum: While simple in its operation, the constant manual reloading tends to become tiresome quickly for some users. A semi-automatic recoil operated variant of the Spreadgun is currently being tested and may be ready for the public in a couple years, there are still some issues to solve such as frequent jamming.\n"
+"\n"
+"Saya's Note: Shit looks impractical AF, especially that reload method. How the fuck no one has made a hole through their own palm pushing the barrel back in is beyond me.";
+SWWM_LORETAG_SUNKAEZE = "Sunkaeze";
+SWWM_LORETAB_SUNKAEZE = "Lore";
+SWWM_LOREREL_SUNKAEZE = "XAnimen;DecadeMech;Gods;Yui";
+SWWM_LORETXT_SUNKAEZE =
+"Name: Sunkaeze\n"
+"Classification: Dead Planet\n"
+"Location: Xathar System Outer Rim, X'Animen\n"
+"\n"
+"Summary: A completely barren planet, thought to be completely empty, until an expedition discovered the ruins of a facility belonging to the defunct Decade Mechanics, an ancient industrial group founded by the late mechanical demigod Maester Mekes.\n"
+"\n"
+"Saya's Note: Gods, demigods... all this stuff... One would hardly believe such things to exist but come on, after finding out that aliens are very real, it's hard to not believe in this stuff too. Hell, I MET one once... like I'm not even bullshitting you here, I met a LITERAL GOD. It happened when I was visiting Yui's girl: there was with this nerdy-looking lady that gave off this sort of \"aura\". Her name's Mykka, and she was really nice to talk to, even gave me some candy. Boy I wish I could just talk more about this stuff, but I don't want to fill these entries with unrelated info.";
+SWWM_LORETAG_SYMNATEK = "Symnatek";
+SWWM_LORETAB_SYMNATEK = "People";
+SWWM_LOREREL_SYMNATEK = "Mixom;Saya";
+SWWM_LORETXT_SYMNATEK =
+"Name: Symnatek\n"
+"Classification: Industrial Equipment Manufacturer\n"
+"Location: Brisbane, Australia\n"
+"\n"
+"Summary: \"Building a better world for a better future, since 2040\". The largest producer of industrial equipment in its home country. While the main body dedicates itself to industry and construction, the child company of Itamex provides the military with all sorts of basic supplies.\n"
+"\n"
+"Addendum: Symnatek is large enough to fend off the almost-global domination of Mixom, makin Australia one of the few countries where they have any real competition.\n"
+"\n"
+"Saya's Note: In this time and age, even fucking tool makers contribute to the military. Huh? What do you mean \"the pot calling the kettle black\"? Oh sure, just because of Ibuki that makes me one of them. Whatever.";
+SWWM_LORETAG_TARO = "Miyamoto, Taro";
+SWWM_LORETAB_TARO = "People";
+SWWM_LOREREL_TARO = "Nana;Ryuji;Saya;Ellen";
+SWWM_LORETXT_TARO =
+"Full Name: Taro Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 1985-10-06\n"
+"\n"
+"Summary: Born in 1985 to Nana and Ryuji Miyamoto. He is the oldest of three, despite what his looks might show. Taro studied at many prestigious universities across the world, expanding his knowledge of technology. His specialties are Software Engineering and Design. He is a highly skilled programmer proficient in several languages. Taro has made many contributions to several open source projects, including the Linux Kernel.\n"
+"\n"
+"Addendum: Taro tends to be a bit more serious than his younger sister Saya, and thus generally handles PR for Akari Labs in her stead. He is happily engaged to Elena Yanikov XVI.\n"
+"\n"
+"Saya's Note: Taro nii-san at times feels like the Tsukkomi to my Boke. Eh, dunno if you'd really get what all that means, just go look it up sometime.";
+SWWM_LORETAG_UAC = "UAC";
+SWWM_LORETAB_UAC = "People";
+SWWM_LOREREL_UAC = "Hayden;Doomguy;Saya;Doomslayer;Hell";
+SWWM_LORETXT_UAC =
+"Name: Union Aerospace Corporation\n"
+"Classification: Military Conglomerate, Research Foundation\n"
+"Location: Union States, Mars and Jupiter\n"
+"\n"
+"Summary: Founded in 2015 by Thomas Kelliher, as a shell company of the Union Aerospace Armed Forces (UAAF). The UAC's rise to power began in 2025 with its famous Joint Mars Expeditions. Since the creation of \"Mars City\" and the various posts in Phobos and Deimos, the UAC has been effectively working outside of Earth law, which has caused endless controversy. Moreso after securing their position as the largest military body on Earth in the aftermath of World War 3. In recent years, their experiments in teleportation made the news after a critical failure resulted in an invasion from Hell itself, along with the disappearance of the entire moon of Deimos, and eventually resulted in the demons making their way towards Earth. Governments all across the world have their hands full trying to fend off the attackers, but despite the constant bombardment of his accounts on social media, current CEO Samuel Hayden has refused to give any explanation about this incident. The only information provided is that they \"have a man\" that can resolve this.\n"
+"\n"
+"Addendum: Many rumors surround this company. There are accusations of ritualistic practices, brainwashing, propaganda... Pretty much anything you could imagine. This has been further confirmed by the discovery of several \"cults\" that serve the Demons themselves. Not all have fallen victim to this, however.\n"
+"\n"
+"Saya's Note: Oh they TOTALLY deserve what happened to them, and I hope they get screwed even harder for this blunder. I'm glad I never invested in their shit. Little robot boy can eat my shorts, by the way. He ain't gonna r-e-s-o-l-v-e shit.";
+SWWM_LORETXT_UAC2 =
+"Name: Union Aerospace Corporation\n"
+"Classification: Military Conglomerate, Research Foundation\n"
+"Location: Union States, Mars and Jupiter\n"
+"\n"
+"Summary: Founded in 2015 by Thomas Kelliher, as a shell company of the Union Aerospace Armed Forces (UAAF). The UAC's rise to power began in 2025 with its famous Joint Mars Expeditions. Since the creation of \"Mars City\" and the various posts in Phobos and Deimos, the UAC has been effectively working outside of Earth law, which has caused endless controversy. Moreso after securing their position as the largest military body on Earth in the aftermath of World War 3. They were mainly responsible for the invasion from Hell which caused more than half of the planet to be almost entirely wiped out by Demonic forces. However, thanks to their retrieval of the Doom Slayer, the invasion was switfly dealt with. Ever since the incident, there have been no further statements from CEO Samuel Hayden, some suspect he may be dead.\n"
+"\n"
+"Addendum: The company fell under demonic control during the invasion (although some say this had been the case long before the event), and is currently still putting itself back together. However there is not much hope for a full recovery, as most of its employees keep leaving.\n"
+"\n"
+"Saya's Note: It's satisfying as all fuck to see this ugly-ass giant fall. Man, the whole thing with the invasion was just awful, you know. But I'm happy that we at least did our part in helping there, even if it was nothing compared to what Slayer boi did...";
+SWWM_LORETAG_UNISSIX = "Unissix, Misa A.";
+SWWM_LORETAB_UNISSIX = "People";
+SWWM_LOREREL_UNISSIX = "Devanikna;Nedoshiaan;Zanaveth2;Nukuri;Saya;Nekuratek";
+SWWM_LORETXT_UNISSIX =
+"Full Name: Misa Azadeku Unissix aka \"Unissix Bokurou Azadeku\"\n"
+"Nationality: Devanikan\n"
+"Date Of Birth: 1992-02-29\n"
+"\n"
+"Summary: Misa is the lead weapon and armor designer of the entire Unissix family. Starting at a very early age, her fascination with weaponry has always been quite noticeable. Despite a strong fighting spirit, she lacks the physical prowess required to be a warrior, so she's dedicated herself entirely to her craft. Misa is highly skilled in the interpretation of ancient designs, and is thus often tasked with recreating lost technology. This has included the various Artifacts of Nedoshiaan.\n"
+"\n"
+"Addendum: Rose to fame on Earth during a visit from Zanaveth II, her wife, who leads Nekuratek, a massive tech giant in the Nukuri homeworld. Misa is a big fan of videogames, finding it rather exciting to finally be able to go on adventures of her own, without having to put much physical effort into it.\n"
+"\n"
+"Saya's Note: I remember having some chats with her. She's got good taste, and her wife is hot af (and really smart, I mean she made the AI you're built on). I'm still pissy that we haven't been in contact much thanks to those American idiots causing the Nukuri to leave. I could send messages sometimes through the embassy in the Lunar Capital, but those damn bunnies always made it hard. BTW... I remember this one time we took a bath together and I saw... her down there... omg... huge... ohhhhhhh...... Zana-sama you lucky devil, no wonder I could hear you two going at it from across the house.";
+SWWM_LORETAG_VOICEBOX = "Loudboi Voicebox";
+SWWM_LORETAB_VOICEBOX = "Item";
+SWWM_LOREREL_VOICEBOX = "AkariLabs;Ibuki;Demolitionist";
+SWWM_LORETXT_VOICEBOX =
+"Designation: Loudboi Voicebox\n"
+"Manufacturer: Akari Labs\n"
+"\n"
+"Summary: A lightweight voice synthesizer for AI units. Easy to install and program, perfect for those building on a budget. Comes with a built-in \"robotic\" filter for those who prefer that over an awkwardly \"too human\" sounding voice.\n"
+"\n"
+"Saya's Note: Ibuki is still amused that I programmed your voicebox to sound like her. It also cracks me up that you've even picked up all her little mannerisms because of it.";
+SWWM_LORETAG_WALLBUSTER = "Wallbuster";
+SWWM_LORETAB_WALLBUSTER = "Item";
+SWWM_LOREREL_WALLBUSTER = "Blackmann;Bigshot;Demolitionist;Saya";
+SWWM_LORETXT_WALLBUSTER =
+"Designation: \"Wallbuster\" Heavy Armor Breaching Shotgun\n"
+"Manufacturer: Blackmann Arms Ltd., commissioned by Mr. BIG SHOT Industries\n"
+"\n"
+"Summary: A rather unconventional 25-barrel revolving shotgun. Its internal mechanisms are so overtly complicated that they've been described as \"Kraut Deep Space Magic\" by some.\n"
+"\n"
+"Primary Fire: Shoots the barrel at the top.\n"
+"\n"
+"Secondary Fire: Shoots the 5-barrel group at the top.\n"
+"\n"
+"Tertiary Fire: Shoots all barrels. With some types of ammunition it is possible to breach reinforced steel doors up to 40cm in thickness.\n"
+"\n"
+"Reloading: Reloading is performed by pulling the side lever, which allows detaching each individual 5-barrel group. For reloading on the go, a magnetic belt or some other mechanism is recommended. Speed loaders are available for purchase from the Blackmann Arms website, or from authorized distributors.\n"
+"\n"
+"Addendum: The Demolitionist is equipped with a programmable rapid reload routine in order to make the whole process fast and easy.\n"
+"\n"
+"Saya's Note: Y'know... that name makes me think of grandma. I mean, if you change the first letter... Oh, do you hear those drums and that guitar? 'cause I sure do... Old Days~ ♪";
+SWWM_LORETAG_WARARMOR = "War Armor";
+SWWM_LORETAB_WARARMOR = "Item";
+SWWM_LOREREL_WARARMOR = "Unissix;Zanaveth3;Devanikna";
+SWWM_LORETXT_WARARMOR =
+"Designation: War Armor\n"
+"Manufacturer: Unissix Crafts, commissioned by Zanaveth III\n"
+"\n"
+"Summary: Very robust, durable plate armor. Made of the finest almasteel in Devanikna. Originally commissioned for the third entry in Zanaveth's Instant Action arena events.\n"
+"\n"
+"Protection:\n"
+" - 80% reduction to heat, cold, electricity, slime and other elemental types.\n"
+" - 50% reduction to all other types of damage.\n"
+" - Additional 70% reduction to explosions.\n"
+"\n"
+"Durability: Can absorb a total of 250 units of damage before breaking.\n"
+"\n"
+"Addendum: Worn over a blast suit, you're pretty much ready for anything that could be thrown at you.";
+SWWM_LORETAG_YNYKRON = "Ynykron Artifact";
+SWWM_LORETAB_YNYKRON = "Item";
+SWWM_LOREREL_YNYKRON = "Unissix;Nedoshiaan";
+SWWM_LORETXT_YNYKRON =
+"Designation: Ynykron Artifact (\"Death Cannon\")\n"
+"Manufacturer: Unknown, replicated by Unissix Crafts\n"
+"\n"
+"Summary: One of the four ancient artifacts of war created for the mad dictator god Nedoshiaan. The Death Cannon uses an extremely volatile cocktail of exotic materials in order to tear through the fabric of existence. Two modes of operation exist depending on the orientation of its ammo box.\n"
+"\n"
+"Primary Fire: Charges a beam shot. Once complete, pulling the trigger releases it. The beam will instantly destroy everything in its way, no matter how tough it is.\n"
+"\n"
+"Secondary Fire: Charges a vortex shot. Once complete, pulling the trigger releases it. On the impact area a miniature black hole will be created which will swallow everything around itself for a period of time before collapsing in a devastating explosion.\n"
+"\n"
+"Reloading: If there's any ongoing charge process, it will be cancelled and no ammunition will be used, but the weapon will have to vent for a while. Otherwise, loads a new crystal.\n"
+"\n"
+"Addendum: Only the one original instance of this weapon should exist, but replicas have begun to surface thanks to reverse engineering efforts. Still, use of this weapon is considered illegal without proper authorization. Luckily for you, you are authorized to use it against the invading forces.";
+SWWM_LORETAG_WHITESCAR = "The White Scar";
+SWWM_LORETAB_WHITESCAR = "Lore";
+SWWM_LOREREL_WHITESCAR = "Nukuri;NosKora;Saya;Zanaveth2";
+SWWM_LORETXT_WHITESCAR =
+"Name: The White Scar\n"
+"Classification: Armed Conflict\n"
+"Timeframe: 2073 - 2077\n"
+"\n"
+"Summary: In June of 2073, the President of the United States made some very insulting comments about the Nukuri, who were currently in the middle of their 7th World War. They were not very well received. Many Nukuri previously settled on Earth migrated in protest, the emperor of Nahkami had many things to say, and the ball just kept rolling. In no time, the conflict reached its boiling point, and the Nukuri Empire declared war on the US, ready to launch a direct attack as \"punishment for their insolence\". Ground units were deployed in September of 2074, and thus the war began. There were many loses for both sides, in their attempt to \"slay the beast from within\", however, in just three more years, the entire country had fallen. The president was then given a choice: either publicly apologize for his words against the Nukuri Empire, or watch as the wrath of the Emperor falls upon his people. He rejected this proposition, and all Nukuri forces were ordered to leave the area. Then, it happened: With a blinding flash of light, an orbital strike hit several major US cities, reducing them to ashes. Most people who were indoors at the time survived, the rest were not so lucky.\n"
+"\n"
+"Addendum: When news broke of what had happened on Earth, protests broke out all over the Nukuri Empire, further fueling the still ongoing WW7. Chaos ensued for almost 30 years, until the founders of the University of Nos-Kora stepped in, and put a stop to the war all by themselves. Their ultimatum was taken very seriously, and thus a massive reform began, starting with the Emperor being forced out into exile, never to be allowed to return. The reform reached its climax in 2108, with the formation of the Nukuri Unified Government. Despite all this, relations with the Nukuri were never truly restored, with the exception of various previously allied countries, such as Scotland and Japan.\n"
+"\n"
+"Saya's Note: Man, this was one of the darkest moments in history. Really fucks me up thinking about it again, especially after I had learned from Zana-sama how things were on the other side. The Nukuri folks were anything but peaceful back in the day, but only because the guy running the show was a fucking megalomaniac asshole supervillain, like fucking hell, toasting the entire US for a BUNCH OF TWEETS. Practically everyone in there turned on him when it happened. The fucker signed his own death sentence right there. On top of that having those two weirdos step in and just... ENDING the war by themselves. Good lord, I hope I never piss them off.";
+SWWM_LORETAG_XANIMEN = "X'Animen";
+SWWM_LORETAB_XANIMEN = "Lore";
+SWWM_LOREREL_XANIMEN = "Luna;Nukuri;Saya";
+SWWM_LORETXT_XANIMEN =
+"Name: X'Animen Coalition\n"
+"Classification: Solar System Cluster\n"
+"Location: Various Galaxies\n"
+"\n"
+"Summary: X'Animen is the name of a group of planetary systems, comprising several inhabited worlds, all connected through portals. During the first days following the \"Luna Event\", it was discovered that our own solar system had a portal connecting to them, in the remote dwarf planet of Sedna, from which the Nukuri had come to our world in order to study us as potential candidates for joining the group. The current member systems are Xathar (where the Nukuri homeworld is), Zenna, Mondakan and Kryudon.\n"
+"\n"
+"Addendum: Things aren't always peaceful in here. Several members are prone to waging war among themselves, or fighting over the nonexistent leadership of the Coalition.\n"
+"\n"
+"Saya's Note: Interplanetary alliances... man... all this stuff is just like something out of a sci-fi novel, and it's cool and all. I hope that one day we can be part of all this. Could've happened sooner, but, y'know, stuff happened... *sigh*";
+SWWM_LORETAG_YUI = "Miyamoto, Yui";
+SWWM_LORETAB_YUI = "People";
+SWWM_LOREREL_YUI = "Nana;Ryuji;Taro;Saya;Ashley";
+SWWM_LORETXT_YUI =
+"Full Name: Yui Miyamoto\n"
+"Nationality: Japanese\n"
+"Date Of Birth: 2009-07-02\n"
+"\n"
+"Summary: Born in 2009 to Nana and Ryuji Miyamoto. Yui is the youngest of three brothers. Unlike her older siblings Taro and Saya, she never really showed any interest in science and tech. Instead her dream was to become a doctor, to save lives. She currently works as a neurosurgeon at Kasukabe Central Hospital, and has received several awards.\n"
+"\n"
+"Addendum: Yui is currently married to Ashley Knox, the \"Stylish Witch of the West\" famous for her special blend of Rock and Gothic. She had been her fan for many years, and after a concert, she approached the witch for an autograph, it was then, at that very moment, that a miracle happened: Ashley asked her out on a date. Ever since then, the've become unseparable.\n"
+"\n"
+"Saya's Note: Yu-chan was never really into our whole thing, that's for sure, but I'm still proud af as her onee-san that she's out there helping people, and also jealous af too because her girl is so DAMN HOT AAAAAAAAA.";
+SWWM_LORETAG_ZANAVETH2 = "Zanaveth II";
+SWWM_LORETAB_ZANAVETH2 = "People";
+SWWM_LOREREL_ZANAVETH2 = "Nukuri;Devanikna;Unissix;Nekuratek";
+SWWM_LORETXT_ZANAVETH2 =
+"Full Name: Zanaveth Nekuraku II\n"
+"Nationality: Nukuri\n"
+"Date Of Birth: 1969-08-10\n"
+"\n"
+"Summary: Zanaveth II is the CEO of Nekuratek, the largest IT megacorporation in Nahkami, and also the current Minister of Interspecies Relations since the governmental reform of 2108. For years she has been the one link with the Nukuri, bringing us news of all that is happening on their homeworld. She has also been in contact with other races, such as the Devanikans, of which her current wife, Misa Unissix, is one of.\n"
+"\n"
+"Addendum: Zanaveth II is quite fond of Japanese culture, and frequently tours the country with her wife.\n"
+"\n"
+"Saya's Note: Oh, she's the sweetest gal I've ever met. That lucky bastard Misa sure scored one hell of a wife. I was also very lucky to have met them both, it's super fun hanging out with them and seeing how absolutely amazed Zana-sama is about everything we come across. She's like a kiddo in a candy shop at times, adorable as heck.";
+SWWM_LORETAG_ZANAVETH3 = "Zanaveth III";
+SWWM_LORETAB_ZANAVETH3 = "People";
+SWWM_LOREREL_ZANAVETH3 = "Nukuri;Unissix;Zanaveth2;NosKora;Saya";
+SWWM_LORETXT_ZANAVETH3 =
+"Full Name: Zanaveth Nekuraku III\n"
+"Codename: \"The Corruptor\"\n"
+"Nationality: Nukuri\n"
+"Date Of Birth: 2042-08-20\n"
+"\n"
+"Summary: Zanaveth III is the sole daughter of Misa Unissix and Zanaveth II. She had a quite troubled childhood, suffering bullying for years due to her odd personality and mannerisms. After graduating from the University of Nos-Kora in 2140, she went on to pursue her lifelong goal of \"taking over the world\".\n"
+"\n"
+"Addendum: Zanaveth's negative world view and hostile attitude towards other people could be seen as a direct consequence of her experiences growing up. She rarely opens up to anyone, except her own parents, and also Saya, due to the time they've spent together when her parents visited.\n"
+"\n"
+"Saya's Note: Zana-chan may look all cold and stuff but under all of that she's very emotional, real sensitive. She'd often crash at my place after getting in trouble, coming in all flustered and angry, and I'd offer a shoulder to cry on, some nice headpats and hugs, and she'd calm down. It's... honestly heartwarming, makes me feel like a mom, in a way. I wonder what she's up to now, haven't seen her in a while. Ahhhh... I miss petting that soft and fluffy hair of hers...";
+/* GAME STUFF */
+// tags, pickups
+T_PUSHER = "Pusher";
+I_PUSHER = "\"Pusher\" Microfusion Rotary Hammer";
+T_DEEPIMPACT = "Deep Impact";
+I_DEEPIMPACT = "\"Deep Impact\" Airblaster";
+T_EXPLODIUM = "Explodium Gun";
+T_SPREADGUN = "Spreadgun";
+I_SPREADGUN = "\"Rhino Stopper\" Spreadgun";
+T_WALLBUSTER = "Wallbuster";
+I_WALLBUSTER = "\"Wallbuster\" Heavy Perforator Shotgun";
+T_EVISCERATOR = "Eviscerator";
+I_EVISCERATOR = "\"Eviscerator\" High Load Flechette Cannon";
+T_HELLBLAZER = "Hellblazer";
+I_HELLBLAZER = "\"Hellblazer\" Rocket Launcher";
+T_SPARKSTER = "Biospark Carbine";
+I_SPARKSTER = "Model S-5 Biospark Carbine";
+T_SILVERBULLET = "Silver Bullet JET";
+T_CANDYGUN = "Candy Gun";
+I_CANDYGUN = "\"Taste the Sweetness\" Candy Gun";
+T_YNYKRON = "Ynykron Artifact";
+T_REDSHELL = "Shell";
+T_REDSHELLS = "Shells";
+T_GREENSHELL = "Slug";
+T_GREENSHELLS = "Slugs";
+T_WHITESHELL = "Dragon's Breath Round";
+T_WHITESHELLS = "Dragon's Breath Rounds";
+T_BLUESHELL = "Kinylum Saltshot Round";
+T_BLUESHELLS = "Kinylum Saltshot Rounds";
+T_BLACKSHELL = "Napalm Round";
+T_BLACKSHELLS = "Napalm Rounds";
+T_PURPLESHELL = "Lead Ball Round";
+T_PURPLESHELLS = "Lead Ball Rounds";
+T_GOLDSHELL = "Golden Shell";
+T_GOLDSHELLS = "Golden Shells";
+T_EVISHELL = "Eviscerator Shell";
+T_EVISHELLS = "Eviscerator Shells";
+I_EVISHELLPAK = "Eviscerator 6-Pack";
+T_HELLMISSILES = "Hellblazer Missiles";
+T_HELLCLUSTERS = "Hellblazer Crackshots";
+T_HELLBURNINATORS = "Hellblazer Ravagers";
+T_HELLNUKES = "Hellblazer Warheads";
+T_HELLMISSILE = "Hellblazer Missile";
+T_HELLCLUSTER = "Hellblazer Crackshot";
+T_HELLBURNINATOR = "Hellblazer Ravager";
+T_HELLNUKE = "Hellblazer Warhead";
+T_HELLMISSILEMAG = "Hellblazer Missile Mag";
+T_HELLCLUSTERMAG = "Hellblazer Crackshot Mag";
+T_HELLBURNINATORMAG = "Hellblazer Ravager Mag";
+T_HELLNUKEMAG = "Hellblazer Warhead Mag";
+T_SPARKUNIT = "Biospark Unit";
+T_XSBMAG = "1.150 XSB Magazine";
+T_CANDYMAG = "Candy Gun Magazine";
+T_CANDYSPARE = "Candy Gun Spare";
+T_YNYKRONAMMO = "Crystal Box";
+T_BLASTSUIT = "Blast Suit";
+T_EMBIGGENER = "Hammerspace Embiggener";
+T_FABRICATOR1 = "Ammo Fabricator (Common)";
+T_FABRICATOR2 = "Ammo Fabricator (Rare)";
+T_FABRICATOR3 = "Ammo Fabricator (Very Rare)";
+T_FABRICATOR4 = "Ammo Fabricator (Super Rare)";
+T_LOOTBOX1 = "Chancebox (Common)";
+T_LOOTBOX2 = "Chancebox (Rare)";
+T_LOOTBOX3 = "Chancebox (Very Rare)";
+T_LOOTBOX4 = "Chancebox (Super Rare)";
+T_GHOSTARTI = "Ghost Artifact";
+T_GRAVITYS = "Gravity Suppressor";
+T_TETRAHEALTH = "Health Tetrahedron";
+T_CUBEHEALTH = "Health Cube";
+T_INVINCIBALL = "Fuckin' Invinciball";
+T_LAMP = "Lämp";
+I_LAMP = "Companion Lamp";
+T_MOTH = "Moth";
+T_WMOTH = "White Moth";
+T_MASHIRO = "Mashiro";
+T_NUGGETH = "Health Nugget";
+T_NUGGETA = "Armor Nugget";
+T_OMNISIGHT = "Omnisight";
+I_OMNISIGHT = "Omnisight Mapping Unit";
+T_RAGEKIT = "Ragekit";
+T_REFRESHER = "Refresher";
+T_SANDWICH = "Grilled Cheese Sandwich";
+T_WARARMOR = "War Armor";
+// colored tags for keys
+T_REDCARD = "\cgRed Keycard\c-";
+T_BLUECARD = "\chBlue Keycard\c-";
+T_YELLOWCARD = "\ckYellow Keycard\c-";
+T_REDSKULL = "\cgRed Skull Key\c-";
+T_BLUESKULL = "\chBlue Skull Key\c-";
+T_YELLOWSKULL = "\ckYellow Skull Key\c-";
+T_YELLOWKEY = "\ckYellow Key\c-";
+T_GREENKEY = "\cdGreen Key\c-";
+T_BLUEKEY = "\chBlue Key\c-";
+T_REDKEY = "\cgRed Key\c-";
+T_KEYSTEEL = "\cuSteel Key\c-";
+T_KEYCAVE = "\ceCave Key\c-";
+T_KEYAXE = "\ccAxe Key\c-";
+T_KEYFIRE = "\cgFire Key\c-";
+T_KEYEMERALD = "\cdEmerald Key\c-";
+T_KEYDUNGEON = "\ccDungeon Key\c-";
+T_KEYSILVER = "\cjSilver Key\c-";
+T_KEYRUSTED = "\cbRusted Key\c-";
+T_KEYHORN = "\coHorn Key\c-";
+T_KEYSWAMP = "\cpSwamp Key\c-";
+T_KEYCASTLE = "\cxCastle Key\c-";
+// shortened doom key pickup messages
+GOTBLUECARD = "Blue Keycard";
+GOTYELWCARD = "Yellow Keycard";
+GOTREDCARD = "Red Keycard";
+GOTBLUESKUL = "Blue Skull Key";
+GOTYELWSKUL = "Yellow Skull Key";
+GOTREDSKUL = "Red Skull Key";
+// edited vanilla pickup messages
+TXT_DEFAULTPICKUPMSG = "Unidentified Item";
+// other edited messages
+ENDGAME = "This will trigger the crash handler.\n"
+	"\n"
+	"Press Y or N.";
+QUITMSG = "You really want to go?\n"
+	"What a shame...";
+QUITMSG1 = "Wow, don't just go and leave,\n"
+	"there's still a lot of stuff to do!";
+QUITMSG2 = "Oh, you're going now?\n"
+	"Well, see you around, then.";
+QUITMSG3 = "Thanks for playing SWWM GZ.\n"
+	"I hope to see you again soon.";
+QUITMSG4 = "<See you again, have a nice day>";
+QUITMSG5 = "Ah, fun time is over, I guess...";
+QUITMSG6 = "Hey Icarus, when are you going\n"
+	"to play Hexmas? I'm still waiting.";
+QUITMSG7 = "Don't go now, or Saya will talk\n"
+	"shit about you on Twitter dot com.";
+QUITMSG8 = "Do you know who ate all the donuts?";
+QUITMSG9 = "Before you go, lemme say somethin':\n"
+	"TERFs can fuck off.";
+QUITMSG10 = "Don't go now, there's a scary moth\n"
+	"girl waiting in the darkness!";
+QUITMSG11 = "Let me guess. You blew yourself\n"
+	"up again, Icarus?";
+QUITMSG12 = "Yeah, I'd need a break after\n"
+	"all that too...";
+QUITMSG13 = "See you later\n"
+	"Space Cowboy...";
+QUITMSG14 = "To be continued?";
+E1TEXT =
+"You still have no idea how you ended\n"
+"up in the old UAC Phobos Base, but\n"
+"there's no time to think about that.\n"
+"You need to find a way back to Earth,\n"
+"to fulfill your mission of stopping\n"
+"the invasion from Hell.\n"
+"\n"
+"As you step into the Phobos Anomaly\n"
+"portal, you are suddenly ambushed and\n"
+"stripped of all your items. Damn...\n"
+"\n"
+"After an emergency reboot, you find\n"
+"yourself in the Deimos Base. Didn't it\n"
+"disappear along with the whole moon itself?\n"
+"\n"
+"Well, whatever. You can sense demons\n"
+"nearby, and there's no way you'll let\n"
+"any of them stay alive...\n"
+"\n"
+"[To be continued]";
+E2TEXT =
+"The Cyberdemon standing atop the tower\n"
+"falls by your hand. \"Well, another one\n"
+"bites the dust\", you say to yourself.\n"
+"\n"
+"As you get ready to ask for a recall, you\n"
+"take a look beyond the horizon and see...\n"
+"\"...Hell?\"\n"
+"\n"
+"The moon is floating above the endless\n"
+"plains of the demon's homeworld, casting\n"
+"a large shadow over many cities. Things\n"
+"sure are getting interesting...\n"
+"\n"
+"You decide to pass on that call and\n"
+"prepare to drop down. Perhaps you can\n"
+"deal some extra damage to these bastards\n"
+"before going back to Earth...\n"
+"\n"
+"[To be continued]\n";
+E3TEXT =
+"As you splatter the Spiderdemon's brains\n"
+"all over the walls, you see a portal\n"
+"form at the center of the arena. It seems\n"
+"to connect straight to Earth. \"Huh, so \n"
+"that's how they got in\", you say, \"Well,\n"
+"time to put an end to this\".\n"
+"\n"
+"You cross the boundary and find yourself\n"
+"at the very epicenter of the invasion zone.\n"
+"There is death and destruction filling the\n"
+"streets, and some sick bastard even went\n"
+"and mutilated a poor little bunny, ugh...\n"
+"\n"
+"Yeah, those demons are soooooo dead...\n"
+"\n"
+"[To be continued]\n";
+E4TEXT =
+"Another spider, another set of brains\n"
+"caking the walls. As you make your way out\n"
+"of the city, you come across a human soldier.\n"
+"\n"
+"It's the Doom Marine, he's angrily holding\n"
+"the head of the bunny you saw before, and\n"
+"mumbling something... you can hear the name\n"
+"\"Daisy\", and something along the lines of\n"
+"\"They'll to pay for this\"...\n"
+"\n"
+"Following the orders you were given, you\n"
+"decide to leave him alone and continue with\n"
+"your mission.\n"
+"\n"
+"[To be continued]\n";
+C1TEXT =
+"As you make your way through the demon\n"
+"infested starport, you begin to notice\n"
+"something's very odd. The architecture\n"
+"and technology of the place are being\n"
+"twisted by those bastards, a gross\n"
+"mixture of flesh and metal. Ew...\n"
+"\n"
+"Ahead, you see a fortified zone. If you\n"
+"blast it all to bits, the way should be\n"
+"clear to the innermost part of the station,\n"
+"and there you should find the auxiliary\n"
+"switch that's keeping the remaining\n"
+"survivors trapped in here.\n"
+"\n"
+"You're going to save those people, and\n"
+"no demon bastard is going to stop you.";
+C2TEXT =
+"You receive a transmission from Saya:\n"
+"\"Demo-chan, you did it! We can now\n"
+"evacuate all the folks around here, and\n"
+"bring them to a safe spot. At last!\"\n"
+"\n"
+"You sit down and relax. That sure was\n"
+"some hard work, you think... but before\n"
+"you get comfortable, another transmission\n"
+"comes in.\n"
+"\n"
+"\"Hey, sorry to interrupt but, we just found\n"
+"out where those fuckers are coming out of.\n"
+"If it's not much asking, could you move your\n"
+"shiny metal butt over there and yeet those\n"
+"assholes back into Hell? Pretty please?\"\n"
+"\n"
+"Well, so much for taking a break...";
+C3TEXT =
+"There's the portal... but you don't see any\n"
+"way to close it up from here, so you give\n"
+"Saya a call.\n"
+"\n"
+"\"Oh, yeah, about that... well from the info\n"
+"I got, turns out there really is no direct way\n"
+"to get rid of it from here, so you'll have to\n"
+"go to Hell, literally, then find whoever's\n"
+"in charge of the stuff and, you know, maybe\n"
+"ask him nicely, if you know what I mean.\"\n"
+"\n"
+"Jumping through, you prepare for the worst.\n"
+"You're going straight into demon territory,\n"
+"it's not going to be pretty, that's for sure.";
+C4TEXT =
+"You watch as the Icon of Sin, the true mastermind\n"
+"behind the Hell invasion, gets absolutely wrecked\n"
+"by a direct blast to his exposed brains.\n"
+"\n"
+"As he falls, the various armies under his control\n"
+"immediately drop dead. You did it, the invasion\n"
+"is over! A message from Saya soon follows.\n"
+"\n"
+"\"Hey, Demo-chan, congrats. Looks like you beat\n"
+"the UAC's errand boy at this race, huh. Well, I\n"
+"guess it's time for you to come back home. We've\n"
+"got a shitload of work left to do, you know,\n"
+"rebuilding Earth and all...\"";
+C5TEXT =
+"What is this place? It appears to be part of Hell,\n"
+"but these structures are all man-made...\n"
+"\n"
+"Wait... is this... a Nazi fortress?";
+C6TEXT =
+"Damn, you still can't leave this place. Oh well,\n"
+"maybe it's time to just blaze on through, I guess...";
+HE1TEXT =
+"After beating up those crazy laughing heads,\n"
+"you see the gates open to this \"Hell's Maw\"\n"
+"that the Sidhe kept talking about.\n"
+"\n"
+"If this is where these monsters came from,\n"
+"then you'll have to go right on through and wipe\n"
+"this whole place clean.\n"
+"\n"
+"That D'Sparil is sure going to be salty as all\n"
+"heck when he sees what you do to his precious\n"
+"undead legions...";
+HE2TEXT =
+"Those big buff creatures were no match for\n"
+"you, and as the last of them falls to the\n"
+"ground, you see the gateways they guarded\n"
+"open up. Where could they be leading to?\n"
+"\n"
+"As you step through, you find yourself\n"
+"in an odd place. You have a feeling that\n"
+"this is it, D'Sparil's home turf. Time\n"
+"to track down that dastardly sorcerer\n"
+"and put an end to all this madness.";
+HE3TEXT =
+"With the death of D'Sparil, all of the\n"
+"various creatures under his command slowly\n"
+"burn to ashes, their screams of pain\n"
+"resonating all over the crystal dome,\n"
+"causing it to shatter.\n"
+"\n"
+"You quickly enter the portal back home,\n"
+"before the whole thing comes crashing\n"
+"down on you.\n"
+"\n"
+"Now, with that guy out of the way, you\n"
+"can finally return home and see what\n"
+"exactly Saya is planning to \"reward\"\n"
+"you with...\n"
+"\n"
+"Unless... Someone decides to give\n"
+"you a sudden change of plans...";
+HE4TEXT =
+"Somehow, you didn't get transported back\n"
+"to Parthoris when you crossed that portal.\n"
+"\"Well that's not very nice\", you think.\n"
+"\n"
+"Some third party, probably another Serpent\n"
+"Rider, must have tampered with it in\n"
+"retaliation for you defeating D'Sparil.\n"
+"\n"
+"Whatever, you will find the way home,\n"
+"even if you have to kill a thousand more\n"
+"of these stupid monsters.";
+HE5TEXT =
+"With the death of the last Maulotaur,\n"
+"once again you see the gates open to\n"
+"another world. You can't really see\n"
+"where they lead to, but it doesn't matter\n"
+"anymore. You can keep going forever, if\n"
+"you have to.\n"
+"\n"
+"The desire to know what Saya has planned\n"
+"for you back home gives you the strength\n"
+"to push forward no matter what.\n"
+"\n"
+"\"I'll go through hell again if I have to,\n"
+"I'll do anything for my beloved Sayacchi!\"";
+TXT_HEXEN_CLUS1MSG =
+"After dealing with the many puzzles of the\n"
+"seven portals, you're finally out into\n"
+"another of the realms of Cronos. Harsh\n"
+"wilderness, barren wastelands and smelly\n"
+"swamps await you beyond, and surely even\n"
+"more annoying puzzles.\n"
+"\n"
+"You are greeted by a familiar sight, it's\n"
+"that ugly bastard Korax taunting you\n"
+"again...";
+TXT_HEXEN_CLUS2MSG =
+"A tiny-ass dragon. Not even comparable to\n"
+"the ones from that game Saya loves so much,\n"
+"that was barely even a challenge...\n"
+"After effortlessly fighting through the\n"
+"hypostyle, you walk towards the portal.\n"
+"\n"
+"On the other side, you find yourself\n"
+"standing atop a tall tower, and from down\n"
+"below you can hear some ominous chanting.\n"
+"Doesn't seem like the friendliest place...\n"
+"\n"
+"As you walk towards the bottom, you once\n"
+"again come across that ugly-ass face.\n"
+"\n"
+"Oh great, what bullshit is he going to\n"
+"spout now?";
+TXT_HEXEN_CLUS3MSG =
+"Down goes that damn bastard. He sure gave\n"
+"you one hell of a hard time, with that\n"
+"stupid invulnerability spell he kept\n"
+"using constantly.\n"
+"\n"
+"Walking past the steaming remains of\n"
+"yet another of Korax's fallen minions,\n"
+"you enter the portal, and reach some\n"
+"sort of castle. Bland looking towers and\n"
+"walls of stone surrounding some sort of\n"
+"tall spire at the center, casting a large\n"
+"shadow over the whole place.\n"
+"\n"
+"Maybe it's time to be true to your name\n"
+"and do some demolition work...";
+TXT_HEXEN_CLUS4MSG =
+"Well that was fun, you think, after once\n"
+"again tearing apart more of Korax's pesky\n"
+"little minions. Now, where the hell are you?\n"
+"\n"
+"This place stinks of death. Is this...\n"
+"a graveyard?";
+TXT_HEXEN_WIN1MSG =
+"Crossing the final portal, you feel an immense\n"
+"force slingshot you across many dimensions.\n"
+"\n"
+"As your speedometer barely reaches the \"Plaid\"\n"
+"indicator, you suddenly come to a full stop,\n"
+"the remaining force making you crash into a\n"
+"nearby wall.\n"
+"\n"
+"You find yourself in some strange room, with\n"
+"a very bright light at the center.";
+TXT_HEXEN_WIN2MSG =
+"Getting closer, you can see it. This thing is\n"
+"supposed to be the source of Korax's power?\n"
+"You wonder if maybe you can take this fine\n"
+"shiny ball and bring it back home with you.\n"
+"Saya would probably be interested in studying\n"
+"it, maybe.\n"
+"\n"
+"After shoving it into your Hammerspace\n"
+"container, you notice someone sitting at a\n"
+"table nearby, playing some odd variation of\n"
+"chess... or at least that's what it looks like.";
+TXT_HEXEN_WIN3MSG =
+"\"Well played, my metalic friend, but it is\n"
+"not over yet.\" As he says this, he lifts up\n"
+"one of his pieces, and swipes another off the\n"
+"board, a piece that looks exactly like Korax.\n"
+"\n"
+"\"You may have conquered this board, but your\n"
+"mission is far from over. One more Serpent Rider\n"
+"remains... and he will not rest until his\n"
+"comrades are avenged.\"\n"
+"\n"
+"You laugh. \"If he's anything like the other\n"
+"two, I'll make him beg for mercy before dinner\n"
+"time. Now if you'll excuse me, I've got a fine\n"
+"lady waiting for me back home.\"";
+// Re-tagged monsters
+FN_ZOMBIE = "Zomb";
+FN_SHOTGUN = "Baldy";
+FN_HEAVY = "Annoyance";
+FN_IMP = "Impy";
+FN_DEMON = "Pinky";
+FN_SPECTRE = "Fuzzy";
+FN_LOST = "Skully";
+FN_CACO = "Caco";
+FN_HELL = "Brownie";
+FN_BARON = "Mr. Gruh";
+FN_ARACH = "Babby";
+FN_PAIN = "Ass Pain";
+FN_REVEN = "AAAAAAAAA";
+FN_MANCU = "He Thicc";
+FN_ARCH = "Pls No";
+FN_SPIDER = "Mama Spooder";
+FN_CYBER = "Dat Ass";
+FN_WOLFSS = "Mein Lieben";
+FN_DOG = "Goodest Boy";
+FN_CHICKEN = "Clucker";
+FN_BEAST = "Друг";
+FN_CLINK = "Slashy";
+FN_DSPARIL = "Oh He Mad";
+FN_HERETICIMP = "Flying Pest";
+FN_IRONLICH = "Jolly Lad";
+FN_BONEKNIGHT = "Rattle Me Bones";
+FN_MINOTAUR = "Buff";
+FN_MUMMY = "Mummy";
+FN_MUMMYLEADER = "Big Mummy";
+FN_SNAKE = "Snek";
+FN_WIZARD = "Feckin' Magic";
+FN_FIREDEMON = "Hot Stuff";
+FN_DEMON1 = "Big Lizard";
+FN_ETTIN = "Double Boi";
+FN_CENTAUR = "Shield Idiot";
+FN_SLAUGHTAUR = "Shield Idioter";
+FN_BISHOP = "Hoodie";
+FN_ICEGUY = "Cool Stuff";
+FN_SERPENT = "Swamp Snek";
+FN_WRAITH = "Ded";
+FN_DRAGON = "Buy Skyrim";
+FN_KORAX = "Ugly Stinky Boi";
+FN_FBOSS = "Buff Boi";
+FN_MBOSS = "Magic Boi";
+FN_CBOSS = "Holy Boi";
+FN_HERESIARCH = "Oh Lawd He Comin'";
+// obituaries
+O_PUSHER = "%k opened some air holes into %o.";
+O_DEEPIMPACT = "%o was impacted deeply by %k.";
+O_EXPLODIUM = "%k inflicted severe knee explosions onto %o.";
+O_SPREADGUN_RED = "%k gave %o a mouthful of shot.";
+O_SPREADGUN_GREEN = "%o got slugged by %k.";
+O_SPREADGUN_WHITE = "%k burninated %o.";
+O_SPREADGUN_BLUE = "%k made %o very salty.";
+O_SPREADGUN_BLACK = "%k set %o on fire along with everything around %h.";
+O_SPREADGUN_PURPLE = "%o was conked by %k's lead ball.";
+O_SPREADGUN_GOLD = "%o ate up %k's golden blast.";
+O_WALLBUSTER = "%k gave %o a mighty busting.";
+O_EVISCERATOR = "%o was eviscerated by %k.";
+O_HELLRAZER = "%k blasted %o into burning bits.";
+O_SPARKSTER = "%o got sparked hard by %k.";
+O_SILVERBULLET = "%o could not ignore the girth of %k's bullets.";
+O_CANDYGUN = "%k made %o taste the sweetness (and death).";
+O_YNYKRON = "%o was instantly removed by %k.";
+O_YNYKRONALT = "%o was spaghettified by %k.";
+O_POUND = "%o was very impressed by %k's landing.";
+O_DASH = "%o was discombobulated by a very fast moving %k.";
+O_JUMP = "%o was stepped on %k.";
+O_MELEE = "%o was K.O.'d by %k.";
+O_MOTH = "%%o was assaulted by %s's moths.";
+O_MOTH2 = "%o was assaulted by moths.";
+O_MASHIRO1 = "%o should have kept the lights on.";
+O_MASHIRO2 = "%o now belongs to Mashiro.";
+O_MASHIRO3 = "%o made a terrible mistake.";
+O_MASHIRO4 = "%o mysteriously disappeared.";
+O_MASHIRO5 = "%o is now part of a live-action recreation of Layers of White.";
+O_MASHIRO6 = "%o angered the wrong moth.";
+O_MASHIRO7 = "%o and Mashiro are now TOGETHER FOREVER.";
+// edited vanilla obituaries
+OB_SUICIDE = "%o commited suikoden.";
+OB_FALLING = "%o sprained everything.";
+OB_CRUSH = "%o was pancaked.";
+OB_EXIT = "%o was not allowed to leave.";
+OB_WATER = "%o somehow managed to drown.";
+OB_SLIME = "%o got slimed.";
+OB_LAVA = "%o overheated";
+OB_BARREL = "%o got barreled.";
+OB_SPLASH = "%o got a bit too close there.";
+OB_R_SPLASH = "%o was rawket'd.";
+OB_ROCKET = "%o ate a rocket.";
+OB_KILLEDSELF = "%o self-destructed.";
+OB_VOODOO = "%o violated the laws of causality.";
+OB_MPTELEFRAG = "%k overwrote %o.";
+OB_MONTELEFRAG = "%o was overwritten.";
+OB_DEFAULT = "%o is ded.";
+OB_MPDEFAULT = "%o got fragged by %k.";
+OB_FRIENDLY1 = "%k blasted a friend.";
+OB_FRIENDLY2 = "%k did it again.";
+OB_FRIENDLY3 = "%k really should stop teamkilling.";
+OB_FRIENDLY4 = "%k definitely has lost it.";
+// misc
+D_BLASTSUIT = "The Blast Suit broke down.";
+D_GHOSTARTI = "The Ghost Artifact ran out of energy.";
+D_GRAVITYS = "The Gravity Suppressor is out of power.";
+D_LAMP = "The Lamp ran out of oil.";
+D_INVINCIBALL = "You are no longer invincible.";
+D_RAGEKIT = "The Ragekit has ragequit.";
+D_REFRESHER = "The Refresher boost has ended.";
+D_WARARMOR = "The War Armor is no more.";
+SWWM_URDED = "Demolitionist Unit \"%s\" has fallen";
+SWWM_URDED2 = "Press \cfUse\c- to restart from the most recent save";
+SWWM_URDED3 = "...or press \cfFire\c- to attempt an emergency reboot";
+SWWM_REFAIL = "EMERGENCY REBOOT FAILED - NOT ENOUGH AUXILIARY POWER AVAILABLE";
+D_REFAIL = "The Emergency Reboot System has recharged completely.";
+SWWM_LQUOTE = "\"";
+SWWM_RQUOTE = "\"";
+// targetter
+SWWM_OVERKILL = "Overkill";
+SWWM_MULTIKILL = "Multi Kill";
+SWWM_SPREEKILL = "Untouchable";
+SWWM_BOSSKILL = "Boss Kill";
+SWWM_MAX = "MAX";
+SWWM_EXIT = "Exit: ";
+SWWM_NEXIT = "Exit";
+SWWM_SEXIT = "Secret Exit";
+// score messages
+SWWM_FINDSECRET = "\cf%s\cf found a secret. +%d\c-";
+SWWM_FINDKEY = "\cf%s\cf got the %s\cf. +%d\c-";
+SWWM_LASTSECRET = "\cf%s\cf found the last secret. +%d\c-";
+SWWM_LASTITEM = "\cf%s\cf got the last item. +%d\c-";
+SWWM_LASTMONSTER = "\cf%s\cf killed the last monster. +%d\c-";
+SWWM_NEWLORE = "New entries have been added to the Library.";
+// intermission tips
+SWWM_INTERTIP1 = "The Demolitionist is immune to drowning, poison and even fall damage (excluding instant kill pits, e.g. in Hexen).";
+SWWM_INTERTIP2 = "The Explodium Gun's altfire has an explosive yield proportional to the bullets left in the mag.";
+SWWM_INTERTIP3 = "Your fuel regenerates over time, but the more you use the impulsor, the longer this will take.";
+SWWM_INTERTIP4 = "The Pusher has a chance to slip off your hands on altfire if it doesn't land a hit, however as a ranged attack it may still be effective.";
+SWWM_INTERTIP5 = "Spare copies of items will be stashed away in your inventory if they can't be immediately used, this even includes health and armor.";
+SWWM_INTERTIP6 = "The Omnisight makes it easy to track down keys and secret exits in maps.";
+SWWM_INTERTIP7 = "True to its name, the Wallbuster's tertiary fire can be used to completely obliterate doors and other obstacles.";
+SWWM_INTERTIP8 = "The Eviscerator can easily clear entire rooms and corridors, but keep in mind that some of the shrapnel might bounce right back at you if you're not careful.";
+SWWM_INTERTIP9 = "When on the move, the Silver Bullet's jet compensators will reduce most of the recoil from firing, but will also deal some damage if you're not wearing armor.";
+SWWM_INTERTIP10 = "Just like other energy weapons of similar function, the Sparkster's primary and secondary fires can be combined with deadly results.";
+SWWM_INTERTIP11 = "The Lämp has a chance to attract a rare type of moth that is much more aggressive than others in its attacks.";
+SWWM_INTERTIP12 = "Most healing items will auto-activate if you're about to die, though sometimes they may not be enough to really save you... unless it's a Grilled Cheese Sandwich.";
+SWWM_INTERTIP13 = "The Ynykron Artifact will instantly kill everything you aim it at, unless it's really unkillable, though usually that's only the case for gods. You're not planning on going after any gods, right?";
+SWWM_INTERTIP14 = "Do not be deceived by the Candy Gun, it may seem like a simple recolor, but it is A LOT stronger than your starting weapon.";
+SWWM_INTERTIP15 = "The Ragekit will greatly increase the strength of your melee attacks and reduce incoming damage, but it'll also make you scream, all the time.";
+SWWM_INTERTIP16 = "You can share items with other players in multiplayer using the trading tab in your Demolitionist menu. Items that won't fit in the destination inventory will not be traded.";
+SWWM_INTERTIP17 = "The Demolitionist Menu is very helpful, do not forget to bind a key to open it.";
+SWWM_INTERTIP18 = "All weapons have a quick melee attack available through a dedicated button. With one-handed weapons you will perform a punch, and with two-handed ones a bash.";
+SWWM_INTERTIP19 = "With the right combination of dashing, boosting and wall jumping, it is perfectly possible to remain in the air for extended periods of time.";
+SWWM_INTERTIP20 = "In multiplayer, any keys you pick up will be immediately shared with other players.";
+SWWM_INTERTIP21 = "Aim for a high score! The more enemies you kill the better. Don't forget to put that cash to use at the in-game store when you can.";
+SWWM_INTERTIP22 = "Although chance boxes may sound like a terrible idea, there is a high probability of obtaining very valuable items for a much lower cost.";
+
+/* SUBTITLES */
+// voice name
+SWWM_VOICENAME_DEFAULT = "Demolitionist";
+// new weapon received
+SWWM_SUBS_DEFAULT_GETWEAPON1 = "Not bad... Not bad at all...";
+SWWM_SUBS_DEFAULT_GETWEAPON2 = "Good find...";
+SWWM_SUBS_DEFAULT_GETWEAPON3 = "Mine now...";
+SWWM_SUBS_DEFAULT_GETWEAPON4 = "Nice...";
+SWWM_SUBS_DEFAULT_GETWEAPON5 = "Bingo...";
+SWWM_SUBS_DEFAULT_GETWEAPON6 = "Hell yeah...";
+SWWM_SUBS_DEFAULT_GETWEAPON7 = "Excellent...";
+SWWM_SUBS_DEFAULT_GETWEAPON8 = "Yes...";
+SWWM_SUBS_DEFAULT_GETWEAPON9 = "There we go...";
+SWWM_SUBS_DEFAULT_GETWEAPON10 = "Perfect...";
+SWWM_SUBS_DEFAULT_GETWEAPON11 = "I like it...";
+SWWM_SUBS_DEFAULT_GETWEAPON12 = "That looks nice...";
+SWWM_SUBS_DEFAULT_GETWEAPON13 = "It's probably worth a fortune...";
+// locked door
+SWWM_SUBS_DEFAULT_LOCKED1 = "Don't have the key.";
+SWWM_SUBS_DEFAULT_LOCKED2 = "Only opens with a key.";
+SWWM_SUBS_DEFAULT_LOCKED3 = "Would need the key.";
+SWWM_SUBS_DEFAULT_LOCKED4 = "Locked tight.";
+// gacha failure in store
+SWWM_SUBS_DEFAULT_PUZZFAIL1 = "Damn.";
+SWWM_SUBS_DEFAULT_PUZZFAIL2 = "Damn it.";
+SWWM_SUBS_DEFAULT_PUZZFAIL3 = "No good.";
+SWWM_SUBS_DEFAULT_PUZZFAIL4 = "Nope.";
+SWWM_SUBS_DEFAULT_PUZZFAIL5 = "Uh uh.";
+SWWM_SUBS_DEFAULT_PUZZFAIL6 = "Hmmm.";
+// gacha success in store
+SWWM_SUBS_DEFAULT_PUZZSUCC1 = "Nice.";
+SWWM_SUBS_DEFAULT_PUZZSUCC2 = "That's it.";
+SWWM_SUBS_DEFAULT_PUZZSUCC3 = "Got it.";
+SWWM_SUBS_DEFAULT_PUZZSUCC4 = "Yes.";
+SWWM_SUBS_DEFAULT_PUZZSUCC5 = "Sweet.";
+// first enemy encounter (20 seconds cooldown since all enemies dead)
+SWWM_SUBS_DEFAULT_FIGHTSTART1 = "Here we go again.";
+SWWM_SUBS_DEFAULT_FIGHTSTART2 = "Let's get this show on the road.";
+SWWM_SUBS_DEFAULT_FIGHTSTART3 = "Time to die.";
+SWWM_SUBS_DEFAULT_FIGHTSTART4 = "Bring it on.";
+SWWM_SUBS_DEFAULT_FIGHTSTART5 = "You are all going to die.";
+SWWM_SUBS_DEFAULT_FIGHTSTART6 = "I've been spoiling for a fight.";
+SWWM_SUBS_DEFAULT_FIGHTSTART7 = "Let's do this.";
+SWWM_SUBS_DEFAULT_FIGHTSTART8 = "Time to get crazy! Kill 'em all!";
+SWWM_SUBS_DEFAULT_FIGHTSTART9 = "You really don't want to start a fight with me.";
+SWWM_SUBS_DEFAULT_FIGHTSTART10 = "Let's get on with it.";
+SWWM_SUBS_DEFAULT_FIGHTSTART11 = "Kill!";
+SWWM_SUBS_DEFAULT_FIGHTSTART12 = "This won't be hard.";
+SWWM_SUBS_DEFAULT_FIGHTSTART13 = "Let's do it.";
+SWWM_SUBS_DEFAULT_FIGHTSTART14 = "Let's do this.";
+SWWM_SUBS_DEFAULT_FIGHTSTART15 = "Let's just get this over with.";
+SWWM_SUBS_DEFAULT_FIGHTSTART16 = "Well, this will be an interesting challenge.";
+SWWM_SUBS_DEFAULT_FIGHTSTART17 = "Okay. Let's get started.";
+SWWM_SUBS_DEFAULT_FIGHTSTART18 = "Oh, this is just what I need right now...";
+SWWM_SUBS_DEFAULT_FIGHTSTART19 = "Time to put on a show.";
+SWWM_SUBS_DEFAULT_FIGHTSTART20 = "I'm putting you down.";
+SWWM_SUBS_DEFAULT_FIGHTSTART21 = "Oh, good. Here I was afraid I'd have nothing to do.";
+// played at map start
+SWWM_SUBS_DEFAULT_MAPSTART1 = "Ugh... this place smells horrible.";
+SWWM_SUBS_DEFAULT_MAPSTART2 = "Okay, let's get to work.";
+SWWM_SUBS_DEFAULT_MAPSTART3 = "Let's hurry this up.";
+SWWM_SUBS_DEFAULT_MAPSTART4 = "This place is all kinds of strange.";
+SWWM_SUBS_DEFAULT_MAPSTART5 = "I was born ready.";
+SWWM_SUBS_DEFAULT_MAPSTART6 = "It's a hard world. I do what I have to.";
+SWWM_SUBS_DEFAULT_MAPSTART7 = "No robot is superior to me.";
+SWWM_SUBS_DEFAULT_MAPSTART8 = "I've seen better.";
+SWWM_SUBS_DEFAULT_MAPSTART9 = "Okay. Let's head in.";
+SWWM_SUBS_DEFAULT_MAPSTART10 = "I don't want any trouble. I'm just passing through.";
+SWWM_SUBS_DEFAULT_MAPSTART11 = "Sorry to keep you waiting.";
+SWWM_SUBS_DEFAULT_MAPSTART12 = "I'll do my best.";
+SWWM_SUBS_DEFAULT_MAPSTART13 = "Just so we're clear: Anything good I find is mine.";
+SWWM_SUBS_DEFAULT_MAPSTART14 = "I bet the food here is terrible.";
+// every time a secret is found
+SWWM_SUBS_DEFAULT_FINDSECRET1 = "Yeah, yeah, I'm the best.";
+SWWM_SUBS_DEFAULT_FINDSECRET2 = "It's true. I do know my shit.";
+SWWM_SUBS_DEFAULT_FINDSECRET3 = "What can I say? I'm good at what I do.";
+SWWM_SUBS_DEFAULT_FINDSECRET4 = "It was no big deal.";
+SWWM_SUBS_DEFAULT_FINDSECRET5 = "No trouble at all.";
+SWWM_SUBS_DEFAULT_FINDSECRET6 = "It was easy.";
+SWWM_SUBS_DEFAULT_FINDSECRET7 = "Thanks to me, yes.";
+SWWM_SUBS_DEFAULT_FINDSECRET8 = "It was a walk in the park.";
+SWWM_SUBS_DEFAULT_FINDSECRET9 = "It was a piece of cake.";
+SWWM_SUBS_DEFAULT_FINDSECRET10 = "I still got it.";
+SWWM_SUBS_DEFAULT_FINDSECRET11 = "I did good work, didn't I?";
+SWWM_SUBS_DEFAULT_FINDSECRET12 = "Wow, that's pretty lucky!";
+SWWM_SUBS_DEFAULT_FINDSECRET13 = "Yeah, well, I am pretty awesome.";
+// frag taunts
+SWWM_SUBS_DEFAULT_SCOREKILL1 = "Good riddance.";
+SWWM_SUBS_DEFAULT_SCOREKILL2 = "One down.";
+SWWM_SUBS_DEFAULT_SCOREKILL3 = "Goodbye.";
+SWWM_SUBS_DEFAULT_SCOREKILL4 = "Heh! You can't stop me.";
+SWWM_SUBS_DEFAULT_SCOREKILL5 = "What a loser.";
+SWWM_SUBS_DEFAULT_SCOREKILL6 = "We're done.";
+SWWM_SUBS_DEFAULT_SCOREKILL7 = "Bye.";
+SWWM_SUBS_DEFAULT_SCOREKILL8 = "Dead as can be.";
+SWWM_SUBS_DEFAULT_SCOREKILL9 = "Another job done.";
+SWWM_SUBS_DEFAULT_SCOREKILL10 = "The pleasure was all mine.";
+SWWM_SUBS_DEFAULT_SCOREKILL11 = "How about something a little more challenging next time?";
+SWWM_SUBS_DEFAULT_SCOREKILL12 = "I'm glad that's over with.";
+SWWM_SUBS_DEFAULT_SCOREKILL13 = "Well, it's over. That's that.";
+SWWM_SUBS_DEFAULT_SCOREKILL14 = "Ugh. Just... go away.";
+SWWM_SUBS_DEFAULT_SCOREKILL15 = "Get lost.";
+SWWM_SUBS_DEFAULT_SCOREKILL16 = "Is that all?";
+SWWM_SUBS_DEFAULT_SCOREKILL17 = "Is that the best you can do?";
+SWWM_SUBS_DEFAULT_SCOREKILL18 = "You annoy me.";
+SWWM_SUBS_DEFAULT_SCOREKILL19 = "Going to have to try harder than that.";
+SWWM_SUBS_DEFAULT_SCOREKILL20 = "What? That it?";
+SWWM_SUBS_DEFAULT_SCOREKILL21 = "Get outta here.";
+SWWM_SUBS_DEFAULT_SCOREKILL22 = "My pleasure.";
+SWWM_SUBS_DEFAULT_SCOREKILL23 = "Out of my way.";
+SWWM_SUBS_DEFAULT_SCOREKILL24 = "Get outta my way.";
+SWWM_SUBS_DEFAULT_SCOREKILL25 = "Want some more?";
+SWWM_SUBS_DEFAULT_SCOREKILL26 = "Done and done.";
+SWWM_SUBS_DEFAULT_SCOREKILL27 = "It's done.";
+// getting hurt by monsters
+SWWM_SUBS_DEFAULT_GETHIT1 = "Whatever...";
+SWWM_SUBS_DEFAULT_GETHIT2 = "*sigh*";
+SWWM_SUBS_DEFAULT_GETHIT3 = "Hm hmm.";
+SWWM_SUBS_DEFAULT_GETHIT4 = "Bitch.";
+SWWM_SUBS_DEFAULT_GETHIT5 = "Asshole...";
+SWWM_SUBS_DEFAULT_GETHIT6 = "You annoy me.";
+SWWM_SUBS_DEFAULT_GETHIT7 = "Up yours.";
+SWWM_SUBS_DEFAULT_GETHIT8 = "You got my attention.";
+SWWM_SUBS_DEFAULT_GETHIT9 = "I'm ending this right now.";
+SWWM_SUBS_DEFAULT_GETHIT10 = "You're a pain in the ass.";
+SWWM_SUBS_DEFAULT_GETHIT11 = "That's bullshit.";
+SWWM_SUBS_DEFAULT_GETHIT12 = "Are you serious?";
+SWWM_SUBS_DEFAULT_GETHIT13 = "Going to have to try harder than that.";
+SWWM_SUBS_DEFAULT_GETHIT14 = "Get outta here.";
+SWWM_SUBS_DEFAULT_GETHIT15 = "And now it's your turn.";
+SWWM_SUBS_DEFAULT_GETHIT16 = "Time to shut you up for good.";
+SWWM_SUBS_DEFAULT_GETHIT17 = "You're not leaving here in one piece.";
+SWWM_SUBS_DEFAULT_GETHIT18 = "You're obviously upset...";
+// getting hurt by friendlies
+SWWM_SUBS_DEFAULT_FRIENDHIT1 = "Are you ticked off at me?";
+SWWM_SUBS_DEFAULT_FRIENDHIT2 = "Are you serious?";
+SWWM_SUBS_DEFAULT_FRIENDHIT3 = "What? Why?";
+SWWM_SUBS_DEFAULT_FRIENDHIT4 = "That's awfully rude.";
+SWWM_SUBS_DEFAULT_FRIENDHIT5 = "Sorry, what?";
+SWWM_SUBS_DEFAULT_FRIENDHIT6 = "Not very friendly, are you?";
+SWWM_SUBS_DEFAULT_FRIENDHIT7 = "Whoa, whoa. Easy there.";
+// hurting a friendly
+SWWM_SUBS_DEFAULT_HITFRIEND1 = "I... sorry.";
+SWWM_SUBS_DEFAULT_HITFRIEND2 = "I'm sorry.";
+SWWM_SUBS_DEFAULT_HITFRIEND3 = "Sorry.";
+// greeting another player
+SWWM_SUBS_DEFAULT_GREET1 = "Hi.";
+SWWM_SUBS_DEFAULT_GREET2 = "Hey there.";
+SWWM_SUBS_DEFAULT_GREET3 = "Hey.";
+SWWM_SUBS_DEFAULT_GREET4 = "Hey.";
+SWWM_SUBS_DEFAULT_GREET5 = "Hey.";
+SWWM_SUBS_DEFAULT_GREET6 = "Well hello.";
+SWWM_SUBS_DEFAULT_GREET7 = "Hi there.";
+// ragekit
+SWWM_SUBS_DEFAULT_RAGEKIT1 = "AAAAAAAAAAAAAAAAAAAAAA!!!!!";
+SWWM_SUBS_DEFAULT_RAGEKIT2 = "FFFFFFUUUUUUUUUUUCKKKK!!!";
+SWWM_SUBS_DEFAULT_RAGEKIT3 = "FUCKFUCKFUCCKKKK!!";
+SWWM_SUBS_DEFAULT_RAGEKIT4 = "AAAAAAAAAARGH!!!!";
+SWWM_SUBS_DEFAULT_RAGEKIT5 = "KILLLLL!!!!";
+SWWM_SUBS_DEFAULT_RAGEKIT6 = "RAAAARGH!!! BRING IT!!!";
+// --- comebacks for korax hub lines ---
+// "Greetings mortal, are you ready to die?"
+SWWM_SUBS_DEFAULT_KORAXGREET1 = "Oh boy. That's it. I'm outta here";
+SWWM_SUBS_DEFAULT_KORAXGREET2 = "Great... That's just great.";
+SWWM_SUBS_DEFAULT_KORAXGREET3 = "I don't want whatever you're selling.";
+SWWM_SUBS_DEFAULT_KORAXGREET4 = "You're... not really my type.";
+SWWM_SUBS_DEFAULT_KORAXGREET5 = "The first word that comes to my mind is 'ugly'.";
+SWWM_SUBS_DEFAULT_KORAXGREET6 = "You look like something that was left in the fridge for too long.";
+SWWM_SUBS_DEFAULT_KORAXGREET7 = "I can see coming here was a mistake.";
+SWWM_SUBS_DEFAULT_KORAXGREET8 = "I'm not comfortable being watched so closely.";
+SWWM_SUBS_DEFAULT_KORAXGREET9 = "Nice attitude...";
+SWWM_SUBS_DEFAULT_KORAXGREET10 = "I could ask you the same question.";
+SWWM_SUBS_DEFAULT_KORAXGREET11 = "I was about to ask you the same thing.";
+SWWM_SUBS_DEFAULT_KORAXGREET12 = "I'm just looking for the mayonnaise. Maybe you could grab it for me. Second shelf, right next to the pudding.";
+SWWM_SUBS_DEFAULT_KORAXGREET13 = "I'm here to pick up an order. Two large pepperoni and a calzone. Name is 'Fuck you'.";
+// "My servants can smell your blood, human"
+SWWM_SUBS_DEFAULT_KORAXBLOOD1 = "Creep.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD2 = "That's good to know.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD3 = "Whatever you say.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD4 = "I don't think so.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD5 = "Um... yeah... I don't think so...";
+SWWM_SUBS_DEFAULT_KORAXBLOOD6 = "If you say so.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD7 = "I don't care.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD8 = "Whatever. Not like I care anyway.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD9 = "I don't really give a shit.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD10 = "Like I give a shit...";
+SWWM_SUBS_DEFAULT_KORAXBLOOD11 = "I think you're confusing me with someone who gives a shit.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD12 = "I'm not so sure about that.";
+SWWM_SUBS_DEFAULT_KORAXBLOOD13 = "Just shut up.";
+// "You have played this game too long, mortal, I think I shall remove you from the board"
+SWWM_SUBS_DEFAULT_KORAXGAME1 = "I really don't care.";
+SWWM_SUBS_DEFAULT_KORAXGAME2 = "Go fuck yourself.";
+SWWM_SUBS_DEFAULT_KORAXGAME3 = "Oh, go cough up a hairball.";
+SWWM_SUBS_DEFAULT_KORAXGAME4 = "Not gonna happen.";
+SWWM_SUBS_DEFAULT_KORAXGAME5 = "Your threats don't scare me.";
+SWWM_SUBS_DEFAULT_KORAXGAME6 = "Not a chance.";
+SWWM_SUBS_DEFAULT_KORAXGAME7 = "I don't take kindly to threats.";
+SWWM_SUBS_DEFAULT_KORAXGAME8 = "Anything else I should know?";
+SWWM_SUBS_DEFAULT_KORAXGAME9 = "Shut up...";
+SWWM_SUBS_DEFAULT_KORAXGAME10 = "No one talks to me like that. Screw you.";
+SWWM_SUBS_DEFAULT_KORAXGAME11 = "You won't talk when you're dead.";
+SWWM_SUBS_DEFAULT_KORAXGAME12 = "I'd like to see you try.";
+SWWM_SUBS_DEFAULT_KORAXGAME13 = "Oh, please try.";
+SWWM_SUBS_DEFAULT_KORAXGAME14 = "I don't know what you're talking about, and I don't care.";
+// "Worship me and I may be yet merciful, then again, maybe not"
+SWWM_SUBS_DEFAULT_KORAXWORSHIP1 = "What?";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP2 = "What a scumbag...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP3 = "Pompous ass...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP4 = "Someone's a little full of himself.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP5 = "So full of yourself...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP6 = "I've heard enough of your bullshit.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP7 = "Blah, blah, blah...";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP8 = "What? I can't hear you over this ringing in my ears.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP9 = "You must think I'm an idiot.";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP10 = "Do I look like an idiot?";
+SWWM_SUBS_DEFAULT_KORAXWORSHIP11 = "You have an awfully high opinion of yourself.";
+// "Are you strong enough to face your own masters?"
+SWWM_SUBS_DEFAULT_KORAXMASTERS1 = "Can we move this along? I've got places to be.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS2 = "I don't appreciate people telling me what to do.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS3 = "Uh... yes, that's right.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS4 = "Suppose I've got nothing better to do.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS5 = "I'm asking myself the same thing.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS6 = "None of your damn business.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS7 = "Yes, I am.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS8 = "That's none of your business.";
+SWWM_SUBS_DEFAULT_KORAXMASTERS9 = "Just shut up already...";

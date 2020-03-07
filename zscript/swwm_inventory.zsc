@@ -604,7 +604,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			HitNormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 			if ( !d.LineSide ) HitNormal *= -1;
-			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation+HitNormal*4);
+			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Use|SPAC_Impact,d.HitLocation+HitNormal*4);
 		}
 		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
 		p.angle = atan2(HitNormal.y,HitNormal.x);

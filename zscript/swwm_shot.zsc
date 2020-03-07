@@ -1389,7 +1389,8 @@ Class TheBall : Actor
 				wside = 0;
 				HitNormal *= -1;
 			}
-			BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
+			if ( oldvel.length() > 15 )
+				BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
 		}
 		else if ( BlockingMobj )
 		{

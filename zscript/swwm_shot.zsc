@@ -1383,8 +1383,13 @@ Class TheBall : Actor
 		else if ( BlockingLine )
 		{
 			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			int wside = 1;
 			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
+			{
+				wside = 0;
 				HitNormal *= -1;
+			}
+			BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
 		}
 		else if ( BlockingMobj )
 		{

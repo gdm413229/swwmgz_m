@@ -1353,30 +1353,20 @@ Class SWWMHandler : EventHandler
 		// suppress non-rage comments when ragekit is active, only screaming allowed
 		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
 		int whichline;
-		int countem = 0, i = 1;
-		String testme, locme;
-		do
-		{
-			testme = String.Format("SWWM_SUBS_%s_%s%d",voicetype.MakeUpper(),type.MakeUpper(),i);
-			locme = StringTable.Localize(testme,false);
-			if ( testme != locme ) countem++;
-			i++;
-		}
-		while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
+		String testme = String.Format("SWWM_SUBS_%s_N%s",voicetype.MakeUpper(),type.MakeUpper());
+		String locme = StringTable.Localize(testme,false);
+		int countem;
+		if ( testme == locme ) countem = 0;
+		else countem = locme.ToInt();
 		if ( countem == 0 )
 		{
 			if ( voicetype ~== "default" ) return 0;
 			// retry with the default voicetype
 			voicetype = "default";
-			i = 1;
-			do
-			{
-				testme = String.Format("SWWM_SUBS_DEFAULT_%s%d",type.MakeUpper(),i);
-				locme = StringTable.Localize(testme,false);
-				if ( testme != locme ) countem++;
-				i++;
-			}
-			while ( (testme != locme) && (i < 100) );	// gotta prevent infinite loops
+			testme = String.Format("SWWM_SUBS_DEFAULT_N%s",type.MakeUpper());
+			locme = StringTable.Localize(testme,false);
+			if ( testme == locme ) countem = 0;
+			else countem = locme.ToInt();
 			if ( countem == 0 ) return 0;
 		}
 		// check last line so we don't repeat
@@ -1388,7 +1378,8 @@ Class SWWMHandler : EventHandler
 			ent = i;
 			break;
 		}
-		if ( last > 0 )
+		if ( countem == 1 ) whichline = 1;
+		else if ( last > 0 )
 		{
 			whichline = Random[DemoLines](1,countem-1);
 			if ( whichline >= last ) whichline++;

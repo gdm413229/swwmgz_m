@@ -63,9 +63,11 @@ Class SWWMArmor : Armor abstract
 			SWWMHandler.DoFlash(Owner,Color(int(clamp(damage*.15,1,16)),255,224,192),3);
 			Owner.A_StartSound("armor/hit",CHAN_BODY,CHANF_DEFAULT,clamp(damage*.03,0.,1.),2.5);
 			saved = HandleDamage(damage,damageType,flags);
+			int healed = max(0,saved-damage);
+			saved = min(saved,damage);
 			if ( amount <= saved ) saved = amount;
 			newdamage -= saved;
-			if ( newdamage < 0 ) Owner.GiveBody(abs(newdamage));
+			if ( healed > 0 ) Owner.GiveBody(healed);
 			amount -= saved;
 			damage = newdamage;
 			if ( amount <= 0 )

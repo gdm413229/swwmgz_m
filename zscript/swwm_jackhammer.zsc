@@ -330,7 +330,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(3,3,3,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(1200);
-			int dmg = int(3+invoker.chargelevel*2);
+			int dmg = int(10+invoker.chargelevel*5);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
@@ -351,7 +351,7 @@ Class PusherWeapon : SWWMWeapon
 					d.HitActor.A_StartSound("pusher/meat",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				}
 				// move towards target
-				vel.xy += Vec2To(d.HitActor).unit();
+				bJUSTATTACKED = true;
 			}
 			else
 			{
@@ -413,7 +413,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(8,8,8,12,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(1600);
-			int dmg = int(80*invoker.chargelevel);
+			int dmg = int(150*invoker.chargelevel);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));

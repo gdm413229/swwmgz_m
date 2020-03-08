@@ -13,7 +13,7 @@ Class ArmorNugget : SWWMArmor
 
 	override int HandleDamage( int damage, Name damageType, int flags )
 	{
-		double factor = amount*.1;
+		double factor = amount*.01;
 		return int(ceil(damage*factor));
 	}
 }

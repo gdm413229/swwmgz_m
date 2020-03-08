@@ -1,0 +1,62 @@
+Mixin Class SWWMStatScreen
+{
+	TextureID bgtex;
+
+	override void StartMusic()
+	{
+		S_ChangeMusic("music/DRAGONY.XM");
+	}
+	private void drawSWWMBg()
+	{
+		if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
+		double ar = Screen.GetAspectRatio();
+		Vector2 tsize = TexMan.GetScaledSize(bgtex);
+		double sar = tsize.x/tsize.y;
+		Vector2 vsize;
+		if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+		else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+		else vsize = tsize;
+		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		// TODO background pics (fanart, 4komas, etc.)
+		// TODO intermission tips at the bottom
+	}
+	override void drawShowNextLoc( void )
+	{
+		drawSWWMBg();
+		drawEL();
+	}
+	override void Drawer( void )
+	{
+		switch ( CurState )
+		{
+		case StatCount:
+			drawSWWMBg();
+			drawStats();
+			break;
+		case ShowNextLoc:
+			drawShowNextLoc();
+			break;
+		case LeavingIntermission:
+			break;
+		default:
+			drawNoState();
+			break;
+		}
+	}
+}
+
+// placeholders, will do the actual custom stuff soon
+Class SWWMStatScreen_SP : DoomStatusScreen
+{
+	Mixin SWWMStatScreen;
+}
+
+Class SWWMStatScreen_Coop : CoopStatusScreen
+{
+	Mixin SWWMStatScreen;
+}
+
+Class SWWMStatScreen_DM : DeathmatchStatusScreen
+{
+	Mixin SWWMStatScreen;
+}

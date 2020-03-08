@@ -842,7 +842,7 @@ Class AmmoFabricator : Inventory abstract
 		if ( pickup && !shouldautouse ) return false;
 		if ( FabricateAmmo() )
 		{
-			Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			return true;
 		}
 		return false;

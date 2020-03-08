@@ -13,7 +13,6 @@ Class GrilledCheeseSandwich : Inventory
 	{
 		SWWMHandler.DoFlash(Owner,Color(64,255,255,64),10);
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
-		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		Owner.GiveBody(1000,1000);
 		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 		let n = Owner.FindInventory("ArmorNugget");
@@ -33,6 +32,7 @@ Class GrilledCheeseSandwich : Inventory
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( Owner.Health >= 1000 ) return false;
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		DoTheThing();
 		return true;
 	}
@@ -41,6 +41,7 @@ Class GrilledCheeseSandwich : Inventory
 		if ( passive && (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
 			newdamage = 0;
+			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			DoTheThing();
 			Amount--;
 		}
@@ -226,7 +227,7 @@ Class GhostArtifact : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
 		if ( g ) g.EffectTics = g.default.EffectTics;
 		else Owner.GiveInventory("GhostPower",1);
@@ -351,7 +352,7 @@ Class GravitySuppressor : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GravityPower(Owner.FindInventory("GravityPower"));
 		if ( g ) g.EffectTics = g.default.EffectTics;
 		else Owner.GiveInventory("GravityPower",1);
@@ -539,7 +540,7 @@ Class FuckingInvinciball : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		Owner.A_StartSound("misc/sundowner",CHAN_POWERUPEXTRA);
 		let i = InvinciballPower(Owner.FindInventory("InvinciballPower"));
 		if ( i )
@@ -745,7 +746,7 @@ Class Ragekit : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let r = RagekitPower(Owner.FindInventory("RagekitPower"));
 		if ( r )
 		{
@@ -798,7 +799,7 @@ Class Omnisight : Inventory
 	{
 		if ( !level.allmap )
 		{
-			Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
 			level.allmap = true;
 		}
 		// not used up, must be kept for the targetting features to work
@@ -807,7 +808,6 @@ Class Omnisight : Inventory
 	Default
 	{
 		Tag "$T_OMNISIGHT";
-		Inventory.UseSound "powerup/omnisight";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.PickupMessage "$I_OMNISIGHT";
 		Inventory.MaxAmount 1;

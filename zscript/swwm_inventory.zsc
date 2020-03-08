@@ -110,8 +110,8 @@ Class SWWMSpareArmor : Inventory abstract
 		let cur = Owner.FindInventory(giveme);
 		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (GetDefaultByType(giveme).Amount+cur.Amount <= cur.MaxAmount) )
 		{
+			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
-			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 			SWWMHandler.DoFlash(Owner,Color(48,96,255,64),5);
 			return true;
 		}
@@ -148,7 +148,7 @@ Class SWWMHealth : Inventory abstract
 		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
 		if ( pickup && !shouldautouse ) return false;
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
-		if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		SWWMHandler.DoFlash(Owner,Color(48,64,128,255),5);
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
@@ -169,10 +169,11 @@ Class SWWMHealth : Inventory abstract
 	{
 		if ( passive && (Owner.Health-damage <= 0) )
 		{
-			if ( UseSound ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+			newdamage = damage;
+			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
-				newdamage = damage-GetDefaultByType(giveme).Amount;
+				newdamage = newdamage-GetDefaultByType(giveme).Amount;
 				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
 				newdamage = max(0,newdamage);
 				AutoUseExtra();

@@ -199,7 +199,6 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !targetter ) targetter = CVar.GetCVar('swwm_targeter',players[consoleplayer]);
 		if ( !healthnums ) healthnums = CVar.GetCVar('swwm_healthnums',players[consoleplayer]);
 		if ( !scorenums ) scorenums = CVar.GetCVar('swwm_scorenums',players[consoleplayer]);
-		if ( !scorebonus ) scorebonus = CVar.GetCVar('swwm_scorebonus',players[consoleplayer]);
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
@@ -298,15 +297,22 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 		}
 		// update floating scores, adding the scorenums first, then the damnums
-		int total_sz = hnd.scorenums_cnt;
-		total_sz += min(100,hnd.damnums_cnt);
+		int total_sz = 0;
+		if ( scorenums.GetBool() ) total_sz += hnd.scorenums_cnt;
+		if ( healthnums.GetBool() ) total_sz += min(50,hnd.damnums_cnt);
 		if ( scoreobjs.Size() != total_sz )
 			scoreobjs.Resize(total_sz);
 		int i = 0;
-		for ( SWWMScoreObj scr=hnd.scorenums; scr; scr=scr.next )
-			scoreobjs[i++] = scr;
-		for ( SWWMScoreObj scr=hnd.damnums; scr && (i<total_sz); scr=scr.next )
-			scoreobjs[i++] = scr;
+		if ( scorenums.GetBool() )
+		{
+			for ( SWWMScoreObj scr=hnd.scorenums; scr; scr=scr.next )
+				scoreobjs[i++] = scr;
+		}
+		if ( healthnums.GetBool() )
+		{
+			for ( SWWMScoreObj scr=hnd.damnums; scr && (i<total_sz); scr=scr.next )
+				scoreobjs[i++] = scr;
+		}
 		// sort by distance
 		for ( int i=0; i<total_sz; i++ )
 		{
@@ -461,6 +467,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hs.x)/hs.x,(barpos.y+2*hs.y)/hs.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
 			}
 		}
+		if ( !scorebonus ) scorebonus = CVar.GetCVar('swwm_scorebonus',players[consoleplayer]);
 		// floating kill scores and others
 		for ( int i=0; i<scoreobjs.Size(); i++ )
 		{
@@ -473,6 +480,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			if ( snum.str != "" )
 			{
+				if ( !scorebonus.GetBool() ) continue;
 				tag = StringTable.Localize(snum.str);
 				if ( snum.score == int.max ) tag.AppendFormat(" %s",StringTable.Localize("$SWWM_MAX"));
 				else if ( snum.score > 0 ) tag.AppendFormat(" x%d",snum.score);

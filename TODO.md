@@ -1,5 +1,4 @@
 Fundamental things:
- - Spreadgun Napalm and Gold Shell ammo types
  - Eviscerator
  - Hellblazer
  - Sparkster
@@ -22,3 +21,8 @@ Extra things:
  - Japanese localization
  - Keen replacement (need ideas)
  - Mod trailer video
+ - Summonable Ibuki companion sub-mod
+ - Strife support
+   - Rewrite all the game's dialogue
+   - Rewrite all the shop systems and other things
+   - Rewrite the cutscenes

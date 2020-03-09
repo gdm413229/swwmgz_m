@@ -1105,7 +1105,7 @@ Class FlamingChunk : Actor
 	{
 		if ( target != lasthit )
 		{
-			OnFire.Apply(target,self.target,myfire?myfire.Amount:max(1,myfire.Amount/10));
+			OnFire.Apply(target,self.target,myfire?myfire.Amount:1);
 			lasthit = target;
 		}
 		return damage;

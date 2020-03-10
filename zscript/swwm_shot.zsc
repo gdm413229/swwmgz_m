@@ -1435,8 +1435,13 @@ Class TheBall : Actor
 				wside = 0;
 				HitNormal *= -1;
 			}
-			if ( oldvel.length() > 15 )
-				BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
+			if ( (oldvel.length() > 15) )
+			{
+				int locknum = SWWMUtility.GetLineLock(BlockingLine);
+				// remotely activate unlocked lines (that aren't exits)
+				if ( (!locknum || (target && target.CheckKeys(locknum,false,true))) && !SWWMUtility.IsExitLine(BlockingLine) )
+					BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
+			}
 		}
 		else if ( BlockingMobj )
 		{

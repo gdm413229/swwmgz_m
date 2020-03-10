@@ -431,6 +431,11 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !proj.IsInFront() ) continue;
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			tag = targ.mytag;
+			if ( targ.legged )
+			{
+				if ( StringTable.Localize("$SWWM_LEGPREFIX") == "R" ) tag = tag..StringTable.Localize("$SWWM_LEG");
+				else tag = StringTable.Localize("$SWWM_LEG")..tag;
+			}
 			int mtime = 35;
 			if ( thesight && (targ.lasthealth > 0) ) mtime += 105;
 			double alph = clamp(((targ.updated+mtime)-level.maptime)/35.,0.,1.);

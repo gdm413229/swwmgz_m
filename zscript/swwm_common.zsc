@@ -32,6 +32,38 @@ Class SWWMUtility
 			len -= remlen;
 		}
 	}
+
+	static int GetLineLock( Line l )
+	{
+		int locknum = l.locknumber;
+		if ( !locknum )
+		{
+			// check the special
+			switch ( l.special )
+			{
+			case FS_Execute:
+				locknum = l.Args[2];
+				break;
+			case Door_LockedRaise:
+			case Door_Animated:
+				locknum = l.Args[3];
+				break;
+			case ACS_LockedExecute:
+			case ACS_LockedExecuteDoor:
+			case Generic_Door:
+				locknum = l.Args[4];
+				break;
+			}
+		}
+		return locknum;
+	}
+
+	static bool IsExitLine( Line l )
+	{
+		if ( (l.special == Exit_Normal) || (l.special == Exit_Secret) || (l.special == Teleport_EndGame) || (l.special == Teleport_NewMap) )
+			return true;
+		return false;
+	}
 }
 
 // Stats
@@ -519,6 +551,8 @@ Class SWWMCombatTracker : Thinker
 	Vector3 pos, prevpos;
 	PlayerInfo myplayer;
 	SWWMCombatTracker prev, next;
+	bool legged;
+	int tcnt;
 
 	static SWWMCombatTracker Spawn( Actor target )
 	{
@@ -589,11 +623,28 @@ Class SWWMCombatTracker : Thinker
 			if ( level.maptime > updated+35 ) Destroy();
 			return;
 		}
+		tcnt++;
+		if ( tcnt == 1 )
+		{
+			// post-spawn health inflation check
+			if ( lasthealth > maxhealth ) maxhealth = lasthealth;
+		}
+		if ( tcnt == 6 )
+		{
+			// legendoom check
+			for ( Inventory i=mytarget.inv; i; i=i.inv )
+			{
+				if ( i.GetClassName() != "LDLegendaryMonsterToken" ) continue;
+				legged = true;
+				// adjust for health inflation
+				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
+			}
+		}
 		if ( mytarget.player || mytarget.bISMONSTER )
 			mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
 		else mytag = "";
 		int newhealth = mytarget.Health;
-		if ( newhealth != lasthealth ) updated = level.maptime+35;
+		//if ( newhealth != lasthealth ) updated = level.maptime+35;
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
 			// enemies within 2000mu that have us as target
@@ -1496,7 +1547,7 @@ Class SWWMHandler : EventHandler
 			for ( int i=0; i<level.lines.Size(); i++ )
 			{
 				Line l = level.lines[i];
-				if ( (l.special != Exit_Normal) && (l.special != Exit_Secret) && (l.special != Teleport_EndGame) && (l.special != Teleport_NewMap) )
+				if ( !SWWMUtility.IsExitLine(l) )
 					continue;
 				if ( skipme.Find(l.Index()) < skipme.Size() ) continue;
 				Vector3 lpos = UseLinePos(l);
@@ -1936,27 +1987,8 @@ Class SWWMHandler : EventHandler
 	{
 		// oneliner on locked doors
 		if ( !e.Thing ) return;
-		int locknum = e.ActivatedLine.locknumber;
-		if ( !locknum )
-		{
-			// check the special
-			switch ( e.ActivatedLine.special )
-			{
-			case FS_Execute:
-				locknum = e.ActivatedLine.Args[2];
-				break;
-			case Door_LockedRaise:
-			case Door_Animated:
-				locknum = e.ActivatedLine.Args[3];
-				break;
-			case ACS_LockedExecute:
-			case ACS_LockedExecuteDoor:
-			case Generic_Door:
-				locknum = e.ActivatedLine.Args[4];
-				break;
-			}
-		}
-		if ( !locknum  ) return;
+		int locknum = SWWMUtility.GetLineLock(e.ActivatedLine);
+		if ( !locknum ) return;
 		if ( e.Thing.CheckLocalView() && !e.Thing.CheckKeys(locknum,false,true) )
 		{
 			if ( !lastlock || (gametic > lastlock+20) )

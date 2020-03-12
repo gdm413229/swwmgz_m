@@ -3,12 +3,44 @@
 
 Class Eviscerator : SWWMWeapon
 {
+	// barrel is extended
+	bool extended;
+	// pending shell load
+	bool pendingload;
+	// countdown to loading new shell
+	int loadtics;
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !pendingload || (Ammo1.Amount <= 0) )
+		{
+			loadtics = 0;
+			return;
+		}
+		loadtics++;
+		if ( (loadtics == 9) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
+			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
+		if ( loadtics > 20 ) pendingload = false;
+	}
+
+	action void A_EvisceratorFire()
+	{
+		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+
+	action void A_EvisceratorAltFire()
+	{
+		A_StartSound("eviscerator/altfire",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+
 	Default
 	{
 		Tag "$T_EVISCERATOR";
 		Inventory.PickupMessage "$I_EVISCERATOR";
 		Obituary "$O_EVISCERATOR";
 		Weapon.SlotNumber 5;
+		Weapon.UpSound "eviscerator/select";
 		Weapon.SelectionOrder 2000;
 		Stamina 50000;
 		Weapon.AmmoType1 "EvisceratorShell";
@@ -19,5 +51,175 @@ Class Eviscerator : SWWMWeapon
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	Deselect:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"DeselectExt");
+		}
+		XZW2 BCDEFGH 2;
+		XZW2 H -1 A_FullLower();
+		Stop;
+	DeselectExt:
+		XZW4 Z 2;
+		XZW5 ABCDEFG 2;
+		XZW5 G -1 A_FullLower();
+		Stop;
+	Select:
+		XZW2 H 2
+		{
+			A_FullRaise();
+			return A_JumpIf(invoker.extended,"SelectExt");
+		}
+		XZW2 IJKLMNOPQR 2;
+		Goto Ready;
+	SelectExt:
+		XZW5 GHIJKLMNOPQ 2;
+		Goto ReadyExt;
+	Ready:
+		XZW2 A 1
+		{
+			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			A_WeaponReady(flg);
+		}
+		Wait;
+	ReadyExt:
+		XZW4 Z 1
+		{
+			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			A_WeaponReady(flg);
+		}
+		Wait;
+	Fire:
+		XZW2 A 1
+		{
+			A_EvisceratorFire();
+			return A_JumpIf(invoker.extended,"FireExt");
+		}
+		XZW3 EFGHIJKLMNOPQR 1;
+		Goto Eject;
+	FireExt:
+		XZW4 Z 1;
+		XZW6 DEFGHIJKLMNOPQ 1;
+		Goto EjectExt;
+	Eject:
+		XZW2 A 4;
+		XZW3 STUV 2;
+		XZW3 W 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 XYZ 1;
+		XZW4 AB 1;
+		XZW4 C 1 A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 DEF 1;
+		XZW4 GHI 2;
+		XZW2 A 1 { invoker.pendingload = true; }
+		Goto Ready;
+	EjectExt:
+		XZW4 Z 4;
+		XZW6 RSTU 2;
+		XZW6 V 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 WXYZ 1;
+		XZW7 A 1;
+		XZW7 B 1 A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 CDE 1;
+		XZW7 FGH 2;
+		XZW4 Z 1 { invoker.pendingload = true; }
+		Goto ReadyExt;
+	AltFire:
+		XZW2 A 2
+		{
+			A_EvisceratorAltFire();
+			return A_JumpIf(invoker.extended,"AltFireExt");
+		}
+		XZW2 STUVW 1;
+		XZW2 XYZ 2;
+		XZW3 ABCD 2;
+		XZW2 A 6;
+		XZW2 A 2 { invoker.pendingload = true; }
+		Goto Ready;
+	AltFireExt:
+		XZW4 Z 2;
+		XZW5 RSTUV 1;
+		XZW5 WXY 2;
+		XZW5 Z 2;
+		XZW6 ABC 2;
+		XZW4 Z 6;
+		XZW4 Z 2 { invoker.pendingload = true; }
+		Goto Ready;
+	Reload:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"ReloadExt");
+		}
+		XZW4 JKLMN 2;
+		XZW4 O 1 A_StartSound("eviscerator/switch");
+		XZW4 PQR 1;
+		XZW4 S 2
+		{
+			invoker.extended = !invoker.extended;
+			A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW4 TUVWY 2;
+		Goto ReadyExt;
+	ReloadExt:
+		XZW4 Z 2;
+		XZW7 IJK 3;
+		XZW7 L 1 A_StartSound("eviscerator/switch");
+		XZW7 MNO 1;
+		XZW7 P 2
+		{
+			invoker.extended = !invoker.extended;
+			A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW7 QRSTU 2;
+		Goto Ready;
+	Zoom:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/checkgun",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"ZoomExt");
+		}
+		XZW7 VWXYZ 2;
+		XZW8 A 2;
+		XZW8 BCDEF 3;
+		XZW8 GHIJK 2;
+		XZW8 LMNO 3;
+		XZW8 PQRSTU 2;
+		XZW8 V 3;
+		Goto Ready;
+	ZoomExt:
+		XZW4 Z 2;
+		XZW9 MNOPQR 2;
+		XZW9 STUVW 3;
+		XZW9 XYZ 2;
+		XZWA AB 2;
+		XZWA CDEF 3;
+		XZWA GHIJKL 2;
+		XZWA M 3;
+		Goto ReadyExt;
+	User1:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"User1Ext");
+		}
+		XZW8 WXYZ 2;
+		XZW9 ABCD 2;
+		XZW9 E 2 A_Melee(60);
+		XZW9 FGH 2;
+		XZW9 I 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 JKL 2;
+		Goto Ready;
+	User1Ext:
+		XZW4 Z 2;
+		XZWA NOPQRSTU 2;
+		XZWA V 2 A_Melee(60);
+		XZWA WXY 2;
+		XZWA Z 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB ABC 2;
+		Goto ReadyExt;
 	}
 }

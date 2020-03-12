@@ -816,7 +816,7 @@ Class SWWMStatusBar : BaseStatusBar
 		String pname = players[consoleplayer].GetUserName();
 		// strip colors
 		SWWMUtility.StripColor(pname);
-		String fullstr = String.Format("\cq%s\cd@\cqdemolitionist%d\cn ~ \c-wall %s%s_",pname,consoleplayer+1,txt);
+		String fullstr = String.Format("\cq%s\cd@\cqdemolitionist%d\cn ~ \c-wall %s_",pname,consoleplayer+1,txt);
 		Font fnt = LangFont(mTewiFont);
 		// cut out to fit
 		int w = fnt.StringWidth(fullstr);

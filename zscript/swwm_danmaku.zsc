@@ -1,14 +1,538 @@
 // Mr. BIG SHOT Industries "Eviscerator" High Load Flak Cannon (from SWWM series)
 // Slot 5, replaces Chaingun, Dragon Claw, Hammer of Retribution
 
+Class EvisceratorChunkLight : DynamicLight
+{
+	Default
+	{
+		DynamicLight.Type "Point";
+		Args 255,224,128,8;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.pos,true);
+		if ( isFrozen() ) return;
+		double intst = clamp((7-EvisceratorChunk(target).lifetime*10)/7.,0,1);
+		args[LIGHT_RED] = int(255*intst);
+		args[LIGHT_GREEN] = int(224*intst);
+		args[LIGHT_BLUE] = int(128*intst);
+	}
+}
+
+Class ChunkImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SprayDecal("WallCrack",-20);
+		int numpt = Random[Eviscerator](-1,2);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Eviscerator](-.8,.8),FRandom[Eviscerator](-.8,.8),FRandom[Eviscerator](-.8,.8))).unit()*FRandom[Eviscerator](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= .6;
+			s.special1 = Random[Eviscerator](0,1);
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](96,192));
+		}
+		numpt = Random[Eviscerator](-2,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1)).unit()*FRandom[Eviscerator](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Eviscerator](-2,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1)).unit()*FRandom[Eviscerator](1,4);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class EvisceratorChunk : Actor
+{
+	Actor lasthit;
+	double rollvel;
+	double lifetime, lifespeed;
+	Vector3 oldvel;
+
+	Default
+	{
+		Obituary "$O_EVISCERATOR";
+		Radius 2;
+		Height 2;
+		Speed 50;
+		DamageFunction int(clamp((vel.length()-6)*.3,0,12));
+		DamageType 'shot';
+		BounceFactor 1.0;
+		WallBounceFactor 1.0;
+		PROJECTILE;
+		+USEBOUNCESTATE;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+ALLOWBOUNCEONACTORS;
+		+NODAMAGETHRUST;
+		+DONTBOUNCEONSKY;
+		+CANBOUNCEWATER;
+		+INTERPOLATEANGLES;
+		+HITTRACER;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		Scale 0.4;
+	}
+
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		let l = Spawn("EvisceratorChunkLight",pos);
+		l.target = self;
+		lifetime = 0;
+		lifespeed = FRandom[Eviscerator](0.01,0.02);
+		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1);
+		scale *= Frandom[Eviscerator](0.8,1.2);
+		frame = Random[Eviscerator](0,5);
+	}
+
+	override void Tick()
+	{
+		static const name tls[] =
+		{
+			'HotMetal0', 'HotMetal1', 'HotMetal2', 'HotMetal3',
+			'HotMetal4', 'HotMetal5', 'HotMetal6', 'HotMetal7'
+		};
+		oldvel = vel;
+		Super.Tick();
+		if ( isFrozen() ) return;
+		lifetime += lifespeed;
+		A_SetTranslation(tls[clamp(int(lifetime*10),0,7)]);
+		if ( !Random[Eviscerator](0,3) && (lifetime < .7) )
+		{
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = .2*vel+(FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1));
+			s.scale *= .5;
+			s.alpha *= scale.x*max(0,.7-lifetime)*1.5;
+		}
+		if ( !InStateSequence(CurState,FindState("Death")) )
+			roll += rollvel;
+	}
+
+	void A_HandleBounce()
+	{
+		Vector3 HitNormal = -vel.unit();
+		F3DFloor ff;
+		if ( BlockingFloor )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			{
+				if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = CurSector.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.top.Normal;
+			else HitNormal = BlockingFloor.floorplane.Normal;
+		}
+		else if ( BlockingCeiling )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			{
+				if ( !(CurSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = CurSector.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.bottom.Normal;
+			else HitNormal = BlockingCeiling.ceilingplane.Normal;
+		}
+		else if ( BlockingLine )
+		{
+			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
+				HitNormal *= -1;
+		}
+		else if ( BlockingMobj )
+		{
+			Vector3 diff = level.Vec3Diff(BlockingMobj.Vec3Offset(0,0,BlockingMobj.Height/2),pos);
+			HitNormal = diff.unit();
+		}
+		// undo the bounce, we need to hook in our own
+		vel = oldvel;
+		// re-do the bounce with our formula
+		Vector3 RealHitNormal = HitNormal;
+		HitNormal = (HitNormal+(FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1))).unit();
+		if ( (HitNormal dot RealHitNormal) < 0 ) HitNormal *= -.5;
+		vel = FRandom[Eviscerator](.8,.95)*((vel dot HitNormal)*HitNormal*(FRandom[Eviscerator](-1.8,-1.))+vel);
+		bHITOWNER = true;
+		if ( (vel.length() > 20) && !Random[Eviscerator](0,2) )
+		{
+			let l = Spawn("ChunkImpact",pos);
+			l.angle = atan2(HitNormal.y,HitNormal.x);
+			l.pitch = asin(-HitNormal.z);
+		}
+		A_Gravity();
+		gravity = .35;
+		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
+		A_StartSound("eviscerator/hit",CHAN_WEAPON,CHANF_OVERLAP,.4);
+		A_AlertMonsters(300);
+		if ( vel.length() < 3 )
+		{
+			A_Stop();
+			ClearBounce();
+			ExplodeMissile();
+		}
+	}
+
+	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
+	{
+		if ( bAMBUSH || (vel.length() <= 5) ) return damage;
+		if ( !target.bNOBLOOD )
+		{
+			target.SpawnBlood(pos,AngleTo(target),damage);
+			A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
+			A_AlertMonsters(900);
+		}
+		return -1;
+	}
+
+	override int SpecialMissileHit( Actor victim )
+	{
+		if ( bAMBUSH || (vel.length() <= 5) || ((victim == target) && !bHITOWNER) || (victim == lasthit) )
+			return 1;
+		// with this we can guarantee that the chunk won't just keep on dealing damage
+		// this is something I wish Unreal's boulders did
+		lasthit = victim;
+		// gather damage
+		SWWMDamageAccumulator.Accumulate(victim,GetMissileDamage(0,0),self,target,damagetype);
+		int amt = SWWMDamageAccumulator.GetAmount(victim);
+		// pass through if it's already dead
+		if ( victim.health-amt <= 0 )
+		{
+			// bleed if not gibbed (reduces effect spam)
+			if ( !victim.bNOBLOOD && (victim.health-amt > victim.GetGibHealth()) )
+			{
+				victim.SpawnBlood(pos,AngleTo(victim),damage);
+				A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
+				A_AlertMonsters(900);
+			}
+			return 1;
+		}
+		SWWMHandler.DoKnockback(victim,vel.unit(),8000);
+		return -1;
+	}
+	States
+	{
+	Spawn:
+		JUNK # -1;
+		Stop;
+	Bounce:
+		JUNK # 0 A_HandleBounce();
+		Goto Spawn;
+	Death:
+		JUNK # 0
+		{
+			bMOVEWITHSECTOR = true;
+			A_SetTics(Random[Eviscerator](30,50));
+		}
+		JUNK # 1 A_FadeOut();
+		Wait;
+	XDeath:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+Class EvisceratorProjSmoke : Actor
+{
+	double lifetime, lifespeed;
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		lifetime = 0;
+		lifespeed = FRandom[Eviscerator](0.004,0.008);
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		lifetime += lifespeed;
+		let s = Spawn("SWWMSmoke",pos);
+		s.vel = (FRandom[Eviscerator](-0.5,0.5),FRandom[Eviscerator](-0.5,0.5),FRandom[Eviscerator](-0.5,0.5));
+		s.vel.z += 2.;
+		s.alpha = scale.x;
+		s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+		scale.x = max(0,1-lifetime);
+		if ( scale.x <= 0 ) Destroy();
+	}
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+		Stop;
+	}
+}
+
+Class EvisceratorProjLight : PaletteLight
+{
+	Default
+	{
+		Args 0,0,0,140;
+		ReactionTime 20;
+	}
+}
+
+Class EvisceratorProj : Actor
+{
+	double heat;
+	Default
+	{
+		Obituary "$O_EVISCERATOR";
+		DamageType 'Exploded';
+		Radius 4;
+		Height 4;
+		Gravity 0.35;
+		Speed 50;
+		PROJECTILE;
+		-NOGRAVITY;
+		+EXPLODEONWATER;
+		+HITTRACER;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		vel.z += 3;
+		heat = 1.5;
+	}
+	action void A_EvisExplode()
+	{
+		bForceXYBillboard = true;
+		A_SetRenderStyle(1.0,STYLE_Add);
+		A_SprayDecal("BigScorch",50);
+		A_NoGravity();
+		A_SetScale(3.5);
+		SWWMHandler.DoBlast(self,240,120000);
+		A_Explode(150,240);
+		A_QuakeEx(6,6,6,20,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.7);
+		A_StartSound("eviscerator/shell",CHAN_WEAPON,attenuation:.5);
+		A_StartSound("eviscerator/shell",CHAN_VOICE,attenuation:.3);
+		A_AlertMonsters(3000);
+		if ( !Tracer ) Spawn("EvisceratorProjSmoke",pos);
+		Spawn("EvisceratorProjLight",pos);
+		Vector3 x, y, z;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Actor p;
+		Vector3 spawnofs;
+		if ( BlockingMobj ) spawnofs = level.Vec3Diff(pos,BlockingMobj.Vec3Offset(0,0,BlockingMobj.height/2)).unit()*4;
+		else if ( BlockingFloor ) spawnofs = BlockingFloor.floorplane.Normal*4;
+		else if ( BlockingCeiling ) spawnofs = BlockingCeiling.ceilingplane.Normal*4;
+		else if ( BlockingLine )
+		{
+			spawnofs = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit()*4;
+			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
+				spawnofs *= -1;
+		}
+		for ( int i=0; i<40; i++ )
+		{
+			p = Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs));
+			p.bHITOWNER = true;
+			a = FRandom[Eviscerator](0,360);
+			s = FRandom[Eviscerator](0,.4);
+			Vector3 dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = -asin(dir.z);
+			p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*(p.speed+FRandom[Eviscerator](-5,15));
+			p.target = target;
+		}
+		int numpt = Random[Eviscerator](8,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1)).unit()*FRandom[Eviscerator](2,8);
+			let s = Spawn("SWWMSpark",level.Vec3Offset(pos,spawnofs));
+			s.vel = pvel;
+		}
+		numpt = Random[Eviscerator](15,30);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1)).unit()*FRandom[Eviscerator](6,16);
+			let s = Spawn("SWWMChip",level.Vec3Offset(pos,spawnofs));
+			s.vel = pvel;
+			s.scale *= FRandom[Eviscerator](0.9,1.8);
+		}
+	}
+	action void A_SubExpl()
+	{
+		special1++;
+		if ( special1 > 8 ) return;
+		int numpt = Random[Eviscerator](0,8-special1);
+		double ang, pt;
+		for ( int i=0; i<numpt; i++ )
+		{
+			ang = FRandom[Eviscerator](0,360);
+			pt = FRandom[Eviscerator](-90,90);
+			FLineTraceData d;
+			Vector3 HitNormal;
+			LineTrace(ang,FRandom[Eviscerator](10,30)+10*special1,pt,TRF_THRUACTORS,data:d);
+			hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			let p = Spawn("EvisceratorSubExpl",d.HitLocation+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.target = target;
+			p.scale *= 2-special1*.1;
+			p.alpha *= 1-special1*.1;
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			invoker.heat -= 0.004+0.0004*vel.length();
+			if ( invoker.heat > 0 )
+			{
+				let s = Spawn("SWWMSmoke",pos);
+				s.alpha *= heat;
+			}
+		}
+		Wait;
+	Death:
+		TNT1 A 0 A_EvisExplode();
+		XSEX ABCDEFGHIJKLMNOPQRS 2 Bright A_Subexpl();
+		Stop;
+	}
+}
+
+Class EvisceratorSubExpl : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 2.;
+		Alpha .6;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XSEX ABCDEFGHIJKLMNOPQRS 1 Bright;
+		Stop;
+	}
+}
+
+Class EvisceratorCasing : SWWMCasing
+{
+	Default
+	{
+		Mass 10;
+		BounceFactor 0.4;
+		WallBounceFactor 0.4;
+		BounceSound "eviscerator/casing";
+	}
+	States
+	{
+	Death:
+		#### # -1
+		{
+			pitch = RandomPick[Junk](-90,90);
+			angle = FRandom[Junk](0,360);
+			roll = 0;
+		}
+		Stop;
+	}
+}
+
 Class Eviscerator : SWWMWeapon
 {
+	bool isfiring;
 	// barrel is extended
 	bool extended;
 	// pending shell load
 	bool pendingload;
 	// countdown to loading new shell
 	int loadtics;
+
+	transient ui TextureID WeaponBox, AmmoIcon;
+	transient ui Font TewiFont;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/EvisceratorDisplay.png",TexMan.Type_Any);
+		if ( !AmmoIcon ) AmmoIcon = TexMan.CheckForTexture("graphics/HUD/EvisceratorShell.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Screen.DrawTexture(WeaponBox,false,bx-47,by-17,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		String astr = String.Format("%d",Ammo1.Amount);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-15-(TewiFont.StringWidth(astr)+1),by-16,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		bool noshell = pendingload||(isfiring&&!pendingload);
+		Screen.DrawTexture(AmmoIcon,false,bx-15,by-15,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,noshell?Color(128,0,0,0):Color(0,0,0,0));
+		Screen.DrawText(TewiFont,Font.CR_WHITE,bx-45,by-16,extended?"►":"",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		if ( (Ammo1.Amount > 0) || !pendingload ) return true;
+		return false;
+	}
+
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+		{
+			if ( (Ammo1.Amount > 0) || !pendingload ) return true;
+			return false;
+		}
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
 
 	override void DoEffect()
 	{
@@ -20,18 +544,145 @@ Class Eviscerator : SWWMWeapon
 		}
 		loadtics++;
 		if ( (loadtics == 9) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
+		{
 			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
+			if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
+				Ammo1.Amount = max(0,Ammo1.Amount-1);
+		}
 		if ( loadtics > 20 ) pendingload = false;
 	}
 
 	action void A_EvisceratorFire()
 	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.isfiring = true;
 		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(6,6,6,3,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.5);
+		A_ZoomFactor(.94,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		SWWMHandler.DoFlash(self,Color(64,255,224,96),3);
+		A_AlertMonsters();
+		A_Recoil(2.);
+		Vector3 x, y, z, x2, y2, z2, dir, origin;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMHandler.DoKnockback(self,-x,15000.);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-5*z);
+		for ( int i=0; i<40; i++ )
+		{
+			a = FRandom[Eviscerator](0,360);
+			s = FRandom[Eviscerator](0,invoker.extended?.06:.3);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			let p = Spawn("EvisceratorChunk",origin);
+			p.target = self;
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = asin(-dir.z);
+			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
+		}
+		for ( int i=0; i<4; i++ )
+		{
+			let s = Spawn("SWWMViewSmoke",origin);
+			SWWMViewSmoke(s).ofs = (10,3,-5);
+			s.target = self;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.alpha *= .2;
+		}
+		for ( int i=0; i<8; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.special1 = 1;
+			s.scale *= .9;
+			s.alpha *= .3;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.vel += vel*.5+x*FRandom[Eviscerator](3.,5.)+y*FRandom[Eviscerator](-1,1)+z*FRandom[Eviscerator](-1,1);
+		}
+		for ( int i=0; i<9; i++ )
+		{
+			let s = Spawn("SWWMSpark",origin);
+			s.scale *= .3;
+			s.alpha *= .4;
+			s.vel += vel*.5+x*FRandom[Eviscerator](4.,8.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
 	}
 
 	action void A_EvisceratorAltFire()
 	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.isfiring = true;
 		A_StartSound("eviscerator/altfire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(4,4,4,5,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.9);
+		A_ZoomFactor(.91,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		SWWMHandler.DoFlash(self,Color(16,255,224,96),3);
+		A_AlertMonsters();
+		A_Recoil(2.2);
+		Vector3 x, y, z, x2, y2, z2, dir, origin;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMHandler.DoKnockback(self,-x,22000.);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-5*z);
+		a = FRandom[Eviscerator](0,360);
+		s = FRandom[Eviscerator](0,invoker.extended?.003:.02);
+		dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("EvisceratorProj",origin);
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		for ( int i=0; i<4; i++ )
+		{
+			let s = Spawn("SWWMViewSmoke",origin);
+			SWWMViewSmoke(s).ofs = (10,3,-5);
+			s.target = self;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.alpha *= .1;
+		}
+		for ( int i=0; i<6; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.special1 = 1;
+			s.scale *= .9;
+			s.alpha *= .2;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.vel += vel*.5+x*FRandom[Eviscerator](3.,5.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
+		for ( int i=0; i<5; i++ )
+		{
+			let s = Spawn("SWWMSpark",origin);
+			s.scale *= .3;
+			s.alpha *= .4;
+			s.vel += vel*.5+x*FRandom[Eviscerator](4.,8.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
+	}
+
+	action void A_EvisceratorEject()
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*10-y*10-z*10);
+		let c = Spawn("EvisceratorCasing",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)-y*FRandom[Junk](3,6)-(0,0,FRandom[Junk](4,6));
+		c.vel += vel*.5;
+	}
+
+	action void A_EvisceratorCasingSmoke( Vector3 ofs )
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*ofs.x+y*ofs.y+z*ofs.z);
+		let s = Spawn("SWWMViewSmoke",origin);
+		SWWMViewSmoke(s).ofs = (ofs.x,ofs.y,ofs.z);
+		s.target = self;
+		s.alpha *= .4;
 	}
 
 	Default
@@ -68,6 +719,7 @@ Class Eviscerator : SWWMWeapon
 	Select:
 		XZW2 H 2
 		{
+			invoker.isfiring = false;
 			A_FullRaise();
 			return A_JumpIf(invoker.extended,"SelectExt");
 		}
@@ -79,16 +731,20 @@ Class Eviscerator : SWWMWeapon
 	Ready:
 		XZW2 A 1
 		{
+			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			A_CheckReload();
 			A_WeaponReady(flg);
 		}
 		Wait;
 	ReadyExt:
 		XZW4 Z 1
 		{
+			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			A_CheckReload();
 			A_WeaponReady(flg);
 		}
 		Wait;
@@ -98,34 +754,57 @@ Class Eviscerator : SWWMWeapon
 			A_EvisceratorFire();
 			return A_JumpIf(invoker.extended,"FireExt");
 		}
-		XZW3 EFGHIJKLMNOPQR 1;
+		XZW3 EFGH 1;
+		XZW3 I 1 A_Recoil(-.8);
+		XZW3 JKLMNOPQR 1;
 		Goto Eject;
 	FireExt:
 		XZW4 Z 1;
-		XZW6 DEFGHIJKLMNOPQ 1;
+		XZW6 DEFG 1;
+		XZW6 H 1 A_Recoil(-.8);
+		XZW6 IJKLMNOPQ 1;
 		Goto EjectExt;
 	Eject:
 		XZW2 A 4;
 		XZW3 STUV 2;
 		XZW3 W 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW3 XYZ 1;
+		XZW3 X 1 A_Overlay(-9999,"EjectSmoke");
+		XZW3 YZ 1;
 		XZW4 AB 1;
-		XZW4 C 1 A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 C 1
+		{
+			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.pendingload = true;
+		}
 		XZW4 DEF 1;
 		XZW4 GHI 2;
-		XZW2 A 1 { invoker.pendingload = true; }
 		Goto Ready;
 	EjectExt:
 		XZW4 Z 4;
 		XZW6 RSTU 2;
 		XZW6 V 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW6 WXYZ 1;
+		XZW6 W 1 A_Overlay(-9999,"EjectSmoke");
+		XZW6 XYZ 1;
 		XZW7 A 1;
-		XZW7 B 1 A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 B 1
+		{
+			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.pendingload = true;
+		}
 		XZW7 CDE 1;
 		XZW7 FGH 2;
-		XZW4 Z 1 { invoker.pendingload = true; }
 		Goto ReadyExt;
+	EjectSmoke:
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,2,-3));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-1,-2));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-3,-1.5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-5,-2));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-7,-3.5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-8.5,-5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-10,-9));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-11,-14));
+		TNT1 A 1 A_EvisceratorEject();
+		Stop;
 	AltFire:
 		XZW2 A 2
 		{
@@ -135,8 +814,7 @@ Class Eviscerator : SWWMWeapon
 		XZW2 STUVW 1;
 		XZW2 XYZ 2;
 		XZW3 ABCD 2;
-		XZW2 A 6;
-		XZW2 A 2 { invoker.pendingload = true; }
+		XZW2 A 1 { invoker.pendingload = true; }
 		Goto Ready;
 	AltFireExt:
 		XZW4 Z 2;
@@ -144,8 +822,7 @@ Class Eviscerator : SWWMWeapon
 		XZW5 WXY 2;
 		XZW5 Z 2;
 		XZW6 ABC 2;
-		XZW4 Z 6;
-		XZW4 Z 2 { invoker.pendingload = true; }
+		XZW4 Z 1 { invoker.pendingload = true; }
 		Goto Ready;
 	Reload:
 		XZW2 A 2
@@ -221,5 +898,24 @@ Class Eviscerator : SWWMWeapon
 		XZWA Z 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWB ABC 2;
 		Goto ReadyExt;
+	Flash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](0,3);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
+	AltFlash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](4,7);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+			l.args[3] -= 20;
+		}
+		Stop;
 	}
 }

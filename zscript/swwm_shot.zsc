@@ -52,6 +52,7 @@ Class SWWMDamageAccumulator : Thinker
 			else type = 'Extreme';
 		}
 		// make sure accumulation isn't reentrant
+		if ( inflictor && (inflictor is 'EvisceratorChunk') ) inflictor.bAMBUSH = true;
 		// 何？
 		for ( int i=0; i<amounts.Size(); i++ )
 		{
@@ -59,7 +60,11 @@ Class SWWMDamageAccumulator : Thinker
 			victim.DamageMobj(inflictor,source,amounts[i],type,DMG_THRUSTLESS);
 		}
 		// clean up
-		if ( inflictor ) inflictor.bEXTREMEDEATH = false;
+		if ( inflictor )
+		{
+			if ( inflictor is 'EvisceratorChunk' ) inflictor.bAMBUSH = false;
+			inflictor.bEXTREMEDEATH = false;
+		}
 		Destroy();
 	}
 
@@ -1296,6 +1301,7 @@ Class TheBall : Actor
 		+BOUNCEONFLOORS;
 		+BOUNCEONCEILINGS;
 		+USEBOUNCESTATE;
+		+DONTBOUNCEONSKY;
 		+MISSILE;
 		+NODAMAGETHRUST;
 		+NOTELEPORT;

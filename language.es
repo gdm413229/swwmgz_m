@@ -45,6 +45,7 @@ SWWM_MCREDS = "Créditos de SWWM GZ";
 SWWM_CLEAD = "Desarrollo Principal:";
 SWWM_CASSETS = "Assets Adicionales:";
 SWWM_CMUSIC = "Música Usada:";
+SWWM_CFANART = "Fanart de Intermisión:";
 SWWM_CPATRON = "Mecenas de Patreon:";
 SWWM_CTHANK = "Agradecimientos Especiales:";
 SWWM_CDRAGON2 = "(Por ser un buen dragón mascota)";
@@ -74,6 +75,7 @@ SWWM_OTHERVOICE = "Voz en Cooperativo";
 SWWM_REVIVE = "Sistema de Reinicio de Emergencia";
 SWWM_REVIVECOOLDOWN = "Tiempo de recarga de Reinicio";
 SWWM_UNLIMITED = "Ilimitado";
+SWWM_INTERTYPE = "Arte de Intermisión";
 TOOLTIP_SWWM_VOICETYPE = "Selecciona el pack de voz para el jugador.";
 TOOLTIP_SWWM_MUTEVOICE = "Controla lo que se mutea, si prefieres tener un protagonista más silencioso.";
 TOOLTIP_SWWM_FLASHSTRENGTH = "Los destellos en pantalla suelen ocurrir al disparar algunas armas, puedes reducirlo si este tipo de effectos te causan malestar.";
@@ -102,6 +104,7 @@ TOOLTIP_SWWM_SHADERS = "Usa shaders de postprocesado para cosas como powerups y 
 TOOLTIP_SWWM_OTHERVOICE = "Te permite oír los comentarios de voz de otros jugadores, si estás lo suficientemente cerca.";
 TOOLTIP_SWWM_REVIVE = "Permite al jugador volver a levantarse tras morir pulsando Fuego. Tiene un cooldown configurable.";
 TOOLTIP_SWWM_REVIVECOOLDOWN = "Tiempo en segundos tras reiniciar, durante el cual si mueres otra vez, no puedes volver a levantarte. Pon a 0 para permitir reinicios ilimitados.";
+TOOLTIP_SWWM_INTERTYPE = "Elige qué mostrar de fondo durante intermisiones.";
 // knowledge base
 SWWM_COMINGSOON = "(próximamente)";
 SWWM_MISSTAB = "Misión";
@@ -1866,6 +1869,9 @@ SWWM_INTERTIP19 = "Con la combinación adecuada de esprintar, impulsar, y saltar
 SWWM_INTERTIP20 = "En multijugador, cualquier llave que recojas será compartida inmediatemente con otros jugadores.";
 SWWM_INTERTIP21 = "¡Aumenta tu puntuación! Cuantos más enemigos elimines, mejor. No te olvides de hacer uso de esos puntos en la tienda in-game cuando puedas.";
 SWWM_INTERTIP22 = "Aunque las cajas afortunadas no suenen a muy buena idea, hay muchas probabilidades de que te toquen items muy valiosos a un coste mucho más reducido.";
+// intermission fanart
+SWWM_INTERART = "Arte: ";
+// intermission 4komas (TBD)
 
 /* SUBTITLES */
 // voice name

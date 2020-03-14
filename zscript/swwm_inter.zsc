@@ -1,13 +1,33 @@
 Mixin Class SWWMStatScreen
 {
-	TextureID bgtex;
+	transient TextureID bgtex, arttex;
+	transient Font TewiFont, MPlusFont;
+	int whichart;
+	transient CVar intertype, lang;
+	double hs;
+	Vector2 ss, origin;
 
+	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	Font LangFont( Font req )
+	{
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		return req;
+	}
 	override void StartMusic()
 	{
 		S_ChangeMusic("music/DRAGONY.XM");
 	}
 	private void drawSWWMBg()
 	{
+		if ( !intertype ) intertype = CVar.GetCVar('swwm_intertype',players[consoleplayer]);
+		if ( !whichart )
+		{
+			int no = 0;
+			if ( intertype.GetInt() == 1 ) no = StringTable.Localize("$SWWM_NFANART").ToInt();
+			//else if ( intertype.GetInt() == 2 ) no = StringTable.Localize("$SWWM_N4KOMA").ToInt();
+			whichart = Random[InterArt](1,no);
+		}
 		if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
 		double ar = Screen.GetAspectRatio();
 		Vector2 tsize = TexMan.GetScaledSize(bgtex);
@@ -17,7 +37,29 @@ Mixin Class SWWMStatScreen
 		else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
 		else vsize = tsize;
 		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
-		// TODO background pics (fanart, 4komas, etc.)
+		// background pics (fanart, 4komas)
+		if ( intertype.GetInt() == 1 )
+		{
+			String artstr = StringTable.Localize(String.Format("$SWWM_FANART%d",whichart));
+			int semic = artstr.IndexOf(";");
+			if ( !arttex ) arttex = TexMan.CheckForTexture(String.Format("graphics/Fanart/%s",artstr.Left(semic)),TexMan.Type_MiscPatch);
+			tsize = TexMan.GetScaledSize(arttex);
+			sar = tsize.x/tsize.y;
+			if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+			else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+			else vsize = tsize;
+			Screen.DrawTexture(arttex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+			String bstr = String.Format("\cx%s\c- %s",StringTable.Localize("$SWWM_FANART"),artstr.Mid(semic+1));
+			Font fnt = LangFont(TewiFont);
+			int len = fnt.StringWidth(bstr);
+			int bw = int((len+8)*hs), bh = int((fnt.GetHeight()+4)*hs);
+			Screen.Dim("Black",.8,Screen.GetWidth()-bw,Screen.GetHeight()-bh,bw,bh);
+			Screen.DrawText(fnt,Font.CR_GOLD,ss.x-(len+4),ss.y-(fnt.GetHeight()+2),bstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+		/*else if ( intertype.GetInt() == 2 )
+		{
+			// TBD when there's art
+		}*/
 		// TODO intermission tips at the bottom
 	}
 	override void drawShowNextLoc( void )
@@ -27,6 +69,11 @@ Mixin Class SWWMStatScreen
 	}
 	override void Drawer( void )
 	{
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
+		hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		origin = (ss.x-640,ss.y-400)/2.;
 		switch ( CurState )
 		{
 		case StatCount:

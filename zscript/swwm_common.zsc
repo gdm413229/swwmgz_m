@@ -1392,6 +1392,7 @@ Class SWWMHandler : EventHandler
 	int lastkill[MAXPLAYERS];
 	int multilevel[MAXPLAYERS];
 	int lastitemcount[MAXPLAYERS];
+	bool allkills, allitems, allsecrets;
 
 	transient CVar mutevoice;
 	transient ui CVar useshaders;
@@ -1725,9 +1726,10 @@ Class SWWMHandler : EventHandler
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
 				int score = 25*(players[i].itemcount-lastitemcount[i]);
-				if ( level.total_items == level.found_items )
+				if ( (level.total_items == level.found_items) && !allitems )
 				{
-					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),2000);
+					allitems = true;
+					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),2500);
 					score += 2475;
 				}
 				SWWMCredits.Give(players[i],score);
@@ -1914,8 +1916,9 @@ Class SWWMHandler : EventHandler
 			SWWMCredits.Give(e.DamageSource.player,score);
 			if ( e.DamageSource.player == players[consoleplayer] )
 				SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
-			if ( level.killed_monsters+1 == level.total_monsters )
+			if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
 			{
+				allkills = true;
 				SWWMCredits.Give(e.DamageSource.player,5000);
 				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),5000);
 			}

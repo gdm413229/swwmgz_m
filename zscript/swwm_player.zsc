@@ -1082,8 +1082,10 @@ Class Demolitionist : PlayerPawn
 		if ( !player ) return false;
 		int score = 500;
 		// last secret (this is called before counting it up, so have to subtract)
-		if ( level.found_secrets == level.total_secrets-1 )
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
 		{
+			if ( hnd ) hnd.allsecrets = true;
 			score = 5000;
 			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
 		}

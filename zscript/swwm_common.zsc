@@ -1394,8 +1394,25 @@ Class SWWMHandler : EventHandler
 	int lastitemcount[MAXPLAYERS];
 	bool allkills, allitems, allsecrets;
 
+	// heal/armor flashes need to be handled here so they don't stack
+	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
+
 	transient CVar mutevoice;
 	transient ui CVar useshaders;
+
+	static void HealthFlash( int p )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || (p == -1) ) return;
+		hnd.hflash[p] = gametic+5;
+	}
+
+	static void ArmorFlash( int p )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || (p == -1) ) return;
+		hnd.aflash[p] = gametic+5;
+	}
 
 	static int AddOneliner( String type, int level, int delay = 5 )
 	{
@@ -2369,6 +2386,21 @@ Class SWWMHandler : EventHandler
 	// stuff for hud
 	override void RenderUnderlay( RenderEvent e )
 	{
+		// armor/health flashes
+		int camplayer = players[consoleplayer].Camera.PlayerNumber();
+		if ( camplayer != -1 )
+		{
+			if ( gametic < hflash[camplayer] )
+			{
+				double fstr = (hflash[camplayer]-(gametic+e.FracTic))/5.;
+				Screen.Dim(Color(64,128,255),.1875*fstr,0,0,Screen.GetWidth(),Screen.GetHeight());
+			}
+			if ( gametic < aflash[camplayer] )
+			{
+				double fstr = (aflash[camplayer]-(gametic+e.FracTic))/5.;
+				Screen.Dim(Color(96,255,64),.1875*fstr,0,0,Screen.GetWidth(),Screen.GetHeight());
+			}
+		}
 		if ( !statusbar || !(statusbar is 'SWWMStatusBar') ) return;
 		SWWMStatusBar(statusbar).viewpos = e.viewpos;
 		SWWMStatusBar(statusbar).viewrot = (e.viewangle,e.viewpitch,e.viewroll);

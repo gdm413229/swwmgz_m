@@ -112,7 +112,7 @@ Class SWWMSpareArmor : Inventory abstract
 		{
 			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
-			SWWMHandler.DoFlash(Owner,Color(48,96,255,64),5);
+			SWWMHandler.ArmorFlash(Owner.PlayerNumber());
 			return true;
 		}
 		return false;
@@ -149,7 +149,7 @@ Class SWWMHealth : Inventory abstract
 		if ( pickup && !shouldautouse ) return false;
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
-		SWWMHandler.DoFlash(Owner,Color(48,64,128,255),5);
+		SWWMHandler.HealthFlash(Owner.PlayerNumber());
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 		return true;

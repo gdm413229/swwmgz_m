@@ -391,8 +391,12 @@ Class Demolitionist : PlayerPawn
 		player.WeaponState |= WF_WEAPONBOBBING;	// always bob
 		Vector2 cur = Super.BobWeapon(ticfrac);
 		if ( !oldbob ) player.WeaponState &= ~WF_WEAPONBOBBING;
-		double diffang = (oldangle*(1.-ticfrac)+angle*ticfrac)-(oldlagangle*(1.-ticfrac)+lagangle*ticfrac);
-		double diffpitch = (oldpitch*(1.-ticfrac)+pitch*ticfrac)-(oldlagpitch*(1.-ticfrac)+lagpitch*ticfrac);
+		double fangle = oldangle*(1.-ticfrac)+angle*ticfrac;
+		double fpitch = (oldpitch*(1.-ticfrac)+pitch*ticfrac);
+		double flagangle = (oldlagangle*(1.-ticfrac)+lagangle*ticfrac);
+		double flagpitch = (oldlagpitch*(1.-ticfrac)+lagpitch*ticfrac);
+		double diffang = fangle-flagangle;
+		double diffpitch = fpitch-flagpitch;
 		if ( abs(diffang) > 1. )
 		{
 			int sgn = (diffang>0)?1:-1;
@@ -405,9 +409,9 @@ Class Demolitionist : PlayerPawn
 		}
 		cur.x += diffang;
 		cur.y -= diffpitch;
-		Vector3 diffvel = oldlagvel*(1.-ticfrac)+lagvel*ticfrac;
-		double diffx = diffvel dot (cos(angle+90),sin(angle+90),0);
-		double diffy = diffvel dot (0,0,1);
+		Vector3 flagvel = oldlagvel*(1.-ticfrac)+lagvel*ticfrac;
+		double diffx = flagvel dot (cos(flagangle+90),sin(flagangle+90),0);
+		double diffy = flagvel dot (0,0,1);
 		if ( abs(diffx) > 1. )
 		{
 			int sgn = (diffx>0)?1:-1;
@@ -427,17 +431,17 @@ Class Demolitionist : PlayerPawn
 		oldangle = angle;
 		oldpitch = pitch;
 		Super.PlayerThink();
+		oldlagangle = lagangle;
+		oldlagpitch = lagpitch;
+		lagangle = lagangle*.8+angle*.2;
+		lagpitch = lagpitch*.8+pitch*.2;
 	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( !player ) return;
-		oldlagangle = lagangle;
-		oldlagpitch = lagpitch;
-		oldlagready = lagready;
 		oldlagvel = lagvel;
-		lagangle = lagangle*.8+angle*.2;
-		lagpitch = lagpitch*.8+pitch*.2;
+		oldlagready = lagready;
 		if ( player.weaponstate&WF_WEAPONBOBBING ) lagready = lagready*.9+.1;
 		else lagready = lagready*.4;
 		lagvel = lagvel*.8+vel*.2;

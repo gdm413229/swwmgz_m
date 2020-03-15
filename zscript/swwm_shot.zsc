@@ -2517,6 +2517,8 @@ Class Spreadgun : SWWMWeapon
 				flg |= WRF_ALLOWRELOAD;
 			else flg |= WRF_NOPRIMARY;
 			A_WeaponReady(flg);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;
 	Fire:

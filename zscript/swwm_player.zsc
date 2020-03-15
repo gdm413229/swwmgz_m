@@ -25,6 +25,15 @@ Class Demolitionist : PlayerPawn
 
 	double guideangle, guidepitch, guideroll;
 
+	// for weapon bobbing stuff
+	bool bumpdown;
+	double bumpvelz;
+	double oldangle, oldpitch;
+	double oldlagangle, oldlagpitch, oldlagready;
+	Vector3 oldlagvel;
+	double lagangle, lagpitch, lagready;
+	Vector3 lagvel;
+
 	enum EUnderType
 	{
 		UNDER_NONE,
@@ -376,10 +385,62 @@ Class Demolitionist : PlayerPawn
 			A_SoundVolume(CHAN_AMBEXTRA,(players[consoleplayer].Camera==self)?1.:0.);
 		lastunder = curunder;
 	}
+	override Vector2 BobWeapon( double ticfrac )
+	{
+		bool oldbob = !!(player.WeaponState&WF_WEAPONBOBBING);
+		player.WeaponState |= WF_WEAPONBOBBING;	// always bob
+		Vector2 cur = Super.BobWeapon(ticfrac);
+		if ( !oldbob ) player.WeaponState &= ~WF_WEAPONBOBBING;
+		double diffang = (oldangle*(1.-ticfrac)+angle*ticfrac)-(oldlagangle*(1.-ticfrac)+lagangle*ticfrac);
+		double diffpitch = (oldpitch*(1.-ticfrac)+pitch*ticfrac)-(oldlagpitch*(1.-ticfrac)+lagpitch*ticfrac);
+		if ( abs(diffang) > 1. )
+		{
+			int sgn = (diffang>0)?1:-1;
+			diffang = abs(diffang)**.7*sgn;
+		}
+		if ( abs(diffpitch) > 1. )
+		{
+			int sgn = (diffpitch>0)?1:-1;
+			diffpitch = abs(diffpitch)**.7*sgn;
+		}
+		cur.x += diffang;
+		cur.y -= diffpitch;
+		Vector3 diffvel = oldlagvel*(1.-ticfrac)+lagvel*ticfrac;
+		double diffx = diffvel dot (cos(angle+90),sin(angle+90),0);
+		double diffy = diffvel dot (0,0,1);
+		if ( abs(diffx) > 1. )
+		{
+			int sgn = (diffx>0)?1:-1;
+			diffx = abs(diffx)**.5*sgn;
+		}
+		if ( abs(diffy) > 1. )
+		{
+			int sgn = (diffy>0)?1:-1;
+			diffy = abs(diffy)**.5*sgn;
+		}
+		cur.x += diffx*4.;
+		cur.y += diffy*4.;
+		return cur*(oldlagready*(1.-ticfrac)+lagready*ticfrac);
+	}
+	override void PlayerThink()
+	{
+		oldangle = angle;
+		oldpitch = pitch;
+		Super.PlayerThink();
+	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( !player ) return;
+		oldlagangle = lagangle;
+		oldlagpitch = lagpitch;
+		oldlagready = lagready;
+		oldlagvel = lagvel;
+		lagangle = lagangle*.8+angle*.2;
+		lagpitch = lagpitch*.8+pitch*.2;
+		if ( player.weaponstate&WF_WEAPONBOBBING ) lagready = lagready*.9+.1;
+		else lagready = lagready*.4;
+		lagvel = lagvel*.8+vel*.2;
 		double traveldist = level.Vec3Diff(prev,pos).length();
 		if ( waterlevel < 2 )
 		{
@@ -401,6 +462,9 @@ Class Demolitionist : PlayerPawn
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
 		{
+			// bump down weapon
+			bumpdown = true;
+			bumpvelz = -lastvelz;
 			if ( lastvelz < -30 )
 			{
 				let s = Spawn("DemolitionistShockwave",pos);
@@ -422,6 +486,12 @@ Class Demolitionist : PlayerPawn
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			if ( lastvelz < -1 )
 				A_Footstep(0,true,clamp(-lastvelz*0.05,0.0,1.0));
+		}
+		if ( bumpdown )
+		{
+			lagvel.z += bumpvelz*.2;
+			bumpvelz *= .8;
+			if ( bumpvelz < double.epsilon ) bumpdown = false;
 		}
 		lastground = player.onground;
 		lastvelz = prevvelz;

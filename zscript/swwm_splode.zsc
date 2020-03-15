@@ -136,7 +136,7 @@ Class ExplodiumMagProj : Actor
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters();
 		SWWMHandler.DoBlast(self,120+30*special1,80000+8000*special1);
-		A_Explode(30+20*special1,120+30*special1);
+		A_Explode(20+15*special1,120+30*special1);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -229,7 +229,7 @@ Class ExplodiumBulletImpact : Actor
 		Super.PostBeginPlay();
 		A_AlertMonsters();
 		SWWMHandler.DoBlast(self,120,80000);
-		A_Explode(50,120);
+		A_Explode(25,120);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
 		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);
@@ -315,7 +315,7 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 40;
+			int dmg = 25;
 			SWWMHandler.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )

@@ -661,12 +661,6 @@ Class SWWMWeapon : Weapon abstract
 		if ( (AmmoGive2 <= 0) && (default.AmmoGive2 > 0) )
 			AmmoGive2 = 1;
 	}
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
-			Owner.player.WeaponState |= WF_WEAPONBOBBING;	// always bob
-	}
 	Default
 	{
 		Weapon.BobStyle "Alpha";

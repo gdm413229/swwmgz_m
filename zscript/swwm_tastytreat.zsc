@@ -974,6 +974,7 @@ Class CandyGun : SWWMWeapon
 		Weapon.AmmoType2 "CandyGunSpares";
 		Weapon.AmmoGive1 1;
 		Weapon.AmmoGive2 1;
+		Weapon.AmmoUse2 0;
 		CandyGun.ClipCount 7;
 		+SWWMWEAPON.NOFIRSTGIVE;
 	}
@@ -989,7 +990,6 @@ Class CandyGun : SWWMWeapon
 	Ready:
 		XZW2 A 1
 		{
-			invoker.CheckAmmo(EitherFire,true);
 			if ( (invoker.clipcount <= 0) && !invoker.chambered && (invoker.Ammo1.Amount > 0) ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
 			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
 			else
@@ -998,6 +998,8 @@ Class CandyGun : SWWMWeapon
 				if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) || (invoker.Ammo1.Amount > 0) || invoker.chambered ) flg |= WRF_ALLOWRELOAD;
 				if ( (invoker.Ammo1.Amount <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) ) flg |= WRF_NOSECONDARY;
 				A_WeaponReady(flg);
+				if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+					invoker.CheckAmmo(EitherFire,true);
 			}
 		}
 		Wait;

@@ -390,6 +390,7 @@ Class EvisceratorProj : Actor
 			s.vel = pvel;
 			s.scale *= FRandom[Eviscerator](0.9,1.8);
 		}
+		Spawn("EvisceratorRing",pos);
 	}
 	action void A_SubExpl()
 	{
@@ -470,6 +471,27 @@ Class EvisceratorSubExpl : Actor
 	}
 }
 
+Class EvisceratorRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 4.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XRG3 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.01);
+		Stop;
+	}
+}
+
 Class EvisceratorCasing : SWWMCasing
 {
 	Default
@@ -546,10 +568,13 @@ Class Eviscerator : SWWMWeapon
 		if ( (loadtics == 9) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
 		{
 			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		if ( loadtics > 20 )
+		{
+			pendingload = false;
 			if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
 				Ammo1.Amount = max(0,Ammo1.Amount-1);
 		}
-		if ( loadtics > 20 ) pendingload = false;
 	}
 
 	action void A_EvisceratorFire()
@@ -734,8 +759,9 @@ Class Eviscerator : SWWMWeapon
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
-			A_CheckReload();
 			A_WeaponReady(flg);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;
 	ReadyExt:
@@ -744,8 +770,9 @@ Class Eviscerator : SWWMWeapon
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
-			A_CheckReload();
 			A_WeaponReady(flg);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;
 	Fire:

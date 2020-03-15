@@ -433,38 +433,82 @@ the old mechanical demigod Maester Mekes.
 ## A loose timeline of events
 
 This is in no way accurate, and it's hard to make much sense of all of it since
-SWWM GZ effectively blends together the Doom and Unreal universes.
+SWWM GZ effectively blends Doom with the UnSX universe (which was itself
+already blended with Unreal). Note that there are BIG SPOILERS for some stuff
+in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 
-- ????: Twenty years after the fall of the Order of the One God, a message is
-  received from an old ruined complex beyond the seas. A declaration of war
-  from the "Church of the Dreadful Lady". A single, well trained mercenary puts
-  an end to their plans, but the true mastermind behind it all manages to flee.
+- 1992: Waratsuki Emimaru is born.
+- August of 2021: Hollow begins.
+- September of 2021: Hollow ends. The "Convergence Event" happens, the real
+  world is destroyed. Waratsuki Emimaru becomes The Grinning Man.
 
-- ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
-  associates, stealing the Heart of D'Sparil and putting an end to the plans
-  for resurrecting him. The mansion is sold off, most of its valuables,
-  including the corporeal remains of the serpent rider, passed around among
-  several parties, until being eventually acquired by the "Cult of the
-  Viridescent Lord".
+...
 
-- ????: The three heroes who defeated Korax are called into the Winter Nexus,
-  they gather the four elemental gems and defeat the "Viridescent Lord". A
-  mysterious shadowy figure revives the corpse of D'Sparil, they disappear.
-
-- ~130 BC: The town of Kereshnovka is founded by an alien race known as the
-  Qurensniv.
-- ~149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
+- Iteration 0: The void forms from within the bubble of empty space-time left
+  by the real world's destruction.
+- Iteration 1: Azadeku, the first Administrator, is spawned.
+- Iteration ~3.56542e208: Azadeku is erased by a Chaos Walker known as The
+  Grinning Man, who takes over the world they created. Project .Blank begins.
+- ~2730000 BC: The mad dictator god Nedoshiaan is assassinated.
+- 50803 BC: Administrator Noskas Kurenai is spawned from the void, creates the
+  world of Novoskhana.
+- 45306 BC: The Eternal Undying Empire of Novoskhana is founded.
+- 13903 BC: The Kurenai Kingdom is founded.
+- 13675 BC: After a long absence, Father Nostros returns to the Kurenai Kingdom
+  followed by an army of demonic creatures, he takes over and forces everyone
+  else out. The old Kurenai Kingdom becomes what is now known as Hell.
+- 4673 BC: Prince Admun is born.
+- 4648 BC: Prince Admun's parents are assassinated, he is appointed as King.
+- 4607 BC: Seras Tonkebis, Admun's personal advisor, executes his plan to take
+  the throne. Admun is forced into exile on the remote Egyptian colony of the
+  planet Earth, and is "cursed to roam the land eternally, unable to ever die".
+- 1309 BC: After the defeat of Hektor Kuratagon and his Votrexxian armies on
+  Hebeku, the Nukuri discover a portal leading to a yet unexplored solar
+  system, and decide to investigate. They come across a planet brimming with
+  life, inhabited by a sapient, antropomorphic species, Humans. After settling
+  on Earth's moon and forming a peaceful alliance with the Lunarian natives,
+  they begin construction of the Luna Research Institute.
+- 244 BC: Reubens Cyrus Karnanaiahmani is born.
+- 130 BC: Having escaped from their homeworld when king Marc P. Karnanaiahmani
+  went mad and began executing anyone he suspected of treason, the Qurensniv
+  people arrive on Earth, a planet that their Nukuri allies were supervising,
+  and found the town of Kereshnovka.
+- 149: The mad druid Daos Khomax summons a demon called Manakei, who proceeds
   to burn down Kereshnovka. A group of warriors manage to defeat him. Weakened,
   he retreats to the ghoul-infested forest, never to be seen again.
+- 808: Admun settles on an european town as a blacksmith, under the alias of
+  "James the Blacksmith".
+- 1011: Admun is imprisoned for a shoddy armor fitting job that caused a young
+  king to have his helmet permanently stuck to his head.
+- 1097: Admun is freed, migrates to Scotland. Adopts his current name of
+  "James Admun Tachmek-Smith".
+- 1308: The University of Nos-Kora is founded.
+- 1744: Nekuratek is founded.
+- 1870: Zanata Nekuraku I dies on a tragic accident while testing the first
+  Nokorokinylum fusion reactor. Her husband commits suicide not long after.
+- 1887: Ashley Knox is born.
+- 1894: Daniel Ischer is born.
+- 1907: Nana Miyamoto is born.
+- 1924: Blackmann Arms is founded.
 - 1933: The Ischer family migrates to the US.
+- 1956: Ryuji Miyamoto is born.
+- 1973: Nana and Ryuji get married.
+- 1976: Häzel Hoodth is born.
 - 1977: A member of Hell's royal family travels to Kereshnovka in order to
   rescue Manakei, who happens to be the heir to the throne. She fails to find
   him.
+- 1980: Janus Locke Hoodth is born.
+- 1985: Taro Miyamoto is born.
 - 1987: Dr. Häzel Hoodth dies tragically, becoming a ghoul of Kereshnovka.
+- 1992: Misa Unissix is born.
+- 1993: Saya Miyamoto is born.
 - 2001: The Union Aerospace Armed Forces is formed.
+- 2003: Onoke Mansion Murders.
 - 2004: The Imanaki Research Foundation builds its headquarters in Kereshnovka.
 - 2005: The town of Soundless Mound becomes shrouded in thick fog for five
   whole days. Several reports of strange happenings are made.
+- 2006: Ashley's band, "The Black Rat's Coven" is formed. Its initial members
+  are Ashley, Maruku Sarahabinaku, Py Kisun and William Dusk.
 - 2007: The "Ghoul hunt" begins after a high-ranking UAAF official is murdered
   by the creatures during a business visit to the Imanaki HQ.
 - 2008: At the peak of the Ghoul hunt, an envoy of the Anarukon people is
@@ -475,25 +519,41 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   survive and put an end to the incident after traveling back through the gate
   and coming into contact with the Anderken royal family. Some time later,
   UAAF soldiers scour the remains of the facility, retrieving most of the
-  foundation's research documents.
+  foundation's research documents. Yui Miyamoto is born.
 - 2010: Akari Labs is founded.
 - 2012: Munch Innovations is founded.
+- 2013: Zanaveth II transfers to the Luna Research Institute, working as
+  head of research Nikita Kunau's assistant.
 - 2014: Tach-Engine Technologies is founded.
 - 2015: The UAAF rebrands itself as the UAC, having found quite a lot of
   interest in what they recovered from Imanaki.
-- 2018: Second major incident in the town of Kereshnovka. A rogue AI known as
-  SUSAN surfaces on the northern seas, assumes control of Russia's missile
-  systems.
+- 2017: Saya creates the first Maidbot.
+- 2016: Zanaveth II and Misa Unissix get married.
+- 2018: Empty Episode One. Second major incident in the town of Kereshnovka. A
+  rogue AI known as SUSAN surfaces on the northern seas, assumes control of
+  Russia's missile systems.
 - 2019: Samuel Hayden is born.
 - 2020: A group of hackers manage to temporarily take over SUSAN, use its
   advanced computing power to run thirty parallel instances of Crysis and a
-  500-player Minecraft server. This lasts for several months.
+  500-player Minecraft server. This lasts for several months, allowing things
+  to mostly return to normal for a while, including the Tokyo Olympics.
+  Following a concert of Ashley's band, she meets Yui Miyamoto and they start
+  dating. Not long after, they get married.
 - 2021: The "Luna Event" happens. The first contact between humans and a
   non-hostile alien race, the Nukuri, who had been observing our race for
   centuries from a hidden research facility on the Moon. Following the event,
   Nukuri forces deployed to Earth successfully neutralize SUSAN.
-- 2023: The two Koreas re-unify.
+- 2022: Scotland becomes independent.
+- 2023: The two Koreas re-unify. Following years of negotiation, Galicia
+  becomes part of Portugal. Ana Blanco becomes the first human woman to marry a
+  Nukuri.
+- 2024: Zanaveth II arrives on Earth, befriends Saya. With her help, Saya's
+  Maidbot is migrated to the Nekuronbot AI framework, further enhancing her
+  personality.
 - 2025: First expedition to Mars, led by the UAC. Scotland becomes independent.
+- 2027: William Dusk leaves Ashley's band, but not before hurting her deeply by
+  escaping with her granddaughter Lyra. He is replaced as drummer by the
+  goddess Mykka.
 - 2029: Forx Aeronautics is founded, singlehandedly "fixes the economy" of the
   UK.
 - 2032: Joint expedition with the Nukuri to Sedna, revealing a gateway that
@@ -501,9 +561,13 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   between two solar systems.
 - 2038: The 32-bit UNIX time rollover happens without many notable incidents.
 - 2040: Symnatek is founded.
+- 2042: Zanaveth III is born.
+- 2044: The Rust Empire is founded.
 - 2045: The ruins of a Decade Mechanics facility are found in Sunkaeze.
 - 2049: The clearly senile Dr. Locke attempts to take over the world.
   Surrenders a couple days later during the counter-attack.
+- 2054: Ryuji Miyamoto passes away.
+- 2066: Elena "Ellen" Yanikov XVI is born.
 - 2068: The Nukuri go through their seventh world war in their home planet.
 - 2073: World War 3 starts thanks to a very negatively received post on social
   media from the president of the US regarding the Nukuri.
@@ -516,24 +580,33 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   it is already too late. World War 3 ends as the United States are almost
   literally dissolved by an orbital strike. In the aftermath, the Nukuri
   abandon Earth, never to come back.
+- 2080: Emperor Kirin Xanai is born.
 - 2082: Alaska becomes part of Canada.
 - 2091: Taro Miyamoto finds Ibuki, who had become a sort of living legend among
-  wastelanders for her various feats. She is brought back to Japan. As
-  promised, Saya immediately shoves her face into Ibuki's chest.
-- 2097: The Earth is invaded by a mysterious humanoid entity, who claims to be
-  the Abrahamic God. He reactivates SUSAN and leaves. Russia and China are both
-  entirely taken over by it.
-- 2099: A lone child manages to take down SUSAN.
+  wastelanders for her various feats, he also comes across Ellen, who casually
+  asks him out on a date. Ibuki is brought back to Japan. As promised, Saya
+  immediately shoves her face into Ibuki's chest.
+- 2095: Taro and Ellen get married.
+- 2097: Empty Episode Two. The Earth is invaded by a mysterious humanoid entity
+  named Uruk'Anth, who claims to be the Abrahamic God. He reactivates SUSAN and
+  leaves. Russia and China are both entirely taken over by it.
+- 2099: Empty Episode 3. A lone child manages to take down SUSAN.
 - 2100: The reconstruction of the United States begins.
 - 2104: The 7th Nukuri World War ends abruptly after the Mishe founders of the
   University of Nos-Kora threaten to break their alliance with the Nukuri.
+- 2108: Formation of the Nukuri Unified Government. Zanaveth II personally
+  appointed by the Nukritas brothers as "Minister of Interspecies Relations"
+  due to her outstanding work on the subject following her graduation at the
+  University of Nos-Kora.
+- 2110: John "BIGSHOT" Gunns is born.
+- 2128: Zanaveth II becomes CEO of Nekuratek.
 - 2137: The United States are reformed, now called "Union States".
 - 2140: Zanaveth III graduates in "Pancake Engineering" at the University of
   Nos-Kora.
 - 2144: UAC's first contact with Hell.
-- 2145: After a coup organized by several members of the lower castes of Hell,
-  the main royal family is forced into exile. Under its new ruler, Hell decides
-  to attack mankind. Doom 3 happens.
+- 2145: After a coup organized by several generals of Hell's military forces,
+  the main royal family is forced into exile. Under its new rulers, Hell
+  decides to attack mankind. Doom 3 happens.
 - 2147: Reginald E. Griggs Jr. is imprisoned after countless human remains were
   found in the basement of his summer house in Olathe.
 - 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
@@ -566,9 +639,17 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   The Doom Slayer heads in to "fix things". A mysterious figure is seen leaving
   the mansion afterwards.
 - 2171: Akari Labs manages to extend their teleportation technology to travel
-  between universes. The second contact with the Anarukon happens, this time
-  all going peacefully. Saya Miyamoto meets Xanai Kirin, their marriage brings
-  forth an alliance between the humans and the Anarukon.
+  between universes. The Demolitionist is deployed in a world called Parthoris,
+  and takes part on a mission to defeat an evil sorcerer who had taken over the
+  land. Months later, following a recommendation from Ashley Knox, the second
+  contact with the Anarukon happens, this time all going peacefully. Saya
+  Miyamoto meets Kirin Xanai, their marriage brings forth an alliance between
+  the humans and the Anarukon.
+- 2172: Second major exploration at Akari Labs, the Demolitionist is deployed
+  into a realm known as Cronos in order to defeat an associate of the old
+  sorcerer from their previous mission.
+- 2173: Third major exploration, with the Demolitionist taking part of a rebel
+  uprising in a world dominated by a cult known as the Order of the One God.
 - 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.
 - 2175: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
@@ -587,6 +668,8 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
+- 2231: Saya and her creations move in with Kirin, she leaves the leadership of
+  Akari Labs to her brother Taro.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
 - 2250: The "Dark Alliance" is formed within X'Animen Coalition territory.
@@ -600,18 +683,20 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
   the Necris invasion of 2304, the corporation is dissolved.
 - 2320: A group of billionaires buy an entire island and turn it into an arena.
   The "Battle Royale" boom starts.
-- 2407: Unissix Bokurou Azadeku devises the "Unissix Tournaments".
+- 2407: Unissix Bokurou Azadeku devises the "Unissix Tournaments". UnSX 1
+  begins.
 - 2409: The first tournament ends with Raik L Raikishionen, prime minister of
   the Nukuri Unified Government, as champion.
-- 2411: In a joint attack, and with the participation of Earth, the "Dark
-  Alliance" is defeated.
-- 2415: The "New Dark Kingdom" is formed, in an attempt to reunite those who
-  were defeated in the former war. Its leader is defeated not long after.
-- 2779: The former "Warriors of the End" who had served Nedoshiaan reunite and
-  attempt to bring forth the apocalypse. Although the warriors are stopped,
-  they manage to summon SHINNOVRE the Eraser. For the first time in history, LS
-  breaks their vow to not get involved in "the affairs of mortals" and banishes
-  their brother.
+- 2411: UnSX 2. In a joint attack, and with the participation of Earth, the
+  "Dark Alliance" is defeated.
+- 2415: UnSX 4. The "New Dark Kingdom" is formed, in an attempt to reunite
+  those who were defeated in the former war. Its leader is defeated not long
+  after.
+- 2779: UnSX 6 begins. The former "Warriors of the End" who had served
+  Nedoshiaan reunite and attempt to bring forth the apocalypse. Although the
+  warriors are stopped, they manage to summon HEKEAS SHINNOVRE the Eraser. For
+  the first time in history, LS breaks their vow to not get involved in "the
+  affairs of mortals" and banishes their brother.
 - 2890: "Vault 490" starts being built in the University of Nos-Kora, it is
   described as a "focusing device" for a weapon capable of "instantly
   neutralizing any threat to our universe".
@@ -627,7 +712,44 @@ SWWM GZ effectively blends together the Doom and Unreal universes.
 - 2917: Following ten confusing years of battle, Hiikya is defeated by Deneva
   Unissix, who sacrifices her own life in the final attack.
 
-- ????: In order to stop a massive Eldrich Abomination from corrupting all of
-  existence, the two Mishe brothers activate Vault 490. Although the threat is
-  defeated, major parts of the multiverse shatter in the process. Project Abyss
-  begins.
+Disconnected events that are hard to place in time:
+
+- ????: Twenty years after the fall of the Order of the One God, a message is
+  received from an old ruined complex from beyond the sea. A declaration of war
+  from the "Church of the Dreadful Lady". A single, well trained mercenary puts
+  an end to their plans, but the true mastermind behind it all manages to flee.
+
+- ????: A Sidhe thief infiltrates the mansion of one of D'Sparil's old
+  associates, stealing the Heart of D'Sparil and putting an end to the plans
+  for resurrecting him. The mansion is sold off, most of its valuables,
+  including the corporeal remains of the serpent rider, passed around among
+  several parties, until being eventually acquired by the "Cult of the
+  Viridescent Lord".
+
+- ????: Long after the defeat of Korax, a nameless warrior is called into the
+  Winter Nexus, they gather the four elemental gems and defeat the "Viridescent
+  Lord". A mysterious shadowy figure revives the corpse of D'Sparil, both
+  disappear shortly after.
+
+Abyssal Era (Project Abyss timeline):
+
+- 57 BA: Using Saya's interportal technology, the Rust Empire creates the
+  various "passages", connecting Akkou and many other realms together.
+- 38 BA: The town of Kenaia becomes corrupted by some strange "red mass", many
+  of its inhabitants turn into mindless beasts.
+- 17 BA: The Church of Levlen initiates their Esper Crusades, aiming to rid the
+  land of all magic-aligned people.
+- 15 BA: Alakir of Kanaiarkar manages to flee his hometown during an attack
+  from Levlen crusaders.
+- 8 BA: First excavations on Evakai.
+- The Abyssal Year: In order to stop a massive Eldrich Abomination from
+  corrupting all of existence, the two Mishe brothers activate Vault 490.
+  Although the threat is defeated, major parts of the multiverse shatter in the
+  process.
+- 4: A strange plague spreads throughout the various realms. A man known as
+  "The Emissary" appears and reveals himself as its creator, he is captured and
+  imprisoned by the Rust Empire.
+- 13: General Marius dies in combat defending the realm of Naiarkar from an
+  invasion of Levlen crusaders.
+- 22: The Grand Patriarch becomes the Champion of the Kenaia Colloseum.
+- 29: Project Abyss begins.

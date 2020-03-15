@@ -447,10 +447,98 @@ Class BigPunchImpact : Actor
 	}
 }
 
+Class ParryField : Actor
+{
+	Default
+	{
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+SHOOTABLE;
+		+NONSHOOTABLE;
+		+NOBLOOD;
+		+DONTTHRUST;
+		Health int.max;
+		Mass int.max;
+		Radius 20;
+		Height 40;
+	}
+
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !master )
+		{
+			Destroy();
+			return;
+		}
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(master.pitch,master.angle,master.roll);
+		origin = level.Vec3Offset(master.Vec2OffsetZ(0,0,master.player.viewz),x*20-(0,0,20));
+		SetOrigin(origin,true);
+		// check for projectiles to deflect
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !a.bMISSILE || a.bTHRUACTORS || (a.target == master) || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
+			Vector3 vdir = a.vel;
+			Vector3 dir = level.Vec3Diff(pos,a.pos).unit();
+			if ( dir dot vdir > 0 ) continue;	// already moving away
+			// deflect directly to target
+			if ( !Random[Parry](0,2) && a.target )
+				dir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
+			// push away
+			if ( a.bSEEKERMISSILE ) a.tracer = a.target;
+			a.target = master;
+			double mvel = a.vel.length();
+			a.vel = dir*mvel*FRandom[Parry](1.,1.2);
+			a.angle = atan2(dir.y,dir.x);
+			a.pitch = asin(-dir.z);
+			bool raging = !!master.FindInventory("RagekitPower");
+			if ( raging ) a.vel *= 2.;
+			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",a.pos);
+			i.target = master;
+			i.angle = atan2(dir.y,dir.x);
+			i.pitch = asin(-dir.z);
+			A_StartSound("demolitionist/parry",CHAN_VOICE,CHANF_OVERLAP,.4);
+		}
+		if ( --special1 <= 0 ) Destroy();
+	}
+
+	override bool CanCollideWith( Actor other, bool passive )
+	{
+		return false;
+	}
+
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		if ( (flags&DMG_INFLICTOR_IS_PUFF) && (source != master) )
+		{
+			// TODO deflect hitscan
+			// three options:
+			//  1. just block the bullet, making it bounce off
+			//  2. ricochet in random direction
+			//  3. ricochet directly back to source
+			A_StartSound("demolitionist/parry",CHAN_VOICE,CHANF_OVERLAP,.4);
+		}
+		return 0;
+	}
+
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+		Stop;
+	}
+}
+
 // Base class for all SWWM Weapons
 Class SWWMWeapon : Weapon abstract
 {
 	private int SWeaponFlags;
+	Actor pfield;	// instance of parry field for current melee attack
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 
@@ -533,6 +621,16 @@ Class SWWMWeapon : Weapon abstract
 		player.SetPSprite(PSP_FLASH,null);
 		player.mo.BringUpWeapon();
 	}
+	action void A_Parry( int duration )
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*20-(0,0,20));
+		if ( invoker.pfield ) invoker.pfield.Destroy();
+		invoker.pfield = Spawn("ParryField",origin);
+		invoker.pfield.master = self;
+		invoker.pfield.special1 = duration;
+	}
 	private action bool TryMelee( double angle, int dmg )
 	{
 		FTranslatedLineTarget t;
@@ -583,14 +681,24 @@ Class SWWMWeapon : Weapon abstract
 	}
 	action void A_Melee( int dmg = 40 )
 	{
+		// temporarily disable parry field so we can trace through
+		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = false;
 		bool raging = CountInv("RagekitPower");
 		int maxang = raging?18:12;
-		for ( int i=0; i<maxang; i++ ) if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) ) return;
+		for ( int i=0; i<maxang; i++ )
+		{
+			if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) )
+			{
+				if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
+				return;
+			}
+		}
 		// check for walls instead
 		FTranslatedLineTarget t;
 		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
 		LineTrace(angle,DEFMELEERANGE,slope,TRF_THRUACTORS,player.viewheight,data:d);
+		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 		if ( d.HitType == TRACE_HitNone ) return;
 		Vector3 HitNormal = -d.HitDir;
 		if ( d.HitType == TRACE_HitFloor )

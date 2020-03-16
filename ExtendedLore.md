@@ -446,7 +446,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 
 - Iteration 0: The void forms from within the bubble of empty space-time left
   by the real world's destruction.
-- Iteration 1: Azadeku, the first Administrator, is spawned.
+- Iteration 1: Azadeku, the zeroth Administrator, is spawned.
 - Iteration ~3.56542e208: Azadeku is erased by a Chaos Walker known as The
   Grinning Man, who takes over the world they created. Project .Blank begins.
 - ~2730000 BC: The mad dictator god Nedoshiaan is assassinated.
@@ -550,7 +550,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 - 2024: Zanaveth II arrives on Earth, befriends Saya. With her help, Saya's
   Maidbot is migrated to the Nekuronbot AI framework, further enhancing her
   personality.
-- 2025: First expedition to Mars, led by the UAC. Scotland becomes independent.
+- 2025: First expedition to Mars, led by the UAC.
 - 2027: William Dusk leaves Ashley's band, but not before hurting her deeply by
   escaping with her granddaughter Lyra. He is replaced as drummer by the
   goddess Mykka.

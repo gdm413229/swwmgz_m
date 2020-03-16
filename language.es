@@ -139,7 +139,6 @@ SWWM_STOREMUNS = "No tienes suficiente dinero";
 SWWM_NOSTORE = "(no queda nada que comprar)";
 SWWM_TRADETAB = "Intercambio";
 SWWM_TRADEFULL = "No puede llevar más de eso";
-SWWM_TRADEHIST = "Historial";
 SWWM_TRADETO = "Enviado a";
 SWWM_TRADEFROM = "Recibido de";
 SWWM_NOTRADE = "(no hay nadie con quien intercambiar)";
@@ -203,7 +202,8 @@ SWWM_HELPTXT =
 "\cx---------------------------\c-\n"
 "\n"
 "\cfArriba/Abajo:\c- Navegar\n"
-"\cfEnter:\c- Elegir opción\n"
+"\cfEnter:\c- Elegir destinatario\n"
+"\cfRetroceso:\c- Historial\n"
 "\n"
 "\cxPestaña de Intercambio - Controles (Intercambio)\c-\n"
 "\cx----------------------------\c-\n"

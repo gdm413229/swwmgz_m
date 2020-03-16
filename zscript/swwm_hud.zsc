@@ -99,7 +99,7 @@ Class SWWMStatusBar : BaseStatusBar
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline
 		m.type = printlevel;
-		m.tic = level.maptime;
+		m.tic = level.totaltime;
 		m.rep = 1;
 		// append chat messages to full history
 		if ( (printlevel == PRINT_CHAT) || (printlevel == PRINT_TEAMCHAT) )
@@ -202,14 +202,14 @@ Class SWWMStatusBar : BaseStatusBar
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
-			if ( level.maptime < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
+			if ( level.totaltime < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
 			PickupQueue.Delete(i);
 			i--;
 		}
 		for ( int i=0; i<MainQueue.Size(); i++ )
 		{
-			if ( (MainQueue[i].type <= PRINT_HIGH) && (level.maptime < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
-			else if ( (MainQueue[i].type > PRINT_HIGH) && (level.maptime < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
+			if ( (MainQueue[i].type <= PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
+			else if ( (MainQueue[i].type > PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
 			MainQueue.Delete(i);
 			i--;
 		}
@@ -363,7 +363,7 @@ Class SWWMStatusBar : BaseStatusBar
 		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		mMPlusFont = HUDFont.Create("MPlusShaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
-		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,1000);
+		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,999999999);
 		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);
 		DashInter = DynamicValueInterpolator.Create(120,.5,1,40);
 		gl_proj = new("swwmLe__GLScreen");
@@ -755,7 +755,7 @@ Class SWWMStatusBar : BaseStatusBar
 				else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = teamcol.GetInt();
 				String cstr = MainQueue[i].str;
 				if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
-				int curtime = MainQueue[i].tic-level.maptime;
+				int curtime = MainQueue[i].tic-level.totaltime;
 				if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*msgduration.GetInt();
 				else curtime += 35*chatduration.GetInt();
 				double alph = clamp(curtime/20.,0.,1.);
@@ -780,7 +780,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				String cstr = PickupQueue[i].str;
 				if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
-				int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-level.maptime;
+				int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-level.totaltime;
 				double alph = clamp(curtime/20.,0.,1.);
 				Font fnt = LangFont(mTewiFont);
 				BrokenLines l = fnt.BreakLines(cstr,int(ss.x*.75));

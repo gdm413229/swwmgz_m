@@ -1,12 +1,10 @@
 Fundamental things:
- - Eviscerator
  - Hellblazer
  - Sparkster
  - Silver Bullet
  - Ynykron
  - Wallbuster
  - Custom intermission
- - Trading tab
 
 Extra things:
  - Art for custom intermission

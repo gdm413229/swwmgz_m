@@ -447,6 +447,8 @@ Class BigPunchImpact : Actor
 	}
 }
 
+Class ReflectedBullet : SWWMCasing {}
+
 Class ParryField : Actor
 {
 	Default
@@ -516,12 +518,40 @@ Class ParryField : Actor
 	{
 		if ( (flags&DMG_INFLICTOR_IS_PUFF) && (source != master) )
 		{
-			// TODO deflect hitscan
-			// three options:
-			//  1. just block the bullet, making it bounce off
-			//  2. ricochet in random direction
-			//  3. ricochet directly back to source
+			Vector3 vdir = (cos(angle),sin(angle),0);
+			Vector3 vpos = inflictor.pos;	// puff goes here
+			bool raging = !!master.FindInventory("RagekitPower");
+			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",vpos);
+			i.angle = angle+180;
+			// deflect hitscan
+			A_StartSound("misc/ricochet",CHAN_VOICE,CHANF_OVERLAP,.7);
 			A_StartSound("demolitionist/parry",CHAN_VOICE,CHANF_OVERLAP,.4);
+			// three options:
+			switch ( Random[Parry](0,7) )
+			{
+			case 0:
+			case 1:
+			case 2:
+				//  1. just block the bullet, making it bounce off
+				let b = Spawn("ReflectedBullet",vpos);
+				b.angle = angle;
+				b.target = self;
+				b.vel = (-vdir+(FRandom[Parry](-.2,.2),FRandom[Parry](-.2,.2),FRandom[Parry](-.2,.2))).unit()*FRandom[Parry](raging?9:3,raging?20:8);
+				break;
+			case 3:
+			case 4:
+			case 5:
+				//  2. ricochet in random direction
+				Vector3 rdir = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit();
+				LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				break;
+			case 6:
+			case 7:
+				//  3. ricochet directly back to source
+				Vector3 tdir = source?(level.Vec3Diff(vpos,source.Vec3Offset(0,0,source.height/2))):(-vdir);
+				LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				break;
+			}
 		}
 		return 0;
 	}

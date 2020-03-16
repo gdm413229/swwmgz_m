@@ -182,8 +182,9 @@ Class SWWMCredits : Thinker
 // Trading history between players
 Class SWWMTrade
 {
-	int timestamp, type;
-	String other, what;
+	int timestamp, type, amt;
+	String other;
+	Class<Inventory> what;
 }
 
 Class SWWMTradeHistory : Thinker
@@ -191,26 +192,28 @@ Class SWWMTradeHistory : Thinker
 	PlayerInfo myplayer;
 	Array<SWWMTrade> ent;
 
-	static void RegisterSend( PlayerInfo p, PlayerInfo other, String what )
+	static void RegisterSend( PlayerInfo p, PlayerInfo other, Class<Inventory> what, int amt )
 	{
 		let th = Find(p);
 		if ( !th ) return;
 		SWWMTrade t = new("SWWMTrade");
-		t.timestamp = gametic;
+		t.timestamp = level.totaltime;
 		t.type = 0;
 		t.other = other.GetUserName();
 		t.what = what;
+		t.amt = amt;
 		th.ent.Push(t);
 	}
-	static void RegisterReceive( PlayerInfo p, PlayerInfo other, String what )
+	static void RegisterReceive( PlayerInfo p, PlayerInfo other, Class<Inventory> what, int amt )
 	{
 		let th = Find(p);
 		if ( !th ) return;
 		SWWMTrade t = new("SWWMTrade");
-		t.timestamp = gametic;
+		t.timestamp = level.totaltime;
 		t.type = 1;
 		t.other = other.GetUserName();
 		t.what = what;
+		t.amt = amt;
 		th.ent.Push(t);
 	}
 
@@ -656,6 +659,59 @@ Class SWWMCombatTracker : Thinker
 		}
 		lasthealth = newhealth;
 		intp.Update(lasthealth);
+	}
+}
+
+// Press F to Pay Respects
+Class PayRespects : HUDMessageBase
+{
+	Vector2 basepos;
+	int lifespan, initialspan, starttic;
+	transient Font TewiFont;
+	double scale;
+	Vector2 hs, ss;
+	int seed, seed2;
+
+	static PayRespects PressF()
+	{
+		let f = new("PayRespects");
+		f.basepos = (FRandom[FInTheChat](0.,1.),FRandom[FInTheChat](1.02,1.05));
+		f.scale = FRandom[FInTheChat](.5,2.);
+		f.lifespan = f.initialspan = Random[FInTheChat](20,80);
+		f.starttic = level.maptime;
+		f.seed = Random[FInTheChat]();
+		f.seed2 = Random[FInTheChat]();
+		f.ScreenSizeChanged();
+		return f;
+	}
+
+	override bool Tick()
+	{
+		lifespan--;
+		return (lifespan<=0);
+	}
+
+	override void ScreenSizeChanged()
+	{
+		hs = StatusBar.GetHUDScale()*scale;
+		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
+	}
+
+	override void Draw( int bottom, int visibility )
+	{
+		Vector2 realpos = (basepos.x*ss.x,basepos.y*ss.y);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Vector2 fo = (TewiFont.StringWidth("F")/2.,-TewiFont.GetHeight());
+		// F rise up
+		int initspd = (128-seed);
+		if ( (initspd >= 0) && (initspd < 32) ) initspd = 32;
+		if ( (initspd < 0) && (initspd > -32) ) initspd = -32;
+		int boostup = 32+(seed2/4);
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		fo.x += (.15*initspd)*((initialspan-(lifespan-fractic))**.6);
+		fo.y += ((initialspan-(lifespan-fractic))**1.6)-boostup*sin((90./initialspan)*(level.maptime+fractic-starttic));
+		double alph = clamp((lifespan+fractic)/double(initialspan),0.,1.);
+		Screen.DrawText(TewiFont,Font.CR_GREEN,realpos.x-fo.x,realpos.y-fo.y,"F",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 	}
 }
 
@@ -1393,6 +1449,8 @@ Class SWWMHandler : EventHandler
 	int multilevel[MAXPLAYERS];
 	int lastitemcount[MAXPLAYERS];
 	bool allkills, allitems, allsecrets;
+	// for money cheat
+	transient ui int kcode;
 
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
@@ -2003,6 +2061,41 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	override bool InputProcess( InputEvent e )
+	{
+		if ( e.Type == InputEvent.TYPE_KeyDown )	// assuming that's the F key on all keyboards (hopefully)
+		{
+			static const int lods[] = {38,24,32,31,24,33,18,50,24,49,18};
+			// what's that spell?
+			// loadsamoney! ... probably
+			if ( e.KeyScan == lods[kcode] )
+			{
+				kcode++;
+				if ( kcode >= 11 )
+				{
+					SendNetworkEvent("swwmmoneycheat",consoleplayer);
+					kcode = 0;
+				}
+			}
+			else kcode = 0;
+			if ( e.KeyScan == 33 )
+			{
+				let demo = Demolitionist(players[consoleplayer].mo);
+				if ( demo && (demo.Health <= 0) && (demo.deadtimer > 40) )
+				{
+					// pay respects
+					int numf = Random[FInTheChat](1,6);
+					for ( int i=0; i<numf; i++ )
+					{
+						let f = PayRespects.PressF();
+						StatusBar.AttachMessage(f,0,layer:StatusBar.HUDMSGLayer_OverHUD);
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	override void WorldLinePreActivated( WorldEvent e )
 	{
 		// oneliner on locked doors
@@ -2294,14 +2387,19 @@ Class SWWMHandler : EventHandler
 					amt = GetDefaultByType(a).Amount;
 				}
 			}
-			int ramt = players[e.Args[1]].mo.CountInv(item);
-			if ( amt > ramt ) amt = ramt;
-			if ( players[e.Args[1]].mo.GiveInventory(item,amt) )
+			Inventory ritm = players[e.Args[1]].mo.FindInventory(item);
+			if ( ritm )
+			{
+				int maxgive = ritm.MaxAmount-ritm.Amount;
+				if ( amt > maxgive ) amt = maxgive;
+			}
+			else if ( amt > def.MaxAmount ) amt = def.MaxAmount;
+			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(item,amt) )
 			{
 				players[e.Args[0]].mo.TakeInventory(item,amt);
 				// add to history
-				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],def.GetTag());
-				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],def.GetTag());
+				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],item,amt);
+				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],item,amt);
 				// add messages
 				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),amt,def.GetTag(),players[e.Args[1]].GetUserName());
 				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),amt,def.GetTag());
@@ -2380,6 +2478,16 @@ Class SWWMHandler : EventHandler
 			double dist = players[consoleplayer].Camera.Distance3D(players[e.Args[0]].mo);
 			if ( dist < 2000 )
 				Console.Printf("\cx%s\cx: %s\c-",players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(19)));
+		}
+		else if ( e.Name ~== "swwmmoneycheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cfLOADSAMONEY!\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
+			}
+			SWWMCredits.Give(players[e.Args[0]],999999999);
 		}
 	}
 

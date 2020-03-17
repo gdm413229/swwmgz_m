@@ -55,6 +55,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int checksend;
 	// seeeeecret
 	int kcode;
+	// crimey clock stuff
+	int c_year, c_month, c_day, c_hour, c_minute;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
@@ -96,7 +98,116 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		tradelib = SWWMTradeHistory.Find(players[consoleplayer]);
 		stats = SWWMStats.Find(players[consoleplayer]);
 		tmsg = "$SWWM_MAINCONTROLS";
-		tmsgtic = gametic+140;
+		tmsgtic = gametic+70;
+		if ( gameinfo.gametype&GAME_Heretic )
+		{
+			c_year = 2171;
+			c_month = 11;
+			c_day = 9;
+			c_hour = 9;
+			c_minute = 41;
+		}
+		else if ( gameinfo.gametype&GAME_Hexen )
+		{
+			c_year = 2178;
+			c_month = 0;
+			c_day = 12;
+			c_hour = 16;
+			c_minute = 41;
+		}
+		else
+		{
+			c_year = 2148;
+			c_month = 5;
+			c_day = 5;
+			c_hour = 12;
+			c_minute = 27;
+		}
+	}
+
+	// please don't look at this
+	private String CrimeTime()
+	{
+		static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+		bool leap_year;
+		int y = c_year, m = c_month, d = c_day, h = c_hour, mn = c_minute;
+		int addtime = level.totaltime/Thinker.TICRATE;
+		while ( addtime > 0 )
+		{
+			leap_year = (!(y%4) && ((y%100) || !(y%400)));
+			if ( addtime >= 86400 )
+			{
+				addtime -= 86400;
+				d++;
+				int md = days_in_month[m];
+				if ( leap_year && (m == 1) ) md++;
+				if ( d >= md )
+				{
+					d = 0;
+					m++;
+					if ( m > 11 )
+					{
+						m = 0;
+						y++;
+					}
+				}
+			}
+			else if ( addtime >= 3600 )
+			{
+				addtime -= 3600;
+				h++;
+				if ( h > 23 )
+				{
+					h = 0;
+					d++;
+					int md = days_in_month[m];
+					if ( leap_year && (m == 1) ) md++;
+					if ( d >= md )
+					{
+						d = 0;
+						m++;
+						if ( m > 11 )
+						{
+							m = 0;
+							y++;
+						}
+					}
+				}
+			}
+			else if ( addtime >= 60 )
+			{
+				addtime -= 60;
+				mn++;
+				if ( mn > 59 )
+				{
+					mn = 0;
+					h++;
+					if ( h > 23 )
+					{
+						h = 0;
+						d++;
+						int md = days_in_month[m];
+						if ( leap_year && (m == 1) ) md++;
+						if ( d >= md )
+						{
+							d = 0;
+							m++;
+							if ( m > 11 )
+							{
+								m = 0;
+								y++;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				// we finished counting
+				addtime = 0;
+			}
+		}
+		return String.Format("%04d-%02d-%02d %02d:%02d",y,m+1,d+1,h,mn);
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
@@ -978,12 +1089,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw bottom messages
 		yy = 386;
-		if ( gametic < tmsgtic )
-		{
-			str = StringTable.Localize(tmsg);
-			xx = 4;
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		}
+		if ( gametic < tmsgtic ) str = StringTable.Localize(tmsg);
+		else str = CrimeTime();
+		xx = 4;
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		str = String.Format("DemolitionOS %s",StringTable.Localize("$SWWM_MODVER"));
 		xx = 637-fnt.StringWidth(str);
 		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -1094,6 +1203,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_INVENTORY )
 		{
+			if ( invlist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOINV");
+				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
 			xx = 9;
 			yy = 23;
 			int longest = 0, len;
@@ -1135,6 +1250,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_KEYS )
 		{
+			if ( invlist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOKEYS");
+				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
 			xx = 9;
 			yy = 23;
 			int longest = 0, len;
@@ -1320,6 +1441,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			if ( !sub )
 			{
+				if ( playerlist.Size() <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOTRADE");
+					Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
 				xx = 9;
 				yy = 23;
 				int longest = 0, len;
@@ -1354,6 +1481,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( sel0 == -1 )
 				{
+					if ( tradelib.ent.Size() <= 0 )
+					{
+						str = StringTable.Localize("$SWWM_NOTRADEHIST");
+						Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						return;
+					}
 					xx = 6;
 					yy = 17;
 					int ofs = clamp(sel1,0,max(0,tradelib.ent.Size()-28));
@@ -1424,8 +1557,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_CHAT )
 		{
-			if ( !(StatusBar is 'SWWMStatusBar') ) return;
 			let bar = SWWMStatusBar(StatusBar);
+			if ( !bar || (bar.FullHistory.Size() <= 0) )
+			{
+				str = StringTable.Localize("$SWWM_NOCHAT");
+				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
 			int margin = TewiFont.StringWidth("[00:00:00] ");
 			int ofs = bar.FullHistory.Size()-(1+sel0);
 			xx = 3;

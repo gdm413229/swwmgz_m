@@ -641,13 +641,13 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 - 2171: Akari Labs manages to extend their teleportation technology to travel
   between universes. The Demolitionist is deployed in a world called Parthoris,
   and takes part on a mission to defeat an evil sorcerer who had taken over the
-  land. Months later, following a recommendation from Ashley Knox, the second
+  land. A month later, following a recommendation from Ashley Knox, the second
   contact with the Anarukon happens, this time all going peacefully. Saya
   Miyamoto meets Kirin Xanai, their marriage brings forth an alliance between
-  the humans and the Anarukon.
-- 2172: Second major exploration at Akari Labs, the Demolitionist is deployed
-  into a realm known as Cronos in order to defeat an associate of the old
-  sorcerer from their previous mission.
+  the humans and the Anarukon. Two weeks after the wedding, a second
+  exploration is initiated, with the Demolitionist deployed into a realm known
+  as Cronos in order to defeat an associate of the old sorcerer from their
+  previous mission.
 - 2173: Third major exploration, with the Demolitionist taking part of a rebel
   uprising in a world dominated by a cult known as the Order of the One God.
 - 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
@@ -660,10 +660,14 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   and takes his place as the true ruler of Hell. His first official act is to
   cease the hostilities with humans, declares the Doom Slayer "Guardian of the
   Gates".
+- 2187: Following a very difficult period of negotiation, the White Scar treaty
+  is dismissed. As bonds with the Nukuri are re-established, their technology
+  is adopted once again by all countries. The Nekuraku family in full joins in
+  on Saya's birthday party the week after.
 - 2193: Akari Labs completes the "Akari Project", resulting in humanity's first
   entry into FTL travel.
-- 2200: Earth joins the "United Aligned Worlds", bonds with the Nukuri are
-  re-established, their technology adopted once again by all countries.
+- 2200: Earth joins the X'Animen Coalition, now known as the "United Aligned
+  Worlds".
 - 2201: The UAC files for bankruptcy.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
@@ -672,7 +676,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   Akari Labs to her brother Taro.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
-- 2250: The "Dark Alliance" is formed within X'Animen Coalition territory.
+- 2250: The "Dark Alliance" is formed within the Xathar system.
 - 2267: Green's World Rebellion.
 - 2270: The Phayder Corporation is founded, attempts to replicate the
   immortality of the Nukuri race on humans through a nano-augmentation method
@@ -687,11 +691,25 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   begins.
 - 2409: The first tournament ends with Raik L Raikishionen, prime minister of
   the Nukuri Unified Government, as champion.
-- 2411: UnSX 2. In a joint attack, and with the participation of Earth, the
-  "Dark Alliance" is defeated.
-- 2415: UnSX 4. The "New Dark Kingdom" is formed, in an attempt to reunite
-  those who were defeated in the former war. Its leader is defeated not long
-  after.
+- 2411: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
+  Not long after, they are defeated in a joint attack with the participation of
+  Earth and many other allied worlds.
+- 2412: Second Unissix Tournament.
+- 2415: The "New Dark Kingdom" appears, led by Ososkuro Axon, son of the
+  fearsome Dread Overlord Nuoma, who attempts to reunite those who were
+  defeated in the former war and strike once more. A long period of war begins.
+- 2418: Third Unissix Tournament.
+- 2425: Fourth Unissix Tournament.
+- 2430: The Fifth and last Unissix Tournament. Misa grows tired of the whole
+  thing.
+- 2448: UnSX 4. A team of mercenaries from various allied worlds manages to
+  take down Ososkuro. Before the finishing blow could be dealt, Nuoma appears
+  and convinces them to spare him, then takes Ososkuro back to their homeland.
+- 2459: Nuoma accidentally reveals her true form to the people of Kruon. The
+  feared "fall of the empire" doesn't happen, she is still revered as a worthy
+  leader.
+- 2500-2778: "The Great Tranquility". An odd period of time with an apparent
+  lack of major conflicts or other noteworthy events.
 - 2779: UnSX 6 begins. The former "Warriors of the End" who had served
   Nedoshiaan reunite and attempt to bring forth the apocalypse. Although the
   warriors are stopped, they manage to summon HEKEAS SHINNOVRE the Eraser. For
@@ -715,7 +733,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 Disconnected events that are hard to place in time:
 
 - ????: Twenty years after the fall of the Order of the One God, a message is
-  received from an old ruined complex from beyond the sea. A declaration of war
+  received from an old ruined complex beyond the seas. A declaration of war
   from the "Church of the Dreadful Lady". A single, well trained mercenary puts
   an end to their plans, but the true mastermind behind it all manages to flee.
 
@@ -733,8 +751,11 @@ Disconnected events that are hard to place in time:
 
 Abyssal Era (Project Abyss timeline):
 
+- 71 BA: Saya and Kirin have their first child, who grows up to become the new
+  Rust Emperor.
 - 57 BA: Using Saya's interportal technology, the Rust Empire creates the
   various "passages", connecting Akkou and many other realms together.
+- 41 BA: Elena Yanikov XIX, daughter of Taro and Elena XVI, is born.
 - 38 BA: The town of Kenaia becomes corrupted by some strange "red mass", many
   of its inhabitants turn into mindless beasts.
 - 17 BA: The Church of Levlen initiates their Esper Crusades, aiming to rid the
@@ -746,10 +767,10 @@ Abyssal Era (Project Abyss timeline):
   corrupting all of existence, the two Mishe brothers activate Vault 490.
   Although the threat is defeated, major parts of the multiverse shatter in the
   process.
-- 4: A strange plague spreads throughout the various realms. A man known as
-  "The Emissary" appears and reveals himself as its creator, he is captured and
-  imprisoned by the Rust Empire.
 - 13: General Marius dies in combat defending the realm of Naiarkar from an
   invasion of Levlen crusaders.
 - 22: The Grand Patriarch becomes the Champion of the Kenaia Colloseum.
+- 27: A strange plague spreads throughout the various realms. A man known as
+  "The Emissary" appears and reveals himself as its creator, he is captured and
+  imprisoned by the Rust Empire.
 - 29: Project Abyss begins.

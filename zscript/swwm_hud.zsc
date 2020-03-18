@@ -668,6 +668,7 @@ Class SWWMStatusBar : BaseStatusBar
 					bool dummy;
 					int slot;
 					if ( inv is 'Weapon' ) [dummy, slot] = CPlayer.weapons.LocateWeapon(Weapon(inv).GetClass());
+					else continue;
 					if ( slot != (i%10) ) continue;
 					// CheckAmmo can't be called from ui, so we have to improvise
 					// for SWWM weapons I made a function for this at least

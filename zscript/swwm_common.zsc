@@ -1160,9 +1160,35 @@ Class TeleLight : PaletteLight
 	}
 }
 
+Class SWWMTeleportSparkle : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 0.3;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+	}
+	States
+	{
+	Spawn:
+		BLPF C 1 Bright
+		{
+			A_SetScale(scale.x*specialf1);
+			A_FadeOut(specialf2);
+		}
+		Wait;
+	}
+}
+
 Class SWWMTeleportFog : Actor
 {
-
 	Default
 	{
 		+NOGRAVITY;
@@ -1192,7 +1218,22 @@ Class SWWMTeleportFog : Actor
 				s.scale *= 3.*alpha;
 				s.alpha *= alpha;
 			}
-			A_FadeOut();
+			numpt = int(Random[ExploS](4,8));
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				double dist = (FRandom[ExploS](5,10)+60*(1.-alpha));
+				if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
+				Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+				Vector3 spos = level.Vec3Offset(pos,ofs);
+				let s = Spawn("SWWMTeleportSparkle",spos);
+				s.scale *= FRandom[ExploS](.8,1.2);
+				s.specialf1 = FRandom[ExploS](.93,.97);
+				s.specialf2 = FRandom[ExploS](.02,.04);
+				s.roll = FRandom[ExploS](0,360);
+			}
+			A_FadeOut(.07);
 		}
 		Wait;
 	}

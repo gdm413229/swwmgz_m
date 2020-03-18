@@ -387,6 +387,9 @@ Class Demolitionist : PlayerPawn
 	}
 	override Vector2 BobWeapon( double ticfrac )
 	{
+		// non-mod weapons bob normally
+		if ( !(player.ReadyWeapon is 'SWWMWeapon') )
+			return Super.BobWeapon(ticfrac);
 		bool oldbob = !!(player.WeaponState&WF_WEAPONBOBBING);
 		player.WeaponState |= WF_WEAPONBOBBING;	// always bob
 		Vector2 cur = Super.BobWeapon(ticfrac);

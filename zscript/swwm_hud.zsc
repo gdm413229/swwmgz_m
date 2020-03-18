@@ -9,7 +9,7 @@ Class MsgLine
 Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex, InventoryTex, ChatTex[6],
-		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5];
+		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont;
 
 	// "Full History" contains all messages since session start, nothing is flushed
@@ -359,6 +359,9 @@ Class SWWMStatusBar : BaseStatusBar
 		EnemyHTex[2] = TexMan.CheckForTexture("graphics/HUD/EnemyBar2.png",TexMan.Type_Any);
 		EnemyHTex[3] = TexMan.CheckForTexture("graphics/HUD/EnemyBar3.png",TexMan.Type_Any);
 		EnemyHTex[4] = TexMan.CheckForTexture("graphics/HUD/EnemyBarS.png",TexMan.Type_Any);
+		GenericAmmoTex[0] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxL.png",TexMan.Type_Any);
+		GenericAmmoTex[1] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxM.png",TexMan.Type_Any);
+		GenericAmmoTex[2] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxR.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
 		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		mMPlusFont = HUDFont.Create("MPlusShaded");
@@ -648,9 +651,39 @@ Class SWWMStatusBar : BaseStatusBar
 	private void DrawWeapon()
 	{
 		if ( CPlayer.ReadyWeapon is 'SWWMWeapon' ) SWWMWeapon(CPlayer.ReadyWeapon).DrawWeapon(FracTic,ss.x-margin,ss.y-(margin+28),hs,ss);
-		else
+		else if ( CPlayer.ReadyWeapon )
 		{
-			// TODO generic display
+			// generic display
+			double xx = ss.x-(margin+14), yy = ss.y-(margin+43);
+			int maxlen = 0;
+			String astr2, astr1;
+			if ( CPlayer.ReadyWeapon.Ammo2 ) astr2 = String.Format("%d",CPlayer.ReadyWeapon.Ammo2.Amount);
+			if ( CPlayer.ReadyWeapon.Ammo1 ) astr1 = String.Format("%d",CPlayer.ReadyWeapon.Ammo1.Amount);
+			maxlen = max(astr1.Length(),astr2.Length());
+			if ( CPlayer.ReadyWeapon.Ammo2 )
+			{
+				yy -= 14;
+				Screen.DrawTexture(GenericAmmoTex[2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				for ( int i=0; i<maxlen; i++ )
+				{
+					xx -= 6;
+					Screen.DrawTexture(GenericAmmoTex[1],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+				Screen.DrawTexture(GenericAmmoTex[0],false,xx-3,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,xx,yy,astr2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 14;
+			}
+			if ( CPlayer.ReadyWeapon.Ammo1 )
+			{
+				Screen.DrawTexture(GenericAmmoTex[2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				for ( int i=0; i<maxlen; i++ )
+				{
+					xx -= 6;
+					Screen.DrawTexture(GenericAmmoTex[1],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+				Screen.DrawTexture(GenericAmmoTex[0],false,xx-3,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,xx,yy,astr1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 		Screen.DrawTexture(WeaponTex,false,ss.x-(margin+61),ss.y-(margin+29),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		double xx = ss.x-(margin+58), yy = ss.y-(margin+29);

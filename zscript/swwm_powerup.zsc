@@ -24,6 +24,8 @@ Class GrilledCheeseSandwich : Inventory
 		let w = Owner.FindInventory("WarArmor");
 		if ( !w ) Owner.GiveInventory("WarArmor",GetDefaultByType("WarArmor").MaxAmount);
 		else w.Amount = w.MaxAmount;
+		let f = Spawn("SWWMItemFog",Owner.Vec3Offset(0,0,Owner.Height/2));
+		f.bAMBUSH = true;
 		SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
 		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
@@ -726,6 +728,7 @@ Class RagekitPower : Powerup
 				lastpulse = max(lastpulse,gametic+35);
 			}
 		}
+		else if ( !passive && inflictor && inflictor.FindInventory("ParriedRage") ) newdamage = damage*8;	// parried projectile
 		else if ( passive )
 			newdamage = damage/4;
 	}

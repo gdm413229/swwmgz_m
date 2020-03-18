@@ -70,20 +70,24 @@ Class SWWMArmor : Armor abstract
 			if ( healed > 0 ) Owner.GiveBody(healed);
 			amount -= saved;
 			damage = newdamage;
-			if ( amount <= 0 )
+			bool shouldautouse = false;
+			if ( swwm_enforceautousearmor == 1 ) shouldautouse = true;
+			else if ( swwm_enforceautousearmor == -1 ) shouldautouse = false;
+			else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
+			if ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) && shouldautouse )
 			{
-				if ( damage > 0 ) newdamage = ApplyDamageFactors(GetClass(),damageType,damage,damage);
-				if ( Owner.CountInv(parent) > 0 )
+				if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+				while ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) )
 				{
-					Amount = default.Amount;
-					if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+					Amount += default.Amount;
 					Owner.TakeInventory(parent,1);
 				}
-				else
-				{
-					if ( Owner.CheckLocalView() && (drainmsg != "") ) Console.Printf(StringTable.Localize(drainmsg));
-					DepleteOrDestroy();
-				}
+			}
+			else if ( amount <= 0 )
+			{
+				if ( damage > 0 ) newdamage = ApplyDamageFactors(GetClass(),damageType,damage,damage);
+				if ( Owner.CheckLocalView() && (drainmsg != "") ) Console.Printf(StringTable.Localize(drainmsg));
+				DepleteOrDestroy();
 				return;
 			}
 		}
@@ -167,7 +171,12 @@ Class SWWMHealth : Inventory abstract
 
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
-		if ( passive && (Owner.Health-damage <= 0) )
+		bool shouldautouse = false;
+		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
+		if ( !shouldautouse && !bBIGPOWERUP ) return;
+		if ( passive && (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
 		{
 			newdamage = damage;
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
@@ -374,9 +383,10 @@ Class PunchImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_QuakeEx(2,2,2,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
-		A_StartSound("demolitionist/punch",CHAN_VOICE);
+		A_StartSound("demolitionist/punch",CHAN_VOICE,CHANF_DEFAULT,bAMBUSH?.6:1.);
 		A_SprayDecal("WallCrack",-20);
 		int numpt = Random[Ponch](5,10);
+		if ( bAMBUSH ) numpt /= 3;
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -386,6 +396,7 @@ Class PunchImpact : Actor
 			s.SetShade(Color(1,1,1)*Random[Ponch](128,192));
 		}
 		numpt = Random[Ponch](4,12);
+		if ( bAMBUSH ) numpt /= 3;
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
@@ -393,6 +404,7 @@ Class PunchImpact : Actor
 			s.vel = pvel;
 		}
 		numpt = Random[Ponch](4,8);
+		if ( bAMBUSH ) numpt /= 3;
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
@@ -418,9 +430,10 @@ Class BigPunchImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_QuakeEx(8,8,8,18,0,600,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:.9);
-		A_StartSound("pusher/althit",CHAN_VOICE);
+		A_StartSound("pusher/althit",CHAN_VOICE,CHANF_DEFAULT,bAMBUSH?.6:1.);
 		A_SprayDecal("BigWallCrack",-20);
 		int numpt = Random[Ponch](9,16);
+		if ( bAMBUSH ) numpt /= 3;
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -430,6 +443,7 @@ Class BigPunchImpact : Actor
 			s.SetShade(Color(1,1,1)*Random[Ponch](128,192));
 		}
 		numpt = Random[Ponch](9,15);
+		if ( bAMBUSH ) numpt /= 3;
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
@@ -437,6 +451,7 @@ Class BigPunchImpact : Actor
 			s.vel = pvel;
 		}
 		numpt = Random[Ponch](9,16);
+		if ( bAMBUSH ) numpt /= 3;
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](2,8);
@@ -448,6 +463,30 @@ Class BigPunchImpact : Actor
 }
 
 Class ReflectedBullet : SWWMCasing {}
+
+Class ParriedRage : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Owner.bMISSILE )
+		{
+			let s = Spawn("SWWMSmoke",Owner.pos);
+			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,1.2);
+			s.scale *= 2.;
+			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+			s.SetShade(Color(4,2,1)*Random[Ponch](32,63));
+		}
+	}
+}
 
 Class ParryField : Actor
 {
@@ -486,7 +525,7 @@ Class ParryField : Actor
 		{
 			if ( !a.bMISSILE || a.bTHRUACTORS || (a.target == master) || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
-			Vector3 dir = level.Vec3Diff(pos,a.pos).unit();
+			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			if ( dir dot vdir > 0 ) continue;	// already moving away
 			// deflect directly to target
 			if ( !Random[Parry](0,2) && a.target )
@@ -499,12 +538,19 @@ Class ParryField : Actor
 			a.angle = atan2(dir.y,dir.x);
 			a.pitch = asin(-dir.z);
 			bool raging = !!master.FindInventory("RagekitPower");
-			if ( raging ) a.vel *= 2.;
+			if ( raging )
+			{
+				a.GiveInventory("ParriedRage",1);
+				a.speed *= 2.;
+				a.vel *= 2.;
+			}
 			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",a.pos);
 			i.target = master;
 			i.angle = atan2(dir.y,dir.x);
 			i.pitch = asin(-dir.z);
-			A_StartSound("demolitionist/parry",CHAN_VOICE,CHANF_OVERLAP,.4);
+			i.bAMBUSH = true;
+			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
+			A_StartSound("demolitionist/parry",CHAN_WEAPON);
 		}
 		if ( --special1 <= 0 ) Destroy();
 	}
@@ -523,9 +569,11 @@ Class ParryField : Actor
 			bool raging = !!master.FindInventory("RagekitPower");
 			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",vpos);
 			i.angle = angle+180;
+			i.bAMBUSH = true;
 			// deflect hitscan
 			A_StartSound("misc/ricochet",CHAN_VOICE,CHANF_OVERLAP,.7);
-			A_StartSound("demolitionist/parry",CHAN_VOICE,CHANF_OVERLAP,.4);
+			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
+			A_StartSound("demolitionist/parry",CHAN_WEAPON);
 			// three options:
 			switch ( Random[Parry](0,7) )
 			{
@@ -535,21 +583,25 @@ Class ParryField : Actor
 				//  1. just block the bullet, making it bounce off
 				let b = Spawn("ReflectedBullet",vpos);
 				b.angle = angle;
-				b.target = self;
-				b.vel = (-vdir+(FRandom[Parry](-.2,.2),FRandom[Parry](-.2,.2),FRandom[Parry](-.2,.2))).unit()*FRandom[Parry](raging?9:3,raging?20:8);
+				b.target = master;
+				b.vel = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit()*FRandom[Parry](raging?9:3,raging?20:8)+(0,0,4);
 				break;
 			case 3:
 			case 4:
 			case 5:
 				//  2. ricochet in random direction
-				Vector3 rdir = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit();
-				LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				Vector3 rdir = (-vdir+(FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6))).unit();
+				bSHOOTABLE = false;
+				master.LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				bSHOOTABLE = true;
 				break;
 			case 6:
 			case 7:
 				//  3. ricochet directly back to source
-				Vector3 tdir = source?(level.Vec3Diff(vpos,source.Vec3Offset(0,0,source.height/2))):(-vdir);
-				LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				Vector3 tdir = source?(level.Vec3Diff(vpos,source.Vec3Offset(0,0,source.height/2))).unit():(-vdir);
+				bSHOOTABLE = false;
+				master.LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				bSHOOTABLE = true;
 				break;
 			}
 		}

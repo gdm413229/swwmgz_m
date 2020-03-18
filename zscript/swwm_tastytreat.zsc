@@ -552,6 +552,7 @@ Class CandyGunProj : Actor
 			s.target = target;
 		}
 		Spawn("CandyLight3",pos);
+		Spawn("CandyRing3",pos);
 	}
 	States
 	{
@@ -660,6 +661,7 @@ Class CandyMagProj : Actor
 			s.target = target;
 		}
 		Spawn("CandyLight2",pos);
+		Spawn("CandyRing2",pos);
 	}
 	States
 	{
@@ -745,6 +747,7 @@ Class CandyBulletImpact : Actor
 			s.vel = pvel;
 		}
 		Spawn("CandyLight",pos);
+		Spawn("CandyRing",pos);
 	}
 	States
 	{
@@ -763,6 +766,53 @@ Class CandyBulletImpact : Actor
 				s.ReactionTime += Random[ExploS](-4,8);
 			}
 		}
+		Stop;
+	}
+}
+
+Class CandyRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 1.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.05);
+		Stop;
+	}
+}
+Class CandyRing2 : CandyRing
+{
+	Default
+	{
+		Scale 3.;
+	}
+	States
+	{
+	Spawn:
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.04);
+		Stop;
+	}
+}
+Class CandyRing3 : CandyRing
+{
+	Default
+	{
+		Scale 5.;
+	}
+	States
+	{
+	Spawn:
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.03);
 		Stop;
 	}
 }

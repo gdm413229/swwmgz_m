@@ -1109,6 +1109,15 @@ Class PoofLight : PaletteLight
 		Args 0,0,0,60;
 	}
 }
+Class PoofLight2 : PaletteLight
+{
+	Default
+	{
+		Tag "Yellow";
+		ReactionTime 20;
+		Args 0,0,0,90;
+	}
+}
 
 Class SWWMItemFog : Actor
 {
@@ -1133,17 +1142,18 @@ Class SWWMItemFog : Actor
 			scale.x *= RandomPick[ExploS](-1,1);
 			scale.y *= RandomPick[ExploS](-1,1);
 			int numpt = Random[ExploS](16,32);
+			if ( bAMBUSH ) numpt *= 2;
 			for ( int i=0; i<numpt; i++ )
 			{
 				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
-				let s = Spawn("SWWMSmallSmoke",pos);
+				let s = Spawn(bAMBUSH?"SWWMSmoke":"SWWMSmallSmoke",pos);
 				s.vel = pvel;
 				s.SetShade(Color(3,2,1)*Random[ExploS](64,85));
 				s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
 				s.scale *= 3.;
-				s.alpha *= .2;
+				s.alpha *= bAMBUSH?.4:.2;
 			}
-			Spawn("PoofLight",pos);
+			Spawn(bAMBUSH?"PoofLight2":"PoofLight",pos);
 		}
 		BLPF A 1 Bright A_FadeOut(.3);
 		Wait;

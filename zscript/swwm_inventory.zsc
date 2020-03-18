@@ -523,24 +523,27 @@ Class ParryField : Actor
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !a.bMISSILE || a.bTHRUACTORS || (a.target == master) || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
+			if ( !((a.bMISSILE && (a.target != master)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			if ( dir dot vdir > 0 ) continue;	// already moving away
-			// deflect directly to target
-			if ( !Random[Parry](0,2) && a.target )
-				dir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
-			// push away
-			if ( a.bSEEKERMISSILE ) a.tracer = a.target;
-			a.target = master;
+			if ( a.bMISSILE )
+			{
+				// deflect directly to target
+				if ( !Random[Parry](0,2) && a.target )
+					dir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
+				// push away
+				if ( a.bSEEKERMISSILE ) a.tracer = a.target;
+				a.target = master;
+			}
 			double mvel = a.vel.length();
-			a.vel = dir*mvel*FRandom[Parry](1.,1.2);
+			a.vel = dir*mvel*FRandom[Parry](1.4,2.);
 			a.angle = atan2(dir.y,dir.x);
 			a.pitch = asin(-dir.z);
 			bool raging = !!master.FindInventory("RagekitPower");
 			if ( raging )
 			{
-				a.GiveInventory("ParriedRage",1);
+				if ( a.bMISSILE ) a.GiveInventory("ParriedRage",1);
 				a.speed *= 2.;
 				a.vel *= 2.;
 			}

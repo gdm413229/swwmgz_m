@@ -540,12 +540,13 @@ Class ParryField : Actor
 			a.vel = dir*mvel*FRandom[Parry](1.4,2.);
 			a.angle = atan2(dir.y,dir.x);
 			a.pitch = asin(-dir.z);
-			bool raging = !!master.FindInventory("RagekitPower");
+			let raging = RagekitPower(master.FindInventory("RagekitPower"));
 			if ( raging )
 			{
 				if ( a.bMISSILE ) a.GiveInventory("ParriedRage",1);
 				a.speed *= 2.;
 				a.vel *= 2.;
+				raging.DoHitFX();
 			}
 			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",a.pos);
 			i.target = master;
@@ -569,8 +570,9 @@ Class ParryField : Actor
 		{
 			Vector3 vdir = (cos(angle),sin(angle),0);
 			Vector3 vpos = inflictor.pos;	// puff goes here
-			bool raging = !!master.FindInventory("RagekitPower");
+			let raging = RagekitPower(master.FindInventory("RagekitPower"));
 			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",vpos);
+			if ( raging ) raging.DoHitFX();
 			i.angle = angle+180;
 			i.bAMBUSH = true;
 			// deflect hitscan
@@ -768,7 +770,7 @@ Class SWWMWeapon : Weapon abstract
 	{
 		// temporarily disable parry field so we can trace through
 		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = false;
-		bool raging = CountInv("RagekitPower");
+		let raging = RagekitPower(FindInventory("RagekitPower"));
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )
 		{
@@ -812,6 +814,7 @@ Class SWWMWeapon : Weapon abstract
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
 		A_StartSound(raging?"pusher/althit":"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(100);
+		if ( raging ) raging.DoHitFX();
 	}
 	override void PlayUpSound( Actor origin )
 	{

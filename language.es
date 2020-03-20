@@ -1842,6 +1842,7 @@ SWWM_LASTITEM = "\cf%s\cf obtuvo el último item. +%d\c-";
 SWWM_LASTMONSTER = "\cf%s\cf mató al último enemigo. +%d\c-";
 SWWM_NEWLORE = "Hay nuevas entradas disponibles en la Bibilioteca.";
 // intermission tips
+SWWM_INTERTIP = "Consejo #%d:";
 SWWM_INTERTIP1 = "La Demolicionista es inmune al ahogamiento, veneno e incluso daño por caída (excluyendo hoyos de muerte instantánea, por ejemplo en Hexen).";
 SWWM_INTERTIP2 = "El fuego secundario de la Pistola de Explodium tiene una carga explosiva proporcional al número de balas restantes en el cargador.";
 SWWM_INTERTIP3 = "Tu combustible se regenera con el tiempo, pero cuanto más uses el propulsor, más tardará.";
@@ -1864,6 +1865,14 @@ SWWM_INTERTIP19 = "Con la combinación adecuada de esprintar, impulsar, y saltar
 SWWM_INTERTIP20 = "En multijugador, cualquier llave que recojas será compartida inmediatemente con otros jugadores.";
 SWWM_INTERTIP21 = "¡Aumenta tu puntuación! Cuantos más enemigos elimines, mejor. No te olvides de hacer uso de esos puntos en la tienda in-game cuando puedas.";
 SWWM_INTERTIP22 = "Aunque las cajas afortunadas no suenen a muy buena idea, hay muchas probabilidades de que te toquen items muy valiosos a un coste mucho más reducido.";
+SWWM_INTERTIP23 = "Con el ritmo adecuado, puedes usar el ataque rápido a melé para desviar proyectiles y balas. Incluso es posible mandarlas de vuelta a su dueño, con daño incrementado si te encuentras bajo los efectos de un Ragekit.";
+SWWM_INTERTIP24 = "¿Sabías que Saya realmente odia la UAC?\n\n¿Que? ¿Ya sabías eso? Vaya, pues entonces ya no se me ocurre que otra cosa contarte.";
+SWWM_INTERTIP25 = "Puedes esprintar contra enemigos para empujarlos fuera de tu camino. Los más débiles puede que mueran inmediatamente por el impacto y salgan volando.";
+SWWM_INTERTIP26 = "Si haces un sprint en el aire apuntando directamente al suelo, puede que aterrices con la fuerca suficiente para causar una onda de choque, apartando a la mayoría de enemigos a tu alrededor.";
+SWWM_INTERTIP27 = "Puedes activar objetos y abrir puertas a puñetazos. Esto también se puede hacer con la munición de Bola de Plomo del Trabuco, a excepción de los botones de salida.";
+SWWM_INTERTIP28 = "Las llamas de los cartuchos de Napalm del Trabuco se extenderán a otros enemigos cercanos (o a ti). Recuerda, si estás ardiendo, tírate al suelo y rueda... o ponte a dar vueltas, funciona igual.";
+SWWM_INTERTIP29 = "La munición incendiaria es inefectiva bajo el agua, por razones obvias.";
+SWWM_INTERTIP30 = "Mis novias son muy cuquis. Lo siento, es que tenía que decirlo.";
 // intermission fanart
 SWWM_INTERART = "Arte: ";
 // intermission 4komas (TBD)

@@ -46,6 +46,8 @@ Class Demolitionist : PlayerPawn
 	int deadtimer;
 	transient int revivefail;
 
+	Actor selflight;
+
 	Default
 	{
 		Speed 1;
@@ -443,6 +445,12 @@ Class Demolitionist : PlayerPawn
 	{
 		Super.Tick();
 		if ( !player ) return;
+		if ( !selflight )
+		{
+			selflight = Spawn("DemolitionistSelfLight",pos);
+			selflight.target = self;
+			selflight.Tick();
+		}
 		oldlagvel = lagvel;
 		oldlagready = lagready;
 		if ( player.weaponstate&WF_WEAPONBOBBING ) lagready = lagready*.9+.1;
@@ -1686,5 +1694,44 @@ Class ReviveCooldown : Powerup
 	override void OwnerDied()
 	{
 		// do nothing, this "powerup" is preserved on death
+	}
+}
+
+// not an actual light, just handles the attach/detach
+Class DemolitionistSelfLight : Actor
+{
+	Default
+	{
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+	}
+	bool activelight()
+	{
+		// active all the time except when invisible or in certain
+		// animation frames
+		if ( target.bINVISIBLE || (target.alpha <= double.epsilon) ) return false;
+		if ( target.InStateSequence(target.CurState,target.FindState("Death")) && ((target.frame == 20) || (target.frame == 22) || (target.frame == 23) || (target.frame == 25) || (target.frame == 27) || (target.frame == 28) || (target.frame == 30) || (target.frame == 31) || (target.frame == 32) || (target.frame == 33) || (target.frame == 34)) )
+			return false;
+		if ( target.InStateSequence(target.CurState,target.FindState("CrouchDeath")) && ((target.frame == 7) || (target.frame == 10) || (target.frame == 11)) )
+			return false;
+		return true;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target || (Demolitionist(target).selflight != self) )
+		{
+			Destroy();
+			return;
+		}
+		if ( !activelight() )
+			target.A_RemoveLight('DemoSelfLight');
+		else if ( activelight() )
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(12,0,target.player.viewz-target.pos.z),0,30,90,target.pitch);
+		if ( target.bINVISIBLE || (target.alpha <= double.epsilon) )
+			target.A_RemoveLight('DemoSelfLight2');
+		else
+			target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,Color(32,48,24),80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
 	}
 }

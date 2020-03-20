@@ -530,20 +530,22 @@ Class SWWMStatusBar : BaseStatusBar
 		// in doom/heretic (draw key icons)
 		if ( !(gameinfo.gametype&(GAME_DOOMCHEX|GAME_HERETIC)) ) return;
 		Vector2 keypos = (ss.x-(margin+2),margin+19);
-		int rowc = 0;
-		double roww = 0;
-		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
+		int colc = 0;
+		double colh = 0;
+		int n = Key.GetKeyTypeCount();
+		for ( int i=0; i<n; i++ )
 		{
-			if ( !(i is "Key") || !i.Icon.IsValid() ) continue;
-			Vector2 siz = TexMan.GetScaledSize(i.Icon);
-			Screen.DrawTexture(i.Icon,false,keypos.x-siz.x,keypos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			keypos.y += siz.y+2;
-			roww = max(roww,siz.x);
-			if ( ++rowc == 3 )
+			let k = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)));
+			if ( !k || !k.Icon.IsValid() ) continue;
+			Vector2 siz = TexMan.GetScaledSize(k.Icon);
+			Screen.DrawTexture(k.Icon,false,keypos.x-siz.x,keypos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			keypos.x -= siz.x+2;
+			colh = max(colh,siz.y);
+			if ( ++colc == 8 )
 			{
-				keypos.y = margin+19;
-				keypos.X -= roww+2;
-				roww = rowc = 0;
+				keypos.x = ss.x-(margin+2);
+				keypos.y += colh+2;
+				colh = colc = 0;
 			}
 		}
 	}

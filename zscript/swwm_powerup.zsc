@@ -712,21 +712,24 @@ Class RagekitPower : Powerup
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_RAGEKIT"));
 	}
 
+	void DoHitFX()
+	{
+		if ( level.maptime <= lasteffect+5 ) return;
+		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
+		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
+		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )
+			lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
+		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
+		lasteffect = level.maptime;
+		lastpulse = max(lastpulse,gametic+35);
+	}
+
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
 		if ( !passive && ((damageType == 'Melee') || (damageType == 'Jump') || (damageType == 'Dash') || (damageType == 'GroundPound')) )
 		{
 			newdamage = damage*8;
-			if ( level.maptime > lasteffect+5 )
-			{
-				SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
-				Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
-				if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )
-					lastrage = SWWMHandler.AddOneliner("ragekit",2,5);
-				Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
-				lasteffect = level.maptime;
-				lastpulse = max(lastpulse,gametic+35);
-			}
+			DoHitFX();
 		}
 		else if ( !passive && inflictor && inflictor.FindInventory("ParriedRage") ) newdamage = damage*8;	// parried projectile
 		else if ( passive )

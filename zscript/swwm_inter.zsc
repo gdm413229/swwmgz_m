@@ -1,11 +1,11 @@
-Mixin Class SWWMStatScreen
+Class SWWMStatScreen : StatusScreen abstract
 {
 	transient TextureID bgtex, arttex;
 	transient Font TewiFont, MPlusFont;
-	int whichart;
+	int whichart, whichtip;
 	transient CVar intertype, lang;
-	double hs;
-	Vector2 ss, origin;
+	double hs, hs2;
+	Vector2 ss, ss2, origin, origin2;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
@@ -37,6 +37,7 @@ Mixin Class SWWMStatScreen
 		else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
 		else vsize = tsize;
 		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		Font fnt = LangFont(TewiFont);
 		// background pics (fanart, 4komas)
 		if ( intertype.GetInt() == 1 )
 		{
@@ -50,7 +51,6 @@ Mixin Class SWWMStatScreen
 			else vsize = tsize;
 			Screen.DrawTexture(arttex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
 			String bstr = String.Format("\cx%s\c- %s",StringTable.Localize("$SWWM_FANART"),artstr.Mid(semic+1));
-			Font fnt = LangFont(TewiFont);
 			int len = fnt.StringWidth(bstr);
 			int bw = int((len+8)*hs), bh = int((fnt.GetHeight()+4)*hs);
 			Screen.Dim("Black",.8,Screen.GetWidth()-bw,Screen.GetHeight()-bh,bw,bh);
@@ -60,12 +60,70 @@ Mixin Class SWWMStatScreen
 		{
 			// TBD when there's art
 		}*/
-		// TODO intermission tips at the bottom
+		// intermission tips at the bottom
+		if ( !whichtip )
+		{
+			int maxtip = StringTable.Localize("$SWWM_NINTERTIP").ToInt();
+			whichtip = Random[InterArt](1,maxtip);
+		}
+		String tipstr = "\cd"..String.Format(StringTable.Localize("$SWWM_INTERTIP"),whichtip).."\c- "..StringTable.Localize(String.Format("$SWWM_INTERTIP%d",whichtip));
+		BrokenLines l = fnt.BreakLines(tipstr,300);
+		int bw = int(308*hs), bh = int((fnt.GetHeight()*l.Count()+8)*hs);
+		double xx = 10, yy = (ss.y-10)-(fnt.GetHeight()*l.Count());
+		Screen.Dim("Black",.8,int((xx-4)*hs),int((yy-4)*hs),bw,bh);
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += fnt.GetHeight();
+		}
+	}
+	override int DrawLF()
+	{
+		Font fnt = LangFont(TewiFont);
+		int len = fnt.StringWidth(lnametexts[0]);
+		bool auth = (authortexts[0].Length()>0);
+		Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(4*hs2),int((len+8)*hs2),int((fnt.GetHeight()+(auth?2:4))*hs2));
+		Screen.DrawText(fnt,Font.CR_GREEN,(ss2.x-len)/2.,6,lnametexts[0],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		double foy = fnt.GetHeight()+(auth?6:8);
+		if ( auth )
+		{
+			double oy = foy*(hs2/hs);
+			int len2 = fnt.StringWidth(authortexts[0]);
+			Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(oy*hs),int((len+8)*hs2),int((fnt.GetHeight()+2)*hs));
+			Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-len2)/2.,oy,authortexts[0],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			foy += (fnt.GetHeight()+2)*(hs/hs2);
+		}
+		foy += 8.;
+		String str = StringTable.Localize("$WI_FINISHED");
+		len = fnt.StringWidth(str);
+		Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(foy*hs2),int((len+8)*hs2),int((fnt.GetHeight()+4)*hs2));
+		Screen.DrawText(fnt,Font.CR_FIRE,(ss2.x-len)/2.,foy+2,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		// return not used
+		return 0;
+	}
+	override void DrawEL()
+	{
+		Font fnt = LangFont(TewiFont);
+		String str = StringTable.Localize("$WI_ENTERING");
+		int len = fnt.StringWidth(str);
+		Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(4*hs2),int((len+8)*hs2),int((fnt.GetHeight()+4)*hs2));
+		Screen.DrawText(fnt,Font.CR_FIRE,(ss2.x-len)/2.,6,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		double foy = fnt.GetHeight()+16;
+		len = fnt.StringWidth(lnametexts[1]);
+		bool auth = (authortexts[1].Length()>0);
+		Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(foy*hs2),int((len+8)*hs2),int((fnt.GetHeight()+(auth?2:4))*hs2));
+		Screen.DrawText(fnt,Font.CR_GREEN,(ss2.x-len)/2.,foy+2,lnametexts[1],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		if ( auth )
+		{
+			double oy = (foy+fnt.GetHeight()+2)*(hs2/hs);
+			int len2 = fnt.StringWidth(authortexts[1]);
+			Screen.Dim("Black",.8,int((ss2.x-len-8)/2*hs2),int(oy*hs),int((len+8)*hs2),int((fnt.GetHeight()+2)*hs));
+			Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-len2)/2.,oy,authortexts[1],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
 	}
 	override void drawShowNextLoc( void )
 	{
 		drawSWWMBg();
-		// TODO
 		drawEL();
 	}
 	override void Drawer( void )
@@ -73,8 +131,11 @@ Mixin Class SWWMStatScreen
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
 		hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		hs2 = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.);
 		ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		ss2 = (Screen.GetWidth(),Screen.GetHeight())/hs2;
 		origin = (ss.x-640,ss.y-400)/2.;
+		origin2 = (ss2.x-320,ss2.y-200)/2.;
 		switch ( CurState )
 		{
 		case StatCount:
@@ -91,65 +152,558 @@ Mixin Class SWWMStatScreen
 			break;
 		}
 	}
+	protected String TimeStr( int secs )
+	{
+		secs = max(secs,0);
+		int h = secs/3600;
+		int m = (secs/60)%60;
+		int s = secs%60;
+		if ( h ) return String.Format("%d\cu:\c-%02d\cu:\c-%02d",h,m,s);
+		else if ( m ) return String.Format("%d\cu:\c-%02d",m,s);
+		else return String.Format("%d",s);
+	}
+	protected int GetPct( int a, int b )
+	{
+		if ( a < 0 ) return 0;
+		if ( b <= 0 ) return 100;
+		return (a*100)/b;
+	}
 }
 
-// placeholders, will do the actual custom stuff soon
-Class SWWMStatScreen_SP : DoomStatusScreen
+Class SWWMStatScreen_SP : SWWMStatScreen
 {
-	Mixin SWWMStatScreen;
+	int intermissioncounter;
 
 	override void initStats()
 	{
-		Super.initStats();
+		intermissioncounter = gameinfo.intermissioncounter;
+		CurState = StatCount;
+		acceleratestage = 0;
+		sp_state = 1;
+		cnt_kills[0] = cnt_items[0] = cnt_secret[0] = -1;
+		cnt_time = cnt_par = -1;
+		cnt_pause = Thinker.TICRATE;
+		cnt_total_time = -1;
 	}
 
 	override void updateStats()
 	{
-		Super.updateStats();
+		if ( acceleratestage && (sp_state != 10) )
+		{
+			acceleratestage = 0;
+			sp_state = 10;
+			PlaySound("menu/buyinv");
+			cnt_kills[0] = Plrs[me].skills;
+			cnt_items[0] = Plrs[me].sitems;
+			cnt_secret[0] = Plrs[me].ssecret;
+			cnt_time = Thinker.Tics2Seconds(Plrs[me].stime);
+			cnt_par = wbs.partime/Thinker.TICRATE;
+			cnt_total_time = Thinker.Tics2Seconds(wbs.totaltime);
+		}
+		if ( sp_state == 2 )
+		{
+			if ( intermissioncounter )
+			{
+				cnt_kills[0] += max((Plrs[me].skills-cnt_kills[0])/10,2);
+				if ( !(bcnt%2) ) PlaySound("menu/demoscroll");
+			}
+			if ( !intermissioncounter || (cnt_kills[0] >= Plrs[me].skills) )
+			{
+				cnt_kills[0] = Plrs[me].skills;
+				PlaySound("menu/buyinv");
+				sp_state++;
+			}
+		}
+		else if ( sp_state == 4 )
+		{
+			if ( intermissioncounter )
+			{
+				cnt_items[0] += max((Plrs[me].sitems-cnt_items[0])/10,2);
+				if ( !(bcnt%2) ) PlaySound("menu/demoscroll");
+			}
+			if ( !intermissioncounter || (cnt_items[0] >= Plrs[me].sitems) )
+			{
+				cnt_items[0] = Plrs[me].sitems;
+				PlaySound("menu/buyinv");
+				sp_state++;
+			}
+		}
+		else if ( sp_state == 6 )
+		{
+			if ( intermissioncounter )
+			{
+				cnt_secret[0] += max((Plrs[me].ssecret-cnt_secret[0])/10,2);
+				if ( !(bcnt%2) ) PlaySound("menu/demoscroll");
+			}
+			if ( !intermissioncounter || (cnt_secret[0] >= Plrs[me].ssecret) )
+			{
+				cnt_secret[0] = Plrs[me].ssecret;
+				PlaySound("menu/buyinv");
+				sp_state++;
+			}
+		}
+		else if ( sp_state == 8 )
+		{
+			int sec = Thinker.Tics2Seconds(Plrs[me].stime);
+			int tsec = Thinker.Tics2Seconds(wbs.totaltime);
+			int psec = wbs.partime/Thinker.TICRATE;
+			if ( intermissioncounter )
+			{
+				if ( !(bcnt%2) ) PlaySound("menu/demoscroll");
+				cnt_time += max((sec-cnt_time)/10,3);
+				cnt_par += max((psec-cnt_par)/10,3);
+				cnt_total_time += max((tsec-cnt_total_time)/10,3);
+			}
+			if ( !intermissioncounter || (cnt_time >= sec) )
+				cnt_time = sec;
+			if ( !intermissioncounter || (cnt_total_time >= tsec) )
+				cnt_total_time = tsec;
+			if ( !intermissioncounter || (cnt_par >= psec) )
+			{
+				cnt_par = psec;
+				if ( cnt_time >= sec )
+				{
+					cnt_total_time = tsec;
+					PlaySound("menu/buyinv");
+					sp_state++;
+				}
+			}
+		}
+		else if ( sp_state == 10 )
+		{
+			if ( acceleratestage )
+			{
+				PlaySound("misc/w_pkup");
+				initShowNextLoc();
+			}
+		}
+		else if ( sp_state&1 )
+		{
+			if ( !--cnt_pause )
+			{
+				sp_state++;
+				cnt_pause = Thinker.TICRATE;
+			}
+		}
 	}
 
 	override void drawStats( void )
 	{
-		Super.drawStats();
+		drawLF();
+		Font fnt = LangFont(TewiFont);
+		// estimate max width of the whole stat counter
+		int maxlen, maxlenl = 0, maxlenr = 0;
+		// left strings
+		String str = StringTable.Localize("$TXT_IMKILLS")..":";
+		int len = fnt.StringWidth(str);
+		maxlenl = len;
+		str = StringTable.Localize("$TXT_IMITEMS")..":";
+		len = fnt.StringWidth(str);
+		if ( len > maxlenl ) maxlenl = len;
+		str = StringTable.Localize("$TXT_IMSECRETS")..":";
+		len = fnt.StringWidth(str);
+		if ( len > maxlenl ) maxlenl = len;
+		str = StringTable.Localize("$TXT_IMTIME")..":";
+		len = fnt.StringWidth(str);
+		if ( len > maxlenl ) maxlenl = len;
+		if ( wi_showtotaltime )
+		{
+			str = StringTable.Localize("$SCORE_TOTAL")..":";	// hey, as long as it works
+			len = fnt.StringWidth(str);
+			if ( len > maxlenl ) maxlenl = len;
+		}
+		if ( wbs.partime )
+		{
+			str = StringTable.Localize("$TXT_IMPAR")..":";
+			len = fnt.StringWidth(str);
+			if ( len > maxlenl ) maxlenl = len;
+		}
+		// right strings
+		if ( wi_percents )
+		{
+			str = String.Format("%d%",GetPct(Plrs[me].skills,wbs.maxkills));
+			len = fnt.StringWidth(str);
+			maxlenr = len;
+			str = String.Format("%d%",GetPct(Plrs[me].sitems,wbs.maxitems));
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+			str = String.Format("%d%",GetPct(Plrs[me].ssecret,wbs.maxsecret));
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+		}
+		else
+		{
+			str = String.Format("%d / %d",Plrs[me].skills,wbs.maxkills);
+			len = fnt.StringWidth(str);
+			maxlenr = len;
+			str = String.Format("%d / %d",Plrs[me].sitems,wbs.maxitems);
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+			str = String.Format("%d / %d",Plrs[me].ssecret,wbs.maxsecret);
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+		}
+		str = TimeStr(Thinker.Tics2Seconds(Plrs[me].stime));
+		len = fnt.StringWidth(str);
+		if ( len > maxlenr ) maxlenr = len;
+		if ( wi_showtotaltime )
+		{
+			str = TimeStr(Thinker.Tics2Seconds(wbs.totaltime));
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+		}
+		if ( wbs.partime )
+		{
+			str = TimeStr(wbs.partime/Thinker.TICRATE);
+			len = fnt.StringWidth(str);
+			if ( len > maxlenr ) maxlenr = len;
+		}
+		int step = fnt.GetHeight()+1;
+		int nl = clamp(sp_state/2,0,4);
+		if ( (nl == 4) )
+		{
+			if ( wi_showtotaltime ) nl++;
+			if ( wbs.partime ) nl++;
+		}
+		nl *= step;
+		maxlen = maxlenl+max(100,maxlenr);
+		// draw the whole damn thing
+		if ( sp_state >= 2 ) Screen.Dim("Black",.8,int((ss2.x-maxlen-8)*.5*hs2),int((ss2.y-nl-8)*.5*hs2),int((maxlen+8)*hs2),int((nl+8)*hs2));
+		double xx = (ss2.x-maxlen)/2., yy = (ss2.y-nl)/2.;
+		if ( sp_state >= 2 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMKILLS")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		yy += step;
+		if ( sp_state >= 4 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMITEMS")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		yy += step;
+		if ( sp_state >= 6 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMSECRETS")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		yy += step;
+		if ( sp_state >= 8 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMTIME")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		yy += step;
+		if ( wi_showtotaltime )
+		{
+			if ( sp_state >= 8 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$SCORE_TOTAL")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			yy += step;
+		}
+		if ( wbs.partime && (sp_state >= 8) ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMPAR")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		xx = (ss2.x+maxlen)/2.;
+		yy = (ss2.y-nl)/2.;
+		if ( wi_percents )
+		{
+			if ( cnt_kills[0] >= 0 )
+			{
+				str = String.Format("%d\cu%\c-",GetPct(cnt_kills[0],wbs.maxkills));
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+			if ( cnt_items[0] >= 0 )
+			{
+				str = String.Format("%d\cu%\c-",GetPct(cnt_items[0],wbs.maxitems));
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+			if ( cnt_secret[0] >= 0 )
+			{
+				str = String.Format("%d\cu%\c-",GetPct(cnt_secret[0],wbs.maxsecret));
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+		}
+		else
+		{
+			if ( cnt_kills[0] >= 0 )
+			{
+				str = String.Format("%d \cu/\c- %d",max(cnt_kills[0],0),wbs.maxkills);
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+			if ( cnt_items[0] >= 0 )
+			{
+				str = String.Format("%d \cu/\c- %d",max(cnt_items[0],0),wbs.maxitems);
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+			if ( cnt_secret[0] >= 0 )
+			{
+				str = String.Format("%d \cu/\c- %d",max(cnt_secret[0],0),wbs.maxsecret);
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+		}
+		if ( cnt_time >= 0 )
+		{
+			str = TimeStr(cnt_time);
+			len = fnt.StringWidth(str);
+			Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		}
+		yy += step;
+		if ( wi_showtotaltime )
+		{
+			if ( cnt_total_time >= 0 )
+			{
+				str = TimeStr(cnt_total_time);
+				len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			}
+			yy += step;
+		}
+		if ( wbs.partime && (cnt_par >= 0) )
+		{
+			str = TimeStr(cnt_par);
+			len = fnt.StringWidth(str);
+			Screen.DrawText(fnt,Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		}
 	}
 }
 
-Class SWWMStatScreen_Coop : CoopStatusScreen
+Class SWWMStatScreen_Coop : SWWMStatScreen
 {
-	Mixin SWWMStatScreen;
-
 	override void initStats()
 	{
-		Super.initStats();
+		CurState = StatCount;
+		acceleratestage = 0;
+		ng_state = 1;
+		cnt_pause = Thinker.TICRATE;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			playerready[i] = false;
+			cnt_kills[i] = cnt_items[i] = cnt_secret[i] = cnt_frags[i] = 0;
+			if ( !playeringame[i] ) continue;
+			dofrags += fragSum(i);
+		}
+		dofrags = !!dofrags;
 	}
 
 	override void updateStats()
 	{
-		Super.updateStats();
+		int fsum;
+		bool stillticking;
+		bool autoskip = autoSkip();
+		if ( (acceleratestage || autoskip) && (ng_state != 10) )
+		{
+			acceleratestage = 0;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_kills[i] = Plrs[i].skills;
+				cnt_items[i] = Plrs[i].sitems;
+				cnt_secret[i] = Plrs[i].ssecret;
+				if ( dofrags ) cnt_frags[i] = fragSum(i);
+			}
+			PlaySound("menu/buyinv");
+			ng_state = 10;
+		}
+		if ( ng_state == 2 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_kills[i] += max((Plrs[i].skills-cnt_kills[i])/10,2);
+				if ( cnt_kills[i] > Plrs[i].skills ) cnt_kills[i] = Plrs[i].skills;
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state++;
+			}
+		}
+		else if ( ng_state == 4 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_items[i] += max((Plrs[i].sitems-cnt_items[i])/10,2);
+				if ( cnt_items[i] > Plrs[i].sitems ) cnt_items[i] = Plrs[i].sitems;
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state++;
+			}
+		}
+		else if ( ng_state == 6 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_secret[i] += max((Plrs[i].ssecret-cnt_secret[i])/10,2);
+				if ( cnt_secret[i] > Plrs[i].ssecret ) cnt_secret[i] = Plrs[i].ssecret;
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state += 1+2*!dofrags;
+			}
+		}
+		else if ( ng_state == 8 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				fsum = fragSum(i);
+				cnt_frags[i] += max((fsum-cnt_frags[i])/10,1);
+				if ( cnt_frags[i] >= fsum ) cnt_frags[i] = fsum;
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state++;
+			}
+		}
+		else if ( ng_state == 10 )
+		{
+			int i;
+			for ( i=0; i<MAXPLAYERS; i++ )
+			{
+				// If the player is in the game and not ready, stop checking
+				if ( playeringame[i] && !players[i].Bot && !playerready[i] )
+					break;
+			}
+			// All players are ready; proceed.
+			if ( ((i == MAXPLAYERS) && acceleratestage) || autoskip )
+			{
+				PlaySound("misc/w_pkup");
+				initShowNextLoc();
+			}
+		}
+		else if ( ng_state&1 )
+		{
+			if ( !--cnt_pause )
+			{
+				ng_state++;
+				cnt_pause = Thinker.TICRATE;
+			}
+		}
 	}
 
 	override void drawStats( void )
 	{
-		Super.drawStats();
+		drawLF();
 	}
 }
 
-Class SWWMStatScreen_DM : DeathmatchStatusScreen
+Class SWWMStatScreen_DM : SWWMStatScreen
 {
-	Mixin SWWMStatScreen;
-
 	override void initStats()
 	{
-		Super.initStats();
+		CurState = StatCount;
+		acceleratestage = 0;
+		for( int i=0; i<MAXPLAYERS; i++ )
+		{
+			playerready[i] = false;
+			cnt_frags[i] = cnt_deaths[i] = player_deaths[i] = 0;
+		}
+		total_frags = 0;
+		total_deaths = 0;
+		ng_state = 1;
+		cnt_pause = Thinker.TICRATE;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] ) continue;
+			for ( int j=0; j<MAXPLAYERS; j++ )
+			{
+				if ( !playeringame[j] ) continue;
+				player_deaths[i] += Plrs[j].frags[i];
+			}
+			total_deaths += player_deaths[i];
+			total_frags += Plrs[i].fragcount;
+		}
 	}
 
 	override void updateStats()
 	{
-		Super.updateStats();
+		bool stillticking;
+		bool doautoskip = autoSkip();
+		if ( (acceleratestage || doautoskip) && (ng_state != 6) )
+		{
+			acceleratestage = 0;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_frags[i] = Plrs[i].fragcount;
+				cnt_deaths[i] = player_deaths[i];
+			}
+			PlaySound("menu/buyinv");
+			ng_state = 6;
+		}
+		if ( ng_state == 2 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_frags[i] += max((Plrs[i].fragcount-cnt_frags[i])/10,2);
+				if ( cnt_frags[i] > Plrs[i].fragcount ) cnt_frags[i] = Plrs[i].fragcount;
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state++;
+			}
+		}
+		else if ( ng_state == 4 )
+		{
+			if ( !(bcnt&2) ) PlaySound("menu/demoscroll");
+			stillticking = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] ) continue;
+				cnt_deaths[i] += max((player_deaths[i]-cnt_deaths[i])/10,2);
+				if ( cnt_deaths[i] > player_deaths[i] ) cnt_deaths[i] = player_deaths[i];
+				else stillticking = true;
+			}
+			if ( !stillticking )
+			{
+				PlaySound("menu/buyinv");
+				ng_state++;
+			}
+		}
+		else if ( ng_state == 6 )
+		{
+			int i;
+			for ( i=0; i<MAXPLAYERS; i++ )
+			{
+				// If the player is in the game and not ready, stop checking
+				if ( playeringame[i] && !players[i].Bot && !playerready[i] )
+					break;
+			}
+			// All players are ready; proceed.
+			if ( ((i == MAXPLAYERS) && acceleratestage) || doautoskip )
+			{
+				PlaySound("misc/w_pkup");
+				initShowNextLoc();
+			}
+		}
+		else if ( ng_state&1 )
+		{
+			if ( !--cnt_pause )
+			{
+				ng_state++;
+				cnt_pause = Thinker.TICRATE;
+			}
+		}
 	}
 
 	override void drawStats( void )
 	{
-		Super.drawStats();
+		drawLF();
 	}
 }

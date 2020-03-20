@@ -753,22 +753,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else if ( curtab == TAB_KEYS )
 		{
 			invlist.Clear();
-			// alphabetically sorted keys
-			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
+			// keys sorted by their index
+			int n = Key.GetKeyTypeCount();
+			for ( int i=0; i<n; i++ )
 			{
-				if ( !(inv is 'Key') ) continue;
-				String tag = inv.GetTag();
-				bool greater = false;
-				for ( int i=0; i<invlist.Size(); i++ )
-				{
-					String tag2 = invlist[i].GetTag();
-					if ( tag > tag2 ) continue;
-					greater = true;
-					invlist.Insert(i,inv);
-					break;
-				}
-				if ( greater ) continue;
-				invlist.Push(inv);
+				let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
+				if ( k ) invlist.Push(k);
 			}
 		}
 		else if ( curtab == TAB_STORE )
@@ -1228,7 +1218,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
-				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -1267,7 +1257,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
-				Screen.DrawText(fnt,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -1395,7 +1385,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
 				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
-				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -1418,7 +1408,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				len = TewiFont.StringWidth(str);
 				int clscol = Font.CR_FIRE;
 				if ( price > muns ) clscol = Font.CR_BLACK;
-				Screen.DrawText(TewiFont,clscol,origin.x+xx+collen[cols-1]+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(TewiFont,clscol,origin.x+xx+collen[cols-1]+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -1457,7 +1447,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					str = players[playerlist[i]].GetUserName();
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
-					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(128,0,0,0):Color(0,0,0,0));
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 					yy += 16;
 					if ( yy >= 370 )
 					{
@@ -1533,7 +1523,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 						else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 						else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
-						Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel1)?Color(128,0,0,0):Color(0,0,0,0));
+						Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel1)?Color(96,0,0,0):Color(0,0,0,0));
 						yy += 16;
 						if ( yy >= 370 )
 						{

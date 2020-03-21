@@ -559,6 +559,7 @@ Class SaltImpact : Actor
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+FOILINVUL;
 	}
 	override void PostBeginPlay()
 	{
@@ -632,6 +633,7 @@ Class SaltBeam : Actor
 		+ROLLCENTER;
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
+		+FOILINVUL;
 	}
 
 	void SpreadOut()
@@ -885,7 +887,11 @@ Class OnFire : Actor
 		{
 			cnt = min(10,30-int(29*(min(1.,amount/500.)**3.)));
 			if ( victim.bSHOOTABLE && (victim.Health > 0) && (amount > 0) )
-				victim.DamageMobj(self,instigator,clamp(int(amount*.1),1,30),'Fire',DMG_THRUSTLESS);	// need to use this actor to have a proper obituary
+			{
+				int flg = DMG_THRUSTLESS;
+				if ( victim is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're on fire, that shield is worthless
+				victim.DamageMobj(self,instigator,clamp(int(amount*.1),1,30),'Fire',flg);	// need to use this actor as inflictor to have a proper obituary
+			}
 			if ( !victim )
 			{
 				A_StopSound(CHAN_5);
@@ -1324,12 +1330,15 @@ Class TheBall : Actor
 		int dmg = int(vel.length()*4.2+heat*80);
 		bool is_schutt = victim.bSHOOTABLE;
 		// critical hit!
+		bool crit = false;
 		if ( is_schutt && !Random[Spreadgun](0,9) )
 		{
 			Spawn("SWWMItemFog",pos);
-			A_StartSound("misc/clonk",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			int whichclonk = Random[Spreadgun](1,11);
+			String snd = String.Format("misc/clonk%d",whichclonk);
+			A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
 			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
-			victim.A_StartSound("misc/clonk",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			victim.A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
 			slamforce *= 4;
 			dmg *= 4;
 			vel *= 1.1;
@@ -1342,10 +1351,11 @@ Class TheBall : Actor
 				s.alpha *= .2;
 				s.vel = pvel;
 			}
+			crit = true;
 		}
 		SWWMHandler.DoKnockback(victim,vel.unit(),slamforce);
 		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && is_schutt);
-		dmg = victim.DamageMobj(self,target,dmg,'Concussion',DMG_THRUSTLESS);
+		dmg = victim.DamageMobj(self,target,dmg,'Concussion',crit?(DMG_THRUSTLESS|DMG_FOILINVUL):DMG_THRUSTLESS);	// crits ignore invulnerability
 		Vector3 dir = -vel.unit();
 		// slam jam
 		if ( bleeds )

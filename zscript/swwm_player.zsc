@@ -571,7 +571,9 @@ Class Demolitionist : PlayerPawn
 					a.vel += pushdir*(15+(spd*150/max(50,a.mass)));
 					a.vel.z += 5+(spd*(50/max(50,a.mass)));
 				}
-				a.DamageMobj(self,self,int(15+spd*2.5),'Dash',DMG_THRUSTLESS);
+				int flg = DMG_THRUSTLESS;
+				if ( FindInventory("RagekitPower") ) flg |= DMG_FOILINVUL;
+				a.DamageMobj(self,self,int(15+spd*2.5),'Dash',flg);
 			}
 		}
 		else if ( InStateSequence(CurState,FindState("Jump")) )
@@ -1733,5 +1735,30 @@ Class DemolitionistSelfLight : Actor
 			target.A_RemoveLight('DemoSelfLight2');
 		else
 			target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,Color(32,48,24),80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
+	}
+}
+
+// for the doom 2 cast
+Class CastDemolitionist : Actor
+{
+	Default
+	{
+		DeathSound "demolitionist/death";
+	}
+	States
+	{
+	Spawn:
+	See:
+		CCD1 ABCDEFGHIJKLMNOP 2;
+		Loop;
+	Missile:
+		CCD1 A 2;
+		CCD2 ABCDEF 2;
+		Goto See;
+	Death:
+		CCD1 A 2;
+		CCD3 ABCDEFGHIJKLMNOP 2;
+		CCD3 Q -1;
+		Stop;
 	}
 }

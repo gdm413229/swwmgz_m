@@ -1356,16 +1356,16 @@ T_GREENKEY = "\cdLlave Verde\c-";
 T_BLUEKEY = "\chLlave Azul\c-";
 T_REDKEY = "\cgLlave Roja\c-";
 T_KEYSTEEL = "\cuLlave de Acero\c-";
-T_KEYCAVE = "\ceLlave de Cueva\c-";
+T_KEYCAVE = "\ceLlave de la Caverna\c-";
 T_KEYAXE = "\ccLlave de Hacha\c-";
 T_KEYFIRE = "\cgLlave de Fuego\c-";
-T_KEYEMERALD = "\cdLlave de Esmeralda\c-";
-T_KEYDUNGEON = "\ccLlave de Mazmorra\c-";
+T_KEYEMERALD = "\cdLlave Esmeralda\c-";
+T_KEYDUNGEON = "\ccLlave del Calabozo\c-";
 T_KEYSILVER = "\cjLlave de Plata\c-";
-T_KEYRUSTED = "\cbLlave de Óxido\c-";
+T_KEYRUSTED = "\cbLlave Oxidada\c-";
 T_KEYHORN = "\coLlave de Cuerno\c-";
-T_KEYSWAMP = "\cpLlave de Ciénaga\c-";
-T_KEYCASTLE = "\cxLlave de Castillo\c-";
+T_KEYSWAMP = "\cpLlave del Pantano\c-";
+T_KEYCASTLE = "\cxLlave del Castillo\c-";
 // shortened doom key pickup messages
 GOTBLUECARD = "Tarjeta Llave Azul";
 GOTYELWCARD = "Tarjeta Llave Amarilla";
@@ -1406,7 +1406,7 @@ E1TEXT =
 "Sigues sin tener ni idea de como has\n"
 "ido a parar a la vieja base de Fobos\n"
 "de la UAC, pero no hay tiempo para\n"
-"pensare en eso. Debes encontrar la\n"
+"pensar en eso. Debes encontrar la\n"
 "forma de regresar a la Tierra, para\n"
 "cumplir to misión de detener la\n"
 "invasión del Infierno.\n"
@@ -1460,7 +1460,7 @@ E3TEXT =
 "epicentro de la zona de invasión. Muerte y\n"
 "destrucción llenan las calles, y algún\n"
 "sádico bastardo parece haber mutilado\n"
-"un pobre conejíto, ugh...\n"
+"un pobre conejito, ugh...\n"
 "\n"
 "Sí, esos demonios van a estar MUY muertos...\n"
 "\n"
@@ -1509,7 +1509,7 @@ C2TEXT =
 "transmisión.\n"
 "\n"
 "\"Oye, perdón por interrumpir pero, acabamos\n"
-"de encontrar por donde salen los hijos de\n"
+"de descubrir de donde salen los hijos de\n"
 "perra esos. Si no es mucho pedir, ¿podrías\n"
 "mover ese brillante culito metálico p'allá\n"
 "y mandar a esos capullos de vuelta al\n"
@@ -1548,7 +1548,7 @@ C4TEXT =
 "tenemos mucho trabajo que hacer, sabes,\n"
 "reconstruyendo la Tierra y tal...\"";
 C5TEXT =
-"¿Que es este sitio? Parece ser parte el Infierno,\n"
+"¿Que es este sitio? Parece ser parte del Infierno,\n"
 "pero estas estructuras son todas hechas por la\n"
 "mano del hombre...\n"
 "\n"
@@ -1570,7 +1570,7 @@ HE1TEXT =
 "humo cuando vea lo que haces con sus preciadas\n"
 "legiones de no muertos...";
 HE2TEXT =
-"Esas criaturas to cachas no fueron rival para\n"
+"Esas criaturas tó cachas no fueron rival para\n"
 "ti, y al caer la última al suelo, ves como\n"
 "los portales que guardaban se abren. ¿A donde\n"
 "pueden llevar?\n"
@@ -1612,7 +1612,7 @@ HE4TEXT =
 "a casa, aunque tengas que matar a mil más\n"
 "de estos estúpidos monstruos.";
 HE5TEXT =
-"Con la muerte del último Minotauro, una\n"
+"Con la muerte del último Maulotauro, una\n"
 "vez más ves como los portales se abren\n"
 "a otro mundo. No puedes ver realmente\n"
 "a donde te van a llevar, pero eso ya no\n"
@@ -1630,7 +1630,7 @@ TXT_HEXEN_CLUS1MSG =
 "siete portales, finalmente estás en otro de\n"
 "los submundos de Cronos. Crueles desiertos,\n"
 "áridos yermos y apestosas ciénagas te esperan\n"
-"más alante, y seguramente más de esos molestos\n"
+"más adelante, y seguramente más de esos molestos\n"
 "acertijos.\n"
 "\n"
 "Te encuentras con algo familiar, es ese asqueroso\n"
@@ -1676,7 +1676,7 @@ TXT_HEXEN_CLUS4MSG =
 "Este sitio apesta a muerte. Es... ¿un cementerio?";
 TXT_HEXEN_WIN1MSG =
 "Cruzando el último portal, sientes como una\n"
-"enorme fuerza te atapulta a través de varias\n"
+"enorme fuerza te catapulta a través de varias\n"
 "dimensiones.\n"
 "\n"
 "Tras casi pasar tu velocímetro por el indicador\n"
@@ -1704,13 +1704,15 @@ TXT_HEXEN_WIN2MSG =
 "hablar contigo...";
 TXT_HEXEN_WIN3MSG =
 "\"Bien jugado, mortal, has conquistado este\n"
-"tablero, pero tu misión lejos quede de haber\n"
-"terminado. Hay aun otro Jinete... quien no\n"
-"descansará hasta haber vengado a sus camaradas.\"\n"
-"Te ries. \"Si es como los otros, lo haré\n"
-"suplicar clemencia antes de que llegue la hora\n"
-"de cenar. Ahora si me disculpas, hay una bella\n"
-"dama que me espera en casa.\"";
+"tablero, pero tu misión lejos queda de\n"
+"haber terminado. Hay aun otro Jinete...\n"
+"quien no descansará hasta haber vengado a\n"
+"sus camaradas.\"\n"
+"\n"
+"Te ries. \"Si es como los otros, le haré\n"
+"suplicar clemencia antes de que llegue la\n"
+"hora de cenar. Ahora si me disculpas, hay\n"
+"una bella dama que me espera en casa.\"";
 // Re-tagged monsters
 FN_ZOMBIE = "Zombi";
 FN_SHOTGUN = "Calvito";
@@ -1726,6 +1728,19 @@ FN_PAIN = "Dolor de Culo";
 FN_SPIDER = "Mami Araña";
 FN_CYBER = "Madre Mía Que Culazo";
 FN_WOLFSS = "Votante de VOX";
+CC_ZOMBIE = "Zombi";
+CC_SHOTGUN = "Calvito";
+CC_HEAVY = "Tocacojones";
+CC_DEMON = "Rosita";
+CC_LOST = "Calaverita";
+CC_CACO = "Tomatín";
+CC_HELL = "Marroncito";
+CC_BARON = "Señor Gruñón";
+CC_ARACH = "Ñiño";
+CC_PAIN = "Dolor de Culo";
+CC_SPIDER = "Mami Araña";
+CC_CYBER = "Madre Mía Que Culazo";
+CC_HERO = "¡Tú!";
 FN_DOG = "Perrete";
 FN_CHICKEN = "Gallina";
 FN_CLINK = "Rasguñitos";
@@ -1870,7 +1885,7 @@ SWWM_INTERTIP28 = "Las llamas de los cartuchos de Napalm del Trabuco se extender
 SWWM_INTERTIP29 = "La munición incendiaria es inefectiva bajo el agua, por razones obvias.";
 SWWM_INTERTIP30 = "Mis novias son muy cuquis. Lo siento, es que tenía que decirlo.";
 // intermission fanart
-SWWM_INTERART = "Arte: ";
+SWWM_FANART = "Arte: ";
 // intermission 4komas (TBD)
 
 /* SUBTITLES */

@@ -57,6 +57,8 @@ Class SWWMArmor : Armor abstract
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
 		if ( !passive ) return;
+		if ( (damagetype == 'Drowning') || (damagetype == 'Falling') || (damagetype == 'Poison') || (damagetype == 'PoisonCloud') )
+			return;	// these go through armor and get ignored by the player
 		int saved;
 		if ( (amount > 0) && !DamageTypeDefinition.IgnoreArmor(damageType) && (damage > 0) )
 		{
@@ -490,6 +492,8 @@ Class ParriedRage : Inventory
 
 Class ParryField : Actor
 {
+	int lasteggtic;
+
 	Default
 	{
 		+NOGRAVITY;
@@ -563,6 +567,11 @@ Class ParryField : Actor
 			i.bAMBUSH = true;
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
+			if ( (level.maptime > lasteggtic) && !Random[Parry](0,9) )
+			{
+				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
+				lasteggtic = level.maptime+5;
+			}
 		}
 		if ( --special1 <= 0 ) Destroy();
 	}
@@ -587,6 +596,11 @@ Class ParryField : Actor
 			A_StartSound("misc/ricochet",CHAN_VOICE,CHANF_OVERLAP,.7);
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
+			if ( (level.maptime > lasteggtic) && !Random[Parry](0,9) )
+			{
+				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
+				lasteggtic = level.maptime+5;
+			}
 			// three options:
 			switch ( Random[Parry](0,7) )
 			{
@@ -750,12 +764,14 @@ Class SWWMWeapon : Weapon abstract
 				invoker.bNOEXTREMEDEATH = true;
 			}
 			d.HitActor.DaggerAlert(self);
-			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			int flg = DMG_USEANGLE|DMG_THRUSTLESS;
+			if ( raging ) flg |= DMG_FOILINVUL;
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',flg,atan2(d.HitDir.y,d.HitDir.x));
 			invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			int quakin = raging?8:2;
 			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
-			if ( !d.HitActor.bNOBLOOD && !d.HitActor.bINVULNERABLE )
+			if ( !d.HitActor.bNOBLOOD && (raging || !d.HitActor.bINVULNERABLE) )
 			{
 				d.HitActor.TraceBleed(dmg,invoker);
 				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);

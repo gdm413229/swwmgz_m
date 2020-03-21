@@ -444,7 +444,7 @@ SWWM_LORETXT_DEMOLITIONIST =
 "Nacionalidad: Japonesa\n"
 "Fecha de Nacimiento: 20 de Enero de 2148\n"
 "\n"
-"Resumen: El Demolicionista es un refinamiento del antiguo programa de supersoldado Oni Rojo, una unidad de combate controlada por IA capaz de utilizar eficientemente cualquier arma a su disposición. Está equipado con un unidad de Impulsor JetBurst portátil, permitiéndole realizar rápidos impulsos y esprints en el aire, también viene equipado con dos contenedores Hammerspace, para un acceso fácil a todas sus armas y municiones, los dos, junto con un llavero, unidos a un Cinturón Útil Magnético. Su núcleo de IA está construido sobre la misma tecnología que los maidbots de Akari Labs, el framework de IA Nekuronbot, provisto como regalo de amistad entre Saya y Zanaveth II, la actual directora de Nekuratek. Gracias a esta tecnología, el Demolicionista es casi indistinguible de una persona real en su comportamiento y respuesta emocional, lo cual hace más comoda la interacción con civiles. La primera unidad fue desplegada en Junio de 2148 en territorio de la Unión de Estados para combatir la invasión demoníaca atraida por las intervenciones de la UAC en el Infierno.\n"
+"Resumen: El Demolicionista es un refinamiento del antiguo programa de supersoldado Oni Rojo, una unidad de combate controlada por IA capaz de utilizar eficientemente cualquier arma a su disposición. Está equipado con un unidad de Impulsor JetBurst portátil, permitiéndole realizar rápidos impulsos y sprints en el aire, también viene equipado con dos contenedores Hammerspace, para un acceso fácil a todas sus armas y municiones, los dos, junto con un llavero, unidos a un Cinturón Útil Magnético. Su núcleo de IA está construido sobre la misma tecnología que las maidbots de Akari Labs, el framework de IA Nekuronbot, provisto como regalo de amistad entre Saya y Zanaveth II, la actual directora de Nekuratek. Gracias a esta tecnología, y combinada con una Pantalla CuteEmotion, el Demolicionista es casi indistinguible de una persona real en su comportamiento y respuesta emocional, lo cual hace más comoda la interacción con civiles. La primera unidad fue desplegada en Junio de 2148 en territorio de la Unión de Estados para combatir la invasión demoníaca atraida por las intervenciones de la UAC en el Infierno.\n"
 "\n"
 "Apéndice: Muchos más detalles se dieron a conocer sobre el primer Demolicionista gracias a una sesión en directo de preguntas y respuestas realizada por Saya Miyamoto. El nombre completo de la unidad es \"Demo Miyamoto\", dado por Saya Miyamoto. Se identifica como no binaria, y menciona que aparte del pronombre \"elle\", tambien acepta ser referida como \"ella\". En cuanto a personalidad, se le puede describir como \"parlanchina\", le encantan los chistes y siempre intenta hacer sonreír a la gente, pero tambien puede ser muy seria y resuelta en su deseo de proteger a quien lo necesite. Demo también lleva un \"Collar de la Suerte\" como muestra de amistad con Saya, aunque la mayoría de la gente comenta que parece algún tipo de accesorio de BDSM.\n"
 "\n"
@@ -554,7 +554,7 @@ SWWM_LORETXT_FABRICATOR =
 "Designación: Fabricador de Munición Universal\n"
 "Fabricante: Cyrus Enterprises\n"
 "\n"
-"Resumen: Nanofabricadores portátiles que pueden construir cualquier tipo de munición de la nada. Disponibles en varios tiers. La diferencie principal siendo el material base total disponible y la complejidad de la munición que se puede fabricar.\n"
+"Resumen: Nanofabricadores portátiles que pueden construir cualquier tipo de munición de la nada. Disponibles en varios tiers. La diferencia principal siendo el material base total disponible y la complejidad de la munición que se puede fabricar.\n"
 "\n"
 "Apéndice: El tier más alto es difícil de encontrar, pero tiene suficiente material para un abastecimiento completo de todos los tipos de munición.\n"
 "\n"
@@ -751,7 +751,7 @@ SWWM_LORETXT_KIRIN =
 "Nacionalidad: Akkouxhei\n"
 "Fecha De Nacimiento: 13 de Abril de 2080\n"
 "\n"
-"Resumen: Kirin Xanai es el actual lider del Imperio Rust de Akkou, uno de las varias ramas desprendidas del Imperio de Novoskhana en protesta de las agresivas políticas de la Emperatriz Eterna. Es un líder muy sensato y se ve \"como cualquier otro tío\". La anteriormente afligida tierra de Akkou ha encontrado gran prosperidad tras la formación del Imperio Rust, con la familia Xanai siendo vista como una bendición de los dioses. Kirin adora entablar amistad con la gente, y es absolutamente adorable.\n"
+"Resumen: Kirin Xanai es el actual líder del Imperio Rust de Akkou, una de las varias ramas desprendidas del Imperio de Novoskhana en protesta de las agresivas políticas de la Emperatriz Eterna. Es un líder muy sensato y se ve \"como cualquier otro tipo\". La anteriormente afligida tierra de Akkou ha encontrado gran prosperidad tras la formación del Imperio Rust, con la familia Xanai siendo vista como una bendición de los dioses. Kirin adora entablar amistad con la gente, y es absolutamente adorable.\n"
 "\n"
 "Apéndice: Al ser de una de las ramas mayores de realeza Anarukon, su casamiento con Saya Miyamoto (♥) abrió varias oportunidades para la alianza con humanos, y sirvió para curar las heridas anteriormente causadas por la intrusión de Imanaki Corp.\n"
 "\n"
@@ -937,7 +937,7 @@ SWWM_LORETXT_ONOKE =
 "Clasificación: Asesinato misterioso no resuelto\n"
 "Localización: Kereshnovka\n"
 "\n"
-"Resumen: En Octubre de 1997, ocurrió un incendio en la Mansion Onoke, a las afueras de Kereshnovka, durante una reunión entre las familias Imanaki y Onoke. Cuando llegaron los bomberos, se encontraron a todos muertos, habiendo sido masacrados cada uno de una forma más cruenta que el anterior. El culpable nunca fue encontrado.\n"
+"Resumen: En Octubre de 2003, ocurrió un incendio en la Mansion Onoke, a las afueras de Kereshnovka, durante una reunión entre las familias Imanaki y Onoke. Cuando llegaron los bomberos, se encontraron a todos muertos, habiendo sido masacrados cada uno de una forma más cruenta que el anterior. El culpable nunca fue encontrado.\n"
 "\n"
 "Apéndice: Inicialmente, ya que el mayordomo jefe de la familia no fue encontrado, algunos sospecharon que había sido responsable, pero mucho mas tarde su cuerpo (o lo que quedaba de él) fue encontrado entre unos árboles cercanos, con su cara machacada e irreconocible.\n"
 "\n"
@@ -1100,7 +1100,7 @@ SWWM_LORETXT_SPREADGUN =
 "\n"
 "Recarga: Descarga el cartucho actual y carga uno nuevo. Si el cartucho cargado no ha sido usado se añadirá de nuevo a su reserva de munición, o si no se dejará caer en el suelo.\n"
 "\n"
-"Apéndice: Aunque simple en su operación, la constante recarga manual tiende a volverse agotadora rápidamente par algunos usuarios. Una variante semiautomática del Trabuco se está probando actualmente y puede que esté lista para el público en unos cuantos años, aun hay algunos problemas que resolver como los atascos frecuentes.\n"
+"Apéndice: Aunque simple en su operación, la constante recarga manual tiende a volverse agotadora rápidamente para algunos usuarios. Una variante semiautomática del Trabuco se está probando actualmente y puede que esté lista para el público en unos cuantos años, aun hay algunos problemas que resolver como los atascos frecuentes.\n"
 "\n"
 "Nota de Saya: La mierda esta es jodidamente poco práctica, especialmente la forma de recargarla. Como coño es que nadie se ha reventado un hoyo por la palma de la mano recolocando el cañón es algo que me supera.";
 SWWM_LORETXT_SUNKAEZE =
@@ -1685,7 +1685,8 @@ TXT_HEXEN_WIN1MSG =
 "pared cercana.\n"
 "\n"
 "Estás en una extraña sala, con una brillante\n"
-"luz en el centro.\n";
+"luz en el centro. Parece venir de una especie\n"
+"de altar.";
 TXT_HEXEN_WIN2MSG =
 "Al acercarte, puedes verla. ¿Se supone que esta\n"
 "cosa es la fuente del poder de Korax? Te\n"
@@ -1696,25 +1697,20 @@ TXT_HEXEN_WIN2MSG =
 "Despues de meterla en el contenedor de\n"
 "Hammerspace, te das cuenta de que hay alguien\n"
 "sentado en una mesa cercana, jugando a una\n"
-"extraña forma de ajedred... o al menos eso es\n"
-"lo que parece.";
+"extraña forma de ajedrez... o al menos eso es\n"
+"lo que parece.\n"
+"\n"
+"Con una voz profunda y gutural, comienza a\n"
+"hablar contigo...";
 TXT_HEXEN_WIN3MSG =
-"\"Bien jugado, amigo metálico, pero esto aun\n"
-"no ha terminado.\" Diciendo esto, levanta\n"
-"una de sus piezas, y empuja otra fuera del\n"
-"tablero, una pieza que es exactamente igual\n"
-"que Korax.\n"
-"\n"
-"\"Puede que hayas conquistado este tablero,\n"
-"pero tu misión está lejos de haber terminado.\n"
-"Todavía queda otro Jinete de Serpiente... y\n"
-"no descansará hasta haber vengado a sus\n"
-"camaradas.\"\n"
-"\n"
-"Te ries. \"Si es como los otros dos, estará\n"
-"suplicando clemencia antes de que llegue la\n"
-"hora de cenar. Ahora si me disculpas, hay una\n"
-"bella dama que me espera en casa.\"";
+"\"Bien jugado, mortal, has conquistado este\n"
+"tablero, pero tu misión lejos quede de haber\n"
+"terminado. Hay aun otro Jinete... quien no\n"
+"descansará hasta haber vengado a sus camaradas.\"\n"
+"Te ries. \"Si es como los otros, lo haré\n"
+"suplicar clemencia antes de que llegue la hora\n"
+"de cenar. Ahora si me disculpas, hay una bella\n"
+"dama que me espera en casa.\"";
 // Re-tagged monsters
 FN_ZOMBIE = "Zombi";
 FN_SHOTGUN = "Calvito";

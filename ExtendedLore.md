@@ -454,7 +454,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   world of Novoskhana.
 - 45306 BC: The Eternal Undying Empire of Novoskhana is founded.
 - 13903 BC: The Kurenai Kingdom is founded.
-- 13675 BC: After a long absence, Father Nostros returns to the Kurenai Kingdom
+- 10675 BC: After a long absence, Father Nostros returns to the Kurenai Kingdom
   followed by an army of demonic creatures, he takes over and forces everyone
   else out. The old Kurenai Kingdom becomes what is now known as Hell.
 - 4673 BC: Prince Admun is born.

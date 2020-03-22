@@ -17,15 +17,15 @@ respective weapon.
   Explodium Gun	| 8000
   Spreadgun	| 15000
    Red Shell	| 500
-   Green Shell	| 600
-   White Shell	| 900
-   Blue Shell	| 700
-   Black Shell	| 1000
-   Purple Shell	| 800
+   Green Shell	| 800
+   White Shell	| 1000
+   Blue Shell	| 1500
+   Black Shell	| 3500
+   Purple Shell	| 1200
    Golden Shell | N/A
   Wallbuster	| 35000
   Eviscerator	| 50000
-   Evisc. Shell	| 3000
+   Evisc. Shell	| 2500
   Hellblazer	| 90000
    Missiles	| 6000
    Crackshots	| 8000

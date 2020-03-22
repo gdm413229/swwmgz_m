@@ -909,7 +909,7 @@ Class OnFire : Actor
 		if ( delay > 0 ) delay--;
 		if ( (level.maptime+special1)%5 ) return;
 		int numpt = clamp(int(Random[FlameT](2,4)*amount*0.02),1,4);
-		numpt = int(clamp(numpt*mult**.5,1,5));
+		numpt = int(clamp(numpt*mult**.5,1,3));
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pos = victim.Vec3Offset(FRandom[FlameT](-victim.radius,victim.radius)*0.8,FRandom[FlameT](-victim.radius,victim.radius)*0.8,FRandom[FlameT](victim.height*0.2,victim.height*0.8));
@@ -918,6 +918,7 @@ Class OnFire : Actor
 			if ( amount > 0 )
 			{
 				let c = victim.Spawn("OnFireTrail",pos);
+				c.special1 = Random[FlameT](-2,2);
 				c.scale *= max(.3,mult*0.5);
 				c.vel = victim.vel*0.5+(cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[FlameT](.5,2.)*c.scale.x;
 			}
@@ -1051,7 +1052,7 @@ Class OnFireTrail : Actor
 			Destroy();
 			return;
 		}
-		if ( !Random[FlameT](0,int(40*(default.alpha-alpha))) )
+		if ( !Random[FlameT](0,int(40*(default.alpha-alpha))) && !((GetAge()+special1)%3) )
 		{
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = (FRandom[FlameT](-0.2,0.2),FRandom[FlameT](-0.2,0.2),FRandom[FlameT](-0.2,0.2));
@@ -1361,20 +1362,28 @@ Class TheBall : Actor
 		if ( bleeds )
 		{
 			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
-			victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
-			victim.TraceBleed(dmg,self);
-			SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
+			if ( victim )
+			{
+				victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
+				victim.TraceBleed(dmg,self);
+				victim.SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
+			}
 		}
 		else
 		{
 			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
-			victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( victim ) victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
 			if ( vel.length() > 15. )
 			{
 				let s = Spawn("BallImpact",pos);
 				s.angle = atan2(dir.y,dir.x);
 				s.pitch = asin(-dir.z);
 			}
+		}
+		if ( crit )
+		{
+			SWWMHandler.DoBlast(self,150,25000,target);
+			A_Explode(dmg/2,150,0);
 		}
 		// only rip shootables
 		if ( (slamforce > girth) && is_schutt )

@@ -3,13 +3,11 @@ Mixin Class SWWMAutoUseFix
 {
 	override bool HandlePickup( Inventory item )
 	{
-		bool res = Super.HandlePickup(item);
-		if ( res && (item.GetClass() == item.GetClass()) )
+		if ( GetClass() == item.GetClass() )
 		{
 			if ( Use(true) ) Amount--;
-			if ( Amount <= 0 ) DepleteOrDestroy();
 		}
-		return res;
+		return Super.HandlePickup(item);
 	}
 }
 
@@ -466,27 +464,90 @@ Class BigPunchImpact : Actor
 
 Class ReflectedBullet : SWWMCasing {}
 
-Class ParriedRage : Inventory
+Class ParriedBuff : Inventory
 {
 	Default
 	{
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
 	}
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner.bMISSILE )
+		if ( !Owner.bMISSILE && !Owner.bSKULLFLY )
 		{
-			let s = Spawn("SWWMSmoke",Owner.pos);
+			// lost soul is no longer attacking
+			Destroy();
+			return;
+		}
+		if ( special1 <= 0 ) return;
+		// smoke trail
+		Actor s;
+		if ( special1&1 )
+		{
+			s = Spawn("SWWMSmoke",Owner.pos);
+			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,.6);
+			s.scale *= 1.2;
+			s.alpha *= .3;
+		}
+		if ( special1 > 1 )
+		{
+			s = Spawn("SWWMSmoke",Owner.pos);
 			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,1.2);
 			s.scale *= 2.;
 			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
 			s.SetShade(Color(4,2,1)*Random[Ponch](32,63));
 		}
+	}
+}
+
+// amplifies damage of parried projectiles
+Class ParryDamageChecker : Inventory
+{
+	Default
+	{
+		+Inventory.UNDROPPABLE;
+		+Inventory.UNTOSSABLE;
+		+Inventory.UNCLEARABLE;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+	}
+
+	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	{
+		Inventory buff;
+		if ( inflictor && (buff=inflictor.FindInventory("ParriedBuff")) )
+		{
+			double mult;
+			if ( buff.special1 <= 1 ) mult = 1.5;
+			else if ( buff.special1 >= 2 ) mult = 8.;
+			if ( buff.special1&1 ) mult *= 2.;
+			newdamage = int(damage*mult);
+		}
+	}
+}
+
+Class ParryRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale .1;
+		Alpha .3;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 A_SetScale(scale.x*(1+specialf1));
+		Stop;
 	}
 }
 
@@ -548,18 +609,21 @@ Class ParryField : Actor
 				if ( a.bSEEKERMISSILE ) a.tracer = a.target;
 				a.target = master;
 			}
+			a.GiveInventory("ParriedBuff",1);
+			let buff = a.FindInventory("ParriedBuff");
 			double mvel = a.vel.length();
-			a.vel = dir*mvel*FRandom[Parry](1.4,2.);
+			double nspeed = min(100,mvel*FRandom[Parry](1.2,1.4)+20);
 			a.angle = atan2(dir.y,dir.x);
 			a.pitch = asin(-dir.z);
 			let raging = RagekitPower(master.FindInventory("RagekitPower"));
 			if ( raging )
 			{
-				if ( a.bMISSILE ) a.GiveInventory("ParriedRage",1);
-				a.speed *= 2.;
-				a.vel *= 2.;
+				buff.special1 = 2;
+				nspeed = min(100,nspeed*2.);
 				raging.DoHitFX();
 			}
+			a.vel = dir*nspeed;
+			if ( a.bMISSILE ) a.speed = nspeed;
 			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",a.pos);
 			i.target = master;
 			i.angle = atan2(dir.y,dir.x);
@@ -567,8 +631,14 @@ Class ParryField : Actor
 			i.bAMBUSH = true;
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
-			if ( (level.maptime > lasteggtic) && !Random[Parry](0,9) )
+			if ( (level.maptime > lasteggtic) && !Random[Parry](0,4) )
 			{
+				for ( int i=1; i<6; i++ )
+				{
+					let r = Spawn("ParryRing",a.pos);
+					r.specialf1 = i*.04;
+				}
+				buff.special1++;
 				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
 				lasteggtic = level.maptime+5;
 			}
@@ -596,8 +666,16 @@ Class ParryField : Actor
 			A_StartSound("misc/ricochet",CHAN_VOICE,CHANF_OVERLAP,.7);
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
-			if ( (level.maptime > lasteggtic) && !Random[Parry](0,9) )
+			double mult = 1.5;
+			if ( raging ) mult = 8.;
+			if ( (level.maptime > lasteggtic) && !Random[Parry](0,4) )
 			{
+				for ( int i=1; i<6; i++ )
+				{
+					let r = Spawn("ParryRing",vpos);
+					r.specialf1 = i*.04;
+				}
+				mult *= 2.;
 				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
 				lasteggtic = level.maptime+5;
 			}
@@ -611,7 +689,7 @@ Class ParryField : Actor
 				let b = Spawn("ReflectedBullet",vpos);
 				b.angle = angle;
 				b.target = master;
-				b.vel = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit()*FRandom[Parry](raging?9:3,raging?20:8)+(0,0,4);
+				b.vel = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit()*FRandom[Parry](1,2)*mult+(0,0,4);
 				break;
 			case 3:
 			case 4:
@@ -619,7 +697,7 @@ Class ParryField : Actor
 				//  2. ricochet in random direction
 				Vector3 rdir = (-vdir+(FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6))).unit();
 				bSHOOTABLE = false;
-				master.LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				master.LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),int(damage*mult),mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
 				bSHOOTABLE = true;
 				break;
 			case 6:
@@ -627,7 +705,7 @@ Class ParryField : Actor
 				//  3. ricochet directly back to source
 				Vector3 tdir = source?(level.Vec3Diff(vpos,source.Vec3Offset(0,0,source.height/2))).unit():(-vdir);
 				bSHOOTABLE = false;
-				master.LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),raging?(damage*8):damage,mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
+				master.LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),int(damage*mult),mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
 				bSHOOTABLE = true;
 				break;
 			}
@@ -739,6 +817,8 @@ Class SWWMWeapon : Weapon abstract
 		invoker.pfield = Spawn("ParryField",origin);
 		invoker.pfield.master = self;
 		invoker.pfield.special1 = duration;
+		if ( !FindInventory("ParryDamageChecker") )
+			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
 	}
 	private action bool TryMelee( double angle, int dmg )
 	{

@@ -23,6 +23,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	// for scrolling
 	bool sub;
 	int sel0, sel1, sel2;
+	int ofs0, ofs1, ofs2;	// usually equal to above, except when using mouse input
+	int drag;	// when dragging with the mouse, which scroller to affect (1 = ofs0 and so on)
 	// stats
 	SWWMStats stats;
 	// inventory lists
@@ -259,6 +261,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else curtab--;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = sel2 = 0;
+			ofs0 = ofs1 = ofs2 = 0;
 			sub = false;
 			invlist.Clear();
 			lorelist.Clear();
@@ -272,6 +275,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else curtab = 0;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = sel2 = 0;
+			ofs0 = ofs1 = ofs2 = 0;
 			sub = false;
 			invlist.Clear();
 			lorelist.Clear();
@@ -302,13 +306,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
 				{
 					MenuSound("menu/demoscroll");
-					sel0++;
+					ofs0 = ++sel0;
 				}
 			}
 			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0--;
+				ofs0 = --sel0;
 			}
 			else if ( (curtab == TAB_LIBRARY) && (lorelist.Size() > 1) )
 			{
@@ -322,30 +326,30 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( (l.Count() > 28) && (sel2 < l.Count()-28) )
 					{
 						MenuSound("menu/demoscroll");
-						sel2++;
+						ofs2 = ++sel2;
 					}
 				}
 				else
 				{
 					MenuSound("menu/demoscroll");
-					sel0++;
+					ofs0 = ++sel0;
 					if ( sel0 >= lorelist.Size() )
-						sel0 = 0;
+						ofs0 = sel0 = 0;
 				}
 			}
 			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0++;
+				ofs0 = ++sel0;
 				if ( sel0 >= invlist.Size() )
-					sel0 = 0;
+					ofs0 = sel0 = 0;
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0++;
+				ofs0 = ++sel0;
 				if ( sel0 >= storelist.Size() )
-					sel0 = 0;
+					ofs0 = sel0 = 0;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
@@ -353,9 +357,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// scroll through player list
 					MenuSound("menu/demoscroll");
-					sel0++;
+					ofs0 = ++sel0;
 					if ( sel0 >= playerlist.Size() )
-						sel0 = 0;
+						ofs0 = sel0 = 0;
 				}
 				else if ( sub )
 				{
@@ -363,15 +367,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					{
 						// scroll through trading history
 						MenuSound("menu/demoscroll");
-						sel1++;
+						ofs1 = ++sel1;
 					}
 					else if ( invlist.Size() > 1 )
 					{
 						// scroll through inventory
 						MenuSound("menu/demoscroll");
-						sel1++;
+						ofs1 = ++sel1;
 						if ( sel1 >= invlist.Size() )
-							sel1 = 0;
+							ofs1 = sel1 = 0;
 					}
 				}
 			}
@@ -382,7 +386,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 > 0 )
 				{
 					MenuSound("menu/demoscroll");
-					sel0--;
+					ofs0 = --sel0;
 				}
 			}
 			else if ( curtab == TAB_MISSION )
@@ -390,13 +394,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 > 0 )
 				{
 					MenuSound("menu/demoscroll");
-					sel0--;
+					ofs0 = --sel0;
 				}
 			}
 			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0++;
+				ofs0 = ++sel0;
 			}
 			else if ( (curtab == TAB_LIBRARY) && (lorelist.Size() > 1) )
 			{
@@ -405,30 +409,30 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( sel2 > 0 )
 					{
 						MenuSound("menu/demoscroll");
-						sel2--;
+						ofs2 = --sel2;
 					}
 				}
 				else
 				{
 					MenuSound("menu/demoscroll");
-					sel0--;
+					ofs0 = --sel0;
 					if ( sel0 < 0 )
-						sel0 = lorelist.Size()-1;
+						ofs0 = sel0 = lorelist.Size()-1;
 				}
 			}
 			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0--;
+				ofs0 = --sel0;
 				if ( sel0 < 0 )
-					sel0 = invlist.Size()-1;
+					ofs0 = sel0 = invlist.Size()-1;
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
-				sel0--;
+				ofs0 = --sel0;
 				if ( sel0 < 0 )
-					sel0 = storelist.Size()-1;
+					ofs0 = sel0 = storelist.Size()-1;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
@@ -436,9 +440,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// scroll through player list
 					MenuSound("menu/demoscroll");
-					sel0--;
+					ofs0 = --sel0;
 					if ( sel0 < 0 )
-						sel0 = playerlist.Size()-1;
+						ofs0 = sel0 = playerlist.Size()-1;
 				}
 				else if ( sub )
 				{
@@ -446,15 +450,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					{
 						// scroll through trading history
 						MenuSound("menu/demoscroll");
-						sel1--;
+						ofs1 = --sel1;
 					}
 					else if ( invlist.Size() > 1 )
 					{
 						// scroll through inventory
 						MenuSound("menu/demoscroll");
-						sel1--;
+						ofs1 = --sel1;
 						if ( sel1 < 0 )
-							sel1 = invlist.Size()-1;
+							ofs1 = sel1 = invlist.Size()-1;
 					}
 				}
 			}
@@ -463,40 +467,40 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 21) )
 			{
 				int oldsel = sel0;
-				sel0 += 22;
-				if ( sel0 >= invlist.Size() ) sel0 = invlist.Size()-1;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = invlist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
 			{
 				int oldsel = sel0;
-				sel0 += 22;
-				if ( sel0 >= storelist.Size() ) sel0 = storelist.Size()-1;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = storelist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
 			else if ( curtab == TAB_LIBRARY )
 			{
 				MenuSound("menu/demoscroll");
-				sel0 = 0;
+				ofs0 = sel0 = 0;
 				sub = false;
-				sel1++;
+				ofs1 = ++sel1;
 				if ( sel1 > LORE_LORE )
-					sel1 = LORE_ITEM;
+					ofs1 = sel1 = LORE_ITEM;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
 				if ( !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
 				{
 					int oldsel = sel0;
-					sel0 += 22;
-					if ( sel0 >= playerlist.Size() ) sel0 = playerlist.Size()-1;
+					ofs0 = sel0 += 22;
+					if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
 					if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 				}
 				else if ( sub && (sel0 != -1) )
 				{
 					int oldsel = sel1;
-					sel1 += 22;
-					if ( sel1 >= invlist.Size() ) sel1 = invlist.Size()-1;
+					ofs1 = sel1 += 22;
+					if ( sel1 >= invlist.Size() ) ofs1 = sel1 = invlist.Size()-1;
 					if ( sel1 != oldsel ) MenuSound("menu/demoscroll");
 				}
 			}
@@ -507,7 +511,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0-22 >= 0 )
 				{
 					MenuSound("menu/demoscroll");
-					sel0 -= 22;
+					ofs0 = sel0 -= 22;
 				}
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
@@ -515,17 +519,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0-22 >= 0 )
 				{
 					MenuSound("menu/demoscroll");
-					sel0 -= 22;
+					ofs0 = sel0 -= 22;
 				}
 			}
 			else if ( curtab == TAB_LIBRARY )
 			{
 				MenuSound("menu/demoscroll");
-				sel0 = 0;
+				ofs0 = sel0 = 0;
 				sub = false;
-				sel1--;
+				ofs1 = --sel1;
 				if ( sel1 < LORE_ITEM )
-					sel1 = LORE_LORE;
+					ofs1 = sel1 = LORE_LORE;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
@@ -533,7 +537,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					if ( sel0-22 >= 0 )
 					{
-						sel0 -= 22;
+						ofs0 = sel0 -= 22;
 						MenuSound("menu/demoscroll");
 					}
 				}
@@ -541,7 +545,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					if ( sel1-22 >= 0 )
 					{
-						sel1 -= 22;
+						ofs1 = sel1 -= 22;
 						MenuSound("menu/demoscroll");
 					}
 				}
@@ -592,7 +596,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					return true;
 				}
 				EventHandler.SendNetworkEvent(String.Format("swwmstoregive.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
-				if ( (camt+amt) >= max ) sel0 = max(0,sel0-1);
+				if ( (camt+amt) >= max ) ofs1 = sel0 = max(0,sel0-1);
 				MenuSound("menu/buyinv");
 			}
 			else if ( curtab == TAB_LIBRARY )
@@ -609,7 +613,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						EventHandler.SendNetworkEvent(String.Format("swwmmarkloreread.%s",lorelist[sel0].tag),consoleplayer);
 					MenuSound("menu/demosel");
 					sub = true;
-					sel2 = 0;
+					ofs2 = sel2 = 0;
 				}
 			}
 			else if ( curtab == TAB_TRADING )
@@ -619,7 +623,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					// pick a player
 					MenuSound("menu/demosel");
 					sub = true;
-					sel1 = 0;
+					ofs1 = sel1 = 0;
 				}
 				else if ( sub && (sel0 != -1) && (invlist.Size() > 0) )
 				{
@@ -651,20 +655,86 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					// open trading history
 					MenuSound("menu/demosel");
 					sub = true;
-					sel0 = -1;
-					sel1 = 0;
+					ofs0 = sel0 = -1;
+					ofs1 = sel1 = 0;
 				}
 				else if ( sub )
 				{
 					// go back
 					MenuSound("menu/democlose");
 					sub = false;
-					sel0 = 0;
+					ofs0 = sel0 = 0;
 				}
 			}
 			return true;
 		}
 		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	override bool MouseEvent( int type, int mx, int my )
+	{
+		bool res = Super.MouseEvent(type,mx,my);
+		Font fnt = LangFont(TewiFont);
+		String str;
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		Vector2 mpos = (mx/hs,my/hs)-origin;
+		int xx, yy, len;
+		if ( type == MOUSE_Click )
+		{
+			if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 401) ) return res;	// outside window bounds, ignore
+			else if ( mpos.y < 14 )
+			{
+				// check which tab we're clicking
+				static const string tabnames[] =
+				{
+					"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
+					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
+					"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+				};
+				xx = 0;
+				for ( int i=0; i<8; i++ )
+				{
+					len = 8+fnt.StringWidth(tabnames[i]);
+					if ( (mpos.x >= xx) && (mpos.x < xx+len+1) )
+					{
+						if ( curtab == i ) break;
+						MenuSound("menu/demotab");
+						curtab = i;
+						CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
+						sel0 = sel1 = sel2 = 0;
+						ofs0 = ofs1 = ofs2 = 0;
+						sub = false;
+						invlist.Clear();
+						lorelist.Clear();
+						storelist.Clear();
+						storeunits.Clear();
+						playerlist.Clear();
+						break;
+					}
+					xx += len;
+				}
+			}
+			else
+			{
+				// TODO per-tab stuff
+			}
+		}
+		else if ( type == MOUSE_Release ) drag = 0;	// stop dragging any active scrollbars
+		else if ( type == MOUSE_Move )
+		{
+			if ( drag )
+			{
+				// TODO scrollbar dragging
+			}
+			else if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 401) ) return res;	// outside window bounds, ignore
+			else
+			{
+				// TODO select on hover
+			}
+		}
+		return res;
 	}
 
 	private bool CmpInventory( Inventory a, Inventory b )
@@ -810,18 +880,23 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( (type is 'Ammo') && (type.GetParentClass() != 'Ammo') ) continue;
 				if ( inv.Stamina <= 0 ) continue;
 				int amt = inv.Amount;
+				int price = int(inv.Stamina*(1.+.5*(amt-1)));
 				if ( type is 'Ammo' )
 				{
-					// get the largest child pickup amount
+					// get the largest affordable child pickup amount
 					for ( int j=0; j<AllActorClasses.Size(); j++ )
 					{
 						let type2 = (Class<Ammo>)(AllActorClasses[j]);
 						if ( !type2 || (type2.GetParentClass() != type) ) continue;
 						let inv2 = GetDefaultByType(type2);
-						if ( inv2.Amount > amt ) amt = inv2.Amount;
+						int cprice = int(inv.Stamina*(1.+.5*(inv2.Amount-1)));
+						if ( (inv2.Amount > amt) && (cprice <= SWWMCredits.Get(players[consoleplayer])) )
+						{
+							price = cprice;
+							amt = inv2.Amount;
+						}
 					}
 				}
-				int price = int(inv.Stamina*(1.+.5*(amt-1)));
 				bool greater = false;
 				for ( int j=0; j<storelist.Size(); j++ )
 				{
@@ -1002,6 +1077,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					curtab = TAB_HELP;
 				}
 				sel0 = sel1 = sel2 = 0;
+				ofs0 = ofs1 = ofs2 = 0;
 				sub = false;
 				invlist.Clear();
 				lorelist.Clear();

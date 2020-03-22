@@ -731,9 +731,7 @@ Class RagekitPower : Powerup
 			newdamage = damage*8;
 			DoHitFX();
 		}
-		else if ( !passive && inflictor && inflictor.FindInventory("ParriedRage") ) newdamage = damage*8;	// parried projectile
-		else if ( passive )
-			newdamage = damage/4;
+		else if ( passive ) newdamage = damage/4;
 	}
 }
 

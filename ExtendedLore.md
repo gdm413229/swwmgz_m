@@ -625,16 +625,12 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 - 2150~2151: The fight against the last remaining Demons on Earth continues.
   Doom Eternal happens. After defeating |BIG SPOILER HERE| contact with him is
   lost completely.
-- 2156: Akari Labs succeeds in creating safe teleportation. The reaction from
-  the UAC on social media is legendary.
+- 2156: Akari Labs succeeds in creating safe teleportation.
 - 2160: Demonic forces are discovered on several old UAC bases, having been
   resurrected by a "Mother Demon". Seeing as the Slayer is nowhere to be found,
   the Doom marine is re-commissioned to stop this madness, he succeeds, but in
   a last transmission states that he will "stay in Hell to make sure no demon
   ever comes out again".
-- 2164: The remains of the Doom marine are found during a routine UAC
-  expedition, the Slayer is seen standing right next to them, as if paying
-  respects to a fellow warrior.
 - 2170: A group of monks discover a mansion haunted by demons, become trapped.
   The Doom Slayer heads in to "fix things". A mysterious figure is seen leaving
   the mansion afterwards.
@@ -668,7 +664,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   entry into FTL travel.
 - 2200: Earth joins the X'Animen Coalition, now known as the "United Aligned
   Worlds".
-- 2201: The UAC files for bankruptcy.
+- 2207: All damage from the Hell Invasion of 2148 is finally repaired.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.

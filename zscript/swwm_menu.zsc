@@ -59,6 +59,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int kcode;
 	// crimey clock stuff
 	int c_year, c_month, c_day, c_hour, c_minute;
+	// mouse stuff
+	Vector2 curmouse;
+	bool isrclick;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
@@ -243,6 +246,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				MenuSound("misc/secret");
 				curtab = TAB_SECRET;
 				sel0 = sel1 = sel2 = 0;
+				ofs0 = ofs1 = ofs2 = 0;
 				sub = false;
 			}
 		default:
@@ -332,24 +336,28 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else
 				{
 					MenuSound("menu/demoscroll");
-					ofs0 = ++sel0;
-					if ( sel0 >= lorelist.Size() )
-						ofs0 = sel0 = 0;
+					if ( sel0 >= lorelist.Size()-1 ) ofs0 = sel0 = 0;
+					else
+					{
+						sel0++;
+						// update ofs so selection stays on-screen
+						int ofs = max(ofs0-26,0);
+						if ( sel0 < ofs ) ofs0 = sel0+26;
+						else if ( sel0 > ofs+26 ) ofs0 = sel0;
+					}
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 1) )
+			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
-				if ( sel0 >= invlist.Size() )
-					ofs0 = sel0 = 0;
+				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = 0;
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
-				if ( sel0 >= storelist.Size() )
-					ofs0 = sel0 = 0;
+				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = 0;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
@@ -358,44 +366,26 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					// scroll through player list
 					MenuSound("menu/demoscroll");
 					ofs0 = ++sel0;
-					if ( sel0 >= playerlist.Size() )
-						ofs0 = sel0 = 0;
+					if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = 0;
 				}
-				else if ( sub )
+				else if ( sub && (sel0 == -1) && (sel1 < tradelib.ent.Size()-28) )
 				{
-					if ( (sel0 == -1) && (sel1 < tradelib.ent.Size()-28) )
-					{
-						// scroll through trading history
-						MenuSound("menu/demoscroll");
-						ofs1 = ++sel1;
-					}
-					else if ( invlist.Size() > 1 )
-					{
-						// scroll through inventory
-						MenuSound("menu/demoscroll");
-						ofs1 = ++sel1;
-						if ( sel1 >= invlist.Size() )
-							ofs1 = sel1 = 0;
-					}
+					// scroll through trading history
+					MenuSound("menu/demoscroll");
+					ofs1 = ++sel1;
 				}
 			}
 			return true;
 		case MKEY_UP:
-			if ( curtab == TAB_HELP )
+			if ( (curtab == TAB_HELP) && (sel0 > 0) )
 			{
-				if ( sel0 > 0 )
-				{
-					MenuSound("menu/demoscroll");
-					ofs0 = --sel0;
-				}
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
 			}
-			else if ( curtab == TAB_MISSION )
+			else if ( (curtab == TAB_MISSION) && (sel0 > 0) )
 			{
-				if ( sel0 > 0 )
-				{
-					MenuSound("menu/demoscroll");
-					ofs0 = --sel0;
-				}
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
 			}
 			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
 			{
@@ -415,24 +405,28 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else
 				{
 					MenuSound("menu/demoscroll");
-					ofs0 = --sel0;
-					if ( sel0 < 0 )
-						ofs0 = sel0 = lorelist.Size()-1;
+					if ( sel0 <= 0 ) ofs0 = sel0 = lorelist.Size()-1;
+					else
+					{
+						sel0--;
+						// update ofs so selection stays on-screen
+						int ofs = max(ofs0-26,0);
+						if ( sel0 < ofs ) ofs0 = sel0+26;
+						else if ( sel0 > ofs+26 ) ofs0 = sel0;
+					}
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 1) )
+			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
-				if ( sel0 < 0 )
-					ofs0 = sel0 = invlist.Size()-1;
+				if ( sel0 < 0 ) ofs0 = sel0 = invlist.Size()-1;
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
-				if ( sel0 < 0 )
-					ofs0 = sel0 = storelist.Size()-1;
+				if ( sel0 < 0 ) ofs0 = sel0 = storelist.Size()-1;
 			}
 			else if ( curtab == TAB_TRADING )
 			{
@@ -441,30 +435,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					// scroll through player list
 					MenuSound("menu/demoscroll");
 					ofs0 = --sel0;
-					if ( sel0 < 0 )
-						ofs0 = sel0 = playerlist.Size()-1;
+					if ( sel0 < 0 ) ofs0 = sel0 = playerlist.Size()-1;
 				}
-				else if ( sub )
+				else if ( sub && (sel0 == -1) && (sel1 > 0) )
 				{
-					if ( (sel0 == -1) && (sel1 > 0) )
-					{
-						// scroll through trading history
-						MenuSound("menu/demoscroll");
-						ofs1 = --sel1;
-					}
-					else if ( invlist.Size() > 1 )
-					{
-						// scroll through inventory
-						MenuSound("menu/demoscroll");
-						ofs1 = --sel1;
-						if ( sel1 < 0 )
-							ofs1 = sel1 = invlist.Size()-1;
-					}
+					// scroll through trading history
+					MenuSound("menu/demoscroll");
+					ofs1 = --sel1;
 				}
 			}
 			return true;
 		case MKEY_RIGHT:
-			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 21) )
+			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
 			{
 				int oldsel = sel0;
 				ofs0 = sel0 += 22;
@@ -484,43 +466,26 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				ofs0 = sel0 = 0;
 				sub = false;
 				ofs1 = ++sel1;
-				if ( sel1 > LORE_LORE )
-					ofs1 = sel1 = LORE_ITEM;
+				if ( sel1 > LORE_LORE ) ofs1 = sel1 = LORE_ITEM;
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
 			{
-				if ( !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
-				{
-					int oldsel = sel0;
-					ofs0 = sel0 += 22;
-					if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
-					if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
-				}
-				else if ( sub && (sel0 != -1) )
-				{
-					int oldsel = sel1;
-					ofs1 = sel1 += 22;
-					if ( sel1 >= invlist.Size() ) ofs1 = sel1 = invlist.Size()-1;
-					if ( sel1 != oldsel ) MenuSound("menu/demoscroll");
-				}
+				int oldsel = sel0;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
+				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
 			return true;
 		case MKEY_LEFT:
-			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS)) && (invlist.Size() > 21) )
+			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
 			{
-				if ( sel0-22 >= 0 )
-				{
-					MenuSound("menu/demoscroll");
-					ofs0 = sel0 -= 22;
-				}
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 -= 22;
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
+			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) && (sel0-22 >= 0) )
 			{
-				if ( sel0-22 >= 0 )
-				{
-					MenuSound("menu/demoscroll");
-					ofs0 = sel0 -= 22;
-				}
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 -= 22;
 			}
 			else if ( curtab == TAB_LIBRARY )
 			{
@@ -528,27 +493,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				ofs0 = sel0 = 0;
 				sub = false;
 				ofs1 = --sel1;
-				if ( sel1 < LORE_ITEM )
-					ofs1 = sel1 = LORE_LORE;
+				if ( sel1 < LORE_ITEM ) ofs1 = sel1 = LORE_LORE;
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) && (sel0-22 >= 0) ) // lol is this ever going to happen
 			{
-				if ( !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
-				{
-					if ( sel0-22 >= 0 )
-					{
-						ofs0 = sel0 -= 22;
-						MenuSound("menu/demoscroll");
-					}
-				}
-				else if ( sub && (sel0 != -1) )
-				{
-					if ( sel1-22 >= 0 )
-					{
-						ofs1 = sel1 -= 22;
-						MenuSound("menu/demoscroll");
-					}
-				}
+				ofs0 = sel0 -= 22;
+				MenuSound("menu/demoscroll");
 			}
 			return true;
 		case MKEY_ENTER:
@@ -671,6 +621,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		return Super.MenuEvent(mkey,fromcontroller);
 	}
 
+	private int rnd( double num )
+	{
+		return int(num+((num<0)?-.5:.5));
+	}
+
 	override bool MouseEvent( int type, int mx, int my )
 	{
 		bool res = Super.MouseEvent(type,mx,my);
@@ -683,9 +638,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		int xx, yy, len;
 		if ( type == MOUSE_Click )
 		{
-			if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 401) ) return res;	// outside window bounds, ignore
+			if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 386) ) return res;	// outside clickable area, ignore
 			else if ( mpos.y < 14 )
 			{
+				if ( isrclick ) return res;
 				// check which tab we're clicking
 				static const string tabnames[] =
 				{
@@ -696,8 +652,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				xx = 0;
 				for ( int i=0; i<8; i++ )
 				{
-					len = 8+fnt.StringWidth(tabnames[i]);
-					if ( (mpos.x >= xx) && (mpos.x < xx+len+1) )
+					len = fnt.StringWidth(tabnames[i])+6;
+					if ( (mpos.x >= xx) && (mpos.x < xx+len) )
 					{
 						if ( curtab == i ) break;
 						MenuSound("menu/demotab");
@@ -716,24 +672,594 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					xx += len;
 				}
 			}
-			else
+			else if ( (curtab == TAB_MISSION) && !isrclick )
 			{
-				// TODO per-tab stuff
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				String str = StringTable.Localize("$SWWM_MISSION_NONE");
+				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
+				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
+				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
+			else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( invlist.Size() <= 0 ) return res;	// clicked nothing
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = (invlist.Size()/22)+1;
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					xx = 9;
+					yy = 23;
+					int cols = 1;
+					for ( int i=ofs; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							// drop on right click in inventory tab
+							if ( (curtab == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
+							else if ( !isrclick ) MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+24;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+				}
+				else if ( !isrclick )
+				{
+					// check that scrollbar is present
+					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = (invlist.Size()/22)+1;
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+			}
+			else if ( (curtab == TAB_KEYS) && !isrclick )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( invlist.Size() <= 0 ) return res;	// clicked nothing
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = (invlist.Size()/22)+1;
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					xx = 9;
+					yy = 23;
+					int cols = 1;
+					for ( int i=ofs; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							// do nothing, we just selected it
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+24;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+				}
+				else if ( !isrclick )
+				{
+					// check that scrollbar is present
+					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = (invlist.Size()/22)+1;
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+			}
+			else if ( (curtab == TAB_STORE) && !isrclick )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( storelist.Size() <= 0 ) return res;	// clicked nothing
+					xx = 9;
+					yy = 23;
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<storelist.Size(); i++ )
+					{
+						if ( !storelist[i] ) continue;
+						let def = GetDefaultByType(storelist[i]);
+						if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+						else str = def.GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+96);
+					totalcol = (storelist.Size()/22)+1;
+					// gotta check both the tag and the price for clicking
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					int cols = 1;
+					for ( int i=ofs; i<storelist.Size(); i++ )
+					{
+						if ( !storelist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest+80) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+96;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+				}
+				else if ( !isrclick )
+				{
+					// check that scrollbar is present
+					if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
+					xx = 9;
+					yy = 23;
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<storelist.Size(); i++ )
+					{
+						if ( !storelist[i] ) continue;
+						let def = GetDefaultByType(storelist[i]);
+						if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+						else str = def.GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+96);
+					totalcol = (storelist.Size()/22)+1;
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+			}
+			else if ( (curtab == TAB_LIBRARY) && !isrclick )
+			{
+				double midp = (lang.GetString()~=="jp")?206:126;
+				if ( mpos.x < midp )
+				{
+					if ( mpos.y < 28 )
+					{
+						// switch category
+						if ( mpos.x < midp/2. ) MenuEvent(MKEY_LEFT,false);
+						else MenuEvent(MKEY_RIGHT,false);
+					}
+					else
+					{
+						// check what item we clicked
+						int xx = 3;
+						int yy = 32;
+						int ofs = max(0,ofs0-26);
+						for ( int i=ofs; i<lorelist.Size(); i++ )
+						{
+							if ( yy > 370 ) break;
+							// check boundary
+							if ( (mpos.y >= yy) && (mpos.y < yy+14) )
+							{
+								if ( sel0 != i ) MenuSound("menu/demoscroll");
+								if ( (sel0 != i) || !sub )
+								{
+									sel0 = i;
+									sub = false;
+									MenuEvent(MKEY_Enter,false);
+								}
+								return res;
+							}
+							yy += 13;
+						}
+					}
+				}
+				else if ( mpos.x < midp+8 )
+				{
+					// check that scrollbar is present
+					if ( lorelist.Size() <= 27 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = lorelist.Size()-27;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step ) step += 26;
+					if ( step != ofs0 ) MenuSound("menu/demoscroll");
+					ofs0 = step;
+					drag = 1;
+				}
+				else if ( sub && (mpos.x >= 632) )
+				{
+					// check that scrollbar is present
+					str = StringTable.Localize(lorelist[sel0].text);
+					BrokenLines l = fnt.BreakLines(str,int(635-xx));
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel2 ) MenuSound("menu/demoscroll");
+					ofs2 = sel2 = step;
+					drag = 3;
+				}
+			}
+			else if ( (curtab == TAB_TRADING) && !isrclick )
+			{
+				if ( !sub )
+				{
+					// check what item we clicked
+					if ( mpos.y < 377 )
+					{
+						if ( playerlist.Size() <= 0 ) return res;	// clicked nothing
+						int longest = 0, len;
+						int maxcol, totalcol;
+						for ( int i=0; i<playerlist.Size(); i++ )
+						{
+							str = players[playerlist[i]].GetUserName();
+							len = fnt.StringWidth(str);
+							if ( len > longest ) longest = len;
+						}
+						maxcol = 622/(longest+24);
+						totalcol = (invlist.Size()/22)+1;
+						int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+						xx = 9;
+						yy = 23;
+						int cols = 1;
+						for ( int i=ofs; i<invlist.Size(); i++ )
+						{
+							str = players[playerlist[i]].GetUserName();
+							len = fnt.StringWidth(str);
+							// check text boundary
+							if ( (mpos.x >= xx) && (mpos.x < xx+len+1) && (mpos.y >= yy) && (mpos.y < yy+14) )
+							{
+								if ( sel0 != i ) MenuSound("menu/demoscroll");
+								ofs0 = sel0 = i;
+								MenuEvent(MKEY_Enter,false);
+								return res;
+							}
+							yy += 16;
+							if ( yy >= 370 )
+							{
+								xx += longest+24;
+								yy = 23;
+								cols++;
+								if ( cols > maxcol ) break;
+							}
+						}
+					}
+					else if ( !isrclick )
+					{
+						// check that scrollbar is present (will it ever be???)
+						if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
+						int longest = 0, len;
+						int maxcol, totalcol;
+						for ( int i=0; i<playerlist.Size(); i++ )
+						{
+							str = players[playerlist[i]].GetUserName();
+							len = fnt.StringWidth(str);
+							if ( len > longest ) longest = len;
+						}
+						maxcol = 622/(longest+24);
+						totalcol = (invlist.Size()/22)+1;
+						if ( maxcol >= totalcol ) return res;	// no scrollbar
+						// calculate offset
+						int szr = totalcol-maxcol;
+						int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+						if ( step > 0 ) step += (maxcol-1);
+						if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+						ofs0 = step*22;
+						drag = 1;
+					}
+				}
+				else if ( sel0 == -1 )
+				{
+					// are we clicking where the scrollbar should be?
+					if ( mpos.x < 632 ) return res;
+					if ( tradelib.ent.Size() <= 28 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = tradelib.ent.Size()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+					drag = 1;
+				}
+			}
+			else if ( (curtab == TAB_CHAT) && !isrclick )
+			{
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				let bar = SWWMStatusBar(StatusBar);
+				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				// calculate offset
+				int szr = bar.FullHistory.Size()-1;
+				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
+			else if ( (curtab == TAB_HELP) && !isrclick )
+			{
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				int k1, k2;
+				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
+				String kstr = bindings.NameKeys(k1,k2);
+				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
 			}
 		}
-		else if ( type == MOUSE_Release ) drag = 0;	// stop dragging any active scrollbars
-		else if ( type == MOUSE_Move )
+		else if ( (type == MOUSE_Move) && drag )	// scroll dragging
 		{
-			if ( drag )
+			if ( curtab == TAB_MISSION )
 			{
-				// TODO scrollbar dragging
+				String str = StringTable.Localize("$SWWM_MISSION_NONE");
+				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
+				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
+				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
 			}
-			else if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 401) ) return res;	// outside window bounds, ignore
-			else
+			else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
 			{
-				// TODO select on hover
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !invlist[i] ) continue;
+					if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+					else str = invlist[i].GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+24);
+				totalcol = (invlist.Size()/22)+1;
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( curtab == TAB_KEYS )
+			{
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !invlist[i] ) continue;
+					str = invlist[i].GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+24);
+				totalcol = (invlist.Size()/22)+1;
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( curtab == TAB_STORE )
+			{
+				// check that scrollbar is present
+				if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
+				xx = 9;
+				yy = 23;
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<storelist.Size(); i++ )
+				{
+					if ( !storelist[i] ) continue;
+					let def = GetDefaultByType(storelist[i]);
+					if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					else str = def.GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+96);
+				totalcol = (storelist.Size()/22)+1;
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( curtab == TAB_LIBRARY )
+			{
+				if ( drag == 1 )
+				{
+					// check that scrollbar is present
+					if ( lorelist.Size() <= 27 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = lorelist.Size()-27;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step ) step += 26;
+					if ( step != ofs0 ) MenuSound("menu/demoscroll");
+					ofs0 = step;
+				}
+				else if ( drag == 3 )
+				{
+					// check that scrollbar is present
+					str = StringTable.Localize(lorelist[sel0].text);
+					BrokenLines l = fnt.BreakLines(str,int(635-xx));
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel2 ) MenuSound("menu/demoscroll");
+					ofs2 = sel2 = step;
+				}
+			}
+			else if ( curtab == TAB_TRADING )
+			{
+				if ( !sub )
+				{
+					// check that scrollbar is present (will it ever be???)
+					if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<playerlist.Size(); i++ )
+					{
+						str = players[playerlist[i]].GetUserName();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = (invlist.Size()/22)+1;
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+				}
+				else if ( sel0 == -1 )
+				{
+					if ( tradelib.ent.Size() <= 28 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = tradelib.ent.Size()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+				}
+			}
+			else if ( curtab == TAB_CHAT )
+			{
+				let bar = SWWMStatusBar(StatusBar);
+				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				// calculate offset
+				int szr = bar.FullHistory.Size()-1;
+				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+			else if ( curtab == TAB_HELP )
+			{
+				int k1, k2;
+				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
+				String kstr = bindings.NameKeys(k1,k2);
+				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
 			}
 		}
+		else if ( type == MOUSE_Release ) drag = 0;	// stop dragging any active scrolls
 		return res;
 	}
 
@@ -952,6 +1478,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				int idx = lorelist.Find(oldone);
 				if ( (idx > 0) && (idx < lorelist.Size()) )
 					sel0 = idx;
+				// update ofs so selection stays on-screen
+				int ofs = max(ofs0-26,0);
+				if ( sel0 < ofs ) ofs0 = sel0+26;
+				else if ( sel0 > ofs+26 ) ofs0 = sel0;
 			}
 			// add "new entries" message
 			if ( lorelib.ent.Size() != oldloresiz )
@@ -1109,10 +1639,68 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			break;
 		case UIEvent.Type_WheelDown:
+			if ( (curtab == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			{
+				// special handling, need to check which side is being scrolled
+				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+				Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+				Vector2 origin = (ss.x-640,ss.y-400)/2.;
+				Vector2 mpos = (curmouse/hs)-origin;
+				double midp = (lang.GetString()~=="jp")?206:126;
+				if ( ((lorelist.Size() > 27) && (mpos.x < midp+8)) || (mpos.x < midp) )
+				{
+					MenuSound("menu/democlose");
+					sub = false;
+				}
+			}
 			return MenuEvent(MKEY_DOWN,false);
 			break;
 		case UIEvent.Type_WheelUp:
+			if ( (curtab == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			{
+				// special handling, need to check which side is being scrolled
+				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+				Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+				Vector2 origin = (ss.x-640,ss.y-400)/2.;
+				Vector2 mpos = (curmouse/hs)-origin;
+				double midp = (lang.GetString()~=="jp")?206:126;
+				if ( ((lorelist.Size() > 27) && (mpos.x < midp+8)) || (mpos.x < midp) )
+				{
+					MenuSound("menu/democlose");
+					sub = false;
+				}
+			}
 			return MenuEvent(MKEY_UP,false);
+			break;
+		case UIEvent.Type_LButtonDown:
+			isrclick = false;
+			return Super.OnUIEvent(ev);
+			break;
+		case UIEvent.Type_RButtonDown:
+			isrclick = true;
+			// copy over what base menus do for L click
+			int y = ev.MouseY;
+			bool res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_RButtonUp:
+			// copy over what base menus do for L release
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				int y = ev.MouseY;
+				bool res = MouseEventBack(MOUSE_Release,ev.MouseX,y);
+				if ( res ) y = -1;
+				res |= MouseEvent(MOUSE_Release,ev.MouseX,y);
+			}
+			return false;
+			break;
+		case UIEvent.Type_MouseMove:
+			// store coords
+			curmouse = (ev.MouseX,ev.MouseY);
 			break;
 		}
 		return Super.OnUIEvent(ev);
@@ -1267,7 +1855,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 		}
-		else if ( curtab == TAB_INVENTORY )
+		else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
 		{
 			if ( invlist.Size() <= 0 )
 			{
@@ -1277,16 +1865,25 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			xx = 9;
 			yy = 23;
-			int longest = 0, len;
-			int ofs = int(floor(max(0,sel0-44)/22.)*22);
-			int cols = 1;
-			for ( int i=ofs; i<invlist.Size(); i++ )
+			int longest, len;
+			int maxcol, totalcol, cols = 1;
+			// first pass, calculate longest item name
+			for ( int i=0; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
 				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+24);
+			totalcol = (invlist.Size()/22)+1;
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			for ( int i=ofs; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				else str = invlist[i].GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
 				else if ( (invlist[i] is 'Ammo') || (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_BROWN;
@@ -1300,16 +1897,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					xx += longest+24;
 					yy = 23;
-					longest = 0;
 					cols++;
-					if ( cols > 3 ) break;
+					if ( cols > maxcol ) break;
 				}
 			}
-			if ( invlist.Size() > 65 )
+			if ( maxcol < totalcol )
 			{
 				// draw scrollbar
-				int szr = (invlist.Size()/22)-2;
-				xx = floor((ofs/22)*(630./szr))+2;
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
@@ -1325,30 +1921,36 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			xx = 9;
 			yy = 23;
 			int longest = 0, len;
-			int ofs = int(floor(max(0,sel0-44)/22.)*22);
-			int cols = 1;
+			int maxcol, totalcol, cols = 1;
 			for ( int i=0; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+24);
+			totalcol = (invlist.Size()/22)+1;
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				str = invlist[i].GetTag();
 				Screen.DrawText(fnt,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
 					xx += longest+24;
 					yy = 23;
-					longest = 0;
 					cols++;
-					if ( cols > 3 ) break;
+					if ( cols > maxcol ) break;
 				}
 			}
-			if ( invlist.Size() > 65 )
+			if ( maxcol < totalcol )
 			{
 				// draw scrollbar
-				int szr = (invlist.Size()/22)-2;
-				xx = floor((ofs/22)*(630./szr))+2;
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
@@ -1378,7 +1980,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawTexture((lang.GetString()~=="jp")?LoreSeparatorW:LoreSeparator,false,origin.x,origin.y+27,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 18;
 			// draw the current entries
-			int ofs = max(0,sel0-26);
+			int ofs = max(0,ofs0-26);
 			for ( int i=ofs; i<lorelist.Size(); i++ )
 			{
 				if ( yy > 370 ) break;
@@ -1393,7 +1995,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 3;
 			// scrollbar
-			if ( lorelist.Size() > 26 )
+			if ( lorelist.Size() > 27 )
 			{
 				int szr = lorelist.Size()-27;
 				yy = floor((ofs)*(353./szr))+17;
@@ -1443,10 +2045,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			xx = 9;
 			yy = 23;
 			int longest = 0, len;
-			int ofs = int(floor(max(0,sel0-22)/22.)*22);
-			int cols = 1;
-			int collen[2];
-			for ( int i=ofs; i<storelist.Size(); i++ )
+			int maxcol, totalcol;
+			for ( int i=0; i<storelist.Size(); i++ )
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
@@ -1454,7 +2054,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else str = def.GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
-				collen[cols-1] = longest;
+			}
+			maxcol = 622/(longest+96);
+			totalcol = (storelist.Size()/22)+1;
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			int cols = 1;
+			for ( int i=ofs; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				else str = def.GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
 				else if ( storelist[i] is 'Ammo' ) clscol = Font.CR_BROWN;
@@ -1467,9 +2077,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					xx += longest+96;
 					yy = 23;
-					longest = 0;
 					cols++;
-					if ( cols > 2 ) break;
+					if ( cols > maxcol ) break;
 				}
 			}
 			xx = 9;
@@ -1484,21 +2093,21 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				len = TewiFont.StringWidth(str);
 				int clscol = Font.CR_FIRE;
 				if ( price > muns ) clscol = Font.CR_BLACK;
-				Screen.DrawText(TewiFont,clscol,origin.x+xx+collen[cols-1]+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(TewiFont,clscol,origin.x+xx+longest+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
-					xx += collen[cols-1]+96;
+					xx += longest+96;
 					yy = 23;
 					cols++;
-					if ( cols > 2 ) break;
+					if ( cols > maxcol ) break;
 				}
 			}
-			if ( storelist.Size() > 43 )
+			if ( maxcol < totalcol )
 			{
 				// draw scrollbar
-				int szr = (storelist.Size()/22)-1;
-				xx = floor((ofs/22)*(630./szr))+2;
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
@@ -1578,47 +2187,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					}
 				}
-				else
-				{
-					xx = 9;
-					yy = 23;
-					int longest = 0, len;
-					int ofs = int(floor(max(0,sel1-44)/22.)*22);
-					int cols = 1;
-					for ( int i=ofs; i<invlist.Size(); i++ )
-					{
-						if ( !invlist[i] ) continue;
-						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
-						else str = invlist[i].GetTag();
-						len = fnt.StringWidth(str);
-						if ( len > longest ) longest = len;
-						int clscol = Font.CR_WHITE;
-						if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
-						else if ( (invlist[i] is 'Ammo') || (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_BROWN;
-						else if ( (invlist[i] is 'PowerupGiver') || (invlist[i] is 'AmmoFabricator') || invlist[i].bBIGPOWERUP ) clscol = Font.CR_PURPLE;
-						else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
-						else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
-						else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
-						Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel1)?Color(96,0,0,0):Color(0,0,0,0));
-						yy += 16;
-						if ( yy >= 370 )
-						{
-							xx += longest+24;
-							yy = 23;
-							longest = 0;
-							cols++;
-							if ( cols > 3 ) break;
-						}
-					}
-					if ( invlist.Size() > 65 )
-					{
-						// draw scrollbar
-						int szr = (invlist.Size()/22)-2;
-						xx = floor((ofs/22)*(630./szr))+2;
-						Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-						Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-					}
-				}
 			}
 		}
 		else if ( curtab == TAB_CHAT )
@@ -1692,188 +2260,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				yy = floor(ofs*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
-		}
-	}
-}
-
-// voice selector
-Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
-{
-	CVar mCVar;
-	Array<String> types;
-
-	OptionMenuItemSWWMVoiceOption Init( String label, Name command, CVar graycheck = null, int center = 0 )
-	{
-		Super.Init(label,command,'',graycheck,center);
-		mCVar = CVar.FindCVar(mAction);
-		int lmp;
-		for ( lmp = Wads.FindLump("swwmvoicepack.txt"); lmp > 0; lmp = Wads.FindLump("swwmvoicepack.txt",lmp+1) )
-		{
-			Array<String> lst;
-			lst.Clear();
-			String dat = Wads.ReadLump(lmp);
-			dat.Split(lst,"\n",0);
-			for ( int i=0; i<lst.Size(); i++ )
-			{
-				if ( (lst[i].Length() <= 0) || (lst[i].GetNextCodePoint(0) == 0) || (lst[i].Left(1) == "\n") || (lst[i].Left(1) == "#") ) continue;
-				types.Push(lst[i]);
-			}
-		}
-		return self;
-	}
-
-	override bool SetString( int i, String newtext )
-	{
-		if ( i == OP_VALUES )
-		{
-			int cnt = types.Size();
-			if ( cnt >= 0 )
-			{
-				mValues = newtext;
-				int s = GetSelection();
-				if ( (s >= cnt) || (s < 0) ) s = 0;
-				SetSelection(s);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	override int GetSelection()
-	{
-		int Selection = -1;
-		int cnt = types.Size();
-		if ( (cnt > 0) && mCVar )
-		{
-			String cv = mCVar.GetString();
-			for( int i=0; i<cnt; i++ )
-			{
-				if ( cv ~== types[i] )
-				{
-					Selection = i;
-					break;
-				}
-			}
-		}
-		return Selection;
-	}
-
-	override void SetSelection( int Selection )
-	{
-		int cnt = types.Size();
-		if ( (cnt > 0) && mCVar )
-			mCVar.SetString(types[Selection]);
-	}
-
-	override int Draw( OptionMenuDescriptor desc, int y, int indent, bool selected )
-	{
-		if ( mCenter ) indent = (screen.GetWidth()/2);
-		drawLabel(indent,y,selected?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,isGrayed());
-		int Selection = GetSelection();
-		String loc;
-		if ( Selection == -1 ) loc = "Unknown";
-		else
-		{
-			String uptxt = types[Selection];
-			uptxt.MakeUpper();
-			String str = String.Format("SWWM_VOICENAME_%s",uptxt);
-			loc = StringTable.Localize(str,false);
-			if ( str == loc ) loc = types[Selection];
-		}
-		drawValue(indent,y,OptionMenuSettings.mFontColorValue,loc,isGrayed());
-		return indent;
-	}
-
-	override bool MenuEvent( int mkey, bool fromcontroller )
-	{
-		int cnt = types.Size();
-		if ( cnt > 0 )
-		{
-			int Selection = GetSelection();
-			if ( mkey == Menu.MKEY_Left )
-			{
-				if ( Selection == -1 ) Selection = 0;
-				else if ( --Selection < 0 ) Selection = cnt-1;
-			}
-			else if ( (mkey == Menu.MKEY_Right) || (mkey == Menu.MKEY_Enter) )
-			{
-				if ( ++Selection >= cnt ) Selection = 0;
-			}
-			else return OptionMenuItem.MenuEvent(mkey,fromcontroller);
-			SetSelection(Selection);
-			Menu.MenuSound("menu/change");
-		}
-		else return OptionMenuItem.MenuEvent(mkey,fromcontroller);
-		return true;
-	}
-}
-
-// option menu /w tooltips
-Class SWWMOptionMenu : OptionMenu
-{
-	private String ttip;
-	transient CVar lang;
-	transient Font TewiFont, MPlusFont;
-
-	override void Ticker()
-	{
-		Super.Ticker();
-		// fetch the tooltip for whatever's selected (if any)
-		if ( mDesc.mSelectedItem == -1 ) return;
-		String mcvar = mDesc.mItems[mDesc.mSelectedItem].GetAction();
-		mcvar.Replace(" ","_");	// need to strip whitespace for command actions
-		String locstr = String.Format("TOOLTIP_%s",mcvar);
-		ttip = StringTable.Localize(locstr,false);
-		if ( ttip == locstr ) ttip = "";
-	}
-	override void Drawer()
-	{
-		Super.Drawer();
-		if ( ttip == "" ) return;
-		// re-evaluate y to check where the cursor is
-		int cy = 0;
-		int y = mDesc.mPosition;
-		if ( y <= 0 )
-		{
-			let font = generic_ui||!mDesc.mFont?NewSmallFont:mDesc.mFont;
-			if ( font && (mDesc.mTitle.Length() > 0) )
-				y = -y+font.GetHeight();
-			else y = -y;
-		}
-		int fontheight = OptionMenuSettings.mLinespacing*CleanYfac_1;
-		y *= CleanYfac_1;
-		int lastrow = Screen.GetHeight()-OptionHeight()*CleanYfac_1;
-		for ( int i=0; ((i < mDesc.mItems.Size()) && (y <= lastrow)); i++ )
-		{
-			// Don't scroll the uppermost items
-			if ( i == mDesc.mScrollTop )
-			{
-				i += mDesc.mScrollPos;
-				if ( i >= mDesc.mItems.Size() ) break;	// skipped beyond end of menu
-			}
-			y += fontheight;
-			if ( mDesc.mSelectedItem == i )
-			{
-				cy = y;
-				break;
-			}
-		}
-		if ( !TewiFont ) TewiFont = Font.GetFont('Tewi');
-		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlus');
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		Font fnt = TewiFont;
-		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
-		let lines = fnt.BreakLines(ttip,CleanWidth_1-8);
-		int height = (8+fnt.GetHeight()*lines.Count())*CleanYFac_1;
-		// draw at the bottom unless the selected option could is covered by the tooltip
-		int ypos = Screen.GetHeight()-height;
-		if ( cy >= ypos ) ypos = 0;
-		Screen.Dim("Black",.75,0,ypos,Screen.GetWidth(),height);
-		ypos += 4*CleanYFac_1;
-		for ( int i=0; i<lines.Count(); i++ )
-		{
-			Screen.DrawText(fnt,Font.CR_WHITE,4*CleanXFac_1,ypos,lines.StringAt(i),DTA_CleanNoMove_1,true);
-			ypos += fnt.GetHeight()*CleanYFac_1;
 		}
 	}
 }

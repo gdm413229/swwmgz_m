@@ -16,7 +16,6 @@ after the first release.
   - Radio
   - Pong minigame
   - Selling items at the store
-* Fanart on the intermission screen
 * 4komas on the intermission screen
 * Actually make a fancy titlemap
 * Mod trailer

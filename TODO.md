@@ -14,7 +14,6 @@ Extra things:
    - A background with a bit more flair than just the fuzz shader.
    - Some sort of flyby featuring the Demolitionist booting up, closeups of
      weapons/items etc.
- - Money cheat?
  - Dual wielding Explodium Gun?
  - Japanese localization
  - Keen replacement (need ideas)

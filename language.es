@@ -174,8 +174,8 @@ SWWM_HELPTXT =
 "\cx-------------------------------\c-\n"
 "\n"
 "\cfFlechas:\c- Navegar\n"
-"\cfEnter:\c- Usar item seleccionado\n"
-"\cfRetroceso:\c- Descartar item seleccionado\n"
+"\cfEnter/Click Izdo.:\c- Usar item seleccionado\n"
+"\cfRetroceso/Click Dcho.:\c- Descartar item seleccionado\n"
 "\n"
 "\cxPestaña de Llavero - Controles\c-\n"
 "\cx----------------------------\c-\n"
@@ -187,7 +187,7 @@ SWWM_HELPTXT =
 "\n"
 "\cfArriba/Abajo:\c- Scroll por entradas\n"
 "\cfLeft/Right:\c- Cambiar categoría\n"
-"\cfEnter:\c- Abrir entrada\n"
+"\cfEnter/Click Izdo.:\c- Abrir entrada\n"
 "\n"
 "\cxPestaña de Biblioteca - Controles (Entrada Abierta)\c-\n"
 "\cx-------------------------------------------------\c-\n"
@@ -199,21 +199,21 @@ SWWM_HELPTXT =
 "\cx---------------------------\c-\n"
 "\n"
 "\cfFlechas:\c- Navegar\n"
-"\cfEnter:\c- Comprar\n"
-//"\cfRetroceso:\c- Vender\n"
+"\cfEnter/Click Izdo.:\c- Comprar\n"
+//"\cfRetroceso/Click Dcho.:\c- Vender\n"
 "\n"
 "\cxPestaña de Intercambio - Controles (Principal)\c-\n"
 "\cx---------------------------\c-\n"
 "\n"
 "\cfArriba/Abajo:\c- Navegar\n"
-"\cfEnter:\c- Elegir destinatario\n"
+"\cfEnter/Click Izdo.:\c- Elegir destinatario\n"
 "\cfRetroceso:\c- Historial\n"
 "\n"
 "\cxPestaña de Intercambio - Controles (Intercambio)\c-\n"
 "\cx----------------------------\c-\n"
 "\n"
 "\cfFlechas:\c- Navegar\n"
-"\cfEnter:\c- Enviar item\n"
+"\cfEnter/Click Izdo.:\c- Enviar item\n"
 "\cfRetroceso:\c- Volver\n"
 "\n"
 "\cxPestaña de Intercambio - Controles (Historial)\c-\n"
@@ -303,6 +303,16 @@ SWWM_LORETXT_ANARUKON2 =
 "Apéndice: Los Anarukon son una de las razas humanoides con la proporción más alta de individuos que no entran dentro del sexo o género binarios segun un reciente censo. Aproximadamente el 40% de la población se puede clasificar como \"intersexo\", y solo un 30% de la población total se puede considerar \"cisgénero\". Un estudio de Mosse Anderken pudo trazar esto a una mutación en el genoma Anarukon que apareció varios años despues de la creación del imperio.\n"
 "\n"
 "Nota de Saya: Sabes... conocí a Andreki una vez, despues de la boda con Kirin-kun. En serio que creía que era solo una niña, dios que vergüenza... También conocí a algunos de sus familiares, como la tipa esta que parece una bruja... su tía ¿creo? No pude mirarla mucho, me ponía los pelos de punta. T-también estaba hmmm... su madre, una guerrera super hardcore tipo Guts, pero en mami, luego otra tía a la que le mola ir por ahí con un disfraz que da mucho mal rollo y usa un alterador de voz para parecer un tío siniestro, me lo pasé de muerte hablando con ella, es majísima. También conocí al mismísimo DIOS en mayúsculas, el \"Padre de Eternidad\"... oh tío la tensión cuando me miraba... pero luego se me pasó, porque en persona es un blandengue. Ahhh... fue la rehostia conocer por fin a toda esta gente despues de solo haber leido sobre ellos, y oh dios no empecemos con lo que es haberme casado con uno, juju. Por fin, un guapetón inmortal solo para mí... y maaaaaadre es que es monísimo... y una fiera en la cama, ijijijijiji~";
+SWWM_LORETXT_ARC =
+"Nombre: Coalición de Respuesta Armada (ARC)\n"
+"Clasificación: Grupo de Resistencia Militar\n"
+"Localización: Tierra\n"
+"\n"
+"Resumen: Un grupo establecido tras la caída de la UAC, creado por su anterior CEO Samuel Hayden a modo de unir todas las fuerzas armadas en las zonas terrestres afectadas por los ejércitos del Infierno, para contraatacar. También han asistido con los esfuerzos de evacuación.\n"
+"\n"
+"Apéndice: Tras finalizar la invasión, han cambiado su objetivo a intentar reparar el daño que el planeta ha sufrido. No hay estimaciones claras de cuanto puede que tarde este proceso, es posible que siglos.\n"
+"\n"
+"Nota de Saya: Oye, sobre eso de \"reparar\", he estado intentando unas cosillas, a ver si se puede acelerar esto. Mira, tal vez sea hora de que la humanidad espabile ya y perdone a los Nukuri, ¿no crees?";
 SWWM_LORETAG_ARGENT = "Energía Argent";
 SWWM_LORETXT_ARGENT =
 "Nombre: Energía Argent\n"
@@ -319,9 +329,9 @@ SWWM_LORETXT_ASHLEY =
 "Nacionalidad: Británica\n"
 "Fecha de Nacimiento: 31 de Octubre de 1887\n"
 "\n"
-"Resumen: Ashley nació en Londres en 1887, hija de Yrikha Yanikov y Maxwell A. Knox. Tiene dos hermanos menores, Viola y Adrian, y un único hijo, Christopher. Ashley es conocida mayormente por ser la guitarrista y cantante de \"The Black Rat's Coven\" (\"El Aquelarre de la Rata Negra\"), una banda de Rock Gótico compuesta íntegramente de brujas que ha estado de gira por todo el mundo. Tambien es una maestra en pintura y escultura, con algunas de sus obras vendiéndose por millones.\n"
+"Resumen: Ashley es la mayor de los tres hijos de Yrikha Yanikov y Maxwell A. Knox, los otros siendo Adrian, un experimentado soldado veterano de la primera y segunda guerras mundiales, y Viola, una aprendiz de bruja. Nació en Londres en 1887, pero pasó la mayor parte de su infancia en Cornualles, despues de que su madre tuviera que darse a la fuga debido a acusaciones de brujería. Ashley es conocida mayormente por ser la guitarrista y cantante de \"The Black Rat's Coven\" (\"El Aquelarre de la Rata Negra\"), una banda de Rock Gótico compuesta íntegramente de brujas que ha estado de gira por todo el mundo. Tambien es una maestra en pintura y escultura, con algunas de sus obras vendiéndose por millones.\n"
 "\n"
-"Apéndice: Poco después del nacimiento de su hijo en 1989, Ashley se divorció del que entonces era su marido, Fredrik Steiner. Muchos años después, durante un concierto en Japón en 2020, conoció a Yui Miyamoto, con quien se casó solo unos pocos días tras el suceso. Ashley lamenta no haberse dado cuenta antes de que prefiere estar con mujeres.\n"
+"Apéndice: Poco después del nacimiento de su único hijo, Christopher, en 1989, Ashley se divorció del que entonces era su marido, Fredrik Steiner. Muchos años después, durante un concierto en Japón en 2020, conoció a Yui Miyamoto, con quien se casó solo unos pocos días tras el suceso. Ashley lamenta no haberse dado cuenta antes de que prefiere estar con mujeres.\n"
 "\n"
 "Nota de Saya: Bendita sea esta lesbiana, amen. Ohhh... Ashley-san es simplemente la mejor, adoro su música, y mola mucho que nos invite a sus conciertos y tal cuando toca. Ah y recuerdo que una vez me dió un abrazo y HNNN ¡¡¡dios es que fue LO MEJOR!!! Ahhhh... suaves pechotes de bruja... ♥";
 SWWM_LORETAG_BELT = "Cinturón Útil";
@@ -459,7 +469,6 @@ SWWM_LORETXT_DEVANIKNA =
 "Apéndice: Esta gente adora las aventuras y matar bestias, todos los miembros de cada clan tienen muchas historias que contar sobre sus hazañas. Deneva Unissix, hermana mayor de Misa Unissix, es actualmente una de las guerreras más populares, habiendo finalmente derrotado a Mero el Destructor, un imponente y gigantesco golem construido por el Príncipe de las Sombras Kuro Noroko quien durante siglos había desatado el terror por todo Ixxeney.\n"
 "\n"
 "Nota de Saya: La gente de Misa mola un huevo. Casi que me hacen pensar en esta serie de JRPGs a la que jugaba hace un chorrón de años, también iba de gente con sangre de dragón... eh... pues no me acuerdo de como se llamaba... en fin. Molones guerreros de Dragones, toma ya.";
-SWWM_LORETAG_DISPLAY = "Pantalla CuteEmotion";
 SWWM_LORETXT_DISPLAY =
 "Designación: Pantalla CuteEmotion\n"
 "Fabricante: Akari Labs\n"
@@ -484,7 +493,7 @@ SWWM_LORETXT_DOOMSLAYER =
 "Nacionalidad: Desconocido\n"
 "Fecha de Nacimiento: Desconocido\n"
 "\n"
-"Resumen: El Slayer es una leyenda viviente para toda la humanidad. Un solo hombre que dió el golpe de gracia a la invasión demoníaca en la Tierra. Inicialmente encontrado por la UAC, encasquetado en un gigantesco sarcófago de piedra, este hombre saltó directamente a la acción en 2149, durante una invasión en Mars City, y desde entonces no ha parado de matar demonios por doquier. La UAC ha intentado que se ponga de su lado, varias veces, pero no responde a nadie y siempre trabaja por su cuenta.\n"
+"Resumen: El Slayer es una leyenda viviente para toda la humanidad. Un solo hombre que dió el golpe de gracia a la invasión demoníaca en la Tierra. Inicialmente encontrado por la UAC, encasquetado en un gigantesco sarcófago de piedra, este hombre saltó directamente a la acción en 2149, durante una invasión en Mars City, y desde entonces no ha parado de matar demonios por doquier. La UAC ha intentado que se ponga de su lado, varias veces, pero no responde a nadie y siempre trabaja por su cuenta. Parece tener algun tipo de relación con una especie alienígena conocida como los \"Centinelas\", aunque no se sabe mucho de ellos, o si es uno de ellos.\n"
 "\n"
 "Apéndice: El Slayer tiene un lado que la mayoría de la gente desconoce. Es un colector nato, y testigos han confirmado verlo recoger varios objetos durante su estancia en la Tierra, incluyendo varias obras literarias y cinematográficas, videojuegos, figuras coleccionables, instrumentos musicales, etc. Aparentemente le encantan los conejos, tambien, un rasgo compartido con el Marine de Doom.\n"
 "\n"
@@ -645,6 +654,16 @@ SWWM_LORETXT_HAYDEN =
 "Apéndice: En 2127, en un intento de salvarse de un cancer incurable, transmitió su consciencia a un cuerpo robótico.\n"
 "\n"
 "Nota de Saya: ¿\"Filántropo\"? Y una polla como la manga de un abrigo. Este tío es el mayor pedante capullo snob ricachón cerdo capitalista de mierda robot asqueroso montón de chatarra que jamás haya pisado la Tierra, o Marte, o el Infierno. El hijo de puta hasta me tiene bloqueada en Twitter porque SABE lo que pienso de él y de su estúpida UAC, y toda la mierda que está haciendo para \"mejorar la humanidad\" solo nos ha traido disgustos. Si pudiera es que... yo iba ahí y le daba una patada así en su brillante trasero metálico, y ya le enseñaba yo lo que pienso de que vaya por ahí usando Lefa de Demonio para resolver la crisis energética.";
+SWWM_LORETXT_HAYDEN2 =
+"Nombre Completo: Samuel Hayden\n"
+"Nacionalidad: Americano\n"
+"Fecha De Nacimiento: 2019, fecha exacta desconocida\n"
+"\n"
+"Resumen: Un autodeclarado \"intelectual y filántropo\" de una familia rica, reclutado por la UAC debido a sus logros en el Consejo Global de las Ciencias. Su descubrimiento de la Energía Argent lo llevó a tomar la posición de CEO. En 2145 lideró la primera expedición tripulada al Infierno, solamente un año despues del primer contacto. Tras los \"Episodios de Doom\" de 2148, abandonó la UAC, por entonces ya corrompida por la influencia del Infierno, para formar la ARC.\n"
+"\n"
+"Apéndice: En 2127, en un intento de salvarse de un cancer incurable, transmitió su consciencia a un cuerpo robótico.\n"
+"\n"
+"Nota de Saya: Sabes, me alegro de que intentara hacer algo BUENO despues de incontables jodiendas de la UAC. Al menos se ha esforzado por compensar toda esa mierda, una pena que le partieran el culo en el proceso.";
 SWWM_LORETAG_HEALTHGEOM = "Geodésico de Salud";
 SWWM_LORETXT_HEALTHGEOM =
 "Designación: Geodésico de Salud\n"
@@ -671,7 +690,7 @@ SWWM_LORETXT_HELL2 =
 "\n"
 "Resumen: Un vasto mundo separado del nuestro, habitado por criaturas que solo pueden ser descritas como \"demonios\". Este Infierno fue inicialmente descubierto a través de los muchos experimentos de viaje interdimensional de Imanaki Corp allá a principios del siglo 21, aunque la UAC se ha esforzado bastante en ocultar este hecho y pretender que ellos fueron los primeros en hacerlo. La respuesta a la UAC haciendo su entrada e intentando robar sus valiosos recursos fue la de aniquilación total. Empezando con los primeros incidentes en Marte y sus lunas, y más tarde una total invasión de la Tierra. Si no hubiera sido por las acciones del Doom Slayer, la humanidad habría perecido.\n"
 "\n"
-"Apéndice: Los líderes del Infierno en aquel entonces no eran reconocidos de forma legítima por la mayoría de la poblacion, ya que habían tomado el mando por la fuerza cuando la Familia Real les dió más poder del que deberían. El Infierno solía ser un lugar más tranquilo antes de su hostil toma de poder, relativamente pacífico, incluso, aparte de alguna que otra incursión de otras naciones que los veían como enemigos. Los diversos generales de las armadas del Infierno deseaban más poder, para luchar contra estos molestos invasores, y así el Príncipe Akusei se lo dió, un terrible error que lamenta hasta este día.\n"
+"Apéndice: Los líderes del Infierno en aquel entonces no eran reconocidos de forma legítima por la mayoría de la poblacion, ya que habían tomado el mando por la fuerza cuando la Familia Real les dió más poder del que deberían. El Infierno solía ser un lugar más tranquilo antes de su hostil toma de poder, relativamente pacífico, incluso, aparte de alguna que otra incursión de otras naciones que los veían como enemigos. Los diversos generales de las armadas del Infierno deseaban más poder, para luchar contra estos molestos invasores, y así el Príncipe Akusei se lo dió, un terrible error que lamenta hasta este día. Tras su derrota, más información ha aparecido, incluyendo detalles de una colaboración con una especie de \"entes angelicales\" conocidos como los Maykrs, habiendo recibido incluso mayor poder a cambio del acceso a sus suministros de Energía Argent.\n"
 "\n"
 "Nota de Saya: Sé bastante de la historia del Infierno gracias a Cytho-sama, el abuelo de Ellen-chan. Nos cuenta sus batallitas de cuando vivía allí. Es interesante, en cierto modo, que no son TODOS tan mala gente, y me apuesto a que la buena gente de ahí tambien lo tuvo crudo viendo lo que sus ejércitos nos hicieron. Cosas así... pasa más a menudo de lo que uno cree. No puedes ir pintando a toda una nación como \"el enemigo\", si hay mucha gente inocente por ahí que no quiere tomar parte de sus mierdas, que rechaza y denuncia activamente lo que está pasando...";
 SWWM_LORETXT_HELLBLAZER =
@@ -816,6 +835,16 @@ SWWM_LORETXT_MAIDBOT =
 "Apéndice: Hubo un tiempo en el que Maidbot fué adaptada a un \"cuerpo de combate\" experimental para asistir al Oni Rojo en su misión en los EEUU. Probó ser efectiva, pero no se sintió cómoda con su trabajo y prefirió volver a ser una chica normal después de todo.\n"
 "\n"
 "Nota de Saya: Sabes... todas mis maidbots, van completamente equipadas, ¿eh? Tú ya me entiendes... están capacitadas para el \"amor\". Maidbot no es una excepción, y deja que te diga... es como estár en el cielo cuando lo hacemos... ♥";
+SWWM_LORETXT_MAYKRS =
+"Nombre: Maykrs\n"
+"Clasificación: Raza Alienígena\n"
+"Localización: Urdak\n"
+"\n"
+"Resumen: Una especie alienígena altamente avanzada, originaria de un mundo lejano. Se dice que tienen apariencia angélica, y poseen poderes increíbles. No hay más detalles al respecto aparte de lo poco que se sabe de documentos filtrados.\n"
+"\n"
+"Apéndice: Su intervención en la invasión del Infierno fue descubierta tras la caída del gobierno militar del Infierno a manos del Doom Slayer. Fueron los que decidieron invadir la Tierra después de que la UAC comenzara a aprovecharse de la Energía Argent de la que dependían para sobrevivir, ofreciendo parte de su poder a los ejércitos del Infierno.\n"
+"\n"
+"Nota de Saya: Sí, creo que recuerdo algo. Todo esto de los \"ángeles\" y tal. Casi que es ya como la segunda vez o así, que la gente se cree que un puñado de extraterrestres de por ahí son \"seres celestiales\" cuando en realidad no son mas que un puñado de capullos. No te voy a pedir que rebusques en libros de historia para eso, así que échale un ojo a la entrada relacionada de \"LANIR\".";
 SWWM_LORETXT_MIXOM =
 "Nombre: Herramientas Mixom\n"
 "Clasificación: Fabricante de Material Industrial\n"
@@ -1045,6 +1074,16 @@ SWWM_LORETXT_SERPENTRIDERS =
 "Resumen: Una tríada de malévolos hechiceros conocidos por todos estos lugares. Todos aquellos que se han atrevido a luchar contra ellos no han tenido mucha suerte. D'Sparil tomó la tierra de Parthoris, sus muchos ejércitos de no muertos habiendo tomado el control del lugar antes de que hubieramos llegado. Luego, en la tierra de Cronos está Korax, una bestia oscura que se burla de todos aquellos que lo desafían. No hemos recibido mucha información sobre el tercer miembro, pero ya nos vendrá a medida que exploramos estos mundos.\n"
 "\n"
 "Nota de Saya: Estoy segura de que puedes cargarte a estos idiotas sin problemas, no tienen ni idea de lo fuerte que eres (o de qué eres, ahora que lo pienso, estos mundos no parecen tener mucho conocimiento de nuestra tecnología).";
+SWWM_LORETAG_SENTINELS = "Centinelas";
+SWWM_LORETXT_SENTINELS =
+"Nombre: Centinelas\n"
+"Localización: Unknown\n"
+"\n"
+"Resumen: También conocidos por el nombre de \"Argenta\", son una especie alienígena de formidables guerreros, de quien se dice que han viajado por todo el universo hace incontables años, incluyendo la Tierra. No hay mucha información disponible sobre ellos, aparte de trozos desperdigados de lore.\n"
+"\n"
+"Apéndice: Posible relación (hostil) con el Infierno, pero no podemos encontrar detalles exactos al respecto, la mayoría de datos han sido perdidos.\n"
+"\n"
+"Nota de Saya: Sí, no sé que pensar. Me encantaría buscar más sobre esto, ¿crees que a lo mejor le puedo preguntar al tío Slayer ese? Probablemente me ignore, seguro.";
 SWWM_LORETXT_SIDHE =
 "Nombre: Sidhe\n"
 "Localización: Parthoris\n"
@@ -1111,6 +1150,15 @@ SWWM_LORETXT_SUNKAEZE =
 "Resumen: Un planeta completamente árido, que se pensaba vacío, hasta que una expedición descubrió las ruinas de unas instalaciones pertenecientes a la extinta Decade Mechanics, un antiguo grupo industrial fundado por el difunto semidios mecánico Maestre Mekes.\n"
 "\n"
 "Nota de Saya: Dioses, semidioses... todo el rollo este... Uno casi que ni se creería que todo esto existe pero venga, después de darnos cuenta que los aliens son muy reales, es difícil no creer en todo esto también. Joder, si CONOZCO uno... no es coña, conozco a un DIOS DE VERDAD. La cosa pasó cuando visitaba a la chica de Yui: pues estaba esta chica con pinta de empollona que tenía como un \"aura\". Se llama Mykka, y es majísima y mola hablar con ella, hasta me dió caramelos y todo. Vamos es que podría seguir hablando de todo esto, pero es que no quiero llenar estas entradas de cosas que no vienen al caso.";
+SWWM_LORETAG_SUSAN = "L.A.N.I.R.";
+SWWM_LORETXT_SUSAN =
+"Nombre: Lanza de Aniquilación, Nulificación, Inexistencia y Ruptura\n"
+"Clasificación: Arma de Destrucción Masiva\n"
+"Localización: Kereshnovka\n"
+"\n"
+"Resumen: Una megaestructura controlada po IA que mide docenas de kilómetros, creada por un misterioso grupo Qurensniv llamado \"Facultad de Iluminados Ningunos\". Habiendo tardado cientos de años en construirse, fue activada finalmente en 2018, tomando luego el control de los sistemas de misiles de Rusia. Su presencia en la Tierra, como una amenaza mayor, fue lo que hizo que los Nukuri iniciaran el \"Evento Luna\". Fuerzas Nukuri desplegadas en 2021 neutralizaron la IA, sin embargo probó ser imposible de destruír, así que se mantuvo inactiva, flotando por los mares del Ártico. En 2097, mucho después del incidente de la Cicatriz Blanca, y con los Nukuri ya no disponibles para defender el planeta, una entidad llamada \"Uruk'Anth\" apareción en la Tierra, anunciando ser \"Dios\", y que es su voluntad que esta máquina traiga consigo el fin del mundo, despues de que la humanidad haya demostrado no ser digna de su bendición. SUSAN fue reactivada, esta ve tomando el control de todos los sistemas de armamento de varias superpotencias mundiales. La Tierra vivió dos largos años de terror, con la IA emitiendo una tremendamente lenta cuenta atras hacia la \"Purificación Mundial\", hasta que fue de algún modo desactivada de nuevo y destruída.\n"
+"\n"
+"Nota de Saya: Como que en serio. \"Soy Dios y digo que debeis morir\", dice. Sí, que se joda el tío ese. Nadie sabe, para nada, como puñetas pasó lo de la segunda vez. Es un misterio como justo... revienta la cosa esa, llevándose con ella al tío ese, también.";
 SWWM_LORETXT_SYMNATEK =
 "Nombre: Symnatek\n"
 "Clasificación: Fabricante de Material Industrial\n"
@@ -1146,9 +1194,9 @@ SWWM_LORETXT_UAC2 =
 "Clasificación: Union Militar, Fundación de Investigación\n"
 "Localización: Unión de Estados, Marte y Júpiter\n"
 "\n"
-"Resumen: Fundada en 2015 por Thomas Kelliher, como una compañía pariente de la Union Aerospace Armed Forces (UAAF). El ascenso al poder de la UAC comenzó en 2025 con sus famosas Expediciones Conjuntas a Marte. Desde la creación de \"Mars City\" y los muchos puestos en Fobos y Deimos, la UAC efectivamente ha estado trabajando fuera de la ley de la Tierra, lo cual ha causado interminables controversias. Aun más despues de haber conseguido asegurar su posición como el mayor cuerpo militar de la Tierra tras la Tercera Guerra Mundial. Fueron los responsables principales de la invasión del Infierno que causó que media Tierra fuera devastada casi totalmente por fuerzas Demoníacas. Sin embargo, gracias a que hubieran traído al Doom Slayer, la invasión fue fácilmente eliminada. Desde el incidente, no ha habido ningún comunicado más de Samuel Hayden, algunos sospechan que esté muerto.\n"
+"Resumen: Fundada en 2015 por Thomas Kelliher, como una compañía pariente de la Union Aerospace Armed Forces (UAAF). El ascenso al poder de la UAC comenzó en 2025 con sus famosas Expediciones Conjuntas a Marte. Desde la creación de \"Mars City\" y los muchos puestos en Fobos y Deimos, la UAC efectivamente ha estado trabajando fuera de la ley de la Tierra, lo cual ha causado interminables controversias. Aun más despues de haber conseguido asegurar su posición como el mayor cuerpo militar de la Tierra tras la Tercera Guerra Mundial. Fueron los responsables principales de la invasión del Infierno que causó que media Tierra fuera devastada casi totalmente por fuerzas Demoníacas. Sin embargo, gracias a que hubieran traído al Doom Slayer, la invasión fue fácilmente eliminada. Desde el incidente, la compañía no ha podido recuperarse, habiendo perdido la mayoría de sus empleados, junto con el antiguo CEO Samuel Hayden.\n"
 "\n"
-"Apéndice: La compañía cayó en el control de los demonios durante la invasión (aunque algunos dicen que esto pudo ser el caso mucho antes del evento), y actualmente sigue recuperándose. Sin embargo no hay muchas esperanzas por una recuperación completa, ya que muchos de sus empleados siguen marchándose.\n"
+"Apéndice: La compañía cayó en el control de los demonios durante la invasión (aunque algunos dicen que esto pudo ser el caso mucho antes del evento), hasta el punto de haber tenido a miembros de alto rango en el gobierno militar del Infierno a cargo de algunas divisiones. Tras haber terminado la invasión, ha habido intentos de que todo vuelva al orden, aunque no hay muchas esperanzas de que esto llege a ocurrir.\n"
 "\n"
 "Nota de Saya: Si es que me da un gusto de cojones ver caer a este asqueroso gigante. Tía, todo lo de la invasión fue horrible, sabes. Pero me alegro de que al menos hubieramos podido ayudar, aunque no fuera nada comparado con lo que el tal Slayer hizo...";
 SWWM_LORETXT_UNISSIX =

@@ -504,6 +504,8 @@ Class InvinciballPower : Powerup
 	{
 		if ( (damage > 0) && passive )
 		{
+			if ( (damagetype == 'Drowning') || (damagetype == 'Falling') || (damagetype == 'Poison') || (damagetype == 'PoisonCloud') )
+				return;	// these go through armor and get ignored by the player
 			if ( damageType == 'Ynykron' )
 			{
 				newdamage = damage;

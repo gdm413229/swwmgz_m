@@ -731,6 +731,8 @@ Main UnSX timeline:
   is dismissed. As bonds with the Nukuri are re-established, their technology
   is adopted once again by all countries. The Nekuraku family in full joins in
   on Saya's birthday party the week after.
+- 2191: Saya and her creations move in with Kirin, she leaves the leadership of
+  Akari Labs to her brother Taro.
 - 2200: Earth joins the X'Animen Coalition, now known as the "United Aligned
   Worlds".
 - 2201: The UAC files for bankrupcy.
@@ -738,8 +740,6 @@ Main UnSX timeline:
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
-- 2231: Saya and her creations move in with Kirin, she leaves the leadership of
-  Akari Labs to her brother Taro.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
 - 2250: The "Dark Alliance" is formed within the Xathar system.

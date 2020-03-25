@@ -419,13 +419,70 @@ The land of magic. A large island floating in an endless ocean of pure magic
 energy. The vast majority of its inhabitants are magic users. Noteworthy people
 born here include Saniuke Okusainaya, the first technomancer, and Kana Sankai,
 head of the Counter-Inquisition, which strives to protect magic users living
-abroad from persecution.
+abroad from persecution. It is also home to the last surviving members of the
+Pynn race.
 
 ### Sunkaeze
 
-A dead planet on the outer rim of the X'Animen system, thought to be entirely
+A dead planet on the outer rim of the Xathar system, thought to be entirely
 barren and inhabitable, until a lone building was found, a factory, built by
 the old mechanical demigod Maester Mekes.
+
+### X'Animen Coalition
+
+A group founded by some of the Warriors of Ix, and formed of several
+interconnected planetary systems, most from the Zen planetarium protected by
+the goddess Anakauser. Its members include:
+
+- Xathar: A system located within the Andromeda galaxy, and the most populated.
+  - Junifh: Scorching hot planet with many underground communities. Home to the
+    Onkou, and to coalition co-founder Ix Konro.
+  - Hebeku: A warm, mountainous planet, inhabited by the Votrexxians.
+  - Nahkami: Icy moon of Hebeku, inhabited by the Nukuri., co-founder
+    of the coalition
+  - Karnanaiahma: A world of large oceans, home of the Qurensniv.
+  - Buran: Formerly lush planet now covered by the matryoshka brain structure
+    known as the Bleaknet, inhabited by the Burakan.
+- Zenna: Second most populated system, located somewhere within the Triangulum
+  galaxy.
+  - Dhetis: A planet brimming with diverse lifeforms, home to countless
+    species.
+  - Ixxeney: Large planet orbited by the fastest known moon. Home of the
+    titanic Xekkians and the draconic Devanikans.
+  - Nekemekya: Semi-artificial planet covered by a large metalic shell, home to
+    the Mekyon, a race of mechanical beings created by Ix Nemeke, co-founder
+    of the coalition.
+  - Xeryuga: Highly hostile magma-filled hellscape planet, inhabited by cute
+    bunnies, and home of Ix Xeuriges, co-founder of the coalition and creator
+    of the many gates connecting these worlds.
+  - Unukugoshuenike: Giant crystal planet, home of the Goshun.
+  - Mishe (former): Destroyed homeworld of the Mishe race.
+- Kryudon: Third most populated system, also from the Andromeda galaxy.
+  - Lok: Dark, fog-covered planet, home of the Lokans and the Rokana.
+  - Kayo: Overpopulated planet-city, homeworld of the Kyon.
+  - Kantharo: Dwarf planet, home of the Kanethes and the Aldabura, and to
+    Ix Pyskou.
+  - Kruon: Ash-covered volcanic planet. Home of the Kruniin, ruled by Dread
+    Overlord Nuoma.
+- Mondakan: A system from the neighbouring planetarium of Kyu.
+  - Mon: A planet with odd similarities to Earth, home of its namesake race,
+         the Mon, plus many others. Also home to Ix Xekkene, coalition
+         co-founder.
+  - Kuranite: Rocky planet, home of various species.
+  - Nedoshiaan (former): The old planet of mad dictator god Nedoshiaan, now
+    completely barren.
+- Sumayon (former): A system from the Milky way, used to house one lone planet.
+  - Senekeye Keinukyenei Bhekeyuni: Homeworld of the Keinun and former home of
+    Ix Sumai. Shattered and pushed out of its orbit after a great cataclysm.
+- Human Solar System (candidate): Our world (duh), located in the Milky Way.
+  - Earth: A planet that, despite its name, has more water than land. Home of
+    the Humans.
+  - Luna: The lone moon of planet Earth, inhabited by the Lunarians.
+- Rimm (candidate): A remote system within the Milky Way that has attracted the
+  interests of many races due to the vast amount of Tarydium found in one of
+  its planets.
+  - Na Pali: Lush planet known for its precious mineral resources, home of the
+    Nali.
 
 ---
 

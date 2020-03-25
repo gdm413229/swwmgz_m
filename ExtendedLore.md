@@ -119,9 +119,8 @@ more or less as if you're "racing him to the finish line".
 
 ### Doom Slayer
 
-An ancient warrior discovered by the UAC during an expedition to Hell. His
-armor appears similar to that of the typical UAC marine, which has led to a lot
-of wild mass guessing. He is completely unrelated to the previous character.
+A universe-hopping demon exterminator. Appears to bear some resemblance to the
+Doom Marine, not much else is known about him.
 
 ### Harold Forx
 
@@ -435,14 +434,16 @@ the old mechanical demigod Maester Mekes.
 This is in no way accurate, and it's hard to make much sense of all of it since
 SWWM GZ effectively blends Doom with the UnSX universe (which was itself
 already blended with Unreal). Note that there are BIG SPOILERS for some stuff
-in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
+in my games here.
+
+Hollow timeline ("real world"):
 
 - 1992: Waratsuki Emimaru is born.
 - August of 2021: Hollow begins.
 - September of 2021: Hollow ends. The "Convergence Event" happens, the real
   world is destroyed. Waratsuki Emimaru becomes The Grinning Man.
 
-...
+Main UnSX timeline:
 
 - Iteration 0: The void forms from within the bubble of empty space-time left
   by the real world's destruction.
@@ -532,7 +533,6 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 - 2018: Empty Episode One. Second major incident in the town of Kereshnovka. A
   rogue AI known as SUSAN surfaces on the northern seas, assumes control of
   Russia's missile systems.
-- 2019: Samuel Hayden is born.
 - 2020: A group of hackers manage to temporarily take over SUSAN, use its
   advanced computing power to run thirty parallel instances of Crysis and a
   500-player Minecraft server. This lasts for several months, allowing things
@@ -541,8 +541,9 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   dating. Not long after, they get married.
 - 2021: The "Luna Event" happens. The first contact between humans and a
   non-hostile alien race, the Nukuri, who had been observing our race for
-  centuries from a hidden research facility on the Moon. Following the event,
-  Nukuri forces deployed to Earth successfully neutralize SUSAN.
+  centuries from a hidden research facility on the Moon, and had noticed the
+  threat SUSAN posed to the planet. Following the event, Nukuri forces deployed
+  to Earth successfully neutralize the rogue AI.
 - 2022: Scotland becomes independent.
 - 2023: The two Koreas re-unify. Following years of negotiation, Galicia
   becomes part of Portugal. Ana Blanco becomes the first human woman to marry a
@@ -610,60 +611,72 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
 - 2147: Reginald E. Griggs Jr. is imprisoned after countless human remains were
   found in the basement of his summer house in Olathe.
 - 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
-  After a lone marine reaches the gates of Hell in order to shut them off from
-  the inside, Akari Labs deploys the first Demolitionist in order to combat the
-  remaining invaders on Earth. After the marine's victory against the Icon of
-  Sin, the invasion ends, but some demons still remain, so without even being
-  given a moment to rest, the marine's sent on another mission. Months later,
-  the UAC still hasn't learned anything, and one of their bases on the moons of
-  Jupiter is invaded. The now legendary "Doom marine" is sent there.
+  The only survivor of the incidents on Phobos and Deimos, the "Doom Marine",
+  arrives on Earth after having fought his way out of Hell, only to find it
+  invaded by Demon armies. The UAC comes into contact with him and he's tasked
+  with stopping the invasion by reaching the gate they used to enter our world,
+  and closing it shut. Seeing an opportunity to compete against the UAC, Akari
+  Labs deploys the first Demolitionist, and gives them the same mission. After
+  the victory against the Icon of Sin, the invasion ends, but some demons still
+  remain, so without even being given a moment to rest, the marine's sent on
+  another mission. Months later, and despite having been thoroughly reformed,
+  the UAC still hasn't learned anything, and another invasion happens. The now
+  legendary "Doom marine" is sent there, Plutonia begins.
 - 2149: An UAC-owned ship en route to the Jupiter base is hijacked, Demon
-  reinforcements arrive. The marine manages to fight them off again. After the
-  incident he is decomissioned, and the Doom episodes are classified. Zanaveth
-  III attempts to take over the world while it's still recovering from the
-  invasion, fails. Hell attempts another invasion of Mars, Doom 2016 happens.
-- 2150~2151: The fight against the last remaining Demons on Earth continues.
-  Doom Eternal happens. After defeating |BIG SPOILER HERE| contact with him is
-  lost completely.
-- 2156: Akari Labs succeeds in creating safe teleportation.
-- 2160: Demonic forces are discovered on several old UAC bases, having been
-  resurrected by a "Mother Demon". Seeing as the Slayer is nowhere to be found,
-  the Doom marine is re-commissioned to stop this madness, he succeeds, but in
-  a last transmission states that he will "stay in Hell to make sure no demon
-  ever comes out again".
-- 2170: A group of monks discover a mansion haunted by demons, become trapped.
-  The Doom Slayer heads in to "fix things". A mysterious figure is seen leaving
-  the mansion afterwards.
-- 2171: Akari Labs manages to extend their teleportation technology to travel
-  between universes. The Demolitionist is deployed in a world called Parthoris,
-  and takes part on a mission to defeat an evil sorcerer who had taken over the
-  land. A month later, following a recommendation from Ashley Knox, the second
-  contact with the Anarukon happens, this time all going peacefully. Saya
-  Miyamoto meets Kirin Xanai, their marriage brings forth an alliance between
-  the humans and the Anarukon. Two weeks after the wedding, a second
-  exploration is initiated, with the Demolitionist deployed into a realm known
-  as Cronos in order to defeat an associate of the old sorcerer from their
-  previous mission.
-- 2173: Third major exploration, with the Demolitionist taking part of a rebel
+  reinforcements arrive. The marine manages to fight them off again
+  (Evilution). After the incident he is decomissioned, and the Doom episodes
+  are classified. Zanaveth III attempts to take over the world while it's still
+  recovering from the invasion, fails (Total Madness: It Always Gets Better).
+- 2150: UAC president Ian Kelliher announces that the company will place all
+  its efforts into repairing the damages done to Earth, though there isn't much
+  hope for this to be finished before the turn of the century. When Saya finds
+  out, she congratulates him for "being less of a greedy bastard", but at the
+  same time mocks him for now being "the US government's lap dog".
+- 2156: Akari Labs succeeds in creating safe teleportation, following the
+  announcement, the UAC's reaction on social media is legendary, in part due
+  to the fact Saya openly mocked them by branding it "demon-proof".
+- 2160: Doom 64. Demonic forces are discovered on several old UAC bases, having
+  been resurrected by a "Mother Demon". The Doom marine is re-commissioned to
+  stop this madness, he succeeds, but in a last transmission states that he
+  will "stay in Hell to make sure no demon ever comes out again".
+- 2171: The "Akari Project". Akari Labs manages to extend their teleportation
+  technology to directly travel between any points in space between any
+  universes, arbitrarily, without the need to pair them beforehand by building
+  connected teleporters. This new technology was named "interportals". After
+  searching for "places of interest for testing", The Demolitionist is deployed
+  in a world called Parthoris, and takes part on a mission to defeat an evil
+  sorcerer who had taken over the land. A month later, following a
+  recommendation from Ashley Knox, the second contact with the Anarukon
+  happens, this time all going peacefully. Saya Miyamoto meets Kirin Xanai,
+  their marriage brings forth an alliance between the humans and the Anarukon.
+  Two weeks after the wedding, a second exploration is initiated, with the
+  Demolitionist deployed into a realm known as Cronos in order to defeat an
+  associate of the old sorcerer from their previous mission.
+- 2173: Third major exploration, with the Demolitionist taking part on a rebel
   uprising in a world dominated by a cult known as the Order of the One God.
 - 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.
 - 2175: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
   "those brats deserved it, they didn't know how to use a fucking chair lol".
+- 2178: A group of monks discover a mansion haunted by demons, become trapped.
+  Through the use of advanced magicks, the head monk summons the "Doom Slayer",
+  a dimension hopping warrior highly experienced in excising demons, and
+  request his services. Once the evils of the mansion are eliminated, a
+  mysterious figure is seen leaving it afterwards.
 - 2181: An old man, who later reveals himself as Manakei, contacts Akari Labs
-  with a request to be transported to Hell. After reaching the royal throne (or
-  what was left of it), he pushes away the rotten corpse of the former prince
-  and takes his place as the true ruler of Hell. His first official act is to
-  cease the hostilities with humans, declares the Doom Slayer "Guardian of the
-  Gates".
+  with a request to be transported to Hell. After reaching it, he unleashes his
+  full power, and singlehandedly defeats the remaining usurper generals, who
+  were in the middle of planning yet another invasion of Earth. After a moment
+  of rest, he makes his way to the royal throne, and takes his place as the
+  legitimate ruler of Hell. His first official act is to cease all hostilities
+  with mankind.
 - 2187: Following a very difficult period of negotiation, the White Scar treaty
   is dismissed. As bonds with the Nukuri are re-established, their technology
   is adopted once again by all countries. The Nekuraku family in full joins in
   on Saya's birthday party the week after.
-- 2193: Akari Labs completes the "Akari Project", resulting in humanity's first
-  entry into FTL travel.
 - 2200: Earth joins the X'Animen Coalition, now known as the "United Aligned
   Worlds".
+- 2201: The UAC files for bankrupcy.
 - 2207: All damage from the Hell Invasion of 2148 is finally repaired.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
@@ -678,7 +691,7 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   immortality of the Nukuri race on humans through a nano-augmentation method
   known as the "Necris process".
 - 2291: The Liandri Grand Tournament begins.
-- ~2304: The Phayder Corporation attacks the Twin Souls colony. UT3 happens.
+- 2304: The Phayder Corporation attacks the Twin Souls colony. UT3 happens.
 - 2307: After a whistleblower reveals the details of Liandri's involvement with
   the Necris invasion of 2304, the corporation is dissolved.
 - 2320: A group of billionaires buy an entire island and turn it into an arena.
@@ -695,6 +708,10 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   fearsome Dread Overlord Nuoma, who attempts to reunite those who were
   defeated in the former war and strike once more. A long period of war begins.
 - 2418: Third Unissix Tournament.
+- 2422: UnSX 3. Incident on the remote planet of Zan'am, in the Rimm system. A
+  group of archaeologists studying some ancient alien ruins send out a distress
+  signal, something has clearly gone wrong, and they're being attacked by an
+  unidentified hostile force. A team of mercenaries is sent.
 - 2425: Fourth Unissix Tournament.
 - 2430: The Fifth and last Unissix Tournament. Misa grows tired of the whole
   thing.
@@ -703,7 +720,8 @@ in my games here (though I'm avoiding spoilers for Doom Eternal, at least)
   and convinces them to spare him, then takes Ososkuro back to their homeland.
 - 2459: Nuoma accidentally reveals her true form to the people of Kruon. The
   feared "fall of the empire" doesn't happen, she is still revered as a worthy
-  leader.
+  leader. Despite all that, she decides to pass the title of overlord to her
+  son Ososkuro.
 - 2500-2778: "The Great Tranquility". An odd period of time with an apparent
   lack of major conflicts or other noteworthy events.
 - 2779: UnSX 6 begins. The former "Warriors of the End" who had served
@@ -762,7 +780,7 @@ Abyssal Era (Project Abyss timeline):
 - The Abyssal Year: In order to stop a massive Eldrich Abomination from
   corrupting all of existence, the two Mishe brothers activate Vault 490.
   Although the threat is defeated, major parts of the multiverse shatter in the
-  process.
+  process, causing severe distortions in time and space.
 - 13: General Marius dies in combat defending the realm of Naiarkar from an
   invasion of Levlen crusaders.
 - 22: The Grand Patriarch becomes the Champion of the Kenaia Colloseum.

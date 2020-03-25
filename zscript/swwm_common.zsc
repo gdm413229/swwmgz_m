@@ -254,13 +254,6 @@ Class SWWMLoreLibrary : Thinker
 	bool DirectAdd( String ref )
 	{
 		// restrictions
-		if ( !(gameinfo.gametype&GAME_Raven) )
-		{
-			if ( ref ~== "Doomslayer" ) return true;	// not witnessed
-			if ( ref ~== "Sentinels" ) return true;	// not known
-			if ( ref ~== "Maykrs" ) return true;	// ditto
-			if ( ref ~== "ARC" ) return true;	// didn't exist yet
-		}
 		if ( !(gameinfo.gametype&GAME_Hexen) )
 		{
 			if ( ref ~== "Kirin" ) return true;	// not met
@@ -274,9 +267,7 @@ Class SWWMLoreLibrary : Thinker
 		if ( gameinfo.gametype&GAME_Raven )
 		{
 			if ( text ~== "SWWM_LORETXT_UAC" )
-				text = "SWWM_LORETXT_UAC2";	// uac ded
-			else if ( text ~== "SWWM_LORETXT_HAYDEN" )
-				text = "SWWM_LORETXT_HAYDEN2";	// hayden "ded"
+				text = "SWWM_LORETXT_UAC2";	// uac "reformed"
 			else if ( text ~== "SWWM_LORETXT_HELL" )
 				text = "SWWM_LORETXT_HELL2";	// invasion was a thing of the past
 			else if ( text ~== "SWWM_LORETXT_NANA" )

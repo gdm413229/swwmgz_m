@@ -1,5 +1,47 @@
 // collectable items that may drop sometimes (future feature)
 
-Class SWWMCollectable : Inventory
+Class SWWMCollectable : Inventory abstract
 {
+}
+
+// April Fools 2020
+Class FroggyChair : Inventory
+{
+	int cdown;
+
+	Default
+	{
+		Tag "$T_FROGGY";
+		Inventory.PickupSound "misc/p_pkup";
+		Inventory.PickupMessage "$T_FROGGY";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNCLEARABLE;
+		Stamina 1440;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		cdown = 150;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Owner && Owner.CheckLocalView() )
+		{
+			if ( cdown == 140 )
+				Console.MidPrint(newsmallfont,"$D_FROGGY1");
+			else if ( cdown == 70 )
+				Console.MidPrint(newsmallfont,"$D_FROGGY2");
+		}
+		if ( cdown > 0 ) cdown--;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

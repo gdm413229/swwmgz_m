@@ -1237,6 +1237,17 @@ SWWM_LORETXT_ZANAVETH3 =
 "Apéndice: La actitud hostil hacia otra gente y visión negativa del mundo que tiene Zanaveth pueden ser consecuencia de su infancia atormentada. Rara vez se abre ante alguien, excepto sus madres, y también Saya, debido a todo el tiempo que pasaron juntas cuando sus madres estaban de visita.\n"
 "\n"
 "Nota de Saya: Zana-chan puede parecer fría y tal pero debajo de todo eso es una chica muy sensible, muy emocional. Solía pasarse por mi casa despues de meterse en líos, toda inquieta y cabreada, y yo le daba mimos para que se calmara. Era... realmente reconfortante, hace que me sienta como una madre, o algo así. Me pregunto a que andará ahora, hace tiempo que no la veo. Ahhhh... Echo de menos acariciar ese pelo tan suave y mullidito que tiene...";
+SWWM_LORETAG_FROGGYCHAIR = "Silla Rana";
+SWWM_LORETXT_FROGGYCHAIR =
+"Designación: Silla Rana\n"
+"Clasificación: Mueble\n"
+"Precio: 1440 Campanas\n"
+"\n"
+"Resumen: Un pequeño precio a pagar.\n"
+"\n"
+"Apéndice: Por una Silla Rana.\n"
+"\n"
+"Nota de Saya: ¿Que puñetas es esto?";
 /* GAME STUFF */
 // tags, pickups
 I_PUSHER = "Taladro Percutor de Microfusión \"Pusher\"";
@@ -1314,6 +1325,7 @@ I_OMNISIGHT = "Unidad de Mapeado Omnivisión";
 T_REFRESHER = "Refrescador";
 T_SANDWICH = "Sandwich de Queso a la Plancha";
 T_WARARMOR = "Armadura de Guerra";
+T_FROGGY = "Silla Rana";
 // colored tags for keys
 T_REDCARD = "\cgTarjeta Llave Roja\c-";
 T_BLUECARD = "\chTarjeta Llave Azul\c-";
@@ -1806,6 +1818,8 @@ SWWM_URDED2 = "Pulsa \cfUsar\c- para reiniciar desde la última partida guardada
 SWWM_URDED3 = "...o pulsa \cfDisparar\c- para intentar un reinicio de emergencia";
 SWWM_REFAIL = "REINICIO DE EMERGENCIA FALLIDO - NO HAY SUFICIENTE POTENCIA AUXILIAR DISPONIBLE";
 D_REFAIL = "El Sistema de Reinicio de Emergencia se ha recargado completamente.";
+D_FROGGY1 = "\cjUn pequeño precio a pagar...\c-";
+D_FROGGY1 = "\cj... por una \cdSilla Rana\cj.\c-";
 // targetter
 SWWM_MULTIKILL = "Racha";
 SWWM_SPREEKILL = "Intocable";

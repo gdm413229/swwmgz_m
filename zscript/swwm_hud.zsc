@@ -895,7 +895,7 @@ Class SWWMStatusBar : BaseStatusBar
 				len = fnt.StringWidth(str);
 				xx = (ss.x-len)/2.;
 				yy = ss.y-48;
-				if ( (gametic%16) < 8 )
+				if ( ((demo.revivefail-level.maptime)%16) < 8 )
 					Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 			alph = clamp((demo.deadtimer-60)/60.,0.,1.);

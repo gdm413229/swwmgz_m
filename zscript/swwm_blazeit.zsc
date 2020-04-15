@@ -1,17 +1,219 @@
 // Imanaki Corp Hellfire Cannon Mk3, aka "Hellblazer" (from SWWM series, originally inspired by the Hellraiser from OMGWEAPONS)
 // Slot 6, replaces Rocket Launcher, Phoenix Rod, Firestorm
 
+// rockets
+Class HellblazerMissile : Actor
+{
+}
+
+Class HellblazerCrackshot : HellblazerMissile
+{
+}
+
+Class HellblazerRavager : HellblazerMissile
+{
+}
+
+Class HellblazerWarhead : HellblazerMissile
+{
+}
+
+// grenades
+Class HellblazerMissile2 : HellblazerMissile
+{
+}
+
+Class HellblazerCrackshot2 : HellblazerCrackshot
+{
+}
+
+Class HellblazerRavager2 : HellblazerRavager
+{
+}
+
+Class HellblazerWarhead2 : HellblazerWarhead
+{
+}
+
 Class Hellblazer : SWWMWeapon
 {
 	int clipcount;
+	Class<Ammo> loadammo, nextammo;
 
 	Property ClipCount : clipcount;
+
+	transient ui TextureID WeaponBox, AmmoIcon;
+	transient ui Font TewiFont;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		// DEBUG
+		Screen.DrawText(TewiFont,Font.CR_RED,bx-160,by-59,"NOT YET FULLY IMPLEMENTED",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_RED,bx-160,by-46,String.Format("Loaded: %s",loadammo?GetDefaultByType(loadammo).GetTag():"(null)"),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_RED,bx-160,by-33,String.Format("Next: %s",nextammo?GetDefaultByType(nextammo).GetTag():"(null)"),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_RED,bx-160,by-20,String.Format("Clip: %d / %d",clipcount,LoadedCapacity()),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// TODO the ammo display itself
+	}
+
+	action void A_HellblazerFire( int type = 0, bool bAlt = false )
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		static const Class<Actor> projs[] = {"HellblazerMissile","HellblazerCrackshot","HellblazerRavager","HellblazerWarhead",
+							"HellblazerMissile2","HellblazerCrackshot2","HellblazerRavager2","HellblazerWarhead2"};
+		A_StartSound(bAlt?"hellblazer/altfire":"hellblazer/fire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:(bAlt?1.7:.8));
+		A_AlertMonsters(bAlt?400:1200);
+		int qstr = bAlt?4:5;
+		A_QuakeEx(qstr,qstr,qstr,bAlt?4:12,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.12*qstr);
+		A_ZoomFactor(bAlt?.96:.93,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_Recoil(bAlt?.3:.5);
+		invoker.clipcount = max(0,invoker.clipcount-1);
+		// TODO fire the stuff
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		for ( int i=0; i<4; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+		return (clipcount>0);
+	}
+
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+		{
+			if ( clipcount > 0 ) return true;
+			for ( int i=0; i<4; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+			return false;
+		}
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
 
 	override bool UsesAmmo( Class<Ammo> kind )
 	{
 		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
 		for ( int i=0; i<4; i++ ) if ( kind is types[i] ) return true;
 		return false;
+	}
+
+	action void A_GlassOverlay( StateLabel g )
+	{
+		if ( !player.FindPSprite(PSP_WEAPON+1) )
+		{
+			A_Overlay(PSP_WEAPON+1,g);
+			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE,true);
+			A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
+		}
+		else player.SetPSprite(PSP_WEAPON+1,invoker.FindState(g));
+	}
+
+	action state A_JumpByAmmoType( StateLabel a, StateLabel b, StateLabel c, StateLabel d, StateLabel g, StateLabel o = null )
+	{
+		A_Overlay(-9999,o);
+		A_GlassOverlay(g);
+		if ( invoker.loadammo is "HellblazerMissiles" ) return invoker.FindState(a);
+		if ( invoker.loadammo is "HellblazerCrackshots" ) return invoker.FindState(b);
+		if ( invoker.loadammo is "HellblazerRavagers" ) return invoker.FindState(c);
+		if ( invoker.loadammo is "HellblazerWarheads" ) return invoker.FindState(d);
+		return invoker.FindState(a);
+	}
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		if ( !loadammo ) loadammo = "HellblazerMissiles";
+		nextammo = loadammo;
+	}
+
+	clearscope int LoadedCapacity() const
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		static const int typeclipcount[] = {6,3,3,2};
+		for ( int i=0; i<4; i++ )
+		{
+			if ( loadammo != types[i] ) continue;
+			let a = Owner.FindInventory(types[i]);
+			return min(a.Amount+clipcount,typeclipcount[i]);
+			break;
+		}
+		return 0;
+	}
+
+	action void A_PickNextAmmo()
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		int curidx = 0;
+		for ( int i=0; i<4; i++ )
+		{
+			if ( invoker.nextammo != types[i] ) continue;
+			curidx = (i+1)%4;
+			break;
+		}
+		Class<Ammo> oldammo = invoker.nextammo, newammo = null;
+		for ( int i=0; i<4; i++ )
+		{
+			int nidx = (i+curidx)%4;
+			if ( CountInv(types[nidx]) <= 0 ) continue;
+			newammo = types[nidx];
+			break;
+		}
+		if ( newammo != oldammo ) A_StartSound("misc/invchange",CHAN_WEAPONEXTRA,CHANF_UI|CHANF_LOCAL);
+		invoker.nextammo = newammo;
+	}
+
+	action void A_ZoomHold()
+	{
+		A_WeaponReady(WRF_NOFIRE);
+		if ( player.cmd.buttons&BT_ZOOM ) return;
+		player.SetPSPrite(PSP_WEAPON,invoker.FindState("Ready"));
+	}
+
+	action void A_SwapAmmo()
+	{
+		let amo = FindInventory(invoker.loadammo);
+		// if we're loading the same ammo type, we only need to remove the needed ammo
+		if ( invoker.loadammo == invoker.nextammo )
+		{
+			int takeamt = invoker.LoadedCapacity()-invoker.clipcount;
+			invoker.clipcount = invoker.LoadedCapacity();
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				amo.Amount = max(0,amo.Amount-takeamt);
+			return;
+		}
+		// re-add/drop any still loaded
+		int maxgiveamt = min(amo.MaxAmount-amo.Amount,invoker.clipcount);
+		int dropamt = invoker.clipcount-maxgiveamt;
+		if ( (dropamt > 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) ) amo.CreateTossable(dropamt);
+		amo.Amount = min(amo.MaxAmount,amo.Amount+invoker.clipcount);
+		// swap
+		invoker.clipcount = 0;
+		invoker.loadammo = invoker.nextammo;
+		invoker.clipcount = invoker.LoadedCapacity();
+		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		{
+			let namo = FindInventory(invoker.loadammo);
+			namo.Amount = max(0,namo.Amount-invoker.clipcount);
+		}
+	}
+
+	action void A_HellblazerReady()
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+		// can we fire?
+		bool canfire = (invoker.clipcount > 0);
+		for ( int i=0; i<4; i++ )
+		{
+			if ( CountInv(types[i]) <= 0 ) break;
+			canfire = true;
+			break;
+		}
+		if ( !canfire ) flg |= WRF_NOPRIMARY|WRF_NOSECONDARY;
+		A_WeaponReady(flg);
+		if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+			invoker.CheckAmmo(EitherFire,true);
 	}
 
 	Default
@@ -21,6 +223,7 @@ Class Hellblazer : SWWMWeapon
 		Obituary "$O_HELLBLAZER";
 		Weapon.SlotNumber 6;
 		Weapon.SelectionOrder 1800;
+		Weapon.UpSound "hellblazer/select";
 		Stamina 90000;
 		Weapon.AmmoType1 "HellblazerMissiles";
 		Weapon.AmmoGive1 6;
@@ -32,5 +235,359 @@ Class Hellblazer : SWWMWeapon
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	Select:
+		XZW2 I 0
+		{
+			A_FullRaise();
+			return A_JumpByAmmoType("Select_1","Select_2","Select_3","Select_4","Select_G");
+		}
+	Select_1:
+		XZW2 IJKLMNOP 2;
+		Goto Ready_1;
+	Select_2:
+		XZW7 DEFGHIJK 2;
+		Goto Ready_2;
+	Select_3:
+		XZWC BCDEFGHI 2;
+		Goto Ready_3;
+	Select_4:
+		XZWG Z 2;
+		XZWH ABCDEFG 2;
+		Goto Ready_4;
+	Select_G:
+		XZWM ABCDEFGH 2;
+		Goto Ready_G;
+	Deselect:
+		XZW2 A 0
+		{
+			A_StartSound("hellblazer/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpByAmmoType("Deselect_1","Deselect_2","Deselect_3","Deselect_4","Deselect_G");
+		}
+	Deselect_1:
+		XZW2 ABCDEFGHI 2;
+		XZW2 I -1 A_FullLower();
+		Stop;
+	Deselect_2:
+		XZW6 VWXYZ 2;
+		XZW7 ABCD 2;
+		XZW7 I -1 A_FullLower();
+		Stop;
+	Deselect_3:
+		XZWB TUVWXYZ 2;
+		XZWC AB 2;
+		XZWC B -1 A_FullLower();
+		Stop;
+	Deselect_4:
+		XZWG RSTUVWXYZ 2;
+		XZWG Z -1 A_FullLower();
+		Stop;
+	Deselect_G:
+		XZWL STUVWXYZ 2;
+		XZWM A 2;
+		XZWM A 0;
+		Stop;
+	Ready:
+		XZW2 A 0 A_JumpByAmmoType("Ready_1","Ready_2","Ready_3","Ready_4","Ready_G");
+	Ready_1:
+		XZW2 A 1 A_HellblazerReady();
+		Wait;
+	Ready_2:
+		XZW6 V 1 A_HellblazerReady();
+		Wait;
+	Ready_3:
+		XZWB T 1 A_HellblazerReady();
+		Wait;
+	Ready_4:
+		XZWG R 1 A_HellblazerReady();
+		Wait;
+	Ready_G:
+		XZWL S 1;
+		Wait;
+	Fire:
+		XZW2 A 0
+		{
+			if ( invoker.clipcount <= 0 )
+			{
+				if ( CountInv(invoker.nextammo) <= 0 ) A_PickNextAmmo();
+				return A_JumpByAmmoType("Unload_1","Unload_2","Unload_3","Unload_4","Unload_G");
+			}
+			return A_JumpByAmmoType("Fire_1","Fire_2","Fire_3","Fire_4","Fire_G");
+		}
+	Fire_1:
+		XZW2 A 1 A_HellblazerFire(0);
+		XZW2 QRSTUVW 2;
+		Goto Cycle_1;
+	Fire_2:
+		XZW6 V 1 A_HellblazerFire(1);
+		XZW7 LMNOPQR 2;
+		Goto Cycle_2;
+	Fire_3:
+		XZWB T 1 A_HellblazerFire(2);
+		XZWC JKLMNOP 2;
+		Goto Cycle_3;
+	Fire_4:
+		XZWG R 1 A_HellblazerFire(3);
+		XZWH HIJKLMN 2;
+		Goto Cycle_4;
+	Fire_G:
+		XZWL S 1;
+		XZWM IJKLMNO 2;
+		Goto Ready_G;	// state jump to cycling is done elsewhere
+	AltFire:
+		XZW2 A 0
+		{
+			if ( invoker.clipcount <= 0 )
+			{
+				if ( CountInv(invoker.nextammo) <= 0 ) A_PickNextAmmo();
+				return A_JumpByAmmoType("Unload_1","Unload_2","Unload_3","Unload_4","Unload_G");
+			}
+			return A_JumpByAmmoType("AltFire_1","AltFire_2","AltFire_3","AltFire_4","AltFire_G");
+		}
+	AltFire_1:
+		XZW2 A 1 A_HellblazerFire(0,true);
+		XZW2 XYZ 2;
+		XZW3 ABCD 2;
+		Goto Cycle_1;
+	AltFire_2:
+		XZW6 V 1 A_HellblazerFire(1,true);
+		XZW7 STUVWXY 2;
+		Goto Cycle_2;
+	AltFire_3:
+		XZWB T 1 A_HellblazerFire(2,true);
+		XZWC QRSTUVW 2;
+		Goto Cycle_3;
+	AltFire_4:
+		XZWG R 1 A_HellblazerFire(3,true);
+		XZWH OPQRSTU 2;
+		Goto Cycle_4;
+	AltFire_G:
+		XZWL S 1;
+		XZWM PQRSTUV 2;
+		Goto Ready_G;	// state jump to cycling is done elsewhere
+	Cycle_1:
+		XZW2 A 3 A_GlassOverlay("Cycle_G1");
+		XZW3 E 3;
+		XZW3 FGHI 2;
+		XZW3 I 0;
+		XZW3 FE 3;
+		Goto Ready_1;
+	Cycle_2:
+		XZW6 V 3 A_GlassOverlay("Cycle_G2");
+		XZW7 Z 3;
+		XZW8 ABCDEFG 2;
+		XZW8 G 0;
+		XZW8 A 3;
+		XZW7 Z 3;
+		Goto Ready_2;
+	Cycle_3:
+		XZWB T 3 A_GlassOverlay("Cycle_G2");
+		XZWC X 3;
+		XZWC YZ 2;
+		XZWD ABCDE 2;
+		XZWD E 0;
+		XZWC YX 3;
+		Goto Ready_3;
+	Cycle_4:
+		XZWG R 3 A_GlassOverlay("Cycle_G3");
+		XZWH V 3;
+		XZWH WXYZ 2;
+		XZWI ABCDEF 2;
+		XZWI F 0;
+		XZWH WV 3;
+		Goto Ready_4;
+	Cycle_G1:
+		XZWL S 3 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWM W 3;
+		XZWM X 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWM YZ 2;
+		XZWN A 2;
+		XZWN A 0 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWM XW 3;
+		Goto Ready_G;
+	Cycle_G2:
+		XZWL S 3 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWM W 3;
+		XZWN B 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN CD 2;
+		XZWN E 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN FGH 2;
+		XZWN H 0 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN B 3;
+		XZWM W 3;
+		Goto Ready_G;
+	Cycle_G3:
+		XZWL S 3 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWM W 3;
+		XZWN I 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN JK 2;
+		XZWN L 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN MN 2;
+		XZWN O 2 A_StartSound("hellblazer/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN PQR 2;
+		XZWN R 0 A_StartSound("hellblazer/shift",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN I 3;
+		XZWM W 3;
+		Goto Ready_G;
+	Reload:
+		XZW2 A 2
+		{
+			if ( (invoker.clipcount >= invoker.LoadedCapacity()) && (invoker.loadammo == invoker.nextammo) )
+				return A_JumpByAmmoType("Idle_1","Idle_2","Idle_3","Idle_4","Idle_G");
+			return A_JumpByAmmoType("Unload_1","Unload_2","Unload_3","Unload_4","Unload_G");
+		}
+		Goto Ready;
+	Unload_1:
+		XZW2 A 2;
+		XZW3 JKLMNOPQRSTUVWXYZ 2;
+		XZW4 ABCDEFGHI 2;
+		XZW4 J 2
+		{
+			A_SwapAmmo();
+			return A_JumpByAmmoType("Load_1","Load_2","Load_3","Load_4","Load_G");
+		}
+		Goto Load_1;
+	Unload_2:
+		XZW6 V 2;
+		XZW8 HIJKLMNOPQRSTUVWXYZ 2;
+		XZW9 ABCDEFG 2;
+		XZW9 H 2
+		{
+			A_SwapAmmo();
+			return A_JumpByAmmoType("Load_1","Load_2","Load_3","Load_4","Load_G");
+		}
+		Goto Load_2;
+	Unload_3:
+		XZWB T 2;
+		XZWD FGHIJKLMNOPQRSTUVWXYZ 2;
+		XZWE ABCDE 2;
+		XZWE F 2
+		{
+			A_SwapAmmo();
+			return A_JumpByAmmoType("Load_1","Load_2","Load_3","Load_4","Load_G");
+		}
+		Goto Load_3;
+	Unload_4:
+		XZWG R 2;
+		XZWI GHIJKLMNOPQRSTUVWXYZ 2;
+		XZWJ ABCDEF 2;
+		XZWJ G 2
+		{
+			A_SwapAmmo();
+			return A_JumpByAmmoType("Load_1","Load_2","Load_3","Load_4","Load_G");
+		}
+		Goto Load_4;
+	Unload_G:
+		XZWL S 2 A_StartSound("hellblazer/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN STU 2;
+		XZWN V 2 A_StartSound("hellblazer/open",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWN WXYZ 2;
+		XZWO ABCDEFGH 2;
+		XZWO I 2 A_StartSound("hellblazer/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWO JKLMNOPQRS 2;
+		Goto Load_G;
+	Load_1:
+		XZW4 JKLMNOPQRSTUVWXYZ 2;
+		XZW5 ABCDEFGHIJ 2;
+		Goto Ready_1;
+	Load_2:
+		XZW9 HIJKLMNOPQRSTUVWXYZ 2;
+		XZWA ABCDEFGH 2;
+		Goto Ready_2;
+	Load_3:
+		XZWE FGHIJKLMNOPQRSTUVWXYZ 2;
+		XZWF ABCDEF 2;
+		Goto Ready_3;
+	Load_4:
+		XZWJ GHIJKLMNOPQRSTUVWXYZ 2;
+		XZWK ABCDEFG 2;
+		Goto Ready_4;
+	Load_G:
+		XZWO STUVWXY 2;
+		XZWO Z 2 A_StartSound("hellblazer/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWP ABCDEFG 2;
+		XZWP H 2 A_StartSound("hellblazer/close",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWP IJKL 2;
+		XZWP M 2 A_StartSound("hellblazer/meleestop",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWP NOPQRS 2;
+		Goto Ready_G;
+	Idle_1:
+		XZW2 A 2;
+		XZW5 KLMNOPQRSTUVWXYZ 2;
+		XZW6 A 2;
+		Goto Ready_1;
+	Idle_2:
+		XZW6 V 2;
+		XZWA IJKLMNOPQRSTUVWXY 2;
+		Goto Ready_2;
+	Idle_3:
+		XZWB T 2;
+		XZWF GHIJKLMNOPQRSTUVW 2;
+		Goto Ready_3;
+	Idle_4:
+		XZWG R 2;
+		XZWK HIJKLMNOPQRSTUVWX 2;
+		Goto Ready_4;
+	Idle_G:
+		XZWL S 2 A_StartSound("hellblazer/idle",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWP TUVWX 2;
+		XZWP Y 2 A_StartSound("hellblazer/dustoff",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWP Z 2;
+		XZWQ ABCDEFGHIJ 2;
+		Goto Ready_G;
+	Zoom:
+		#### # 1
+		{
+			A_PickNextAmmo();
+			A_WeaponReady(WRF_NOFIRE);
+		}
+		#### # 1 A_ZoomHold();
+		Wait;
+	User1:
+		XZW2 A 0 A_JumpByAmmoType("User1_1","User1_2","User1_3","User1_4","User1_G");
+	User1_1:
+		XZW2 A 4;
+		XZW6 BCDE 3;
+		XZW6 FGH 1;
+		XZW6 IJK 2;
+		XZW6 LMNOPQRSTU 2;
+		Goto Ready_1;
+	User1_2:
+		XZW6 V 4;
+		XZWA Z 3;
+		XZWB ABC 3;
+		XZWB DEF 1;
+		XZWB GHI 2;
+		XZWB JKLMNOPQRS 2;
+		Goto Ready_2;
+	User1_3:
+		XZWB T 4;
+		XZWF XYZ 3;
+		XZWG A 3;
+		XZWG BCD 1;
+		XZWG EFG 2;
+		XZWG HIJKLMNOPQ 2;
+		Goto Ready_3;
+	User1_4:
+		XZWG R 4;
+		XZWK YZ 3;
+		XZWL AB 3;
+		XZWL CDE 1;
+		XZWL FGH 2;
+		XZWL IJKLMNOPQR 2;
+		Goto Ready_4;
+	User1_G:
+		XZWL S 4
+		{
+			A_StartSound("hellblazer/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWQ KLMN 3;
+		XZWQ OP 1;
+		XZWQ Q 1 A_Melee(75);
+		XZWQ RSTUV 2;
+		XZWQ W 2 A_StartSound("hellblazer/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWQ XYZ 2;
+		XZWR ABCD 2;
+		Goto Ready_G;
 	}
 }

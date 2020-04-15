@@ -1206,11 +1206,6 @@ Class CompanionLamp : Actor
 		if ( BlockingLine.flags&(Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING) ) return true;
 		return false;
 	}
-	private int WhichBlockingLineSide()
-	{
-		if ( !BlockingLine ) return 0;
-		return ((pos.y-BlockingLine.v1.p.y)*BlockingLine.delta.x+(BlockingLine.v1.p.x-pos.x)*BlockingLine.delta.y > double.epsilon);
-	}
 	override void Tick()
 	{
 		Super.Tick();
@@ -1276,7 +1271,7 @@ Class CompanionLamp : Actor
 		{
 			// push away from wall
 			Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
-			if ( !WhichBlockingLineSide() ) normal *= -1;
+			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) ) normal *= -1;
 			vel += 4.*normal;
 			blocked = true;
 		}

@@ -115,8 +115,8 @@ Class CandyBeam : Actor
 		Vector3 normal = -t.Results.HitVector, dir = t.Results.HitVector;
 		if ( t.Results.HitType == TRACE_HitWall )
 		{
-			normal = (t.Results.HitLine.delta.y,-t.Results.HitLine.delta.x,0).unit();
-			if ( t.Results.Side ) normal *= -1;
+			normal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+			if ( !t.Results.Side ) normal *= -1;
 			t.Results.HitLine.RemoteActivate(target,t.Results.Side,SPAC_Impact,t.Results.HitPos);
 			dir -= 2*normal*(dir dot normal);
 		}

@@ -88,7 +88,7 @@ it would enter mass production and sell like hotcakes.
 ### Symnatek
 
 A manufacturer of construction tools and heavy machinery. More popular than
-Mixom (at least outside the US), despite most people not even knowing its name.
+Mixom (at least in Australia), despite most people not even knowing its name.
 Also makes basic military equipment, such as knives and other close combat
 weapons.
 
@@ -103,8 +103,8 @@ most known for its work on fusion energy... and for its weapons (of course).
 
 A small weapons shop run by members of the Unissix family of warriors. While
 mostly specialized in blades and hammers and whatnot, sometimes they've done
-firearms by request. It is run by Unissix Bokurou Azadeku, who also leads the
-"Unissix Tournaments", a yearly gladiatorial sporting event.
+firearms by request. It is led by Unissix Bokurou Azadeku, who also organizes
+the "Unissix Tournaments", a gladiatorial sporting event.
 
 ---
 
@@ -170,7 +170,7 @@ doesn't succeed (UnSX 5).
 
 ### J.A. Tachmek-Smith
 
-A man who, if all reports are true, would be over ten thousand years old.
+A man who, if all reports are true, would be over six thousand years old.
 Claims to be the "true king of Egypt", among other things. He's also the
 founder and head of research at Tach-Engine Technologies, and a notable
 philanthropist.
@@ -351,7 +351,7 @@ even seems to have some level of sentience.
 
 An odd and unexplainable material that combusts violently when ignited or
 struck. A single gram of the stuff has the explosive yield of a standard-issue
-hand grenade, which makes it very useful in the creation small bombs. It's
+hand grenade, which makes it very useful in the creation of small bombs. It's
 rumored that such devices could have been used for the assasination of a
 certain rich Japanese family.
 
@@ -456,7 +456,7 @@ the goddess Anakauser. Its members include:
     bunnies, and home of Ix Xeuriges, co-founder of the coalition and creator
     of the many gates connecting these worlds.
   - Unukugoshuenike: Giant crystal planet, home of the Goshun.
-  - Mishe (former): Destroyed homeworld of the Mishe race.
+  - Unuenishe (former): Destroyed homeworld of the Mishe race.
 - Kryudon: Third most populated system, also from the Andromeda galaxy.
   - Lok: Dark, fog-covered planet, home of the Lokans and the Rokana.
   - Kayo: Overpopulated planet-city, homeworld of the Kyon.
@@ -558,7 +558,7 @@ Main UnSX timeline:
 - 1980: Janus Locke Hoodth is born.
 - 1985: Taro Miyamoto is born.
 - 1987: Dr. Häzel Hoodth dies tragically, becoming a ghoul of Kereshnovka.
-- 1992: Misa Unissix is born.
+- 1992: Unissix Bokurou Azadeku is born.
 - 1993: Saya Miyamoto is born.
 - 2001: The Union Aerospace Armed Forces is formed.
 - 2003: Onoke Mansion Murders.
@@ -567,7 +567,7 @@ Main UnSX timeline:
   whole days. Several reports of strange happenings are made.
 - 2006: Ashley's band, "The Black Rat's Coven" is formed. Its initial members
   are Ashley, Maruku Sarahabinaku, Py Kisun and William Dusk.
-- 2007: The "Ghoul hunt" begins after a high-ranking UAAF official is murdered
+- 2007: The "Ghoul hunt" begins after a high-ranking UAAF officer is murdered
   by the creatures during a business visit to the Imanaki HQ.
 - 2008: At the peak of the Ghoul hunt, an envoy of the Anarukon people is
   attacked while attempting to kidnap Manakei. The demonic heir is lost once
@@ -586,7 +586,8 @@ Main UnSX timeline:
 - 2015: The UAAF rebrands itself as the UAC, having found quite a lot of
   interest in what they recovered from Imanaki.
 - 2017: Saya creates the first Maidbot.
-- 2016: Zanaveth II and Misa Unissix get married.
+- 2016: Zanaveth II and Unissix Bokurou Azadeku meet during one of her research
+  trips, they get married on the same day.
 - 2018: Empty Episode One. Second major incident in the town of Kereshnovka. A
   rogue AI known as SUSAN surfaces on the northern seas, assumes control of
   Russia's missile systems.
@@ -594,8 +595,6 @@ Main UnSX timeline:
   advanced computing power to run thirty parallel instances of Crysis and a
   500-player Minecraft server. This lasts for several months, allowing things
   to mostly return to normal for a while, including the Tokyo Olympics.
-  Following a concert of Ashley's band, she meets Yui Miyamoto and they start
-  dating. Not long after, they get married.
 - 2021: The "Luna Event" happens. The first contact between humans and a
   non-hostile alien race, the Nukuri, who had been observing our race for
   centuries from a hidden research facility on the Moon, and had noticed the
@@ -607,11 +606,12 @@ Main UnSX timeline:
   Nukuri.
 - 2024: Zanaveth II arrives on Earth, befriends Saya. With her help, Saya's
   Maidbot is migrated to the Nekuronbot AI framework, further enhancing her
-  personality.
+  personality. Saya and Maidbot start dating.
 - 2025: First expedition to Mars, led by the UAC.
 - 2027: William Dusk leaves Ashley's band, but not before hurting her deeply by
   escaping with her granddaughter Lyra. He is replaced as drummer by the
-  goddess Mykka.
+  goddess Mykka. Following a concert in Japan, she meets Yui Miyamoto and they
+  start dating. The two get married only a few days after the fact.
 - 2029: Forx Aeronautics is founded, singlehandedly "fixes the economy" of the
   UK.
 - 2032: Joint expedition with the Nukuri to Sedna, revealing a gateway that
@@ -627,6 +627,10 @@ Main UnSX timeline:
 - 2054: Ryuji Miyamoto passes away.
 - 2066: Elena "Ellen" Yanikov XVI is born.
 - 2068: The Nukuri go through their seventh world war in their home planet.
+  Zanaveth II and her wife move to Sankaideriha for the time being.
+- 2070: Ashley invites Saya to Sankaideriha, they come across Zanaveth II and
+  her wife there, the "hot springs incident" happens. Saya agrees to take care
+  of their child while they stay there.
 - 2073: World War 3 starts thanks to a very negatively received post on social
   media from the president of the US regarding the Nukuri.
 - 2074: In an act of desperation, the US sells Texas back to Mexico in order to
@@ -643,11 +647,11 @@ Main UnSX timeline:
 - 2091: Taro Miyamoto finds Ibuki, who had become a sort of living legend among
   wastelanders for her various feats, he also comes across Ellen, who casually
   asks him out on a date. Ibuki is brought back to Japan. As promised, Saya
-  immediately shoves her face into Ibuki's chest.
+  immediately shoves her face into Ibuki's chest, they start dating afterwards.
 - 2095: Taro and Ellen get married.
 - 2097: Empty Episode Two. The Earth is invaded by a mysterious humanoid entity
-  named Uruk'Anth, who claims to be the Abrahamic God. He reactivates SUSAN and
-  leaves. Russia and China are both entirely taken over by it.
+  named Uruk'Anth, who claims to be the Abrahamic God. He reactivates SUSAN.
+  Russia and China are both entirely taken over by it.
 - 2099: Empty Episode 3. A lone child manages to take down SUSAN.
 - 2100: The reconstruction of the United States begins.
 - 2104: The 7th Nukuri World War ends abruptly after the Mishe founders of the
@@ -657,6 +661,7 @@ Main UnSX timeline:
   due to her outstanding work on the subject following her graduation at the
   University of Nos-Kora.
 - 2110: John "BIGSHOT" Gunns is born.
+- 2120: Zanaveth III enrolls at the University of Nos-Kora.
 - 2128: Zanaveth II becomes CEO of Nekuratek.
 - 2137: The United States are reformed, now called "Union States".
 - 2140: Zanaveth III graduates in "Pancake Engineering" at the University of
@@ -674,16 +679,16 @@ Main UnSX timeline:
   with stopping the invasion by reaching the gate they used to enter our world,
   and closing it shut. Seeing an opportunity to compete against the UAC, Akari
   Labs deploys the first Demolitionist, and gives them the same mission. After
-  the victory against the Icon of Sin, the invasion ends, but some demons still
-  remain, so without even being given a moment to rest, the marine's sent on
-  another mission. Months later, and despite having been thoroughly reformed,
-  the UAC still hasn't learned anything, and another invasion happens. The now
-  legendary "Doom marine" is sent there, Plutonia begins.
+  the victory against the Icon of Sin, the invasion ends. Saya rewards the
+  Demolitionist with a maidbot body, and a date. Months later, and despite
+  having been thoroughly reformed, the UAC still hasn't learned anything, and
+  another invasion happens. The "Doom marine" is sent there, Plutonia begins.
 - 2149: An UAC-owned ship en route to the Jupiter base is hijacked, Demon
   reinforcements arrive. The marine manages to fight them off again
   (Evilution). After the incident he is decomissioned, and the Doom episodes
-  are classified. Zanaveth III attempts to take over the world while it's still
-  recovering from the invasion, fails (Total Madness: It Always Gets Better).
+  are classified. Zanaveth III sneaks into Earth and attempts to take over the
+  world while it's still recovering from the invasion, fails in the most
+  ridiculous way imaginable (Total Madness: It Always Gets Better).
 - 2150: UAC president Ian Kelliher announces that the company will place all
   its efforts into repairing the damages done to Earth, though there isn't much
   hope for this to be finished before the turn of the century. When Saya finds
@@ -705,10 +710,11 @@ Main UnSX timeline:
   sorcerer who had taken over the land. A month later, following a
   recommendation from Ashley Knox, the second contact with the Anarukon
   happens, this time all going peacefully. Saya Miyamoto meets Kirin Xanai,
-  their marriage brings forth an alliance between the humans and the Anarukon.
-  Two weeks after the wedding, a second exploration is initiated, with the
-  Demolitionist deployed into a realm known as Cronos in order to defeat an
-  associate of the old sorcerer from their previous mission.
+  just one week after they met, their marriage brings forth an alliance between
+  the humans and the Anarukon. Two weeks after the wedding, a second
+  exploration is initiated, with the Demolitionist deployed into a realm known
+  as Cronos in order to defeat an associate of the old sorcerer from their
+  previous mission.
 - 2173: Third major exploration, with the Demolitionist taking part on a rebel
   uprising in a world dominated by a cult known as the Order of the One God.
 - 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
@@ -733,10 +739,10 @@ Main UnSX timeline:
   on Saya's birthday party the week after.
 - 2191: Saya and her creations move in with Kirin, she leaves the leadership of
   Akari Labs to her brother Taro.
+- 2193: All damage from the Hell Invasion of 2148 is finally repaired.
 - 2200: Earth joins the X'Animen Coalition, now known as the "United Aligned
   Worlds".
-- 2201: The UAC files for bankrupcy.
-- 2207: All damage from the Hell Invasion of 2148 is finally repaired.
+- 2201: The UAC files for bankruptcy.
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
@@ -753,8 +759,7 @@ Main UnSX timeline:
   the Necris invasion of 2304, the corporation is dissolved.
 - 2320: A group of billionaires buy an entire island and turn it into an arena.
   The "Battle Royale" boom starts.
-- 2407: Unissix Bokurou Azadeku devises the "Unissix Tournaments". UnSX 1
-  begins.
+- 2407: Misa Unissix devises the "Unissix Tournaments". UnSX 1 begins.
 - 2409: The first tournament ends with Raik L Raikishionen, prime minister of
   the Nukuri Unified Government, as champion.
 - 2411: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
@@ -769,12 +774,12 @@ Main UnSX timeline:
   group of archaeologists studying some ancient alien ruins send out a distress
   signal, something has clearly gone wrong, and they're being attacked by an
   unidentified hostile force. A team of mercenaries is sent.
-- 2425: Fourth Unissix Tournament.
-- 2430: The Fifth and last Unissix Tournament. Misa grows tired of the whole
-  thing.
-- 2448: UnSX 4. A team of mercenaries from various allied worlds manages to
+- 2424: UnSX 4. A team of mercenaries from various allied worlds manages to
   take down Ososkuro. Before the finishing blow could be dealt, Nuoma appears
   and convinces them to spare him, then takes Ososkuro back to their homeland.
+- 2425: Fourth Unissix Tournament.
+- 2430: The Fifth and last Unissix Tournament. Unissix Bokurou Azadeku grows
+  tired of the whole thing.
 - 2459: Nuoma accidentally reveals her true form to the people of Kruon. The
   feared "fall of the empire" doesn't happen, she is still revered as a worthy
   leader. Despite all that, she decides to pass the title of overlord to her
@@ -803,7 +808,7 @@ Main UnSX timeline:
 
 Disconnected events that are hard to place in time:
 
-- ????: Twenty years after the fall of the Order of the One God, a message is
+- ????: 25 years after the fall of the Order of the One God, a message is
   received from an old ruined complex beyond the seas. A declaration of war
   from the "Church of the Dreadful Lady". A single, well trained mercenary puts
   an end to their plans, but the true mastermind behind it all manages to flee.

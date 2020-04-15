@@ -4,7 +4,9 @@ Fundamental things:
  - Silver Bullet
  - Ynykron
  - Wallbuster
- - Custom intermission
+
+Not so fundamental things:
+ - Chanceboxes
 
 Extra things:
  - Art for custom intermission
@@ -19,6 +21,8 @@ Extra things:
  - Keen replacement (need ideas)
  - Mod trailer video
  - Summonable Ibuki companion sub-mod
+
+Very extra things:
  - Strife support
    - Rewrite all the game's dialogue
    - Rewrite all the shop systems and other things

@@ -1,0 +1,15 @@
+// TODO Strife compatibility code
+
+// TODO hijack vanilla dialogues and hook in crimes_m dialogue menu for them
+Class SWWMConversationMenu : ConversationMenu
+{
+	override int Init( StrifeDialogueNode CurNode, PlayerInfo player, int activereply )
+	{
+		return Super.Init(CurNode,player,activereply);
+	}
+}
+
+// TODO Sigil key item, replaces the drops from bosses
+Class SWWMCompatSigil : Inventory
+{
+}

@@ -181,7 +181,7 @@ Class PusherProjectile : Actor
 		else if ( BlockingLine )
 		{
 			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
-			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
+			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
 				HitNormal *= -1;
 		}
 		else if ( BlockingMobj )

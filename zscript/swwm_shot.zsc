@@ -409,7 +409,7 @@ Class DragonBreathArm : Actor
 		else if ( BlockingLine )
 		{
 			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
-			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
+			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
 				HitNormal *= -1;
 		}
 		else if ( BlockingMobj )
@@ -924,7 +924,7 @@ Class OnFire : Actor
 			}
 			if ( !(i%2) )
 			{
-				let s = victim.Spawn("SWWMSmoke",pos);
+				let s = victim.Spawn("SWWMHalfSmoke",pos);
 				s.scale *= max(1.,1.6*mult);
 				s.alpha *= min(amount+30,100)*0.02;
 				s.vel = victim.vel*0.5+(cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[FlameT](.2,.6)*s.scale.x;
@@ -1054,7 +1054,7 @@ Class OnFireTrail : Actor
 		}
 		if ( !Random[FlameT](0,int(40*(default.alpha-alpha))) && !((GetAge()+special1)%3) )
 		{
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = (FRandom[FlameT](-0.2,0.2),FRandom[FlameT](-0.2,0.2),FRandom[FlameT](-0.2,0.2));
 			s.vel += vel*0.3;
 			s.alpha *= alpha*4;
@@ -1307,6 +1307,7 @@ Class TheBall : Actor
 		+BOUNCEONWALLS;
 		+BOUNCEONFLOORS;
 		+BOUNCEONCEILINGS;
+		+CANBOUNCEWATER;
 		+USEBOUNCESTATE;
 		+DONTBOUNCEONSKY;
 		+MISSILE;
@@ -1454,13 +1455,9 @@ Class TheBall : Actor
 		else if ( BlockingLine )
 		{
 			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
-			int wside = 1;
-			if ( !BlockingLine.sidedef[1] || (CurSector == BlockingLine.frontsector) )
-			{
-				wside = 0;
-				HitNormal *= -1;
-			}
-			if ( (oldvel.length() > 15) )
+			int wside = SWWMUtility.PointOnLineSide(pos.xy,BlockingLine);
+			if ( !wside ) HitNormal *= -1;
+			if ( (oldvel.length() > 15) && swwm_balluse )
 			{
 				int locknum = SWWMUtility.GetLineLock(BlockingLine);
 				// remotely activate unlocked lines (that aren't exits)
@@ -1965,7 +1962,8 @@ Class Spreadgun : SWWMWeapon
 		else player.SetPSprite(PSP_WEAPON,invoker.FindState(firedstates[amidx]));
 		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
 		{
-			TakeInventory(invoker.nextammo,1);
+			let amo = FindInventory(invoker.nextammo);
+			if ( amo && (amo.Amount > 0) ) amo.Amount--;
 		}
 		A_Overlay(-9999,"LoadDummy");
 	}
@@ -1979,7 +1977,16 @@ Class Spreadgun : SWWMWeapon
 			for ( int i=0; i<7; i++ )
 			{
 				if ( invoker.loadammo != types[i] ) continue;
-				if ( !GiveInventory(types[i],1) ) Spawn(types[i],Vec3Angle(5,angle,height/2));
+				let amo = FindInventory(types[i]);
+				if ( !amo )
+				{
+					amo = Inventory(Spawn(types[i]));
+					amo.AttachToOwner(self);
+					amo.Amount = 0;
+				}
+				if ( amo.Amount < amo.MaxAmount ) amo.Amount++;
+				else if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+					Spawn(types[i],Vec3Angle(5,angle,height/2));
 				break;
 			}
 		}

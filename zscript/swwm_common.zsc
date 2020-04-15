@@ -64,6 +64,14 @@ Class SWWMUtility
 			return true;
 		return false;
 	}
+
+	// how the fuck is this not available to ZScript?
+	// copied from P_PointOnLineSidePrecise()
+	static int PointOnLineSide( Vector2 p, Line l )
+	{
+		if ( !l ) return 0;
+		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
+	}
 }
 
 // Stats
@@ -272,6 +280,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_HELL2";	// invasion was a thing of the past
 			else if ( text ~== "SWWM_LORETXT_NANA" )
 				text = "SWWM_LORETXT_NANA2";	// demo met nana
+			else if ( text ~== "SWWM_LORETXT_ZANAVETH3" )
+				text = "SWWM_LORETXT_ZANAVETH32";	// iagb happened
 		}
 		if ( gameinfo.gametype&GAME_Hexen )
 		{
@@ -883,6 +893,17 @@ Class SWWMSmoke : Actor
 	{
 	Spawn:
 		XSMK ABCDEFGHIJKLMNOPQRST 1 A_SetTics(1+special1);
+		Stop;
+	}
+}
+
+Class SWWMHalfSmoke : SWWMSmoke
+{
+
+	States
+	{
+	Spawn:
+		XSMK ACEGIKMOQS 1 A_SetTics(1+special1);
 		Stop;
 	}
 }

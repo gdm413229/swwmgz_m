@@ -1075,44 +1075,45 @@ Class Hellblazer : SWWMWeapon
 	User1:
 		XZW2 A 0 A_JumpByAmmoType("User1_1","User1_2","User1_3","User1_4","User1_G");
 	User1_1:
-		XZW2 A 4;
-		XZW6 BCDE 3;
+		XZW2 A 2;
+		XZW6 BCDE 2;
 		XZW6 FGH 1;
 		XZW6 IJK 2;
 		XZW6 LMNOPQRSTU 2;
 		Goto Ready_1;
 	User1_2:
-		XZW6 V 4;
-		XZWA Z 3;
-		XZWB ABC 3;
+		XZW6 V 2;
+		XZWA Z 2;
+		XZWB ABC 2;
 		XZWB DEF 1;
 		XZWB GHI 2;
 		XZWB JKLMNOPQRS 2;
 		Goto Ready_2;
 	User1_3:
-		XZWB T 4;
-		XZWF XYZ 3;
-		XZWG A 3;
+		XZWB T 2;
+		XZWF XYZ 2;
+		XZWG A 2;
 		XZWG BCD 1;
 		XZWG EFG 2;
 		XZWG HIJKLMNOPQ 2;
 		Goto Ready_3;
 	User1_4:
-		XZWG R 4;
-		XZWK YZ 3;
-		XZWL AB 3;
+		XZWG R 2;
+		XZWK YZ 2;
+		XZWL AB 2;
 		XZWL CDE 1;
 		XZWL FGH 2;
 		XZWL IJKLMNOPQR 2;
 		Goto Ready_4;
 	User1_G:
-		XZWL S 4
+		XZWL S 2
 		{
 			A_StartSound("hellblazer/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
 		}
-		XZWQ KLMN 3;
-		XZWQ OP 1;
+		XZWQ KLMN 2;
+		XZWQ O 1 A_Parry(9);
+		XZWQ P 1;
 		XZWQ Q 1 A_Melee(75);
 		XZWQ RSTUV 2;
 		XZWQ W 2 A_StartSound("hellblazer/meleeend",CHAN_WEAPON,CHANF_OVERLAP);

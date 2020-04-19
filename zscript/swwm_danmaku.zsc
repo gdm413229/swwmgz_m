@@ -910,10 +910,11 @@ Class Eviscerator : SWWMWeapon
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
 			return A_JumpIf(invoker.extended,"User1Ext");
 		}
-		XZW8 WXYZ 2;
-		XZW9 AB 2;
-		XZW9 C 2 A_Parry(9);
-		XZW9 D 2;
+		XZW8 WXY 2;
+		XZW8 Z 1;
+		XZW9 AB 1;
+		XZW9 C 1 A_Parry(9);
+		XZW9 D 1;
 		XZW9 E 2 A_Melee(60);
 		XZW9 FGH 2;
 		XZW9 I 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
@@ -921,9 +922,10 @@ Class Eviscerator : SWWMWeapon
 		Goto Ready;
 	User1Ext:
 		XZW4 Z 2;
-		XZWA NOPQRS 2;
-		XZWA T 2 A_Parry(9);
-		XZWA U 2;
+		XZWA NOP 2;
+		XZWA QRS 1;
+		XZWA T 1 A_Parry(9);
+		XZWA U 1;
 		XZWA V 2 A_Melee(60);
 		XZWA WXY 2;
 		XZWA Z 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);

@@ -72,6 +72,21 @@ Class SWWMUtility
 		if ( !l ) return 0;
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
 	}
+
+	// not portal aware, will have to fix that later
+	static bool SphereIntersect( Actor a, Vector3 p, double radius )
+	{
+		Vector3 amin = a.pos+(-a.radius,-a.radius,0),
+			amax = a.pos+(a.radius,a.radius,a.height);
+		double distsq = 0.;
+		if ( p.x < amin.x ) distsq += (amin.x-p.x)**2;
+		if ( p.x > amax.x ) distsq += (p.x-amax.x)**2;
+		if ( p.y < amin.y ) distsq += (amin.y-p.y)**2;
+		if ( p.y > amax.y ) distsq += (p.y-amax.y)**2;
+		if ( p.z < amin.z ) distsq += (amin.z-p.z)**2;
+		if ( p.z > amax.z ) distsq += (p.z-amax.z)**2;
+		return (distsq <= (radius**2));
+	}
 }
 
 // Stats
@@ -2658,7 +2673,7 @@ Class SWWMHandler : EventHandler
 		while ( bi.Next() )
 		{
 			Actor a = bi.Thing;
-			if ( !a || (a == ignoreme) || !a.bSHOOTABLE || !Source.CheckSight(a,0xf) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
+			if ( !a || (a == ignoreme) || !a.bSHOOTABLE || !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
 				continue;
 			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
 			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);

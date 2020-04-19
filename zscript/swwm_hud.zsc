@@ -905,6 +905,17 @@ Class SWWMStatusBar : BaseStatusBar
 			xx = (ss.x-len)/2.;
 			yy = (ss.y-fnt.GetHeight()*4)/2.;
 			Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
+			{
+				alph = clamp((demo.deadtimer-90)/60.,0.,1.);
+				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"),CPlayer.GetUserName());
+				fnt = LangFont(mTewiFont);
+				len = fnt.StringWidth(str);
+				xx = (ss.x-len)/2.;
+				yy = ss.y/2.;
+				Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				return;
+			}
 			alph = clamp((demo.deadtimer-140)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
@@ -942,7 +953,7 @@ Class SWWMStatusBar : BaseStatusBar
 		DrawInventory();
 		DrawStatus();
 		DrawWeapon();
-		DrawMessages();
 		DrawDeath();
+		DrawMessages();
 	}
 }

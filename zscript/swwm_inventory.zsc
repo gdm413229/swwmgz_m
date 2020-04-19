@@ -52,6 +52,8 @@ Class SWWMArmor : Armor abstract
 	{
 		return damage;
 	}
+	// sadly we can'y use the extra AbsorbDamage arguments until GZDoom gets updated
+	//override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
 		if ( !passive ) return;
@@ -81,6 +83,15 @@ Class SWWMArmor : Armor abstract
 				{
 					Amount += default.Amount;
 					Owner.TakeInventory(parent,1);
+					// absorb the extra damage too
+					saved = HandleDamage(damage,damageType,flags);
+					healed = max(0,saved-damage);
+					saved = min(saved,damage);
+					if ( amount <= saved ) saved = amount;
+					newdamage -= saved;
+					if ( healed > 0 ) Owner.GiveBody(healed);
+					amount -= saved;
+					damage = newdamage;
 				}
 			}
 			else if ( amount <= 0 )

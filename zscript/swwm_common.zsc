@@ -2126,6 +2126,8 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
+		else if ( e.Thing is 'BossBrain' ) e.Thing.SetTag("$FN_BOSSBRAIN");
+		else if ( e.Thing is 'CommanderKeen' ) e.Thing.SetTag("$FN_KEEN");
 		if ( (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}
 

@@ -1,0 +1,274 @@
+// This is stuff for making vanilla doom/heretic/hexen boss encounters
+// a bit more... "fair", so to speak
+// Also adds cool Souls-style healthbars
+
+Class SWWMVanillaBossHandler : EventHandler
+{
+	String bosstag;
+	Array<Actor> bossactors;
+
+	Actor bossbrainactor;
+	Actor bossviewactor;
+	TextureID facetex[5];
+
+	bool initialized;
+	ui bool ui_initialized;
+	ui TextureID bbar_f, bbar_r, bbar_d;
+	ui double alpha;
+	ui DynamicValueInterpolator ihealth, ihealthr;
+	ui int thealth, hmax;
+	ui int oldhealth[30];
+	ui int cummdamage, lastcummtic;	// please do not misread
+	transient ui CVar dodrawbossbar;
+
+	override void WorldThingSpawned( WorldEvent e )
+	{
+		bool upgrademe = swwm_upgradebosses;
+		if ( gameinfo.gametype&GAME_Doom )
+		{
+			if ( level.mapname ~== "E1M8" )
+			{
+				if ( e.Thing is 'BaronOfHell' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 3;
+				}
+				bosstag = "$BT_BRUISERS";
+			}
+			else if ( level.mapname ~== "E2M8" )
+			{
+				if ( e.Thing is 'Cyberdemon' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 4;
+				}
+				bosstag = "$BT_CYBIE";
+			}
+			else if ( (level.mapname ~== "E3M8") || (level.mapname ~== "E4M8") )
+			{
+				if ( e.Thing is 'Spidermastermind' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe )
+					{
+						if ( level.mapname ~== "E3M8" ) e.Thing.Health *= 5;
+						else e.Thing.Health *= 3;
+					}
+				}
+				bosstag = "$BT_SPIDER";
+			}
+			else if ( level.mapname ~== "MAP30" )
+			{
+				if ( e.Thing is 'BossBrain' )
+				{
+					bossbrainactor = e.Thing;
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 16;	// goodbye, instakills
+				}
+				if ( e.Thing is 'BossEye' )
+					bossviewactor = e.Thing;
+				bosstag = "$BT_IOS";
+			}
+		}
+		else if ( gameinfo.gametype&GAME_Heretic )
+		{
+			if ( (level.mapname ~== "E1M8") || (level.mapname ~== "E4M8") )
+			{
+				if ( e.Thing is 'IronLich' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 4;
+				}
+				bosstag = "$BT_LICHES";
+			}
+			else if ( (level.mapname ~== "E2M8") || (level.mapname ~== "E5M8") )
+			{
+				if ( e.Thing is 'Minotaur' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 2;
+				}
+				bosstag = "$BT_MINOTAUR";
+			}
+			else if ( level.mapname ~== "E3M8" )
+			{
+				if ( e.Thing is 'Sorcerer1' )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 2;
+					bosstag = "$BT_DSPARIL";
+				}
+				else if ( e.Thing is 'Sorcerer2' )
+				{
+					// second phase
+					bossactors.Clear();
+					initialized = false;
+					bossactors.Push(e.Thing);
+					if ( upgrademe ) e.Thing.Health *= 3;
+					bosstag = "$BT_DSPARIL2";
+				}
+			}
+		}
+		else if ( gameinfo.gametype&GAME_Hexen )
+		{
+			if ( e.Thing is 'ClericBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 3;
+				bosstag = "$BT_CLERIC";
+			}
+			else if ( e.Thing is 'FighterBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 3;
+				bosstag = "$BT_FIGHTER";
+			}
+			else if ( e.Thing is 'MageBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 3;
+				bosstag = "$BT_MAGE";
+			}
+			else if ( e.Thing is 'Dragon' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 4;
+				bosstag = "$BT_DRAGON";
+			}
+			else if ( e.Thing is 'Heresiarch' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 6;
+				bosstag = "$BT_HERESIARCH";
+			}
+			else if ( e.Thing is 'Korax' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 8;
+				bosstag = "$BT_KORAX";
+			}
+		}
+	}
+
+	override void WorldTick()
+	{
+		if ( initialized ) return;
+		// wait until bosses are active
+		for ( int i=0; i<bossactors.Size(); i++ )
+		{
+			if ( !bossactors[i] ) continue;
+			if ( (!bossactors[i].target || !bossactors[i].CheckSight(bossactors[i].target))
+				&& (!bossviewactor || (bossviewactor && !bossviewactor.target)) ) continue;
+			initialized = true;
+			break;
+		}
+	}
+
+	override void PostUITick()
+	{
+		if ( (!ui_initialized && initialized) || (ui_initialized && !initialized) )
+		{
+			ui_initialized = true;
+			thealth = 0;
+			for ( int i=0; i<bossactors.Size(); i++ )
+			{
+				if ( !bossactors[i] ) continue;
+				thealth += bossactors[i].Health;
+			}
+			hmax = thealth;
+			for ( int i=0; i<30; i++ ) oldhealth[i] = thealth;
+			cummdamage = 0;
+			if ( !ihealth ) ihealth = DynamicValueInterpolator.Create(thealth,.1,1,1000);
+			else ihealth.Reset(thealth);
+			if ( !ihealthr ) ihealthr = DynamicValueInterpolator.Create(thealth,.5,1,1000);
+			else ihealthr.Reset(thealth);
+			return;
+		}
+		if ( !ui_initialized ) return;
+		// update healthbar
+		int newhealth = 0;
+		for ( int i=0; i<bossactors.Size(); i++ )
+		{
+			if ( !bossactors[i] ) continue;
+			newhealth += bossactors[i].Health;
+		}
+		oldhealth[0] = newhealth;
+		int curcumm = max(0,thealth-newhealth);
+		if ( curcumm > 0 )
+		{
+			cummdamage += curcumm;
+			lastcummtic = gametic;
+		}
+		else if ( gametic > lastcummtic+150 ) cummdamage = 0;
+		thealth = newhealth;
+		ihealthr.Update(thealth);
+		if ( thealth > oldhealth[29] )
+			for ( int i=29; i>0; i-- )
+				oldhealth[i] = thealth;
+		ihealth.Update(oldhealth[29]);
+		for ( int i=29; i>0; i-- )
+			oldhealth[i] = oldhealth[i-1];
+		if ( thealth > 0 ) alpha = min(3.,alpha+1./30.);
+		else alpha = max(0,alpha-1./50.);
+	}
+
+	// called by HUD
+	ui void DrawBossBar( SWWMStatusBar bar )
+	{
+		if ( !ui_initialized || (alpha <= 0.) ) return;
+		if ( !dodrawbossbar ) dodrawbossbar = CVar.GetCVar('swwm_bosshealthbars',players[consoleplayer]);
+		if ( !dodrawbossbar.GetBool() ) return;
+		if ( !bbar_f ) bbar_f = TexMan.CheckForTexture("graphics/HUD/BossHealthBarBox.png",TexMan.Type_Any);
+		if ( !bbar_r ) bbar_r = TexMan.CheckForTexture("graphics/HUD/BossHealthBar.png",TexMan.Type_Any);
+		if ( !bbar_d ) bbar_d = TexMan.CheckForTexture("graphics/HUD/BossHealthBarDecay.png",TexMan.Type_Any);
+		Vector2 vpos = ((bar.ss.x-300)/2.,bar.ss.y-(bar.margin+35));
+		Screen.DrawTexture(bbar_f,false,vpos.x-2,vpos.y-2,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+		int rw = int(clamp((ihealthr.GetValue()*300.)/hmax,0.,300.));
+		int dw = int(clamp((ihealth.GetValue()*300.)/hmax,0.,300.));
+		Screen.DrawTexture(bbar_d,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_WindowRight,dw);
+		Screen.DrawTexture(bbar_r,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_WindowRight,rw);
+		Font barfnt = bar.LangFont(bar.mTewiFont);
+		Font dmgfnt = bar.mTewiFont.mFont;
+		if ( (cummdamage > 0) && (gametic < lastcummtic+150) )
+		{
+			double calph = clamp(((lastcummtic+150)-gametic)/50.,0.,1.);
+			string dnum = String.Format("%d",cummdamage);
+			Screen.DrawText(dmgfnt,Font.CR_RED,vpos.x+300-dmgfnt.StringWidth(dnum),vpos.y-(dmgfnt.GetHeight()+2),dnum,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha*calph);
+		}
+		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+	}
+
+	// can't use this until I actually figure out how to make those walls damageable
+	/*private bool IsIOSWall( Line l )
+	{
+		if ( !facetex[0] )
+		{
+			facetex[0] = TexMan.CheckForTexture("ZZZFACE1",TexMan.Type_Wall);
+			facetex[1] = TexMan.CheckForTexture("ZZZFACE2",TexMan.Type_Wall);
+			facetex[2] = TexMan.CheckForTexture("ZZZFACE3",TexMan.Type_Wall);
+			facetex[3] = TexMan.CheckForTexture("ZZZFACE4",TexMan.Type_Wall);
+			facetex[4] = TexMan.CheckForTexture("ZZZFACE5",TexMan.Type_Wall);
+		}
+		for ( int i=0; i<5; i++ )
+		{
+			for ( int j=0; j<3; j++ )
+			{
+				if ( l.sidedef[0].GetTexture(j) == facetex[i] ) return true;
+				if ( l.sidedef[1] && l.sidedef[1].GetTexture(j) == facetex[i] ) return true;
+			}
+		}
+		return false;
+	}
+
+	override void WorldLineDamaged( WorldEvent e )
+	{
+		// allow boss brain to take (reduced) damage from the facewall being shot
+		if ( level.mapname ~== "MAP30" )
+		{
+			if ( !IsIOSWall(e.DamageLine) ) return;
+			if ( bossbrainactor )
+				bossbrainactor.DamageMobj(e.Inflictor,e.DamageSource,e.Damage/3,e.DamageType,e.DamageFlags,e.DamageAngle);
+			e.NewDamage = 0;
+		}
+	}*/
+}

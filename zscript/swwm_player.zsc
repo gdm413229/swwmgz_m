@@ -489,7 +489,7 @@ Class Demolitionist : PlayerPawn
 			// bump down weapon
 			bumpdown = true;
 			bumpvelz = -lastvelz;
-			if ( lastvelz < -30 )
+			if ( lastvelz < -25 )
 			{
 				let s = Spawn("DemolitionistShockwave",pos);
 				s.target = self;
@@ -602,6 +602,13 @@ Class Demolitionist : PlayerPawn
 		// lucky collar
 		if ( Health < 25 ) damage /= 4;
 		if ( source == self ) damage /= 2;
+		if ( !inflictor && !source && (CurSector.flags&Sector.SECF_ENDLEVEL) )
+		{
+			// end level hax
+			damage = max(50,health-100);
+			flags |= DMG_FORCED|DMG_NO_ARMOR;
+			mod = 'EndLevel';
+		}
 		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage/2,10,40));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )

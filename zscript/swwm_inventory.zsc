@@ -182,6 +182,7 @@ Class SWWMHealth : Inventory abstract
 
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
+		if ( damageType == 'EndLevel' ) return;
 		bool shouldautouse = false;
 		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
 		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;

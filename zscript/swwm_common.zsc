@@ -633,8 +633,8 @@ Class SWWMCombatTracker : Thinker
 		// update
 		if ( mytarget )
 		{
-			pos = level.Vec3Offset(mytarget.pos,(0,0,mytarget.default.height));
-			prevpos = level.Vec3Offset(mytarget.prev,(0,0,mytarget.default.height));
+			pos = level.Vec3Offset(mytarget.pos,(0,0,mytarget.height));
+			prevpos = level.Vec3Offset(mytarget.prev,(0,0,mytarget.height));
 		}
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
@@ -662,11 +662,11 @@ Class SWWMCombatTracker : Thinker
 				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
 			}
 		}
-		if ( mytarget.player || mytarget.bISMONSTER )
+		// VERY expensive, do not use
+		/*if ( mytarget.player || mytarget.bISMONSTER )
 			mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
-		else mytag = "";
+		else mytag = "";*/
 		int newhealth = mytarget.Health;
-		//if ( newhealth != lasthealth ) updated = level.maptime+35;
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
 			// enemies within 2000mu that have us as target
@@ -674,7 +674,9 @@ Class SWWMCombatTracker : Thinker
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// enemies we're directly aiming at within 600mu
-			if ( players[consoleplayer].mo.CheckSight(mytarget) && ((mytarget.Vec3To(players[consoleplayer].mo).length() < 600) || (players[consoleplayer].mo.AimTarget() == mytarget)) ) updated = level.maptime;
+			// the order of these checks allows for a minimal performance hit
+			// as AimTarget() is incredibly expensive to call too often
+			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) && (players[consoleplayer].mo.AimTarget() == mytarget) ) updated = level.maptime;
 		}
 		lasthealth = newhealth;
 		intp.Update(lasthealth);
@@ -914,7 +916,6 @@ Class SWWMSmoke : Actor
 
 Class SWWMHalfSmoke : SWWMSmoke
 {
-
 	States
 	{
 	Spawn:
@@ -1989,7 +1990,16 @@ Class SWWMHandler : EventHandler
 	override void WorldThingDamaged( WorldEvent e )
 	{
 		if ( e.Damage > 0 )
+		{
 			SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED);
+			// update combat tracker for it
+			for ( SWWMCombatTracker t=trackers; t; t=t.next )
+			{
+				if ( t.mytarget != e.Thing ) continue;
+				t.updated = level.maptime+35;
+				break;
+			}
+		}
 		if ( e.Thing.player )
 		{
 			tookdamage[e.Thing.PlayerNumber()] = true;

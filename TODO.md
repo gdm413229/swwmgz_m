@@ -17,6 +17,7 @@ Extra things:
    - Some sort of flyby featuring the Demolitionist booting up, closeups of
      weapons/items etc.
  - Dual wielding Explodium Gun?
+ - Randomized vanilla monster retagging with multiple options
  - Japanese localization
  - Keen replacement (need ideas)
  - Mod trailer video

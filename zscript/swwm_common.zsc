@@ -2262,12 +2262,12 @@ Class SWWMHandler : EventHandler
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacement](1,2)];
+				e.Replacement = redpool[Random[Replacement](0,2)];
 				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacement](1,2)];
+				e.Replacement = greenpool[Random[Replacement](0,2)];
 				break;
 			case 6:
 			case 7:
@@ -2294,17 +2294,17 @@ Class SWWMHandler : EventHandler
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacement](2,5)];
+				e.Replacement = redpool[Random[Replacement](1,5)];
 				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacement](2,4)];
+				e.Replacement = greenpool[Random[Replacement](1,4)];
 				break;
 			case 6:
 			case 7:
 			case 8:
-				e.Replacement = whitepool[Random[Replacement](1,3)];
+				e.Replacement = whitepool[Random[Replacement](0,3)];
 				break;
 			case 9:
 			case 10:
@@ -2313,7 +2313,7 @@ Class SWWMHandler : EventHandler
 				break;
 			case 12:
 			case 13:
-				e.Replacement = bluepool[Random[Replacement](2,3)];
+				e.Replacement = bluepool[Random[Replacement](1,3)];
 				break;
 			case 14:
 				e.Replacement = blackpool[Random[Replacement](0,2)];
@@ -2322,7 +2322,7 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Replacee == 'ClipBox' )
 		{
-			if ( Random[Replacements](0,2) ) e.Replacement = 'EvisceratorShell';
+			if ( Random[Replacements](0,3) ) e.Replacement = 'EvisceratorShell';
 			else e.Replacement = 'EvisceratorSixPack';
 		}
 		else if ( e.Replacee == 'BlasterAmmo' ) e.Replacement = 'EvisceratorShell';
@@ -2359,19 +2359,23 @@ Class SWWMHandler : EventHandler
 			case 1:
 			case 2:
 			case 3:
-				e.Replacement = 'HellblazerMissileMag';
+				if ( Random[Replacements](0,1) ) e.Replacement = 'HellblazerMissiles';
+				else e.Replacement = 'HellblazerMissileMag';
 				break;
 			case 4:
 			case 5:
 			case 6:
-				e.Replacement = 'HellblazerCrackshotMag';
+				if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerCrackshots';
+				else e.Replacement = 'HellblazerCrackshotMag';
 				break;
 			case 7:
 			case 8:
-				e.Replacement = 'HellblazerRavagerMag';
+				if ( Random[Replacements](0,3) ) e.Replacement = 'HellblazerRavagers';
+				else e.Replacement = 'HellblazerRavagerMag';
 				break;
 			case 9:
-				e.Replacement = 'HellblazerWarheadMag';
+				if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerWarheads';
+				else e.Replacement = 'HellblazerWarheadMag';
 				break;
 			}
 		}
@@ -2436,6 +2440,7 @@ Class SWWMHandler : EventHandler
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
 			let mo = players[e.player].mo;
 			if ( (mo.Health <= 0) || !(mo is 'Demolitionist') ) return;
+			// TODO redo these as fake weapons
 			switch ( e.Args[0] )
 			{
 			case 1:

@@ -13,15 +13,13 @@ after the first release.
   - Super Happy Fun Ball (SWWM Z)
 * Additional Demolitionist Menu features
   - Per-monster kill tracker in stats tab
-  - Radio
+  - Radio (add-on)
   - Pong minigame
   - Selling items at the store
 * 4komas on the intermission screen
 * Actually make a fancy titlemap
 * Mod trailer
-* Additional HUD stuff
-  - Minimap with radar like in SWWM Z
-  - Fake livestream chat, with dynamic reactions to all sorts of stuff
+* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff
 * Character and item images for the library
 * Full Mashiro model for Lämp easter egg
 * Summonable Ibuki companion (w/ optional "stream friendly" clothing)

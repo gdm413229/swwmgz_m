@@ -1,9 +1,9 @@
 Fundamental things:
- - Hellblazer
  - Sparkster
  - Silver Bullet
  - Ynykron
  - Wallbuster
+ - Coop/DM intermission drawing
 
 Not so fundamental things:
  - Chanceboxes
@@ -20,7 +20,6 @@ Extra things:
  - Japanese localization
  - Keen replacement (need ideas)
  - Mod trailer video
- - Summonable Ibuki companion sub-mod
 
 Very extra things:
  - Strife support

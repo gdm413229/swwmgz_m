@@ -2492,7 +2492,8 @@ Class Spreadgun : SWWMWeapon
 	{
 		Super.ModifyDropAmount(dropamount);
 		// toss some ammo while we're at it
-		A_DropItem(Random[Spreadgun](0,2)?"RedShell":"GreenShell",Random[Spreadgun](1,3));
+		if ( Random[Spreadgun](0,1) )
+			A_DropItem(Random[Spreadgun](0,2)?"RedShell":"GreenShell",Random[Spreadgun](1,2));
 	}
 
 	Default

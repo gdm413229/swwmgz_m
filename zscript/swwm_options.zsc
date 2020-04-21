@@ -9,7 +9,7 @@ Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
 	{
 		Super.Init(label,command,'',graycheck,center);
 		mCVar = CVar.FindCVar(mAction);
-		/*int lmp;
+		int lmp;
 		for ( lmp = Wads.FindLump("swwmvoicepack.txt"); lmp > 0; lmp = Wads.FindLump("swwmvoicepack.txt",lmp+1) )
 		{
 			Array<String> lst;
@@ -21,8 +21,7 @@ Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
 				if ( (lst[i].Length() <= 0) || (lst[i].GetNextCodePoint(0) == 0) || (lst[i].Left(1) == "\n") || (lst[i].Left(1) == "#") ) continue;
 				types.Push(lst[i]);
 			}
-		}*/
-		types.Push("default");
+		}
 		return self;
 	}
 
@@ -163,7 +162,7 @@ Class SWWMOptionMenu : OptionMenu
 			}
 		}
 		if ( !TewiFont ) TewiFont = Font.GetFont('Tewi');
-		/*if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlus');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlus');
 		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		Font fnt = TewiFont;
 		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
@@ -178,6 +177,6 @@ Class SWWMOptionMenu : OptionMenu
 		{
 			Screen.DrawText(fnt,Font.CR_WHITE,4*CleanXFac_1,ypos,lines.StringAt(i),DTA_CleanNoMove_1,true);
 			ypos += fnt.GetHeight()*CleanYFac_1;
-		}*/
+		}
 	}
 }

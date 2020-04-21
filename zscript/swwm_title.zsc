@@ -37,11 +37,11 @@ Class SWWMTitleStuff : EventHandler
 		String str = "presents";
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-10,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-16,0.,1.);
-		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_Alpha,alf);
+		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
 		str = "a mod by \cxMarisa Kirisame";
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-18,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-24,0.,1.);
-		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_Alpha,alf);
+		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
 		tsize = TexMan.GetScaledSize(tex[1]);
 		sar = tsize.x/tsize.y;
 		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);

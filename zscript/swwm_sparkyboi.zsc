@@ -1,11 +1,625 @@
 // Decade Mechanics Model S-5 Biospark Carbine aka "Legacy Sparkster" (from UnSX series, also featured in SWWM series)
 // Slot 7, replaces Plasma Rifle, Hellstaff, Arc of Death
 
+Class BiosparkExplLight : PaletteLight
+{
+	Default
+	{
+		Tag "SparkExpl";
+	}
+}
+
+Class SparkArcLight : PaletteLight
+{
+	Default
+	{
+		Tag "SparkArc";
+		ReactionTime 30;
+	}
+}
+
+Class BiosparkBall : Actor
+{
+	int deto;
+
+	Default
+	{
+		Obituary "$O_BIOSPARK";
+		DamageType "Electricity";
+		RenderStyle "Add";
+		Radius 5;
+		Height 10;
+		Speed 20;
+		PROJECTILE;
+		+FOILINVUL;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+EXPLODEONWATER;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("biospark/spark",CHAN_VOICE,CHANF_LOOPING);
+	}
+	void A_SparkTick()
+	{
+		int numpt = Random[ExploS](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			double dist = FRandom[ExploS](5,10);
+			if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
+			Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+			Vector3 spos = level.Vec3Offset(pos,ofs);
+			let s = Spawn("BiosparkSpark",spos);
+			s.vel = ofs*FRandom[ExploS](-.01,.02);
+			s.scale *= FRandom[ExploS](.3,.5);
+			s.specialf1 = FRandom[ExploS](.93,.97);
+			s.specialf2 = FRandom[ExploS](.02,.04);
+			s.roll = FRandom[ExploS](0,360);
+		}
+		numpt = Random[ExploS](0,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			double dist = FRandom[ExploS](5,10);
+			if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
+			Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+			Vector3 spos = level.Vec3Offset(pos,ofs);
+			let s = Spawn("BiosparkArcSmall",spos);
+			s.target = target;
+			s.master = self;
+			s.ReactionTime += Random[Sparkster](0,8);
+			s.angle = ang;
+			s.pitch = pt;
+		}
+		double magvel = vel.length();
+		magvel *= 1.03;
+		if ( magvel > 50. ) magvel = 50.;
+		Vector3 dir = vel.unit();
+		dir = (dir+(FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1))*FRandom[Sparkster](.002,.003)).unit();
+		// check targets at an interval, to save on performance
+		if ( !(GetAge()%5) )
+		{
+			double closest = double.infinity;
+			let bt = BlockThingsIterator.Create(self,500);
+			while ( bt.Next() )
+			{
+				let t = bt.Thing;
+				double dist;
+				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || t.IsFriend(target) || ((dist=Distance3D(t)) > 500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.height/2)).unit();
+				if ( dir dot dirto < .5 ) continue;	// don't seek stuff that's behind us
+				if ( dist > closest ) continue;
+				closest = dist;
+				tracer = t;
+			}
+		}
+		if ( tracer && (tracer.Health > 0) && CheckSight(tracer,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+		{
+			Vector3 dirto = level.Vec3Diff(pos,tracer.Vec3Offset(0,0,tracer.height/2));
+			double dist = dirto.length();
+			if ( dist > 4 )
+			{
+				dirto /= dist;
+				dir = (dir+.1*dirto*(clamp(1.-(dist/500.),0.,1.)**3.)).unit();
+			}
+		}
+		vel = magvel*dir;
+		angle = atan2(dir.y,dir.x);
+		pitch = asin(-dir.z);
+		if ( deto > 1 )
+		{
+			ExplodeMissile();
+			return;
+		}
+		// proximity check
+		let bt = BlockThingsIterator.Create(self,200);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || t.IsFriend(target) || !SWWMUtility.SphereIntersect(t,level.Vec3Offset(pos,vel),50) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			deto++;
+			break;
+		}
+	}
+	void A_SparkExplode()
+	{
+		A_StopSound(CHAN_VOICE);
+		A_AlertMonsters(5000);
+		SWWMHandler.DoBlast(self,150,120000);
+		A_Explode(50,150);
+		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
+		A_StartSound("biospark/hit",CHAN_ITEM,attenuation:.8);
+		A_StartSound("biospark/hit",CHAN_WEAPON,attenuation:.6);
+		A_SprayDecal("ShockMark",172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](16,32);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](3,12);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+			s.special1 = Random[ExploS](1,4);
+			s.scale *= 2.8;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](10,20);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](20,30);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,24);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](2,4);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			let s = Spawn("BiosparkArc",pos);
+			s.target = target;
+			s.angle = ang;
+			s.pitch = pt;
+			s.ReactionTime += Random[Sparkster](0,20);
+		}
+		Spawn("BiosparkExplLight",pos);
+	}
+	void A_SparkSubExpl()
+	{
+		special1++;
+		if ( special1 > 30 ) return;
+		double factor = (30-special1)/30.;
+		double invfct = 1.-factor;
+		SWWMHandler.DoBlast(self,300*invfct,-5000*factor);
+		A_Explode(int(30*factor),int(150*invfct));
+		int numpt = int(Random[ExploS](16,32)*factor);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8)*factor;
+			let s = Spawn("SWWMSmallSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(4,5,2)*int(Random[ExploS](40,50)*factor));
+			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+			s.scale *= 4.*factor;
+			s.alpha *= factor;
+		}
+		numpt = int(Random[ExploS](4,8));
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			double dist = (FRandom[ExploS](5,10)+60*invfct);
+			if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
+			Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
+			Vector3 spos = level.Vec3Offset(pos,ofs);
+			let s = Spawn("BiosparkSpark",spos);
+			s.vel = ofs*FRandom[ExploS](-.03,.08);
+			s.scale *= FRandom[ExploS](.8,1.2)*factor;
+			s.specialf1 = FRandom[ExploS](.93,.97);
+			s.specialf2 = FRandom[ExploS](.02,.04);
+			s.roll = FRandom[ExploS](0,360);
+		}
+		if ( special1%2 ) return;
+		numpt = int(Random[ExploS](0,5)*factor);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			let s = Spawn("BiosparkArc",pos);
+			s.target = target;
+			s.angle = ang;
+			s.pitch = pt;
+			s.ReactionTime += Random[Sparkster](0,int(10*factor));
+		}
+	}
+	States
+	{
+	Spawn:
+		BSPK ABCDEFGHIJ 1 Bright A_SparkTick();
+		Loop;
+	Death:
+		TNT1 A 0 A_SparkExplode();
+		XEX2 ABCDEFGHIJKLMNPQRS 1 Bright A_SparkSubExpl();
+		TNT1 A 1
+		{
+			A_SparkSubExpl();
+			A_FadeOut(.05);
+		}
+		Wait;
+	}
+}
+
+Class BiosparkBeam : Actor
+{
+}
+
+Class BiosparkChildBeam : BiosparkBeam
+{
+}
+
+Class BigBiospark : Actor
+{
+}
+
+Class BiosparkArc : Actor
+{
+	Vector3 nextpos, nextdir;
+
+	action void A_Trace()
+	{
+		let t = new("CandyBeamTracer");
+		t.hitlist.Clear();
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		t.ShootThroughList.Clear();
+		t.Trace(pos,CurSector,x,speed,0);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+		for ( int i=0; i<t.hitlist.Size(); i++ )
+		{
+			SWWMHandler.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x,5000);
+			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electricity',DMG_THRUSTLESS);
+		}
+		Vector3 normal = -t.Results.HitVector, dir = t.Results.HitVector;
+		if ( t.Results.HitType == TRACE_HitWall )
+		{
+			normal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+			if ( !t.Results.Side ) normal *= -1;
+			t.Results.HitLine.RemoteActivate(target,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			dir -= 2*normal*(dir dot normal);
+		}
+		else if ( t.Results.HitType == TRACE_HitFloor )
+		{
+			if ( t.Results.ffloor ) normal = -t.Results.ffloor.top.Normal;
+			else normal = t.Results.HitSector.floorplane.Normal;
+			dir -= 2*normal*(dir dot normal);
+		}
+		else if ( t.Results.HitType == TRACE_HitCeiling )
+		{
+			if ( t.Results.ffloor ) normal = -t.Results.ffloor.bottom.Normal;
+			else normal = t.Results.HitSector.ceilingplane.Normal;
+			dir -= 2*normal*(dir dot normal);
+		}
+		else
+		{
+			t.Results.HitPos = level.Vec3Offset(pos,x*speed);
+			normal *= 0;
+		}
+		double a = FRandom[Sparkster](0,360), s = FRandom[Sparkster](0.,.8);
+		invoker.nextpos = level.Vec3Offset(t.Results.HitPos,normal);
+		dir = (dir+cos(a)*y*s+sin(a)*z*s).unit();
+		if ( master )
+		{
+			Vector3 dirto = level.Vec3Diff(invoker.nextpos,master.Vec3Offset(0,0,master.height/2));
+			double dist = dirto.length();
+			if ( dist > 10 )
+			{
+				dirto /= dist;
+				dir = (dir+.5*dirto*(clamp(1.-(dist/3000.),0.,1.)**1.5)).unit();
+			}
+		}
+		else
+		{
+			double closest = double.infinity;
+			let bt = BlockThingsIterator.Create(self,1500);
+			while ( bt.Next() )
+			{
+				let t = bt.Thing;
+				double dist;
+				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || t.IsFriend(target) || ((dist=Distance3D(t)) > 1500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				Vector3 dirto = level.Vec3Diff(invoker.nextpos,t.Vec3Offset(0,0,t.height/2));
+				if ( dir dot dirto < .2 ) continue;
+				if ( dist > closest ) continue;
+				closest = dist;
+				tracer = t;
+			}
+			if ( tracer )
+			{
+				Vector3 dirto = level.Vec3Diff(invoker.nextpos,tracer.Vec3Offset(0,0,tracer.height/2));
+				double dist = dirto.length();
+				if ( dist > 10 )
+				{
+					dirto /= dist;
+					dir = (dir+.5*dirto*(clamp(1.-(dist/1500.),0.,1.)**3.)).unit();
+				}
+			}
+		}
+		invoker.nextdir = dir;
+	}
+	action void A_Spread( Sound arcsnd = "", double attn = 1. )
+	{
+		if ( special1 > ReactionTime ) return;
+		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
+		let b = Spawn(GetClass(),invoker.nextpos);
+		b.angle = atan2(invoker.nextdir.y,invoker.nextdir.x);
+		b.pitch = asin(-invoker.nextdir.z);
+		b.target = target;
+		b.master = master;
+		b.tracer = tracer;
+		b.special1 = special1+1;
+		b.special2 = special2;
+		if ( (arcsnd != "") && !((special1+special2)%3) && !Random[Sparkster](0,5) ) A_StartSound(arcsnd,CHAN_WEAPON,attenuation:attn);
+		if ( !((special1+special2)%8) && !Random[Sparkster](0,1) )
+		{
+			let p = Spawn("SparkArcLight",level.Vec3Offset(pos,tdir/2));
+			p.args[3] = int(speed*8);
+		}
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		frame = Random[Sparkster](0,11);
+		special2 = Random[Sparkster](-4,4);
+	}
+	Default
+	{
+		RenderStyle "Add";
+		DamageFunction 5;
+		ReactionTime 20;
+		Speed 16;
+		Radius .1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+NOTELEPORT;
+		+FOILINVUL;
+	}
+	States
+	{
+	Spawn:
+		XZW1 # 1 Bright;
+		XZW1 # 1 Bright A_Trace();
+		XZW1 # 1 Bright A_Spread("biospark/bigarc",.6);
+		XZW1 # 1 Bright A_FadeOut(.05);
+		Wait;
+	}
+}
+
+Class BiosparkArcSmall : BiosparkArc
+{
+	Default
+	{
+		ReactionTime 15;
+		DamageFunction 2;
+		Speed 8;
+	}
+	States
+	{
+	Spawn:
+		XZW1 # 1 Bright;
+		XZW1 # 1 Bright A_Trace();
+		XZW1 # 1 Bright A_Spread("biospark/arc",2.);
+		XZW1 # 1 Bright A_FadeOut(.1);
+		Wait;
+	}
+}
+
+Class BiosparkArcBig : BiosparkArc
+{
+	Default
+	{
+		ReactionTime 40;
+		DamageFunction 20;
+		Speed 32;
+	}
+	States
+	{
+	Spawn:
+		XZW1 # 1 Bright;
+		XZW1 # 1 Bright A_Trace();
+		XZW1 # 1 Bright A_Spread("biospark/zap",.4);
+		XZW1 # 1 Bright A_FadeOut(.025);
+		Wait;
+	}
+}
+
+Class BiosparkSpark : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale .8;
+		Radius .1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+	}
+	States
+	{
+	Spawn:
+		SSPK A 1 Bright
+		{
+			A_SetScale(scale.x*specialf1);
+			A_FadeOut(specialf2);
+		}
+		Wait;
+	}
+}
+
+Class BiosparkCore : Actor
+{
+}
+
+Class SparksterMag : SWWMCasing
+{
+	Default
+	{
+		Mass 10;
+		BounceFactor 0.4;
+		WallBounceFactor 0.4;
+		BounceSound "explodium/mag";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		heat = 0;
+	}
+	States
+	{
+	Death:
+		#### # -1
+		{
+			pitch = 0;
+			angle = FRandom[Junk](0,360);
+			roll = 0;
+		}
+		Stop;
+	}
+}
+
 Class Sparkster : SWWMWeapon
 {
 	int clipcount;
 
 	Property ClipCount : clipcount;
+
+	transient ui TextureID WeaponBox, AmmoBar[3];
+	transient ui Font TewiFont;
+	transient ui DynamicValueInterpolator iclip;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		if ( !WeaponBox )
+		{
+			WeaponBox = TexMan.CheckForTexture("graphics/HUD/BiosparkDisplay.png",TexMan.Type_Any);
+			AmmoBar[0] = TexMan.CheckForTexture("graphics/HUD/BiosparkBar.png",TexMan.Type_Any);
+			AmmoBar[1] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarRed.png",TexMan.Type_Any);
+			AmmoBar[2] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarGray.png",TexMan.Type_Any);
+		}
+		Screen.DrawTexture(WeaponBox,false,bx-29,by-29,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-27,by-27,String.Format("%2d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(AmmoBar[2],false,bx-27,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(AmmoBar[clipcount<4],false,bx-27,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,iclip?(iclip.GetValue()/10):0);
+	}
+
+	override void HudTick()
+	{
+		if ( !iclip ) iclip = DynamicValueInterpolator.Create(clipcount*30,.25,1,10);
+		else iclip.Update(clipcount*30);
+	}
+
+	override bool CheckAmmo( int fireMode, bool autoSwitch, bool requireAmmo, int ammocount )
+	{
+		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
+		if ( (fireMode == PrimaryFire) || (fireMode == AltFire) ) return ((clipcount > 0) || (Ammo1.Amount > 0));
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		if ( clipcount > 0 ) return true;
+		return Super.ReportHUDAmmo();
+	}
+
+	action void A_FireSpark( int mode )
+	{
+		if ( mode == 2 ) invoker.clipcount = 0;
+		else invoker.clipcount = max(0,invoker.clipcount-1);
+		Vector3 x, y, z, x2, y2, z2, dir;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+5*y-5*z);
+		double a, s;
+		Actor p;
+		switch ( mode )
+		{
+		case 0:
+			// spark
+			A_StartSound("biospark/fire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.7);
+			A_QuakeEx(2,2,2,5,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
+			A_ZoomFactor(.96,ZOOM_INSTANT);
+			A_ZoomFactor(1.);
+			A_SWWMFlash();
+			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
+			A_AlertMonsters(5000);
+			a = FRandom[Spread](0,360);
+			s = FRandom[Spread](0,.007);
+			[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			p = Spawn("BiosparkBall",origin);
+			p.target = self;
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = asin(-dir.z);
+			p.vel = dir*p.speed;
+			break;
+		case 1:
+			// beam
+			A_StartSound("biospark/altfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.8);
+			A_QuakeEx(3,3,3,5,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.3);
+			A_ZoomFactor(.95,ZOOM_INSTANT);
+			A_ZoomFactor(1.);
+			A_SWWMFlash();
+			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
+			A_AlertMonsters(4000);
+			a = FRandom[Spread](0,360);
+			s = FRandom[Spread](0,.003);
+			[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			p = Spawn("BiosparkBeam",origin);
+			p.target = self;
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = asin(-dir.z);
+			p.vel = dir*p.speed;
+			break;
+		case 2:
+			// big spark
+			A_StartSound("biospark/thirdfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:1.5);
+			A_QuakeEx(5,5,5,10,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.6);
+			A_ZoomFactor(.94,ZOOM_INSTANT);
+			A_ZoomFactor(1.);
+			A_AlertMonsters(1200);
+			A_Recoil(.6);
+			a = FRandom[Spread](0,360);
+			s = FRandom[Spread](0,.012);
+			[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			p = Spawn("BiosparkCore",origin);
+			p.target = self;
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = asin(-dir.z);
+			p.vel = dir*p.speed;
+			p.vel.z += 3.5;
+			break;
+		}
+	}
+
+	action void A_DropMag()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
+		let c = Spawn("SparksterMag",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( Owner.player && (Owner.player.Readyweapon == self) )
+			Owner.A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOPING,.4,4.);
+	}
 
 	Default
 	{
@@ -13,6 +627,7 @@ Class Sparkster : SWWMWeapon
 		Inventory.PickupMessage "$I_SPARKSTER";
 		Obituary "$O_SPARKSTER";
 		Weapon.SlotNumber 7;
+		Weapon.UpSound "biospark/select";
 		Weapon.SelectionOrder 1600;
 		Stamina 150000;
 		Weapon.AmmoType1 "SparkUnit";
@@ -24,6 +639,99 @@ Class Sparkster : SWWMWeapon
 	{
 	Spawn:
 		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 G 2
+		{
+			A_FullRaise();
+			A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOPING,.4,4.);
+		}
+		XZW2 HIJKLM 2;
+		Goto Ready;
+	Deselect:
+		XZW2 A 2 A_StartSound("biospark/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 BCDEFG 2;
+		XZW2 G -1
+		{
+			A_StopSound(CHAN_WEAPONEXTRA);
+			A_FullLower();
+		}
+		Stop;
+	Ready:
+		XZW2 A 1
+		{
+			int flg = WRF_ALLOWUSER1|WRF_NOSECONDARY;	// temp while the two other fire modes are unimplemented
+			//int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( (invoker.ClipCount < invoker.default.ClipCount) && (invoker.Ammo1.Amount > 0) ) flg |= WRF_ALLOWRELOAD;
+			A_WeaponReady(flg);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_ZOOM) )
+				invoker.CheckAmmo(EitherFire,true);
+		}
+		Wait;
+	Fire:
+		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
+		XZW2 A 12 A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1 A_FireSpark(0);
+		XZW2 NOPQ 2;
+		Goto Ready;
+	AltFire:
+		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
+		XZW2 A 12 A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1 A_FireSpark(1);
+		XZW2 RSTU 2;
+		Goto Ready;
+	Zoom:
+		XZW2 A 0 A_JumpIf(invoker.ClipCount<4,"Reload");
+		XZW2 A 12 A_StartSound("biospark/prethird",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1 A_FireSpark(2);
+		XZW2 VWXYZ 2;
+		Goto Ready;
+	Reload:
+		XZW2 A 2 A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 ABCDE 2;
+		XZW3 F 2
+		{
+			invoker.clipcount = 0;
+			A_StartSound("biospark/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW3 GHIJKL 2;
+		XZW3 M 2 A_DropMag();
+		XZW3 NOPQR 2;
+		XZW3 S 2
+		{
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+			invoker.clipcount = invoker.default.clipcount;
+			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW3 UVW 2;
+		XZW3 X 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 YZ 2;
+		XZW4 ABCD 2;
+		Goto Ready;
+	User1:
+		XZW2 A 2
+		{
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW4 EFG 2;
+		XZW4 H 1 A_Parry(9);
+		XZW4 IJ 1;
+		XZW4 K 2 A_Melee(60);
+		XZW4 LMNOPQ 2;
+		XZW4 R 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 STUVWX 2;
+		Goto Ready;
+	Flash:
+		XZWZ A 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[0] = 192;
+			l.args[1] = 255;
+			l.args[2] = 96;
+			l.target = self;
+		}
 		Stop;
 	}
 }

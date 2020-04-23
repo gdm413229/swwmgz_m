@@ -2059,7 +2059,7 @@ Class SWWMHandler : EventHandler
 				s.mkill = multilevel[pnum]+1;
 			lastkill[pnum] = level.maptime;
 			// scoring
-			int score = min(2000,int(ceil(e.Thing.SpawnHealth()*.5)*10));
+			int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.25)*10));
 			int ofs = 0;
 			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH)) && !e.DamageSource.bNOEXTREMEDEATH && !(e.Inflictor && e.Inflictor.bNOEXTREMEDEATH) )
 			{
@@ -2072,13 +2072,16 @@ Class SWWMHandler : EventHandler
 				SWWMScoreObj.Spawn((multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1),e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_MULTIKILL",++ofs);
 			if ( !tookdamage[pnum] )
 			{
-				score += 100+50*spreecount[pnum];
+				int spreebonus = 10*spreecount[pnum];
+				// taper off after 10x (some people go really far with these, holy fuck)
+				if ( spreecount[pnum] > 10 ) spreebonus = int(spreebonus*((spreecount[pnum]/10.)**.25));
+				score += 100+spreebonus;
 				if ( (spreecount[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
 					SWWMScoreObj.Spawn(spreecount[pnum]+1,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_SPREEKILL",++ofs);
 			}
 			if ( e.Thing.bBOSS )
 			{
-				score += 10000;
+				score += 5000;
 				if ( e.DamageSource.player == players[consoleplayer] )
 					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",++ofs);
 			}
@@ -2088,8 +2091,8 @@ Class SWWMHandler : EventHandler
 			if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
 			{
 				allkills = true;
-				SWWMCredits.Give(e.DamageSource.player,5000);
-				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),5000);
+				SWWMCredits.Give(e.DamageSource.player,2000);
+				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),2000);
 			}
 			spreecount[pnum]++;
 			if ( s && spreecount[pnum] > s.skill )

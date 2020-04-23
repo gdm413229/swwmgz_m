@@ -470,16 +470,16 @@ with a multiplier suffix.
 Current score.
 
 The scoring system is pretty straightforward. Each thing you kill (even if not
-an enemy) will give you points according to half of its base health, rounded up
-to the nearest multiple of 10 and capped to 2000, plus these bonuses (in order
-of application):
+an enemy) will give you points according to a quarter of its base health,
+rounded up to the nearest multiple of 10 and capped to 1000, plus these bonuses
+(in order of application):
  * x1.25 for an overkill (enemy was gibbed or killed in one shot).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.
  * +100 for killing an enemy without having taken damage since last spawn, with
-   extra +50 boosts for consecutive kills.
- * +10000 if the enemy killed is a boss.
- * +5000 if you've killed the last enemy in the map.
+   extra +10 boosts for consecutive kills (extra boosts taper off after 10x).
+ * +5000 if the enemy killed is a boss.
+ * +2000 if you've killed the last enemy in the map.
 
 You are also given +500 points for each secret found, +5000 if it's the final
 secret. Countable items give +25 points each or +2500 if it's the final item.

@@ -134,7 +134,7 @@ Class ExplodiumMagProj : Actor
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
-		A_AlertMonsters();
+		A_AlertMonsters(6000);
 		SWWMHandler.DoBlast(self,120+30*special1,80000+8000*special1);
 		A_Explode(20+15*special1,120+30*special1);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
@@ -227,7 +227,7 @@ Class ExplodiumBulletImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(3000);
 		SWWMHandler.DoBlast(self,120,80000);
 		A_Explode(25,120);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
@@ -302,7 +302,7 @@ Class ExplodiumGun : SWWMWeapon
 		A_ZoomFactor(1.);
 		A_SWWMFlash();
 		SWWMHandler.DoFlash(self,Color(64,255,224,64),3);
-		A_AlertMonsters();
+		A_AlertMonsters(5000);
 		A_Recoil(1.2);
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);

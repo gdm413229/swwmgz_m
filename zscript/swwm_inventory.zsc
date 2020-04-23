@@ -733,6 +733,51 @@ Class ParryField : Actor
 	}
 }
 
+Class UseList
+{
+	Line hitline;
+	int hitside;
+	Actor hitactor;
+	Vector3 pos;
+}
+
+Class UseLineTracer : LineTracer
+{
+	Array<UseList> uses;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			let u = new("UseList");
+			u.hitline = null;
+			u.hitactor = Results.HitActor;
+			u.pos = Results.HitPos;
+			uses.Push(u);
+			return TRACE_Skip;
+		}
+		if ( Results.HitType == TRACE_HitWall )
+		{
+			if ( Results.HitLine.Activation&(SPAC_Use|SPAC_UseThrough) )
+			{
+				let u = new("UseList");
+				u.hitline = Results.HitLine;
+				u.hitside = Results.Side;
+				u.hitactor = null;
+				u.pos = Results.HitPos;
+				uses.Push(u);
+			}
+			if ( Results.Tier == TIER_Middle )
+			{
+				if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything|Line.ML_BlockUse)) )
+					return TRACE_Stop;
+				return TRACE_Skip;
+			}
+		}
+		return TRACE_Stop;
+	}
+}
+
 // Base class for all SWWM Weapons
 Class SWWMWeapon : Weapon abstract
 {
@@ -855,7 +900,8 @@ Class SWWMWeapon : Weapon abstract
 				invoker.bEXTREMEDEATH = false;
 				invoker.bNOEXTREMEDEATH = true;
 			}
-			d.HitActor.DaggerAlert(self);
+			if ( !d.HitActor.bDORMANT )	// lol oops
+				d.HitActor.DaggerAlert(self);
 			int flg = DMG_USEANGLE|DMG_THRUSTLESS;
 			if ( raging ) flg |= DMG_FOILINVUL;
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',flg,atan2(d.HitDir.y,d.HitDir.x));
@@ -896,12 +942,31 @@ Class SWWMWeapon : Weapon abstract
 				return;
 			}
 		}
+		// check for usables
+		let ut = new("UseLineTracer");
+		ut.uses.Clear();
+		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE,0);
+		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
+		for ( int i=0; i<ut.uses.Size(); i++ )
+		{
+			if ( ut.uses[i].hitactor )
+			{
+				if ( ut.uses[i].hitactor == self ) continue;
+				if ( ut.uses[i].hitactor.Used(self) ) break;
+			}
+			else if ( ut.uses[i].hitline )
+			{
+				int locknum = SWWMUtility.GetLineLock(ut.uses[i].hitline);
+				if ( !locknum || CheckKeys(locknum,false,true) )
+					ut.uses[i].hitline.RemoteActivate(self,ut.uses[i].hitside,SPAC_Use,ut.uses[i].pos);
+				if ( !(ut.uses[i].hitline.activation&SPAC_UseThrough) ) break;
+			}
+		}
 		// check for walls instead
 		FTranslatedLineTarget t;
 		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
 		LineTrace(angle,DEFMELEERANGE,slope,TRF_THRUACTORS,player.viewheight,data:d);
-		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 		if ( d.HitType == TRACE_HitNone ) return;
 		Vector3 HitNormal = -d.HitDir;
 		if ( d.HitType == TRACE_HitFloor )
@@ -919,9 +984,6 @@ Class SWWMWeapon : Weapon abstract
 			HitNormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 			if ( !d.LineSide ) HitNormal *= -1;
 			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation+HitNormal*4);
-			int locknum = SWWMUtility.GetLineLock(d.HitLine);
-			if ( !locknum || CheckKeys(locknum,false,true) )
-				d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Use,d.HitLocation+HitNormal*4);
 		}
 		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
 		p.angle = atan2(HitNormal.y,HitNormal.x);

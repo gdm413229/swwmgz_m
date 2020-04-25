@@ -2050,7 +2050,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 				else str = def.GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;

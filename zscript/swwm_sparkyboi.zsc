@@ -1113,11 +1113,11 @@ Class BiosparkArc : Actor
 	action void A_Spread( Sound arcsnd = "", double attn = 1., int extra = 0 )
 	{
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
-		if ( extra && !Random[Sparkster](0,12-extra*3) )
+		if ( (extra > 1) && !Random[Sparkster](0,3) )
 		{
-			for ( int i=0; i<extra; i++ )
+			for ( int i=0; i<3; i++ )
 			{
-				let r = Spawn((extra>1)?"BiosparkArc":"BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster](0,1)));
+				let r = Spawn("BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster](0,1)));
 				Vector3 x, y, z;
 				[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 				double a = FRandom[Sparkster](0,360), s = FRandom[Sparkster](0.,1.);
@@ -1126,7 +1126,7 @@ Class BiosparkArc : Actor
 				r.pitch = asin(-sdir.z);
 				r.target = target;
 				r.master = master;
-				r.ReactionTime /= 4;
+				r.ReactionTime /= 3;
 			}
 		}
 		if ( (special1 > ReactionTime) || bAMBUSH ) return;

@@ -496,7 +496,7 @@ Class Demolitionist : PlayerPawn
 				s.special1 = int(-lastvelz);
 				ReactionTime = 17;
 				A_Stop();
-				A_AlertMonsters();
+				A_AlertMonsters(2500);
 				if ( player == players[consoleplayer] )
 				{
 					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -973,7 +973,7 @@ Class Demolitionist : PlayerPawn
 					s.special1 = 30;
 					ReactionTime = 17;
 					A_Stop();
-					A_AlertMonsters();
+					A_AlertMonsters(2500);
 					if ( player == players[consoleplayer] )
 					{
 						A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -1203,7 +1203,7 @@ Class Demolitionist : PlayerPawn
 		if ( !player ) return;
 		// add lore if any
 		SWWMLoreLibrary.Add(player,item.GetClassName());
-		if ( (item is 'Weapon') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
+		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 			SWWMHandler.AddOneliner("getweapon",2);
 		if ( (item is 'Key') && !key_reentrant )
 		{
@@ -1390,7 +1390,7 @@ Class Demolitionist : PlayerPawn
 	DashEnd:
 		XZW4 TUVWX 2;
 		Goto Spawn+1;
-	Taunt:
+	Wave:
 		#### # 3;
 		XZW4 YZ 3;
 		XZW5 ABCDEFGHIJKLM 3;
@@ -1775,6 +1775,108 @@ Class CastDemolitionist : Actor
 		CCD1 A 2;
 		CCD3 ABCDEFGHIJKLMNOP 2;
 		CCD3 Q -1;
+		Stop;
+	}
+}
+
+// First person gestures
+Class SWWMGesture : SWWMWeapon
+{
+	Weapon formerweapon;
+	int whichgesture;
+	bool deaded;
+	int gonect;
+
+	static void SetGesture( PlayerPawn mo, int which = 0 )
+	{
+		if ( (mo.player.ReadyWeapon is 'SWWMGesture') || (mo.player.PendingWeapon is 'SWWMGesture') ) return;	// already gesturing
+		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
+		if ( !w )
+		{
+			w = SWWMGesture(Spawn("SWWMGesture"));
+			mo.AddInventory(w);
+		}
+		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
+		else w.formerweapon = mo.player.ReadyWeapon;
+		w.whichgesture = which;
+		mo.player.PendingWeapon = w;
+	}
+
+	action void A_CallPlayerGesture( statelabel st )
+	{
+		if ( invoker.Owner.FindState(st) && (invoker.Owner.Health > 0) )
+			invoker.Owner.SetStateLabel(st);
+	}
+
+	action void A_FinishGesture()
+	{
+		player.PendingWeapon = invoker.formerweapon;
+		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
+	override void OwnerDied()
+	{
+		Super.OwnerDied();
+		deaded = true;
+	}
+
+	Default
+	{
+		+WEAPON.CHEATNOTWEAPON;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+	}
+	States
+	{
+	Select:
+		TNT1 A 1
+		{
+			A_FullRaise();
+			if ( invoker.deaded ) A_FinishGesture();
+		}
+		Goto Ready;
+	Ready:
+		TNT1 A 1
+		{
+			if ( invoker.whichgesture == 1 ) return ResolveState("Approve");
+			if ( invoker.whichgesture == 2 ) return ResolveState("Victory");
+			return ResolveState("Wave");
+		}
+		Wait;
+	Fire:
+		TNT1 A 1;
+		Goto Ready;
+	Wave:
+		TNT1 A 3 A_CallPlayerGesture("Wave");
+		XZW1 AB 3;
+		XZW1 C 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 DEFGHIJ 3;
+		XZW1 K 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 LMNO 3;
+		TNT1 A -1 A_FinishGesture();
+		Stop;
+	Approve:
+		TNT1 A 3 A_CallPlayerGesture("Approve");
+		XZW1 PQ 3;
+		XZW1 R 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 STUVWX 3;
+		XZW1 Y 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 Z 3;
+		XZW2 ABCDEF 3;
+		TNT1 A -1 A_FinishGesture();
+		Stop;
+	Victory:
+		TNT1 A 3 A_CallPlayerGesture("Victory");
+		XZW2 GH 3;
+		XZW2 I 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 JKLMNOPQ 3;
+		XZW2 R 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 STUVWXY 3;
+		TNT1 A -1 A_FinishGesture();
+		Stop;
+	Deselect:
+		TNT1 A -1 A_FullLower();
 		Stop;
 	}
 }

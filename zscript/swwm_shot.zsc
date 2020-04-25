@@ -564,7 +564,7 @@ Class SaltImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(6000);
 		SWWMHandler.DoBlast(self,120,15000);
 		A_Explode(25,120);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
@@ -1555,7 +1555,7 @@ Class GoldenImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(40000);
 		SWWMHandler.DoBlast(self,200,120000);
 		A_Explode(7777,200);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
@@ -1682,7 +1682,7 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(9000);
 		SWWMHandler.DoBlast(self,200,90000);
 		A_Explode(777,200);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
@@ -1807,7 +1807,7 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(3000);
 		SWWMHandler.DoBlast(self,200,60000);
 		A_Explode(77,200);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);

@@ -247,8 +247,8 @@ Secondary fire is a concentrated beam shot, a very old thing from the original
 UnSX 1 incarnation. The beam can penetrate multiple solid targets.
 
 Reload deploys a capsule that releases a massive sphere of pure energy
-that tracks down any hostile targets. It has a rather limited lifespan, and can
-be even shot down.
+that tracks down any hostile targets. It will rip through everything and even
+bounce off surfaces, but it has a rather limited lifespan.
 
 If the beam hits either of the other energy blobs, they will detonate with
 highly amplified damage and range.
@@ -267,15 +267,14 @@ you can aim straight.
 
 Primary fire shoots, duh.
 
-Secondary fire toggles the recoil compensators. These small jet engines can
-potentially deal damage to yourself if you don't have any armor, so be careful.
+Secondary fire uses the scope. Can be held to go up to 16x.
 
 Reload reloads (what else is new).
 
-Zoom uses the scope. Can be held to go up to 16x.
-
 This weapon is generally not recommended for human use outside of power armor.
-Good thing you're not a human, then.
+Good thing you're not a human, then. Still, the recoil compensator jet engines
+can potentially deal damage to yourself if you don't have any armor, so be
+careful.
 
 ### 1.150 XSB Bullets, replaces Cells, Runes
 

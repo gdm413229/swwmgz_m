@@ -298,10 +298,11 @@ Class SWWMStatusBar : BaseStatusBar
 				}
 			}
 		}
+		else trackers.Clear();
 		// update floating scores, adding the scorenums first, then the damnums
 		int total_sz = 0;
 		if ( scorenums.GetBool() ) total_sz += hnd.scorenums_cnt;
-		if ( healthnums.GetBool() ) total_sz += min(50,hnd.damnums_cnt);
+		if ( healthnums.GetBool() ) total_sz += min(100,hnd.damnums_cnt);
 		if ( scoreobjs.Size() != total_sz )
 			scoreobjs.Resize(total_sz);
 		int i = 0;

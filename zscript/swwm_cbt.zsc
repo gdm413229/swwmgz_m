@@ -18,6 +18,22 @@ Class Wallbuster : SWWMWeapon
 		return false;
 	}
 
+	// leave these while it's still unimplemented
+	override bool ReportHUDAmmo()
+	{
+		return false;
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		return false;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		if ( other.player == players[consoleplayer] )
+			Console.Printf("\cgWALLBUSTER NOT IMPLEMENTED\c-");
+	}
+
 	Default
 	{
 		Tag "$T_WALLBUSTER";
@@ -31,6 +47,22 @@ Class Wallbuster : SWWMWeapon
 	{
 	Spawn:
 		XZW1 A -1;
+		Stop;
+	Select:
+		TNT1 A 1
+		{
+			Console.Printf("\cgWALLBUSTER NOT IMPLEMENTED\c-");
+			A_FullRaise();
+		}
+		Goto Ready;
+	Ready:
+		TNT1 A 1 A_WeaponReady();
+		Wait;
+	Fire:
+		TNT1 A 1;
+		Goto Ready;
+	Deselect:
+		TNT1 A -1 A_FullLower();
 		Stop;
 	}
 }

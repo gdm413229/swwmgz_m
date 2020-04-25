@@ -897,7 +897,7 @@ Class SWWMSmoke : Actor
 		if ( isFrozen() ) return;
 		vel *= 0.96;
 		vel.z += 0.01;
-		if ( waterlevel > 0 )
+		if ( (waterlevel > 0) && !bAMBUSH )
 		{
 			let b = Spawn("SWWMBubble",pos);
 			b.scale *= abs(scale.x);
@@ -969,7 +969,7 @@ Class SWWMViewSmoke : SWWMSmoke
 		ofs += vvel;
 		vvel *= 0.96;
 		vvel.z += 0.01;
-		if ( waterlevel > 0 ) Destroy();
+		if ( (waterlevel > 0) && !bAMBUSH ) Destroy();
 	}
 }
 
@@ -2457,13 +2457,13 @@ Class SWWMHandler : EventHandler
 			switch ( e.Args[0] )
 			{
 			case 1:
-				if ( mo.FindState("Approve") ) mo.SetStateLabel("Approve");
+				SWWMGesture.SetGesture(mo,1);
 				break;
 			case 2:
-				if ( mo.FindState("Victory") ) mo.SetStateLabel("Victory");
+				SWWMGesture.SetGesture(mo,2);
 				break;
 			default:
-				if ( mo.FindState("Taunt") ) mo.SetStateLabel("Taunt");
+				SWWMGesture.SetGesture(mo,0);
 				break;
 			}
 		}

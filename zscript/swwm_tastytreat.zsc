@@ -215,6 +215,7 @@ Class CandyPop : Actor
 		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
 		let mo = players[consoleplayer].camera;
 		Vector3 pp;
+		if ( !mo.CheckSight(self) ) return;
 		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
 		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
 		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
@@ -230,7 +231,7 @@ Class CandyPop : Actor
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			A_AlertMonsters();
+			A_AlertMonsters(2000);
 			SWWMHandler.DoBlast(self,120,60000);
 			A_Explode(100,120);
 			Scale *= FRandom[ExploS](0.6,1.8);
@@ -297,7 +298,7 @@ Class TinyCandyPop : CandyPop
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			A_AlertMonsters();
+			A_AlertMonsters(700);
 			SWWMHandler.DoBlast(self,80,32000);
 			A_Explode(40,80);
 			Scale *= FRandom[ExploS](0.6,1.8);

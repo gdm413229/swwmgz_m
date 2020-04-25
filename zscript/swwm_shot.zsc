@@ -228,6 +228,7 @@ Class SpreadImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(200);
 		A_StartSound("spreadgun/pellet",CHAN_VOICE,CHANF_DEFAULT,.4,4.);
 		A_SprayDecal("TinyBulletChip",-20);
 		int numpt = Random[Spreadgun](2,4);
@@ -241,14 +242,14 @@ Class SpreadImpact : Actor
 			s.special1 = Random[Spreadgun](0,1);
 			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
 		}
-		numpt = Random[Spreadgun](1,3);
+		numpt = Random[Spreadgun](-1,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Spreadgun](2,5);
+		numpt = Random[Spreadgun](2,4);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,4);
@@ -273,9 +274,10 @@ Class SlugImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(500);
 		A_StartSound("spreadgun/slug",CHAN_VOICE,CHANF_DEFAULT,1.,2.);
 		A_SprayDecal("BulletChip",-20);
-		int numpt = Random[Spreadgun](6,12);
+		int numpt = Random[Spreadgun](5,10);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -286,14 +288,14 @@ Class SlugImpact : Actor
 			s.special1 = Random[Spreadgun](0,2);
 			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
 		}
-		numpt = Random[Spreadgun](4,8);
+		numpt = Random[Spreadgun](2,5);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Spreadgun](10,15);
+		numpt = Random[Spreadgun](4,8);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
@@ -530,7 +532,7 @@ Class SaltLight : PaletteLight
 	{
 		Tag "SaltTail";
 		ReactionTime 30;
-		Args 0,0,0,120;
+		Args 0,0,0,240;
 	}
 }
 Class SaltLight2 : PaletteLight
@@ -624,7 +626,7 @@ Class SaltBeam : Actor
 		RenderStyle "Add";
 		Radius 0.1;
 		Height 0;
-		Stamina 3;
+		Stamina 9;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -638,7 +640,6 @@ Class SaltBeam : Actor
 
 	void SpreadOut()
 	{
-		A_AlertMonsters(1200);
 		special1 = 1;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -652,9 +653,9 @@ Class SaltBeam : Actor
 			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
 			b.A_CheckTerrain();
 		}
-		for ( int i=16; i<t.Results.Distance; i+=32 )
+		for ( int i=4; i<t.Results.Distance; i+=8 )
 		{
-			if ( !Random[Spreadgun](0,Stamina) ) continue;
+			if ( Random[Spreadgun](0,Stamina) ) continue;
 			let b = Actor.Spawn("SWWMSmoke",level.Vec3Offset(pos,x*i));
 			b.Scale *= FRandom[Spreadgun](.6,.8);
 			b.special1 = Random[Spreadgun](1,2);
@@ -704,7 +705,7 @@ Class SaltBeam : Actor
 			return;
 		}
 		// next beam
-		if ( !(special2%2) && !Random[Spreadgun](0,4) )
+		if ( !(special2%4) && !Random[Spreadgun](0,4) )
 			Spawn("SaltLight",level.Vec3Offset(pos,x*16));
 		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*32));
 		double a = FRandom[Spreadgun](0,360), s = FRandom[Spreadgun](0,.06);
@@ -1262,6 +1263,7 @@ Class BallImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(500);
 		A_QuakeEx(3,3,3,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
 		A_StartSound("spreadgun/ball",CHAN_VOICE);
 		A_SprayDecal("WallCrack",-20);
@@ -1337,13 +1339,14 @@ Class TheBall : Actor
 			Spawn("SWWMItemFog",pos);
 			int whichclonk = Random[Spreadgun](1,11);
 			String snd = String.Format("misc/clonk%d",whichclonk);
+			A_AlertMonsters(2500);
 			A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
 			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 			victim.A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
 			slamforce *= 4;
 			dmg *= 4;
 			vel *= 1.1;
-			let numpt = Random[Spreadgun](40,50);
+			let numpt = Random[Spreadgun](20,30);
 			for ( int i=0; i<numpt; i++ )
 			{
 				Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,8);
@@ -1684,7 +1687,6 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters(9000);
 		SWWMHandler.DoBlast(self,200,90000);
 		A_Explode(777,200);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
@@ -1810,7 +1812,6 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters(3000);
 		SWWMHandler.DoBlast(self,200,60000);
 		A_Explode(77,200);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);

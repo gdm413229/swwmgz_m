@@ -79,8 +79,12 @@ Class SWWMArmor : Armor abstract
 			if ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) && shouldautouse )
 			{
 				if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+				int tgive = 0;
+				bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();
 				while ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) )
 				{
+					if ( acc ) tgive += default.Amount;
+					else SWWMScoreObj.Spawn(default.Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 					Amount += default.Amount;
 					Owner.TakeInventory(parent,1);
 					// absorb the extra damage too
@@ -93,6 +97,7 @@ Class SWWMArmor : Armor abstract
 					amount -= saved;
 					damage = newdamage;
 				}
+				if ( acc ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 			}
 			else if ( amount <= 0 )
 			{
@@ -128,6 +133,7 @@ Class SWWMSpareArmor : Inventory abstract
 			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 			SWWMHandler.ArmorFlash(Owner.PlayerNumber());
+			SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
 			return true;
 		}
 		return false;
@@ -166,7 +172,7 @@ Class SWWMHealth : Inventory abstract
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		SWWMHandler.HealthFlash(Owner.PlayerNumber());
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
-		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 		return true;
 	}
 
@@ -192,14 +198,19 @@ Class SWWMHealth : Inventory abstract
 		{
 			newdamage = damage;
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			int tgive = 0;
+			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
+				if ( acc ) tgive += GetDefaultByType(giveme).Amount;
+				else SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 				newdamage = newdamage-GetDefaultByType(giveme).Amount;
 				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
 				newdamage = max(0,newdamage);
 				AutoUseExtra();
 				Amount--;
 			}
+			if ( acc ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 		}
 		else newdamage = damage;
 	}

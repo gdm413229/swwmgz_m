@@ -415,17 +415,20 @@ Class SWWMLoreLibrary : Thinker
 // floating scores
 Class SWWMScoreObj : Thinker
 {
+	int xcnt;
+	int xtcolor[5];
+	int xscore[5];
+	String xstr[5];
 	int tcolor;
 	int score;
-	String str;
 	Vector3 pos;
 	int lifespan, initialspan;
 	int starttic, seed, seed2;
-	int ofs;
 	SWWMScoreObj prev, next;
 	bool damnum;
+	Actor acc;
 
-	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, String str = "", int ofs = 0 )
+	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, Actor acc = null )
 	{
 		let o = new("SWWMScoreObj");
 		o.ChangeStatNum(STAT_USER);
@@ -434,11 +437,11 @@ Class SWWMScoreObj : Thinker
 		o.lifespan = o.initialspan = 60;
 		o.tcolor = tcolor;
 		o.starttic = level.maptime;
-		o.str = str;
 		o.seed = Random[ScoreBits]();
 		o.seed2 = Random[ScoreBits]();
-		o.ofs = ofs;
-		o.damnum = (tcolor == Font.CR_RED) || (tcolor == Font.CR_GREEN);
+		o.damnum = (tcolor == Font.CR_RED) || (tcolor == Font.CR_GREEN) || (tcolor == Font.CR_BLUE);
+		o.xcnt = 0;
+		o.acc = acc;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( hnd )
 		{
@@ -575,6 +578,7 @@ Class SWWMCombatTracker : Thinker
 	SWWMCombatTracker prev, next;
 	bool legged;
 	int tcnt;
+	double height;
 
 	static SWWMCombatTracker Spawn( Actor target )
 	{
@@ -593,8 +597,9 @@ Class SWWMCombatTracker : Thinker
 		else t.mytag = "";
 		t.lasthealth = t.maxhealth = target.health;
 		t.updated = int.min;
-		t.pos = level.Vec3Offset(target.pos,(0,0,target.default.height));
-		t.prevpos = level.Vec3Offset(target.prev,(0,0,target.default.height));
+		t.height = t.mytarget.height;
+		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
+		t.prevpos = level.Vec3Offset(target.prev,(0,0,t.height));
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -633,8 +638,8 @@ Class SWWMCombatTracker : Thinker
 		// update
 		if ( mytarget )
 		{
-			pos = level.Vec3Offset(mytarget.pos,(0,0,mytarget.height));
-			prevpos = level.Vec3Offset(mytarget.prev,(0,0,mytarget.height));
+			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
+			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
 		}
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
@@ -645,6 +650,8 @@ Class SWWMCombatTracker : Thinker
 			if ( level.maptime > updated+35 ) Destroy();
 			return;
 		}
+		// only update height while alive
+		height = mytarget.height;
 		tcnt++;
 		if ( tcnt == 1 )
 		{
@@ -1172,7 +1179,7 @@ Class SWWMItemFog : Actor
 			scale *= FRandom[ExploS](0.9,1.1);
 			scale.x *= RandomPick[ExploS](-1,1);
 			scale.y *= RandomPick[ExploS](-1,1);
-			int numpt = Random[ExploS](16,32);
+			int numpt = Random[ExploS](8,12);
 			if ( bAMBUSH ) numpt *= 2;
 			for ( int i=0; i<numpt; i++ )
 			{
@@ -1215,16 +1222,19 @@ Class SWWMTeleportSparkle : Actor
 		+ROLLSPRITE;
 		+ROLLCENTER;
 		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*specialf1);
+		A_FadeOut(specialf2);
 	}
 	States
 	{
 	Spawn:
-		BLPF C 1 Bright
-		{
-			A_SetScale(scale.x*specialf1);
-			A_FadeOut(specialf2);
-		}
-		Wait;
+		BLPF C -1 Bright;
+		Stop;
 	}
 }
 
@@ -1248,7 +1258,7 @@ Class SWWMTeleportFog : Actor
 	Spawn:
 		TNT1 A 1
 		{
-			int numpt = int(Random[ExploS](16,32)*alpha);
+			int numpt = int(Random[ExploS](6,12)*alpha);
 			for ( int i=0; i<numpt; i++ )
 			{
 				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8)*alpha;
@@ -1537,7 +1547,7 @@ Class SWWMHandler : EventHandler
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
 
-	transient CVar mutevoice;
+	transient CVar mutevoice, accdamage;
 	transient ui CVar useshaders;
 
 	static void HealthFlash( int p )
@@ -1991,7 +2001,20 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Damage > 0 )
 		{
-			SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED);
+			if ( !accdamage ) accdamage = CVar.GetCVar('swwm_accdamage',players[consoleplayer]);
+			bool spawnme = true;
+			if ( accdamage.GetBool() )
+			{
+				// find existing damage number
+				for ( SWWMScoreObj d=damnums; d; d=d.next )
+				{
+					if ( (d.starttic < level.maptime) || (d.acc != e.Thing) ) continue;
+					d.score -= e.Damage;
+					spawnme = false;
+					break;
+				}
+			}
+			if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED,e.Thing);
 			// update combat tracker for it
 			for ( SWWMCombatTracker t=trackers; t; t=t.next )
 			{
@@ -2060,34 +2083,59 @@ Class SWWMHandler : EventHandler
 			lastkill[pnum] = level.maptime;
 			// scoring
 			int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.25)*10));
+			SWWMScoreObj scr = null;
+			if ( e.DamageSource.player == players[consoleplayer] )
+				scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			int ofs = 0;
 			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH)) && !e.DamageSource.bNOEXTREMEDEATH && !(e.Inflictor && e.Inflictor.bNOEXTREMEDEATH) )
 			{
 				score = int(score*1.25);
-				if ( e.DamageSource.player == players[consoleplayer] )
-					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_OVERKILL",++ofs);
+				if ( scr )
+				{
+					scr.xscore[ofs] = 0;
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = "$SWWM_OVERKILL";
+					scr.xcnt = ++ofs;
+				}
 			}
 			score = int(score*(1.+.5*min(multilevel[pnum],16)));
-			if ( (multilevel[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
-				SWWMScoreObj.Spawn((multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1),e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_MULTIKILL",++ofs);
+			if ( (multilevel[pnum] > 0) && scr )
+			{
+				if ( scr )
+				{
+					scr.xscore[ofs] = (multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1);
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = "$SWWM_MULTIKILL";
+					scr.xcnt = ++ofs;
+				}
+			}
 			if ( !tookdamage[pnum] )
 			{
 				int spreebonus = 10*spreecount[pnum];
 				// taper off after 10x (some people go really far with these, holy fuck)
 				if ( spreecount[pnum] > 10 ) spreebonus = int(spreebonus*((spreecount[pnum]/10.)**.25));
 				score += 100+spreebonus;
-				if ( (spreecount[pnum] > 0) && (e.DamageSource.player == players[consoleplayer]) )
-					SWWMScoreObj.Spawn(spreecount[pnum]+1,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_SPREEKILL",++ofs);
+				if ( (spreecount[pnum] > 0) && scr )
+				{
+					scr.xscore[ofs] = spreecount[pnum]+1;
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = "$SWWM_SPREEKILL";
+					scr.xcnt = ++ofs;
+				}
 			}
 			if ( e.Thing.bBOSS )
 			{
 				score += 5000;
-				if ( e.DamageSource.player == players[consoleplayer] )
-					SWWMScoreObj.Spawn(0,e.Thing.Vec3Offset(0,0,e.Thing.Height/2),Font.CR_FIRE,"$SWWM_BOSSKILL",++ofs);
+				if ( scr )
+				{
+					scr.xscore[ofs] = 0;
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = "$SWWM_BOSSKILL";
+					scr.xcnt = ++ofs;
+				}
 			}
 			SWWMCredits.Give(e.DamageSource.player,score);
-			if ( e.DamageSource.player == players[consoleplayer] )
-				SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+			if ( scr ) scr.score = score;	// update final score
 			if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
 			{
 				allkills = true;

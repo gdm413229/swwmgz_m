@@ -234,6 +234,9 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( CPlayer.ReadyWeapon is 'SWWMWeapon' )
 			SWWMWeapon(CPlayer.ReadyWeapon).HudTick();
 		bool thesight = CPlayer.mo.FindInventory("Omnisight");
+		let cam = players[consoleplayer].camera;
+		Vector3 viewvec = (cos(viewrot.x)*cos(viewrot.y),sin(viewrot.x)*cos(viewrot.y),sin(-viewrot.y));
+		int sz;
 		if ( thesight )
 		{
 			// update omnisight stuff
@@ -241,12 +244,19 @@ Class SWWMStatusBar : BaseStatusBar
 				intpoints.Resize(hnd.intpoints_cnt);
 			int i = 0;
 			for ( SWWMInterest poi=hnd.intpoints; poi; poi=poi.next )
+			{
+				if ( viewvec dot level.Vec3Diff(viewpos,poi.pos) < 0 ) continue;
 				intpoints[i++] = poi;
+			}
+			// squeeze if some were discarded
+			if ( i != hnd.intpoints_cnt )
+				intpoints.Resize(i);
 			// sort by distance
-			for ( int i=0; i<hnd.intpoints_cnt; i++ )
+			sz = intpoints.Size();
+			for ( int i=0; i<sz; i++ )
 			{
 				int j = 1;
-				while ( j < hnd.intpoints_cnt )
+				while ( j < sz )
 				{
 					int k = j;
 					while ( (k > 0) && (CmpInterest(intpoints[k-1],intpoints[k]) || CmpDist(intpoints[k-1].pos,intpoints[k].pos)) )
@@ -265,26 +275,28 @@ Class SWWMStatusBar : BaseStatusBar
 			// update target stuff
 			if ( trackers.Size() != hnd.trackers_cnt )
 				trackers.Resize(hnd.trackers_cnt);
-			int i = 0, actual = 0;
-			for ( SWWMCombatTracker trk=hnd.trackers; trk; trk=trk.next )
+			int i = 0;
+			for ( SWWMCombatTracker trk=hnd.trackers; trk && (i<40); trk=trk.next )
 			{
-				actual++;
 				// ignore player unless chasecamming
 				if ( (trk.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 				if ( trk.myplayer && deathmatch ) continue;	// no players in dm
 				int mtime = 35;
 				if ( thesight && (trk.lasthealth > 0) ) mtime += 105;
 				if ( level.maptime > trk.updated+mtime ) continue;
+				// ignore trackers clearly outside of player view
+				if ( viewvec dot level.Vec3Diff(viewpos,trk.pos) < 0 ) continue;
 				trackers[i++] = trk;
 			}
 			// squeeze if some were discarded
 			if ( i != hnd.trackers_cnt )
 				trackers.Resize(i);
+			sz = trackers.Size();
 			// sort by distance (give priority to players)
-			for ( int i=0; i<trackers.Size(); i++ )
+			for ( int i=0; i<sz; i++ )
 			{
 				int j = 1;
-				while ( j < trackers.Size() )
+				while ( j < sz )
 				{
 					int k = j;
 					while ( (k > 0) && (CmpTarget(trackers[k-1],trackers[k]) || CmpDist(trackers[k-1].pos,trackers[k].pos)) )
@@ -301,26 +313,36 @@ Class SWWMStatusBar : BaseStatusBar
 		else trackers.Clear();
 		// update floating scores, adding the scorenums first, then the damnums
 		int total_sz = 0;
-		if ( scorenums.GetBool() ) total_sz += hnd.scorenums_cnt;
-		if ( healthnums.GetBool() ) total_sz += min(100,hnd.damnums_cnt);
+		if ( scorenums.GetBool() ) total_sz += min(20,hnd.scorenums_cnt);
+		if ( healthnums.GetBool() ) total_sz += min(40,hnd.damnums_cnt);
 		if ( scoreobjs.Size() != total_sz )
 			scoreobjs.Resize(total_sz);
 		int i = 0;
 		if ( scorenums.GetBool() )
 		{
-			for ( SWWMScoreObj scr=hnd.scorenums; scr; scr=scr.next )
+			for ( SWWMScoreObj scr=hnd.scorenums; scr && (i<total_sz); scr=scr.next )
+			{
+				if ( viewvec dot level.Vec3Diff(viewpos,scr.pos) < 0 ) continue;
 				scoreobjs[i++] = scr;
+			}
 		}
 		if ( healthnums.GetBool() )
 		{
 			for ( SWWMScoreObj scr=hnd.damnums; scr && (i<total_sz); scr=scr.next )
+			{
+				if ( viewvec dot level.Vec3Diff(viewpos,scr.pos) < 0 ) continue;
 				scoreobjs[i++] = scr;
+			}
 		}
+		// squeeze if some were discarded
+		if ( i != total_sz )
+			scoreobjs.Resize(i);
 		// sort by distance
-		for ( int i=0; i<total_sz; i++ )
+		sz = scoreobjs.Size();
+		for ( int i=0; i<sz; i++ )
 		{
 			int j = 1;
-			while ( j < total_sz )
+			while ( j < sz )
 			{
 				int k = j;
 				while ( (k > 0) && (CmpScore(scoreobjs[k-1],scoreobjs[k]) || CmpDist(scoreobjs[k-1].pos,scoreobjs[k].pos)) )
@@ -429,8 +451,6 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			let targ = trackers[i];
 			if ( !targ ) continue;
-			// cap to 40, so the screen isn't too cluttered
-			if ( displayed++ > 40 ) break;
 			Vector3 tdir = Level.Vec3Diff(ViewPos,targ.prevpos*(1.-fractic)+targ.pos*fractic);
 			proj.ProjectWorldPos(ViewPos+tdir);
 			Vector2 npos = proj.ProjectToNormal();
@@ -489,14 +509,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Vector2 npos = proj.ProjectToNormal();
 			if ( !proj.IsInFront() ) continue;
 			Vector2 vpos = viewport.SceneToWindow(npos);
-			if ( snum.str != "" )
-			{
-				if ( !scorebonus.GetBool() ) continue;
-				tag = StringTable.Localize(snum.str);
-				if ( snum.score == int.max ) tag.AppendFormat(" %s",StringTable.Localize("$SWWM_MAX"));
-				else if ( snum.score > 0 ) tag.AppendFormat(" x%d",snum.score);
-			}
-			else tag = String.Format("%+d",snum.score);
+			tag = String.Format("%+d",snum.score);
 			double alph = clamp((snum.lifespan+fractic)/35.,0.,1.);
 			Vector2 fo = (0,0);
 			if ( snum.tcolor == Font.CR_RED )
@@ -509,7 +522,7 @@ Class SWWMStatusBar : BaseStatusBar
 				fo.x = (.05*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.8);
 				fo.y = -((snum.initialspan-(snum.lifespan-fractic))**1.5)+boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
 			}
-			else if ( snum.tcolor == Font.CR_GREEN )
+			else if ( (snum.tcolor == Font.CR_GREEN) || (snum.tcolor == Font.CR_BLUE) )
 			{
 				// health falls up (?)
 				int initspd = (128-snum.seed);
@@ -520,9 +533,20 @@ Class SWWMStatusBar : BaseStatusBar
 				fo.y = ((snum.initialspan-(snum.lifespan-fractic))**1.2)-boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
 			}
 			else fo.y = snum.initialspan-(snum.lifespan-fractic);	// score rises linearly
-			Font fnt = (snum.str!="")?LangFont(mMiniwiFont):mMiniwiFont.mFont;
-			fo.y += snum.ofs*fnt.GetHeight();
+			Font fnt = mMiniwiFont.mFont;
 			Screen.DrawText(fnt,snum.tcolor,(vpos.x-hs.x*(fo.x+fnt.StringWidth(tag)/2.))/hs.x,(vpos.y-hs.y*(fo.y+(fnt.GetHeight()/2.)))/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			// extra strings (if available)
+			if ( !scorebonus.GetBool() ) continue;
+			fo.y += fnt.GetHeight();
+			fnt = LangFont(mMiniwiFont);
+			for ( int i=0; i<snum.xcnt; i++ )
+			{
+				tag = StringTable.Localize(snum.xstr[i]);
+				if ( snum.xscore[i] == int.max ) tag.AppendFormat(" %s",StringTable.Localize("$SWWM_MAX"));
+				else if ( snum.xscore[i] > 0 ) tag.AppendFormat(" x%d",snum.xscore[i]);
+				Screen.DrawText(fnt,snum.xtcolor[i],(vpos.x-hs.x*(fo.x+fnt.StringWidth(tag)/2.))/hs.x,(vpos.y-hs.y*(fo.y+(fnt.GetHeight()/2.)))/hs.y,tag,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				fo.y += fnt.GetHeight();
+			}
 		}
 	}
 
@@ -742,7 +766,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
 		{
 			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%3d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			return;
 		}
 		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+15),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);

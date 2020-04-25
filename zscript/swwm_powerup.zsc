@@ -14,7 +14,15 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMHandler.DoFlash(Owner,Color(64,255,255,64),10);
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.GiveBody(1000,1000);
-		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
+		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
+			SWWMScoreObj.Spawn(600,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+		else
+		{
+			SWWMScoreObj.Spawn(200,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+			SWWMScoreObj.Spawn(150,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+			SWWMScoreObj.Spawn(250,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+		}
 		let n = Owner.FindInventory("ArmorNugget");
 		if ( !n ) Owner.GiveInventory("ArmorNugget",GetDefaultByType("ArmorNugget").MaxAmount);
 		else n.Amount = n.MaxAmount;

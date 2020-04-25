@@ -255,7 +255,7 @@ Class HellblazerMissile : Actor
 		A_StartSound("hellblazer/hitm",CHAN_VOICE,attenuation:.5);
 		A_AlertMonsters(2500);
 		Spawn("HellblazerExplLight",pos);
-		int numpt = Random[Hellblazer](16,32);
+		int numpt = Random[Hellblazer](12,24);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](2,8);
@@ -273,7 +273,7 @@ Class HellblazerMissile : Actor
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Hellblazer](15,30);
+		numpt = Random[Hellblazer](12,16);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](10,20);
@@ -352,7 +352,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		A_StartSound("hellblazer/hitc",CHAN_VOICE,attenuation:.4);
 		A_AlertMonsters(3000);
 		Spawn("HellblazerExplLight",pos);
-		int numpt = Random[Hellblazer](16,32);
+		int numpt = Random[Hellblazer](12,24);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](2,8);
@@ -370,7 +370,7 @@ Class HellblazerCrackshot : HellblazerMissile
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Hellblazer](15,30);
+		numpt = Random[Hellblazer](12,16);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](10,20);
@@ -422,7 +422,7 @@ Class HellblazerRavager : HellblazerMissile
 		A_StartSound("hellblazer/hitr",CHAN_VOICE,attenuation:.3);
 		A_AlertMonsters(4500);
 		Spawn("HellblazerExplLight",pos);
-		int numpt = Random[Hellblazer](20,40);
+		int numpt = Random[Hellblazer](16,28);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](4,12);
@@ -440,7 +440,7 @@ Class HellblazerRavager : HellblazerMissile
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Hellblazer](15,30);
+		numpt = Random[Hellblazer](12,20);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](10,20);
@@ -501,7 +501,7 @@ Class HellblazerWarhead : HellblazerMissile
 		A_StartSound("hellblazer/hitw",CHAN_VOICE,attenuation:.1);
 		A_AlertMonsters(40000);
 		Spawn("HellblazerExplLight3",pos);
-		int numpt = Random[Hellblazer](40,80);
+		int numpt = Random[Hellblazer](20,30);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](4,20);
@@ -519,7 +519,7 @@ Class HellblazerWarhead : HellblazerMissile
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Hellblazer](25,40);
+		numpt = Random[Hellblazer](20,25);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](10,40);
@@ -704,6 +704,7 @@ Mixin Class HellblazerGrenade
 			ExplodeMissile();
 			return;
 		}
+		if ( swwm_extraalert ) A_AlertMonsters(300);
 		A_StartSound("hellblazer/bounce",CHAN_ITEM);
 		rollvel = FRandom[Hellblazer](-16,16);
 		anglevel = FRandom[Hellblazer](-16,16);
@@ -884,7 +885,7 @@ Class HellblazerClusterMini : HellblazerMissile
 		A_StartSound("hellblazer/hitcs",CHAN_VOICE,attenuation:.5);
 		A_AlertMonsters(2000);
 		Spawn("HellblazerExplLight2",pos);
-		int numpt = Random[Hellblazer](6,16);
+		int numpt = Random[Hellblazer](4,8);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](1,5);
@@ -895,14 +896,14 @@ Class HellblazerClusterMini : HellblazerMissile
 			s.scale *= 1.5;
 			s.alpha *= .4;
 		}
-		numpt = Random[Hellblazer](4,8);
+		numpt = Random[Hellblazer](4,6);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](2,5);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Hellblazer](6,12);
+		numpt = Random[Hellblazer](4,6);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](5,10);

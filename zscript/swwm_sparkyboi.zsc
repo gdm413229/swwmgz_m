@@ -141,7 +141,7 @@ Class BiosparkBall : Actor
 			if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
 			Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
 			Vector3 spos = level.Vec3Offset(pos,ofs);
-			let s = Spawn("BiosparkArcSmall",spos);
+			let s = Spawn(!Random[Sparkster](0,10)?"BiosparkArc":"BiosparkArcSmall",spos);
 			s.target = target;
 			s.master = self;
 			s.ReactionTime += Random[Sparkster](0,8);
@@ -1117,7 +1117,7 @@ Class BiosparkArc : Actor
 		{
 			for ( int i=0; i<3; i++ )
 			{
-				let r = Spawn("BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster](0,1)));
+				let r = Spawn("BiosparkArc",level.Vec3Offset(pos,tdir*FRandom[Sparkster](0,1)));
 				Vector3 x, y, z;
 				[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 				double a = FRandom[Sparkster](0,360), s = FRandom[Sparkster](0.,1.);
@@ -1200,7 +1200,7 @@ Class BiosparkArcBig : BiosparkArc
 {
 	Default
 	{
-		ReactionTime 8;
+		ReactionTime 10;
 		DamageFunction 100;
 		Speed 64;
 	}

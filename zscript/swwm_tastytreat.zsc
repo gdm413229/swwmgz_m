@@ -231,7 +231,6 @@ Class CandyPop : Actor
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			A_AlertMonsters(2000);
 			SWWMHandler.DoBlast(self,120,60000);
 			A_Explode(100,120);
 			Scale *= FRandom[ExploS](0.6,1.8);
@@ -298,7 +297,6 @@ Class TinyCandyPop : CandyPop
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			A_AlertMonsters(700);
 			SWWMHandler.DoBlast(self,80,32000);
 			A_Explode(40,80);
 			Scale *= FRandom[ExploS](0.6,1.8);
@@ -511,7 +509,7 @@ Class CandyGunProj : Actor
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 6.+.2*special1;
-		A_AlertMonsters();
+		A_AlertMonsters(40000);
 		SWWMHandler.DoBlast(self,300+20*special1,80000+8000*special1);
 		A_Explode(3000+400*special1,300+20*special1);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
@@ -620,7 +618,7 @@ Class CandyMagProj : Actor
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
-		A_AlertMonsters();
+		A_AlertMonsters(20000);
 		SWWMHandler.DoBlast(self,250+25*special1,80000+8000*special1);
 		A_Explode(600+400*special1,250+25*special1);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
@@ -712,7 +710,7 @@ Class CandyBulletImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters();
+		A_AlertMonsters(9000);
 		SWWMHandler.DoBlast(self,200,48000);
 		A_Explode(350,200);
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
@@ -860,7 +858,7 @@ Class CandyGun : SWWMWeapon
 		A_ZoomFactor(1.);
 		A_SWWMFlash();
 		SWWMHandler.DoFlash(self,Color(64,224,64,255),5);
-		A_AlertMonsters();
+		A_AlertMonsters(9000);
 		A_Recoil(2.2);
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);

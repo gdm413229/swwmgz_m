@@ -69,7 +69,7 @@ Class RefresherRegen : Powerup
 		{
 			if ( Owner.GiveBody(int(Strength),500) )
 			{
-				SWWMScoreObj.Spawn(int(Strength),Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GREEN);
+				SWWMScoreObj.Spawn(int(Strength),Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 				SWWMHandler.DoFlash(Owner,Color(32,224,128,255),10);
 				Owner.A_StartSound("powerup/refresher",CHAN_ITEM,CHANF_LOCAL,.4);
 			}

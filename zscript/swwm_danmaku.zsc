@@ -194,7 +194,7 @@ Class EvisceratorChunk : Actor
 		gravity = .35;
 		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
 		A_StartSound("eviscerator/hit",CHAN_WEAPON,CHANF_OVERLAP,.4);
-		A_AlertMonsters(300);
+		if ( swwm_extraalert ) A_AlertMonsters(300);
 		if ( vel.length() < 3 )
 		{
 			A_Stop();
@@ -382,7 +382,7 @@ Class EvisceratorProj : Actor
 			let s = Spawn("SWWMSpark",level.Vec3Offset(pos,spawnofs));
 			s.vel = pvel;
 		}
-		numpt = Random[Eviscerator](15,30);
+		numpt = Random[Eviscerator](8,16);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1),FRandom[Eviscerator](-1,1)).unit()*FRandom[Eviscerator](6,16);

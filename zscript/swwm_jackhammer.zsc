@@ -18,7 +18,7 @@ Class PusherImpact : Actor
 		A_QuakeEx(2,2,2,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
 		A_StartSound("pusher/hit",CHAN_VOICE);
 		A_SprayDecal("WallCrack",-20);
-		int numpt = Random[Pusher](5,10);
+		int numpt = Random[Pusher](4,8);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -27,14 +27,14 @@ Class PusherImpact : Actor
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[Pusher](128,192));
 		}
-		numpt = Random[Pusher](4,12);
+		numpt = Random[Pusher](2,6);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,8);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Pusher](4,8);
+		numpt = Random[Pusher](3,6);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,8);
@@ -62,7 +62,7 @@ Class BigPusherImpact : Actor
 		A_QuakeEx(5,5,5,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:.8);
 		A_StartSound("pusher/althit",CHAN_VOICE);
 		A_SprayDecal("ImpactMark",-20);
-		int numpt = Random[Pusher](8,20);
+		int numpt = Random[Pusher](8,16);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -71,14 +71,14 @@ Class BigPusherImpact : Actor
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[Pusher](128,192));
 		}
-		numpt = Random[Pusher](4,12);
+		numpt = Random[Pusher](4,10);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,12);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Pusher](10,20);
+		numpt = Random[Pusher](8,20);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,16);
@@ -288,6 +288,7 @@ Class PusherProjectile : Actor
 Class PusherWeapon : SWWMWeapon
 {
 	double chargelevel, vibe;
+	int hitcnt;
 
 	transient ui TextureID WeaponBox, ChargeBar;
 	transient ui DynamicValueInterpolator ChargeInter;
@@ -387,7 +388,8 @@ Class PusherWeapon : SWWMWeapon
 			s.scale *= 1.4;
 			s.alpha *= .03;
 		}
-		A_AlertMonsters(500);
+		if ( swwm_extraalert || !(invoker.hitcnt%20) ) A_AlertMonsters(500);
+		invoker.hitcnt++;
 	}
 
 	action void A_PusherAlt()
@@ -545,6 +547,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_WeaponOffset(0,32);
 			invoker.chargelevel = .2;
+			invoker.hitcnt = 0;
 			A_StartSound("pusher/start",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("pusher/motor",CHAN_WEAPONEXTRA,CHANF_LOOPING,pitch:1.5);
 		}

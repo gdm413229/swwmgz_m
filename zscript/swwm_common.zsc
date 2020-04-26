@@ -595,7 +595,12 @@ Class SWWMCombatTracker : Thinker
 		if ( target.player || target.bISMONSTER )
 			t.mytag = target.player?target.player.GetUserName():target.GetTag();
 		else t.mytag = "";
-		t.lasthealth = t.maxhealth = target.health;
+		if ( target.player )
+		{
+			t.lasthealth = target.health;
+			t.maxhealth = target.default.health;
+		}
+		else t.lasthealth = t.maxhealth = target.health;
 		t.updated = int.min;
 		t.height = t.mytarget.height;
 		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
@@ -653,12 +658,12 @@ Class SWWMCombatTracker : Thinker
 		// only update height while alive
 		height = mytarget.height;
 		tcnt++;
-		if ( tcnt == 1 )
+		if ( (tcnt == 1) && !mytarget.player )
 		{
 			// post-spawn health inflation check
 			if ( lasthealth > maxhealth ) maxhealth = lasthealth;
 		}
-		if ( tcnt == 6 )
+		if ( (tcnt == 6) && !mytarget.player )
 		{
 			// legendoom check
 			for ( Inventory i=mytarget.inv; i; i=i.inv )

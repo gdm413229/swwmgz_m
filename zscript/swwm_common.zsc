@@ -1520,6 +1520,23 @@ Class UglyBoyGetsFuckedUp : Thinker
 	}
 }
 
+// Hack
+Class SWWMFontPreloader : StaticEventHandler
+{
+	override void OnRegister()
+	{
+		Font.GetFont('Miniwi');
+		Font.GetFont('MiniwiShaded');
+		Font.GetFont('MiniwiShadedInverse');
+		Font.GetFont('MPlus');
+		Font.GetFont('MPlusShaded');
+		Font.GetFont('MPlusShadedInverse');
+		Font.GetFont('Tewi');
+		Font.GetFont('TewiShaded');
+		Font.GetFont('TewiShadedInverse');
+	}
+}
+
 // Handler responsible for item replacements and whatever else
 Class SWWMHandler : EventHandler
 {
@@ -1903,6 +1920,7 @@ Class SWWMHandler : EventHandler
 					score += 2475;
 				}
 				SWWMCredits.Give(players[i],score);
+				SWWMScoreObj.Spawn(score,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
 				lastitemcount[i] = players[i].itemcount;
 			}
 		}
@@ -2141,6 +2159,7 @@ Class SWWMHandler : EventHandler
 				allkills = true;
 				SWWMCredits.Give(e.DamageSource.player,2000);
 				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),2000);
+				SWWMScoreObj.Spawn(2000,e.DamageSource.Vec3Offset(0,0,e.DamageSource.Height/2));
 			}
 			spreecount[pnum]++;
 			if ( s && spreecount[pnum] > s.skill )
@@ -2643,6 +2662,7 @@ Class SWWMHandler : EventHandler
 				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
 			}
 			SWWMCredits.Give(players[e.Args[0]],999999999);
+			SWWMScoreObj.Spawn(999999999,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
 		}
 	}
 

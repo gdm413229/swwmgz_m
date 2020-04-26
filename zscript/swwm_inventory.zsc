@@ -438,6 +438,29 @@ Class PunchImpact : Actor
 	}
 }
 
+Class BigPunchSplash : Actor
+{
+	Default
+	{
+		DamageType 'Melee';
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMHandler.DoBlast(self,50,40000,target);
+		A_Explode(5,80,0);
+		Destroy();
+	}
+}
+
 Class BigPunchImpact : Actor
 {
 	Default
@@ -931,6 +954,11 @@ Class SWWMWeapon : Weapon abstract
 				let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation);
 				p.angle = atan2(-d.HitDir.y,-d.HitDir.x);
 			}
+			if ( raging )
+			{
+				let ps = Spawn("BigPunchSplash",d.HitLocation);
+				ps.target = self;
+			}
 			A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
 			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
 			else A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
@@ -999,6 +1027,11 @@ Class SWWMWeapon : Weapon abstract
 		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
 		p.angle = atan2(HitNormal.y,HitNormal.x);
 		p.pitch = asin(-HitNormal.z);
+		if ( raging )
+		{
+			let ps = Spawn("BigPunchSplash",d.HitLocation+HitNormal*4);
+			ps.target = self;
+		}
 		int quakin = raging?4:1;
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
 		A_StartSound(raging?"pusher/althit":"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);

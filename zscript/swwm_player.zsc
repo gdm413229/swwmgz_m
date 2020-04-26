@@ -576,6 +576,7 @@ Class Demolitionist : PlayerPawn
 				if ( (abs(diff.x) > (radius+a.radius+spd*2)) || (abs(diff.y) > (radius+a.radius+spd*2)) ) continue;
 				if ( (diff.z > (height+spd*2)) || (diff.z < -(a.height+spd*2)) ) continue;
 				if ( diff.unit() dot dir.unit() < .35 ) continue;
+				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				// large monsters will stop the player
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -598,6 +599,7 @@ Class Demolitionist : PlayerPawn
 				}
 				int flg = DMG_THRUSTLESS;
 				if ( FindInventory("RagekitPower") ) flg |= DMG_FOILINVUL;
+				a.bBLASTED = true;
 				a.DamageMobj(self,self,int(15+spd*2.5),'Dash',flg);
 			}
 		}
@@ -1219,6 +1221,7 @@ Class Demolitionist : PlayerPawn
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);
 		SWWMCredits.Give(player,score);
+		SWWMScoreObj.Spawn(score,Vec3Offset(0,0,Height/2));
 		return true;
 	}
 	override void AddInventory( Inventory item )
@@ -1229,12 +1232,13 @@ Class Demolitionist : PlayerPawn
 		SWWMLoreLibrary.Add(player,item.GetClassName());
 		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 			SWWMHandler.AddOneliner("getweapon",2);
-		if ( (item is 'Key') && !key_reentrant )
+		if ( (item is 'Key') && !key_reentrant && !deathmatch )
 		{
 			// score
 			int score = 250;
 			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
 			SWWMCredits.Give(player,score);
+			SWWMScoreObj.Spawn(250,Vec3Offset(0,0,Height/2));
 			if ( !swwm_sharekeys ) return;
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )
@@ -1593,6 +1597,8 @@ Class DemolitionistRadiusShockwaveTail : Actor
 
 Class DemolitionistRadiusShockwave : Actor
 {
+	Actor lasthit;
+
 	Default
 	{
 		RenderStyle "Translucent";
@@ -1611,9 +1617,12 @@ Class DemolitionistRadiusShockwave : Actor
 		+WALLSPRITE;
 		+NOTELEPORT;
 		+RIPPER;
+		+BLOODLESSIMPACT;
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
+		if ( target == lasthit ) return 0;
+		lasthit = target;
 		if ( damage <= 0 ) return damage;
 		if ( (target.mass < LARGE_MASS) && !target.bDONTTHRUST )
 		{
@@ -1673,7 +1682,7 @@ Class DemolitionistShockwave : Actor
 		A_Explode(10+min(special1,90),70+min(special1*2,130),XF_EXPLICITDAMAGETYPE,damagetype:'GroundPound');
 		for ( int i=0; i<360; i+=5 )
 		{
-			let r = Spawn("DemolitionistRadiusShockwave",Vec3Angle(5,i));
+			let r = Spawn("DemolitionistRadiusShockwave",Vec3Angle(10,i));
 			r.target = target;
 			r.angle = i;
 			r.vel.xy = (cos(i),sin(i))*r.speed;

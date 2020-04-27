@@ -62,6 +62,23 @@ Class GrilledCheeseSandwich : Inventory
 		Super.DoEffect();
 		if ( Amount <= 0 ) DepleteOrDestroy();
 	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find last armor or health item
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'SWWMHealth') && !(i is 'SWWMArmor') ) continue;
+			found = i;
+		}
+		if ( !found ) return;
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
 
 	Default
 	{

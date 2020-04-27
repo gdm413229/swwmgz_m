@@ -73,11 +73,12 @@ Class SWWMUtility
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
 	}
 
-	// not portal aware, will have to fix that later
+	// sphere intersection check, useful for proximity detection
 	static bool SphereIntersect( Actor a, Vector3 p, double radius )
 	{
-		Vector3 amin = a.pos+(-a.radius,-a.radius,0),
-			amax = a.pos+(a.radius,a.radius,a.height);
+		Vector3 ap = p+level.Vec3Diff(p,a.pos);	// portal-relative actor position
+		Vector3 amin = ap+(-a.radius,-a.radius,0),
+			amax = ap+(a.radius,a.radius,a.height);
 		double distsq = 0.;
 		if ( p.x < amin.x ) distsq += (amin.x-p.x)**2;
 		if ( p.x > amax.x ) distsq += (p.x-amax.x)**2;
@@ -86,6 +87,81 @@ Class SWWMUtility
 		if ( p.z < amin.z ) distsq += (amin.z-p.z)**2;
 		if ( p.z > amax.z ) distsq += (p.z-amax.z)**2;
 		return (distsq <= (radius**2));
+	}
+
+	// THANKS FOR NOT GIVING US ANY OTHER WAY TO CHECK IF A LOCK NUMBER IS VALID
+	static bool IsValidLockNum( int l )
+	{
+		if ( (l < 1) || (l > 255) ) return true;
+		Array<Int> valid;
+		valid.Clear();
+		for ( int i=0; i<Wads.GetNumLumps(); i++ )
+		{
+			String lname = Wads.GetLumpName(i);
+			if ( !(lname ~== "LOCKDEFS") ) continue;
+			String data = Wads.ReadLump(i);
+			Array<String> lines;
+			lines.Clear();
+			data.Split(lines,"\n");
+			for ( int j=0; j<lines.Size(); j++ )
+			{
+				if ( lines[j].Left(10) ~== "CLEARLOCKS" ) valid.Clear();
+				else if ( Lines[j].Left(5) ~== "LOCK " )
+				{
+					Array<String> spl;
+					spl.Clear();
+					lines[j].Split(spl," ",TOK_SKIPEMPTY);
+					// check game string (if any)
+					if ( spl.Size() > 2 )
+					{
+						if ( (spl[2] ~== "DOOM") && !(gameinfo.gametype&GAME_Doom) ) continue;
+						else if ( (spl[2] ~== "HERETIC") && !(gameinfo.gametype&GAME_Heretic) ) continue;
+						else if ( (spl[2] ~== "HEXEN") && !(gameinfo.gametype&GAME_Hexen) ) continue;
+						else if ( (spl[2] ~== "STRIFE") && !(gameinfo.gametype&GAME_Strife) ) continue;
+						else if ( (spl[2] ~== "CHEX") && !(gameinfo.gametype&GAME_Chex) ) continue;
+					}
+					valid.Push(spl[1].ToInt());
+				}
+			}
+		}
+		for ( int i=0; i<valid.Size(); i++ )
+		{
+			if ( valid[i] == l ) return true;
+		}
+		return false;
+	}
+
+	// wheeeeeeee, let's play a game of "who is who"
+	static bool IsCivilian( Actor a )
+	{
+		if ( a is 'Beggar' )
+		{
+			if ( (a.level.mapname ~== "MAP32") && (a is 'Beggar1') )
+				return false;	// Prisoner (sorry but we have to)
+			return true;
+		}
+		if ( a is 'Peasant' )
+		{
+			// exclude certain key NPCs
+			if ( (a.level.mapname ~== "MAP01") && (a is 'Peasant9') )
+				return false;	// Beldin (sorry but we have to)
+			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant22') )
+				return false;	// Mourel (fuck that guy)
+			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant4') )
+				return false;	// Harris (also fuck that guy)
+			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant5') )
+				return false;	// Derwin (fat bastard)
+			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant7') )
+				return false;	// Ketrick (THIS IS GARBAGE)
+			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant7') )
+				return false;	// Montag (gimme the damn key)
+			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant8') )
+				return false;	// Wolenick (gimme a hand)
+			if ( (a.level.mapname ~== "MAP33") && (a is 'Peasant5') )
+				return false;	// Harris (also fuck that guy)
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -1338,7 +1414,11 @@ Class SWWMBulletTrail : LineTracer
 		t.ShootThroughList.Clear();
 		t.Trace(pos,level.PointInSector(pos.xy),dir,dist,0);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
 			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
@@ -1952,9 +2032,17 @@ Class SWWMHandler : EventHandler
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !a.player && !a.bIsMonster && !a.bCountKill ) continue;
+			if ( !a.player && !a.bISMONSTER ) continue;
 			// ignore the dead
 			if ( (a.Health <= 0) || a.bKILLED || a.bCORPSE ) continue;
+			// ignore friends
+			if ( a.IsFriend(players[consoleplayer].mo) ) continue;
+			// [Strife] ignore if not in combat
+			if ( (gameinfo.gametype&GAME_Strife) && !a.bINCOMBAT && !a.bJUSTATTACKED ) continue;
+			// [Strife] ignore certain classes
+			if ( (a is 'RatBuddy') || (a is 'Peasant') || (a is 'Beggar') ) continue;
+			// [Strife] ignore Oracle's spectre while it's inactive
+			if ( (a is 'AlienSpectre3') && a.InStateSequence(a.CurState,a.FindState("Spawn")) ) continue;
 			// ignore if not targetted or either actor can't see the other
 			if ( (a.target != players[consoleplayer].mo)
 				|| !a.CheckSight(players[consoleplayer].mo)
@@ -2070,7 +2158,7 @@ Class SWWMHandler : EventHandler
 			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
 			{
 				// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
-				if ( e.Thing.IsFriend(e.DamageSource) && !(e.Thing is 'LampMoth') )
+				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing)) && !(e.Thing is 'LampMoth') )
 				{
 					if ( !lastcombat || (gametic > lastcombat+20) )
 						lastcombat = AddOneliner("hitfriend",1,15);
@@ -2093,7 +2181,11 @@ Class SWWMHandler : EventHandler
 			{
 				highesttic = gametic;
 				if ( !lastcombat || (gametic > lastcombat+20) )
-					lastcombat = AddOneliner("scorekill",1,15);
+				{
+					if ( e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing) )
+						lastcombat = AddOneliner("friendkill",1,15);
+					else lastcombat = AddOneliner("scorekill",1,15);
+				}
 			}
 			if ( !e.Thing.default.bCountKill )	// no credits
 				return;
@@ -2272,11 +2364,15 @@ Class SWWMHandler : EventHandler
 		// oneliner on locked doors
 		if ( !e.Thing ) return;
 		int locknum = SWWMUtility.GetLineLock(e.ActivatedLine);
-		if ( !locknum ) return;
+		if ( (locknum < 1) || (locknum > 255) ) return;
 		if ( e.Thing.CheckLocalView() && !e.Thing.CheckKeys(locknum,false,true) )
 		{
 			if ( !lastlock || (gametic > lastlock+20) )
-				lastlock = AddOneliner("locked",2);
+			{
+				if ( SWWMUtility.IsValidLockNum(locknum) )
+					lastlock = AddOneliner("locked",2);
+				else lastlock = AddOneliner("jammed",2);
+			}
 		}
 	}
 
@@ -2525,7 +2621,6 @@ Class SWWMHandler : EventHandler
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
 			let mo = players[e.player].mo;
 			if ( (mo.Health <= 0) || !(mo is 'Demolitionist') ) return;
-			// TODO redo these as fake weapons
 			switch ( e.Args[0] )
 			{
 			case 1:
@@ -2759,28 +2854,62 @@ Class SWWMHandler : EventHandler
 		hnd.flashes.push(qf);
 	}
 
-	// Doom's explosions aren't fully 3D
-	static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer, Actor ignoreme = null )
+	// Doom's explosions aren't fully 3D in their knockback
+	static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer, Actor ignoreme = null, bool forceblast = false )
 	{
 		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
 		while ( bi.Next() )
 		{
 			Actor a = bi.Thing;
-			if ( !a || (a == ignoreme) || !a.bSHOOTABLE || !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) || (a == Source) || (Source.Distance3D(a) > ExplosionRadius) || a.bCANNOTPUSH || (a.Mass >= 10000000) )
+			// early checks for self and ignored actor (usually the instigator)
+			if ( !a || (a == ignoreme) || (a == Source) )
 				continue;
+			// can't be affected
+			if ( !a.bSHOOTABLE && !a.bVULNERABLE )
+				continue;
+			// no blasting if no radius dmg (unless forced)
+			if ( a.bNORADIUSDMG && !Source.bFORCERADIUSDMG && !forceblast )
+				continue;
+			// massive, no knockback
+			if ( a.bCANNOTPUSH || (a.Mass >= 10000000) )
+				continue;
+			// check the DONTHARMCLASS/DONTHARMSPECIES flags
+			if ( !a.player && ((Source.bDONTHARMCLASS && (a.GetClass() == Source.GetClass())) || (Source.bDONTHARMSPECIES && (a.GetSpecies() == Source.GetSpecies()))) )
+				continue;
+			// can we see it
+			if ( !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+				continue;
+			// make use of GetRadiusDamage to see if it's in range
+			if ( Source.GetRadiusDamage(a,int(MomentumTransfer),int(ExplosionRadius),oldradiusdmg:Source.bOLDRADIUSDMG) <= 0 )
+				continue;
+			// perform our own blasting code, based partially on Unreal's HurtRadius
 			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
 			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);
 			double dist = max(1,dir.length());
 			double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
+			// intersecting, randomize direction
+			if ( dir.length() <= double.epsilon )
+			{
+				double ang = FRandom[DoBlast](0,360);
+				double pt = FRandom[DoBlast](-90,90);
+				dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			}
 			dir = dir/dist;
-			a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*max(50,a.mass)));
+			Vector3 momentum = dir*damagescale*(MomentumTransfer/Thinker.TICRATE);
+			momentum /= max(50,a.mass); // cap minimum mass to prevent ridiculously strong pushing
+			a.vel += momentum;
 		}
 	}
 
 	// Same for this
 	static void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer )
 	{
-		if ( !Victim || !Victim.bSHOOTABLE || Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) ) return;
+		if ( !Victim )
+			return;
+		if ( !Victim.bSHOOTABLE && !Victim.bVULNERABLE )
+			return;
+		if ( Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) )
+			return;
 		Victim.vel += HitDirection*(MomentumTransfer/(Thinker.TICRATE*max(50,Victim.Mass)));
 	}
 
@@ -2815,7 +2944,7 @@ Class SWWMCrashHandler : StaticEventHandler
 			wasinmap = true;
 			timer = 0;
 		}
-		else if ( (gamestate == GS_FULLCONSOLE) && (wasinmap || (timer > 0)) )
+		else if ( (gamestate == GS_FULLCONSOLE) && ((wasinmap && !players[consoleplayer].viewheight) || (timer > 0)) )
 		{
 			wasinmap = false;
 			if ( timer == 1 )
@@ -2883,9 +3012,53 @@ Class SWWMBrutalHandler : StaticEventHandler
 	override void RenderOverlay( RenderEvent e )
 	{
 		if ( !detected ) return;
-		if ( scr.IsNull() ) scr = TexMan.CheckForTexture("graphics/bdscreen.png",TexMan.Type_Any);
+		if ( !scr ) scr = TexMan.CheckForTexture("graphics/bdscreen.png",TexMan.Type_Any);
 		Screen.Dim("Red",(timer/350.)-.2,0,0,Screen.GetWidth(),Screen.GetHeight());
-		Screen.DrawTexture(scr,false,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,DTA_VirtualWidth,1280,DTA_VirtualHeight,960,DTA_Alpha,min(1.,timer/50.));
+		double ar = Screen.GetAspectRatio();
+		Vector2 tsize = TexMan.GetScaledSize(scr);
+		Vector2 vsize = (Screen.GetWidth(),Screen.GetHeight());
+		if ( (tsize.x > vsize.x) || (tsize.y > vsize.y) )
+		{
+			double sar = tsize.x/tsize.y;
+			if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
+			else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
+			else vsize = tsize;
+		}
+		Screen.DrawTexture(scr,false,(vsize.x-tsize.x)/2.+FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,(vsize.y-tsize.y)/2.+FRandom[bdscreen](-1,1)*max(timer-40,0)**3*.000003,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,min(1.,timer/50.));
 		Screen.Dim("Red",(timer/70.)-3.5,0,0,Screen.GetWidth(),Screen.GetHeight());
+	}
+}
+
+// HORNY
+Class SWWMHDoomHandler : StaticEventHandler
+{
+	ui TextureID scr;
+	bool detected;
+
+	override void OnRegister()
+	{
+		for ( int i=0; i<AllActorClasses.size(); i++ )
+		{
+			if ( AllActorClasses[i].GetClassName() != "HDoomPlayer" ) continue;
+			detected = true;
+			break;
+		}
+	}
+
+	override void RenderOverlay( RenderEvent e )
+	{
+		if ( !detected ) return;
+		if ( !scr ) scr = TexMan.CheckForTexture("graphics/hdscreen.png",TexMan.Type_Any);
+		double ar = Screen.GetAspectRatio();
+		Vector2 tsize = TexMan.GetScaledSize(scr);
+		Vector2 vsize = (Screen.GetWidth(),Screen.GetHeight());
+		if ( (tsize.x > vsize.x) || (tsize.y > vsize.y) )
+		{
+			double sar = tsize.x/tsize.y;
+			if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
+			else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
+			else vsize = tsize;
+		}
+		Screen.DrawTexture(scr,false,(vsize.x-tsize.x)/2.,(vsize.y-tsize.y)/2.,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
 	}
 }

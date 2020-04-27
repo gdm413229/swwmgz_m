@@ -714,7 +714,11 @@ Class BiosparkBeam : Actor
 		t.ShootThroughList.Clear();
 		t.Trace(pos,CurSector,x,speed,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
 			if ( t.hitlist[i].hitactor is 'BiosparkHitbox' )
@@ -1033,7 +1037,11 @@ Class BiosparkArc : Actor
 		t.ShootThroughList.Clear();
 		t.Trace(pos,CurSector,x,speed,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
 			SWWMHandler.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x,GetMissileDamage(0,0)*1000);

@@ -647,7 +647,11 @@ Class SaltBeam : Actor
 		t.ignore = target;
 		t.Trace(pos,cursector,x,32,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
 			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
@@ -2014,7 +2018,11 @@ Class Spreadgun : SWWMWeapon
 	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false )
 	{
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
 			let b = Spawn(large?"InvisibleSplasher":"SmolInvisibleSplasher",t.WaterHitList[i].hitpos);

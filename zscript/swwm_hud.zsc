@@ -589,7 +589,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
 			String nstr = String.Format("%ds",Powerup(i).EffectTics/Thinker.TICRATE);
 			int len = mTewiFont.mFont.StringWidth(nstr);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha);
 			return;
 		}
 		if ( (i is 'SWWMLamp') && aspowerup )
@@ -597,7 +597,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,SWWMLamp(i).isBlinking()?alpha*.5:alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
 			String nstr = String.Format("%d%%",SWWMLamp(i).Charge);
 			int len = mTewiFont.mFont.StringWidth(nstr);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,SWWMLamp(i).isBlinking()?alpha*.5:alpha);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,SWWMLamp(i).isBlinking()?alpha*.5:alpha);
 			return;
 		}
 		Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
@@ -607,7 +607,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( (i.Amount > 99999) && !forceamt ) nstr = "99999";
 			else nstr = String.Format("%d",i.Amount);
 			int len = mTewiFont.mFont.StringWidth(nstr);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		}
 	}
 

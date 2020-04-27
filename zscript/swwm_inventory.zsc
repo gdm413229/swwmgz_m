@@ -35,10 +35,33 @@ Class SWWMArmor : Armor abstract
 		Super.AttachToOwner(other);
 		// find last armor that's better than us
 		Inventory found = null;
+		bool foundarmor = false;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
+			if ( i is 'SWWMArmor' ) foundarmor = true;
 			if ( !(i is 'SWWMArmor') || (i == self) || (SWWMArmor(i).priority < priority) ) continue;
 			found = i;
+			Console.Printf("%s is better",i.GetTag());
+		}
+		if ( !found && !foundarmor )
+		{
+			// check if first item in inventory is health or a sandwich
+			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'GrilledCheeseSandwich') )
+			{
+				// place ourselves before it
+				Console.Printf("Moving before %s",other.Inv.GetTag());
+				Inv = other.Inv;
+				other.Inv = self;
+				return;
+			}
+			// find first item with health or sandwich after it
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || (!(i.Inv is 'SWWMHealth' ) && !(i.Inv is 'GrilledCheeseSandwich')) ) continue;
+				Console.Printf("%s is right next to %s",i.GetTag(),i.Inv.GetTag());
+				found = i;
+				break;
+			}
 		}
 		if ( !found ) return;
 		// place ourselves right after it
@@ -160,6 +183,55 @@ Class SWWMHealth : Inventory abstract
 	Class<Inventory> giveme;
 
 	Property GiveHealth : giveme;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find last health item that's better than us
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'SWWMHealth') || (i == self) || (GetDefaultByType(SWWMHealth(i).giveme).Amount < GetDefaultByType(giveme).Amount) ) continue;
+			found = i;
+			Console.Printf("%s is better",i.GetTag());
+		}
+		if ( !found )
+		{
+			// find last armor item
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'SWWMArmor') ) continue;
+				found = i;
+				Console.Printf("Moving next to armor %s",i.GetTag());
+			}
+		}
+		if ( !found )
+		{
+			// check if the first item in inventory is a sandwich
+			if ( other.Inv is 'GrilledCheeseSandwich' )
+			{
+				Console.Printf("Moving before %s",other.Inv.GetTag());
+				// place ourselves before it
+				Inv = other.Inv;
+				other.Inv = self;
+				return;
+			}
+			// find first item next to a sandwich
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+				Console.Printf("%s is right next to %s",i.GetTag(),i.Inv.GetTag());
+				found = i;
+				break;
+			}
+		}
+		if ( !found ) return;
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
 
 	override bool Use( bool pickup )
 	{
@@ -778,6 +850,7 @@ Class UseList
 Class UseLineTracer : LineTracer
 {
 	Array<UseList> uses;
+	Array<Line> glass;
 
 	override ETraceStatus TraceCallback()
 	{
@@ -805,6 +878,8 @@ Class UseLineTracer : LineTracer
 			{
 				if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything|Line.ML_BlockUse)) )
 					return TRACE_Stop;
+				if ( Results.HitLine.special == GlassBreak )	// fuck glass
+					glass.Push(Results.HitLine);
 				return TRACE_Skip;
 			}
 		}
@@ -971,21 +1046,11 @@ Class SWWMWeapon : Weapon abstract
 	{
 		// temporarily disable parry field so we can trace through
 		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = false;
-		let raging = RagekitPower(FindInventory("RagekitPower"));
-		int maxang = raging?18:12;
-		for ( int i=0; i<maxang; i++ )
-		{
-			if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) )
-			{
-				if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
-				return;
-			}
-		}
 		// check for usables
 		let ut = new("UseLineTracer");
 		ut.uses.Clear();
+		ut.glass.Clear();
 		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE,0);
-		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 		for ( int i=0; i<ut.uses.Size(); i++ )
 		{
 			if ( ut.uses[i].hitactor )
@@ -1001,6 +1066,22 @@ Class SWWMWeapon : Weapon abstract
 				if ( !(ut.uses[i].hitline.activation&SPAC_UseThrough) ) break;
 			}
 		}
+		// fuck glass
+		for ( int i=0; i<ut.glass.Size(); i++ )
+		{
+			ut.glass[i].Activate(self,0,SPAC_Impact);
+		}
+		let raging = RagekitPower(FindInventory("RagekitPower"));
+		int maxang = raging?18:12;
+		for ( int i=0; i<maxang; i++ )
+		{
+			if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) )
+			{
+				if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
+				return;
+			}
+		}
+		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 		// check for walls instead
 		FTranslatedLineTarget t;
 		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);

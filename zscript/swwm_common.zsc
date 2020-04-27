@@ -3032,6 +3032,7 @@ Class SWWMBrutalHandler : StaticEventHandler
 // HORNY
 Class SWWMHDoomHandler : StaticEventHandler
 {
+	ui int timer;
 	ui TextureID scr;
 	bool detected;
 
@@ -3045,9 +3046,25 @@ Class SWWMHDoomHandler : StaticEventHandler
 		}
 	}
 
+	override void UiTick()
+	{
+		timer++;
+		if ( timer == 50 )
+		{
+			S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+		}
+		if ( timer == 70 )
+		{
+			int ngiggl = Random[hdscreen](1,14);
+			S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+		}
+	}
+
 	override void RenderOverlay( RenderEvent e )
 	{
-		if ( !detected ) return;
+		if ( !detected || (timer < 50) ) return;
 		if ( !scr ) scr = TexMan.CheckForTexture("graphics/hdscreen.png",TexMan.Type_Any);
 		double ar = Screen.GetAspectRatio();
 		Vector2 tsize = TexMan.GetScaledSize(scr);

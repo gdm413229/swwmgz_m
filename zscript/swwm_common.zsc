@@ -2990,7 +2990,7 @@ Class SWWMBrutalHandler : StaticEventHandler
 	override void UiTick()
 	{
 		if ( !detected ) return;
-		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )
+		if ( gamestate == GS_LEVEL )
 		{
 			if ( timer == 1 )
 			{
@@ -3048,18 +3048,22 @@ Class SWWMHDoomHandler : StaticEventHandler
 
 	override void UiTick()
 	{
-		timer++;
-		if ( timer == 50 )
+		if ( gamestate == GS_LEVEL )
 		{
-			S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
-			S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			if ( timer == 50 )
+			{
+				S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				S_StartSound("bestsound",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			}
+			else if ( timer == 70 )
+			{
+				int ngiggl = Random[hdscreen](1,14);
+				S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			}
+			timer++;
 		}
-		if ( timer == 70 )
-		{
-			int ngiggl = Random[hdscreen](1,14);
-			S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
-			S_StartSound(String.Format("saya/giggle%d",ngiggl),CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
-		}
+		else timer = 0;
 	}
 
 	override void RenderOverlay( RenderEvent e )

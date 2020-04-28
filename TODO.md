@@ -1,12 +1,13 @@
 Fundamental things:
- - Sparkster
+ - Sparkster tertiary fire
  - Silver Bullet
  - Ynykron
  - Wallbuster
- - Coop/DM intermission drawing
+ - Clean up / rewrite lore entries
 
 Not so fundamental things:
  - Chanceboxes
+ - Extra Demolitionist animations (swim, weapon melee/reload/idle)
 
 Extra things:
  - Art for custom intermission

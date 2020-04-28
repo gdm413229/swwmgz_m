@@ -38,10 +38,9 @@ Class SWWMArmor : Armor abstract
 		bool foundarmor = false;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
-			if ( i is 'SWWMArmor' ) foundarmor = true;
+			if ( (i is 'SWWMArmor') && (i != self) ) foundarmor = true;
 			if ( !(i is 'SWWMArmor') || (i == self) || (SWWMArmor(i).priority < priority) ) continue;
 			found = i;
-			Console.Printf("%s is better",i.GetTag());
 		}
 		if ( !found && !foundarmor )
 		{
@@ -49,7 +48,6 @@ Class SWWMArmor : Armor abstract
 			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'GrilledCheeseSandwich') )
 			{
 				// place ourselves before it
-				Console.Printf("Moving before %s",other.Inv.GetTag());
 				Inv = other.Inv;
 				other.Inv = self;
 				return;
@@ -58,9 +56,17 @@ Class SWWMArmor : Armor abstract
 			for ( Inventory i=other.Inv; i; i=i.Inv )
 			{
 				if ( (i == self) || (!(i.Inv is 'SWWMHealth' ) && !(i.Inv is 'GrilledCheeseSandwich')) ) continue;
-				Console.Printf("%s is right next to %s",i.GetTag(),i.Inv.GetTag());
 				found = i;
 				break;
+			}
+		}
+		if ( !found && !foundarmor )
+		{
+			// find last of either invinciball or ragekit power
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'InvinciballPower') && !(i is 'RagekitPower') ) continue;
+				found = i;
 			}
 		}
 		if ( !found ) return;
@@ -193,7 +199,6 @@ Class SWWMHealth : Inventory abstract
 		{
 			if ( !(i is 'SWWMHealth') || (i == self) || (GetDefaultByType(SWWMHealth(i).giveme).Amount < GetDefaultByType(giveme).Amount) ) continue;
 			found = i;
-			Console.Printf("%s is better",i.GetTag());
 		}
 		if ( !found )
 		{
@@ -202,7 +207,6 @@ Class SWWMHealth : Inventory abstract
 			{
 				if ( !(i is 'SWWMArmor') ) continue;
 				found = i;
-				Console.Printf("Moving next to armor %s",i.GetTag());
 			}
 		}
 		if ( !found )
@@ -210,7 +214,6 @@ Class SWWMHealth : Inventory abstract
 			// check if the first item in inventory is a sandwich
 			if ( other.Inv is 'GrilledCheeseSandwich' )
 			{
-				Console.Printf("Moving before %s",other.Inv.GetTag());
 				// place ourselves before it
 				Inv = other.Inv;
 				other.Inv = self;
@@ -220,9 +223,17 @@ Class SWWMHealth : Inventory abstract
 			for ( Inventory i=other.Inv; i; i=i.Inv )
 			{
 				if ( (i == self) || !(i.Inv is 'GrilledCheeseSandwich') ) continue;
-				Console.Printf("%s is right next to %s",i.GetTag(),i.Inv.GetTag());
 				found = i;
 				break;
+			}
+		}
+		if ( !found )
+		{
+			// find last of either invinciball or ragekit power
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'InvinciballPower') && !(i is 'RagekitPower') ) continue;
+				found = i;
 			}
 		}
 		if ( !found ) return;
@@ -527,8 +538,8 @@ Class BigPunchSplash : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,50,40000,target);
-		A_Explode(5,80,0);
+		SWWMHandler.DoBlast(self,120,40000,target);
+		A_Explode(special1,120,0);
 		Destroy();
 	}
 }
@@ -1033,6 +1044,7 @@ Class SWWMWeapon : Weapon abstract
 			{
 				let ps = Spawn("BigPunchSplash",d.HitLocation);
 				ps.target = self;
+				ps.special1 = dmg;
 			}
 			A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
 			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1112,6 +1124,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			let ps = Spawn("BigPunchSplash",d.HitLocation+HitNormal*4);
 			ps.target = self;
+			ps.special1 = dmg;
 		}
 		int quakin = raging?4:1;
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);

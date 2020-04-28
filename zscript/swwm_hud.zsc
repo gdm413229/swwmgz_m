@@ -27,7 +27,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, targettag, lang;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, targettag, lang, maxtarg, maxscore, maxdamns;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -201,6 +201,12 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !targetter ) targetter = CVar.GetCVar('swwm_targeter',players[consoleplayer]);
 		if ( !healthnums ) healthnums = CVar.GetCVar('swwm_healthnums',players[consoleplayer]);
 		if ( !scorenums ) scorenums = CVar.GetCVar('swwm_scorenums',players[consoleplayer]);
+		if ( !maxtarg ) maxtarg = CVar.GetCVar('swwm_maxtargets',players[consoleplayer]);
+		if ( !maxscore ) maxscore = CVar.GetCVar('swwm_maxscorenums',players[consoleplayer]);
+		if ( !maxdamns ) maxdamns = CVar.GetCVar('swwm_maxdamnums',players[consoleplayer]);
+		int maxtargetnum = max(0,maxtarg.GetInt());
+		int maxscorenum = max(0,maxscore.GetInt());
+		int maxdamnum = max(0,maxdamns.GetInt());
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
@@ -276,7 +282,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( trackers.Size() != hnd.trackers_cnt )
 				trackers.Resize(hnd.trackers_cnt);
 			int i = 0;
-			for ( SWWMCombatTracker trk=hnd.trackers; trk && (i<40); trk=trk.next )
+			for ( SWWMCombatTracker trk=hnd.trackers; trk && (!maxtargetnum||(i<maxtargetnum)); trk=trk.next )
 			{
 				// ignore player unless chasecamming
 				if ( (trk.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
@@ -313,8 +319,8 @@ Class SWWMStatusBar : BaseStatusBar
 		else trackers.Clear();
 		// update floating scores, adding the scorenums first, then the damnums
 		int total_sz = 0;
-		if ( scorenums.GetBool() ) total_sz += min(20,hnd.scorenums_cnt);
-		if ( healthnums.GetBool() ) total_sz += min(40,hnd.damnums_cnt);
+		if ( scorenums.GetBool() ) total_sz += maxscorenum?min(maxscorenum,hnd.scorenums_cnt):hnd.scorenums_cnt;
+		if ( healthnums.GetBool() ) total_sz += maxdamnum?min(maxdamnum,hnd.damnums_cnt):hnd.damnums_cnt;
 		if ( scoreobjs.Size() != total_sz )
 			scoreobjs.Resize(total_sz);
 		int i = 0;

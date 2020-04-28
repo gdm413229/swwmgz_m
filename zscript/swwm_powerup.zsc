@@ -65,11 +65,11 @@ Class GrilledCheeseSandwich : Inventory
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		// find last armor or health item
+		// find last armor/health item or invuln/ragekit
 		Inventory found = null;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
-			if ( !(i is 'SWWMHealth') && !(i is 'SWWMArmor') ) continue;
+			if ( !(i is 'SWWMHealth') && !(i is 'SWWMArmor') && !(i is 'InvinciballPower') && !(i is 'RagekitPower') ) continue;
 			found = i;
 		}
 		if ( !found ) return;
@@ -526,6 +526,36 @@ Class InvinciballPower : Powerup
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_INVINCIBALL"));
 	}
 
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find first with health/armor or sandwich after it
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+			found = i;
+			break;
+		}
+		if ( !found )
+		{
+			// check if first item in inventory is health/armor or a sandwich
+			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'SWWMArmor') || (other.Inv is 'GrilledCheeseSandwich') )
+			{
+				// place ourselves before it
+				Inv = other.Inv;
+				other.Inv = self;
+				return;
+			}
+			return;
+		}
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
+
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
 		if ( damageType == 'EndLevel' ) return;
@@ -736,6 +766,36 @@ Class RagekitPower : Powerup
 		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_RAGEKIT"));
+	}
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find first with health/armor or sandwich after it
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+			found = i;
+			break;
+		}
+		if ( !found )
+		{
+			// check if first item in inventory is health/armor or a sandwich
+			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'SWWMArmor') || (other.Inv is 'GrilledCheeseSandwich') )
+			{
+				// place ourselves before it
+				Inv = other.Inv;
+				other.Inv = self;
+				return;
+			}
+			return;
+		}
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
 	}
 
 	void DoHitFX()

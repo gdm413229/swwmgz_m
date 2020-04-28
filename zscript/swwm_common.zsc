@@ -2086,7 +2086,7 @@ Class SWWMHandler : EventHandler
 				enteredcombat = true;
 			}
 		}
-		if ( enteredcombat && (!highesttic || (gametic > highesttic+100)) )
+		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) )
 			lastcombat = AddOneliner("fightstart",1,10);
 	}
 
@@ -2173,17 +2173,22 @@ Class SWWMHandler : EventHandler
 		{
 			if ( (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
 			{
-				if ( !lastcombat || (gametic > lastcombat+20) )
-					lastcombat = AddOneliner(e.Thing.IsFriend(e.DamageSource)?"friendhit":"gethit",1,15);
+				if ( !lastcombat || (gametic > lastcombat+40) )
+				{
+					if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.DamageSource)) )
+						lastcombat = AddOneliner("friendhit",1,10);
+					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.bBOSSDEATH)?2:4) ) lastcombat = AddOneliner("gethit",1,15);
+				}
 				highesttic = gametic;
 			}
-			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) )
+			// friendly fire lines only fire up if we didn't kill them right away (because then the teamkill line should take priority)
+			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) && (e.Thing.Health > 0) )
 			{
 				// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
 				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing)) && !(e.Thing is 'LampMoth') )
 				{
-					if ( !lastcombat || (gametic > lastcombat+20) )
-						lastcombat = AddOneliner("hitfriend",1,15);
+					if ( !lastcombat || (gametic > lastcombat+40) )
+						lastcombat = AddOneliner("hitfriend",1,10);
 					highesttic = gametic;
 				}
 			}
@@ -2202,11 +2207,12 @@ Class SWWMHandler : EventHandler
 			if ( e.DamageSource == players[consoleplayer].mo )
 			{
 				highesttic = gametic;
-				if ( !lastcombat || (gametic > lastcombat+20) )
+				if ( !lastcombat || (gametic > lastcombat+40) )
 				{
 					if ( e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing) )
-						lastcombat = AddOneliner("friendkill",1,15);
-					else lastcombat = AddOneliner("scorekill",1,15);
+						lastcombat = AddOneliner("friendkill",1,5);
+					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.bBOSSDEATH)?2:5) )
+						lastcombat = AddOneliner("scorekill",1,15);
 				}
 			}
 			if ( !e.Thing.default.bCountKill )	// no credits

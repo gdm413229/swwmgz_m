@@ -3048,7 +3048,7 @@ Class SWWMHDoomHandler : StaticEventHandler
 
 	override void UiTick()
 	{
-		if ( gamestate == GS_LEVEL )
+		if ( (gamestate == GS_LEVEL) && detected )
 		{
 			if ( timer == 50 )
 			{

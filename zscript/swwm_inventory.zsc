@@ -997,7 +997,7 @@ Class SWWMWeapon : Weapon abstract
 		if ( !FindInventory("ParryDamageChecker") )
 			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
 	}
-	private action bool TryMelee( double angle, int dmg )
+	private action bool TryMelee( double angle, int dmg, String hitsound = "" )
 	{
 		FTranslatedLineTarget t;
 		double slope = AimLineAttack(angle,1.5*DEFMELEERANGE,t,0.,ALF_CHECK3D);
@@ -1048,13 +1048,13 @@ Class SWWMWeapon : Weapon abstract
 			}
 			A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
 			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
-			else A_StartSound(bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
+			else A_StartSound((hitsound!="")?hitsound:bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
 			A_AlertMonsters(300);
 			return true;
 		}
 		return false;
 	}
-	action void A_Melee( int dmg = 40 )
+	action void A_Melee( int dmg = 40, String hitsound = "" )
 	{
 		// temporarily disable parry field so we can trace through
 		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = false;
@@ -1087,7 +1087,7 @@ Class SWWMWeapon : Weapon abstract
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )
 		{
-			if ( TryMelee(angle+i*(45./16),dmg) || TryMelee(angle-i*(45./16),dmg) )
+			if ( TryMelee(angle+i*(45./16),dmg,hitsound) || TryMelee(angle-i*(45./16),dmg,hitsound) )
 			{
 				if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 				return;
@@ -1128,7 +1128,7 @@ Class SWWMWeapon : Weapon abstract
 		}
 		int quakin = raging?4:1;
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
-		A_StartSound(raging?"pusher/althit":"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
+		A_StartSound(raging?"pusher/althit":(hitsound!="")?hitsound:"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(100);
 		if ( raging ) raging.DoHitFX();
 	}

@@ -283,11 +283,11 @@ Class Demolitionist : PlayerPawn
 		else
 		{
 			if ( swwm_extraalert ) A_AlertMonsters(800);
-			dashboost *= .5;
+			dashboost *= (player.cmd.buttons&BT_USER2)?.8:.1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
-		dashcooldown = 40;
+		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
 		fuelcooldown = max(60,fuelcooldown);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
 			SetStateLabel("DashEnd");
@@ -580,9 +580,7 @@ Class Demolitionist : PlayerPawn
 				a = bi.Thing;
 				if ( !a || (a == self) || !a.bSHOOTABLE || a.bTHRUACTORS ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
-				if ( (abs(diff.x) > (radius+a.radius+spd*2)) || (abs(diff.y) > (radius+a.radius+spd*2)) ) continue;
-				if ( (diff.z > (height+spd*2)) || (diff.z < -(a.height+spd*2)) ) continue;
-				if ( diff.unit() dot dir.unit() < .35 ) continue;
+				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*spd,8,16) ) continue;
 				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				// large monsters will stop the player
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
@@ -809,7 +807,7 @@ Class Demolitionist : PlayerPawn
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && level.IsJumpingAllowed() )
 		{
 			dashdir = dodge.unit();
-			dashcooldown = 40;
+			dashcooldown = 10;
 			dashboost = 20.;
 			bOnMobj = false;
 			if ( player.cheats & CF_REVERTPLEASE )

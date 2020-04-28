@@ -1040,6 +1040,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 3;
 				}
 			}
+			else if ( (curtab == TAB_TRADING) && isrclick )
+			{
+				MenuEvent(MKEY_Back,false);
+			}
 			else if ( (curtab == TAB_TRADING) && !isrclick )
 			{
 				if ( !sub )
@@ -1495,12 +1499,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						}
 					}
 				}
+				// sort by unit price
 				bool greater = false;
 				for ( int j=0; j<storelist.Size(); j++ )
 				{
 					let inv2 = GetDefaultByType(storelist[j]);
-					int price2 = int(inv2.Stamina*(1.+.5*(storeunits[j]-1)));
-					if ( price > price2 ) continue;
+					if ( inv.Stamina > inv2.Stamina ) continue;
 					greater = true;
 					storelist.Insert(j,type);
 					storeunits.Insert(j,amt);
@@ -2135,7 +2139,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 				else str = def.GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;

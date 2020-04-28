@@ -31,15 +31,15 @@ respective weapon.
    Crackshots	| 8000
    Ravagers	| 12000
    Warheads	| 25000
-  Sparkster	| 150000
-   Spark Unit	| 20000
+  Sparkster	| 200000
+   Spark Unit	| 50000
   Silver Bullet	| 400000
-   S.B. Mag	| 30000
+   S.B. Mag	| 70000
   Candygun	| 1000000
-   Candy Mag	| 80000
+   Candy Mag	| 100000
    Spare Gun	| 600000
-  Ynykron	| 2000000
-   Crystal Unit	| 400000
+  Ynykron	| 2500000
+   Crystal Unit	| 1000000
 
 #### DLC weapons and ammo (when available)
 
@@ -59,11 +59,11 @@ These will be available long after the first release.
   Puntzer Gamma	| 200000
    SMW.05 Mag	| 20000
   EMP Carbine	| 300000
-   EMP Core	| 35000
+   EMP Core	| 60000
   PROWEL&TADEL	| 1600000
-   Insane Core	| 40000
-  S.H. Fun Ball	| 2500000
-   Fun Stuff	| 500000
+   Insane Core	| 150000
+  S.H. Fun Ball	| 2000000
+   Fun Stuff	| 800000
 
 #### Other items
 

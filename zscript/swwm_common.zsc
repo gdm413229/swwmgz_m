@@ -73,6 +73,28 @@ Class SWWMUtility
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
 	}
 
+	// box intersection check, for collision detection
+	static bool BoxIntersect( Actor a, Actor b, Vector3 ofs = (0,0,0), int pad = 0 )
+	{
+		Vector3 diff = level.Vec3Diff(level.Vec3Offset(a.pos,ofs),b.pos);
+		if ( (abs(diff.x) > (a.radius+b.radius+pad)) || (abs(diff.y) > (a.radius+b.radius+pad)) ) return false;
+		if ( (diff.z > a.height+pad) || (diff.z < -(b.height+pad)) ) return false;
+		return true;
+	}
+
+	// extruded box intersection check, useful when checking things that might be hit along a path
+	static bool ExtrudeIntersect( Actor a, Actor b, Vector3 range, int steps, int pad = 0 )
+	{
+		if ( steps <= 0 ) return BoxIntersect(a,b,pad:pad);
+		double step = 1./steps;
+		for ( double i=step; i<=1.; i+=step )
+		{
+			if ( BoxIntersect(a,b,range*i,pad) )
+				return true;
+		}
+		return false;
+	}
+
 	// sphere intersection check, useful for proximity detection
 	static bool SphereIntersect( Actor a, Vector3 p, double radius )
 	{

@@ -520,6 +520,13 @@ Class Demolitionist : PlayerPawn
 			if ( (lastvelz < -5) || !(level.maptime%5) )
 			{
 				int realdmg = encroached.DamageMobj(self,self,int((2+max(0,-lastvelz*3))*max(1.,mass/encroached.mass)),'Jump',DMG_THRUSTLESS);
+				if ( FindInventory("RagekitPower") )
+				{
+					let ps = Spawn("BigPunchSplash",pos);
+					ps.damagetype = 'Jump';
+					ps.target = self;
+					ps.special1 = realdmg;
+				}
 				if ( !encroached.bNOBLOOD && !encroached.bINVULNERABLE )
 				{
 					encroached.TraceBleed(realdmg,self);
@@ -600,7 +607,14 @@ Class Demolitionist : PlayerPawn
 				int flg = DMG_THRUSTLESS;
 				if ( FindInventory("RagekitPower") ) flg |= DMG_FOILINVUL;
 				if ( !a.player ) a.bBLASTED = true;
-				a.DamageMobj(self,self,int(15+spd*2.5),'Dash',flg);
+				int dmg = a.DamageMobj(self,self,int(15+spd*2.5),'Dash',flg);
+				if ( FindInventory("RagekitPower") )
+				{
+					let ps = Spawn("BigPunchSplash",diff/2);
+					ps.damagetype = 'Dash';
+					ps.target = self;
+					ps.special1 = dmg;
+				}
 			}
 		}
 		else if ( InStateSequence(CurState,FindState("Jump")) )
@@ -911,7 +925,14 @@ Class Demolitionist : PlayerPawn
 					if ( jumpactor && jumpactor.bSHOOTABLE )
 					{
 						SWWMHandler.DoKnockback(jumpactor,(-walldir,0),12000);
-						jumpactor.DamageMobj(self,self,10,'Jump');
+						int dmg = jumpactor.DamageMobj(self,self,10,'Jump');
+						if ( FindInventory("RagekitPower") )
+						{
+							let ps = Spawn("BigPunchSplash",pos);
+							ps.damagetype = 'Jump';
+							ps.target = self;
+							ps.special1 = dmg;
+						}
 					}
 					if ( walljump || wallclimb )
 					{

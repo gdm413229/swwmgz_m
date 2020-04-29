@@ -21,13 +21,6 @@ Mixin Class SWWMAmmo
 		return copy;
 	}
 
-	private bool CmpAmmo( Class<Ammo> a, Class<Ammo> b )
-	{
-		let amta = GetDefaultByType(a).Amount;
-		let amtb = GetDefaultByType(b).Amount;
-		return (amta < amtb);
-	}
-
 	override bool SpecialDropAction( Actor dropper )
 	{
 		if ( Amount != default.Amount )
@@ -38,6 +31,40 @@ Mixin Class SWWMAmmo
 			return true;
 		}
 		return false;
+	}
+
+	private bool CmpAmmo( Class<Ammo> a, Class<Ammo> b )
+	{
+		let amta = GetDefaultByType(a).Amount;
+		let amtb = GetDefaultByType(b).Amount;
+		return (amta < amtb);
+	}
+
+	private int partition_ammotypes( Array<Class<Ammo> > a, int l, int h )
+	{
+		Class<Ammo> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpAmmo(pv,a[j]) )
+			{
+				i++;
+				Class<Ammo> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Class<Ammo> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_ammotypes( Array<Class<Ammo> > a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_ammotypes(a,l,h);
+		qsort_ammotypes(a,l,p-1);
+		qsort_ammotypes(a,p+1,h);
 	}
 
 	override inventory CreateTossable( int amt )
@@ -55,22 +82,7 @@ Mixin Class SWWMAmmo
 				ammotypes.Push((Class<Ammo>)(AllActorClasses[i]));
 		}
 		// sort from largest to smallest
-		for ( int i=0; i<ammotypes.Size(); i++ )
-		{
-			int j = 1;
-			while ( j < ammotypes.Size() )
-			{
-				int k = j;
-				while ( (k > 0) && CmpAmmo(ammotypes[k-1],ammotypes[k]) )
-				{
-					Class<Ammo> tmp = ammotypes[k];
-					ammotypes[k] = ammotypes[k-1];
-					ammotypes[k-1] = tmp;
-					k--;
-				}
-				j++;
-			}
-		}
+		qsort_ammotypes(ammotypes,0,ammotypes.Size()-1);
 		// perform subdivision
 		Inventory last = null;
 		while ( amt > 0 )

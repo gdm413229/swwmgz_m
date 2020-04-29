@@ -1372,7 +1372,67 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || db.bBIGPOWERUP ) tb = 3;
 		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 5;
 		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 4;
-		return ta < tb;
+		return ta <= tb;
+	}
+
+	private int partition_inventory( Array<Inventory> a, int l, int h )
+	{
+		Inventory pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpInventory(pv,a[j]) )
+			{
+				i++;
+				Inventory tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Inventory tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_inventory( Array<Inventory> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_inventory(a,l,h);
+		qsort_inventory(a,l,p-1);
+		qsort_inventory(a,p+1,h);
+	}
+
+	private int partition_store( Array<Class<Inventory> > a, Array<int> b, int l, int h )
+	{
+		Class<Inventory> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpInventoryClass(pv,a[j]) )
+			{
+				i++;
+				Class<Inventory> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+				int tmpi = b[j];
+				b[j] = b[i];
+				b[i] = tmpi;
+			}
+		}
+		Class<Inventory> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		int tmpi = b[h];
+		b[h] = b[i+1];
+		b[i+1] = tmpi;
+		return i+1;
+	}
+	private void qsort_store( Array<Class<Inventory> > a, Array<int> b, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_store(a,b,l,h);
+		qsort_store(a,b,l,p-1);
+		qsort_store(a,b,p+1,h);
 	}
 
 	override void Ticker()
@@ -1405,22 +1465,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				invlist.Push(inv);
 			}
 			// re-sort by category
-			for ( int i=0; i<invlist.Size(); i++ )
-			{
-				int j = 1;
-				while ( j < invlist.Size() )
-				{
-					int k = j;
-					while ( (k > 0) && CmpInventory(invlist[k-1],invlist[k]) )
-					{
-						Inventory tmp = invlist[k];
-						invlist[k] = invlist[k-1];
-						invlist[k-1] = tmp;
-						k--;
-					}
-					j++;
-				}
-			}
+			qsort_inventory(invlist,0,invlist.Size()-1);
 		}
 		else if ( curtab == TAB_KEYS )
 		{
@@ -1515,25 +1560,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				storeunits.Push(amt);
 			}
 			// re-sort by category
-			for ( int i=0; i<storelist.Size(); i++ )
-			{
-				int j = 1;
-				while ( j < storelist.Size() )
-				{
-					int k = j;
-					while ( (k > 0) && CmpInventoryClass(storelist[k-1],storelist[k]) )
-					{
-						Class<Inventory> tmp = storelist[k];
-						storelist[k] = storelist[k-1];
-						storelist[k-1] = tmp;
-						int tmpi = storeunits[k];
-						storeunits[k] = storeunits[k-1];
-						storeunits[k-1] = tmpi;
-						k--;
-					}
-					j++;
-				}
-			}
+			qsort_store(storelist,storeunits,0,storelist.Size()-1);
 		}
 		else if ( curtab == TAB_LIBRARY )
 		{
@@ -1598,22 +1625,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					invlist.Push(inv);
 				}
 				// re-sort by category
-				for ( int i=0; i<invlist.Size(); i++ )
-				{
-					int j = 1;
-					while ( j < invlist.Size() )
-					{
-						int k = j;
-						while ( (k > 0) && CmpInventory(invlist[k-1],invlist[k]) )
-						{
-							Inventory tmp = invlist[k];
-							invlist[k] = invlist[k-1];
-							invlist[k-1] = tmp;
-							k--;
-						}
-						j++;
-					}
-				}
+				qsort_inventory(invlist,0,invlist.Size()-1);
 			}
 		}
 		// check if use succeeded

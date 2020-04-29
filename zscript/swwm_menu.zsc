@@ -91,7 +91,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
 		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
 		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
-		if ( (curtab < 0) || (curtab > 7) ) curtab = 0;
+		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		if ( (curtab < TAB_MISSION) || (curtab > maxtab) ) curtab = TAB_MISSION;
+		if ( curtab == TAB_LIBRARY ) sel1 = CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).GetInt();
 		MenuSound("menu/demoopen");
 		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
@@ -253,6 +255,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			kcode = 0;
 			break;
 		}
+		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
 		switch ( mkey )
 		{
 		case MKEY_BACK:
@@ -261,7 +264,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEUP:
 			MenuSound("menu/demotab");
-			if ( (curtab <= 0) || (curtab > 7) ) curtab = 7;
+			if ( (curtab <= TAB_MISSION) || (curtab > maxtab) ) curtab = maxtab;
 			else curtab--;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = sel2 = 0;
@@ -275,8 +278,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEDOWN:
 			MenuSound("menu/demotab");
-			if ( curtab < 7 ) curtab++;
-			else curtab = 0;
+			if ( curtab < maxtab ) curtab++;
+			else curtab = TAB_MISSION;
 			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
 			sel0 = sel1 = sel2 = 0;
 			ofs0 = ofs1 = ofs2 = 0;
@@ -291,6 +294,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( curtab == TAB_HELP )
 			{
 				String str = StringTable.Localize("$SWWM_HELPTXT");
+				if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -467,6 +471,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				sub = false;
 				ofs1 = ++sel1;
 				if ( sel1 > LORE_LORE ) ofs1 = sel1 = LORE_ITEM;
+				CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).SetInt(sel1);
 			}
 			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
 			{
@@ -494,6 +499,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				sub = false;
 				ofs1 = --sel1;
 				if ( sel1 < LORE_ITEM ) ofs1 = sel1 = LORE_LORE;
+				CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).SetInt(sel1);
 			}
 			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) && (sel0-22 >= 0) ) // lol is this ever going to happen
 			{
@@ -646,11 +652,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				static const string tabnames[] =
 				{
 					"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
-					"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB"
 				};
 				xx = 0;
-				for ( int i=0; i<8; i++ )
+				int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+				for ( int i=TAB_MISSION; i<=maxtab; i++ )
 				{
 					len = fnt.StringWidth(tabnames[i])+6;
 					if ( (mpos.x >= xx) && (mpos.x < xx+len) )
@@ -1029,8 +1035,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// check that scrollbar is present
 					str = StringTable.Localize(lorelist[sel0].text);
-					BrokenLines l = fnt.BreakLines(str,int(635-xx));
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
 					else return res;	// no scrollbar
 					// calculate offset
 					int szr = l.Count()-28;
@@ -1265,8 +1273,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// check that scrollbar is present
 					str = StringTable.Localize(lorelist[sel0].text);
-					BrokenLines l = fnt.BreakLines(str,int(635-xx));
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
 					else return res;	// no scrollbar
 					// calculate offset
 					int szr = l.Count()-28;
@@ -1444,13 +1454,27 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Close();
 			return;
 		}
+		if ( !multiplayer && ((curtab == TAB_TRADING) || (curtab == TAB_CHAT)) )
+		{
+			MenuSound("menu/demotab");
+			curtab = TAB_MISSION;
+			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
+			sel0 = sel1 = sel2 = 0;
+			ofs0 = ofs1 = ofs2 = 0;
+			sub = false;
+			invlist.Clear();
+			lorelist.Clear();
+			storelist.Clear();
+			storeunits.Clear();
+			playerlist.Clear();
+		}
 		if ( curtab == TAB_INVENTORY )
 		{
 			invlist.Clear();
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -1610,7 +1634,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				// alphabetically sorted inventory
 				for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 				{
-					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
+					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
 					String tag = inv.GetTag();
 					bool greater = false;
 					for ( int i=0; i<invlist.Size(); i++ )
@@ -1816,11 +1840,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			"$SWWM_LORETAB0", "$SWWM_LORETAB1", "$SWWM_LORETAB2"
 		};
-		int mx = (curtab>7)?9:8;
-		for ( int i=0; i<mx; i++ )
+		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		int mx = maxtab;
+		if ( (curtab > TAB_CHAT) ) mx++;
+		for ( int i=0; i<=mx; i++ )
 		{
-			str = StringTable.Localize(tabnames[(i>7)?curtab:i]);
-			Screen.DrawText(fnt,((i>7)||(curtab==i))?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			str = StringTable.Localize(tabnames[(i>maxtab)?curtab:i]);
+			Screen.DrawText(fnt,((i>maxtab)||(curtab==i))?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += fnt.StringWidth(str)+2;
 			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
@@ -1853,7 +1879,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy >= 370 ) break;
-				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
 			// scrollbar
@@ -2108,7 +2134,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy > 370 ) break;
-				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
 			// scrollbar
@@ -2328,6 +2354,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 			String kstr = bindings.NameKeys(k1,k2);
 			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+			if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;
@@ -2336,7 +2363,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy >= 370 ) break;
-				Screen.DrawText(fnt,Font.CR_GREEN,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
 			// scrollbar

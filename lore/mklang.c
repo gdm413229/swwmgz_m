@@ -116,7 +116,7 @@ processtxt:
 		}
 		else fputc(txt[txtpos],lf);
 		txtpos++;
-		if ( (txt[txtpos] == '\n') && ((txtpos >= txtlen-1) || !strncmp(txt+txtpos+1,"TXT\n",4)) )
+		if ( (txt[txtpos] == '\n') && ((txtpos >= txtlen-1) || !strncmp(txt+txtpos+1,"TXT\n",4) || !strncmp(txt+txtpos+1,"END\n",4)) )
 		{
 			txtpos++;
 			break;

@@ -375,9 +375,21 @@ Class SWWMLoreLibrary : Thinker
 	bool DirectAdd( String ref )
 	{
 		// restrictions
-		if ( !(gameinfo.gametype&GAME_Hexen) )
+		if ( !(gameinfo.gametype&(GAME_Raven|GAME_Strife)) )
 		{
+			if ( ref ~== "Parthoris" ) return true;
+			if ( ref ~== "Sidhe" ) return true;
+			if ( ref ~== "SerpentRiders" ) return true;
+		}
+		if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) )
+		{
+			if ( ref ~== "Cronos" ) return true;
 			if ( ref ~== "Kirin" ) return true;	// not met
+		}
+		if ( !(gameinfo.gametype&GAME_Strife) )
+		{
+			if ( ref ~== "TheOrder" ) return true;
+			if ( ref ~== "TheFront" ) return true;
 		}
 		ref = ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
@@ -385,8 +397,12 @@ Class SWWMLoreLibrary : Thinker
 		String text = String.Format("SWWM_LORETXT_%s",ref);
 		String assoc = String.Format("SWWM_LOREREL_%s",ref);
 		// redirects
-		if ( gameinfo.gametype&GAME_Raven )
+		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
+			if ( text ~== "SWWM_LORETXT_AKARILABS" )
+				text = "SWWM_LORETXT_AKARILABS2";	// demo won, akari project announced
+			if ( text ~== "SWWM_LORETXT_DEMOLITIONIST" )
+				text = "SWWM_LORETXT_DEMOLITIONIST2";	// demo rewarded with maidbot frame
 			if ( text ~== "SWWM_LORETXT_UAC" )
 				text = "SWWM_LORETXT_UAC2";	// uac "reformed"
 			else if ( text ~== "SWWM_LORETXT_HELL" )
@@ -395,13 +411,20 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_NANA2";	// demo met nana
 			else if ( text ~== "SWWM_LORETXT_ZANAVETH3" )
 				text = "SWWM_LORETXT_ZANAVETH32";	// iagb happened
+			if ( text ~== "SWWM_LORETXT_BIGSHOT" )
+				text = "SWWM_LORETXT_BIGSHOT2";	// predictions about crimes_m
 		}
-		if ( gameinfo.gametype&GAME_Hexen )
+		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
 		{
 			if ( text ~== "SWWM_LORETXT_SAYA" )
 				text = "SWWM_LORETXT_SAYA2";	// married kirin
 			else if ( text ~== "SWWM_LORETXT_ANARUKON" )
 				text = "SWWM_LORETXT_ANARUKON2";	// comments from miyamoto-xanai wedding
+		}
+		if ( gameinfo.gametype&GAME_Strife )
+		{
+			if ( text ~== "SWWM_LORETXT_BIGSHOT2" )
+				text = "SWWM_LORETXT_BIGSHOT3";	// crimes_m happened
 		}
 		// check that it's valid
 		if ( StringTable.Localize(tag,false) == tag ) return false;
@@ -1669,7 +1692,7 @@ Class SWWMHandler : EventHandler
 	int lastitemcount[MAXPLAYERS];
 	bool allkills, allitems, allsecrets;
 	// for money cheat
-	transient ui int kcode;
+	transient ui int kcode, lcode;
 
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
@@ -1932,14 +1955,19 @@ Class SWWMHandler : EventHandler
 		l.DirectAdd("KnowledgeBase");
 		l.DirectAdd("Saya");
 		l.DirectAdd("UAC");
-		if ( gameinfo.gametype&GAME_Raven )
+		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
 			l.DirectAdd("Parthoris");
 			l.DirectAdd("SerpentRiders");
 			l.DirectAdd("Sidhe");
 		}
-		if ( gameinfo.gametype&GAME_Hexen )
+		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
 			l.DirectAdd("Cronos");
+		if ( gameinfo.gametype&GAME_Strife )
+		{
+			l.DirectAdd("TheOrder");
+			l.DirectAdd("TheFront");
+		}
 		SWWMStats s = SWWMStats.Find(p);
 		if ( !s )
 		{
@@ -2357,7 +2385,7 @@ Class SWWMHandler : EventHandler
 
 	override bool InputProcess( InputEvent e )
 	{
-		if ( e.Type == InputEvent.TYPE_KeyDown )	// assuming that's the F key on all keyboards (hopefully)
+		if ( e.Type == InputEvent.TYPE_KeyDown )
 		{
 			static const int lods[] = {38,24,32,31,24,33,18,50,24,49,18};
 			// what's that spell?
@@ -2372,7 +2400,19 @@ Class SWWMHandler : EventHandler
 				}
 			}
 			else kcode = 0;
-			if ( e.KeyScan == 33 )
+			static const int deep[] = {32,18,18,25,38,24,19,18};
+			// the deepest lore
+			if ( e.KeyScan == deep[lcode] )
+			{
+				lcode++;
+				if ( lcode >= 8 )
+				{
+					SendNetworkEvent("swwmlorecheat",consoleplayer);
+					lcode = 0;
+				}
+			}
+			else lcode = 0;
+			if ( e.KeyScan == 33 ) // assuming that's the F key on all keyboards (hopefully)
 			{
 				let demo = Demolitionist(players[consoleplayer].mo);
 				if ( demo && (demo.Health <= 0) && (demo.deadtimer > 40) )
@@ -2795,6 +2835,18 @@ Class SWWMHandler : EventHandler
 			SWWMCredits.Give(players[e.Args[0]],999999999);
 			SWWMScoreObj.Spawn(999999999,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
 		}
+		else if ( e.Name ~== "swwmlorecheat" )
+		{
+			// look up all lore files
+			for ( int l=0; l<Wads.GetNumLumps(); l++ )
+			{
+				String fn = Wads.GetLumpFullName(l);
+				if ( fn.Left(13) != "lore/default/" ) continue;
+				int ext = fn.IndexOf(".txt");
+				if ( ext != fn.Length()-4 ) continue;
+				SWWMLoreLibrary.Add(players[e.Args[0]],fn.Mid(13,ext-13));
+			}
+		}
 	}
 
 	// stuff for hud
@@ -3016,6 +3068,7 @@ Class SWWMBrutalHandler : StaticEventHandler
 			detected = true;
 			break;
 		}
+		SetRandomSeed[bdscreen](Random[bdscreen]()+consoleplayer+MSTime());
 	}
 
 	override void UiTick()
@@ -3075,6 +3128,7 @@ Class SWWMHDoomHandler : StaticEventHandler
 			detected = true;
 			break;
 		}
+		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
 	}
 
 	override void UiTick()

@@ -10,7 +10,7 @@ Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex, InventoryTex, ChatTex[6],
 		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
-	HUDFont mTewiFont, mMiniwiFont, mMPlusFont;
+	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
 	// "Full History" contains all messages since session start, nothing is flushed
 	// this can be accessed from a section of the knowledge base
@@ -48,11 +48,17 @@ Class SWWMStatusBar : BaseStatusBar
 
 	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
 
-	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	// if playing in Japanese, returns an alternate font of the same height
+	// Tewi -> MPlus
+	// Miniwi -> k6x8
 	Font LangFont( HUDFont req )
 	{
 		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		if ( lang.GetString() ~== "jp" ) return mMPlusFont.mFont;
+		if ( lang.GetString() ~== "jp" )
+		{
+			if ( req == mMiniwiFont ) return mk6x8Font.mFont;
+			return mMPlusFont.mFont;
+		}
 		return req.mFont;
 	}
 
@@ -460,6 +466,7 @@ Class SWWMStatusBar : BaseStatusBar
 		mTewiFont = HUDFont.Create("TewiShaded");
 		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		mMPlusFont = HUDFont.Create("MPlusShaded");
+		mk6x8Font = HUDFont.Create("k6x8Shaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
 		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,999999999);
 		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);

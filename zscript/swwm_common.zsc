@@ -399,8 +399,6 @@ Class SWWMLoreLibrary : Thinker
 		// redirects
 		if ( gameinfo.gametype&GAME_Strife )
 		{
-			if ( text ~== "SWWM_LORETXT_BIGSHOT" )
-				text = "SWWM_LORETXT_BIGSHOT3";	// crimes_m happened
 		}
 		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
 		{
@@ -408,6 +406,10 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_SAYA2";	// married kirin
 			else if ( text ~== "SWWM_LORETXT_ANARUKON" )
 				text = "SWWM_LORETXT_ANARUKON2";	// comments from miyamoto-xanai wedding
+			else if ( text ~== "SWWM_LORETXT_HELL" )
+				text = "SWWM_LORETXT_HELL3";	// met father nostros during the wedding
+			else if ( text ~== "SWWM_LORETXT_GHOULHUNT" )
+				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the wedding
 		}
 		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
@@ -797,10 +799,6 @@ Class SWWMCombatTracker : Thinker
 				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
 			}
 		}
-		// VERY expensive, do not use
-		/*if ( mytarget.player || mytarget.bISMONSTER )
-			mytag = mytarget.player?mytarget.player.GetUserName():mytarget.GetTag();
-		else mytag = "";*/
 		int newhealth = mytarget.Health;
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
@@ -808,10 +806,8 @@ Class SWWMCombatTracker : Thinker
 			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
-			// enemies we're directly aiming at within 600mu
-			// the order of these checks allows for a minimal performance hit
-			// as AimTarget() is incredibly expensive to call too often
-			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) && (players[consoleplayer].mo.AimTarget() == mytarget) ) updated = level.maptime;
+			// any visible enemies within 600mu
+			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
 		}
 		lasthealth = newhealth;
 		intp.Update(lasthealth);

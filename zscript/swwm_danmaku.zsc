@@ -851,11 +851,11 @@ Class Eviscerator : SWWMWeapon
 		XZW6 ABC 2;
 		XZW4 Z 1 { invoker.pendingload = true; }
 		Goto Ready;
-	Reload:
+	Zoom:
 		XZW2 A 2
 		{
 			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
-			return A_JumpIf(invoker.extended,"ReloadExt");
+			return A_JumpIf(invoker.extended,"ZoomExt");
 		}
 		XZW4 JKLMN 2;
 		XZW4 O 1 A_StartSound("eviscerator/switch");
@@ -867,7 +867,7 @@ Class Eviscerator : SWWMWeapon
 		}
 		XZW4 TUVWY 2;
 		Goto ReadyExt;
-	ReloadExt:
+	ZoomExt:
 		XZW4 Z 2;
 		XZW7 IJK 3;
 		XZW7 L 1 A_StartSound("eviscerator/switch");
@@ -879,11 +879,11 @@ Class Eviscerator : SWWMWeapon
 		}
 		XZW7 QRSTU 2;
 		Goto Ready;
-	Zoom:
+	Reload:
 		XZW2 A 2
 		{
 			A_StartSound("eviscerator/checkgun",CHAN_WEAPON,CHANF_OVERLAP);
-			return A_JumpIf(invoker.extended,"ZoomExt");
+			return A_JumpIf(invoker.extended,"ReloadExt");
 		}
 		XZW7 VWXYZ 2;
 		XZW8 A 2;
@@ -893,7 +893,7 @@ Class Eviscerator : SWWMWeapon
 		XZW8 PQRSTU 2;
 		XZW8 V 3;
 		Goto Ready;
-	ZoomExt:
+	ReloadExt:
 		XZW4 Z 2;
 		XZW9 MNOPQR 2;
 		XZW9 STUVW 3;

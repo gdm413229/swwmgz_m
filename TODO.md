@@ -8,6 +8,7 @@ Fundamental things:
 Not so fundamental things:
  - Chanceboxes
  - Extra Demolitionist animations (swim, weapon melee/reload/idle)
+ - Separate HUD and healthbar/damnum scaling factors
 
 Extra things:
  - Art for custom intermission

@@ -335,7 +335,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sub )
 				{
 					String str = StringTable.Localize(lorelist[sel0].text);
-					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					int ofs = (lang.GetString()~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
 					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
@@ -1043,7 +1043,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// check that scrollbar is present
 					str = StringTable.Localize(lorelist[sel0].text);
-					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					int ofs = (lang.GetString()~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
 					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
@@ -1281,7 +1281,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					// check that scrollbar is present
 					str = StringTable.Localize(lorelist[sel0].text);
-					int ofs = fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+12;
+					int ofs = (lang.GetString()~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
 					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
@@ -2082,10 +2082,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			xx = 3;
 			yy = 14;
 			// draw the category
+			int twidth = (lang.GetString()~=="jp")?200:120;
 			str = StringTable.Localize(ltabnames[sel1]);
 			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,"<",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx+fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-6,origin.y+yy,">",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+(fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-fnt.StringWidth(str))/2,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx+twidth-6,origin.y+yy,">",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+(twidth-fnt.StringWidth(str))/2,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			// draw "unread" indicators on sides
 			int ltab = sel1-1;
 			if ( ltab < 0 ) ltab = 2;
@@ -2098,7 +2099,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( lorelib.ent[i].tab == rtab ) runread |= !lorelib.ent[i].read;
 			}
 			if ( lunread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+6,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			if ( runread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")-12,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( runread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+twidth-12,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Screen.DrawTexture((lang.GetString()~=="jp")?LoreSeparatorW:LoreSeparator,false,origin.x,origin.y+27,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 18;
 			// draw the current entries
@@ -2113,7 +2114,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+len,origin.y+yy," ‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 13;
 			}
-			xx += fnt.StringWidth("MMMMMMMMMMMMMMMMMMMM")+2;
+			xx += twidth+2;
 			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 3;
 			// scrollbar

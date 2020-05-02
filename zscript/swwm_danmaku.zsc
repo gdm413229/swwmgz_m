@@ -82,7 +82,7 @@ Class EvisceratorChunk : Actor
 		Radius 2;
 		Height 2;
 		Speed 50;
-		DamageFunction int(clamp((vel.length()-6)*.3,0,12));
+		DamageFunction int(clamp((vel.length()-6)*.2+max(0,1.-lifetime)*5.,0,12));
 		DamageType 'shot';
 		BounceFactor 1.0;
 		WallBounceFactor 1.0;
@@ -206,18 +206,18 @@ Class EvisceratorChunk : Actor
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
 		if ( bAMBUSH || (vel.length() <= 5) ) return damage;
-		if ( !target.bNOBLOOD )
+		if ( !target.bNOBLOOD && !target.bINVULNERABLE )
 		{
 			target.SpawnBlood(pos,AngleTo(target),damage);
 			A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
-			A_AlertMonsters(900);
+			if ( swwm_extraalert || !Random[Eviscerator](0,3) ) A_AlertMonsters(900);
 		}
 		return -1;
 	}
 
 	override int SpecialMissileHit( Actor victim )
 	{
-		if ( bAMBUSH || (vel.length() <= 5) || ((victim == target) && !bHITOWNER) || (victim == lasthit) )
+		if ( bAMBUSH || (vel.length() <= 5) || ((victim == target) && !bHITOWNER) || (victim == lasthit) || !victim.bSHOOTABLE )
 			return 1;
 		// with this we can guarantee that the chunk won't just keep on dealing damage
 		// this is something I wish Unreal's boulders did
@@ -229,11 +229,10 @@ Class EvisceratorChunk : Actor
 		if ( victim.health-amt <= 0 )
 		{
 			// bleed if not gibbed (reduces effect spam)
-			if ( !victim.bNOBLOOD && (victim.health-amt > victim.GetGibHealth()) )
+			if ( !victim.bNOBLOOD && !victim.bINVULNERABLE && (victim.health-amt > victim.GetGibHealth()) )
 			{
 				victim.SpawnBlood(pos,AngleTo(victim),damage);
 				A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
-				A_AlertMonsters(900);
 			}
 			return 1;
 		}

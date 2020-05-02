@@ -873,7 +873,7 @@ Class SWWMOneLiner : HUDMessageBase
 	String whichline;
 	int lifespan, curtime;
 	transient Font TewiFont, MPlusFont;
-	transient CVar safezone, lang;
+	transient CVar safezone, lang, hscale;
 
 	static SWWMOneLiner Make( String whichline, int lifespan )
 	{
@@ -896,8 +896,16 @@ Class SWWMOneLiner : HUDMessageBase
 		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
+		if ( !hscale ) hscale = CVar.GetCVar('swwm_hudscale',players[consoleplayer]);
 		int margin = safezone.GetInt();
-		Vector2 hs = StatusBar.GetHUDScale();
+		Vector2 hs;
+		if ( hscale.GetInt() <= 0 ) hs = StatusBar.GetHUDScale();
+		else
+		{
+			hs.x = hscale.GetInt();
+			if ( Screen.GetWidth()/hs.x < 640. ) hs.x = max(1,floor(Screen.GetWidth()/640.));
+			hs.y = hs.x;
+		}
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String loc = StringTable.Localize(whichline);
 		if ( loc.Length() <= 0 ) return;	// don't draw empty strings
@@ -1956,6 +1964,11 @@ Class SWWMHandler : EventHandler
 			s.myplayer = p;
 			s.lastspawn = level.totaltime;
 			s.favweapon = -1;
+			for ( Inventory i=p.mo.Inv; i; i=i.inv )
+			{
+				if ( i is 'Weapon' )
+					s.GotWeapon(Weapon(i).GetClass());
+			}
 		}
 		// reset some vars
 		multilevel[e.playernumber] = 0;

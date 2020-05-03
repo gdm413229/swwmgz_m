@@ -929,7 +929,7 @@ Class SWWMOneLiner : HUDMessageBase
 		for ( int i=0; i<l.Count(); i++ )
 		{
 			int len = fnt.StringWidth(l.StringAt(i));
-			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-len)/2.,(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			Screen.DrawText(fnt,Font.CR_FIRE,int((ss.x-len)/2.),(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			yy -= h;
 		}
 	}

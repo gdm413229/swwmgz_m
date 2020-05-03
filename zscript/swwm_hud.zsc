@@ -910,7 +910,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				int len = fnt.StringWidth(l.StringAt(j));
 				xx = (ss.x-len)/2.;
-				Screen.DrawText(fnt,pickcol.GetInt(),xx,yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,pickcol.GetInt(),int(xx),yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy -= h;
 			}
 			yy -= 6;

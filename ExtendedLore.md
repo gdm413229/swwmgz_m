@@ -748,63 +748,84 @@ Main UnSX timeline:
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
+- 2245: "Vault 490" starts being built in the University of Nos-Kora, it is
+  described as a "focusing device" for a weapon capable of "instantly
+  neutralizing any threat to our universe".
 - 2250: The "Dark Alliance" is formed within the Xathar system.
 - 2267: Green's World Rebellion.
 - 2270: The Phayder Corporation is founded, attempts to replicate the
   immortality of the Nukuri race on humans through a nano-augmentation method
   known as the "Necris process".
+- 2284: UnSX 3. Incident on the remote planet of Zan'am, in the Rimm system. A
+  group of archaeologists studying some ancient alien ruins send out a distress
+  signal, something has clearly gone wrong, and they're being attacked by an
+  unidentified hostile force. A team of mercenaries is sent.
+- 2298: A strange humanoid creature is carried into the Vault. The Mishe
+  brothers announce that "although retrieving the weapon proved to be quite
+  difficult, everything is now ready".
+- 2299: Unissix Bokurou Azadeku dies under mysterious circumstances. Hours
+  later, she is seen alive once again, although her appearance has changed
+  dramatically.
 - 2291: The Liandri Grand Tournament begins.
 - 2304: The Phayder Corporation attacks the Twin Souls colony. UT3 happens.
 - 2307: After a whistleblower reveals the details of Liandri's involvement with
   the Necris invasion of 2304, the corporation is dissolved.
-- 2320: A group of billionaires buy an entire island and turn it into an arena.
+- 2310: A group of billionaires buy an entire island and turn it into an arena.
   The "Battle Royale" boom starts.
-- 2407: Misa Unissix devises the "Unissix Tournaments". UnSX 1 begins.
-- 2409: The first tournament ends with Raik L Raikishionen, prime minister of
-  the Nukuri Unified Government, as champion.
-- 2411: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
-  Not long after, they are defeated in a joint attack with the participation of
-  Earth and many other allied worlds.
-- 2412: Second Unissix Tournament.
-- 2415: The "New Dark Kingdom" appears, led by Ososkuro Axon, son of the
+- 2315: The "New Dark Kingdom" appears, led by Ososkuro Axon, son of the
   fearsome Dread Overlord Nuoma, who attempts to reunite those who were
   defeated in the former war and strike once more. A long period of war begins.
-- 2418: Third Unissix Tournament.
-- 2422: UnSX 3. Incident on the remote planet of Zan'am, in the Rimm system. A
-  group of archaeologists studying some ancient alien ruins send out a distress
-  signal, something has clearly gone wrong, and they're being attacked by an
-  unidentified hostile force. A team of mercenaries is sent.
-- 2424: UnSX 4. A team of mercenaries from various allied worlds manages to
+- 2324: UnSX 4. A team of mercenaries from various allied worlds manages to
   take down Ososkuro. Before the finishing blow could be dealt, Nuoma appears
   and convinces them to spare him, then takes Ososkuro back to their homeland.
-- 2425: Fourth Unissix Tournament.
-- 2430: The Fifth and last Unissix Tournament. Unissix Bokurou Azadeku grows
-  tired of the whole thing.
-- 2459: Nuoma accidentally reveals her true form to the people of Kruon. The
+- 2327: Elena Yanikov XXII, daughter of Taro and Elena XXI, is born.
+- 2330: Saya and Kirin have their first child, Yasu, who grows up to become
+  the new Rust Emperor.
+- 2336: Misa Unissix devises the "Unissix Tournaments". UnSX 1 begins.
+- 2337: The first tournament ends with Raik L Raikishionen, prime minister of
+  the Nukuri Unified Government, as champion.
+- 2338: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
+  Not long after, they are defeated in a joint attack with the participation of
+  Earth and many other allied worlds.
+- 2340: Second Unissix Tournament.
+- 2343: Nuoma accidentally reveals her true form to the people of Kruon. The
   feared "fall of the empire" doesn't happen, she is still revered as a worthy
   leader. Despite all that, she decides to pass the title of overlord to her
   son Ososkuro.
-- 2500-2778: "The Great Tranquility". An odd period of time with an apparent
-  lack of major conflicts or other noteworthy events.
-- 2779: UnSX 6 begins. The former "Warriors of the End" who had served
+- 2344: Using Saya's interportal technology, the Rust Empire creates the
+  various "passages", connecting Akkou and many other realms together. Third
+  Unissix Tournament.
+- 2348: Fourth Unissix Tournament.
+- 2349: UnSX 6 begins. The former "Warriors of the End" who had served
   Nedoshiaan reunite and attempt to bring forth the apocalypse. Although the
   warriors are stopped, they manage to summon HEKEAS SHINNOVRE the Eraser. For
   the first time in history, LS breaks their vow to not get involved in "the
   affairs of mortals" and banishes their brother.
-- 2890: "Vault 490" starts being built in the University of Nos-Kora, it is
-  described as a "focusing device" for a weapon capable of "instantly
-  neutralizing any threat to our universe".
-- 2899: A strange humanoid creature is carried into the Vault. The Mishe
-  brothers announce that "although retrieving the weapon proved to be quite
-  difficult, everything is now ready".
-- 2900: Unissix Bokurou Azadeku dies under mysterious circumstances. Hours
-  later, she is seen alive once again, although her appearance has changed
-  dramatically.
-- 2907: An unidentified terrorist group attacks the Nekuratek Advanced Arms
+- 2352: The Fifth and last Unissix Tournament. Unissix Bokurou Azadeku grows
+  tired of the whole thing.
+- 2363: The town of Kenaia becomes corrupted by some strange "red mass", many
+  of its inhabitants turn into mindless beasts.
+- 2384: The Church of Levlen initiates their Esper Crusades, aiming to rid the
+  land of all magic-aligned people.
+- 2386: Alakir of Kanaiarkar manages to flee his hometown during an attack
+  from Levlen crusaders.
+- 2387: An unidentified terrorist group attacks the Nekuratek Advanced Arms
   Research Facility in Nahkami, stealing several prototypes. The Hiikyan War
   begins.
-- 2917: Following ten confusing years of battle, Hiikya is defeated by Deneva
+- 2393: First excavations on Evakai.
+- 2397: Following ten confusing years of battle, Hiikya is defeated by Deneva
   Unissix, who sacrifices her own life in the final attack.
+- 2401: In order to stop a massive Eldrich Abomination from
+  corrupting all of existence, the two Mishe brothers activate Vault 490.
+  Although the threat is defeated, major parts of the multiverse shatter in the
+  process, causing severe distortions in time and space.
+- 2414: General Marius dies in combat defending the realm of Naiarkar from an
+  invasion of Levlen crusaders.
+- 2423: The Grand Patriarch becomes the Champion of the Kenaia Colloseum.
+- 2428: A strange plague spreads throughout the various realms. A man known as
+  "The Emissary" appears and reveals himself as its creator, he is captured and
+  imprisoned by the Rust Empire.
+- 2430: Project Abyss begins.
 
 Disconnected events that are hard to place in time:
 
@@ -824,29 +845,3 @@ Disconnected events that are hard to place in time:
   Winter Nexus, they gather the four elemental gems and defeat the "Viridescent
   Lord". A mysterious shadowy figure revives the corpse of D'Sparil, both
   disappear shortly after.
-
-Abyssal Era (Project Abyss timeline):
-
-- 71 BA: Saya and Kirin have their first child, Yasu, who grows up to become
-  the new Rust Emperor.
-- 57 BA: Using Saya's interportal technology, the Rust Empire creates the
-  various "passages", connecting Akkou and many other realms together.
-- 41 BA: Elena Yanikov XXII, daughter of Taro and Elena XXI, is born.
-- 38 BA: The town of Kenaia becomes corrupted by some strange "red mass", many
-  of its inhabitants turn into mindless beasts.
-- 17 BA: The Church of Levlen initiates their Esper Crusades, aiming to rid the
-  land of all magic-aligned people.
-- 15 BA: Alakir of Kanaiarkar manages to flee his hometown during an attack
-  from Levlen crusaders.
-- 8 BA: First excavations on Evakai.
-- The Abyssal Year: In order to stop a massive Eldrich Abomination from
-  corrupting all of existence, the two Mishe brothers activate Vault 490.
-  Although the threat is defeated, major parts of the multiverse shatter in the
-  process, causing severe distortions in time and space.
-- 13: General Marius dies in combat defending the realm of Naiarkar from an
-  invasion of Levlen crusaders.
-- 22: The Grand Patriarch becomes the Champion of the Kenaia Colloseum.
-- 27: A strange plague spreads throughout the various realms. A man known as
-  "The Emissary" appears and reveals himself as its creator, he is captured and
-  imprisoned by the Rust Empire.
-- 29: Project Abyss begins.

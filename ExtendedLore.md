@@ -625,7 +625,7 @@ Main UnSX timeline:
 - 2049: The clearly senile Dr. Locke attempts to take over the world.
   Surrenders a couple days later during the counter-attack.
 - 2054: Ryuji Miyamoto passes away.
-- 2066: Elena "Ellen" Yanikov XVI is born.
+- 2066: Elena "Ellen" Yanikov XXI is born.
 - 2068: The Nukuri go through their seventh world war in their home planet.
   Zanaveth II and her wife move to Sankaideriha for the time being.
 - 2070: Ashley invites Saya to Sankaideriha, they come across Zanaveth II and
@@ -827,11 +827,11 @@ Disconnected events that are hard to place in time:
 
 Abyssal Era (Project Abyss timeline):
 
-- 71 BA: Saya and Kirin have their first child, who grows up to become the new
-  Rust Emperor.
+- 71 BA: Saya and Kirin have their first child, Yasu, who grows up to become
+  the new Rust Emperor.
 - 57 BA: Using Saya's interportal technology, the Rust Empire creates the
   various "passages", connecting Akkou and many other realms together.
-- 41 BA: Elena Yanikov XIX, daughter of Taro and Elena XVI, is born.
+- 41 BA: Elena Yanikov XXII, daughter of Taro and Elena XXI, is born.
 - 38 BA: The town of Kenaia becomes corrupted by some strange "red mass", many
   of its inhabitants turn into mindless beasts.
 - 17 BA: The Church of Levlen initiates their Esper Crusades, aiming to rid the

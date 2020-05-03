@@ -1424,11 +1424,11 @@ Class Sparkster : SWWMWeapon
 			AmmoBar[1] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarRed.png",TexMan.Type_Any);
 			AmmoBar[2] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarGray.png",TexMan.Type_Any);
 		}
-		Screen.DrawTexture(WeaponBox,false,bx-29,by-29,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-27,by-27,String.Format("%2d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawTexture(AmmoBar[2],false,bx-27,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(WeaponBox,false,bx-28,by-28,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-26,by-26,String.Format("%2d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(AmmoBar[2],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		bool blinking = (failtime>gametic)&&((failtime-gametic)%16>=8);
-		Screen.DrawTexture(AmmoBar[clipcount<4],false,bx-27,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,iclip?(iclip.GetValue()/10):0,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
+		Screen.DrawTexture(AmmoBar[clipcount<4],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,iclip?(iclip.GetValue()/10):0,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
 	}
 
 	override void HudTick()

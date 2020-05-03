@@ -531,12 +531,12 @@ Class Eviscerator : SWWMWeapon
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/EvisceratorDisplay.png",TexMan.Type_Any);
 		if ( !AmmoIcon ) AmmoIcon = TexMan.CheckForTexture("graphics/HUD/EvisceratorShell.png",TexMan.Type_Any);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
-		Screen.DrawTexture(WeaponBox,false,bx-47,by-17,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(WeaponBox,false,bx-46,by-16,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		String astr = String.Format("%d",Ammo1.Amount);
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-15-(TewiFont.StringWidth(astr)+1),by-16,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-14-(TewiFont.StringWidth(astr)+1),by-15,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		bool noshell = pendingload||(isfiring&&!pendingload);
-		Screen.DrawTexture(AmmoIcon,false,bx-15,by-15,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,noshell?Color(128,0,0,0):Color(0,0,0,0));
-		Screen.DrawText(TewiFont,Font.CR_WHITE,bx-45,by-16,extended?"►":"",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(AmmoIcon,false,bx-14,by-14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,noshell?Color(128,0,0,0):Color(0,0,0,0));
+		Screen.DrawText(TewiFont,Font.CR_WHITE,bx-44,by-15,extended?"►":"",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	override bool ReportHUDAmmo()

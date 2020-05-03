@@ -842,12 +842,12 @@ Class CandyGun : SWWMWeapon
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/CandygunDisplay.png",TexMan.Type_Any);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
-		Screen.DrawTexture(WeaponBox,false,bx-52,by-45,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-23,by-22,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-20,by-15,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		int cx = (Ammo1.Amount>9)?49:46;
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-cx,by-19,String.Format("%d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-38,by-41,String.Format("%d",Ammo2.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(WeaponBox,false,bx-51,by-44,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-22,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-19,by-14,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int cx = (Ammo1.Amount>9)?48:45;
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-cx,by-18,String.Format("%d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-37,by-40,String.Format("%d",Ammo2.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	action void A_Schutt()

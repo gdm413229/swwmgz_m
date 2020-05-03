@@ -297,10 +297,10 @@ Class PusherWeapon : SWWMWeapon
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/PusherDisplay.png",TexMan.Type_Any);
 		if ( !ChargeBar ) ChargeBar = TexMan.CheckForTexture("graphics/HUD/PusherBar.png",TexMan.Type_Any);
-		Screen.DrawTexture(WeaponBox,false,bx-61,by-10,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(WeaponBox,false,bx-60,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		int chg = clamp(ChargeInter?ChargeInter.GetValue():int(chargelevel*100),0,100);
 		int cw = int(chg*56./100.);
-		Screen.DrawTexture(ChargeBar,false,bx-59,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,cw);
+		Screen.DrawTexture(ChargeBar,false,bx-58,by-7,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,cw);
 	}
 
 	override void HudTick()

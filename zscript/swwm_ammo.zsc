@@ -792,6 +792,46 @@ Class AmmoFabricator : Inventory abstract
 		return Super.CreateCopy(other);
 	}
 
+	private bool CmpFabAmmo( Class<Ammo> a, Class<Ammo> b )
+	{
+		let ia = Owner.FindInventory(a);
+		int cnta = ia?ia.Amount:0;
+		int maxa = ia?ia.MaxAmount:GetDefaultByType(a).Amount;
+		let ib = Owner.FindInventory(b);
+		int cntb = ib?ib.Amount:0;
+		int maxb = ib?ib.MaxAmount:GetDefaultByType(b).Amount;
+		double facta = cnta/double(maxa);
+		double factb = cntb/double(maxb);
+		return (facta > factb);
+	}
+
+	private int partition_fabammo( Array<Class<Ammo> > a, int l, int h )
+	{
+		Class<Ammo> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpFabAmmo(pv,a[j]) )
+			{
+				i++;
+				Class<Ammo> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Class<Ammo> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_fabammo( Array<Class<Ammo> > a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_fabammo(a,l,h);
+		qsort_fabammo(a,l,p-1);
+		qsort_fabammo(a,p+1,h);
+	}
+
 	bool FabricateAmmo()
 	{
 		Array<Class<Ammo> > available;
@@ -805,7 +845,9 @@ Class AmmoFabricator : Inventory abstract
 			if ( !(def.Stamina) || (def.Stamina > maxunitprice) ) continue;
 			available.Push(a);
 		}
-		// start from lowest to highest needed until we fill the inventory or run out of budget
+		// sort by "need weight" (prioritize ammo that the player lacks over ammo that te player has plenty of
+		qsort_fabammo(available,0,available.Size()-1);
+		// loop through until we fill the inventory or run out of budget
 		bool given = false;
 		int consumed = 0;
 		String fabstr = "";
@@ -920,7 +962,7 @@ Class FabricatorTier3 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
-		AmmoFabricator.Budget 120000;
+		AmmoFabricator.Budget 150000;
 		AmmoFabricator.PerType 8;
 		AmmoFabricator.MaxUnitPrice 80000;
 		Stamina 150000;

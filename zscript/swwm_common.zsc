@@ -2473,14 +2473,14 @@ Class SWWMHandler : EventHandler
 			else e.Replacement = 'Wallbuster';
 		}
 		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeapHammer') ) e.Replacement = 'Eviscerator';
-		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'CWeapFlame') ) e.Replacement = 'Hellblazer';
+		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'FWeaponPiece3') ) e.Replacement = 'Hellblazer';
 		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') )
 		{
 			if ( Random[Replacements](0,2) ) e.Replacement = 'Sparkster';
 			else e.Replacement = 'SilverBullet';
 		}
-		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = 'Sparkster';
-		else if ( e.Replacee is 'FWeaponPiece3' ) e.Replacement = 'SilverBullet';
+		else if ( e.Replacee is 'CWeapFlame' ) e.Replacement = 'Sparkster';
+		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = 'SilverBullet';
 		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') )
 		{
 			if ( !Random[Replacements](0,2) ) e.Replacement = 'Ynykron';
@@ -2659,8 +2659,8 @@ Class SWWMHandler : EventHandler
 			|| (e.Replacee == 'CWeaponPiece1') || (e.Replacee == 'CWeaponPiece3')
 			|| (e.Replacee == 'MWeaponPiece2') || (e.Replacee == 'MWeaponPiece3') )
 		{
-			if ( Random[Replacements](0,7) ) e.Replacement = 'SWWMNothing';
-			else if ( Random[Replacements](0,3) ) e.Replacement = 'HammerspaceEmbiggener';
+			if ( Random[Replacements](0,1) ) e.Replacement = 'SWWMNothing';
+			else if ( Random[Replacements](0,5) ) e.Replacement = 'HammerspaceEmbiggener';
 			else e.Replacement = 'GoldShell';
 		}
 		else if ( (e.Replacee == 'ArmorBonus') || (e.Replacee == 'ArtiTimeBomb') || (e.Replacee == 'ArtiBlastRadius') ) e.Replacement = 'ArmorNuggetItem';

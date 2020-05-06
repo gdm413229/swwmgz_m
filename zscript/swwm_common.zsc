@@ -1064,12 +1064,63 @@ Class SWWMSmoke : Actor
 	}
 }
 
-Class SWWMHalfSmoke : SWWMSmoke
+// ultra-lightweight non-interacting smoke, used by fire trails
+Class SWWMHalfSmoke : Actor
 {
+	Default
+	{
+		RenderStyle "Shaded";
+		StencilColor "FFFFFF";
+		Radius 0.1;
+		Height 0;
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+NOTELEPORT;
+		+NOINTERACTION;
+		Scale 0.3;
+	}
+	override void PostBeginPlay()
+	{
+		double ang, pt;
+		scale *= FRandom[Puff](0.5,1.5);
+		alpha *= FRandom[Puff](0.5,1.5);
+		ang = FRandom[Puff](0,360);
+		pt = FRandom[Puff](-90,90);
+		vel += (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[Puff](0.2,0.8);
+		roll = Frandom[Puff](0,360);
+		scale.x *= RandomPick[Puff](-1,1);
+		scale.y *= RandomPick[Puff](-1,1);
+		tics = 1+special1;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		vel *= 0.96;
+		vel.z += 0.01;
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+		UpdateWaterLevel();
+		if ( (waterlevel > 0) && !bAMBUSH )
+		{
+			let b = Spawn("SWWMBubble",pos);
+			b.scale *= abs(scale.x);
+			b.vel = vel;
+			Destroy();
+			return;
+		}
+		if ( tics > 0 ) tics--;
+		if ( !SetState(CurState.NextState) )
+			return;
+		tics = 1+special1;
+	}
+
 	States
 	{
 	Spawn:
-		XSMK ACEGIKMOQS 1 A_SetTics(1+special1);
+		XSMK ACEGIKMOQS 1;
 		Stop;
 	}
 }

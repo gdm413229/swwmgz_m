@@ -800,11 +800,15 @@ Class Demolitionist : PlayerPawn
 		if ( !(fm|sm) ) fm = 1;
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
-		if ( player.onground ) dodge.z = max(0,dodge.z);
+		if ( player.onground )
+		{
+			if ( !level.IsJumpingAllowed() ) dodge.z = 0;
+			else dodge.z = max(0,dodge.z);
+		}
 		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
 		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
 			dodge.z += .15;
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && level.IsJumpingAllowed() )
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 10;

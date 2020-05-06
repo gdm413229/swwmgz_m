@@ -630,8 +630,14 @@ Class Demolitionist : PlayerPawn
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
 		// lucky collar
-		if ( Health < 25 ) damage /= 4;
 		if ( source == self ) damage /= 2;
+		if ( Health-damage < 25 )
+		{
+			int splitdmg[2];
+			splitdmg[0] = max(0,Health-25);	// non-reduced part (>=25% health)
+			splitdmg[1] = (damage-splitdmg[0])/4;	// reduced part (<25% health)
+			damage = splitdmg[0]+splitdmg[1];
+		}
 		if ( !inflictor && !source && (CurSector.flags&Sector.SECF_ENDLEVEL) )
 		{
 			// end level hax

@@ -215,8 +215,14 @@ Class SWWMStats : Thinker
 		return false;
 	}
 
-	void AddWeaponKill( Class<Weapon> which )
+	void AddWeaponKill( Actor inflictor )
 	{
+		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
+		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
+		// properly credit napalm damage to Spreadgun
+		if ( inflictor is 'OnFire' ) which = 'Spreadgun';
+		// TODO handle other projectiles
+		if ( !which ) return;
 		for ( int i=0; i<wstats.Size(); i++ )
 		{
 			if ( wstats[i].w != which ) continue;
@@ -636,6 +642,7 @@ Class SWWMInterest : Thinker
 	Line trackedline;
 	Vector3 pos;
 	SWWMInterest prev, next;
+	String keytag;
 
 	static SWWMInterest Spawn( Vector3 pos = (0,0,0), Key thekey = null, Line theline = null )
 	{
@@ -644,7 +651,11 @@ Class SWWMInterest : Thinker
 		i.ChangeStatNum(STAT_USER);
 		i.trackedkey = thekey;
 		i.trackedline = theline;
-		if ( thekey ) i.type = INT_Key;
+		if ( thekey )
+		{
+			i.type = INT_Key;
+			i.keytag = thekey.GetTag();
+		}
 		else if ( theline ) i.type = INT_Exit;
 		else
 		{
@@ -2022,11 +2033,16 @@ Class SWWMHandler : EventHandler
 		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( lang.GetString() != curlang )
 		{
-			// manually refresh combat tracker tags if language has changed
+			// manually refresh some tags if language has changed
 			for ( SWWMCombatTracker t=trackers; t; t=t.next )
 			{
 				if ( !t.mytarget || (!t.mytarget.player && !t.mytarget.bISMONSTER) ) continue;
 				t.mytag = t.mytarget.player?t.mytarget.player.GetUserName():t.mytarget.GetTag();
+			}
+			for ( SWWMInterest p=intpoints; p; p=p.next )
+			{
+				if ( (p.type != INT_Key) || !p.trackedkey ) continue;
+				p.keytag = p.trackedkey.GetTag();
 			}
 		}
 		curlang = lang.GetString();
@@ -2236,8 +2252,7 @@ Class SWWMHandler : EventHandler
 			if ( s )
 			{
 				s.kills++;
-				if ( e.DamageSource.player.ReadyWeapon )
-					s.AddWeaponKill(e.DamageSource.player.ReadyWeapon.GetClass());
+				s.AddWeaponKill(e.Inflictor);
 			}
 			if ( e.DamageSource == players[consoleplayer].mo )
 			{

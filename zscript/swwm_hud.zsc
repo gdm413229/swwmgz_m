@@ -512,7 +512,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Vector2 npos = proj.ProjectToNormal();
 				if ( !proj.IsInFront() ) continue;
 				Vector2 vpos = viewport.SceneToWindow(npos);
-				if ( poi.type == INT_Key ) tag = String.Format("\cf%s\c-",StringTable.Localize(poi.trackedkey.GetTag()));
+				if ( poi.type == INT_Key ) tag = String.Format("\cf%s\c-",poi.keytag);
 				else if ( poi.type == INT_Exit )
 				{
 					if ( poi.trackedline.special == Exit_Secret )

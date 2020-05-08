@@ -236,7 +236,7 @@ Class EvisceratorChunk : Actor
 			}
 			return 1;
 		}
-		SWWMHandler.DoKnockback(victim,vel.unit(),8000);
+		SWWMHandler.DoKnockback(victim,vel.unit(),12000);
 		return -1;
 	}
 	States
@@ -256,7 +256,7 @@ Class EvisceratorChunk : Actor
 		JUNK # 1 A_FadeOut();
 		Wait;
 	XDeath:
-		TNT1 A 1;
+		TNT1 A 35;
 		Stop;
 	}
 }

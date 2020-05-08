@@ -185,6 +185,30 @@ Class SWWMUtility
 		}
 		return false;
 	}
+
+	// Thanks to ZZYZX and Nash
+	static play void SetToSlope( Actor a, double dang )
+	{
+		vector3 fnormal = a.CurSector.floorplane.Normal;
+		// find closest 3d floor for its normal
+		F3DFloor ff;
+		for ( int i=0; i<a.CurSector.Get3DFloorCount(); i++ )
+		{
+			if ( !(a.CurSector.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
+			ff = a.CurSector.Get3DFloor(i);
+			break;
+		}
+		if ( ff ) fnormal = -ff.top.Normal;
+		vector2 fnormalp1 = ((fnormal.x != 0) || (fnormal.y != 0))?(fnormal.x,fnormal.y).Unit():(0,0);
+		vector2 fnormalp2 = ((fnormal.x,fnormal.y).Length(),fnormal.z);
+		double fang = atan2(fnormalp1.y,fnormalp1.x); // floor angle (not pitch!)
+		double fpitch = atan2(fnormalp2.x,fnormalp2.y); // floor pitch
+		double ddiff1 = sin(fang-dang);
+		double ddiff2 = cos(fang-dang);
+		a.pitch = fpitch*ddiff2;
+		a.roll = -fpitch*ddiff1;
+		a.angle = dang;
+	}
 }
 
 // Stats
@@ -415,7 +439,9 @@ Class SWWMLoreLibrary : Thinker
 			else if ( text ~== "SWWM_LORETXT_HELL" )
 				text = "SWWM_LORETXT_HELL3";	// met father nostros during the wedding
 			else if ( text ~== "SWWM_LORETXT_GHOULHUNT" )
-				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the wedding
+				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the
+			else if ( text ~== "SWWM_LORETXT_RAGEKIT" )
+				text = "SWWM_LORETXT_RAGEKIT2";	// kirin's reactions to demo using this item
 		}
 		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
@@ -2331,7 +2357,7 @@ Class SWWMHandler : EventHandler
 			if ( e.DamageSource.player == players[consoleplayer] )
 				scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			int ofs = 0;
-			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH)) && !e.DamageSource.bNOEXTREMEDEATH && !(e.Inflictor && e.Inflictor.bNOEXTREMEDEATH) )
+			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) )
 			{
 				score = int(score*1.25);
 				if ( scr )

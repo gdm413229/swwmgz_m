@@ -8,7 +8,7 @@ Class MsgLine
 
 Class SWWMStatusBar : BaseStatusBar
 {
-	TextureID StatusTex, WeaponTex, ScoreTex, InventoryTex, ChatTex[6],
+	TextureID StatusTex, WeaponTex, ScoreTex[3], InventoryTex, ChatTex[6],
 		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
@@ -49,7 +49,7 @@ Class SWWMStatusBar : BaseStatusBar
 	bool can_project;
 	transient CVar cvar_renderer;
 
-	DynamicValueInterpolator HealthInter, ScoreInter, FuelInter, DashInter;
+	DynamicValueInterpolator HealthInter, ScoreInter, ScoreInter2, FuelInter, DashInter;
 
 	// if playing in Japanese, returns an alternate font of the same height
 	// Tewi -> MPlus
@@ -317,7 +317,10 @@ Class SWWMStatusBar : BaseStatusBar
 		// update interpolators
 		HealthInter.Update(CPlayer.health);
 		if ( !hnd ) hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		ScoreInter.Update(SWWMCredits.Get(CPlayer));
+		int s1, s2;
+		[s1, s2] = SWWMCredits.Get(CPlayer);
+		ScoreInter.Update(s1);
+		if ( ScoreInter.GetValue() >= ScoreInter.mCurrentValue ) ScoreInter2.Update(s2);
 		let d = Demolitionist(CPlayer.mo);
 		if ( d )
 		{
@@ -448,7 +451,9 @@ Class SWWMStatusBar : BaseStatusBar
 		HealthTex[2] = TexMan.CheckForTexture("graphics/HUD/HealthBar2.png",TexMan.Type_Any);
 		HealthTex[3] = TexMan.CheckForTexture("graphics/HUD/HealthBar3.png",TexMan.Type_Any);
 		HealthTex[4] = TexMan.CheckForTexture("graphics/HUD/HealthBarS.png",TexMan.Type_Any);
-		ScoreTex = TexMan.CheckForTexture("graphics/HUD/ScoreBox.png",TexMan.Type_Any);
+		ScoreTex[0] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxL.png",TexMan.Type_Any);
+		ScoreTex[1] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxM.png",TexMan.Type_Any);
+		ScoreTex[2] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxR.png",TexMan.Type_Any);
 		WeaponTex = TexMan.CheckForTexture("graphics/HUD/WeaponBox.png",TexMan.Type_Any);
 		ChatTex[0] = TexMan.CheckForTexture("graphics/HUD/ChatBoxTop.png",TexMan.Type_Any);
 		ChatTex[1] = TexMan.CheckForTexture("graphics/HUD/ChatBoxLine.png",TexMan.Type_Any);
@@ -472,6 +477,7 @@ Class SWWMStatusBar : BaseStatusBar
 		mk6x8Font = HUDFont.Create("k6x8Shaded");
 		HealthInter = DynamicValueInterpolator.Create(100,.1,1,100);
 		ScoreInter = DynamicValueInterpolator.Create(0,.1,1,999999999);
+		ScoreInter2 = DynamicValueInterpolator.Create(0,.1,1,999999999);
 		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);
 		DashInter = DynamicValueInterpolator.Create(120,.5,1,40);
 		gl_proj = new("swwmLe__GLScreen");
@@ -520,9 +526,9 @@ Class SWWMStatusBar : BaseStatusBar
 					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 				}
 				Font fnt = LangFont(mMiniwiFont);
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y-hsb.y*fnt.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y-hsb.y*fnt.GetHeight()/2.)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y+hsb.y*fnt.GetHeight()/2.)/hs.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y+hsb.y*fnt.GetHeight()/2.)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
 			}
 		}
 		// targetting array
@@ -640,8 +646,35 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawScore()
 	{
-		Screen.DrawTexture(ScoreTex,false,ss.x-(margin+72),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+57),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( ScoreInter2.GetValue() > 0 )
+		{
+			int digits = 9;
+			digits += int(Log10(ScoreInter2.GetValue()))+1;
+			int xx = 19+6*digits;
+			Screen.DrawTexture(ScoreTex[0],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx -= 15;
+			for ( int i=0; i<digits; i++ )
+			{
+				Screen.DrawTexture(ScoreTex[1],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx -= 6;
+			}
+			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,String.Format("%d",clamp(ScoreInter2.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+		else
+		{
+			int xx = 73;
+			Screen.DrawTexture(ScoreTex[0],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx -= 15;
+			for ( int i=0; i<9; i++ )
+			{
+				Screen.DrawTexture(ScoreTex[1],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx -= 6;
+			}
+			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
 		// in doom/heretic (draw key icons)
 		if ( !(gameinfo.gametype&(GAME_DOOMCHEX|GAME_HERETIC)) ) return;
 		Vector2 keypos = (ss.x-(margin+2),margin+19);

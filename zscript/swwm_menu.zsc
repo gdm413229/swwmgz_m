@@ -529,11 +529,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
 			{
-				int moni = SWWMCredits.Get(players[consoleplayer]);
 				let itm = GetDefaultByType(storelist[sel0]);
 				let amt = storeunits[sel0];
 				int price = int(itm.Stamina*(1.+.5*(amt-1)));
-				if ( moni < price )
+				if ( !SWWMCredits.CanTake(players[consoleplayer],price) )
 				{
 					MenuSound("menu/noinvuse");
 					tmsg = StringTable.Localize("$SWWM_STOREMUNS");
@@ -1859,8 +1858,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
 		}
-		int muns = SWWMCredits.Get(players[consoleplayer]);
-		str = String.Format("\cg¥\c-%09d",muns);
+		int muns1, muns2;
+		[muns1, muns2] = SWWMCredits.Get(players[consoleplayer]);
+		str = "\cg¥\c-";
+		if ( muns2 > 0 ) str.AppendFormat("%d",muns2);
+		str.AppendFormat("%09d",muns1);
 		xx = 637-TewiFont.StringWidth(str);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw bottom messages
@@ -1973,7 +1975,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
-			str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
+			if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
+			else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
 			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 		}
@@ -2215,7 +2218,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				str = String.Format("¥%d",price);
 				len = TewiFont.StringWidth(str);
 				int clscol = Font.CR_FIRE;
-				if ( price > muns ) clscol = Font.CR_BLACK;
+				if ( (price > muns1) && (muns2 <= 0) ) clscol = Font.CR_BLACK;
 				Screen.DrawText(TewiFont,clscol,origin.x+xx+longest+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )

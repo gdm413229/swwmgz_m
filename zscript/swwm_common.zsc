@@ -222,8 +222,8 @@ Class SWWMStats : Thinker
 {
 	PlayerInfo myplayer;
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
-		deaths,	damagedealt, damagetaken, mkill, hiscore, topdealt,
-		toptaken, skill;
+		deaths,	damagedealt, damagetaken, mkill, hiscore, hhiscore,
+		topdealt, toptaken, skill;
 	double grounddist, airdist, fuelusage, topspeed;
 	Array<WeaponUsage> wstats;
 	Array<Class<Weapon> > alreadygot;
@@ -279,42 +279,75 @@ Class SWWMStats : Thinker
 Class SWWMCredits : Thinker
 {
 	PlayerInfo myplayer;
-	int credits;
+	int credits, hcredits;
 
-	static void Give( PlayerInfo p, int amount )
+	static void Give( PlayerInfo p, int amount, int hamount = 0 )
 	{
 		let c = Find(p);
 		if ( !c ) return;
-		if ( (c.credits+amount < c.credits) || (c.credits+amount > 999999999) ) c.credits = 999999999;
+		if ( c.credits+amount < c.credits ) c.credits = int.max;
 		else c.credits += amount;
+		while ( c.credits > 999999999 )
+		{
+			c.credits -= 1000000000;
+			c.hcredits++;
+		}
+		if ( (c.hcredits+hamount < c.hcredits) || (c.hcredits+hamount > 999999999) ) c.hcredits = 999999999;
+		else c.hcredits += hamount;
 		let s = SWWMStats.Find(p);
-		if ( s && (c.credits > s.hiscore) ) s.hiscore = c.credits;
+		if ( s && ((c.hcredits > s.hhiscore) || ((c.credits > s.hiscore) && (c.hcredits >= s.hhiscore))) )
+		{
+			s.hiscore = c.credits;
+			s.hhiscore = c.hcredits;
+		}
 	}
 
-	static clearscope bool CanTake( PlayerInfo p, int amount )
+	static clearscope bool CanTake( PlayerInfo p, int amount, int hamount = 0 )
 	{
 		let c = Find(p);
 		if ( !c ) return false;
+		int req = amount, hreq = hamount;
+		while ( req > 999999999 )
+		{
+			req -= 1000000000;
+			hreq++;
+		}
+		// waaaaay too much
+		if ( (c.hcredits-hreq < 0) || (c.hcredits-hreq > c.hcredits) ) return false;
 		// too much!
-		if ( (c.credits-amount < 0) || (c.credits-amount > c.credits) ) return false;
+		if ( ((c.credits-amount < 0) || (c.credits-amount > c.credits)) && (c.hcredits-hreq <= 0) ) return false;
 		return true;
 	}
 
-	static bool Take( PlayerInfo p, int amount )
+	static bool Take( PlayerInfo p, int amount, int hamount = 0 )
 	{
 		let c = Find(p);
 		if ( !c ) return false;
+		int req = amount, hreq = hamount;
+		while ( req > 999999999 )
+		{
+			req -= 1000000000;
+			hreq++;
+		}
+		// waaaaay too much
+		if ( (c.hcredits-hreq < 0) || (c.hcredits-hreq > c.hcredits) ) return false;
 		// too much!
-		if ( (c.credits-amount < 0) || (c.credits-amount > c.credits) ) return false;
-		c.credits -= amount;
+		if ( ((c.credits-amount < 0) || (c.credits-amount > c.credits)) && (c.hcredits-hreq <= 0) ) return false;
+		c.hcredits -= hreq;
+		c.credits -= req;
+		while ( c.credits < 0 )
+		{
+			c.credits += 1000000000;
+			c.hcredits--;
+		}
 		return true;
 	}
 
-	static clearscope int Get( PlayerInfo p )
+	static clearscope int, int Get( PlayerInfo p )
 	{
 		let c = Find(p);
 		if ( !c ) return 0;
-		return c.credits;
+		return c.credits, c.hcredits;
 	}
 
 	static clearscope SWWMCredits Find( PlayerInfo p )
@@ -2808,7 +2841,7 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
 			{
-				players[e.Args[0]].mo.GiveInventory(item,e.Args[2]);
+				players[e.Args[0]].mo.GiveInventory(item,e.Args[2],true);
 				if ( item is 'Weapon' ) players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
 			}
 		}
@@ -2835,7 +2868,7 @@ Class SWWMHandler : EventHandler
 				if ( amt > maxgive ) amt = maxgive;
 			}
 			else if ( amt > def.MaxAmount ) amt = def.MaxAmount;
-			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(item,amt) )
+			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(item,amt,true) )
 			{
 				players[e.Args[0]].mo.TakeInventory(item,amt);
 				// add to history
@@ -2928,8 +2961,8 @@ Class SWWMHandler : EventHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
 			}
-			SWWMCredits.Give(players[e.Args[0]],999999999);
-			SWWMScoreObj.Spawn(999999999,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
+			SWWMCredits.Give(players[e.Args[0]],1000000000);
+			SWWMScoreObj.Spawn(1000000000,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
 		}
 		else if ( e.Name ~== "swwmlorecheat" )
 		{

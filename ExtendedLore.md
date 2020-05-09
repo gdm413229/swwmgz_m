@@ -6,6 +6,9 @@ featured in this mod, or to some background story elements. All of these are
 pretty much part of the "larger picture" of my multiverse, some having been
 around since 1997 when I first started writing stories.
 
+This file will be deleted once the currently undergoing lore refining is
+complete, as it won't be needed afterwards.
+
 ---
 
 ## Corporations
@@ -438,8 +441,7 @@ the goddess Anakauser. Its members include:
   - Junifh: Scorching hot planet with many underground communities. Home to the
     Onkou, and to coalition co-founder Ix Konro.
   - Hebeku: A warm, mountainous planet, inhabited by the Votrexxians.
-  - Nahkami: Icy moon of Hebeku, inhabited by the Nukuri., co-founder
-    of the coalition
+  - Nahkami: Icy moon of Hebeku, inhabited by the Nukuri.
   - Karnanaiahma: A world of large oceans, home of the Qurensniv.
   - Buran: Formerly lush planet now covered by the matryoshka brain structure
     known as the Bleaknet, inhabited by the Burakan.
@@ -470,7 +472,7 @@ the goddess Anakauser. Its members include:
          co-founder.
   - Kuranite: Rocky planet, home of various species.
   - Nedoshiaan (former): The old planet of mad dictator god Nedoshiaan, now
-    completely barren.
+    completely barren. Former home of the Izuna race.
 - Sumayon (former): A system from the Milky way, used to house one lone planet.
   - Senekeye Keinukyenei Bhekeyuni: Homeworld of the Keinun and former home of
     Ix Sumai. Shattered and pushed out of its orbit after a great cataclysm.
@@ -495,7 +497,7 @@ in my games here.
 
 Hollow timeline ("real world"):
 
-- 1992: Waratsuki Emimaru is born.
+- February 29, 1992: Waratsuki Emimaru is born.
 - August of 2021: Hollow begins.
 - September of 2021: Hollow ends. The "Convergence Event" happens, the real
   world is destroyed. Waratsuki Emimaru becomes The Grinning Man.
@@ -508,14 +510,14 @@ Main UnSX timeline:
 - Iteration ~3.56542e208: Azadeku is erased by a Chaos Walker known as The
   Grinning Man, who takes over the world they created. Project .Blank begins.
 - ~2730000 BC: The mad dictator god Nedoshiaan is assassinated.
-- 50803 BC: Administrator Noskas Kurenai is spawned from the void, creates the
-  world of Novoskhana.
+- March 20, 50803 BC: Administrator Noskas Kurenai is spawned from the void,
+  creates the world of Novoskhana.
 - 45306 BC: The Eternal Undying Empire of Novoskhana is founded.
 - 13903 BC: The Kurenai Kingdom is founded.
 - 10675 BC: After a long absence, Father Nostros returns to the Kurenai Kingdom
   followed by an army of demonic creatures, he takes over and forces everyone
   else out. The old Kurenai Kingdom becomes what is now known as Hell.
-- 4673 BC: Prince Admun is born.
+- November 6, 4673 BC: Prince Admun is born.
 - 4648 BC: Prince Admun's parents are assassinated, he is appointed as King.
 - 4607 BC: Seras Tonkebis, Admun's personal advisor, executes his plan to take
   the throne. Admun is forced into exile on the remote Egyptian colony of the
@@ -526,7 +528,7 @@ Main UnSX timeline:
   life, inhabited by a sapient, antropomorphic species, Humans. After settling
   on Earth's moon and forming a peaceful alliance with the Lunarian natives,
   they begin construction of the Luna Research Institute.
-- 244 BC: Reubens Cyrus Karnanaiahmani is born.
+- May 25, 244 BC: Reubens Cyrus Karnanaiahmani is born.
 - 130 BC: Having escaped from their homeworld when king Marc P. Karnanaiahmani
   went mad and began executing anyone he suspected of treason, the Qurensniv
   people arrive on Earth, a planet that their Nukuri allies were supervising,
@@ -544,22 +546,22 @@ Main UnSX timeline:
 - 1744: Nekuratek is founded.
 - 1870: Zanata Nekuraku I dies on a tragic accident while testing the first
   Nokorokinylum fusion reactor. Her husband commits suicide not long after.
-- 1887: Ashley Knox is born.
-- 1894: Daniel Ischer is born.
-- 1907: Nana Miyamoto is born.
+- October 31, 1887: Ashley Knox is born.
+- August 27, 1894: Daniel Ischer is born.
+- July 7, 1907: Nana Miyamoto is born.
 - 1924: Blackmann Arms is founded.
 - 1933: The Ischer family migrates to the US.
-- 1956: Ryuji Miyamoto is born.
+- March 12, 1956: Ryuji Miyamoto is born.
 - 1973: Nana and Ryuji get married.
 - 1976: Häzel Hoodth is born.
 - 1977: A member of Hell's royal family travels to Kereshnovka in order to
   rescue Manakei, who happens to be the heir to the throne. She fails to find
   him.
-- 1980: Janus Locke Hoodth is born.
-- 1985: Taro Miyamoto is born.
+- July 30, 1980: Janus Locke Hoodth is born.
+- October 6, 1985: Taro Miyamoto is born.
 - 1987: Dr. Häzel Hoodth dies tragically, becoming a ghoul of Kereshnovka.
-- 1992: Unissix Bokurou Azadeku is born.
-- 1993: Saya Miyamoto is born.
+- February 29, 1992: Unissix Bokurou Azadeku is born.
+- March 20, 1993: Saya Miyamoto is born.
 - 2001: The Union Aerospace Armed Forces is formed.
 - 2003: Onoke Mansion Murders.
 - 2004: The Imanaki Research Foundation builds its headquarters in Kereshnovka.
@@ -585,7 +587,7 @@ Main UnSX timeline:
 - 2014: Tach-Engine Technologies is founded.
 - 2015: The UAAF rebrands itself as the UAC, having found quite a lot of
   interest in what they recovered from Imanaki.
-- 2017: Saya creates the first Maidbot.
+- July 7, 2017: Saya creates the first Maidbot.
 - 2016: Zanaveth II and Unissix Bokurou Azadeku meet during one of her research
   trips, they get married on the same day.
 - 2018: Empty Episode One. Second major incident in the town of Kereshnovka. A
@@ -595,18 +597,18 @@ Main UnSX timeline:
   advanced computing power to run thirty parallel instances of Crysis and a
   500-player Minecraft server. This lasts for several months, allowing things
   to mostly return to normal for a while, including the Tokyo Olympics.
-- 2021: The "Luna Event" happens. The first contact between humans and a
-  non-hostile alien race, the Nukuri, who had been observing our race for
+- February 2021: The "Luna Event" happens. The first contact between humans and
+  a non-hostile alien race, the Nukuri, who had been observing our race for
   centuries from a hidden research facility on the Moon, and had noticed the
   threat SUSAN posed to the planet. Following the event, Nukuri forces deployed
   to Earth successfully neutralize the rogue AI.
+- December 2021: Zanaveth II arrives on Earth, befriends Saya. With her help,
+  Saya's Maidbot is migrated to the Nekuronbot AI framework, further enhancing
+  her personality. Saya and Maidbot start dating.
 - 2022: Scotland becomes independent.
 - 2023: The two Koreas re-unify. Following years of negotiation, Galicia
   becomes part of Portugal. Ana Blanco becomes the first human woman to marry a
   Nukuri.
-- 2024: Zanaveth II arrives on Earth, befriends Saya. With her help, Saya's
-  Maidbot is migrated to the Nekuronbot AI framework, further enhancing her
-  personality. Saya and Maidbot start dating.
 - 2025: First expedition to Mars, led by the UAC.
 - 2027: William Dusk leaves Ashley's band, but not before hurting her deeply by
   escaping with her granddaughter Lyra. He is replaced as drummer by the
@@ -619,13 +621,13 @@ Main UnSX timeline:
   between two solar systems.
 - 2038: The 32-bit UNIX time rollover happens without many notable incidents.
 - 2040: Symnatek is founded.
-- 2042: Zanaveth III is born.
+- August 20, 2042: Zanaveth III is born.
 - 2044: The Rust Empire is founded.
 - 2045: The ruins of a Decade Mechanics facility are found in Sunkaeze.
 - 2049: The clearly senile Dr. Locke attempts to take over the world.
   Surrenders a couple days later during the counter-attack.
-- 2054: Ryuji Miyamoto passes away.
-- 2066: Elena "Ellen" Yanikov XXI is born.
+- June 22, 2054: Ryuji Miyamoto passes away.
+- June 6, 2066: Elena "Ellen" Yanikov XXI is born.
 - 2068: The Nukuri go through their seventh world war in their home planet.
   Zanaveth II and her wife move to Sankaideriha for the time being.
 - 2070: Ashley invites Saya to Sankaideriha, they come across Zanaveth II and
@@ -633,16 +635,16 @@ Main UnSX timeline:
   of their child while they stay there.
 - 2073: World War 3 starts thanks to a very negatively received post on social
   media from the president of the US regarding the Nukuri.
-- 2074: In an act of desperation, the US sells Texas back to Mexico in order to
-  gather funds for a "solution to all their problems" from Akari Labs. Military
-  contractors are immediately sent to Japan with several billion dollars. The
-  "Red Oni" project is started.
+- September 9, 2074: In an act of desperation, the US sells Texas back to
+  Mexico in order to gather funds for a "solution to all their problems" from
+  Akari Labs. Military contractors are immediately sent to Japan with several
+  billion dollars. The "Red Oni" project is started.
 - 2075: Blackmann Arms moves back to Germany.
 - 2077: Akari Labs deploys Ibuki, the "Red Oni" super soldier, on America, but
   it is already too late. World War 3 ends as the United States are almost
   literally dissolved by an orbital strike. In the aftermath, the Nukuri
   abandon Earth, never to come back.
-- 2080: Emperor Kirin Xanai is born.
+- April 13, 2080: Emperor Kirin Xanai is born.
 - 2082: Alaska becomes part of Canada.
 - 2091: Taro Miyamoto finds Ibuki, who had become a sort of living legend among
   wastelanders for her various feats, he also comes across Ellen, who casually
@@ -660,7 +662,7 @@ Main UnSX timeline:
   appointed by the Nukritas brothers as "Minister of Interspecies Relations"
   due to her outstanding work on the subject following her graduation at the
   University of Nos-Kora.
-- 2110: John "BIGSHOT" Gunns is born.
+- November 12, 2110: John "BIGSHOT" Gunns is born.
 - 2120: Zanaveth III enrolls at the University of Nos-Kora.
 - 2128: Zanaveth II becomes CEO of Nekuratek.
 - 2137: The United States are reformed, now called "Union States".
@@ -672,17 +674,19 @@ Main UnSX timeline:
   decides to attack mankind. Doom 3 happens.
 - 2147: Reginald E. Griggs Jr. is imprisoned after countless human remains were
   found in the basement of his summer house in Olathe.
-- 2148: The Doom episodes happen as the UAC still hasn't learned their lesson.
-  The only survivor of the incidents on Phobos and Deimos, the "Doom Marine",
-  arrives on Earth after having fought his way out of Hell, only to find it
-  invaded by Demon armies. The UAC comes into contact with him and he's tasked
-  with stopping the invasion by reaching the gate they used to enter our world,
-  and closing it shut. Seeing an opportunity to compete against the UAC, Akari
-  Labs deploys the first Demolitionist, and gives them the same mission. After
-  the victory against the Icon of Sin, the invasion ends. Saya rewards the
-  Demolitionist with a maidbot body, and a date. Months later, and despite
-  having been thoroughly reformed, the UAC still hasn't learned anything, and
-  another invasion happens. The "Doom marine" is sent there, Plutonia begins.
+- Early 2148: The Doom episodes happen as the UAC still hasn't learned their
+  lesson. The only survivor of the incidents on Phobos and Deimos, the "Doom
+  Marine", arrives on Earth after having fought his way out of Hell, only to
+  find it invaded by Demon armies. The UAC comes into contact with him and he's
+  tasked with stopping the invasion by reaching the gate they used to enter our
+  world, and closing it shut.
+- June 6, 2148: Seeing an opportunity to compete against the UAC, Akari Labs
+  deploys the first Demolitionist, and gives them the same mission. After the
+  victory against the Icon of Sin, the invasion ends. Saya rewards the
+  Demolitionist with a maidbot body, and a date.
+- Late 2148: Months later, and despite having been thoroughly reformed, the UAC
+  still hasn't learned anything, and another invasion happens. The "Doom
+  Marine" is sent there, Plutonia begins.
 - 2149: An UAC-owned ship en route to the Jupiter base is hijacked, Demon
   reinforcements arrive. The marine manages to fight them off again
   (Evilution). After the incident he is decomissioned, and the Doom episodes
@@ -704,28 +708,30 @@ Main UnSX timeline:
 - 2171: The "Akari Project". Akari Labs manages to extend their teleportation
   technology to directly travel between any points in space between any
   universes, arbitrarily, without the need to pair them beforehand by building
-  connected teleporters. This new technology was named "interportals". After
-  searching for "places of interest for testing", The Demolitionist is deployed
-  in a world called Parthoris, and takes part on a mission to defeat an evil
-  sorcerer who had taken over the land. A month later, following a
-  recommendation from Ashley Knox, the second contact with the Anarukon
-  happens, this time all going peacefully. Saya Miyamoto meets Kirin Xanai,
-  just one week after they met, their marriage brings forth an alliance between
-  the humans and the Anarukon. Two weeks after the wedding, a second
-  exploration is initiated, with the Demolitionist deployed into a realm known
-  as Cronos in order to defeat an associate of the old sorcerer from their
-  previous mission.
-- 2173: Third major exploration, with the Demolitionist taking part on a rebel
-  uprising in a world dominated by a cult known as the Order of the One God.
+  connected teleporters. This new technology was named "interportals".
+- April 9, 2171: After searching for "places of interest for testing", The
+  Demolitionist is deployed in a world called Parthoris, and takes part on a
+  mission to defeat an evil sorcerer who had taken over the land.
+- May 1, 2171: A month later, following a recommendation from Ashley Knox, the
+  second contact with the Anarukon happens, this time all going peacefully.
+  Saya Miyamoto meets Kirin Xanai.
+- May 8, 2171: The marriage between Saya and Kirin brings forth an alliance
+  between the humans and the Anarukon.
+- May 25, 2171: Two weeks after the wedding, a second exploration is initiated,
+  with the Demolitionist deployed into a realm known as Cronos in order to
+  defeat an associate of the old sorcerer from their previous mission.
+- August 13, 2173: Third major exploration, with the Demolitionist taking part
+  on a rebel uprising in a world dominated by a cult known as the Order of the
+  One God.
 - 2174: The prophecy of Mr. BIG SHOT comes true as the "Great Face In The Sky"
   reveals itself. It is defeated by a single man, one John A. Bortson III.
 - 2175: Reginald E. Griggs Jr. is executed by lethal injection. His last words:
   "those brats deserved it, they didn't know how to use a fucking chair lol".
-- 2178: A group of monks discover a mansion haunted by demons, become trapped.
-  Through the use of advanced magicks, the head monk summons the "Doom Slayer",
-  a dimension hopping warrior highly experienced in excising demons, and
-  request his services. Once the evils of the mansion are eliminated, a
-  mysterious figure is seen leaving it afterwards.
+- October 31, 2178: A group of monks discover a mansion haunted by demons,
+  become trapped. Through the use of advanced magicks, the head monk summons
+  the "Doom Slayer", a dimension hopping warrior highly experienced in excising
+  demons, and request his services. Once the evils of the mansion are
+  eliminated, a mysterious figure is seen leaving it afterwards.
 - 2181: An old man, who later reveals himself as Manakei, contacts Akari Labs
   with a request to be transported to Hell. After reaching it, he unleashes his
   full power, and singlehandedly defeats the remaining usurper generals, who
@@ -760,13 +766,13 @@ Main UnSX timeline:
   group of archaeologists studying some ancient alien ruins send out a distress
   signal, something has clearly gone wrong, and they're being attacked by an
   unidentified hostile force. A team of mercenaries is sent.
+- 2291: The Liandri Grand Tournament begins.
 - 2298: A strange humanoid creature is carried into the Vault. The Mishe
   brothers announce that "although retrieving the weapon proved to be quite
   difficult, everything is now ready".
-- 2299: Unissix Bokurou Azadeku dies under mysterious circumstances. Hours
-  later, she is seen alive once again, although her appearance has changed
-  dramatically.
-- 2291: The Liandri Grand Tournament begins.
+- February 29, 2299: Unissix Bokurou Azadeku dies under mysterious
+  circumstances. Hours later, she is seen alive once again, although her
+  appearance has changed dramatically.
 - 2304: The Phayder Corporation attacks the Twin Souls colony. UT3 happens.
 - 2307: After a whistleblower reveals the details of Liandri's involvement with
   the Necris invasion of 2304, the corporation is dissolved.
@@ -781,7 +787,9 @@ Main UnSX timeline:
 - 2327: Elena Yanikov XXII, daughter of Taro and Elena XXI, is born.
 - 2330: Saya and Kirin have their first child, Yasu, who grows up to become
   the new Rust Emperor.
-- 2336: Misa Unissix devises the "Unissix Tournaments". UnSX 1 begins.
+- 2336: Misa Unissix devises the "Unissix Tournaments", a VR gladiatorial event
+  akin to the old Liandri Tournaments, but without any real blood shed. UnSX 1
+  begins.
 - 2337: The first tournament ends with Raik L Raikishionen, prime minister of
   the Nukuri Unified Government, as champion.
 - 2338: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.

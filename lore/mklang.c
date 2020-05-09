@@ -162,21 +162,23 @@ static int ftw_callback( const char *path, const struct stat *st,
 	return FTW_CONTINUE;
 }
 
+#define NLANGS 3
+
 int main( void )
 {
-	const char langs[3][16] =
+	const char langs[NLANGS][16] =
 	{
 		"default",
 		"es",
 		"jp"
 	};
-	const char langfiles[3][32] =
+	const char langfiles[NLANGS][32] =
 	{
 		"../language.def_lore",
 		"../language.es_lore",
 		"../language.jp_lore"
 	};
-	for ( int i=0; i<3; i++ )
+	for ( int i=0; i<NLANGS; i++ )
 	{
 		lf = fopen(langfiles[i],"wb");
 		if ( !lf ) continue;

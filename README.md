@@ -168,15 +168,15 @@ Primary fire shoots one barrel at a time.
 
 Secondary fire shoots five barrels at once, watch out for the recoil.
 
-Press the zoom button to fire all barrels at the same time, but keep in mind
-this might kill you too if you're not well protected.
+Press the zoom button to fire all barrels at the same time, but this time
+REALLY watch out for the recoil.
 
 Reload reloads (obviously). The process is very complicated so I'll explain it
 better as a list:
  - Press fire to change the ammo type to load.
  - Press altfire to queue reloads, if the selected ammo is exhausted, you will
    be prompted to reselect one.
- - Press zoom to undo the last action (or cancel if there's nothing to undo).
+ - Press zoom to "auto-load". Stronger ammo types will be prioritized.
  - In single player, the game is paused when you're in the queueing process, so
    you can take your time, but in coop you better have someone to cover you
    while you micromanage this beast.
@@ -186,8 +186,6 @@ better as a list:
  - Press reload again to start filling it up (or cancel if there's no queue).
  - While loading shells, you can stop the reload by pressing any weapon button.
  - For a skilled combat robot like you, reloading this should be very fast.
- - The barrels have a mechanism that prevents unspent shells from being
-   ejected, so those will stay there until they're fired.
 
 People like to nickname it the "Ballbuster". You'll see why.
 
@@ -201,7 +199,7 @@ Primary fire deploys a curtain of hot lead, it covers a rather wide angle.
 Secondary fire unleashes the shitstorm bomb. If you thought primary fire was
 spammy, think again.
 
-Reload toggles between wide spread (default) and tight spread for primary.
+Zoom toggles between wide spread (default) and tight spread for primary.
 
 This weapon made the Unreal Engine cry, so GZDoom may suffer a lot too.
 
@@ -219,7 +217,7 @@ Primary fire shoots a hot flaming rocket that unleashes hell in a wide area.
 
 Secondary fire lobs it as a grenade that will bounce around.
 
-Reload changes the ammo type, there are four options (see ammo section below).
+Zoom changes the ammo type, there are four options (see ammo section below).
 
 This thing is more explosive than it looks, so if you're reading this, Icarus,
 DO NOT use it at close range.
@@ -246,9 +244,9 @@ abilities.
 Secondary fire is a concentrated beam shot, a very old thing from the original
 UnSX 1 incarnation. The beam can penetrate multiple solid targets.
 
-Reload deploys a capsule that releases a massive sphere of pure energy
-that tracks down any hostile targets. It will rip through everything and even
-bounce off surfaces, but it has a rather limited lifespan.
+Zoom deploys a capsule that releases a massive sphere of pure energy that
+tracks down any hostile targets. It will rip through everything and even bounce
+off surfaces, but it has a rather limited lifespan.
 
 If the beam hits either of the other energy blobs, they will detonate with
 highly amplified damage and range.
@@ -278,10 +276,10 @@ careful.
 
 ### 1.150 XSB Bullets, replaces Cells, Runes
 
-The 1.150 caliber Extreme Super Burst bullets employ an explodium microcharge
-to be shot with enough energy to reach a relatively high, although still
-subsonic speed. They are hard to come by, so spawns are scarce, and they won't
-even pop up in Hammerspace Embiggeners, only on higher tier Fabricators.
+The 1.150 caliber eXplosive Super Burst bullets employ an explodium microcharge
+to be shot with enough energy to reach a relatively high velocity. They are
+hard to come by, so spawns are scarce, and they won't even pop up in
+Hammerspace Embiggeners, only on higher tier Fabricators.
 
 ### Candy Gun (slot 9), replaces BFG9000, Firemace, Bloodscourge (stub)
 
@@ -310,14 +308,15 @@ charging, using either fire button will release the shot. Make sure to keep
 some distance from your targets, because the resulting blast has a pretty
 nasty amount of splash damage.
 
-Secondary fire initiates a reverse charge process for another shot. The result
-of this is an implosion of massive strength located at a singular point, which
-temporarily creates a miniature black hole that will eat up anything that's not
-bolted down, including yourself.
+Secondary fire swaps the orientation of the ammo box, allowing for a "reverse
+charge". The result of this is an implosion of massive strength located at a
+singular point, temporarily creating a vortex that will pull in anything that's
+not bolted down and tear it apart through potent tidal forces, including
+yourself if you don't keep your distance.
 
 Reloading cancels the charge. Ammo will not be wasted, but it will have to vent
-for a while longer than after firing normally. Note that you can't cancel if
-it's already full.
+for a while longer than after firing normally. If the ammo was spent, reloads
+a new ammo box instead.
 
 Unlike its previous incarnation in SWWM Platinum, this one doesn't have such an
 obscene pre-fire delay, so it's much easier to land a shot.
@@ -325,8 +324,8 @@ obscene pre-fire delay, so it's much easier to land a shot.
 ### Puronokorokinylum Crystal
 
 Additional ammo charge for the Ynykron Artifact. These don't spawn, so you'll
-have to get more ammo by finding additional weapon pickups (at least until the
-store is implemented).
+have to get more ammo by finding additional weapon pickups or managing to
+afford one in the store.
 
 ---
 
@@ -460,9 +459,9 @@ be configurable.
 Message display. Can be configured to show different numbers of messages
 depending on whether the chat prompt is open. Chat messages take much longer to
 expire than others, so there's less of a chance to miss them, as they might pop
-back up when the less important ones expire. A full chat history can also be
-read at any time in the Demolitionist Menu. Repeated messages are compressed
-with a multiplier suffix.
+back up when the less important ones expire. In multiplayer games, a full chat
+history can also be read at any time in the Demolitionist Menu. Repeated
+messages are compressed with a multiplier suffix.
 
 ### Top right corner
 
@@ -472,7 +471,7 @@ The scoring system is pretty straightforward. Each thing you kill (even if not
 an enemy) will give you points according to a quarter of its base health,
 rounded up to the nearest multiple of 10 and capped to 1000, plus these bonuses
 (in order of application):
- * x1.25 for an overkill (enemy was gibbed or killed in one shot).
+ * x1.25 for an overkill (enemy received twice its base health in damage).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.
  * +100 for killing an enemy without having taken damage since last spawn, with
@@ -490,8 +489,8 @@ In Doom and Heretic, collected keys will be displayed below the score box.
 
 ### Bottom left corner
 
-Your health, armor and fuel, along with an inventory bar, and all active
-armors and powerups (with their respective durability/duration).
+Your health, armor and fuel, along with an inventory box, and all active armors
+and powerups (with their respective durability/duration).
 
 ### Bottom border
 
@@ -511,11 +510,11 @@ smoke clouds, a targeter has been implemented, which will show the following:
 * Players and monsters: Draws an identificative label and a health bar. The bar
   can display overhealing on players, and also indicate when someone is
   invulnerable. When they take damage or get healed, numbers (either red or
-  green) will pop up around them. The targeter only picks up enemies in your
-  direct line of sight, gradually fading once you lose sight of them, and can
-  only display up to 40 individual bars, giving priority first to players, then
-  the nearest enemies. The Omnisight increases the time out-of-sight targets
-  remain targetted.
+  green) will pop up around them. The targeter only picks up active enemies in
+  your direct line of sight, gradually fading once you lose sight of them, and
+  can only display up to 40 individual bars (configurable), giving priority
+  first to players, then the nearest enemies. The Omnisight increases the time
+  out-of-sight targets remain targetted.
 * Keys and map exits: If you've picked up an Omnisight, key items and any exit
   lines will be marked and labeled, along with a little distance indicator in
   map units. Note that this doesn't work for script-triggered exits.

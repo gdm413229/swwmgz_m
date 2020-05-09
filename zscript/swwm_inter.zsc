@@ -1,3 +1,5 @@
+// Custom intermission screens
+
 Class SWWMStatScreen : StatusScreen abstract
 {
 	transient TextureID bgtex, arttex;
@@ -668,7 +670,8 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 			{
 				str = String.Format("%3d\cu%%\c-",GetPct(cnt_secret[i],wbs.maxsecret));
 				Screen.DrawText(fnt,(!wbs.maxsecret||(cnt_secret[i]>=wbs.maxsecret))?Font.CR_GOLD:Font.CR_WHITE,xx+secretlen-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				missedsecret -= cnt_secret[i];			}
+				missedsecret -= cnt_secret[i];
+			}
 			xx += secretlen+spc;
 			str = String.Format("%3d\cu%%\c-",GetPct(cnt_kills[i],wbs.maxkills));
 			Screen.DrawText(fnt,(!wbs.maxkills||(cnt_kills[i]>=wbs.maxkills))?Font.CR_GOLD:Font.CR_WHITE,xx+killslen-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);

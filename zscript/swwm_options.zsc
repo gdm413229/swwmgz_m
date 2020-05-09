@@ -1,3 +1,4 @@
+// Menu stuff
 
 // voice selector
 Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
@@ -178,5 +179,24 @@ Class SWWMOptionMenu : OptionMenu
 			Screen.DrawText(fnt,Font.CR_WHITE,4*CleanXFac_1,ypos,lines.StringAt(i),DTA_CleanNoMove_1,true);
 			ypos += fnt.GetHeight()*CleanYFac_1;
 		}
+	}
+}
+
+Class SWWMMainMenu : ListMenu
+{
+	transient Font TewiFont;
+
+	override void Drawer()
+	{
+		Super.Drawer();
+		int xx, yy;
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		String str = StringTable.Localize("$SWWM_MODVER");
+		int width = TewiFont.StringWidth(str)+8;
+		int height = TewiFont.GetHeight()+4;
+		xx = CleanWidth_1-width;
+		yy = CleanHeight_1-height;
+		Screen.Dim("Black",.75,int(xx*CleanXFac_1),int(yy*CleanYFac_1),int(width*CleanXFac_1),int(height*CleanYFac_1));
+		Screen.DrawText(TewiFont,Font.CR_GOLD,(xx+4)*CleanXFac_1,(yy+2)*CleanYFac_1,str,DTA_CleanNoMove_1,true);
 	}
 }

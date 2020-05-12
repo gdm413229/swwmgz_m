@@ -543,8 +543,9 @@ Main UnSX timeline:
 - 1097: Admun is freed, migrates to Scotland. Adopts his current name of
   "James Admun Tachmek-Smith".
 - 1308: The University of Nos-Kora is founded.
+- March 21st, 1605: Zanata Nekuraku I is born.
 - 1744: Nekuratek is founded.
-- 1870: Zanata Nekuraku I dies on a tragic accident while testing the first
+- 1870: Zanata I dies on a tragic accident while testing the first
   Nokorokinylum fusion reactor. Her husband commits suicide not long after.
 - October 31, 1887: Ashley Knox is born.
 - August 27, 1894: Daniel Ischer is born.
@@ -552,6 +553,7 @@ Main UnSX timeline:
 - 1924: Blackmann Arms is founded.
 - 1933: The Ischer family migrates to the US.
 - March 12, 1956: Ryuji Miyamoto is born.
+- August 10, 1969: Zanaveth Nekuraku II is born.
 - 1973: Nana and Ryuji get married.
 - 1976: Häzel Hoodth is born.
 - 1977: A member of Hell's royal family travels to Kereshnovka in order to
@@ -621,7 +623,7 @@ Main UnSX timeline:
   between two solar systems.
 - 2038: The 32-bit UNIX time rollover happens without many notable incidents.
 - 2040: Symnatek is founded.
-- August 20, 2042: Zanaveth III is born.
+- August 20, 2042: Zanaveth Nekuraku III is born.
 - 2044: The Rust Empire is founded.
 - 2045: The ruins of a Decade Mechanics facility are found in Sunkaeze.
 - 2049: The clearly senile Dr. Locke attempts to take over the world.

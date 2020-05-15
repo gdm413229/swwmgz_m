@@ -481,6 +481,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_SERPENTRIDERS2";	// defeated d'sparil
 			else if ( text ~== "SWWM_LORETXT_XANIMEN" )
 				text = "SWWM_LORETXT_XANIMEN2";	// footnote about nuoma
+			else if ( text ~== "SWWM_LORETXT_ZANAVETH2" )
+				text = "SWWM_LORETXT_ZANAVETH22";	// met at wedding
 		}
 		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
@@ -503,8 +505,16 @@ Class SWWMLoreLibrary : Thinker
 		}
 		// check that it's valid
 		if ( StringTable.Localize(tag,false) == tag ) return false;
-		if ( StringTable.Localize(tab,false) == tab ) return false;
-		if ( StringTable.Localize(text,false) == text ) return false;
+		if ( StringTable.Localize(tab,false) == tab )
+		{
+			Console.Printf("Entry \"%s\" defines no tab.",ref);
+			return false;
+		}
+		if ( StringTable.Localize(text,false) == text )
+		{
+			Console.Printf("Entry \"%s\" defines no text.",ref);
+			return false;
+		}
 		// check if existing
 		for ( int i=0; i<ent.Size(); i++ )
 		{

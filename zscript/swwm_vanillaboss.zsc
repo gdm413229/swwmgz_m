@@ -111,6 +111,8 @@ Class SWWMVanillaBossHandler : EventHandler
 		}
 		else if ( gameinfo.gametype&GAME_Hexen )
 		{
+			if ( level.mapname ~== "TEST" )	// not in Kinsie's test map
+				return;
 			if ( e.Thing is 'ClericBoss' )
 			{
 				bossactors.Push(e.Thing);

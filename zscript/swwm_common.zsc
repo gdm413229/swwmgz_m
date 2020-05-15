@@ -466,7 +466,7 @@ Class SWWMLoreLibrary : Thinker
 		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
 		{
 			if ( text ~== "SWWM_LORETXT_SAYA" )
-				text = "SWWM_LORETXT_SAYA2";	// married kirin
+				text = "SWWM_LORETXT_SAYA3";	// married kirin
 			else if ( text ~== "SWWM_LORETXT_ANARUKON" )
 				text = "SWWM_LORETXT_ANARUKON2";	// comments from miyamoto-xanai wedding
 			else if ( text ~== "SWWM_LORETXT_HELL" )
@@ -486,7 +486,9 @@ Class SWWMLoreLibrary : Thinker
 		}
 		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
-			if ( text ~== "SWWM_LORETXT_AKARILABS" )
+			if ( text ~== "SWWM_LORETXT_SAYA" )
+				text = "SWWM_LORETXT_SAYA2";	// dating demo
+			else if ( text ~== "SWWM_LORETXT_AKARILABS" )
 				text = "SWWM_LORETXT_AKARILABS2";	// demo won, akari project announced
 			else if ( text ~== "SWWM_LORETXT_DEMOLITIONIST" )
 				text = "SWWM_LORETXT_DEMOLITIONIST2";	// demo rewarded with maidbot frame

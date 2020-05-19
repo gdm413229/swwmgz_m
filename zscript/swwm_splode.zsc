@@ -427,6 +427,8 @@ Class ExplodiumGun : SWWMWeapon
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
 		Weapon.SelectionOrder 2600;
+		//Inventory.MaxAmount 2;
+		//Weapon.SisterWeapon "DualExplodiumGun";
 		Stamina 8000;
 		ExplodiumGun.ClipCount 7;
 	}
@@ -568,3 +570,21 @@ Class ExplodiumGun : SWWMWeapon
 		Stop;
 	}
 }
+
+// TODO Dual Explodium Guns (eventually)
+/*
+Class DualExplodiumGun : ExplodiumGun
+{
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+			return (SisterWeapon&&(SisterWeapon.Amount > 1));
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	Default
+	{
+		Tag "$T_EXPLODIUM2";
+		Weapon.SisterWeapon "ExplodiumGun";
+	}
+}*/

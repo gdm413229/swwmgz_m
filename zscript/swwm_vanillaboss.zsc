@@ -57,6 +57,16 @@ Class SWWMVanillaBossHandler : EventHandler
 				}
 				bosstag = "$BT_SPIDER";
 			}
+			else if ( level.mapname ~== "MAP07" )
+			{
+				if ( (e.Thing is 'Fatso') || (e.Thing is 'Arachnotron') )
+				{
+					bossactors.Push(e.Thing);
+					if ( upgrademe )
+						e.Thing.Health *= 2;
+				}
+				bosstag = "$BT_DIMPLE";
+			}
 			else if ( level.mapname ~== "MAP30" )
 			{
 				if ( e.Thing is 'BossBrain' )
@@ -116,19 +126,19 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'ClericBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.Health *= 2;
 				bosstag = "$BT_CLERIC";
 			}
 			else if ( e.Thing is 'FighterBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.Health *= 2;
 				bosstag = "$BT_FIGHTER";
 			}
 			else if ( e.Thing is 'MageBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.Health *= 2;
 				bosstag = "$BT_MAGE";
 			}
 			else if ( e.Thing is 'Dragon' )
@@ -175,7 +185,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			for ( int i=0; i<bossactors.Size(); i++ )
 			{
 				if ( !bossactors[i] ) continue;
-				thealth += bossactors[i].Health;
+				thealth += max(0,bossactors[i].Health);
 			}
 			hmax = thealth;
 			for ( int i=0; i<30; i++ ) oldhealth[i] = thealth;
@@ -192,7 +202,7 @@ Class SWWMVanillaBossHandler : EventHandler
 		for ( int i=0; i<bossactors.Size(); i++ )
 		{
 			if ( !bossactors[i] ) continue;
-			newhealth += bossactors[i].Health;
+			newhealth += max(0,bossactors[i].Health);
 		}
 		oldhealth[0] = newhealth;
 		int curcumm = max(0,thealth-newhealth);

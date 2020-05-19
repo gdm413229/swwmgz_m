@@ -17,7 +17,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
 		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
-	transient CVar lang;
+	transient CVar lang, fuzz;
 	transient Font TewiFont, MPlusFont;
 	int curtab, oldtab;
 	// for scrolling
@@ -1833,7 +1833,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		Vector2 origin = (ss.x-640,ss.y-400)/2.;
-		Screen.DrawTexture(FancyBg,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Add,DTA_Alpha,.5);
+		if ( !fuzz ) fuzz = CVar.GetCvar('swwm_fuzz',players[consoleplayer]);
+		if ( fuzz.GetBool() )
+			Screen.DrawTexture(FancyBg,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Add,DTA_Alpha,.5);
 		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw tabs
 		double xx = 3, yy = 0;

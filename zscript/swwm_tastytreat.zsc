@@ -838,6 +838,42 @@ Class CandyGun : SWWMWeapon
 
 	Property ClipCount : ClipCount;
 
+	// re-edit to allow picking up spares in coop
+	override bool HandlePickup( Inventory item )
+	{
+		if ( item.GetClass() == GetClass() )
+		{
+			bool ammoget, spareget;
+			[ammoget, spareget] = CandyGun(item).PickupForAmmoAndSpares(self);
+			if ( ammoget )
+			{
+				item.bPickupGood = true;
+				if ( !spareget )
+				{
+					// sell excess
+					int sellprice = SWWMUtility.Round100(Stamina*.7);
+					SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
+					SWWMCredits.Give(Owner.player,sellprice);
+					if ( Owner.player )
+						Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+				}
+				return true;
+			}
+		}
+		return Super.HandlePickup(item);
+	}
+	protected bool, bool PickupForAmmoAndSpares( Weapon ownedWeapon )
+	{
+		bool gotstuff = false, gotspares = false;
+		int oldamount = ownedWeapon.Ammo1.Amount;
+		gotstuff = AddExistingAmmo(ownedWeapon.Ammo1,AmmoGive1);
+		gotspares = AddExistingAmmo(ownedWeapon.Ammo2,AmmoGive2);
+		let Owner = ownedWeapon.Owner;
+		if ( gotstuff && Owner && Owner.player && (oldamount == 0) )
+			PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo1.GetClass());
+		return gotstuff, gotspares;
+	}
+
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/CandygunDisplay.png",TexMan.Type_Any);

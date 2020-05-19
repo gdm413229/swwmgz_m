@@ -5,6 +5,15 @@ Mixin Class SWWMAutoUseFix
 	{
 		if ( GetClass() == item.GetClass() )
 		{
+			// sell excess if there's a price
+			if ( bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
+			{
+				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+			}
 			if ( Use(true) ) Amount--;
 		}
 		return Super.HandlePickup(item);
@@ -906,6 +915,26 @@ Class SWWMWeapon : Weapon abstract
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 
+	override bool HandlePickup( Inventory item )
+	{
+		if ( (GetClass() == item.GetClass()) )
+		{
+			if ( Weapon(item).PickupForAmmo(self) )
+				item.bPickupGood = true;
+			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
+			{
+				// sell excess
+				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+				item.bPickupGood = true;
+			}
+			return true;
+		}
+		return Super.HandlePickup(item);
+	}
 	override void AttachToOwner( Actor other )
 	{
 		Inventory.AttachToOwner(other);

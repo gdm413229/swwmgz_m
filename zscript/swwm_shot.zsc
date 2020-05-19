@@ -1564,8 +1564,8 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(40000);
-		SWWMHandler.DoBlast(self,200,120000);
-		A_Explode(7777,200);
+		SWWMHandler.DoBlast(self,600,1200000);
+		A_Explode(7777,600);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1691,8 +1691,8 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,200,90000);
-		A_Explode(777,200);
+		SWWMHandler.DoBlast(self,400,900000);
+		A_Explode(777,400);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigScorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -1816,7 +1816,7 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,200,60000);
+		SWWMHandler.DoBlast(self,200,600000);
 		A_Explode(77,200);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("Scorch",-172);

@@ -18,7 +18,7 @@ Extra things:
    - A background with a bit more flair than just the fuzz shader.
    - Some sort of flyby featuring the Demolitionist booting up, closeups of
      weapons/items etc.
- - Dual wielding Explodium Gun?
+ - Dual wielding Explodium Gun
  - Randomized vanilla monster retagging with multiple options
  - Japanese localization
  - Keen replacement (need ideas)

@@ -38,7 +38,7 @@ respective weapon.
   Candygun	| 1000000
    Candy Mag	| 100000
    Spare Gun	| 600000
-  Ynykron	| 2500000
+  Ynykron	| 5000000
    Crystal Unit	| 1000000
 
 #### DLC weapons and ammo (when available)
@@ -62,7 +62,7 @@ These will be available long after the first release.
    EMP Core	| 60000
   PROWEL&TADEL	| 1600000
    Insane Core	| 150000
-  S.H. Fun Ball	| 2000000
+  S.H. Fun Ball	| 4000000
    Fun Stuff	| 800000
 
 #### Other items

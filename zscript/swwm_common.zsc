@@ -209,6 +209,11 @@ Class SWWMUtility
 		a.roll = -fpitch*ddiff1;
 		a.angle = dang;
 	}
+
+	static clearscope int Round100( double x )
+	{
+		return int(ceil(x/100.)*100.);
+	}
 }
 
 // Stats
@@ -805,7 +810,7 @@ Class SWWMCombatTracker : Thinker
 		t = new("SWWMCombatTracker");
 		t.ChangeStatNum(STAT_USER);
 		t.mytarget = target;
-		if ( target.player || target.bISMONSTER )
+		if ( target.player || target.bISMONSTER || (target is 'BossBrain') )
 			t.mytag = target.player?target.player.GetUserName():target.GetTag();
 		else t.mytag = "";
 		if ( target.player )
@@ -895,6 +900,11 @@ Class SWWMCombatTracker : Thinker
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// any visible enemies within 600mu
+			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
+		}
+		else if ( mytarget is 'BossBrain' )
+		{
+			// teh romero, only if visible
 			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
 		}
 		lasthealth = newhealth;
@@ -2328,11 +2338,14 @@ Class SWWMHandler : EventHandler
 			}
 			if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED,e.Thing);
 			// update combat tracker for it
-			for ( SWWMCombatTracker t=trackers; t; t=t.next )
+			if ( !(e.Thing is 'BossBrain') )
 			{
-				if ( t.mytarget != e.Thing ) continue;
-				t.updated = level.maptime+35;
-				break;
+				for ( SWWMCombatTracker t=trackers; t; t=t.next )
+				{
+					if ( t.mytarget != e.Thing ) continue;
+					t.updated = level.maptime+35;
+					break;
+				}
 			}
 		}
 		if ( e.Thing.player )
@@ -2415,7 +2428,7 @@ Class SWWMHandler : EventHandler
 				{
 					scr.xscore[ofs] = 0;
 					scr.xtcolor[ofs] = Font.CR_FIRE;
-					scr.xstr[ofs] = "$SWWM_OVERKILL";
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_OVERKILL");
 					scr.xcnt = ++ofs;
 				}
 			}
@@ -2426,7 +2439,7 @@ Class SWWMHandler : EventHandler
 				{
 					scr.xscore[ofs] = (multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1);
 					scr.xtcolor[ofs] = Font.CR_FIRE;
-					scr.xstr[ofs] = "$SWWM_MULTIKILL";
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_MULTIKILL");
 					scr.xcnt = ++ofs;
 				}
 			}
@@ -2440,7 +2453,7 @@ Class SWWMHandler : EventHandler
 				{
 					scr.xscore[ofs] = spreecount[pnum]+1;
 					scr.xtcolor[ofs] = Font.CR_FIRE;
-					scr.xstr[ofs] = "$SWWM_SPREEKILL";
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_SPREEKILL");
 					scr.xcnt = ++ofs;
 				}
 			}
@@ -2451,7 +2464,7 @@ Class SWWMHandler : EventHandler
 				{
 					scr.xscore[ofs] = 0;
 					scr.xtcolor[ofs] = Font.CR_FIRE;
-					scr.xstr[ofs] = "$SWWM_BOSSKILL";
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_BOSSKILL");
 					scr.xcnt = ++ofs;
 				}
 			}
@@ -2502,14 +2515,34 @@ Class SWWMHandler : EventHandler
 		if ( hnd ) hnd.DoKeyTagFix(a);
 	}
 
+	// spreads apart overlapping inventory items, since they'll look bad otherwise
+	private void CheckSpreadOut( Actor a )
+	{
+		let bt = BlockThingsIterator.Create(a,16);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || (t == a) || !(t is 'Inventory') || !(t.spawnpoint ~== a.spawnpoint) ) continue;
+			double ang = FRandom[Spreading](0,360);
+			a.vel += (cos(ang)*4,sin(ang)*4,3);
+			break;
+		}
+	}
+
 	override void WorldThingSpawned( WorldEvent e )
 	{
+		if ( e.Thing is 'Inventory' )
+			CheckSpreadOut(e.Thing);
 		if ( e.Thing is 'Key' )
 		{
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
-		else if ( e.Thing is 'BossBrain' ) e.Thing.SetTag("$FN_BOSSBRAIN");
+		else if ( e.Thing is 'BossBrain' )
+		{
+			e.Thing.SetTag("$FN_BOSSBRAIN");
+			e.Thing.A_SetSize(20,70);
+		}
 		else if ( e.Thing is 'CommanderKeen' ) e.Thing.SetTag("$FN_KEEN");
 		if ( (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}

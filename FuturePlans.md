@@ -4,10 +4,10 @@ after the first release.
 * DLC Weapon Set:
   - Itamex Reinforced Hammer (UnSX 5)
   - Gravity Gun (Ultra Suite)
-  - Splatter (SWWM)
+  - Puntzer Gamma (Ultra Suite 2)
   - Skull Launcher (Weirdweapons)
   - Blackfire Igniter (UnSX 5, Ultra Suite 3)
-  - Puntzer Gamma (Ultra Suite 2)
+  - Sparkster x3 (UnSX 2)
   - Rail Carbine ("Tesla Beamer" in Ultra Suite 2 & 3)
   - PROWEL & TADEL (Ultra Suite 2 & 3)
   - Super Happy Fun Ball (SWWM Z)

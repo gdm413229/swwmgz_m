@@ -1450,7 +1450,16 @@ Class SWWMLamp : Inventory
 		// add charge
 		if ( item.GetClass() == GetClass() )
 		{
-			if ( Charge > 0 )
+			if ( (Charge >= Default.Charge) && (Amount+item.Amount > MaxAmount) )
+			{
+				// sell excess
+				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+			}
+			else if ( Charge > 0 )
 			{
 				int AddCharge = Charge+SWWMLamp(item).Charge;
 				Charge = min(Default.Charge,AddCharge);

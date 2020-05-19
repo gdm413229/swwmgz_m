@@ -635,8 +635,8 @@ Class SWWMStatusBar : BaseStatusBar
 			fnt = LangFont(mMiniwiFont);
 			for ( int i=0; i<snum.xcnt; i++ )
 			{
-				tag = StringTable.Localize(snum.xstr[i]);
-				if ( snum.xscore[i] == int.max ) tag.AppendFormat(" %s",StringTable.Localize("$SWWM_MAX"));
+				tag = snum.xstr[i];
+				if ( snum.xscore[i] == int.max ) tag.AppendFormat(" MAX");
 				else if ( snum.xscore[i] > 0 ) tag.AppendFormat(" x%d",snum.xscore[i]);
 				Screen.DrawText(fnt,snum.xtcolor[i],(vpos.x-hss.x*(fo.x+fnt.StringWidth(tag)/2.))/hss.x,(vpos.y-hss.y*(fo.y+(fnt.GetHeight()/2.)))/hss.y,tag,DTA_VirtualWidthF,sss.x,DTA_VirtualHeightF,sss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				fo.y += fnt.GetHeight();

@@ -3,12 +3,11 @@ Fundamental things:
  - Silver Bullet
  - Ynykron
  - Wallbuster
- - Clean up / rewrite lore entries
+ - Spanish lore entry retranslation
 
 Not so fundamental things:
  - Chanceboxes
  - Extra Demolitionist animations (swim, weapon melee/reload/idle)
- - Separate HUD and healthbar/damnum scaling factors
 
 Extra things:
  - Art for custom intermission

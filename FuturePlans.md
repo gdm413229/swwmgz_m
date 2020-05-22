@@ -16,6 +16,7 @@ after the first release.
   - Radio (add-on)
   - Pong minigame
   - Selling items at the store
+* Achievements
 * 4komas on the intermission screen
 * Actually make a fancy titlemap
 * Mod trailer

@@ -1,9 +1,7 @@
 Fundamental things:
- - Sparkster tertiary fire
+ - Wallbuster
  - Silver Bullet
  - Ynykron
- - Wallbuster
- - Spanish lore entry retranslation
 
 Not so fundamental things:
  - Chanceboxes

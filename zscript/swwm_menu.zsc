@@ -1932,7 +1932,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
 			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
-			str = String.Format("\cx%s\c-%g\cul\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/6.);
+			str = String.Format("\cx%s\c-%g\cul\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.);
 			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += 16;
 			str = String.Format("\cx%s\c-%g\cukm/h\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE));

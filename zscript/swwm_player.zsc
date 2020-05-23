@@ -285,8 +285,8 @@ Class Demolitionist : PlayerPawn
 			if ( swwm_extraalert ) A_AlertMonsters(800);
 			dashboost *= (player.cmd.buttons&BT_USER2)?.8:.1;
 		}
-		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
-		dashfuel = max(0.,dashfuel-dashboost);
+		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost*1.5);
+		dashfuel = max(0.,dashfuel-dashboost*1.5);
 		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
 		fuelcooldown = max(60,fuelcooldown);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
@@ -300,7 +300,7 @@ Class Demolitionist : PlayerPawn
 		else
 		{
 			if ( swwm_extraalert ) A_AlertMonsters(800);
-			dashboost *= (player.cmd.buttons&BT_JUMP)?.9:.4;
+			dashboost *= (player.cmd.buttons&BT_JUMP)?.95:.4;
 			last_boost = level.maptime+1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
@@ -548,7 +548,7 @@ Class Demolitionist : PlayerPawn
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
-			dashfuel = min(120.,dashfuel+max(dashfuel*.01,.05));
+			dashfuel = min(240.,dashfuel+max(dashfuel*.01,.05));
 		if ( (dashboost > 0.) && (InStateSequence(CurState,FindState("Dash")) || (InStateSequence(CurState,FindState("Jump")) && player.cmd.buttons&BT_JUMP)) )
 			dashsnd = true;
 		else
@@ -779,7 +779,7 @@ Class Demolitionist : PlayerPawn
 				double fs = TweakSpeeds(1.,0.);
 				if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
 				Vector3 accel = (RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle),0);
-				accel *= fs/960.;
+				accel *= fs/512.;
 				double spd = vel.length();
 				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
 				else vel = vel+accel/TICRATE;

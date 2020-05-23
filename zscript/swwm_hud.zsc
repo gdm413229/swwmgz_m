@@ -880,7 +880,7 @@ Class SWWMStatusBar : BaseStatusBar
 		double alph = .6;
 		if ( !d || (d.dashfuel > 20) || ((gametic%10) < 5) ) alph = 1.;
 		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+20),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,dw,DTA_Alpha,alph);
-		int fw = FuelInter.GetValue();
+		int fw = FuelInter.GetValue()/2;
 		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
 		int ht = clamp(HealthInter.GetValue(),0,10000);
 		int hw = min(ht,100);

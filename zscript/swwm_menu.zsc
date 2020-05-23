@@ -1998,7 +1998,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=0; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -2009,7 +2010,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;

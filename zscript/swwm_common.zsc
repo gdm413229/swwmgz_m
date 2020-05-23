@@ -2515,16 +2515,15 @@ Class SWWMHandler : EventHandler
 		if ( hnd ) hnd.DoKeyTagFix(a);
 	}
 
-	// spreads apart overlapping inventory items, since they'll look bad otherwise
-	private void CheckSpreadOut( Actor a )
+	// copies the floatbob of overlapping identical items, so it doesn't look weird
+	private void CopyFloatBob( Actor a )
 	{
 		let bt = BlockThingsIterator.Create(a,16);
 		while ( bt.Next() )
 		{
 			let t = bt.Thing;
 			if ( !t || (t == a) || !(t is 'Inventory') || !(t.spawnpoint ~== a.spawnpoint) ) continue;
-			double ang = FRandom[Spreading](0,360);
-			a.vel += (cos(ang)*4,sin(ang)*4,3);
+			a.floatbobphase = t.floatbobphase;
 			break;
 		}
 	}
@@ -2532,7 +2531,7 @@ Class SWWMHandler : EventHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		if ( e.Thing is 'Inventory' )
-			CheckSpreadOut(e.Thing);
+			CopyFloatBob(e.Thing);
 		if ( e.Thing is 'Key' )
 		{
 			DoKeyTagFix(e.Thing);

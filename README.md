@@ -412,7 +412,15 @@ the side effect of turning you into a screaming beast.
 
 Ragequit happens after 30 seconds.
 
-### Gravity suppressor, replaces Radsuit, Wings of Wrath, Boots of Speed
+### Elemental coating, replaces Radsuit
+
+A proper radsuit replacement, and sort of a rehash of the old "Barrier" powerup
+from previous SWWM versions.
+
+For 60 seconds, you can walk on hazardous floors or even take a nice swim in
+corrosive slime, scorching magma, freezing waters, or other extremes.
+
+### Gravity suppressor, replaces Wings of Wrath, Boots of Speed
 
 Continuing with the "replace jump boots with flight" decision in previous mods,
 this time you'll be getting a proper easy to control antigravity powerup.

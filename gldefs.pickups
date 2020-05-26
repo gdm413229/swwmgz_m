@@ -67,6 +67,11 @@ Brightmap Texture "models/Moth_Mashiro.png"
 {
 	Map "models/Moth_Mashiro_bright.png"
 }
+Brightmap Texture "models/Barrier.png"
+{
+	Map "models/Barrier_bright.png"
+	DisableFullbright
+}
 
 PointLight ARMORNUGGETLIGHT
 {
@@ -179,4 +184,16 @@ FlickerLight2 LAMPLIGHT
 Object CompanionLamp
 {
 	Frame "XZW1B" { light "LAMPLIGHT" }
+}
+
+PointLight BARRIERLIGHT
+{
+	Color 0.1 1.0 0.0
+	Size 40
+	Offset 0 16 0
+	Attenuate 1
+}
+Object EBarrier
+{
+	Frame "XZW1" { light "BARRIERLIGHT" }
 }

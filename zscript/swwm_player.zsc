@@ -173,10 +173,10 @@ Class Demolitionist : PlayerPawn
 			{
 				if ( !(AllActorClasses[i] is "Key") ) continue;
 				// clean up redundant keys
-				if ( !(gameinfo.gametype&GAME_CHEX) && ((AllActorClasses[i] is 'ChexRedCard') || (AllActorClasses[i] is 'ChexBlueCard') || (AllActorClasses[i] is 'ChexYellowCard')) ) continue;
-				else if ( (gameinfo.gametype&GAME_CHEX) && !(AllActorClasses[i] is 'ChexRedCard') && !(AllActorClasses[i] is 'ChexBlueCard') && !(AllActorClasses[i] is 'ChexYellowCard') ) continue;
+				if ( !(gameinfo.gametype&GAME_Chex) && ((AllActorClasses[i] is 'ChexRedCard') || (AllActorClasses[i] is 'ChexBlueCard') || (AllActorClasses[i] is 'ChexYellowCard')) ) continue;
+				else if ( (gameinfo.gametype&GAME_Chex) && !(AllActorClasses[i] is 'ChexRedCard') && !(AllActorClasses[i] is 'ChexBlueCard') && !(AllActorClasses[i] is 'ChexYellowCard') ) continue;
 				// don't give heretic keys in doom
-				if ( (gameinfo.gametype&GAME_DOOMCHEX) && ((AllActorClasses[i] is 'KeyYellow') || (AllActorClasses[i] is 'KeyGreen') || (AllActorClasses[i] is 'KeyBlue')) ) continue;
+				if ( (gameinfo.gametype&GAME_DoomChex) && ((AllActorClasses[i] is 'KeyYellow') || (AllActorClasses[i] is 'KeyGreen') || (AllActorClasses[i] is 'KeyBlue')) ) continue;
 				let keyitem = GetDefaultByType(AllActorClasses[i]);
 				if ( keyitem.special1 )
 				{
@@ -215,7 +215,9 @@ Class Demolitionist : PlayerPawn
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
 				if ( type is 'Chancebox' ) continue;	// do not give these until they're fully implemented
-				if ( !(gameinfo.gametype&GAME_HEXEN) && (type is 'AmmoFabricator') ) continue;	// no fabricators outside of hexen
+				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators outside of hexen
+				if ( !(gameinfo.gametype&(GAME_DoomChex|GAME_Strife)) && (type is 'EBarrier') ) continue;	// no barrier outside of doom/strife
+				if ( !(gameinfo.gametype&GAME_Raven) && (type is 'GravitySuppressor') ) continue;	// no gravity suppressor outside heretic/hexen
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
 					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )

@@ -1522,6 +1522,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( type is 'Chancebox' ) continue;
 				// no fabricators outside of hexen
 				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
+				// no barrier outside of doom/strife
+				if ( !(gameinfo.gametype&(GAME_DoomChex|GAME_Strife)) && (type is 'EBarrier') ) continue;
+				// no gravity suppressor outside heretic/hexen
+				if ( !(gameinfo.gametype&GAME_Raven) && (type is 'GravitySuppressor') ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;

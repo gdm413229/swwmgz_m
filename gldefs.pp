@@ -1,5 +1,12 @@
 HardwareShader PostProcess beforebloom
 {
+	Name "BarrierShader"
+	Shader "shaders/glsl/Barrier.fp" 330
+	Texture WarpTex "textures/heattex.png"
+	Uniform float timer
+}
+HardwareShader PostProcess beforebloom
+{
 	Name "GhostShader"
 	Shader "shaders/glsl/Ghostscreen.fp" 330
 }

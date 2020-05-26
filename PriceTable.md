@@ -80,6 +80,7 @@ be purchased from the store, they have to be found in maps.
   Armor Nugget	| 1000
   Blast Suit	| 40000
   War Armor	| 100000
+  E. Coating	| 80000
   Ghost Arti.	| 120000
   Gravity Supp.	| 150000
   Sandwich	| 800000

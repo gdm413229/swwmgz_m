@@ -260,7 +260,7 @@ Class BigBiospark : Actor
 			}
 			if ( SWWMUtility.SphereIntersect(t,pos,120) )
 			{
-				Vector3 dirto = level.Vec3Diff(pos,tracer.Vec3Offset(0,0,tracer.height/2));
+				Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.height/2));
 				double dist = dirto.length();
 				dirto /= dist;
 				if ( dist > 4. ) SWWMHandler.DoKnockback(t,-dirto,clamp(120.-dist,0.,120.)*100);

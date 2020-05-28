@@ -1640,15 +1640,14 @@ Class DemolitionistRadiusShockwave : Actor
 		Height 8;
 		Alpha 0.8;
 		Scale 1.2;
-		+NOBLOCKMAP;
+		PROJECTILE;
 		+DONTSPLASH;
-		+MISSILE;
 		+STEPMISSILE;
 		+NOEXPLODEFLOOR;
 		+WALLSPRITE;
-		+NOTELEPORT;
 		+RIPPER;
 		+BLOODLESSIMPACT;
+		-NOGRAVITY;
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{

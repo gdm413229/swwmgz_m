@@ -14,7 +14,7 @@ void main()
 		uv += (flood-.5)*.005;
 		col += texture(InputTexture,uv).rgb;
 	}
-	col.rgb /= 7.;
+	col.rgb /= 5.;
 	col.rgb = pow(max(col.rgb,vec3(0.)),vec3(1.2,1.15,.77))*vec3(1.03,1.32,.98);
 	FragColor = vec4(col,1.);
 }

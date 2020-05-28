@@ -1887,12 +1887,6 @@ Class SWWMGesture : SWWMWeapon
 		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
 	}
 
-	override void OwnerDied()
-	{
-		Super.OwnerDied();
-		deaded = true;
-	}
-
 	Default
 	{
 		+WEAPON.CHEATNOTWEAPON;
@@ -1908,7 +1902,7 @@ Class SWWMGesture : SWWMWeapon
 		TNT1 A 1
 		{
 			A_FullRaise();
-			if ( invoker.deaded ) A_FinishGesture();
+			if ( Health <= 0 ) A_FinishGesture();
 		}
 		Goto Ready;
 	Ready:

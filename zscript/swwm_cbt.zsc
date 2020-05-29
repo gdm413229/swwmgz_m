@@ -359,7 +359,19 @@ Class Wallbuster : SWWMWeapon
 		XZW2 A 1;
 		Goto Ready;
 	User1:
-		XZW2 A 1;
+		XZW2 A 2
+		{
+			A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW9 GHIJ 2;
+		XZW9 K 1 A_Parry(9);
+		XZW9 LMN 1;
+		XZW9 O 2 A_Melee(70,"demolitionist/whitl");
+		XZW9 PQRSTU 2;
+		XZW9 V 2 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 WXYZ 2;
+		XZWA ABCD 2;
 		Goto Ready;
 	Deselect:
 		XZW2 A 2 A_StartSound("wallbuster/deselect",CHAN_WEAPON,CHANF_OVERLAP);

@@ -2869,6 +2869,7 @@ Class SWWMHandler : EventHandler
 
 	override void NetworkProcess( ConsoleEvent e )
 	{
+		static const Class<Ammo> cbttypes[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
 		if ( e.Name ~== "swwmgesture" )
 		{
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
@@ -3028,6 +3029,25 @@ Class SWWMHandler : EventHandler
 				if ( ext != fn.Length()-4 ) continue;
 				SWWMLoreLibrary.Add(players[e.Args[0]],fn.Mid(13,ext-13));
 			}
+		}
+		else if ( e.Name.Left(8) ~== "swwmcbt." )
+		{
+			// from wikipedia, the free encyclopedia
+			if ( !playeringame[e.Args[0]] || !players[e.Args[0]].mo ) return;
+			let cbt = Wallbuster(players[e.Args[0]].mo.FindInventory("Wallbuster"));
+			if ( !cbt ) return;
+			cbt.reloadqueue.Clear();
+			Array<String> qs;
+			qs.Clear();
+			String rite = e.Name.Mid(8);
+			rite.Split(qs,",",TOK_SKIPEMPTY);
+			for ( int i=0; i<qs.Size(); i++ )
+			{
+				int qi = qs[i].ToInt();
+				if ( (qi < 0) || (qi > 3) ) continue;
+				cbt.reloadqueue.Push(cbttypes[qi]);
+			}
+			cbt.waitreload = false;
 		}
 	}
 

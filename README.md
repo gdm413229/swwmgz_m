@@ -173,18 +173,12 @@ REALLY watch out for the recoil.
 
 Reload reloads (obviously). The process is very complicated so I'll explain it
 better as a list:
- - Press fire to change the ammo type to load.
- - Press altfire to queue reloads, if the selected ammo is exhausted, you will
-   be prompted to reselect one.
- - Press zoom to "auto-load". Stronger ammo types will be prioritized.
+ - A menu will open after the side lever is pulled. Here you can queue ammo to
+   load up. Controls are displayed at all times.
  - In single player, the game is paused when you're in the queueing process, so
    you can take your time, but in coop you better have someone to cover you
    while you micromanage this beast.
- - Since it's actually just a menu, you can also cancel by closing it.
- - The reload menu can also be helpful to see the current status of all loaded
-   barrels.
- - Press reload again to start filling it up (or cancel if there's no queue).
- - While loading shells, you can stop the reload by pressing any weapon button.
+ - While loading shells, you can cancel by holding the reload button.
  - For a skilled combat robot like you, reloading this should be very fast.
 
 People like to nickname it the "Ballbuster". You'll see why.

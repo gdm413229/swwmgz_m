@@ -3,6 +3,311 @@
 
 Class WallbusterReloadMenu : GenericMenu
 {
+	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	TextureID MainWindow, AmmoIcon[4];
+	int sel0;
+	Array<int> queue;
+	int AmmoSets[4];
+	bool isrclick, ismclick;
+	transient CVar pauseme, lang;
+
+	// if playing in Japanese, returns an alternate font of the same height
+	// Tewi -> MPlus
+	// Miniwi -> k6x8
+	Font LangFont( Font req )
+	{
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		if ( lang.GetString() ~== "jp" )
+		{
+			if ( req == MiniwiFont ) return k6x8Font;
+			return MPlusFont;
+		}
+		return req;
+	}
+
+	override void Init( Menu parent )
+	{
+		Super.Init(parent);
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].ReadyWeapon is 'Wallbuster') )
+		{
+			EventHandler.SendNetworkEvent("swwmcbt.",consoleplayer);
+			Close();
+			return;
+		}
+		TewiFont = Font.GetFont('TewiShaded');
+		MPlusFont = Font.GetFont('MPlusShaded');
+		MiniwiFont = Font.GetFont('MiniwiShaded');
+		k6x8Font = Font.GetFont('k6x8Shaded');
+		MainWindow = TexMan.CheckForTexture("graphics/HUD/WallbusterMenu.png",TexMan.Type_Any);
+		AmmoIcon[0] = TexMan.CheckForTexture("graphics/HUD/RedShell.png",TexMan.Type_Any);
+		AmmoIcon[1] = TexMan.CheckForTexture("graphics/HUD/GreenShell.png",TexMan.Type_Any);
+		AmmoIcon[2] = TexMan.CheckForTexture("graphics/HUD/BlueShell.png",TexMan.Type_Any);
+		AmmoIcon[3] = TexMan.CheckForTexture("graphics/HUD/PurpleShell.png",TexMan.Type_Any);
+		MenuSound("menu/demotab");
+		queue.Clear();
+		sel0 = 0;
+	}
+
+	override void Ticker()
+	{
+		Super.Ticker();
+		if ( !pauseme ) pauseme = CVar.GetCVar('swwm_cbtpause',players[consoleplayer]);
+		if ( pauseme.GetBool() ) menuactive = Menu.On;
+		else menuactive = Menu.OnNoPause;
+		if ( (players[consoleplayer].Health > 0) && (players[consoleplayer].ReadyWeapon is 'Wallbuster') ) return;
+		MenuEvent(MKEY_BACK,false);
+	}
+
+	private bool IsDone()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( queue.Size() >= 25 ) return true;
+		for ( int i=0; i<4; i++ )
+		{
+			if ( (players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]) > 0 )
+				return false;
+		}
+		return true;
+	}
+
+	private bool PushAmmo( bool autoshift = false )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( queue.Size() >= 25 ) return true;
+		if ( (players[consoleplayer].mo.CountInv(types[sel0])-AmmoSets[sel0]) <= 0 )
+		{
+			if ( autoshift )
+			{
+				// switch to next available ammo
+				for ( int i=0; i<4; i++ )
+				{
+					int idx = (sel0+i)%4;
+					if ( (players[consoleplayer].mo.CountInv(types[idx])-AmmoSets[idx]) > 0 )
+					{
+						sel0 = idx;
+						return PushAmmo(true);
+					}
+				}
+			}
+			MenuSound("menu/noinvuse");
+			return false;
+		}
+		if ( !autoshift ) MenuSound("menu/demosel");
+		AmmoSets[sel0]++;
+		queue.Push(sel0);
+		return true;
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		switch ( mkey )
+		{
+		case MKEY_BACK:
+			queue.Clear();
+			for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent("swwmcbt.",consoleplayer);
+			Close();
+			return true;
+		case MKEY_ENTER:
+			if ( queue.Size() <= 0 )
+			{
+				while ( queue.Size() < 25 )
+				{
+					if ( !PushAmmo(true) )
+						break;
+				}
+			}
+			String cbt = "swwmcbt.";
+			for ( int i=0; i<queue.Size(); i++ )
+				cbt.AppendFormat("%d,",queue[i]);
+			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent(cbt,consoleplayer);
+			Close();
+			return true;
+		case MKEY_UP:
+			if ( queue.Size() <= 0 ) MenuSound("menu/noinvuse");
+			else
+			{
+				MenuSound("menu/demoscroll");
+				AmmoSets[queue[queue.Size()-1]]--;
+				queue.Pop();
+			}
+			return true;
+		case MKEY_DOWN:
+			if ( IsDone() )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			PushAmmo();
+			return true;
+		case MKEY_RIGHT:
+			MenuSound("menu/demotab");
+			sel0++;
+			if ( sel0 > 3 ) sel0 = 0;
+			return true;
+		case MKEY_LEFT:
+			MenuSound("menu/demotab");
+			sel0--;
+			if ( sel0 < 0 ) sel0 = 3;
+			return true;
+		case MKEY_PAGEDOWN:
+			if ( IsDone() )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			while ( queue.Size() < 25 )
+			{
+				if ( !PushAmmo(true) )
+					return true;
+			}
+			MenuSound("menu/demosel");
+			return true;
+		case MKEY_CLEAR:
+		case MKEY_PAGEUP:
+			if ( queue.Size() <= 0 ) MenuSound("menu/noinvuse");
+			else
+			{
+				MenuSound("menu/demoscroll");
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+			}
+			return true;
+		}
+		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	override bool MouseEvent( int type, int mx, int my )
+	{
+		bool res = Super.MouseEvent(type,mx,my);
+		// TODO
+		return res;
+	}
+
+	override bool OnUiEvent( UIEvent ev )
+	{
+		int y;
+		bool res;
+		switch ( ev.type )
+		{
+		case UIEvent.Type_LButtonDown:
+			isrclick = false;
+			ismclick = false;
+			return Super.OnUIEvent(ev);
+			break;
+		case UIEvent.Type_RButtonDown:
+			isrclick = true;
+			ismclick = false;
+			// copy over what base menus do for L click
+			y = ev.MouseY;
+			res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_MButtonDown:
+			isrclick = false;
+			ismclick = true;
+			// copy over what base menus do for L click
+			y = ev.MouseY;
+			res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_RButtonUp:
+		case UIEvent.Type_MButtonUp:
+			// copy over what base menus do for L release
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				y = ev.MouseY;
+				res = MouseEventBack(MOUSE_Release,ev.MouseX,y);
+				if ( res ) y = -1;
+				res |= MouseEvent(MOUSE_Release,ev.MouseX,y);
+			}
+			return false;
+			break;
+		}
+		return Super.OnUIEvent(ev);
+	}
+
+	override void Drawer()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		Super.Drawer();
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-132,ss.y-26)/2.;
+		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int ox = 27, oy = 2;
+		for ( int i=0; i<4; i++ )
+		{
+			Screen.DrawTexture(AmmoIcon[i],false,origin.x+ox,origin.y+oy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(0,0,0,0):Color(128,0,0,0));
+			String astr = String.Format("%3d",players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]);
+			Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+ox-(TewiFont.StringWidth(astr)+1),origin.y+oy-2,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(0,0,0,0):Color(128,0,0,0));
+			ox += 33;
+		}
+		// pointer (▸)
+		Screen.DrawChar(TewiFont,Font.CR_GREEN,origin.x+2+33*sel0,origin.y,0x25B8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int siz = queue.Size()-1;
+		ox = 2+siz*5+(siz/5);
+		oy = 15;
+		for ( int i=0; i<=siz; i++ )
+		{
+			Screen.DrawTexture(AmmoIcon[queue[i]],false,origin.x+ox,origin.y+oy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			ox -= 5;
+			if ( !((i+1)%5) ) ox--;
+		}
+		// text stuff
+		String str;
+		Font fnt;
+		int boxw, sw;
+		double x, y;
+		fnt = LangFont(TewiFont);
+		str = StringTable.Localize("$SWWM_BUSTERTITLE");
+		sw = fnt.StringWidth(str);
+		boxw = sw;
+		fnt = LangFont(MiniwiFont);
+		str = "(C)2148 Akari Labs";
+		sw = fnt.StringWidth(str);
+		if ( sw > boxw ) boxw = sw;
+		x = floor((ss.x-boxw)/2.);
+		y = origin.y-30;
+		Screen.Dim("Black",.8,int((x-2)*hs),int((y-1)*hs),int((boxw+4)*hs),int(25*hs));
+		fnt = LangFont(TewiFont);
+		str = StringTable.Localize("$SWWM_BUSTERTITLE");
+		sw = fnt.StringWidth(str);
+		x = floor((ss.x-sw)/2.);
+		Screen.DrawText(fnt,Font.CR_FIRE,x,y,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		y += 14;
+		fnt = LangFont(MiniwiFont);
+		str = "(C)2148 Akari Labs";
+		sw = fnt.StringWidth(str);
+		x = floor((ss.x-sw)/2.);
+		Screen.DrawText(fnt,Font.CR_GOLD,x,y,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		y = origin.y+36;
+		fnt = LangFont(MiniwiFont);
+		str = StringTable.Localize("$SWWM_BUSTERKEYS");
+		BrokenLines l = fnt.BreakLines(str,300);
+		boxw = 0;
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			sw = l.StringWidth(i);
+			if ( sw > boxw ) boxw = sw;
+		}
+		x = floor((ss.x-boxw)/2.);
+		Screen.Dim("Black",.8,int((x-2)*hs),int((y-2)*hs),int((boxw+4)*hs),int((9*l.Count()+2)*hs));
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			Screen.DrawText(fnt,Font.CR_WHITE,x,y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			y += 9;
+		}
+	}
 }
 
 Class Wallbuster : SWWMWeapon
@@ -11,7 +316,7 @@ Class Wallbuster : SWWMWeapon
 	bool fired[25];
 	int rotation[6];
 	bool initialized;
-	Array<int> reloadqueue;
+	Array<Class<Ammo> > reloadqueue;
 	transient bool waitreload;
 	int whichspin;
 	transient CVar cbtmuffler;
@@ -158,12 +463,32 @@ Class Wallbuster : SWWMWeapon
 				fired[i] = false;
 		}
 	}
+	action void A_CBTFlash( StateLabel flashlabel = null, int index = 0 )
+	{
+		if ( !player || !player.ReadyWeapon )
+			return;
+		Weapon weap = player.ReadyWeapon;
+		State flashstate = null;
+		if ( !flashlabel )
+		{
+			if ( weap.bAltFire )
+				flashstate = weap.FindState('AltFlash');
+			if ( !flashstate )
+				flashstate = weap.FindState('Flash');
+		}
+		else flashstate = weap.FindState(flashlabel);
+		player.SetPSprite(PSP_FLASH,flashstate+index);
+		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+		A_OverlayRenderStyle(PSP_FLASH,STYLE_Add);
+	}
 	action void A_FireShells( int num = 1 )
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
 		static const statelabel flashes[] = {"FlashRed","FlashGreen","FlashBlue","FlashPurple"};
 		static const String sounds[] = {"spreadgun/redfire","spreadgun/greenfire","spreadgun/bluefire","spreadgun/purplefire"};
 		static const Color cols[] = {Color(40,255,192,64),Color(36,255,192,80),Color(48,32,176,255),Color(24,255,224,96)};
+		int redflashstr = 0;
+		int blueflashstr = 0;
 		// speen
 		if ( num == 1 ) invoker.whichspin = 1;
 		else if ( num == 5 ) invoker.whichspin = 2;
@@ -191,6 +516,7 @@ Class Wallbuster : SWWMWeapon
 			player.SetPsprite(PSP_WEAPON,ResolveState("DryFire"));
 			return;
 		}
+		Console.Printf("\cgFIRING NOT FULLY IMPLEMENTED\c-");
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		if ( !invoker.cbtmuffler ) invoker.cbtmuffler = CVar.GetCVar('swwm_earbuster',players[consoleplayer]);
@@ -211,12 +537,16 @@ Class Wallbuster : SWWMWeapon
 			int which = 0;
 			for ( int j=0; j<4; j++ )
 			{
-				if ( !(invoker.loaded[i] is types[j]) ) continue;
+				if ( !(invoker.loaded[idx] is types[j]) ) continue;
 				which = j;
 				break;
 			}
 			double rfact = invoker.cbtmuffler.GetBool()?.85:.65;
 			A_StartSound(sounds[which],CHAN_WEAPON,CHANF_OVERLAP,1./(howmany**rfact),.6-howmany*.004,1.-howmany*.012);
+			if ( which == 0 ) redflashstr = max(120,redflashstr+10);
+			else if ( which == 1 ) redflashstr = max(90,redflashstr+8);
+			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
+			else if ( which == 3 ) redflashstr = max(60,redflashstr+6);
 			invoker.fired[idx] = true;
 		}
 		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));
@@ -227,6 +557,21 @@ Class Wallbuster : SWWMWeapon
 		A_QuakeEx(qk,qk,qk,ql,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:qk*.15);
 		A_ZoomFactor(1.+qk*.04,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
+		if ( redflashstr > 0 )
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = redflashstr;
+			l.target = self;
+		}
+		if ( blueflashstr > 0 )
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[0] = 96;
+			l.args[1] = 224;
+			l.args[2] = 255;
+			l.args[3] = blueflashstr;
+			l.target = self;
+		}
 	}
 	action void A_SpinOne()
 	{
@@ -245,6 +590,19 @@ Class Wallbuster : SWWMWeapon
 		A_StartSound("wallbuster/handspin",CHAN_WEAPON,CHANF_OVERLAP);
 		invoker.rotation[5]--;
 		while ( invoker.rotation[5] < 0 ) invoker.rotation[5] += 5;
+	}
+	action void A_OpenMenu()
+	{
+		invoker.reloadqueue.Clear();
+		invoker.waitreload = true;
+		if ( player == players[consoleplayer] )
+			Menu.SetMenu('WallbusterReloadMenu');
+	}
+	action void A_WaitMenu()
+	{
+		if ( invoker.waitreload ) return;
+		if ( invoker.reloadqueue.Size() <= 0 ) player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
+		else player.SetPsprite(PSP_WEAPON,ResolveState("Detach"));
 	}
 
 	Default
@@ -347,16 +705,30 @@ Class Wallbuster : SWWMWeapon
 		XZW2 A 0;
 		Goto Ready;
 	Reload:
-		XZW2 A 1;
-		Goto Ready;
+		XZW2 A 2 A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 DEFGHIJK 2;
+		XZW4 L 1 A_StartSound("wallbuster/unlock",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 MNOPQ 1;
+		XZW4 RSTUV 2;
+		XZW4 W 2 A_OpenMenu();
+		XZW4 W 1 A_WaitMenu();
+		Wait;
 	Detach:
-		XZW2 A 1;
-		Goto Ready;
+		XZW4 W 1
+		{
+			Console.Printf("\cgRELOADING NOT IMPLEMENTED\c-");
+		}
+		Goto EndReload;
 	Attach:
-		XZW2 A 1;
-		Goto Ready;
+		XZW2 W 1;
+		Goto EndReload;
 	EndReload:
-		XZW2 A 1;
+		XZW4 W 2;
+		XZW8 OPQRS 2;
+		XZW8 T 1 A_StartSound("wallbuster/lock",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 UVWXY 1;
+		XZW8 Z 2 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 ABCDEF 2;
 		Goto Ready;
 	User1:
 		XZW2 A 2
@@ -377,6 +749,210 @@ Class Wallbuster : SWWMWeapon
 		XZW2 A 2 A_StartSound("wallbuster/deselect",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW2 BCDEFG 2;
 		XZW2 G -1 A_FullLower();
+		Stop;
+	FlashRed:
+		XZWW A 2 Bright;
+		Stop;
+		XZWW B 2 Bright;
+		Stop;
+		XZWW C 2 Bright;
+		Stop;
+		XZWW D 2 Bright;
+		Stop;
+		XZWW E 2 Bright;
+		Stop;
+		XZWW F 2 Bright;
+		Stop;
+		XZWW G 2 Bright;
+		Stop;
+		XZWW H 2 Bright;
+		Stop;
+		XZWW I 2 Bright;
+		Stop;
+		XZWW J 2 Bright;
+		Stop;
+		XZWW K 2 Bright;
+		Stop;
+		XZWW L 2 Bright;
+		Stop;
+		XZWW M 2 Bright;
+		Stop;
+		XZWW N 2 Bright;
+		Stop;
+		XZWW O 2 Bright;
+		Stop;
+		XZWW P 2 Bright;
+		Stop;
+		XZWW Q 2 Bright;
+		Stop;
+		XZWW R 2 Bright;
+		Stop;
+		XZWW S 2 Bright;
+		Stop;
+		XZWW T 2 Bright;
+		Stop;
+		XZWW U 2 Bright;
+		Stop;
+		XZWW V 2 Bright;
+		Stop;
+		XZWW W 2 Bright;
+		Stop;
+		XZWW X 2 Bright;
+		Stop;
+		XZWW Y 2 Bright;
+		Stop;
+	FlashGreen:
+		XZWX A 2 Bright;
+		Stop;
+		XZWX B 2 Bright;
+		Stop;
+		XZWX C 2 Bright;
+		Stop;
+		XZWX D 2 Bright;
+		Stop;
+		XZWX E 2 Bright;
+		Stop;
+		XZWX F 2 Bright;
+		Stop;
+		XZWX G 2 Bright;
+		Stop;
+		XZWX H 2 Bright;
+		Stop;
+		XZWX I 2 Bright;
+		Stop;
+		XZWX J 2 Bright;
+		Stop;
+		XZWX K 2 Bright;
+		Stop;
+		XZWX L 2 Bright;
+		Stop;
+		XZWX M 2 Bright;
+		Stop;
+		XZWX N 2 Bright;
+		Stop;
+		XZWX O 2 Bright;
+		Stop;
+		XZWX P 2 Bright;
+		Stop;
+		XZWX Q 2 Bright;
+		Stop;
+		XZWX R 2 Bright;
+		Stop;
+		XZWX S 2 Bright;
+		Stop;
+		XZWX T 2 Bright;
+		Stop;
+		XZWX U 2 Bright;
+		Stop;
+		XZWX V 2 Bright;
+		Stop;
+		XZWX W 2 Bright;
+		Stop;
+		XZWX X 2 Bright;
+		Stop;
+		XZWX Y 2 Bright;
+		Stop;
+	FlashBlue:
+		XZWY A 2 Bright;
+		Stop;
+		XZWY B 2 Bright;
+		Stop;
+		XZWY C 2 Bright;
+		Stop;
+		XZWY D 2 Bright;
+		Stop;
+		XZWY E 2 Bright;
+		Stop;
+		XZWY F 2 Bright;
+		Stop;
+		XZWY G 2 Bright;
+		Stop;
+		XZWY H 2 Bright;
+		Stop;
+		XZWY I 2 Bright;
+		Stop;
+		XZWY J 2 Bright;
+		Stop;
+		XZWY K 2 Bright;
+		Stop;
+		XZWY L 2 Bright;
+		Stop;
+		XZWY M 2 Bright;
+		Stop;
+		XZWY N 2 Bright;
+		Stop;
+		XZWY O 2 Bright;
+		Stop;
+		XZWY P 2 Bright;
+		Stop;
+		XZWY Q 2 Bright;
+		Stop;
+		XZWY R 2 Bright;
+		Stop;
+		XZWY S 2 Bright;
+		Stop;
+		XZWY T 2 Bright;
+		Stop;
+		XZWY U 2 Bright;
+		Stop;
+		XZWY V 2 Bright;
+		Stop;
+		XZWY W 2 Bright;
+		Stop;
+		XZWY X 2 Bright;
+		Stop;
+		XZWY Y 2 Bright;
+		Stop;
+	FlashPurple:
+		XZWZ A 2 Bright;
+		Stop;
+		XZWZ B 2 Bright;
+		Stop;
+		XZWZ C 2 Bright;
+		Stop;
+		XZWZ D 2 Bright;
+		Stop;
+		XZWZ E 2 Bright;
+		Stop;
+		XZWZ F 2 Bright;
+		Stop;
+		XZWZ G 2 Bright;
+		Stop;
+		XZWZ H 2 Bright;
+		Stop;
+		XZWZ I 2 Bright;
+		Stop;
+		XZWZ J 2 Bright;
+		Stop;
+		XZWZ K 2 Bright;
+		Stop;
+		XZWZ L 2 Bright;
+		Stop;
+		XZWZ M 2 Bright;
+		Stop;
+		XZWZ N 2 Bright;
+		Stop;
+		XZWZ O 2 Bright;
+		Stop;
+		XZWZ P 2 Bright;
+		Stop;
+		XZWZ Q 2 Bright;
+		Stop;
+		XZWZ R 2 Bright;
+		Stop;
+		XZWZ S 2 Bright;
+		Stop;
+		XZWZ T 2 Bright;
+		Stop;
+		XZWZ U 2 Bright;
+		Stop;
+		XZWZ V 2 Bright;
+		Stop;
+		XZWZ W 2 Bright;
+		Stop;
+		XZWZ X 2 Bright;
+		Stop;
+		XZWZ Y 2 Bright;
 		Stop;
 	}
 }

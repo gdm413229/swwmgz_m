@@ -5,6 +5,7 @@ Mixin Class SWWMAutoUseFix
 	{
 		if ( GetClass() == item.GetClass() )
 		{
+			if ( Use(true) ) Amount--;
 			// sell excess if there's a price
 			if ( bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
 			{
@@ -14,7 +15,6 @@ Mixin Class SWWMAutoUseFix
 				if ( Owner.player )
 					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 			}
-			if ( Use(true) ) Amount--;
 		}
 		return Super.HandlePickup(item);
 	}

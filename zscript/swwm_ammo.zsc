@@ -1068,8 +1068,7 @@ Class HammerspaceEmbiggener : Inventory
 		bool res = Super.HandlePickup(item);
 		if ( item.GetClass() == GetClass() )
 		{
-			if ( !cheatedin ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
-			cheatedin = false;
+			if ( !HammerspaceEmbiggener(item).cheatedin ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 			// readjust ammo values to new capacity
 			for ( Inventory i=Owner.Inv; i; i=i.Inv )
 			{

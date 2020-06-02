@@ -179,7 +179,8 @@ better as a list:
    you can take your time, but in coop you better have someone to cover you
    while you micromanage this beast.
  - While loading shells, you can cancel by holding the reload button.
- - For a skilled combat robot like you, reloading this should be very fast.
+ - For a skilled combat robot like you, reloading this should be very fast. 10
+   seconds tops, for all 25 barrels.
 
 People like to nickname it the "Ballbuster". You'll see why.
 

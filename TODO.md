@@ -1,11 +1,12 @@
 Fundamental things:
- - Wallbuster
+ - Wallbuster breaching feature
  - Silver Bullet
  - Ynykron
 
 Not so fundamental things:
  - Chanceboxes
  - Extra Demolitionist animations (swim, weapon melee/reload/idle)
+ - Adjust Demolitionist crouch height to match anims
 
 Extra things:
  - Art for custom intermission

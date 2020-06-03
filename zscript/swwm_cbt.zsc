@@ -1161,11 +1161,12 @@ Class Wallbuster : SWWMWeapon
 			A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartReloadTiming();
 		}
-		XZW4 DEFGHIJK 2;
+		XZW4 DEFG 2;
+		XZW4 HIJK 1;
 		XZW4 L 1 A_StartSound("wallbuster/unlock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 MNOPQ 1;
-		XZW4 RSTUV 2;
-		XZW4 W 2 A_OpenMenu();
+		XZW4 RSTUV 1;
+		XZW4 W 1 A_OpenMenu();
 		XZW4 W 1 A_WaitMenu();
 		Wait;
 	Detach:
@@ -1238,8 +1239,9 @@ Class Wallbuster : SWWMWeapon
 		XZW7 XYZ 1;
 		XZW8 ABC 1;
 		XZW8 D 2 A_HandSpin();
-		XZW8 EFGHIJKL 2;
-		XZW8 M 2 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 EFGHIJ 2;
+		XZW8 KL 1;
+		XZW8 M 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW8 N 0;
 		Goto DetachHold;
 	AttachShell0:
@@ -1259,12 +1261,13 @@ Class Wallbuster : SWWMWeapon
 		XZWE GHIJKLMNOPQRST 1;
 		Stop;
 	EndReload:
-		XZW4 W 2 ;
-		XZW8 OPQRS 2;
+		XZW4 W 1;
+		XZW8 OPQRS 1;
 		XZW8 T 1 A_StartSound("wallbuster/lock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW8 UVWXY 1;
-		XZW8 Z 2 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW9 ABCDEF 2;
+		XZW8 Z 1 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 ABC 1;
+		XZW9 DEF 2;
 		XZW2 A 0 A_StopReloadTiming();
 		Goto Ready;
 	User1:

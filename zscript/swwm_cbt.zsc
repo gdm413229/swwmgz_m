@@ -1044,7 +1044,6 @@ Class Wallbuster : SWWMWeapon
 	}
 	action void A_StartReloadTiming()
 	{
-		invoker.rnum = invoker.reloadqueue.Size();
 		invoker.timing = true;
 		invoker.reloadtime[0] = level.time;
 	}
@@ -1172,6 +1171,7 @@ Class Wallbuster : SWWMWeapon
 	Detach:
 		XZW4 W 0
 		{
+			invoker.rnum = invoker.reloadqueue.Size();
 			invoker.cancelreload = false;
 			A_Overlay(-9999,"CheckCancelReload");
 		}

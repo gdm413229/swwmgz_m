@@ -1223,7 +1223,12 @@ Class Wallbuster : SWWMWeapon
 		XZW7 TUVW 1;
 		XZW7 XYZ 1;
 		XZW8 ABC 1;
-		XZW8 D 2 A_HandSpin();
+		XZW8 D 2
+		{
+			invoker.cancelreload = false;
+			A_Overlay(-9999,"CheckCancelReload");
+			A_HandSpin();
+		}
 		XZW8 EFGHIJ 2;
 		XZW8 KL 1;
 		XZW8 M 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);

@@ -478,6 +478,7 @@ Class PusherWeapon : SWWMWeapon
 			p.pitch = pitch;
 			p.vel = x*p.speed*invoker.chargelevel;
 			p.target = self;
+			SWWMHandler.DoKnockback(self,x,85000.);
 		}
 		if ( !gone )
 		{

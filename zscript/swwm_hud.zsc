@@ -887,7 +887,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
 		{
 			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+16),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+15),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			return;
 		}
 		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);

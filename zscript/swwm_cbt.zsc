@@ -686,7 +686,7 @@ Class Wallbuster : SWWMWeapon
 			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
 			else if ( which == 3 ) redflashstr = max(60,redflashstr+6);
 			A_CBTFlash(flashes[which],i);
-			if ( alertness > louds[which] ) += louds[which]/4;
+			if ( alertness > louds[which] ) alertness += louds[which]/4;
 			else alertness += louds[which];
 		}
 		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));

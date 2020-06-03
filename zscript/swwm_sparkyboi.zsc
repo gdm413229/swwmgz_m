@@ -1047,7 +1047,7 @@ Class BiosparkBeam : Actor
 		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
-			if ( t.hitlist[i].hitactor is 'BiosparkHitbox' )
+			if ( (t.hitlist[i].hitactor is 'BiosparkHitbox') && t.hitlist[i].hitactor.target )
 			{
 				let s = Spawn("BiosparkComboImpact",t.hitlist[i].hitactor.pos);
 				s.target = target;
@@ -1190,7 +1190,7 @@ Class BiosparkBeam : Actor
 		t.Trace(pos,CurSector,x,speed,0);
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
-			if ( t.hitlist[i].hitactor is 'BiosparkHitbox' )
+			if ( (t.hitlist[i].hitactor is 'BiosparkHitbox') && t.hitlist[i].hitactor.target )
 				t.hitlist[i].hitactor.target.Destroy();
 			else
 			{

@@ -1191,7 +1191,13 @@ Class BiosparkBeam : Actor
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
 			if ( (t.hitlist[i].hitactor is 'BiosparkHitbox') && t.hitlist[i].hitactor.target )
+			{
+				let s = Spawn("BiosparkComboImpact",t.hitlist[i].hitactor.pos);
+				s.target = target;
+				s.angle = atan2(t.hitlist[i].x.y,t.hitlist[i].x.x);
+				s.pitch = asin(-t.hitlist[i].x.z);
 				t.hitlist[i].hitactor.target.Destroy();
+			}
 			else
 			{
 				SWWMHandler.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,15000);

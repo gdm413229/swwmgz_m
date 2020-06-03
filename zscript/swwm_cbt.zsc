@@ -167,7 +167,7 @@ Class WallbusterReloadMenu : GenericMenu
 				return true;
 			}
 			int i = 0;
-			while ( (queue.Size() > 0) && (++i < 5) )
+			while ( (queue.Size() > 0) && (i++ < 5) )
 			{
 				if ( !PopAmmo() )
 					break;
@@ -181,7 +181,7 @@ Class WallbusterReloadMenu : GenericMenu
 				return true;
 			}
 			int j = 0;
-			while ( (queue.Size() < 25) && (++j < 5) )
+			while ( (queue.Size() < 25) && (j++ < 5) )
 			{
 				if ( !PushAmmo(true) )
 					return true;

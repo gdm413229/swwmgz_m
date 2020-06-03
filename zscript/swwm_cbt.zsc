@@ -98,6 +98,14 @@ Class WallbusterReloadMenu : GenericMenu
 		return true;
 	}
 
+	private bool PopAmmo()
+	{
+		if ( queue.Size() <= 0 ) return false;
+		AmmoSets[queue[queue.Size()-1]]--;
+		queue.Pop();
+		return true;
+	}
+
 	override bool MenuEvent( int mkey, bool fromcontroller )
 	{
 		switch ( mkey )
@@ -126,13 +134,13 @@ Class WallbusterReloadMenu : GenericMenu
 			Close();
 			return true;
 		case MKEY_UP:
-			if ( queue.Size() <= 0 ) MenuSound("menu/noinvuse");
-			else
+			if ( queue.Size() <= 0 )
 			{
-				MenuSound("menu/demoscroll");
-				AmmoSets[queue[queue.Size()-1]]--;
-				queue.Pop();
+				MenuSound("menu/noinvuse");
+				return true;
 			}
+			PopAmmo();
+			MenuSound("menu/demoscroll");
 			return true;
 		case MKEY_DOWN:
 			if ( IsDone() )
@@ -152,13 +160,28 @@ Class WallbusterReloadMenu : GenericMenu
 			sel0--;
 			if ( sel0 < 0 ) sel0 = 3;
 			return true;
+		case MKEY_PAGEUP:
+			if ( queue.Size() <= 0 )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			int i = 0;
+			while ( (queue.Size() > 0) && (++i < 5) )
+			{
+				if ( !PopAmmo(true) )
+					break;
+			}
+			MenuSound("menu/demoscroll");
+			return true;
 		case MKEY_PAGEDOWN:
 			if ( IsDone() )
 			{
 				MenuSound("menu/noinvuse");
 				return true;
 			}
-			while ( queue.Size() < 25 )
+			int i = 0;
+			while ( (queue.Size() < 25) && (++i < 5) )
 			{
 				if ( !PushAmmo(true) )
 					return true;
@@ -166,7 +189,6 @@ Class WallbusterReloadMenu : GenericMenu
 			MenuSound("menu/demosel");
 			return true;
 		case MKEY_CLEAR:
-		case MKEY_PAGEUP:
 			if ( queue.Size() <= 0 ) MenuSound("menu/noinvuse");
 			else
 			{

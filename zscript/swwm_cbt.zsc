@@ -388,7 +388,6 @@ Class Wallbuster : SWWMWeapon
 	bool timing;
 	int reloadtime[2], rnum;
 	transient bool cancelreload;
-	double srecoil;
 
 	transient ui TextureID WeaponBox, AmmoIcon[4], LoadIcon[4], UsedIcon[4], EmptyIcon;
 	transient ui Font TewiFont;
@@ -710,8 +709,6 @@ Class Wallbuster : SWWMWeapon
 			l.target = self;
 		}
 		// third pass, actually fire them
-		A_Overlay(-9999,"InvRecoil");
-		invoker.srecoil = 0.;
 		Vector3 base = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+8*y-10*z);
 		SpreadgunTracer st;
 		SpreadSlugTracer sst;
@@ -781,9 +778,7 @@ Class Wallbuster : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
 				}
-				SWWMHandler.DoKnockback(self,-x,6000.);
-				A_Recoil(2.);
-				invoker.srecoil += -.8;
+				SWWMHandler.DoKnockback(self,-x,24000.);
 				break;
 			case 2:
 				// saltshot
@@ -821,9 +816,7 @@ Class Wallbuster : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-2,2)+z*FRandom[Wallbuster](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,4000.);
-				A_Recoil(1.4);
-				invoker.srecoil += -.5;
+				SWWMHandler.DoKnockback(self,-x,20000.);
 				break;
 			case 3:
 				// lead ball
@@ -858,9 +851,7 @@ Class Wallbuster : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
 				}
-				SWWMHandler.DoKnockback(self,-x,2500.);
-				A_Recoil(1.);
-				invoker.srecoil += -.35;
+				SWWMHandler.DoKnockback(self,-x,9000.);
 				break;
 			default:
 				// buckshot
@@ -901,9 +892,7 @@ Class Wallbuster : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-2,2)+z*FRandom[Wallbuster](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,4000.);
-				A_Recoil(1.4);
-				invoker.srecoil += -.5;
+				SWWMHandler.DoKnockback(self,-x,18000.);
 				break;
 			}
 		}
@@ -1098,10 +1087,6 @@ Class Wallbuster : SWWMWeapon
 	Zoom:
 		XZW2 A 0 A_FireShells(25);
 		Goto FireTwentyFive;
-	InvRecoil:
-		TNT1 A 3;
-		TNT1 A 1 A_Recoil(invoker.srecoil);
-		Stop;
 	FireOne:
 		XZW2 AQRSTUVWX 1;
 		XZW2 A 0

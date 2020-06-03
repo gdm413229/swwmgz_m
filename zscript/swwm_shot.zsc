@@ -1845,7 +1845,6 @@ Class Spreadgun : SWWMWeapon
 {
 	bool fired;	// shell was used
 	Class<Ammo> loadammo, nextammo;	// currently loaded shell, next shell to load
-	double srecoil;
 
 	transient ui TextureID WeaponBox, AmmoIcon[7], LoadedIcon[7];
 	transient ui Font TewiFont;
@@ -2140,9 +2139,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
 				}
-				SWWMHandler.DoKnockback(self,-x,6000.);
-				A_Recoil(2.);
-				invoker.srecoil = -.8;
+				SWWMHandler.DoKnockback(self,-x,25000.);
 				break;
 			case 2:
 				for ( int j=0; j<9; j++ )
@@ -2179,9 +2176,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,2000.);
-				A_Recoil(.4);
-				invoker.srecoil = -.15;
+				SWWMHandler.DoKnockback(self,-x,13000.);
 				break;
 			case 3:
 				for ( int j=0; j<8; j++ )
@@ -2217,9 +2212,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,4000.);
-				A_Recoil(1.4);
-				invoker.srecoil = -.5;
+				SWWMHandler.DoKnockback(self,-x,23000.);
 				break;
 			case 4:
 				for ( int j=0; j<10; j++ )
@@ -2257,9 +2250,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,12.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,3500.);
-				A_Recoil(.7);
-				invoker.srecoil = -.24;
+				SWWMHandler.DoKnockback(self,-x,14000.);
 				break;
 			case 5:
 				a = FRandom[Spreadgun](0,360);
@@ -2293,9 +2284,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
 				}
-				SWWMHandler.DoKnockback(self,-x,2500.);
-				A_Recoil(1.);
-				invoker.srecoil = -.35;
+				SWWMHandler.DoKnockback(self,-x,9500.);
 				break;
 			case 6:
 				a = FRandom[Spreadgun](0,360);
@@ -2360,9 +2349,7 @@ Class Spreadgun : SWWMWeapon
 					s.bAMBUSH = true;
 					s.vel += vel*.5+x*FRandom[Spreadgun](1.,20.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,12000.);
-				A_Recoil(3.6);
-				invoker.srecoil = -2.;
+				SWWMHandler.DoKnockback(self,-x,30000.);
 				break;
 			default:
 				st = new("SpreadgunTracer");
@@ -2402,9 +2389,7 @@ Class Spreadgun : SWWMWeapon
 					s.alpha *= .4;
 					s.vel += vel*.5+x*FRandom[Spreadgun](4.,8.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
-				SWWMHandler.DoKnockback(self,-x,4000.);
-				A_Recoil(1.4);
-				invoker.srecoil = -.5;
+				SWWMHandler.DoKnockback(self,-x,20000.);
 				break;
 			}
 			break;
@@ -2580,9 +2565,7 @@ Class Spreadgun : SWWMWeapon
 			A_FireShell();
 			return ResolveState(null);
 		}
-		XZW2 RS 1;
-		XZW2 T 1 A_Recoil(invoker.srecoil);
-		XZW2 U 1;
+		XZW2 RSTU 1;
 		XZW2 VWXY 2;
 		Goto ReadyFired;
 	AltFire:

@@ -3187,9 +3187,7 @@ Class SWWMHandler : EventHandler
 				dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
 			}
 			dir = dir/dist;
-			Vector3 momentum = dir*damagescale*(MomentumTransfer/Thinker.TICRATE);
-			momentum /= max(50,a.mass); // cap minimum mass to prevent ridiculously strong pushing
-			a.vel += momentum;
+			DoKnockback(a,dir,MomentumTransfer*damagescale);
 		}
 	}
 
@@ -3202,7 +3200,11 @@ Class SWWMHandler : EventHandler
 			return;
 		if ( Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) )
 			return;
-		Victim.vel += HitDirection*(MomentumTransfer/(Thinker.TICRATE*max(50,Victim.Mass)));
+		Vector3 Momentum = HitDirection*MomentumTransfer;
+		if ( (Victim.pos.z <= Victim.floorz) || !Victim.TestMobjZ() )
+			Momentum.z = max(Momentum.z,.1*Momentum.length());
+		Momentum /= Thinker.TICRATE*max(50,Victim.Mass);
+		Victim.vel += Momentum;
 	}
 
 	static void DoSwing( Actor target, Vector2 dir, double initial, double inc, int steps, int mode = 0, int delay = 0, double rmul = 1.0 )

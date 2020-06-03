@@ -1832,7 +1832,7 @@ Class Sparkster : SWWMWeapon
 			A_ZoomFactor(.94,ZOOM_INSTANT);
 			A_ZoomFactor(1.);
 			A_AlertMonsters(1200);
-			A_Recoil(.6);
+			SWWMHandler.DoKnockback(self,-x,2500.);
 			a = FRandom[Spread](0,360);
 			s = FRandom[Spread](0,.012);
 			[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);

@@ -29,8 +29,8 @@ Class AirBullet : FastProjectile
 			if ( target == lasthit ) return 0;
 			lasthit = target;
 		}
-		SWWMHandler.DoKnockback(target,vel.unit(),10000*specialf1);
-		return int(damage*specialf1);
+		SWWMHandler.DoKnockback(target,vel.unit(),10000);
+		return damage;
 	}
 	override void Effect()
 	{
@@ -62,6 +62,17 @@ Class AirBullet : FastProjectile
 	void A_Splode()
 	{
 		A_AlertMonsters(8000);
+		if ( target && SWWMUtility.SphereIntersect(target,pos,120) )
+		{
+			// push away
+			Vector3 dir = level.Vec3Diff(pos,target.Vec3Offset(0,0,target.height/2));
+			double dist = dir.length();
+			dir /= dist;
+			double mm = 8000000./max(20.,dist);
+			if ( (target.pos.z > target.floorz) && target.TestMobjZ() ) mm *= 1.6;
+			SWWMHandler.DoKnockback(target,dir,mm);
+		}
+		SWWMHandler.DoBlast(self,400,100000);
 		A_QuakeEx(6,6,6,20,0,250,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		A_StartSound("deepimpact/bullethit",CHAN_VOICE,CHANF_DEFAULT,1.,.3);
 		A_SprayDecal("ImpactMark");
@@ -263,17 +274,20 @@ Class DeepImpact : SWWMWeapon
 		if ( !weap ) return;
 		A_QuakeEx(1,1,1,2,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.05);
 		A_StartSound("deepimpact/fire",CHAN_WEAPON,CHANF_OVERLAP);
-		A_Recoil(.05);
 		A_AlertMonsters(300);
 		invoker.clipcount = max(0,invoker.clipcount-3);
 		Vector3 x, y, z, dir;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMHandler.DoKnockback(self,-x,2000.);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3*z);
 		DeepTracer t = new("DeepTracer");
 		t.ignoreme = self;
 		Array<THitList> list;
 		list.Clear();
 		int rings = 1;
+		int wallhits = 0;
+		Vector3 hitnormal;
+		Vector3 wnorm = (0,0,0);
 		for ( double i=0; i<1.; i+=.05 )
 		{
 			for ( int j=0; j<360; j+=(360/rings) )
@@ -301,9 +315,36 @@ Class DeepImpact : SWWMWeapon
 					list[inl].avgdir += dir;
 					list[inl].avgdist += t.hitdist[i];
 				}
-				if ( t.Results.HitType == TRACE_HitWall ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+				if ( t.Results.HitType == TRACE_HitWall )
+				{
+					t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+					wallhits++;
+					hitnormal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+					if ( !t.Results.Side ) hitnormal *= -1;
+					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
+				}
+				else if ( t.Results.HitType == TRACE_HitFloor )
+				{
+					wallhits++;
+					if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.top.Normal;
+					else hitnormal = t.Results.HitSector.floorplane.Normal;
+					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
+				}
+				else if ( t.Results.HitType == TRACE_HitCeiling )
+				{
+					wallhits++;
+					if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.bottom.Normal;
+					else hitnormal = t.Results.HitSector.ceilingplane.Normal;
+					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
+				}
 			}
 			rings += 5;
+		}
+		if ( wallhits > 0 )
+		{
+			wnorm /= wallhits;
+			if ( (pos.z > floorz) && TestMobjZ() ) wnorm *= 2.4;
+			SWWMHandler.DoKnockback(self,wnorm.unit(),wnorm.length()*5000000.);
 		}
 		for ( int i=0; i<list.Size(); i++ )
 		{
@@ -347,12 +388,12 @@ Class DeepImpact : SWWMWeapon
 		if ( !weap ) return;
 		A_StopSound(CHAN_WEAPONEXTRA);
 		A_QuakeEx(6,6,6,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.7);
-		A_Recoil(4.);
 		A_StartSound("deepimpact/altfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.5);
 		A_AlertMonsters(8000);
 		invoker.clipcount = 0;
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMHandler.DoKnockback(self,-x,42000.);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3*z);
 		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.002);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
@@ -362,7 +403,6 @@ Class DeepImpact : SWWMWeapon
 		p.angle = atan2(dir.y,dir.x);
 		p.pitch = asin(-dir.z);
 		p.vel = dir*p.speed;
-		p.specialf1 = invoker.charge;
 		invoker.charge = 0;
 		int numpt = Random[Impact](14,18);
 		for ( int i=0; i<numpt; i++ )

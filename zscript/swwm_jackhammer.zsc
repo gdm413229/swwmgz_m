@@ -91,10 +91,10 @@ Class BigPusherImpact : Actor
 
 Class PusherProjectile : Actor
 {
-	bool canpickup;
 	Vector3 oldvel;
 	double oldangle, oldpitch;
 	Actor lasthit;
+	int hittics;
 
 	Default
 	{
@@ -260,6 +260,13 @@ Class PusherProjectile : Actor
 	}
 	override void Touch( Actor toucher )
 	{
+		let w = toucher.FindInventory("PusherWeapon");
+		if ( toucher.player && w )
+		{
+			let psp = toucher.player.GetPSPrite(PSP_WEAPON);
+			if ( psp && psp.CurState.InStateSequence(w.FindState("AltMiss")) )
+				return;
+		}
 		if ( !toucher.player || !toucher.GiveInventory("PusherWeapon",1) ) return;
 		if ( toucher.CheckLocalView() )
 		{
@@ -321,7 +328,7 @@ Class PusherWeapon : SWWMWeapon
 		A_WeaponOffset(FRandom[Pusher](-1,1)*2,32+FRandom[Pusher](-1,1)*2);
 		A_ZoomFactor(1.01,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
-		A_Recoil(-1.);
+		A_Recoil(-cos(pitch));
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3*z);
@@ -401,7 +408,7 @@ Class PusherWeapon : SWWMWeapon
 		A_StartSound("pusher/altfire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_ZoomFactor(1.+invoker.chargelevel*.2,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
-		A_Recoil(-(2.+4.*invoker.chargelevel));
+		A_Recoil(-(2.+4.*invoker.chargelevel)*cos(pitch));
 		A_QuakeEx(2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),3+int(invoker.chargelevel*6),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.3+invoker.chargelevel*.7);
 		A_WeaponOffset(0,32);
 		A_Overlay(-9999,null);
@@ -557,19 +564,19 @@ Class PusherWeapon : SWWMWeapon
 		XZW2 N 1
 		{
 			A_WeaponOffset(FRandom[Pusher](-1,1),32+FRandom[Pusher](-1,1));
-			A_Recoil(1.);
+			A_Recoil(cos(pitch));
 		}
 		XZW2 O 1 A_PusherDrill();
 		XZW2 P 1
 		{
 			A_WeaponOffset(FRandom[Pusher](-1,1),32+FRandom[Pusher](-1,1));
-			A_Recoil(1.);
+			A_Recoil(cos(pitch));
 		}
 		XZW2 Q 1 A_PusherDrill();
 		XZW2 R 1
 		{
 			A_WeaponOffset(FRandom[Pusher](-1,1),32+FRandom[Pusher](-1,1));
-			A_Recoil(1.);
+			A_Recoil(cos(pitch));
 		}
 		XZW2 S 1 A_PusherDrill();
 		XZW2 N 2
@@ -577,7 +584,7 @@ Class PusherWeapon : SWWMWeapon
 			if ( player.cmd.buttons&BT_ATTACK )
 				return ResolveState("Hold");
 			invoker.chargelevel *= .4;
-			A_Recoil(.5);
+			A_Recoil(.5*cos(pitch));
 			A_ClearRefire();
 			A_WeaponOffset(0,32);
 			A_StopSound(CHAN_WEAPON);

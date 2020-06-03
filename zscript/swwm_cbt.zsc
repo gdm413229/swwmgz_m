@@ -620,6 +620,7 @@ Class Wallbuster : SWWMWeapon
 		static const statelabel flashes[] = {"FlashRed","FlashGreen","FlashBlue","FlashPurple"};
 		static const String sounds[] = {"spreadgun/redfire","spreadgun/greenfire","spreadgun/bluefire","spreadgun/purplefire"};
 		static const Color cols[] = {Color(40,255,192,64),Color(36,255,192,80),Color(48,32,176,255),Color(24,255,224,96)};
+		static const int louds[] = {800,1000,1100,1200,1400,600,2500};
 		int redflashstr = 0;
 		int blueflashstr = 0;
 		// speen
@@ -655,6 +656,7 @@ Class Wallbuster : SWWMWeapon
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		if ( !invoker.cbtmuffler ) invoker.cbtmuffler = CVar.GetCVar('swwm_earbuster',players[consoleplayer]);
+		int alertness = 0;
 		// second pass, play the fire effects
 		for ( int i=0; i<num; i++ )
 		{
@@ -684,6 +686,8 @@ Class Wallbuster : SWWMWeapon
 			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
 			else if ( which == 3 ) redflashstr = max(60,redflashstr+6);
 			A_CBTFlash(flashes[which],i);
+			if ( alertness > louds[which] ) += louds[which]/4;
+			else alertness += louds[which];
 		}
 		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));
 		else if ( howmany < 15 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireFive"));
@@ -693,6 +697,7 @@ Class Wallbuster : SWWMWeapon
 		A_QuakeEx(qk,qk,qk,ql,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:qk*.15);
 		A_ZoomFactor(1.+qk*.04,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
+		A_AlertMonsters(alertness);
 		if ( redflashstr > 0 )
 		{
 			let l = Spawn("SWWMWeaponLight",pos);

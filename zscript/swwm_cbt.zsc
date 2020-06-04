@@ -796,6 +796,7 @@ Class Wallbuster : SWWMWeapon
 					b.angle = atan2(x2.y,x2.x);
 					b.pitch = asin(-x2.z);
 					b.Stamina += howmany*16;
+					b.Accuracy += howmany/5;
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{
@@ -862,7 +863,11 @@ Class Wallbuster : SWWMWeapon
 				// buckshot
 				if ( !st ) st = new("SpreadgunTracer");
 				st.ignoreme = self;
-				for ( int j=0; j<(30-howmany); j++ )
+				// attempt to uniformize expected damage
+				int expecteddmg = 180;
+				int numshot = 31-howmany;
+				int individualdmg = int(ceil(expecteddmg/double(numshot)));
+				for ( int j=0; j<numshot; j++ )
 				{
 					a = FRandom[Wallbuster](0,360);
 					s = FRandom[Wallbuster](0,.1);
@@ -871,7 +876,7 @@ Class Wallbuster : SWWMWeapon
 					st.shootthroughlist.Clear();
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-					ProcessTraceHit(st,origin,dir,6,7000,bc:5+howmany/6);
+					ProcessTraceHit(st,origin,dir,individualdmg,7000,bc:5+howmany/6);
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{
@@ -1234,8 +1239,7 @@ Class Wallbuster : SWWMWeapon
 			A_Overlay(-9999,"CheckCancelReload");
 			A_HandSpin();
 		}
-		XZW8 EFGHIJ 2;
-		XZW8 KL 1;
+		XZW8 EFGHIL 2;
 		XZW8 M 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW8 N 0;
 		Goto DetachHold;

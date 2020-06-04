@@ -463,10 +463,49 @@ Class PurpleShell4 : PurpleShell
 	}
 }
 
+Class GoldShellSparkle : Actor
+{
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[Goldy](.5,1.5);
+		vel.z = FRandom[Goldy](.5,1.5);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		SetOrigin(Vec3Offset(0,0,vel.z),true);
+		alpha -= .02;
+		if ( alpha <= 0 ) Destroy();
+	}
+	Default
+	{
+		RenderStyle "Add";
+		Scale 0.05;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCEXYBILLBOARD;
+	}
+	States
+	{
+	Spawn:
+		BLPF A -1 Bright;
+		Stop;
+	}
+}
+
 Class GoldShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+
+	action void A_GoldShellTrail()
+	{
+		if ( Random[Goldy](0,2) ) return;
+		Spawn("GoldShellSparkle",Vec3Offset(FRandom[Goldy](-2,2),FRandom[Goldy](-2,2),FRandom[Goldy](10,18)));
+	}
 
 	Default
 	{
@@ -483,8 +522,8 @@ Class GoldShell : Ammo
 	States
 	{
 	Spawn:
-		XZW1 A -1;
-		Stop;
+		XZW1 A 1 A_GoldShellTrail();
+		Wait;
 	}
 }
 

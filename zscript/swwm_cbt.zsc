@@ -364,13 +364,13 @@ Class CBTHandler : StaticEventHandler
 					cbt.A_StopSound(CHAN_AMBEXTRA+1);
 					cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOPING,cbtvol,0.);
 				}
-				cbt.A_StartSound("wallbuster/cbt",CHAN_AMBEXTRA+2,CHANF_UI|CHANF_LOOPING,cbtvol,0.);
+				cbt.A_StartSound("wallbuster/cbt",CHAN_AMBEXTRA+2,CHANF_UI,cbtvol,0.);
 			}
 			else if ( (cbtme.GetInt() < 2) && cbt.IsActorPlayingSound(CHAN_AMBEXTRA+2) )
 				cbt.A_StopSound(CHAN_AMBEXTRA+2);
 		}
 		else cbtvol = max(0.,cbtvol-.1);
-		cbt.A_SoundVolume(CHAN_AMBEXTRA+1,cbtvol);
+		cbt.A_SoundVolume(CHAN_AMBEXTRA+1,cbtvol*((cbtme.GetInt()>=2)?.8:1.));
 		cbt.A_SoundVolume(CHAN_AMBEXTRA+2,cbtvol);
 	}
 }
@@ -530,6 +530,12 @@ Class Wallbuster : SWWMWeapon
 			for ( int i=0; i<25; i++ )
 				fired[i] = false;
 		}
+	}
+	override void DetachFromOwner()
+	{
+		A_StopSound(CHAN_AMBEXTRA+1);
+		A_StopSound(CHAN_AMBEXTRA+2);
+		Super.DetachFromOwner();
 	}
 	action void A_CBTFlash( StateLabel flashlabel = null, int index = 0 )
 	{

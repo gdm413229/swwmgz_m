@@ -980,6 +980,31 @@ Class SWWMWeapon : Weapon abstract
 	virtual ui void HudTick()
 	{
 	}
+	// animations
+	action void A_PlayerFire()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayFire();
+	}
+	action void A_PlayerMelee( bool bFast = false )
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) )
+		{
+			if ( bFast ) demo.PlayFastMelee();
+			else demo.PlayMelee();
+		}
+	}
+	action void A_PlayerReload()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayReload();
+	}
+	action void A_PlayerCheckGun()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayCheckGun();
+	}
 	// instant raise/lower
 	action void A_FullRaise()
 	{

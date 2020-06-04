@@ -896,6 +896,7 @@ Class CandyGun : SWWMWeapon
 		A_SWWMFlash();
 		SWWMHandler.DoFlash(self,Color(64,224,64,255),5);
 		A_AlertMonsters(9000);
+		A_PlayerFire();
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		SWWMHandler.DoKnockback(self,-x,18000.);
@@ -1095,7 +1096,11 @@ Class CandyGun : SWWMWeapon
 		XZW2 S 2 A_DropCasing();
 		Goto Ready;
 	AltFire:
-		XZW2 A 2 A_JumpIf(invoker.clipcount<=0,"Reload");
+		XZW2 A 2
+		{
+			A_PlayerReload();
+			return A_JumpIf(invoker.clipcount<=0,"Reload");
+		}
 		XZW5 NO 2;
 		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 Q 1;
@@ -1113,7 +1118,11 @@ Class CandyGun : SWWMWeapon
 			invoker.special1 = invoker.clipcount;
 			invoker.clipcount = 0;
 		}
-		XZW6 D 1 A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 D 1
+		{
+			A_PlayerMelee();
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		XZW6 EFGHIJKLMNOPRS 1;
 		XZW6 T 1 A_ThrowMag();
 		XZW6 UVWXY 2;
@@ -1123,7 +1132,11 @@ Class CandyGun : SWWMWeapon
 		#### # 1;
 		XZWA Z 1;
 		XZWB ABC 1;
-		XZWB D 1 A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB D 1
+		{
+			A_PlayerMelee();
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		XZWB EFGHIJKLMNOPQR 1;
 		XZWB S 1 A_ThrowGun();
 		XZWB TUVWXYZ 2;
@@ -1139,7 +1152,8 @@ Class CandyGun : SWWMWeapon
 		XZW2 A 1
 		{
 			if ( (invoker.Ammo1.Amount <= 0) || (invoker.clipcount >= invoker.default.clipcount) ) return ResolveState("CheckBullet");
-			else if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
+			A_PlayerReload();
+			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
@@ -1185,7 +1199,11 @@ Class CandyGun : SWWMWeapon
 		XZW5 IJKLM 1;
 		Goto Ready;
 	Zoom:
-		XZW2 A 1 A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		XZW2 A 1
+		{
+			A_PlayerCheckGun();
+			return A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		}
 		Goto Ready;
 	CheckBullet:
 		XZW2 A 1;
@@ -1201,6 +1219,7 @@ Class CandyGun : SWWMWeapon
 	User1Hold:
 		XZW7 V 1
 		{
+			A_PlayerMelee(true);
 			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
 			A_Parry(9);
 		}

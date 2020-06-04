@@ -1320,6 +1320,7 @@ Class Hellblazer : SWWMWeapon
 		A_QuakeEx(qstr,qstr,qstr,bAlt?4:12,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.12*qstr);
 		A_ZoomFactor(bAlt?.96:.93,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
+		A_PlayerFire();
 		invoker.clipcount = max(0,invoker.clipcount-1);
 		invoker.magstate[invoker.magpos] = true;
 		invoker.spinskipped++;
@@ -1839,7 +1840,8 @@ Class Hellblazer : SWWMWeapon
 		XZWK ABCDEFG 2;
 		Goto Ready_4;
 	Load_G:
-		XZWO STUVWXY 2;
+		XZWO S 2 A_PlayerReload();
+		XZWO TUVWXY 2;
 		XZWO Z 2 A_StartSound("hellblazer/magin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWP ABCDEFG 2;
 		XZWP H 2 A_StartSound("hellblazer/close",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1865,7 +1867,11 @@ Class Hellblazer : SWWMWeapon
 		XZWK HIJKLMNOPQRSTUVWX 2;
 		Goto Ready_4;
 	Idle_G:
-		XZWL S 2 A_StartSound("hellblazer/idle",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWL S 2
+		{
+			A_StartSound("hellblazer/idle",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
+		}
 		XZWP TUVWX 2;
 		XZWP Y 2 A_StartSound("hellblazer/dustoff",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWP Z 2;
@@ -1917,6 +1923,7 @@ Class Hellblazer : SWWMWeapon
 		{
 			A_StartSound("hellblazer/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
 		}
 		XZWQ KLM 2;
 		XZWQ N 2 A_Parry(9);

@@ -275,6 +275,7 @@ Class DeepImpact : SWWMWeapon
 		A_QuakeEx(1,1,1,2,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.05);
 		A_StartSound("deepimpact/fire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(300);
+		A_PlayerFire();
 		invoker.clipcount = max(0,invoker.clipcount-3);
 		Vector3 x, y, z, dir;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -390,6 +391,7 @@ Class DeepImpact : SWWMWeapon
 		A_QuakeEx(6,6,6,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.7);
 		A_StartSound("deepimpact/altfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.5);
 		A_AlertMonsters(8000);
+		A_PlayerFire();
 		invoker.clipcount = 0;
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -504,14 +506,22 @@ Class DeepImpact : SWWMWeapon
 		XZW3 RSTUV 2;
 		Goto Ready;
 	Zoom:
-		XZW2 A 3 A_StartSound("deepimpact/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 3
+		{
+			A_StartSound("deepimpact/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
+		}
 		XZW3 WXYZ 3;
 		XZW4 AB 4;
 		XZW4 CD 3;
 		XZW4 EFG 2;
 		Goto Ready;
 	User1:
-		XZW2 A 2 A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 2
+		{
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
 		XZW4 H 2 A_StartSound("demolitionist/reloadbeg",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 I 2;
 		XZW4 J 1 A_Parry(9);

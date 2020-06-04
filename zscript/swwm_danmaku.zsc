@@ -586,6 +586,7 @@ Class Eviscerator : SWWMWeapon
 		A_ZoomFactor(.94,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
 		A_SWWMFlash();
+		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(64,255,224,96),3);
 		A_AlertMonsters(4500);
 		Vector3 x, y, z, x2, y2, z2, dir, origin;
@@ -642,6 +643,7 @@ Class Eviscerator : SWWMWeapon
 		A_ZoomFactor(.91,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
 		A_SWWMFlash();
+		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(16,255,224,96),3);
 		A_AlertMonsters(4000);
 		Vector3 x, y, z, x2, y2, z2, dir, origin;
@@ -876,6 +878,7 @@ Class Eviscerator : SWWMWeapon
 		XZW2 A 2
 		{
 			A_StartSound("eviscerator/checkgun",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
 			return A_JumpIf(invoker.extended,"ReloadExt");
 		}
 		XZW7 VWXYZ 2;
@@ -901,6 +904,7 @@ Class Eviscerator : SWWMWeapon
 		{
 			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
 			return A_JumpIf(invoker.extended,"User1Ext");
 		}
 		XZW8 WXY 2;

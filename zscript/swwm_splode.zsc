@@ -301,6 +301,7 @@ Class ExplodiumGun : SWWMWeapon
 		A_SWWMFlash();
 		SWWMHandler.DoFlash(self,Color(64,255,224,64),3);
 		A_AlertMonsters(5000);
+		A_PlayerFire();
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		SWWMHandler.DoKnockback(self,-x,12000.);
@@ -453,7 +454,11 @@ Class ExplodiumGun : SWWMWeapon
 		XZW2 S 2 A_DropCasing();
 		Goto Ready;
 	AltFire:
-		XZW2 A 2 A_JumpIf(invoker.clipcount<=0,"Reload");
+		XZW2 A 2
+		{
+			A_PlayerReload();
+			return A_JumpIf(invoker.clipcount<=0,"Reload");
+		}
 		XZW5 NO 2;
 		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 QRSTUVWXYZ 1;
@@ -465,7 +470,11 @@ Class ExplodiumGun : SWWMWeapon
 			invoker.special1 = invoker.clipcount;
 			invoker.clipcount = 0;
 		}
-		XZW6 D 1 A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 D 1
+		{
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
 		XZW6 EFGHIJKLMNOPRS 1;
 		XZW6 T 1 A_ThrowMag();
 		XZW6 UVWXY 2;
@@ -474,8 +483,9 @@ Class ExplodiumGun : SWWMWeapon
 	Reload:
 		XZW2 A 1
 		{
+			if ( invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
+			A_PlayerReload();
 			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
-			else if ( invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
@@ -515,7 +525,11 @@ Class ExplodiumGun : SWWMWeapon
 		XZW5 IJKLM 1;
 		Goto Ready;
 	Zoom:
-		XZW2 A 1 A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		XZW2 A 1
+		{
+			A_PlayerCheckGun();
+			return A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		}
 		Goto Ready;
 	CheckBullet:
 		XZW2 A 1;
@@ -531,6 +545,7 @@ Class ExplodiumGun : SWWMWeapon
 	User1Hold:
 		XZW7 V 1
 		{
+			A_PlayerMelee(true);
 			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
 			A_Parry(9);
 		}

@@ -2094,6 +2094,7 @@ Class Spreadgun : SWWMWeapon
 			A_QuakeEx(quakes[i],quakes[i],quakes[i],9,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2*quakes[i]);
 			A_ZoomFactor(1.+quakes[i]*.04,ZOOM_INSTANT);
 			A_ZoomFactor(1.);
+			A_PlayerFire();
 			SWWMHandler.DoFlash(self,cols[i],5);
 			Vector3 x, y, z;
 			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -2575,7 +2576,11 @@ Class Spreadgun : SWWMWeapon
 		#### # 1 A_AltHold();
 		Wait;
 	Reload:
-		#### # 1 A_SelectUnloadState();
+		#### # 1
+		{
+			A_PlayerReload();
+			A_SelectUnloadState();
+		}
 		Stop;
 	UnloadDummy:	// overlay with shared functions for all unload anims
 		TNT1 A 11;
@@ -2747,6 +2752,7 @@ Class Spreadgun : SWWMWeapon
 		XZW2 A 1
 		{
 			A_StartSound("spreadgun/checkgun",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
 			return A_JumpIf(invoker.fired,"ZoomFired");
 		}
 		XZWH JKLMNOPQRST 1;
@@ -2762,7 +2768,11 @@ Class Spreadgun : SWWMWeapon
 		XZWJ QRSTUV 1;
 		Goto ReadyFired;
 	DummyMelee:
-		TNT1 A 3 A_Parry(9);
+		TNT1 A 3
+		{
+			A_Parry(9);
+			A_PlayerMelee(true);
+		}
 		TNT1 A 1 A_Melee();
 		Stop;
 	User1:

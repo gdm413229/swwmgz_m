@@ -698,6 +698,7 @@ Class Wallbuster : SWWMWeapon
 		A_ZoomFactor(1.+qk*.04,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
 		A_AlertMonsters(alertness);
+		A_PlayerFire();
 		if ( redflashstr > 0 )
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
@@ -1175,7 +1176,11 @@ Class Wallbuster : SWWMWeapon
 		XZW5 ABCDEF 1;
 		XZW5 G 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
 	DetachHold:
-		XZW5 H 1 A_StartDetachOverlays();
+		XZW5 H 1
+		{
+			A_StartDetachOverlays();
+			A_PlayerReload();
+		}
 		XZW5 IJKLMNOPQ 1;
 		XZW5 R 2 A_DropShells();
 		XZW5 ST 2;
@@ -1274,6 +1279,7 @@ Class Wallbuster : SWWMWeapon
 		{
 			A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
 		}
 		XZW9 GHI 2;
 		XZW9 J 2 A_Parry(9);

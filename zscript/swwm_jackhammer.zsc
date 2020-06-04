@@ -412,6 +412,7 @@ Class PusherWeapon : SWWMWeapon
 		A_QuakeEx(2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),3+int(invoker.chargelevel*6),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.3+invoker.chargelevel*.7);
 		A_WeaponOffset(0,32);
 		A_Overlay(-9999,null);
+		A_PlayerFire();
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3*z);
@@ -628,13 +629,21 @@ Class PusherWeapon : SWWMWeapon
 		Stop;
 	Reload:
 	Zoom:
-		XZW2 A 2 A_StartSound("pusher/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 2
+		{
+			A_StartSound("pusher/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
+		}
 		XZW3 XYZ 2;
 		XZW4 ABCDEFGHIJKLMNOPQR 2;
 		XZW4 STUVWXYZ 3;
 		Goto Ready;
 	User1:
-		XZW2 A 2 A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 2
+		{
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
 		XZW5 ABC 2;
 		XZW5 D 1 A_Parry(9);
 		XZW5 EFGH 1;

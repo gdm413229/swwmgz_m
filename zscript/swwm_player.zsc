@@ -1180,6 +1180,9 @@ Class Demolitionist : PlayerPawn
 	}
 	override void PlayAttacking()
 	{
+		// Do nothing if it's a SWWM weapon, since those do things themselves
+		if ( player && (player.ReadyWeapon is 'SWWMWeapon') )
+			return;
 		if ( InStateSequence(CurState,FindState("Dash"))
 			|| InStateSequence(CurState,FindState("Jump")) )
 			return;	// don't cancel dash/jump
@@ -1189,6 +1192,46 @@ Class Demolitionist : PlayerPawn
 	override void PlayAttacking2()
 	{
 		PlayAttacking();
+	}
+	void PlayFire()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump")) )
+			return;	// don't cancel dash/jump
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchMissile");
+		else SetStateLabel("Missile");
+	}
+	void PlayMelee()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump")) )
+			return;	// don't cancel dash/jump
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchMelee");
+		else SetStateLabel("Melee");
+	}
+	void PlayFastMelee()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump")) )
+			return;	// don't cancel dash/jump
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchFastMelee");
+		else SetStateLabel("FastMelee");
+	}
+	void PlayReload()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump")) )
+			return;	// don't cancel dash/jump
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchReload");
+		else SetStateLabel("Reload");
+	}
+	void PlayCheckGun()
+	{
+		if ( InStateSequence(CurState,FindState("Dash"))
+			|| InStateSequence(CurState,FindState("Jump")) )
+			return;	// don't cancel dash/jump
+		if ( player && (player.crouchdir == -1) ) SetStateLabel("CrouchCheckGun");
+		else SetStateLabel("CheckGun");
 	}
 	void A_DMFade()
 	{
@@ -1529,11 +1572,33 @@ Class Demolitionist : PlayerPawn
 		XZW6 EFGHIJKLMNOPQRSTUVW 3;
 		Goto Spawn+1;
 	Missile:
-	Melee:
 		// attacking
 		XZW1 A 2;
 		XZW6 XYZ 2;
 		XZW7 ABC 2;
+		Goto Spawn+1;
+	Melee:
+		// ponch
+		XZW1 A 2;
+		XZW8 TUVWXYZ 2;
+		XZW9 ABCDEF 2;
+		Goto Spawn+1;
+	FastMelee:
+		// ponch (fast)
+		XZW1 A 1;
+		XZW8 TUVWXYZ 1;
+		XZW9 ABCDEF 1;
+		Goto Spawn+1;
+	Reload:
+		// reload
+		XZW1 A 2;
+		XZW9 GHIJKLMNOPQRSTUVWXYZ 2;
+		XZWA ABCDE 2;
+		Goto Spawn+1;
+	CheckGun:
+		// speen
+		XZW1 A 2;
+		XZWA FGHIJKLMNOPQRSTUVWXY 2;
 		Goto Spawn+1;
 	StartCrouch:
 		// go crouching
@@ -1556,6 +1621,26 @@ Class Demolitionist : PlayerPawn
 		XZW7 M 2;
 		XZW7 WXYZ 2;
 		XZW8 AB 2;
+		Goto Crouch+1;
+	CrouchMelee:
+		XZW7 M 2;
+		XZWA Z 2;
+		XZWB ABCDEFGHIJKL 2;
+		Goto Crouch+1;
+	CrouchFastMelee:
+		XZW7 M 1;
+		XZWA Z 1;
+		XZWB ABCDEFGHIJKL 1;
+		Goto Crouch+1;
+	CrouchReload:
+		XZW7 M 2;
+		XZWB MNOPQRSTUVWXYZ 2;
+		XZWC ABCDEFGHIJ 2;
+		Goto Crouch+1;
+	CrouchCheckGun:
+		XZW7 M 2;
+		XZWC LMNOPQRSTUVWXYZ 2;
+		XZWD ABCD 2;
 		Goto Crouch+1;
 	CrouchPain:
 		XZW7 M 1;

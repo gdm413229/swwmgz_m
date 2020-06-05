@@ -5,8 +5,7 @@ Fundamental things:
 
 Not so fundamental things:
  - Chanceboxes
- - Extra Demolitionist animations (swim, weapon melee/reload/idle)
- - Adjust Demolitionist crouch height to match anims
+ - Extra Demolitionist animations (swimming, additional gestures)
 
 Extra things:
  - Art for custom intermission
@@ -17,6 +16,7 @@ Extra things:
    - Some sort of flyby featuring the Demolitionist booting up, closeups of
      weapons/items etc.
  - Dual wielding Explodium Gun
+ - Quick grenade function (Explodium Mag)
  - Randomized vanilla monster retagging with multiple options
  - Japanese localization
  - Keen replacement (need ideas)

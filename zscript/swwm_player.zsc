@@ -1574,31 +1574,32 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	Missile:
 		// attacking
-		XZW1 A 2;
+		#### # 2;
 		XZW6 XYZ 2;
 		XZW7 ABC 2;
 		Goto Spawn+1;
 	Melee:
 		// ponch
-		XZW1 A 2;
+		#### # 2;
 		XZW8 TUVWXYZ 2;
 		XZW9 ABCDEF 2;
 		Goto Spawn+1;
 	FastMelee:
 		// ponch (fast)
-		XZW1 A 1;
+		#### # 2;
 		XZW8 TUVWXYZ 1;
-		XZW9 ABCDEF 1;
+		XZW9 ABCDE 1;
+		XZW9 F 2;
 		Goto Spawn+1;
 	Reload:
 		// reload
-		XZW1 A 2;
+		#### # 2;
 		XZW9 GHIJKLMNOPQRSTUVWXYZ 2;
 		XZWA ABCDE 2;
 		Goto Spawn+1;
 	CheckGun:
 		// speen
-		XZW1 A 2;
+		#### # 2;
 		XZWA FGHIJKLMNOPQRSTUVWXY 2;
 		Goto Spawn+1;
 	StartCrouch:
@@ -1629,9 +1630,10 @@ Class Demolitionist : PlayerPawn
 		XZWB ABCDEFGHIJKL 2;
 		Goto Crouch+1;
 	CrouchFastMelee:
-		XZW7 M 1;
+		XZW7 M 2;
 		XZWA Z 1;
-		XZWB ABCDEFGHIJKL 1;
+		XZWB ABCDEFGHIJK 1;
+		XZWB L 2;
 		Goto Crouch+1;
 	CrouchReload:
 		XZW7 M 2;

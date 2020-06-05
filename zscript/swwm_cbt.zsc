@@ -1209,10 +1209,60 @@ Class Wallbuster : SWWMWeapon
 			invoker.rnum = invoker.reloadqueue.Size();
 			invoker.cancelreload = false;
 			A_Overlay(-9999,"CheckCancelReload");
+			// jump to spin if current group is full
+			int nset = 0;
+			for ( int i=0; i<5; i++ )
+			{
+				// get physical index
+				int idx = i;
+				// shift based on full rotation
+				idx = (idx+invoker.rotation[5]*5);
+				while ( idx > 24 ) idx -= 25;
+				int group = idx/5;
+				// shift based on group rotation
+				int gidx = i%5;
+				gidx = (gidx+invoker.rotation[group]);
+				while ( gidx > 4 ) gidx -= 5;
+				idx = gidx+group*5;
+				if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+				nset++;
+			}
+			// but previous isn't
+			for ( int i=20; i<25; i++ )
+			{
+				// get physical index
+				int idx = i;
+				// shift based on full rotation
+				idx = (idx+invoker.rotation[5]*5);
+				while ( idx > 24 ) idx -= 25;
+				int group = idx/5;
+				// shift based on group rotation
+				int gidx = i%5;
+				gidx = (gidx+invoker.rotation[group]);
+				while ( gidx > 4 ) gidx -= 5;
+				idx = gidx+group*5;
+				if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+				nset++;
+			}
+			return A_JumpIf((nset>=5)&&(nset<10),"DetachSpin");
 		}
 		XZW4 WXYZ 1;
 		XZW5 ABCDEF 1;
 		XZW5 G 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		Goto DetachHold;
+	DetachSpin:
+		XZWE U 0;
+		XZWE VWXYZ 1;
+		XZWF A 2
+		{
+			invoker.cancelreload = false;
+			A_Overlay(-9999,"CheckCancelReload");
+			A_HandSpin();
+		}
+		XZWF BCDEFG 2;
+		XZWF J 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWF K 0;
+		Goto DetachHold;
 	DetachHold:
 		XZW5 H 1
 		{

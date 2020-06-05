@@ -1209,8 +1209,10 @@ Class Wallbuster : SWWMWeapon
 			invoker.rnum = invoker.reloadqueue.Size();
 			invoker.cancelreload = false;
 			A_Overlay(-9999,"CheckCancelReload");
+			// if it's a full rotation, don't hand-spin
+			if ( invoker.rnum > 20 ) return ResolveState(null);
 			// jump to spin if current group is full
-			int nset = 0;
+			int nset = 0, nsetp = 0;
 			for ( int i=0; i<5; i++ )
 			{
 				// get physical index
@@ -1242,9 +1244,9 @@ Class Wallbuster : SWWMWeapon
 				while ( gidx > 4 ) gidx -= 5;
 				idx = gidx+group*5;
 				if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
-				nset++;
+				nsetp++;
 			}
-			return A_JumpIf((nset>=5)&&(nset<10),"DetachSpin");
+			return A_JumpIf((nset>=5)&&(nsetp<5),"DetachSpin");
 		}
 		XZW4 WXYZ 1;
 		XZW5 ABCDEF 1;

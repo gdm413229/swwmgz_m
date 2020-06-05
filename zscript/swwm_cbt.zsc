@@ -45,7 +45,7 @@ Class WallbusterReloadMenu : GenericMenu
 		AmmoIcon[3] = TexMan.CheckForTexture("graphics/HUD/PurpleShell.png",TexMan.Type_Any);
 		MenuSound("menu/demotab");
 		queue.Clear();
-		sel0 = 0;
+		sel0 = CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).GetInt();;
 	}
 
 	override void Ticker()
@@ -85,6 +85,7 @@ Class WallbusterReloadMenu : GenericMenu
 					if ( (players[consoleplayer].mo.CountInv(types[idx])-AmmoSets[idx]) > 0 )
 					{
 						sel0 = idx;
+						CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).SetInt(sel0);
 						return PushAmmo(true);
 					}
 				}
@@ -111,6 +112,7 @@ Class WallbusterReloadMenu : GenericMenu
 			candidates.Push(i);
 		}
 		sel0 = Random[WallbusterMenu](0,candidates.Size()-1);
+		CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).SetInt(sel0);
 		AmmoSets[sel0]++;
 		queue.Push(sel0);
 	}
@@ -171,11 +173,13 @@ Class WallbusterReloadMenu : GenericMenu
 			MenuSound("menu/demotab");
 			sel0++;
 			if ( sel0 > 3 ) sel0 = 0;
+			CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).SetInt(sel0);
 			return true;
 		case MKEY_LEFT:
 			MenuSound("menu/demotab");
 			sel0--;
 			if ( sel0 < 0 ) sel0 = 3;
+			CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).SetInt(sel0);
 			return true;
 		case MKEY_PAGEUP:
 			if ( queue.Size() <= 0 )

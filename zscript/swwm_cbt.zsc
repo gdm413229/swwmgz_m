@@ -98,6 +98,23 @@ Class WallbusterReloadMenu : GenericMenu
 		return true;
 	}
 
+	private void ShuffleAmmo()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		// there's probably a better way to do this but I'm lazy
+		Array<Int> candidates;
+		candidates.Clear();
+		for ( int i=0; i<4; i++ )
+		{
+			if ( (players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]) <= 0 )
+				continue;
+			candidates.Push(i);
+		}
+		sel0 = Random[WallbusterMenu](0,candidates.Size()-1);
+		AmmoSets[sel0]++;
+		queue.Push(sel0);
+	}
+
 	private bool PopAmmo()
 	{
 		if ( queue.Size() <= 0 ) return false;
@@ -214,6 +231,21 @@ Class WallbusterReloadMenu : GenericMenu
 		bool res;
 		switch ( ev.type )
 		{
+		case UIEvent.Type_KeyDown:
+			if ( ev.keychar == UiEvent.Key_Tab )
+			{
+				// shuffle!
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+				bool didsomething = false;
+				while ( !IsDone() )
+				{
+					ShuffleAmmo();
+					didsomething = true;
+				}
+				MenuSound(didsomething?"menu/demosel":"menu/noinvuse");
+			}
+			break;
 		case UIEvent.Type_LButtonDown:
 			isrclick = false;
 			ismclick = false;
@@ -758,7 +790,7 @@ Class Wallbuster : SWWMWeapon
 				// slug
 				if ( !sst ) sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 250.;
+				sst.penetration = 275.;
 				a = FRandom[Wallbuster](0,360);
 				s = FRandom[Wallbuster](0,.002);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -803,7 +835,7 @@ Class Wallbuster : SWWMWeapon
 					b.angle = atan2(x2.y,x2.x);
 					b.pitch = asin(-x2.z);
 					b.Stamina += howmany*16;
-					b.Accuracy += howmany/5;
+					b.Accuracy += 2+howmany/5;
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{
@@ -840,7 +872,7 @@ Class Wallbuster : SWWMWeapon
 				p.target = self;
 				p.angle = atan2(dir.y,dir.x);
 				p.pitch = asin(-dir.z);
-				p.vel = dir*p.speed;
+				p.vel = dir*p.speed*1.25;
 				for ( int i=0; i<(4-howmany/8); i++ )
 				{
 					let s = Spawn("SWWMViewSmoke",origin);
@@ -871,7 +903,7 @@ Class Wallbuster : SWWMWeapon
 				if ( !st ) st = new("SpreadgunTracer");
 				st.ignoreme = self;
 				// attempt to uniformize expected damage
-				int expecteddmg = 180;
+				int expecteddmg = 200;
 				int numshot = 31-howmany;
 				int individualdmg = int(ceil(expecteddmg/double(numshot)));
 				for ( int j=0; j<numshot; j++ )
@@ -1007,7 +1039,7 @@ Class Wallbuster : SWWMWeapon
 				{
 					Vector3 x, y, z;
 					[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-					Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-10*z);
+					Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-3*y-13*z);
 					let c = Spawn(casetypes[which],origin);
 					c.angle = angle;
 					c.pitch = pitch;
@@ -1025,7 +1057,7 @@ Class Wallbuster : SWWMWeapon
 					}
 					if ( amo.Amount < amo.MaxAmount ) amo.Amount++;
 					else if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
-						Spawn(types[which],Vec3Angle(5,(angle-20)+i*10,height/2));
+						Spawn(types[which],Vec3Angle(10,(angle-20)+i*10,height/3));
 				}
 			}
 			invoker.loaded[invoker.rotation[5]*5+i] = null;

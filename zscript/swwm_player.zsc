@@ -216,8 +216,6 @@ Class Demolitionist : PlayerPawn
 				if ( !type ) continue;
 				if ( type is 'Chancebox' ) continue;	// do not give these until they're fully implemented
 				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators outside of hexen
-				if ( !(gameinfo.gametype&(GAME_DoomChex|GAME_Strife)) && (type is 'EBarrier') ) continue;	// no barrier outside of doom/strife
-				if ( !(gameinfo.gametype&GAME_Raven) && (type is 'GravitySuppressor') ) continue;	// no gravity suppressor outside heretic/hexen
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
 					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )
@@ -574,6 +572,7 @@ Class Demolitionist : PlayerPawn
 			Vector3 dir = vel+dashdir*dashboost;
 			double spd = dir.length();
 			dir = dir.unit();
+			Vector3 viewdir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 			// look for things we could potentially bump into
 			let bi = BlockThingsIterator.Create(self,500);
 			bool bumped = false;
@@ -607,7 +606,9 @@ Class Demolitionist : PlayerPawn
 				int flg = DMG_THRUSTLESS;
 				if ( FindInventory("RagekitPower") ) flg |= DMG_FOILINVUL;
 				if ( !a.player ) a.bBLASTED = true;
-				int dmg = a.DamageMobj(self,self,int(15+spd*2.5),'Dash',flg);
+				int dmg = int(15+spd*2.5);
+				if ( dir dot viewdir < -.3 ) dmg *= 2;	// BUTTSLAM
+				dmg = a.DamageMobj(self,self,dmg,'Dash',flg);
 				if ( FindInventory("RagekitPower") )
 				{
 					let ps = Spawn("BigPunchSplash",diff/2);

@@ -665,7 +665,7 @@ Class Eviscerator : SWWMWeapon
 		p.target = self;
 		p.angle = atan2(dir.y,dir.x);
 		p.pitch = asin(-dir.z);
-		p.vel = dir*p.speed;
+		p.vel = dir*p.speed*(invoker.extended?1.6:.8);
 		for ( int i=0; i<4; i++ )
 		{
 			let s = Spawn("SWWMViewSmoke",origin);

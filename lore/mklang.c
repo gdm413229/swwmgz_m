@@ -162,7 +162,7 @@ static int ftw_callback( const char *path, const struct stat *st,
 	return FTW_CONTINUE;
 }
 
-#define NLANGS 7
+#define NLANGS 8
 
 int main( void )
 {
@@ -174,7 +174,8 @@ int main( void )
 		"ru",
 		"fr",
 		"it",
-		"de"
+		"de",
+		"esm"
 	};
 	const char langfiles[NLANGS][32] =
 	{
@@ -184,7 +185,8 @@ int main( void )
 		"../language.ru_lore",
 		"../language.fr_lore",
 		"../language.it_lore",
-		"../language.de_lore"
+		"../language.de_lore",
+		"../language.esm_lore",
 	};
 	for ( int i=0; i<NLANGS; i++ )
 	{

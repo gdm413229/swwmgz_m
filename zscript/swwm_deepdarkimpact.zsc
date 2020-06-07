@@ -8,9 +8,11 @@ Class AirBullet : FastProjectile
 
 	Default
 	{
+		Obituary "$O_DEEPIMPACT";
 		Radius 2;
 		Height 4;
 		DamageFunction 100;
+		DamageType 'AirRip';
 		Speed 400;
 		PROJECTILE;
 		+FORCERADIUSDMG;
@@ -436,7 +438,7 @@ Class DeepImpact : SWWMWeapon
 	{
 		Tag "$T_DEEPIMPACT";
 		Inventory.PickupMessage "$I_DEEPIMPACT";
-		Obituary "$O_DEEPIMPACT";
+		Obituary "$O_DEEPIMPACT_WEAK";
 		Weapon.UpSound "deepimpact/select";
 		Weapon.SlotNumber 1;
 		Weapon.SelectionOrder 3000;

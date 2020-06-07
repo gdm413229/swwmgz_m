@@ -561,6 +561,11 @@ Class SaltImpact : Actor
 		+NOTELEPORT;
 		+FOILINVUL;
 	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
@@ -636,6 +641,11 @@ Class SaltBeam : Actor
 		+FOILINVUL;
 	}
 
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
 	void SpreadOut()
 	{
 		special1 = 1;
@@ -697,6 +707,7 @@ Class SaltBeam : Actor
 				i.target = target;
 				i.special1 = (Stamina-9)/4;
 				i.special2 = Accuracy;
+				i.args[0] = args[1];
 			}
 			return;
 		}
@@ -708,6 +719,7 @@ Class SaltBeam : Actor
 			i.target = target;
 			i.special1 = (Stamina-9)/4;
 			i.special2 = Accuracy;
+			i.args[0] = args[1];
 			return;
 		}
 		// next beam
@@ -721,6 +733,7 @@ Class SaltBeam : Actor
 		next.target = target;
 		next.special2 = (special2+1)%10;
 		next.args[0] = args[0]+1;
+		next.args[1] = args[1];
 		next.SetStateLabel("TrailSpawn");
 	}
 
@@ -1324,6 +1337,11 @@ Class TheBall : Actor
 		BounceFactor 1.0;
 		Radius 2;
 		Height 2;
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	override int SpecialMissileHit( Actor victim )
 	{

@@ -140,7 +140,7 @@ Class PusherProjectile : Actor
 		pitch += clamp(deltaangle(pitch,asin(-dir.z)),-2,2);
 		// cancel if we hit a wall dead-on
 		FLineTraceData d;
-		LineTrace(oldangle,30,oldpitch,TRF_THRUACTORS,5,data:d);
+		LineTrace(oldangle,30,oldpitch,TRF_THRUACTORS|TRF_NOSKY,5,data:d);
 		if ( d.HitType != TRACE_HitNone )
 		{
 			angle = oldangle;
@@ -150,10 +150,31 @@ Class PusherProjectile : Actor
 			ExplodeMissile(BlockingLine,BlockingMobj);
 		}
 	}
+	private bool HitSkyLine( Line l, int hitside )
+	{
+		if ( !l ) return false;
+		// if it's onesided, check if it's a Line_Horizon
+		if ( !l.sidedef[1] ) return (l.special == Line_Horizon);
+		Sector outs, ins;
+		if ( hitside )
+		{
+			ins = l.backsector;
+			outs = l.frontsector;
+		}
+		else
+		{
+			ins = l.frontsector;
+			outs = l.backsector;
+		}
+		// return true if we're in a sector with sky and we hit the upper part of the line
+		if ( ins.GetTexture(1) != skyflatnum ) return false;
+		return (outs.ceilingplane.ZAtPoint(pos.xy) <= pos.z);
+	}
 	void A_HandleBounce()
 	{
 		Vector3 HitNormal = -vel.unit();
 		F3DFloor ff;
+		int lineside = 1;
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
@@ -182,7 +203,10 @@ Class PusherProjectile : Actor
 		{
 			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
 			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
+			{
+				lineside = 0;
 				HitNormal *= -1;
+			}
 		}
 		else if ( BlockingMobj )
 		{
@@ -204,6 +228,13 @@ Class PusherProjectile : Actor
 		angle = oldangle;
 		pitch = oldpitch;
 		vel = oldvel;
+		// try to guess if we hit the sky
+		if ( HitSkyLine(BlockingLine,lineside) || (BlockingCeiling && (ceilingpic == skyflatnum)) || (BlockingFloor && (floorpic == skyflatnum)) )
+		{
+			special1 = 0;
+			ExplodeMissile();
+			return;
+		}
 		// re-do the bounce with our formula
 		vel = .8*((vel dot HitNormal)*HitNormal*(-1.8+FRandom[Pusher](.0,.8))+vel);
 		A_StartSound("pusher/bounce",volume:.3);
@@ -243,6 +274,8 @@ Class PusherProjectile : Actor
 			bNOGRAVITY = true;
 		}
 		else pitch = 0;
+		gravity = 1.;
+		ClearBounce();
 		bSPECIAL = true;
 		A_SetSize(20,16);
 		A_ChangeLinkFlags(0);
@@ -287,7 +320,10 @@ Class PusherProjectile : Actor
 		XZW1 A 0 A_HandleBounce();
 		Goto Spawn;
 	Death:
-		XZW1 A -1 A_BecomePickup();
+		XZW1 A 0 A_BecomePickup();
+		XZW1 A 1 A_JumpIf(pos.z<=floorz,1);
+		Wait;
+		XZW1 A -1 A_StartSound("pusher/bounce");
 		Stop;
 	}
 }

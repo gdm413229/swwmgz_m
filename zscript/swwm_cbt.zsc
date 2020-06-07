@@ -427,7 +427,16 @@ Class Wallbuster : SWWMWeapon
 
 	transient ui TextureID WeaponBox, AmmoIcon[4], LoadIcon[4], UsedIcon[4], EmptyIcon;
 	transient ui Font TewiFont;
+	Class<Ammo> curobt;
 
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( curobt is 'RedShell' ) return StringTable.Localize("$O_WALLBUSTER_RED");
+		if ( curobt is 'GreenShell' ) return StringTable.Localize("$O_WALLBUSTER_GREEN");
+		if ( curobt is 'BlueShell' ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( curobt is 'PurpleShell' ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
@@ -788,6 +797,7 @@ Class Wallbuster : SWWMWeapon
 			b.y += 8;
 			Vector2 n = (b.x*cos(t2)-b.y*sin(t2),b.x*sin(t2)+b.y*cos(t2));
 			origin = level.Vec3Offset(base,n.x*y+n.y*z);
+			invoker.curobt = types[which];
 			switch ( which )
 			{
 			case 1:
@@ -840,6 +850,7 @@ Class Wallbuster : SWWMWeapon
 					b.pitch = asin(-x2.z);
 					b.Stamina += howmany*16;
 					b.Accuracy += 2+howmany/5;
+					b.Args[1] = 1;	// came from wallbuster
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{
@@ -877,6 +888,7 @@ Class Wallbuster : SWWMWeapon
 				p.angle = atan2(dir.y,dir.x);
 				p.pitch = asin(-dir.z);
 				p.vel = dir*p.speed*1.25;
+				p.special1 = 1;	// came from wallbuster
 				for ( int i=0; i<(4-howmany/8); i++ )
 				{
 					let s = Spawn("SWWMViewSmoke",origin);
@@ -1102,7 +1114,7 @@ Class Wallbuster : SWWMWeapon
 	{
 		Tag "$T_WALLBUSTER";
 		Inventory.PickupMessage "$I_WALLBUSTER";
-		Obituary "$O_WALLBUSTER";
+		Obituary "$O_WALLBUSTER_RED";
 		Weapon.SlotNumber 4;
 		Weapon.SelectionOrder 2200;
 		Weapon.UpSound "wallbuster/select";

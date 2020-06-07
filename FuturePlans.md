@@ -12,7 +12,11 @@ after the first release.
   - PROWEL & TADEL (Ultra Suite 2 & 3)
   - Super Happy Fun Ball (SWWM Z)
 * Additional Demolitionist Menu features
-  - Per-monster kill tracker in stats tab
+  - Stats tab subsections
+    - Monster kill tracker
+    - Item pickup tracker
+    - Level stats tracker
+    - Achevements tracker (see below)
   - Radio (add-on)
   - Pong minigame
   - Selling items at the store
@@ -45,7 +49,7 @@ after the first release.
 * Fake livestream chat overlay, with dynamic reactions to all sorts of stuff
 * Character and item images for the library
 * Full Mashiro model for Lämp easter egg
-* Summonable Ibuki companion (w/ optional "stream friendly" clothing)
+* Ibuki companion add-on (w/ optional "stream friendly" clothing)
 * Saya model, for scenes or something idk
-* Japanese Localization???
+* Japanese localization???
 * Strife support, with rewritten dialogue

@@ -248,9 +248,17 @@ Class SWWMStats : Thinker
 	{
 		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
 		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
-		// properly credit napalm damage to Spreadgun
-		if ( inflictor is 'OnFire' ) which = 'Spreadgun';
-		// TODO handle other projectiles
+		// properly credit some projectiles to their respective gun
+		if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
+		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';
+		else if ( (inflictor is 'ExplodiumMagArm') || (inflictor is 'ExplodiumMagProj') || (inflictor is 'ExplodiumBulletImpact') ) which = 'ExplodiumGun';
+		else if ( (inflictor is 'DragonBreathArm') || ((inflictor is 'SaltImpact') && !inflictor.Args[0]) || ((inflictor is 'SaltBeam') && !inflictor.Args[1]) || (inflictor is 'OnFire') || (inflictor is 'FlamingChunk') || ((inflictor is 'TheBall') && !inflictor.special1) || (inflictor is 'GoldenImpact') || (inflictor is 'GoldenSubImpact') || (inflictor is 'GoldenSubSubImpact') ) which = 'Spreadgun';
+		else if ( ((inflictor is 'SaltImpact') && inflictor.Args[0]) || ((inflictor is 'SaltBeam') && inflictor.Args[1]) || ((inflictor is 'TheBall') && inflictor.special1) ) which = 'Wallbuster';
+		else if ( (inflictor is 'EvisceratorChunk') || (inflictor is 'EvisceratorProj') ) which = 'Eviscerator';
+		else if ( (inflictor is 'HellblazerRavagerArm') || (inflictor is 'HellblazerWarheadArm') ) which = 'Hellblazer';
+		else if ( (inflictor is 'BigBiospark') || (inflictor is 'BiosparkBall') || (inflictor is 'BiosparkBeamImpact') || (inflictor is 'BiosparkComboImpact') || (inflictor is 'BiosparkBeam') || (inflictor is 'BiosparkArc') ) which = 'Sparkster';
+		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
+		// TODO Silver Bullet / Ynykron projs when implemented
 		if ( !which ) return;
 		for ( int i=0; i<wstats.Size(); i++ )
 		{
@@ -2423,6 +2431,17 @@ Class SWWMHandler : EventHandler
 			if ( e.DamageSource.player == players[consoleplayer] )
 				scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			int ofs = 0;
+			if ( e.DamageType == 'Push' )
+			{
+				score += 1000;
+				if ( scr )
+				{
+					scr.xscore[ofs] = 0;
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_SHAMEFUL");
+					scr.xcnt = ++ofs;
+				}
+			}
 			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) )
 			{
 				score = int(score*1.25);

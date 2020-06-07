@@ -481,6 +481,7 @@ rounded up to the nearest multiple of 10 and capped to 1000, plus these bonuses
    extra +10 boosts for consecutive kills (extra boosts taper off after 10x).
  * +5000 if the enemy killed is a boss.
  * +2000 if you've killed the last enemy in the map.
+ * +1000 if the enemy was killed with the Deep Impact primary (humiliation).
 
 You are also given +500 points for each secret found, +5000 if it's the final
 secret. Countable items give +25 points each or +2500 if it's the final item.

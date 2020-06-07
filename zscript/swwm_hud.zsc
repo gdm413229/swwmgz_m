@@ -886,7 +886,7 @@ Class SWWMStatusBar : BaseStatusBar
 		int hw = min(ht,100);
 		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
 		{
-			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+15),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			return;
 		}
@@ -1025,7 +1025,7 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		// death prompt
 		let demo = Demolitionist(CPlayer.mo);
-		if ( !demo || (CPlayer.Health > 0) ) return;
+		if ( !demo || (CPlayer.Health > 0) || (CPlayer != players[consoleplayer]) ) return;
 		String str;
 		double alph;
 		int len;
@@ -1054,6 +1054,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
 			{
+				if ( sv_norespawn ) return;
 				alph = clamp((demo.deadtimer-90)/60.,0.,1.);
 				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"),CPlayer.GetUserName());
 				fnt = LangFont(mTewiFont);

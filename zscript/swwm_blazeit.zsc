@@ -611,8 +611,7 @@ Mixin Class HellblazerGrenade
 	double rollvel, anglevel, pitchvel;
 	Vector3 oldvel;
 
-	// can't put here until next gzdoom release
-	/*Default
+	Default
 	{
 		BounceFactor 1.;
 		WallBounceFactor 1.;
@@ -629,7 +628,7 @@ Mixin Class HellblazerGrenade
 		+INTERPOLATEANGLES;
 		+ROLLSPRITE;
 		+ROLLCENTER;
-	}*/
+	}
 
 	override void PostBeginPlay()
 	{
@@ -722,123 +721,31 @@ Mixin Class HellblazerGrenade
 Class HellblazerMissile2 : HellblazerMissile
 {
 	Mixin HellblazerGrenade;
-
-	Default
-	{
-		BounceFactor 1.;
-		WallBounceFactor 1.;
-		Gravity .35;
-		ReactionTime 85;
-		-NOGRAVITY;
-		+USEBOUNCESTATE;
-		+BOUNCEONWALLS;
-		+BOUNCEONFLOORS;
-		+BOUNCEONCEILINGS;
-		+ALLOWBOUNCEONACTORS;
-		+DONTBOUNCEONSKY;
-		+CANBOUNCEWATER;
-		+INTERPOLATEANGLES;
-		+ROLLSPRITE;
-		+ROLLCENTER;
-	}
 }
 
 Class HellblazerCrackshot2 : HellblazerCrackshot
 {
 	Mixin HellblazerGrenade;
-
-	Default
-	{
-		BounceFactor 1.;
-		WallBounceFactor 1.;
-		Gravity .35;
-		ReactionTime 85;
-		-NOGRAVITY;
-		+USEBOUNCESTATE;
-		+BOUNCEONWALLS;
-		+BOUNCEONFLOORS;
-		+BOUNCEONCEILINGS;
-		+ALLOWBOUNCEONACTORS;
-		+DONTBOUNCEONSKY;
-		+CANBOUNCEWATER;
-		+INTERPOLATEANGLES;
-		+ROLLSPRITE;
-		+ROLLCENTER;
-	}
 }
 
 Class HellblazerRavager2 : HellblazerRavager
 {
 	Mixin HellblazerGrenade;
-
-	Default
-	{
-		BounceFactor 1.;
-		WallBounceFactor 1.;
-		Gravity .35;
-		ReactionTime 85;
-		-NOGRAVITY;
-		+USEBOUNCESTATE;
-		+BOUNCEONWALLS;
-		+BOUNCEONFLOORS;
-		+BOUNCEONCEILINGS;
-		+ALLOWBOUNCEONACTORS;
-		+DONTBOUNCEONSKY;
-		+CANBOUNCEWATER;
-		+INTERPOLATEANGLES;
-		+ROLLSPRITE;
-		+ROLLCENTER;
-	}
 }
 
 Class HellblazerWarhead2 : HellblazerWarhead
 {
 	Mixin HellblazerGrenade;
-
-	Default
-	{
-		BounceFactor 1.;
-		WallBounceFactor 1.;
-		Gravity .35;
-		ReactionTime 85;
-		-NOGRAVITY;
-		+USEBOUNCESTATE;
-		+BOUNCEONWALLS;
-		+BOUNCEONFLOORS;
-		+BOUNCEONCEILINGS;
-		+ALLOWBOUNCEONACTORS;
-		+DONTBOUNCEONSKY;
-		+CANBOUNCEWATER;
-		+INTERPOLATEANGLES;
-		+ROLLSPRITE;
-		+ROLLCENTER;
-	}
 }
 
-Class HellblazerClusterMini : HellblazerMissile
+Class HellblazerClusterMini : HellblazerMissile2
 {
-	Mixin HellblazerGrenade;
-
 	Default
 	{
 		Radius 2;
 		Height 4;
 		Speed 20;
-		BounceFactor 1.;
-		WallBounceFactor 1.;
-		Gravity .35;
 		ReactionTime 30;
-		-NOGRAVITY;
-		+USEBOUNCESTATE;
-		+BOUNCEONWALLS;
-		+BOUNCEONFLOORS;
-		+BOUNCEONCEILINGS;
-		+ALLOWBOUNCEONACTORS;
-		+DONTBOUNCEONSKY;
-		+CANBOUNCEWATER;
-		+INTERPOLATEANGLES;
-		+ROLLSPRITE;
-		+ROLLCENTER;
 	}
 
 	void A_ClusterTick( Color smokecol )

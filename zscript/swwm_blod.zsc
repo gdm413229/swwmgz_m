@@ -481,19 +481,19 @@ Class SWWMGoreHandler : EventHandler
 
 	override void WorldThingSpawned( WorldEvent e )
 	{
-		// vanilla blood color changes (requires gzdoom update)
-		/*if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") )
+		// vanilla blood color changes
+		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") )
 		{
-			let gb = Spawn("GreenBloodReference");
+			let gb = Actor.Spawn("GreenBloodReference");
 			e.Thing.CopyBloodColor(gb);
 			gb.Destroy();
 		}
 		else if ( e.Thing.GetClass() == "Cacodemon" )
 		{
-			let bb = Spawn("BlueBloodReference");
+			let bb = Actor.Spawn("BlueBloodReference");
 			e.Thing.CopyBloodColor(bb);
 			bb.Destroy();
-		}*/
+		}
 	}
 
 	override void WorldThingDamaged( WorldEvent e )

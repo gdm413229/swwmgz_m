@@ -48,7 +48,10 @@ Class GrilledCheeseSandwich : Inventory
 	}
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
-		if ( damageType == 'EndLevel' ) return;
+		if ( ApplyDamageFactor(damageType,damage) <= 0 )
+			return;	// this damage type is ignored by the player, so it does not affect us
+		if ( damageType == 'EndLevel' )
+			return; // don't trigger on endlevel damage
 		if ( passive && (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
 			newdamage = 0;
@@ -561,8 +564,8 @@ Class InvinciballPower : Powerup
 		if ( damageType == 'EndLevel' ) return;
 		if ( (damage > 0) && passive )
 		{
-			if ( (damagetype == 'Drowning') || (damagetype == 'Falling') || (damagetype == 'Poison') || (damagetype == 'PoisonCloud') )
-				return;	// these go through armor and get ignored by the player
+			if ( ApplyDamageFactor(damageType,damage) <= 0 )
+				return;	// this damage type is ignored, so don't flash
 			if ( damageType == 'Ynykron' )
 				return;	// can't block this
 			newdamage = 0;

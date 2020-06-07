@@ -90,13 +90,8 @@ Class SWWMArmor : Armor abstract
 	{
 		return damage;
 	}
-	// sadly we can'y use the extra AbsorbDamage arguments until GZDoom gets updated
-	//override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
-	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
-		if ( !passive ) return;
-		if ( (damagetype == 'Drowning') || (damagetype == 'Falling') || (damagetype == 'Poison') || (damagetype == 'PoisonCloud') )
-			return;	// these go through armor and get ignored by the player
 		int saved;
 		if ( (amount > 0) && !DamageTypeDefinition.IgnoreArmor(damageType) && (damage > 0) )
 		{
@@ -280,7 +275,10 @@ Class SWWMHealth : Inventory abstract
 
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
-		if ( damageType == 'EndLevel' ) return;
+		if ( ApplyDamageFactor(damageType,damage) <= 0 )
+			return;	// this damage type is ignored by the player, so it does not affect us
+		if ( damageType == 'EndLevel' )
+			return; // don't trigger on endlevel damage
 		bool shouldautouse = false;
 		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
 		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;

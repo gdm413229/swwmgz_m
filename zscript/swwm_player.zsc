@@ -47,6 +47,8 @@ Class Demolitionist : PlayerPawn
 	transient int revivefail;
 
 	Actor selflight;
+	Actor oldencroached;
+	Vector3 oldencroachedpos;
 
 	Default
 	{
@@ -69,6 +71,8 @@ Class Demolitionist : PlayerPawn
 		+NOBLOOD;
 		+DONTGIB;
 		+NOICEDEATH;
+		+DONTMORPH;
+		+DONTDRAIN;
 	}
 	// oh yay, more cheat modification
 	override void CheatGive( String name, int amount )
@@ -515,6 +519,20 @@ Class Demolitionist : PlayerPawn
 		bool dummy;
 		Actor encroached;
 		[dummy, encroached] = TestMobjZ();
+		if ( encroached )
+		{
+			// try to follow movement (this method is awkward but works with monsters)
+			if ( encroached == oldencroached )
+				SetOrigin(level.Vec3Offset(pos,level.Vec3Diff(oldencroachedpos,encroached.pos)),true);
+			oldencroached = encroached;
+			oldencroachedpos = encroached.pos;
+		}
+		else
+		{
+			// launch in movement direction (useful for moving platforms)
+			if ( oldencroached ) vel += oldencroached.vel;
+			oldencroached = null;
+		}
 		if ( encroached && encroached.bSHOOTABLE && (lastvelz <= 0) && !encroached.player )
 		{
 			if ( (lastvelz < -5) || !(level.maptime%5) )
@@ -611,7 +629,7 @@ Class Demolitionist : PlayerPawn
 				dmg = a.DamageMobj(self,self,dmg,'Dash',flg);
 				if ( FindInventory("RagekitPower") )
 				{
-					let ps = Spawn("BigPunchSplash",diff/2);
+					let ps = Spawn("BigPunchSplash",level.Vec3Offset(pos,diff/2));
 					ps.damagetype = 'Dash';
 					ps.target = self;
 					ps.special1 = dmg;
@@ -989,12 +1007,12 @@ Class Demolitionist : PlayerPawn
 		if ( player.viewheight <= 6 )
 		{
 			deadtimer++;
-			if ( deadtimer == 60 )
-				A_StartSound("demolitionist/youdied",CHAN_DEMOVOICE,CHANF_OVERLAP|CHANF_UI|CHANF_LOCAL);
+			if ( (deadtimer == 60) && (player == players[consoleplayer]) )
+				A_StartSound("demolitionist/youdied",CHAN_DEMOVOICE,CHANF_OVERLAP|CHANF_UI);
 			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
 			{
 				// standard behaviour, respawn normally
-				if ( (Level.maptime >= player.respawn_time) || ((player.cmd.buttons&BT_USE) && !player.Bot) )
+				if ( (((player.cmd.buttons&BT_USE) && !player.Bot) || ((deathmatch || alwaysapplydmflags) && sv_forcerespawn && (Level.maptime >= player.respawn_time))) && !sv_norespawn )
 				{
 					player.cls = null;
 					player.playerstate = PST_REBORN;
@@ -1014,6 +1032,7 @@ Class Demolitionist : PlayerPawn
 				if ( !FindInventory("ReviveCooldown") )
 				{
 					player.Resurrect();
+					SetState(FindState("Spawn")+1);	// skip tweening
 					roll = 0;
 					let s = Spawn("DemolitionistShockwave",pos);
 					s.target = self;
@@ -1036,7 +1055,7 @@ Class Demolitionist : PlayerPawn
 				}
 				else if ( level.maptime > revivefail )
 				{
-					A_StartSound("menu/fail",CHAN_ITEM,CHANF_UI|CHANF_LOCAL);
+					if ( player == players[consoleplayer] ) A_StartSound("menu/fail",CHAN_ITEM,CHANF_UI);
 					revivefail = level.maptime+120;
 				}
 			}
@@ -1236,8 +1255,9 @@ Class Demolitionist : PlayerPawn
 	}
 	void A_DMFade()
 	{
-		if ( !deathmatch || player ) return;
-		A_FadeOut(0.03);
+		if ( player ) return;
+		Spawn("TeleportFog",pos,ALLOW_REPLACE);
+		Destroy();
 	}
 	void A_DemoPain()
 	{
@@ -1391,7 +1411,7 @@ Class Demolitionist : PlayerPawn
 		player.crouchdir = direction;
 		player.crouchfactor += crouchspeed;
 		// check whether the move is ok
-		Height = defaultheight*player.crouchfactor;
+		Height = defaultheight;	// actually test the full height, or it'll look weird
 		if ( !TryMove(pos.xy,false) )
 		{
 			Height = savedheight;
@@ -1399,6 +1419,7 @@ Class Demolitionist : PlayerPawn
 			{
 				// doesn't fit
 				player.crouchfactor -= crouchspeed;
+				player.crouchdir = -1;	// force crouch
 				return;
 			}
 		}
@@ -1496,7 +1517,6 @@ Class Demolitionist : PlayerPawn
 		}
 		XZW2 RSTUVWXYZ 2;
 		XZW3 ABCDEFG 2;
-		XZW3 H 350;
 		XZW3 H 1 A_DMFade();
 		Wait;
 	Jump:
@@ -1657,7 +1677,6 @@ Class Demolitionist : PlayerPawn
 			A_NoBlocking();
 		}
 		XZW8 GHIJK 2;
-		XZW8 L 350;
 		XZW8 L 1 A_DMFade();
 		Wait;
 	EndCrouch:
@@ -1954,7 +1973,7 @@ Class DemolitionistSelfLight : Actor
 	override void Tick()
 	{
 		Super.Tick();
-		if ( !target || (Demolitionist(target).selflight != self) )
+		if ( !target || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
 		{
 			Destroy();
 			return;

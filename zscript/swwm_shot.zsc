@@ -946,7 +946,7 @@ Class OnFire : Actor
 			{
 				let s = victim.Spawn("SWWMHalfSmoke",pos);
 				s.scale *= max(1.,1.6*mult);
-				s.alpha *= min(amount+30,100)*0.02;
+				s.alpha *= min(amount+30,100)*.01;
 				s.vel = victim.vel*0.5+(cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[FlameT](.2,.6)*s.scale.x;
 			}
 		}
@@ -1077,7 +1077,7 @@ Class OnFireTrail : Actor
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
 			s.vel += vel*.3;
-			s.alpha *= alpha*4;
+			s.alpha *= alpha*3;
 			s.scale *= .5+abs(scale.x)*(.5+GetAge()/6.);
 		}
 	}

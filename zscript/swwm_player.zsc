@@ -530,7 +530,7 @@ Class Demolitionist : PlayerPawn
 		else
 		{
 			// launch in movement direction (useful for moving platforms)
-			if ( oldencroached ) vel += oldencroached.vel;
+			if ( oldencroached ) vel += oldencroached.vel+level.Vec3Diff(oldencroachedpos,oldencroached.pos);
 			oldencroached = null;
 		}
 		if ( encroached && encroached.bSHOOTABLE && (lastvelz <= 0) && !encroached.player )

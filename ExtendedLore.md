@@ -209,7 +209,7 @@ abandoned, as still living witnesses of the event declared him dead.
 The "mad dictator god", who ruled a world bearing his own name. Associated with
 several artifacts found within the massive crater where the heart of his
 empire once was. Among them the most notable are the "Nekrodero", "Ynykron",
-"Kyshyje" and "Myssup" artifacts, four weapons that would have been used by
+"Kyshyje" and "Mykradvo" artifacts, four weapons that would have been used by
 his personal elite knights, known as the "Warriors of World's End".
 
 After his assassination, a massive crater was found where his throne once
@@ -754,6 +754,7 @@ Main UnSX timeline:
 - 2214: The Vortex Rikers crashes on planet Na Pali, Unreal begins.
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
+- 2219: The Ishtara Scientific Foundation is formed.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
 - 2245: "Vault 490" starts being built in the University of Nos-Kora, it is

@@ -159,7 +159,6 @@ Class SWWMSpareArmor : Inventory abstract
 		if ( swwm_enforceautousearmor == 1 ) shouldautouse = true;
 		else if ( swwm_enforceautousearmor == -1 ) shouldautouse = false;
 		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
-		if ( pickup && !shouldautouse ) return false;
 		let cur = Owner.FindInventory(giveme);
 		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (GetDefaultByType(giveme).Amount+cur.Amount <= cur.MaxAmount) )
 		{
@@ -254,7 +253,6 @@ Class SWWMHealth : Inventory abstract
 		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
 		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
 		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
-		if ( pickup && !shouldautouse ) return false;
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		SWWMHandler.HealthFlash(Owner.PlayerNumber());

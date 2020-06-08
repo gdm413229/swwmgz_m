@@ -864,6 +864,9 @@ Class HellblazerClusterMini : HellblazerMissile2
 	Spawn:
 		XZW1 A 1 A_ClusterTick(Color(2,4,2));
 		Wait;
+	Bounce:
+		XZW1 A 0 A_HandleBounce();
+		Goto Spawn;
 	Death:
 		TNT1 A 0 A_ClusterExplode();
 		HEXP ABCDEFGHIJKLMNOPQR 1 Bright A_ClusterSubExpl();

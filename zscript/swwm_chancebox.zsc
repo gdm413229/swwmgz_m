@@ -332,7 +332,6 @@ Class FancyConfetti : Actor
 		Radius 2;
 		Height 2;
 		+NOBLOCKMAP;
-		+MISSILE;
 		+DROPOFF;
 		+MOVEWITHSECTOR;
 		+THRUACTORS;
@@ -341,6 +340,7 @@ Class FancyConfetti : Actor
 		+INTERPOLATEANGLES;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+SLIDESONWALLS;
 		Gravity 0.05;
 	}
 	override void PostBeginPlay()
@@ -375,11 +375,13 @@ Class FancyConfetti : Actor
 			angle += anglevel;
 			pitch += pitchvel;
 			roll += rollvel;
+			return A_JumpIf(pos.z<=floorz,"Death");
 		}
 		Loop;
 	Death:
 		XZW1 # -1
 		{
+			A_Stop();
 			pitch = roll = 0;
 		}
 		Stop;

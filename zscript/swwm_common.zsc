@@ -3197,7 +3197,7 @@ Class SWWMHandler : EventHandler
 			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
 			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);
 			double dist = max(1,dir.length());
-			double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
+			double damagescale = 1-clamp((dist-a.radius)/ExplosionRadius,0.,1.);
 			// intersecting, randomize direction
 			if ( dir.length() <= double.epsilon )
 			{

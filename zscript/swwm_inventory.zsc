@@ -271,9 +271,9 @@ Class SWWMHealth : Inventory abstract
 		if ( Amount <= 0 ) DepleteOrDestroy();
 	}
 
-	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
-		if ( ApplyDamageFactor(damageType,damage) <= 0 )
+		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
 			return;	// this damage type is ignored by the player, so it does not affect us
 		if ( damageType == 'EndLevel' )
 			return; // don't trigger on endlevel damage
@@ -282,7 +282,7 @@ Class SWWMHealth : Inventory abstract
 		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
 		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
 		if ( !shouldautouse && !bBIGPOWERUP ) return;
-		if ( passive && (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
+		if ( (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
 		{
 			newdamage = damage;
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);

@@ -46,13 +46,13 @@ Class GrilledCheeseSandwich : Inventory
 		DoTheThing();
 		return true;
 	}
-	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
-		if ( ApplyDamageFactor(damageType,damage) <= 0 )
+		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
 			return;	// this damage type is ignored by the player, so it does not affect us
 		if ( damageType == 'EndLevel' )
 			return; // don't trigger on endlevel damage
-		if ( passive && (Owner.Health-damage <= 0) && (Amount > 0) )
+		if ( (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
 			newdamage = 0;
 			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
@@ -559,15 +559,16 @@ Class InvinciballPower : Powerup
 		Inv = saved;
 	}
 
-	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
-		if ( damageType == 'EndLevel' ) return;
-		if ( (damage > 0) && passive )
+		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
+			return;	// this damage type is ignored, so don't flash
+		if ( damageType == 'Ynykron' )
+			return;	// can't block this
+		if ( damageType == 'EndLevel' )
+			return; // don't trigger on endlevel damage
+		if ( damage > 0 )
 		{
-			if ( ApplyDamageFactor(damageType,damage) <= 0 )
-				return;	// this damage type is ignored, so don't flash
-			if ( damageType == 'Ynykron' )
-				return;	// can't block this
 			newdamage = 0;
 			if ( level.maptime > lasteffect+5 )
 			{

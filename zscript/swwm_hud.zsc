@@ -27,7 +27,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, midcol, midbcol, midduration;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -50,6 +50,17 @@ Class SWWMStatusBar : BaseStatusBar
 	transient CVar cvar_renderer;
 
 	DynamicValueInterpolator HealthInter, ScoreInter, ScoreInter2, FuelInter, DashInter;
+
+	Inventory lastsel;
+	Weapon lastwep;
+	transient CVar ntags;
+	String ntagstr;
+	int ntagtic, ntagcol;
+
+	String midstr;
+	int midtic, midtype;
+
+	bool koraxhack;
 
 	// if playing in Japanese, returns an alternate font of the same height
 	// Tewi -> MPlus
@@ -87,26 +98,80 @@ Class SWWMStatusBar : BaseStatusBar
 			MainQueue.Delete(i);
 			i--;
 		}
+		// flush nametag
+		ntagstr = "";
+		ntagtic = 0;
 	}
 
 	override bool ProcessMidPrint( Font fnt, String msg, bool bold )
 	{
-		// check for Korax lines
-		if ( msg == StringTable.Localize("$TXT_ACS_MAP02_11_AREYO") )
+		// check for Korax lines, add them to chat (and reply to some of them)
+		bool koraxline = false;
+		if ( msg == StringTable.Localize("$TXT_ACS_MAP02_9_GREET") )
+			koraxline = true;
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP02_11_AREYO") )
+		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",0,consoleplayer);
+			koraxline = true;
+		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP13_11_MYSER") )
+		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",1,consoleplayer);
+			koraxline = true;
+		}
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP22_27_YOUHA") )
+			koraxline = true;
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP22_29_ITHIN") )
+		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",2,consoleplayer);
+			koraxline = true;
+		}
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP27_8_WORSH") )
+			koraxline = true;
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP27_10_THENA") )
+		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",3,consoleplayer);
+			koraxline = true;
+		}
+		else if ( msg == StringTable.Localize("$TXT_ACS_MAP35_12_AREYO") )
+			koraxline = true;
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP35_14_TOFAC") )
+		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",4,consoleplayer);
+			koraxline = true;
+		}
+		if ( koraxline )
+		{
+			koraxhack = true;
+			Console.Printf(msg);
+			koraxhack = false;
+			return true;
+		}
+		if ( !fnt || (fnt == smallfont) || (fnt == smallfont2) || (fnt == newsmallfont) || (fnt == originalsmallfont) )
+		{
+			midstr = msg;
+			midtic = level.totaltime;
+			midtype = bold?2:0;
+			return true;
+		}
+		if ( (fnt == bigfont) || (fnt == originalbigfont) )
+		{
+			midstr = msg;
+			midtic = level.totaltime;
+			midtype = bold?3:1;
+			return true;
+		}
 		return false;
 	}
 
 	override bool ProcessNotify( EPrintLevel printlevel, String outline )
 	{
+		if ( koraxhack )
+		{
+			// treat as chat message
+			printlevel = PRINT_CHAT;
+			outline = "Korax: "..outline;
+		}
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline
 		m.type = printlevel;
@@ -437,6 +502,34 @@ Class SWWMStatusBar : BaseStatusBar
 			scoreobjs.Resize(i);
 		// sort by distance
 		qsort_scoreobjs(scoreobjs,0,scoreobjs.Size()-1);
+		// part of gross hackery to override nametag display
+		if ( !ntags ) ntags = CVar.GetCVar('displaynametags',players[consoleplayer]);
+		if ( CPlayer.inventorytics > 0 )
+		{
+			if ( CPlayer.mo.InvSel && (CPlayer.mo.InvSel != lastsel) && (ntags.GetInt()&1) && (CPlayer == players[consoleplayer]) )
+			{
+				ntagstr = CPlayer.mo.InvSel.GetTag();
+				ntagtic = level.totaltime;
+				ntagcol = CVar.GetCVar('nametagcolor',players[consoleplayer]).GetInt();
+			}
+			lastsel = CPlayer.mo.InvSel;
+		}
+		if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon != lastwep) )
+		{
+			if ( (ntags.GetInt()&2) && (CPlayer == players[consoleplayer]) && !(CPlayer.PendingWeapon is 'SWWMGesture') )
+			{
+				ntagstr = CPlayer.PendingWeapon.GetTag();
+				ntagtic = level.totaltime;
+				ntagcol = CVar.GetCVar('nametagcolor',players[consoleplayer]).GetInt();
+			}
+		}
+		lastwep = CPlayer.PendingWeapon;
+		// make sure vanilla nametags don't display
+		DetachMessageID(0x5745504e);	// WEPN
+		DetachMessageID(0x53494e56);	// SINV
+		// also try with different endianness, just in case
+		DetachMessageID(0x4e504557);	// WEPN
+		DetachMessageID(0x564e4953);	// SINV
 	}
 
 	override void Init()
@@ -917,18 +1010,37 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);
 		if ( !pickcol ) pickcol = CVar.GetCVar('msg0color',players[consoleplayer]);
+		Font fnt = LangFont(mTewiFont);
+		int h = fnt.GetHeight();
+		// draw nametags below them
+		double yy;
+		double nalph = 0.;
+		int tagtime = (ntagtic+70)-level.totaltime;
+		if ( (ntagstr != "") && (tagtime > 0) )
+		{
+			nalph = clamp(tagtime/20.,0.,1.);
+			yy = ss.y-(margin+50);
+			// shift up if boss healthbar is present
+			if ( bosshnd && (bosshnd.alpha > 0.) ) yy -= int(25*clamp(bosshnd.alpha*2.,0.,1.));
+			int len = fnt.StringWidth(ntagstr);
+			double xx = (ss.x-len)/2.;
+			Screen.Dim("Black",.8*nalph,int((xx-6)*hs.x),int(yy*hs.y),int((len+12)*hs.x),int((h+4)*hs.y));
+			Screen.DrawText(fnt,ntagcol,int(xx),yy+2,ntagstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,nalph);
+		}
 		if ( PickupQueue.Size() <= 0 ) return;
 		// reverse order since they're drawn bottom to top
 		int mend = max(0,PickupQueue.Size()-(maxpick.GetInt()));
-		double yy = ss.y-(margin+50);
+		yy = ss.y-(margin+50);
+		// shift up if boss healthbar is present
 		if ( bosshnd && (bosshnd.alpha > 0.) ) yy -= int(25*clamp(bosshnd.alpha*2.,0.,1.));
+		// shift up again if nametag is present
+		if ( nalph > 0. ) yy -= int((fnt.GetHeight()+6)*clamp(nalph*2.,0.,1.));
 		for ( int i=PickupQueue.Size()-1; i>=mend; i-- )
 		{
 			String cstr = PickupQueue[i].str;
 			if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
 			int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-level.totaltime;
 			double alph = clamp(curtime/20.,0.,1.);
-			Font fnt = LangFont(mTewiFont);
 			BrokenLines l = fnt.BreakLines(cstr,int(ss.x*.75));
 			int maxlen = 0;
 			for ( int j=0; j<l.Count(); j++ )
@@ -936,7 +1048,6 @@ Class SWWMStatusBar : BaseStatusBar
 				int len = fnt.StringWidth(l.StringAt(j));
 				if ( len > maxlen ) maxlen = len;
 			}
-			int h = fnt.GetHeight();
 			double xx = (ss.x-maxlen)/2.;
 			Screen.Dim("Black",.8*alph,int((xx-6)*hs.x),int((yy-h*(l.Count()-1))*hs.y),int((maxlen+12)*hs.x),int((h*l.Count()+4)*hs.y));
 			for ( int j=l.Count()-1; j>=0; j-- )
@@ -954,13 +1065,33 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
 		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
+		if ( !midduration ) midduration = CVar.GetCVar('con_midtime',players[consoleplayer]);
 		if ( !obitcol ) obitcol = CVar.GetCVar('msg1color',players[consoleplayer]);
 		if ( !critcol ) critcol = CVar.GetCVar('msg2color',players[consoleplayer]);
 		if ( !chatcol ) chatcol = CVar.GetCVar('msg3color',players[consoleplayer]);
 		if ( !teamcol ) teamcol = CVar.GetCVar('msg4color',players[consoleplayer]);
+		if ( !midcol ) midcol = CVar.GetCVar('msgmidcolor',players[consoleplayer]);
+		if ( !midbcol ) midbcol = CVar.GetCVar('msgmidcolor2',players[consoleplayer]);
+		Font fnt = LangFont(mTewiFont);
+		double xx, yy;
+		if ( midstr != "" )
+		{
+			double ssp = (midtype&1)?.5:1.;
+			double hsp = (midtype&1)?2.:1.;
+			int col = (midtype&2)?midbcol.GetInt():midcol.GetInt();
+			int curtime = (midtic+int(35*midduration.GetFloat()))-level.totaltime;
+			double alph = clamp(curtime/20.,0.,1.);
+			int h = fnt.GetHeight();
+			int len = fnt.StringWidth(midstr);
+			xx = (ss.x*ssp-len)/2.;
+			yy = ss.y*ssp*.35;
+			Screen.Dim("Black",.8*alph,int((xx-6)*hs.x*hsp),int(yy*hs.y*hsp),int((len+12)*hs.x*hsp),int((h+4)*hs.y*hsp));
+			Screen.DrawText(fnt,col,int(xx),yy+2,midstr,DTA_VirtualWidthF,ss.x*ssp,DTA_VirtualHeightF,ss.y*ssp,DTA_KeepRatio,true,DTA_Alpha,alph);
+		}
 		if ( MainQueue.Size() <= 0 ) return;
 		int mstart = max(0,MainQueue.Size()-(maxchat[chatopen>=gametic].GetInt()));
-		double xx = margin, yy = margin;
+		xx = margin;
+		yy = margin;
 		bool smol = (ss.x<640);
 		Screen.DrawTexture(ChatTex[smol?3:0],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		yy++;
@@ -976,7 +1107,6 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*msgduration.GetInt();
 			else curtime += 35*chatduration.GetInt();
 			double alph = clamp(curtime/20.,0.,1.);
-			Font fnt = LangFont(mTewiFont);
 			BrokenLines l = fnt.BreakLines(cstr,smol?211:361);
 			for ( int j=0; j<l.Count(); j++ )
 			{

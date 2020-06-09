@@ -17,6 +17,7 @@ Extra things:
      weapons/items etc.
  - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
+ - Mag refilling system (no more wasted ammo)
  - Randomized vanilla monster retagging with multiple options
  - Japanese localization
  - Keen replacement (need ideas)

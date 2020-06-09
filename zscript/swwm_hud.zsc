@@ -1081,12 +1081,21 @@ Class SWWMStatusBar : BaseStatusBar
 			int col = (midtype&2)?midbcol.GetInt():midcol.GetInt();
 			int curtime = (midtic+int(35*midduration.GetFloat()))-level.totaltime;
 			double alph = clamp(curtime/20.,0.,1.);
+			BrokenLines l = fnt.BreakLines(midstr,int(ss.x*ssp));
 			int h = fnt.GetHeight();
-			int len = fnt.StringWidth(midstr);
-			xx = (ss.x*ssp-len)/2.;
-			yy = ss.y*ssp*.35;
-			Screen.Dim("Black",.8*alph,int((xx-6)*hs.x*hsp),int(yy*hs.y*hsp),int((len+12)*hs.x*hsp),int((h+4)*hs.y*hsp));
-			Screen.DrawText(fnt,col,int(xx),yy+2,midstr,DTA_VirtualWidthF,ss.x*ssp,DTA_VirtualHeightF,ss.y*ssp,DTA_KeepRatio,true,DTA_Alpha,alph);
+			int maxlen = 0;
+			for ( int i=0; i<l.Count(); i++ ) maxlen = max(maxlen,fnt.StringWidth(l.StringAt(i)));
+			xx = (ss.x*ssp-maxlen)/2.;
+			yy = ss.y*ssp*.375;
+			yy -= (h*l.Count()+4)/2.;	// center
+			Screen.Dim("Black",.8*alph,int((xx-6)*hs.x*hsp),int(yy*hs.y*hsp),int((maxlen+12)*hs.x*hsp),int((h*l.Count()+4)*hs.y*hsp));
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				int len = fnt.StringWidth(l.StringAt(i));
+				xx = (ss.x*ssp-len)/2.;
+				Screen.DrawText(fnt,col,int(xx),yy+2,l.StringAt(i),DTA_VirtualWidthF,ss.x*ssp,DTA_VirtualHeightF,ss.y*ssp,DTA_KeepRatio,true,DTA_Alpha,alph);
+				yy += h;
+			}
 		}
 		if ( MainQueue.Size() <= 0 ) return;
 		int mstart = max(0,MainQueue.Size()-(maxchat[chatopen>=gametic].GetInt()));

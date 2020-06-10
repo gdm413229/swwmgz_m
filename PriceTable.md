@@ -31,14 +31,14 @@ respective weapon.
    Crackshots	| 8000
    Ravagers	| 12000
    Warheads	| 25000
-  Sparkster	| 200000
+  Sparkster S-5	| 200000
    Spark Unit	| 50000
   Silver Bullet	| 400000
    S.B. Mag	| 70000
   Candygun	| 1000000
    Candy Mag	| 100000
    Spare Gun	| 600000
-  Ynykron	| 5000000
+  Ynykron Arti.	| 5000000
    Crystal Unit	| 1000000
 
 #### DLC weapons and ammo (when available)
@@ -48,22 +48,20 @@ These will be available long after the first release.
   Item          | Price
   ------------- | -----
   Sledgehammer	| 9000
-  Gravity Gun	| 20000
-   Gravity Cell	| 2000
-  Splatter	| 45000
-   Splat Core	| 4000
-  Skull Launch.	| 75000
-   Skull Bomb	| 8000
+  Puntzer Beta	| 10000
+   SMW.05 Bull.	| 1000
+  Puntzer Gamma	| 50000
+  Quadravol	| 80000
+   Quad. Ammo	| 10000
   Blackfire Ig.	| 120000
-   Blackfire C.	| 12000
-  Puntzer Gamma	| 200000
-   SMW.05 Mag	| 20000
+   Blackfire C.	| 15000
+  Sparkster x3	| 250000
+   Nokron Unit	| 35000
+   Kinylum Unit	| 25000
   EMP Carbine	| 300000
    EMP Core	| 60000
   PROWEL&TADEL	| 1600000
-   Insane Core	| 150000
-  S.H. Fun Ball	| 4000000
-   Fun Stuff	| 800000
+   Madness Core	| 150000
 
 #### Other items
 

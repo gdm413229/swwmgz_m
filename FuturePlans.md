@@ -3,14 +3,13 @@ after the first release.
 
 * DLC Weapon Set:
   - Itamex Reinforced Hammer (UnSX 5)
-  - Gravity Gun (Ultra Suite)
+  - Puntzer Beta (SWWM Iridium)
   - Puntzer Gamma (Ultra Suite 2)
-  - Skull Launcher (Weirdweapons)
+  - Quadravol (UnSX)
   - Blackfire Igniter (UnSX 5, Ultra Suite 3)
   - Sparkster x3 (UnSX 2)
   - Rail Carbine ("Tesla Beamer" in Ultra Suite 2 & 3)
   - PROWEL & TADEL (Ultra Suite 2 & 3)
-  - Super Happy Fun Ball (SWWM Z)
 * Additional Demolitionist Menu features
   - Stats tab subsections
     - Monster kill tracker
@@ -31,17 +30,20 @@ after the first release.
   - Nutatco™ Chocolate Bar (It's got a savage taste)
   - Hege Cactus (Appears to absorb all water, causing intense thirst)
   - Froggy Chair (A small price to pay)
-  - Raidemin Action Figure (A popular Nukuri superhero)
+  - Raidemin Action Figure (A popular Nukuri superhero, "looks a lot like you")
   - Frispy™ Tasty Corn Snack (Saya's favorite)
   - Hoagie (Can't eat it, but looks delicious)
   - Lithium - Volume One (A work of art, one of the finest graphic novels)
   - [Heretic] Demolitionist Plush ("You're getting famous, Demo-chan")
   - [Heretic] Lord Vilkreath - Fundamentals of Puzzle Design ("The hell is this crap?")
   - [Heretic] Doomguy Action Figure ("Oh, he gets one too?")
+  - [Heretic] Tyketto's Tome of Power ("I think I heard it talk once")
+  - [Heretic] Quartz Flask ("Tastes funny")
   - [Hexen] Toot Froot™ Peach Juice ("The taste reminds me of Kirin")
   - [Hexen] Haunted Saya Bean Plush (Eats your snacks and calls you a horny)
   - [Hexen] Kirin Plushie ("I don't know who made it but I love it")
   - [Hexen] Akkouxhei Milk Bread (Absolutely delicious, in moderation)
+  - [Hexen] Obelisk of the Golden Vale ("I puked out my guts when I touched that fucking thing")
   - ... and more as I come up with them
 * 4komas on the intermission screen
 * Actually make a fancy titlemap

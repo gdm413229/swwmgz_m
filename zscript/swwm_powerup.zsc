@@ -51,9 +51,6 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
 		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
-		let s = Owner.FindInventory("GrilledCheeseSafeguard");
-		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
-		else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
 	}
 	override bool Use( bool pickup )
 	{
@@ -76,6 +73,9 @@ Class GrilledCheeseSandwich : Inventory
 			newdamage = 0;
 			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			DoTheThing();
+			let s = Owner.FindInventory("GrilledCheeseSafeguard");
+			if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
+			else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
 			Amount--;
 		}
 	}

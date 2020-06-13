@@ -55,8 +55,8 @@ Class SilverAirRip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,80,4000.,target);
-		A_Explode(20,80,0);
+		SWWMHandler.DoBlast(self,60,2000.,target);
+		A_Explode(20,60,0);
 		Destroy();
 	}
 }
@@ -71,12 +71,21 @@ Class SilverImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
 	}
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		if ( swwm_extraalert ) A_AlertMonsters(500);
+		SWWMHandler.DoBlast(self,100,8000.);
+		A_Explode(100,100);
+		if ( swwm_extraalert ) A_AlertMonsters(2500);
 		A_QuakeEx(4,4,4,20,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
+		if ( special1 )
+		{
+			Destroy();
+			return;
+		}
 		A_StartSound("silverbullet/hit",CHAN_VOICE,CHANF_DEFAULT,1.,.7);
 		A_SprayDecal("BigBulletChip",-20);
 		A_SprayDecal("HugeWallCrack",-20);
@@ -224,10 +233,8 @@ Class SilverBullet : SWWMWeapon
 			let b = Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
 			b.A_CheckTerrain();
 		}
-		for ( int i=8; i<t.Results.Distance; i+=16 )
+		for ( int i=4; i<t.Results.Distance; i+=8 )
 		{
-			let s = Spawn("SilverAirRip",level.Vec3Offset(origin,dir*i));
-			s.target = self;
 			if ( !Random[Boolet](0,1) ) continue;
 			let b = Spawn("SWWMSmoke",level.Vec3Offset(origin,dir*i));
 			b.Scale *= FRandom[Boolet](.9,1.6);
@@ -244,12 +251,16 @@ Class SilverBullet : SWWMWeapon
 				let p = Spawn("SilverImpact",t.HitList[i].HitLocation);
 				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;
 				p.pitch = asin(t.HitList[i].x.z);
+				p.target = self;
 			}
 			else
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
 				t.HitList[i].HitActor.A_StartSound("silverbullet/flesh",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
+				let p = Spawn("SilverImpact",t.HitList[i].HitLocation);
+				p.special1 = 1;
+				p.target = self;
 			}
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
@@ -273,7 +284,13 @@ Class SilverBullet : SWWMWeapon
 			let p = Spawn("SilverImpact",t.Results.HitPos+hitnormal*4);
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
+			p.target = self;
 			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+		}
+		for ( int i=8; i<t.Results.Distance; i+=16 )
+		{
+			let s = Spawn("SilverAirRip",level.Vec3Offset(origin,dir*i));
+			s.target = self;
 		}
 	}
 	action void A_SilverFire()
@@ -295,7 +312,7 @@ Class SilverBullet : SWWMWeapon
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		SpreadSlugTracer sst = new("SpreadSlugTracer");
 		sst.ignoreme = self;
-		sst.penetration = 1500.;
+		sst.penetration = 1800.;
 		sst.hitlist.Clear();
 		sst.shootthroughlist.Clear();
 		sst.waterhitlist.Clear();

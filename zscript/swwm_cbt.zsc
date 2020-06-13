@@ -111,7 +111,8 @@ Class WallbusterReloadMenu : GenericMenu
 				continue;
 			candidates.Push(i);
 		}
-		sel0 = Random[WallbusterMenu](0,candidates.Size()-1);
+		if ( candidates.Size() <= 0 ) return;
+		sel0 = candidates[Random[WallbusterMenu](0,candidates.Size()-1)];
 		CVar.GetCVar('swwm_cbtlast',players[consoleplayer]).SetInt(sel0);
 		AmmoSets[sel0]++;
 		queue.Push(sel0);

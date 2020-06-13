@@ -77,8 +77,8 @@ Class SilverImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,100,8000.);
-		A_Explode(100,100);
+		SWWMHandler.DoBlast(self,50,8000.);
+		A_Explode(50,100);
 		if ( swwm_extraalert ) A_AlertMonsters(2500);
 		A_QuakeEx(4,4,4,20,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )
@@ -312,7 +312,7 @@ Class SilverBullet : SWWMWeapon
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		SpreadSlugTracer sst = new("SpreadSlugTracer");
 		sst.ignoreme = self;
-		sst.penetration = 1800.;
+		sst.penetration = 2000.;
 		sst.hitlist.Clear();
 		sst.shootthroughlist.Clear();
 		sst.waterhitlist.Clear();

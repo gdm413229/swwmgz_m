@@ -640,7 +640,7 @@ Class Wallbuster : SWWMWeapon
 				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_FOOTSTEP,CHANF_OVERLAP,.4,4.);
 			}
 		}
-		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) )
+		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
 		{
 			Vector3 hitnormal = -t.Results.HitVector;
 			if ( t.Results.HitType == TRACE_HitFloor )

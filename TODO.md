@@ -1,6 +1,5 @@
 Fundamental things:
  - Wallbuster breaching feature
- - Silver Bullet
  - Ynykron Artifact
 
 Not so fundamental things:

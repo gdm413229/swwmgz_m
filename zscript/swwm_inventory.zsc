@@ -976,6 +976,10 @@ Class SWWMWeapon : Weapon abstract
 	virtual ui void HudTick()
 	{
 	}
+	// extra drawing, usually scopes
+	virtual ui void RenderUnderlay( RenderEvent e )
+	{
+	}
 	// animations
 	action void A_PlayerFire()
 	{
@@ -1048,12 +1052,12 @@ Class SWWMWeapon : Weapon abstract
 		if ( !FindInventory("ParryDamageChecker") )
 			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
 	}
-	private action bool TryMelee( double angle, int dmg, String hitsound = "" )
+	private action bool TryMelee( double angle, int dmg, String hitsound = "", double rangemul = 1. )
 	{
 		FTranslatedLineTarget t;
-		double slope = AimLineAttack(angle,1.5*DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		double slope = AimLineAttack(angle,1.5*DEFMELEERANGE*rangemul,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
-		LineTrace(angle,1.5*DEFMELEERANGE,slope,0,player.viewheight,data:d);
+		LineTrace(angle,1.5*DEFMELEERANGE*rangemul,slope,0,player.viewheight,data:d);
 		bool raging = CountInv("RagekitPower");
 		if ( d.HitType == TRACE_HitActor )
 		{
@@ -1105,7 +1109,7 @@ Class SWWMWeapon : Weapon abstract
 		}
 		return false;
 	}
-	action void A_Melee( int dmg = 40, String hitsound = "" )
+	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1. )
 	{
 		// temporarily disable parry field so we can trace through
 		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = false;
@@ -1113,7 +1117,7 @@ Class SWWMWeapon : Weapon abstract
 		let ut = new("UseLineTracer");
 		ut.uses.Clear();
 		ut.glass.Clear();
-		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE,0);
+		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE*rangemul,0);
 		for ( int i=0; i<ut.uses.Size(); i++ )
 		{
 			if ( ut.uses[i].hitactor )
@@ -1138,7 +1142,7 @@ Class SWWMWeapon : Weapon abstract
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )
 		{
-			if ( TryMelee(angle+i*(45./16),dmg,hitsound) || TryMelee(angle-i*(45./16),dmg,hitsound) )
+			if ( TryMelee(angle+i*(45./16),dmg,hitsound,rangemul) || TryMelee(angle-i*(45./16),dmg,hitsound,rangemul) )
 			{
 				if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 				return;
@@ -1147,9 +1151,9 @@ Class SWWMWeapon : Weapon abstract
 		if ( invoker.pfield ) invoker.pfield.bSHOOTABLE = true;
 		// check for walls instead
 		FTranslatedLineTarget t;
-		double slope = AimLineAttack(angle,DEFMELEERANGE,t,0.,ALF_CHECK3D);
+		double slope = AimLineAttack(angle,DEFMELEERANGE*rangemul,t,0.,ALF_CHECK3D);
 		FLineTraceData d;
-		LineTrace(angle,DEFMELEERANGE,slope,TRF_THRUACTORS,player.viewheight,data:d);
+		LineTrace(angle,DEFMELEERANGE*rangemul,slope,TRF_THRUACTORS,player.viewheight,data:d);
 		if ( d.HitType == TRACE_HitNone ) return;
 		Vector3 HitNormal = -d.HitDir;
 		if ( d.HitType == TRACE_HitFloor )

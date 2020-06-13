@@ -636,8 +636,8 @@ Class Wallbuster : SWWMWeapon
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
-				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_BODY,CHANF_OVERLAP,1.,2.);
-				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_BODY,CHANF_OVERLAP,.4,4.);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_FOOTSTEP,CHANF_OVERLAP,.4,4.);
 			}
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) )
@@ -746,7 +746,7 @@ Class Wallbuster : SWWMWeapon
 		int qk = min(9,1+howmany/5);
 		int ql = min(25,6+howmany/2);
 		A_QuakeEx(qk,qk,qk,ql,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:qk*.15);
-		A_ZoomFactor(1.+qk*.04,ZOOM_INSTANT);
+		A_ZoomFactor(1.-qk*.04,ZOOM_INSTANT);
 		A_ZoomFactor(1.);
 		A_AlertMonsters(alertness);
 		A_PlayerFire();
@@ -1390,7 +1390,7 @@ Class Wallbuster : SWWMWeapon
 		XZW9 GHI 2;
 		XZW9 J 2 A_Parry(9);
 		XZW9 KLM 1;
-		XZW9 N 1 A_Melee(70,"demolitionist/whitl");
+		XZW9 N 1 A_Melee(70,"demolitionist/whitl",1.2);
 		XZW9 OPQRS 2;
 		XZW9 T 2 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW9 UVW 2;

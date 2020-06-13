@@ -150,7 +150,7 @@ Class SpreadgunTracer : LineTracer
 				// go right on through if dead
 				if ( Results.HitActor.health-amt <= 0 ) return TRACE_Skip;
 				// stap
-				return TRACE_Abort;
+				return TRACE_Stop;
 			}
 			return TRACE_Skip;
 		}
@@ -198,7 +198,7 @@ Class SpreadSlugTracer : SpreadgunTracer
 				ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
 				hitlist.Push(ent);
 				penetration = max(0,penetration-ent.hitdamage);
-				if ( penetration <= 0 ) return TRACE_Abort;
+				if ( penetration <= 0 ) return TRACE_Stop;
 				return TRACE_Skip;
 			}
 			return TRACE_Skip;
@@ -2056,11 +2056,11 @@ Class Spreadgun : SWWMWeapon
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
-				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_BODY,CHANF_OVERLAP,1.,2.);
-				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_BODY,CHANF_OVERLAP,.4,4.);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_FOOTSTEP,CHANF_OVERLAP,.4,4.);
 			}
 		}
-		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) )
+		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
 		{
 			Vector3 hitnormal = -t.Results.HitVector;
 			if ( t.Results.HitType == TRACE_HitFloor )
@@ -2100,7 +2100,7 @@ Class Spreadgun : SWWMWeapon
 			A_StartSound(sounds[i],CHAN_WEAPON,CHANF_OVERLAP,attenuation:.6);
 			A_AlertMonsters(louds[i]);
 			A_QuakeEx(quakes[i],quakes[i],quakes[i],9,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2*quakes[i]);
-			A_ZoomFactor(1.+quakes[i]*.04,ZOOM_INSTANT);
+			A_ZoomFactor(1.-quakes[i]*.04,ZOOM_INSTANT);
 			A_ZoomFactor(1.);
 			A_PlayerFire();
 			SWWMHandler.DoFlash(self,cols[i],5);

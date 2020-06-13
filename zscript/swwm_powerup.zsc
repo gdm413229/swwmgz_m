@@ -1,4 +1,18 @@
 // Powerups go here
+Class GrilledCheeseSafeguard : Powerup
+{
+	Default
+	{
+		Inventory.Icon "graphics/HUD/Icons/I_Sandwich.png";
+		Powerup.Duration -3;
+	}
+
+	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	{
+		if ( passive ) newdamage = 0;
+	}
+}
+
 Class GrilledCheeseSandwich : Inventory
 {
 	Mixin SWWMAutoUseFix;
@@ -37,6 +51,9 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
 		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
+		let s = Owner.FindInventory("GrilledCheeseSafeguard");
+		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
+		else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
 	}
 	override bool Use( bool pickup )
 	{
@@ -48,6 +65,8 @@ Class GrilledCheeseSandwich : Inventory
 	}
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
+		if ( Owner.FindInventory("GrilledCheeseSafeguard") )
+			return;	// the safeguard absorbs all
 		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
 			return;	// this damage type is ignored by the player, so it does not affect us
 		if ( damageType == 'EndLevel' )

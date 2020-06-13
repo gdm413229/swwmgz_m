@@ -1,5 +1,10 @@
 HardwareShader PostProcess beforebloom
 {
+	Name "SilverScope"
+	Shader "shaders/glsl/SilverScope.fp" 330
+}
+HardwareShader PostProcess beforebloom
+{
 	Name "BarrierShader"
 	Shader "shaders/glsl/Barrier.fp" 330
 	Texture WarpTex "textures/heattex.png"

@@ -258,7 +258,7 @@ Bullet, with built-in recoil compensation. A joint project of Blackmann Arms
 and Forx Industries. This thing kills almost everything in one shot, provided
 you can aim straight.
 
-Primary fire shoots, duh.
+Primary fire shoots, duh. A second press chambers another round.
 
 Secondary fire uses the scope. Can be held to go up to 16x.
 

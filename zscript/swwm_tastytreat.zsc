@@ -177,7 +177,7 @@ Class CandyBeam : Actor
 		Obituary "$O_CANDYGUN";
 		RenderStyle "Add";
 		Alpha 0.4;
-		DamageFunction 20;
+		DamageFunction 25;
 		ReactionTime 12;
 		Radius 0.1;
 		Height 0;
@@ -238,14 +238,13 @@ Class CandyPop : Actor
 		BLPF B 3 NoDelay
 		{
 			SWWMHandler.DoBlast(self,120,60000);
-			A_Explode(100,120);
+			A_Explode(200,120);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
 			roll = FRandom[Explos](0,360);
 			Spawn("CandyPLight",pos);
 			FlashPlayer(60,800);
-			A_StartSound("candygun/hit",CHAN_VOICE,CHANF_DEFAULT,.08,.6,1.3);
 			int numpt = Random[ExploS](-3,3);
 			for ( int i=0; i<numpt; i++ )
 			{
@@ -279,7 +278,7 @@ Class TinyCandyBeam : CandyBeam
 	Default
 	{
 		ReactionTime 12;
-		DamageFunction 10;
+		DamageFunction 15;
 	}
 	States
 	{
@@ -304,7 +303,7 @@ Class TinyCandyPop : CandyPop
 		BLPF B 3 NoDelay
 		{
 			SWWMHandler.DoBlast(self,80,32000);
-			A_Explode(40,80);
+			A_Explode(60,80);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
@@ -364,7 +363,7 @@ Class CandyMagArm : Actor
 			SWWMHandler.DoBlast(self,50+6*reactiontime,3000+800*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.1+(FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7))).unit()*spd;
-			A_Explode(40+reactiontime*5,50+6*reactiontime);
+			A_Explode(80+reactiontime*7,50+6*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel+vel*.2;
@@ -440,7 +439,7 @@ Class CandyMagArmBig : CandyMagArm
 			SWWMHandler.DoBlast(self,100+8*reactiontime,3000+900*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.1+(FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5))).unit()*spd;
-			A_Explode(80+reactiontime*8,100+8*reactiontime);
+			A_Explode(120+reactiontime*10,100+8*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel+vel*.2;
@@ -473,7 +472,6 @@ Class CandyMagArmBig : CandyMagArm
 					s.pitch = pt;
 					s.ReactionTime += Random[ExploS](10,30);
 				}
-				A_StartSound("candygun/maghit",CHAN_VOICE,CHANF_DEFAULT,.5,.4,1.5);
 				Destroy();
 			}
 		}
@@ -518,7 +516,7 @@ Class CandyGunProj : Actor
 		Scale *= 6.+.2*special1;
 		A_AlertMonsters(40000);
 		SWWMHandler.DoBlast(self,300+20*special1,80000+8000*special1);
-		A_Explode(3000+400*special1,300+20*special1);
+		A_Explode(3500+500*special1,300+20*special1);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
@@ -628,7 +626,7 @@ Class CandyMagProj : Actor
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters(20000);
 		SWWMHandler.DoBlast(self,250+25*special1,80000+8000*special1);
-		A_Explode(600+400*special1,250+25*special1);
+		A_Explode(700+600*special1,250+25*special1);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -721,7 +719,7 @@ Class CandyBulletImpact : Actor
 		Super.PostBeginPlay();
 		A_AlertMonsters(9000);
 		SWWMHandler.DoBlast(self,200,48000);
-		A_Explode(350,200);
+		A_Explode(700,200);
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);
@@ -916,7 +914,7 @@ Class CandyGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 500;
+			int dmg = 900;
 			SWWMHandler.DoKnockback(d.HitActor,d.HitDir,72000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )

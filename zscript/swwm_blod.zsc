@@ -460,7 +460,7 @@ Class CorpseFallTracker : Thinker
 		// play fall thumps
 		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ());
 		if ( wasflying && !isflying && (lastvelz < -10) )
-			mybody.A_StartSound("misc/bodythump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			mybody.A_StartSound("misc/bodythump",CHAN_DAMAGE,CHANF_OVERLAP);
 		wasflying = isflying;
 		lastvelz = mybody.vel.z;
 		// wait until body is dead on floor and at the last state of animation

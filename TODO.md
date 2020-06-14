@@ -3,7 +3,6 @@ Fundamental things:
  - Ynykron Artifact
 
 Not so fundamental things:
- - Chanceboxes
  - Extra Demolitionist animations (swimming, additional gestures)
 
 Extra things:

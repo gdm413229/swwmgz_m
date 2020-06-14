@@ -91,7 +91,3 @@ be purchased from the store, they have to be found in maps.
   T2 Fabricator	| 12000
   T3 Fabricator	| 150000
   T4 Fabricator	| 1920000
-  T1 Chancebox	| 1000
-  T2 Chancebox	| 10000
-  T3 Chancebox	| 100000
-  T4 Chancebox	| 1000000

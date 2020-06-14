@@ -392,7 +392,7 @@ Class PusherWeapon : SWWMWeapon
 				{
 					d.HitActor.TraceBleed(dmg,invoker);
 					d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
-					d.HitActor.A_StartSound("pusher/meat",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					d.HitActor.A_StartSound("pusher/meat",CHAN_DAMAGE,CHANF_OVERLAP);
 				}
 				// move towards target
 				bJUSTATTACKED = true;
@@ -477,7 +477,7 @@ Class PusherWeapon : SWWMWeapon
 				{
 					d.HitActor.TraceBleed(dmg,invoker);
 					d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
-					d.HitActor.A_StartSound("pusher/altmeat",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					d.HitActor.A_StartSound("pusher/altmeat",CHAN_DAMAGE,CHANF_OVERLAP);
 				}
 			}
 			else

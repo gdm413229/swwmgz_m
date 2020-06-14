@@ -1518,8 +1518,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				let type = (Class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				// skip chanceboxes, since they're not yet implemented
-				if ( type is 'Chancebox' ) continue;
 				// no fabricators outside of hexen
 				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
 				// skip maxed items

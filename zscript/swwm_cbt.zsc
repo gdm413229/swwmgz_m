@@ -637,8 +637,8 @@ Class Wallbuster : SWWMWeapon
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
-				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
-				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_FOOTSTEP,CHANF_OVERLAP,.4,4.);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_DAMAGE,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_DAMAGE,CHANF_OVERLAP,.4,4.);
 			}
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )

@@ -1352,9 +1352,9 @@ Class TheBall : Actor
 			int whichclonk = Random[Spreadgun](1,11);
 			String snd = String.Format("misc/clonk%d",whichclonk);
 			A_AlertMonsters(2500);
-			A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			A_StartSound(snd,CHAN_VOICE,CHANF_OVERLAP,1.,.2);
 			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
-			victim.A_StartSound(snd,CHAN_FOOTSTEP,CHANF_OVERLAP,1.,.2);
+			victim.A_StartSound(snd,CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
 			slamforce *= 4;
 			dmg *= 4;
 			vel *= 1.1;
@@ -1379,7 +1379,7 @@ Class TheBall : Actor
 			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
 			if ( victim )
 			{
-				victim.A_StartSound("spreadgun/ballf",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
+				victim.A_StartSound("spreadgun/ballf",CHAN_DAMAGE,CHANF_OVERLAP,(vel.length()/30.)**.5);
 				victim.TraceBleed(dmg,self);
 				victim.SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
 			}
@@ -1387,7 +1387,7 @@ Class TheBall : Actor
 		else
 		{
 			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
-			if ( victim ) victim.A_StartSound("spreadgun/ball",CHAN_FOOTSTEP,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( victim ) victim.A_StartSound("spreadgun/ball",CHAN_DAMAGE,CHANF_OVERLAP,(vel.length()/30.)**.5);
 			if ( vel.length() > 15. )
 			{
 				let s = Spawn("BallImpact",pos);
@@ -2056,8 +2056,8 @@ Class Spreadgun : SWWMWeapon
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
-				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
-				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_FOOTSTEP,CHANF_OVERLAP,.4,4.);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_DAMAGE,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_DAMAGE,CHANF_OVERLAP,.4,4.);
 			}
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )

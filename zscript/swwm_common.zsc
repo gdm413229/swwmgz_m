@@ -2,14 +2,16 @@
 enum ESWWMGZChannels
 {
 	CHAN_YOUDONEFUCKEDUP = 63200,	// exception handler
-	CHAN_DEMOVOICE = 63201,	// demolitionist voices
-	CHAN_FOOTSTEP = 63202,	// footstep sounds and others
+	CHAN_DEMOVOICE = 63201,		// demolitionist voices
+	CHAN_FOOTSTEP = 63202,		// footstep sounds and others
 	CHAN_WEAPONEXTRA = 63203,	// additional weapon sounds (usually loops)
-	CHAN_POWERUP = 63204,	// powerup sounds
+	CHAN_POWERUP = 63204,		// powerup sounds
 	CHAN_POWERUPEXTRA = 63205,	// additional powerup sounds
-	CHAN_JETPACK = 63206,	// jetpack sound
-	CHAN_ITEMEXTRA = 63207,	// additional item sounds
-	CHAN_AMBEXTRA = 63208	// player ambience when submerged
+	CHAN_JETPACK = 63206,		// jetpack sound
+	CHAN_ITEMEXTRA = 63207,		// additional item sounds
+	CHAN_WEAPONEXTRA2 = 63208,	// additional weapon sound slot
+	CHAN_DAMAGE = 63209,		// used for impact/hit sounds
+	CHAN_AMBEXTRA = 63210		// player ambience when submerged
 };
 
 // Misc. Utility code
@@ -1415,6 +1417,75 @@ Class SWWMChip : Actor
 		Stop;
 	Dummy:
 		JUNK ABCDEF -1;
+		Stop;
+	}
+}
+
+Class FancyConfetti : Actor
+{
+	int deadtimer;
+	double anglevel, pitchvel, rollvel;
+
+	Default
+	{
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+DROPOFF;
+		+MOVEWITHSECTOR;
+		+THRUACTORS;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+SLIDESONWALLS;
+		Gravity 0.05;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		deadtimer = 0;
+		anglevel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		pitchvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		rollvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		if ( bAMBUSH ) frame = 0;
+		else frame = Random[Junk](0,9);
+		scale *= Frandom[Junk](0.8,1.2);
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		vel.xy *= 0.98;
+		if ( vel.z > 0 ) vel.z *= 0.98;
+		if ( InStateSequence(CurState,ResolveState("Death")) )
+		{
+			deadtimer++;
+			if ( deadtimer > 300 ) A_FadeOut(0.05);
+			return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 # 1
+		{
+			angle += anglevel;
+			pitch += pitchvel;
+			roll += rollvel;
+			return A_JumpIf(pos.z<=floorz,"Death");
+		}
+		Loop;
+	Death:
+		XZW1 # -1
+		{
+			A_Stop();
+			pitch = roll = 0;
+		}
+		Stop;
+	Dummy:
+		XZW1 ABCDEFGHIJ -1;
 		Stop;
 	}
 }

@@ -218,7 +218,6 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				if ( type is 'Chancebox' ) continue;	// do not give these until they're fully implemented
 				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators outside of hexen
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
@@ -603,8 +602,8 @@ Class Demolitionist : PlayerPawn
 				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-				A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
-				a.A_StartSound("demolitionist/bump",CHAN_FOOTSTEP,CHANF_OVERLAP);
+				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5)) )
 				{
 					if ( bumped ) continue;

@@ -178,8 +178,13 @@ Class SilverBullet : SWWMWeapon
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
 	{
 		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
-		if ( fireMode == PrimaryFire ) return ((chambered && !fired) || (clipcount > 0) || (Ammo1.Amount > 0));
-		if ( fireMode == AltFire ) return true;	// it's just a zoom
+		if ( (fireMode == PrimaryFire) || (fireMode == AltFire) )
+		{
+			// allow player to still use the zoom even if there's no ammo left
+			// (should work fine, assuming I've correctly interpreted the execution chain of all this stuff)
+			if ( autoswitch && (fireMode == AltFire) ) return true;
+			return ((chambered && !fired) || (clipcount > 0) || (Ammo1.Amount > 0));
+		}
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
 	}
 	override void AttachToOwner( Actor other )
@@ -257,7 +262,7 @@ Class SilverBullet : SWWMWeapon
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
-				t.HitList[i].HitActor.A_StartSound("silverbullet/flesh",CHAN_FOOTSTEP,CHANF_OVERLAP,1.,2.);
+				t.HitList[i].HitActor.A_StartSound("silverbullet/flesh",CHAN_DAMAGE,CHANF_OVERLAP,1.,2.);
 				let p = Spawn("SilverImpact",t.HitList[i].HitLocation);
 				p.special1 = 1;
 				p.target = self;
@@ -410,6 +415,7 @@ Class SilverBullet : SWWMWeapon
 		SilverBullet.ClipCount 5;
 		+SWWMWEAPON.NOFIRSTGIVE;
 		+WEAPON.NO_AUTO_SWITCH;
+		+WEAPON.ALT_AMMO_OPTIONAL;
 	}
 	States
 	{

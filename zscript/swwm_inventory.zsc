@@ -951,6 +951,7 @@ Class SWWMWeapon : Weapon abstract
 	{
 		Owner.A_StopSound(CHAN_WEAPON);
 		Owner.A_StopSound(CHAN_WEAPONEXTRA);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA2);
 		Super.DetachFromOwner();
 	}
 	override void OwnerDied()
@@ -959,6 +960,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			Owner.A_StopSound(CHAN_WEAPON);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA2);
 		}
 		A_ClearRefire();
 		Super.OwnerDied();

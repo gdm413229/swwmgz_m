@@ -214,7 +214,7 @@ Class DeepImpact : SWWMWeapon
 		if ( !AmmoBar ) AmmoBar = TexMan.CheckForTexture("graphics/HUD/DeepImpactBar.png",TexMan.Type_Any);
 		Screen.DrawTexture(WeaponBox,false,bx-36,by-54,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		int chg = clamp(ChargeInter?ChargeInter.GetValue():clipcount,0,100);
-		int ct = int(((by-3)-(chg*50./100.))*hs.y);
+		int ct = int(((by-2)-(chg*50./100.))*hs.y);
 		Screen.DrawTexture(AmmoBar,false,bx-7,by-52,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ClipTop,ct);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-35,by-13,String.Format("%3d%%",chg),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}

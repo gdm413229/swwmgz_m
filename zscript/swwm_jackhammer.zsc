@@ -569,6 +569,7 @@ Class PusherWeapon : SWWMWeapon
 		Tag "$T_PUSHER";
 		Inventory.PickupMessage "$I_PUSHER";
 		Obituary "$O_PUSHER";
+		Inventory.Icon "graphics/HUD/Icons/W_Pusher.png";
 		Weapon.UpSound "pusher/select";
 		Weapon.SlotNumber 1;
 		Weapon.SelectionOrder 2800;
@@ -661,7 +662,19 @@ Class PusherWeapon : SWWMWeapon
 		Goto Ready;
 	AltMiss:
 		XZW3 QRSTUVW 1;
-		TNT1 A -1 { RemoveInventory(invoker); }
+		TNT1 A -1
+		{
+			let nw = player.mo.PickNextWeapon();
+			// gross hack (don't prioritize Deep Impact if we have something better than it)
+			if ( nw is 'DeepImpact' )
+			{
+				player.ReadyWeapon = nw;
+				nw = player.mo.PickNextWeapon();
+				player.ReadyWeapon = invoker;
+			}
+			if ( nw != invoker ) player.PendingWeapon = nw;
+			RemoveInventory(invoker);
+		}
 		Stop;
 	Reload:
 	Zoom:

@@ -853,7 +853,10 @@ Class CandyGun : SWWMWeapon
 			if ( !spareget )
 			{
 				// sell excess
-				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				int sellprice = Stamina;
+				// subtract price of ammo given
+				if ( ammoget ) sellprice -= Ammo1.Stamina;
+				sellprice = SWWMUtility.Round100(sellprice*.7);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )

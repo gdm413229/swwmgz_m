@@ -924,6 +924,7 @@ Class Demolitionist : PlayerPawn
 					}
 				}
 				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
+				if ( FindInventory("RagekitPower") ) jumpvelz *= 2.;
 				double pvelz = vel.z;
 				if ( !player.onground && !(player.cheats&CF_PREDICTING) )
 				{

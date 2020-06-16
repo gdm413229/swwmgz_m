@@ -16,6 +16,7 @@ Class GrilledCheeseSafeguard : Powerup
 Class GrilledCheeseSandwich : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -254,6 +255,7 @@ Class GhostArtifactX : Actor
 Class GhostArtifact : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -398,6 +400,7 @@ Class GravityX : GhostArtifactX
 Class GravitySuppressor : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	override bool Use( bool pickup )
 	{
@@ -611,6 +614,7 @@ Class InvinciballX : GhostArtifactX
 Class FuckingInvinciball : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -855,11 +859,13 @@ Class RagekitX : GhostArtifactX
 Class Ragekit : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		Owner.GiveBody(-100);	// full base health
 		let r = RagekitPower(Owner.FindInventory("RagekitPower"));
 		if ( r )
 		{
@@ -908,6 +914,8 @@ Class Ragekit : Inventory
 
 Class Omnisight : Inventory
 {
+	Mixin SWWMOverlapPickupSound;
+
 	override bool Use( bool pickup )
 	{
 		if ( !level.allmap )
@@ -1455,6 +1463,8 @@ Class CompanionLamp : Actor
 
 Class SWWMLamp : Inventory
 {
+	Mixin SWWMOverlapPickupSound;
+
 	bool bActive;
 	TextureID OnIcon;
 	Actor thelamp;
@@ -1685,6 +1695,7 @@ Class BarrierPower : PowerIronFeet
 Class EBarrier : Inventory
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	override bool Use( bool pickup )
 	{

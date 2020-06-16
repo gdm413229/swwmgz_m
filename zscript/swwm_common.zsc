@@ -10,8 +10,9 @@ enum ESWWMGZChannels
 	CHAN_JETPACK = 63206,		// jetpack sound
 	CHAN_ITEMEXTRA = 63207,		// additional item sounds
 	CHAN_WEAPONEXTRA2 = 63208,	// additional weapon sound slot
-	CHAN_DAMAGE = 63209,		// used for impact/hit sounds
-	CHAN_AMBEXTRA = 63210		// player ambience when submerged
+	CHAN_WEAPONEXTRA3 = 63209,	// additional weapon sound slot (again)
+	CHAN_DAMAGE = 63210,		// used for impact/hit sounds
+	CHAN_AMBEXTRA = 63211		// player ambience when submerged
 };
 
 // Misc. Utility code
@@ -1897,6 +1898,7 @@ Class SWWMHandler : EventHandler
 	transient int highesttic;
 	transient Array<QueuedFlash> flashes;
 	transient Array<LastLine> lastlines;
+	transient int lastpickuptic[MAXPLAYERS];
 	SWWMCombatTracker trackers;
 	SWWMScoreObj scorenums, damnums;
 	SWWMInterest intpoints;

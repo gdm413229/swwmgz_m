@@ -190,6 +190,7 @@ Class RedShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -250,6 +251,7 @@ Class GreenShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -303,6 +305,7 @@ Class WhiteShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -349,6 +352,7 @@ Class BlueShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -395,6 +399,7 @@ Class BlackShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -434,6 +439,7 @@ Class PurpleShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -506,6 +512,7 @@ Class GoldShell : Ammo
 {
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	action void A_GoldShellTrail()
 	{
@@ -540,6 +547,7 @@ Class GoldShell : Ammo
 Class EvisceratorShell : Ammo
 {
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -578,6 +586,7 @@ Class EvisceratorSixPack : EvisceratorShell
 Class HellblazerMissiles : Ammo
 {
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -611,6 +620,7 @@ Class HellblazerMissileMag : HellblazerMissiles
 Class HellblazerCrackshots : Ammo
 {
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -644,6 +654,7 @@ Class HellblazerCrackshotMag : HellblazerCrackshots
 Class HellblazerRavagers : Ammo
 {
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -677,6 +688,7 @@ Class HellblazerRavagerMag : HellblazerRavagers
 Class HellblazerWarheads : Ammo
 {
 	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
 
 	Default
 	{
@@ -713,6 +725,8 @@ Class HellblazerWarheadMag : HellblazerWarheads
 
 Class SparkUnit : Ammo
 {
+	Mixin SWWMOverlapPickupSound;
+
 	Default
 	{
 		Tag "$T_SPARKUNIT";
@@ -740,6 +754,8 @@ Class SparkUnit : Ammo
 
 Class SilverBulletAmmo : Ammo
 {
+	Mixin SWWMOverlapPickupSound;
+
 	Default
 	{
 		Tag "$T_XSBMAG";
@@ -767,6 +783,8 @@ Class SilverBulletAmmo : Ammo
 
 Class CandyGunAmmo : Ammo
 {
+	Mixin SWWMOverlapPickupSound;
+
 	Default
 	{
 		Tag "$T_CANDYMAG";
@@ -807,11 +825,13 @@ Class CandyGunSpares : Ammo
 
 Class YnykronAmmo : Ammo
 {
+	Mixin SWWMOverlapPickupSound;
+
 	Default
 	{
 		Tag "$T_YNYKRONAMMO";
 		Inventory.PickupMessage "$T_YNYKRONAMMO";
-		Stamina 1000000;
+		Stamina 3000000;
 		Inventory.Icon "graphics/HUD/Icons/A_Ynykron.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
@@ -834,6 +854,8 @@ Class YnykronAmmo : Ammo
 
 Class AmmoFabricator : Inventory abstract
 {
+	Mixin SWWMOverlapPickupSound;
+
 	int budget, pertype, maxunitprice;
 
 	Property Budget : budget;
@@ -1045,6 +1067,7 @@ Class FabricatorTier4 : AmmoFabricator
 
 Class HammerspaceEmbiggener : Inventory
 {
+	Mixin SWWMOverlapPickupSound;
 	bool cheatedin;
 
 	override void SetGiveAmount( Actor receiver, int amount, bool givecheat )

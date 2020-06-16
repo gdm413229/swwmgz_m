@@ -20,6 +20,28 @@ Mixin Class SWWMAutoUseFix
 	}
 }
 
+Mixin Class SWWMOverlapPickupSound
+{
+	// overlap sounds
+	override void PlayPickupSound( Actor toucher )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			if ( hnd.lastpickuptic[toucher.PlayerNumber()] == gametic )
+				return;	// don't play if picked up on the same exact tic (overlapping items)
+			hnd.lastpickuptic[toucher.PlayerNumber()] = gametic;
+		}
+		double atten;
+		int flags = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
+		if ( bNoAttenPickupSound ) atten = ATTN_NONE;
+		else atten = ATTN_NORM;
+		if ( toucher && toucher.CheckLocalView() )
+			flags |= CHANF_NOPAUSE;
+		toucher.A_StartSound(PickupSound,CHAN_ITEM,flags,1.,atten);
+	}
+}
+
 // Base class for all SWWM Armors
 Class SWWMArmor : Armor abstract
 {
@@ -148,6 +170,7 @@ Class SWWMArmor : Armor abstract
 Class SWWMSpareArmor : Inventory abstract
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	Class<SWWMArmor> giveme;
 
@@ -186,6 +209,7 @@ Class SWWMSpareArmor : Inventory abstract
 Class SWWMHealth : Inventory abstract
 {
 	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
 
 	// can't use the Health class for whatever reason
 	// nice parser you got there I guess?
@@ -907,6 +931,8 @@ Class UseLineTracer : LineTracer
 // Base class for all SWWM Weapons
 Class SWWMWeapon : Weapon abstract
 {
+	Mixin SWWMOverlapPickupSound;
+
 	private int SWeaponFlags;
 	Actor pfield;	// instance of parry field for current melee attack
 
@@ -916,12 +942,28 @@ Class SWWMWeapon : Weapon abstract
 	{
 		if ( (GetClass() == item.GetClass()) )
 		{
+			int oldammo1 = Ammo1?Ammo1.Amount:0;
+			int oldammo2 = Ammo2?Ammo2.Amount:0;
 			if ( Weapon(item).PickupForAmmo(self) )
 				item.bPickupGood = true;
 			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
 			{
 				// sell excess
-				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				int sellprice = Stamina;
+				// subtract prices of ammo given
+				if ( Ammo1 )
+				{
+					int ammogiven1 = Ammo1.Amount-oldammo1;
+					if ( ammogiven1 > 0 )
+						sellprice -= int(Ammo1.Stamina*(1.+.5*(ammogiven1-1)));
+				}
+				if ( Ammo2 )
+				{
+					int ammogiven2 = Ammo2.Amount-oldammo2;
+					if ( ammogiven2 > 0 )
+						sellprice -= int(Ammo2.Stamina*(1.+.5*(ammogiven2-1)));
+				}
+				sellprice = SWWMUtility.Round100(sellprice*.7);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
@@ -952,6 +994,7 @@ Class SWWMWeapon : Weapon abstract
 		Owner.A_StopSound(CHAN_WEAPON);
 		Owner.A_StopSound(CHAN_WEAPONEXTRA);
 		Owner.A_StopSound(CHAN_WEAPONEXTRA2);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA3);
 		Super.DetachFromOwner();
 	}
 	override void OwnerDied()
@@ -961,6 +1004,7 @@ Class SWWMWeapon : Weapon abstract
 			Owner.A_StopSound(CHAN_WEAPON);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA2);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA3);
 		}
 		A_ClearRefire();
 		Super.OwnerDied();

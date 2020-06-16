@@ -39,7 +39,7 @@ respective weapon.
    Candy Mag	| 100000
    Spare Gun	| 600000
   Ynykron Arti.	| 5000000
-   Crystal Unit	| 1000000
+   Crystal Unit	| 3000000
 
 #### DLC weapons and ammo (when available)
 

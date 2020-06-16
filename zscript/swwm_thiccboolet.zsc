@@ -138,6 +138,7 @@ Class SilverBullet : SWWMWeapon
 	double zoomlevel;
 	ui TextureID reticle;
 	bool initialized;
+	int rezoom;
 
 	State dezoomstate;
 
@@ -356,7 +357,8 @@ Class SilverBullet : SWWMWeapon
 			s.alpha *= .4;
 			s.vel += vel*.5+x*FRandom[Silverbullet](4.,8.)+y*FRandom[Silverbullet](-1,1)+z*FRandom[Silverbullet](-1,1);
 		}
-		SWWMHandler.DoKnockback(self,-x,320000.);
+		bool reduceme = (player.mo.CanCrouch()&&(player.crouchfactor != 1));
+		SWWMHandler.DoKnockback(self,-x,reduceme?32000.:320000.);
 	}
 	action void A_DropCasing()
 	{
@@ -385,7 +387,8 @@ Class SilverBullet : SWWMWeapon
 		invoker.specialf1 -= .06;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		vel += x*min(1.,invoker.specialf1)*(600./Mass);
+		bool reduceme = (player.mo.CanCrouch()&&(player.crouchfactor != 1));
+		vel += x*min(1.,invoker.specialf1)*((reduceme?60.:600.)/Mass);
 		A_OverlayAlpha(PSP_WEAPON+2,clamp(invoker.specialf1*3.,0.,1.));
 		if ( Random[SilverBullet](0,int(invoker.specialf1*4)) )
 			self.DamageMobj(invoker,self,2,'jet');
@@ -444,6 +447,11 @@ Class SilverBullet : SWWMWeapon
 			int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( (invoker.clipcount < invoker.default.clipcount) && (sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) || (invoker.Ammo1.Amount > 0)) )
 				flg |= WRF_ALLOWRELOAD;
+			if ( invoker.rezoom > 0 )
+			{
+				flg |= WRF_NOSECONDARY;
+				invoker.rezoom--;
+			}
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&BT_ATTACK )
 				invoker.CheckAmmo(EitherFire,true);
@@ -541,11 +549,14 @@ Class SilverBullet : SWWMWeapon
 		TNT1 A 1
 		{
 			invoker.zoomed = true;
-			invoker.zoomlevel = clamp(invoker.zoomlevel*1.1+.1,1.,16.);
+			invoker.zoomlevel = clamp(invoker.zoomlevel*1.05+.05,1.,16.);
 			A_ZoomFactor(invoker.zoomlevel);
 			if ( !(level.maptime%2) && (invoker.zoomlevel < 16.) ) A_StartSound("silverbullet/zooming",CHAN_WEAPON,CHANF_OVERLAP,.2);
 			if ( !(player.cmd.buttons&BT_ALTATTACK) )
+			{
+				invoker.rezoom = 3;
 				return ResolveState("ZoomReady");
+			}
 			return ResolveState(null);
 		}
 		Wait;

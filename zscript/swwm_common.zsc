@@ -3318,6 +3318,26 @@ Class SWWMHandler : EventHandler
 	}
 }
 
+// preload fonts and stuff
+Class SWWMPreloader : StaticEventHandler
+{
+	override void OnRegister()
+	{
+		Font.GetFont('k6x8');
+		Font.GetFont('k6x8Shaded');
+		Font.GetFont('k6x8ShadedInverse');
+		Font.GetFont('Miniwi');
+		Font.GetFont('MiniwiShaded');
+		Font.GetFont('MiniwiShadedInverse');
+		Font.GetFont('MPlus');
+		Font.GetFont('MPlusShaded');
+		Font.GetFont('MPlusShadedInverse');
+		Font.GetFont('Tewi');
+		Font.GetFont('TewiShaded');
+		Font.GetFont('TewiShadedInverse');
+	}
+}
+
 // Fancy crash effect
 Class SWWMCrashHandler : StaticEventHandler
 {

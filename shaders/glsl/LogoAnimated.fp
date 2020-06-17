@@ -15,19 +15,19 @@ vec4 blacktoalpha( in vec4 src )
 	vec4 dst = src;
 	float dist = 0., alpha = 0.;
 	float d, a;
-	a = clamp(dst.r,0.,1);
+	a = clamp(dst.r,0.,1.);
 	if ( a > alpha )
 	{
 		alpha = a;
 		dist = d;
 	}
-	a = clamp(dst.g,0.,1);
+	a = clamp(dst.g,0.,1.);
 	if ( a > alpha )
 	{
 		alpha = a;
 		dist = d;
 	}
-	a = clamp(dst.b,0.,1);
+	a = clamp(dst.b,0.,1.);
 	if ( a > alpha )
 	{
 		alpha = a;

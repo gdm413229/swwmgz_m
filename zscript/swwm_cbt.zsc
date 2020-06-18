@@ -997,6 +997,7 @@ Class Wallbuster : SWWMWeapon
 	action void A_StartDetachOverlays()
 	{
 		static const statelabel shells[] = {"DetachShell0","DetachShell1","DetachShell2","DetachShell3","DetachShell4"};
+		static const statelabel shellsfired[] = {"DetachShellF0","DetachShellF1","DetachShellF2","DetachShellF3","DetachShellF4"};
 		for ( int i=0; i<5; i++ )
 		{
 			// get physical index
@@ -1011,7 +1012,9 @@ Class Wallbuster : SWWMWeapon
 			while ( gidx > 4 ) gidx -= 5;
 			idx = gidx+group*5;
 			if ( !invoker.loaded[idx] ) continue;
-			A_Overlay(PSP_WEAPON+1+i,shells[i]);
+			if ( invoker.fired[idx] )
+				A_Overlay(PSP_WEAPON+1+i,shellsfired[i]);
+			else A_Overlay(PSP_WEAPON+1+i,shells[i]);
 		}
 		A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 	}
@@ -1327,6 +1330,23 @@ Class Wallbuster : SWWMWeapon
 	DetachShell4:
 		XZWD WXYZ 1;
 		XZWE ABCDEF 1;
+		Stop;
+	DetachShellF0:
+		XZWF LMNOPQRSTU 1;
+		Stop;
+	DetachShellF1:
+		XZWF VWXYZ 1;
+		XZWG ABCDE 1;
+		Stop;
+	DetachShellF2:
+		XZWG FGHIJKLMNO 1;
+		Stop;
+	DetachShellF3:
+		XZWG PQRSTUVWXY 1;
+		Stop;
+	DetachShellF4:
+		XZWG Z 1;
+		XZWH ABCDEFGHI 1;
 		Stop;
 	Attach:
 		XZW6 EF 2;

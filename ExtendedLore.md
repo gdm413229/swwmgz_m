@@ -517,6 +517,10 @@ Main UnSX timeline:
 - 10675 BC: After a long absence, Father Nostros returns to the Kurenai Kingdom
   followed by an army of demonic creatures, he takes over and forces everyone
   else out. The old Kurenai Kingdom becomes what is now known as Hell.
+- 8135 BC: The Goshun declare war on their creators, the Mishe. After a very
+  one-sided confrontation, the Mishe home planet of Unuenishe is destroyed, but
+  the entire species manages to flee beforehand by pushing the planet's
+  artificial moon, Deishe, out of orbit.
 - November 6, 4673 BC: Prince Admun is born.
 - 4648 BC: Prince Admun's parents are assassinated, he is appointed as King.
 - 4607 BC: Seras Tonkebis, Admun's personal advisor, executes his plan to take
@@ -666,6 +670,10 @@ Main UnSX timeline:
   University of Nos-Kora.
 - November 12, 2110: John "BIGSHOT" Gunns is born.
 - 2120: Zanaveth III enrolls at the University of Nos-Kora.
+- 2121: The "Dark Alliance" is formed within the X'Animen coalition, composed
+  of some of its "least desirable" members, and led by Zexwa Goshunk, the
+  mastermind behind the destruction of the Mishe homeworld. This group wouldn't
+  be seen as a threat until a century later.
 - 2128: Zanaveth II becomes CEO of Nekuratek.
 - 2137: The United States are reformed, now called "Union States".
 - 2140: Zanaveth III graduates in "Pancake Engineering" at the University of
@@ -734,13 +742,13 @@ Main UnSX timeline:
   the "Doom Slayer", a dimension hopping warrior highly experienced in excising
   demons, and request his services. Once the evils of the mansion are
   eliminated, a mysterious figure is seen leaving it afterwards.
-- 2181: An old man, who later reveals himself as Manakei, contacts Akari Labs
-  with a request to be transported to Hell. After reaching it, he unleashes his
-  full power, and singlehandedly defeats the remaining usurper generals, who
-  were in the middle of planning yet another invasion of Earth. After a moment
-  of rest, he makes his way to the royal throne, and takes his place as the
-  legitimate ruler of Hell. His first official act is to cease all hostilities
-  with mankind.
+- 2181: Manakei is found after years of thoroughly combing the Nuskar Forest.
+  Saya transports him back to Hell. After reaching it, he unleashes his full
+  power, and singlehandedly defeats the remaining usurper generals, who were in
+  the middle of planning yet another invasion of Earth. After a moment of rest,
+  he makes his way to the royal throne, and takes his place as the legitimate
+  ruler of Hell. His first official act is to cease all hostilities with
+  mankind.
 - 2187: Following a very difficult period of negotiation, the White Scar treaty
   is dismissed. As bonds with the Nukuri are re-established, their technology
   is adopted once again by all countries. The Nekuraku family in full joins in
@@ -755,12 +763,14 @@ Main UnSX timeline:
 - 2215: The NEG is formed in anticipation of the coming Skaarj invasion.
 - 2216: The Seven Day Siege happens, the Skaarj are defeated.
 - 2219: The Ishtara Scientific Foundation is formed.
+- 2238: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
+  Not long after, they are defeated in a joint attack with the participation of
+  Earth and many other allied worlds.
 - 2241: The Mishe race disappears from the universe, leaving only the founders
   of the University of Nos-Kora behind, who refuse to explain what happened.
 - 2245: "Vault 490" starts being built in the University of Nos-Kora, it is
   described as a "focusing device" for a weapon capable of "instantly
   neutralizing any threat to our universe".
-- 2250: The "Dark Alliance" is formed within the Xathar system.
 - 2267: Green's World Rebellion.
 - 2270: The Phayder Corporation is founded, attempts to replicate the
   immortality of the Nukuri race on humans through a nano-augmentation method
@@ -782,8 +792,8 @@ Main UnSX timeline:
 - 2310: A group of billionaires buy an entire island and turn it into an arena.
   The "Battle Royale" boom starts.
 - 2315: The "New Dark Kingdom" appears, led by Ososkuro Axon, son of the
-  fearsome Dread Overlord Nuoma, who attempts to reunite those who were
-  defeated in the former war and strike once more. A long period of war begins.
+  fearsome Dread Overlord Nuoma, who attempts to reunite the defeated Dark
+  Alliance and strike once more. A long period of war begins.
 - 2324: UnSX 4. A team of mercenaries from various allied worlds manages to
   take down Ososkuro. Before the finishing blow could be dealt, Nuoma appears
   and convinces them to spare him, then takes Ososkuro back to their homeland.
@@ -795,9 +805,6 @@ Main UnSX timeline:
   begins.
 - 2337: The first tournament ends with Raik L Raikishionen, prime minister of
   the Nukuri Unified Government, as champion.
-- 2338: UnSX 2. Members of the Dark Alliance attempt to take over the Bleaknet.
-  Not long after, they are defeated in a joint attack with the participation of
-  Earth and many other allied worlds.
 - 2340: Second Unissix Tournament.
 - 2343: Nuoma accidentally reveals her true form to the people of Kruon. The
   feared "fall of the empire" doesn't happen, she is still revered as a worthy
@@ -807,7 +814,7 @@ Main UnSX timeline:
   various "passages", connecting Akkou and many other realms together. Third
   Unissix Tournament.
 - 2348: Fourth Unissix Tournament.
-- 2349: UnSX 6 begins. The former "Warriors of the End" who had served
+- 2349: UnSX 6 begins. Some of the former "Warriors of the End" who had served
   Nedoshiaan reunite and attempt to bring forth the apocalypse. Although the
   warriors are stopped, they manage to summon HEKEAS SHINNOVRE the Eraser. For
   the first time in history, LS breaks their vow to not get involved in "the
@@ -816,8 +823,8 @@ Main UnSX timeline:
   tired of the whole thing.
 - 2363: The town of Kenaia becomes corrupted by some strange "red mass", many
   of its inhabitants turn into mindless beasts.
-- 2384: The Church of Levlen initiates their Esper Crusades, aiming to rid the
-  land of all magic-aligned people.
+- 2384: The Church of Levlen initiates their second Esper Crusades, aiming to
+  rid the land of all magic-aligned people.
 - 2386: Alakir of Kanaiarkar manages to flee his hometown during an attack
   from Levlen crusaders.
 - 2387: An unidentified terrorist group attacks the Nekuratek Advanced Arms

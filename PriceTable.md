@@ -2,7 +2,7 @@
 
 These are the prices of any items that can be bought in the in-game store.
 For items that are also available in bundles (e.g.: Shells), the price of
-those follows the formula (price*(1+0.75*amount)).
+those follows the formula (price*(1+0.75*(amount-1))).
 These values may be adjusted in the future after things are tested properly.
 
 #### Weapons and ammo

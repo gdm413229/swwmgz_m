@@ -955,13 +955,13 @@ Class SWWMWeapon : Weapon abstract
 				{
 					int ammogiven1 = Ammo1.Amount-oldammo1;
 					if ( ammogiven1 > 0 )
-						sellprice -= int(Ammo1.Stamina*(1.+.5*(ammogiven1-1)));
+						sellprice -= int(Ammo1.Stamina*(1.+.75*(ammogiven1-1)));
 				}
 				if ( Ammo2 )
 				{
 					int ammogiven2 = Ammo2.Amount-oldammo2;
 					if ( ammogiven2 > 0 )
-						sellprice -= int(Ammo2.Stamina*(1.+.5*(ammogiven2-1)));
+						sellprice -= int(Ammo2.Stamina*(1.+.75*(ammogiven2-1)));
 				}
 				sellprice = SWWMUtility.Round100(sellprice*.7);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);

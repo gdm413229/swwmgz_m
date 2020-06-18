@@ -531,7 +531,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				let itm = GetDefaultByType(storelist[sel0]);
 				let amt = storeunits[sel0];
-				int price = int(itm.Stamina*(1.+.5*(amt-1)));
+				int price = int(itm.Stamina*(1.+.75*(amt-1)));
 				if ( !SWWMCredits.CanTake(players[consoleplayer],price) )
 				{
 					MenuSound("menu/noinvuse");
@@ -1556,7 +1556,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( (type is 'Ammo') && (type.GetParentClass() != 'Ammo') ) continue;
 				if ( inv.Stamina <= 0 ) continue;
 				int amt = inv.Amount;
-				int price = int(inv.Stamina*(1.+.5*(amt-1)));
+				int price = int(inv.Stamina*(1.+.75*(amt-1)));
 				if ( type is 'Ammo' )
 				{
 					int maxneed = cur.MaxAmount-cur.Amount;
@@ -1566,7 +1566,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						let type2 = (Class<Ammo>)(AllActorClasses[j]);
 						if ( !type2 || (type2.GetParentClass() != type) ) continue;
 						let inv2 = GetDefaultByType(type2);
-						int cprice = int(inv.Stamina*(1.+.5*(inv2.Amount-1)));
+						int cprice = int(inv.Stamina*(1.+.75*(inv2.Amount-1)));
 						if ( (inv2.Amount > amt) && (inv2.Amount <= maxneed) && (cprice <= SWWMCredits.Get(players[consoleplayer])) )
 						{
 							price = cprice;
@@ -2217,7 +2217,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				int price = int(def.Stamina*(1.+.5*(storeunits[i]-1)));
+				int price = int(def.Stamina*(1.+.75*(storeunits[i]-1)));
 				str = String.Format("¥%d",price);
 				len = TewiFont.StringWidth(str);
 				int clscol = Font.CR_FIRE;

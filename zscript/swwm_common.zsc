@@ -1429,6 +1429,18 @@ Class SWWMChip : Actor
 	{
 		Super.Tick();
 		if ( isFrozen() ) return;
+		if ( specialf1 > 0 )
+		{
+			specialf1 -= FRandom[Junk](.006,.012);
+			if ( !Random[Junk](0,5) )
+			{
+				let s = Spawn("SWWMHalfSmoke",pos);
+				s.SetShade(Color(1,1,1)*Random[Junk](20,60));
+				s.alpha *= min(.4,specialf1*.4);
+				s.vel = vel*.5+(0.,0.,.1);
+				s.scale *= FRandom[Junk](.8,1.3);
+			}
+		}
 		if ( InStateSequence(CurState,ResolveState("Death")) )
 		{
 			deadtimer++;

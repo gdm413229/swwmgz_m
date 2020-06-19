@@ -623,24 +623,25 @@ Class BusterWall : Thinker
 				if ( Random[Wallbuster](0,2) ) continue;
 				Vector3 spot = (x+FRandom[Wallbuster](-stepx,stepx)*.5,y+FRandom[Wallbuster](-stepy,stepy)*.5,z+FRandom[Wallbuster](-stepz,stepz)*.5);
 				if ( level.PointInSector(spot.xy) != hs ) continue;
-				int numpt = Random[Wallbuster](1,3);
+				int numpt = Random[Wallbuster](2,3);
 				for ( int i=0; i<numpt; i++ )
 				{
 					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](.3,4.);
 					let s = Actor.Spawn("SWWMSmoke",spot);
 					s.vel = pvel;
 					s.scale *= 2.5;
-					s.special1 = Random[Wallbuster](1,5);
+					s.special1 = Random[Wallbuster](1,3);
 					s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
 				}
-				numpt = Random[Wallbuster](3,8);
+				numpt = Random[Wallbuster](8,16);
 				for ( int i=0; i<numpt; i++ )
 				{
 					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](8.,16.);
 					let s = Actor.Spawn("SWWMChip",spot);
 					s.vel = pvel;
-					s.scale *= FRandom[Wallbuster](1.,2.);
+					s.scale *= FRandom[Wallbuster](2.,3.);
 					s.A_SetTranslation('Rubble');
+					s.specialf1 = FRandom[Wallbuster](1.,1.5);
 				}
 			}
 		}
@@ -656,7 +657,7 @@ Class BusterWall : Thinker
 				if ( Random[Wallbuster](0,2) ) continue;
 				Vector3 spot = (x+FRandom[Wallbuster](-stepx,stepx)*.5,y+FRandom[Wallbuster](-stepy,stepy)*.5,z+FRandom[Wallbuster](-stepz,stepz)*.5);
 				if ( level.PointInSector(spot.xy) != hs ) continue;
-				int numpt = Random[Wallbuster](1,3);
+				int numpt = Random[Wallbuster](2,3);
 				for ( int i=0; i<numpt; i++ )
 				{
 					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](.3,4.);
@@ -666,14 +667,15 @@ Class BusterWall : Thinker
 					s.special1 = Random[Wallbuster](1,3);
 					s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
 				}
-				numpt = Random[Wallbuster](3,8);
+				numpt = Random[Wallbuster](8,16);
 				for ( int i=0; i<numpt; i++ )
 				{
 					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](8.,16.);
 					let s = Actor.Spawn("SWWMChip",spot);
 					s.vel = pvel;
-					s.scale *= FRandom[Wallbuster](1.,2.);
+					s.scale *= FRandom[Wallbuster](2.,3.);
 					s.A_SetTranslation('Rubble');
+					s.specialf1 = FRandom[Wallbuster](1.,1.5);
 				}
 			}
 		}

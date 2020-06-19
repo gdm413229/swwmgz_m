@@ -564,7 +564,7 @@ Class SaltImpact : Actor
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( args[0] == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	override void PostBeginPlay()
@@ -644,7 +644,7 @@ Class SaltBeam : Actor
 
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( args[1] == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	void SpreadOut()
@@ -678,10 +678,11 @@ Class SaltBeam : Actor
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
 		{
+			if ( args[1] ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x);
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
 				SWWMHandler.DoKnockback(t.Results.HitActor,x,25000);
-				t.Results.HitActor.DamageMobj(self,target,60,'Salt',DMG_THRUSTLESS);
+				t.Results.HitActor.DamageMobj(self,target,60+Accuracy*5,'Salt',DMG_THRUSTLESS);
 			}
 			Vector3 norm = -x;
 			if ( t.Results.HitType == TRACE_HitWall )
@@ -1442,6 +1443,7 @@ Class TheBall : Actor
 		lasthit = null;
 		Vector3 HitNormal = -vel.unit();
 		F3DFloor ff;
+		LineTracer faketracer = new("LineTracer");
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
@@ -1451,8 +1453,14 @@ Class TheBall : Actor
 				ff = CurSector.Get3DFloor(i);
 				break;
 			}
-			if ( ff ) HitNormal = -ff.top.Normal;
+			if ( ff )
+			{
+				faketracer.Results.ffloor = ff;
+				HitNormal = -ff.top.Normal;
+			}
 			else HitNormal = BlockingFloor.floorplane.Normal;
+			faketracer.Results.HitType = TRACE_HitFloor;
+			faketracer.Results.HitSector = BlockingFloor;
 		}
 		else if ( BlockingCeiling )
 		{
@@ -1463,8 +1471,14 @@ Class TheBall : Actor
 				ff = CurSector.Get3DFloor(i);
 				break;
 			}
-			if ( ff ) HitNormal = -ff.bottom.Normal;
+			if ( ff )
+			{
+				faketracer.Results.ffloor = ff;
+				HitNormal = -ff.bottom.Normal;
+			}
 			else HitNormal = BlockingCeiling.ceilingplane.Normal;
+			faketracer.Results.HitType = TRACE_HitCeiling;
+			faketracer.Results.HitSector = BlockingCeiling;
 		}
 		else if ( BlockingLine )
 		{
@@ -1478,11 +1492,30 @@ Class TheBall : Actor
 				if ( (!locknum || (target && target.CheckKeys(locknum,false,true))) && !SWWMUtility.IsExitLine(BlockingLine) )
 					BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
 			}
+			faketracer.Results.HitType = TRACE_HitWall;
+			faketracer.Results.HitLine = BlockingLine;
+			faketracer.Results.Side = wside;
+			faketracer.Results.Tier = TIER_Middle;
+			// guess the tier hit
+			if ( BlockingLine.sidedef[1] )
+			{
+				double ceil = BlockingLine.sidedef[!wside].sector.ceilingplane.ZAtPoint(pos.xy);
+				double flor = BlockingLine.sidedef[!wside].sector.floorplane.ZAtPoint(pos.xy);
+				if ( pos.z >= ceil ) faketracer.Results.Tier = TIER_Upper;
+				else if ( (pos.z+Height) <= flor ) faketracer.Results.Tier = TIER_Lower;
+			}
 		}
 		else if ( BlockingMobj )
 		{
 			Vector3 diff = level.Vec3Diff(BlockingMobj.Vec3Offset(0,0,BlockingMobj.Height/2),pos);
 			HitNormal = diff.unit();
+			faketracer.Results.HitType = TRACE_HitActor;
+		}
+		// send the needed data for a bust
+		if ( special1 == 1 )
+		{
+			int dmg = int(oldvel.length()*4.2+heat*80);
+			BusterWall.Bust(faketracer.Results,dmg,target,oldvel.unit());
 		}
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;

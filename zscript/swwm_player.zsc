@@ -1021,6 +1021,8 @@ Class Demolitionist : PlayerPawn
 			}
 			else if ( (player.cmd.buttons&BT_USE) && (deadtimer > 120) )
 			{
+				// gross hackfix for library "vanishing"
+				SWWMExcuseMeWhatTheFuckHandler.ThisIsSomeSeriousBullshit();
 				// reload save
 				player.cls = null;
 				player.playerstate = PST_ENTER;

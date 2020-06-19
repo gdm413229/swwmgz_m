@@ -445,6 +445,41 @@ Class SWWMLore
 	bool read;
 }
 
+// so apparently on restart after dying, static thinkers don't get reloaded until AFTER the player has spawned
+// and the player calls GiveDefaultInventory even though it's all later discarded and they're given the saved inventory
+// all I can ask is: WHY
+Class SWWMExcuseMeWhatTheFuckHandler : StaticEventHandler
+{
+	bool reborn_hackfix;
+	int clear_hackfix;
+
+	override void WorldTick()
+	{
+		if ( gamestate != GS_LEVEL ) return;
+		if ( clear_hackfix > 0 )
+		{
+			clear_hackfix--;
+			if ( clear_hackfix <= 0 )
+				reborn_hackfix = false;
+		}
+	}
+
+	static bool WhyTheFuckIsThisAThing()
+	{
+		let hnd = SWWMExcuseMeWhatTheFuckHandler(StaticEventHandler.Find("SWWMExcuseMeWhatTheFuckHandler"));
+		if ( !hnd ) return false;
+		return hnd.reborn_hackfix;
+	}
+
+	static void ThisIsSomeSeriousBullshit()
+	{
+		let hnd = SWWMExcuseMeWhatTheFuckHandler(StaticEventHandler.Find("SWWMExcuseMeWhatTheFuckHandler"));
+		if ( !hnd ) return;
+		hnd.reborn_hackfix = true;
+		hnd.clear_hackfix = 2;
+	}
+}
+
 Class SWWMLoreLibrary : Thinker
 {
 	PlayerInfo myplayer;
@@ -584,6 +619,8 @@ Class SWWMLoreLibrary : Thinker
 
 	static void Add( PlayerInfo p, String ref )
 	{
+		// ignore this call on player rebirth, otherwise a new thinker will be created when the player calls GiveDefaultInventory
+		if ( SWWMExcuseMeWhatTheFuckHandler.WhyTheFuckIsThisAThing() ) return;
 		SWWMLoreLibrary ll = Find(p);
 		if ( !ll )
 		{

@@ -1,5 +1,4 @@
 Fundamental things:
- - Wallbuster breaching feature
  - Ynykron Artifact
 
 Not so fundamental things:

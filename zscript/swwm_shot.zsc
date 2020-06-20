@@ -678,7 +678,7 @@ Class SaltBeam : Actor
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
 		{
-			if ( args[1] ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x);
+			if ( args[1] ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x,t.Results.HitPos.z);
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
 				SWWMHandler.DoKnockback(t.Results.HitActor,x,25000);
@@ -1515,7 +1515,7 @@ Class TheBall : Actor
 		if ( special1 == 1 )
 		{
 			int dmg = int(oldvel.length()*4.2+heat*80);
-			BusterWall.Bust(faketracer.Results,dmg,target,oldvel.unit());
+			BusterWall.Bust(faketracer.Results,dmg,target,oldvel.unit(),pos.z+Height/2.);
 		}
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;

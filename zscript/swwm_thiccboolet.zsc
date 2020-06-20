@@ -87,8 +87,8 @@ Class SilverImpact : Actor
 			return;
 		}
 		A_StartSound("silverbullet/hit",CHAN_VOICE,CHANF_DEFAULT,1.,.7);
-		A_SprayDecal("BigBulletChip",-20);
-		A_SprayDecal("HugeWallCrack",-20);
+		A_SprayDecal("BigBulletChip",-64);
+		A_SprayDecal("HugeWallCrack",-64);
 		int numpt = Random[Silverbullet](15,25);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
@@ -122,6 +122,163 @@ Class SilverImpact : Actor
 	Spawn:
 		TNT1 A 20;
 		Stop;
+	}
+}
+
+Class WallPenetrate
+{
+	Vector3 hitpos, hitdir, hitnormal;
+}
+
+Class AuxiliarySilverBulletTracer : LineTracer
+{
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor ) return TRACE_Skip;
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class SilverBulletTracer : SpreadSlugTracer
+{
+	Array<WallPenetrate> WallPenetrateList;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
+				int killdamage = min(Results.HitActor.health,int(penetration));
+				hitlist.Push(ent);
+				penetration = max(0,penetration-killdamage);
+				if ( penetration <= 0 ) return TRACE_Stop;
+				return TRACE_Skip;
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+			{
+				for ( int i=1; i<int(penetration/16); i++ )
+				{
+					Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
+					if ( level.IsPointInLevel(ofs) )
+					{
+						penetration = max(0,penetration-i*8);
+						let wp = new("WallPenetrate");
+						wp.hitpos = Results.HitPos;
+						wp.hitdir = Results.HitVector;
+						wp.hitnormal = (-Results.HitLine.delta.y,Results.HitLine.delta.x,0).unit();
+						if ( !Results.Side ) wp.hitnormal *= -1;
+						WallPenetrateList.Push(wp);
+						if ( Results.HitLine.sidedef[1] )
+							ShootThroughList.Push(Results.HitLine);
+						// trace backwards to find exit surface
+						let at = new("AuxiliarySilverBulletTracer");
+						at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_HitSky);
+						if ( at.Results.HitType != TRACE_HitNone )
+						{
+							let wp2 = new("WallPenetrate");
+							wp2.hitpos = at.Results.HitPos;
+							wp2.hitdir = at.Results.HitVector;
+							if ( at.Results.HitType == TRACE_HitWall )
+							{
+								wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
+								if ( !at.Results.Side ) wp2.hitnormal *= -1;
+								if ( at.Results.HitLine.sidedef[1] )
+									ShootThroughList.Push(at.Results.HitLine);
+							}
+							else if ( at.Results.HitType == TRACE_HitCeiling )
+								wp2.hitnormal = at.Results.HitSector.ceilingplane.Normal;
+							else if ( at.Results.HitType == TRACE_HitFloor )
+								wp2.hitnormal = at.Results.HitSector.floorplane.Normal;
+							WallPenetrateList.Push(wp2);
+						}
+						return TRACE_Skip;
+					}
+				}
+				return TRACE_Stop;
+			}
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		else if ( Results.HitType != TRACE_HitNone )
+		{
+			for ( int i=1; i<int(penetration/16); i++ )
+			{
+				Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
+				if ( level.IsPointInLevel(ofs) )
+				{
+					penetration = max(0,penetration-i*8);
+					let wp = new("WallPenetrate");
+					wp.hitpos = Results.HitPos;
+					wp.hitdir = Results.HitVector;
+					if ( Results.HitType == TRACE_HitWall )
+					{
+						wp.hitnormal = (-Results.HitLine.delta.y,Results.HitLine.delta.x,0).unit();
+						if ( !Results.Side ) wp.hitnormal *= -1;
+						ShootThroughList.Push(Results.HitLine);
+					}
+					else if ( Results.HitType == TRACE_HitCeiling )
+						wp.hitnormal = Results.HitSector.ceilingplane.Normal;
+					else if ( Results.HitType == TRACE_HitFloor )
+						wp.hitnormal = Results.HitSector.floorplane.Normal;
+					WallPenetrateList.Push(wp);
+					// trace backwards to find exit surface
+					let at = new("AuxiliarySilverBulletTracer");
+					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_HitSky);
+					if ( at.Results.HitType != TRACE_HitNone )
+					{
+						let wp2 = new("WallPenetrate");
+						wp2.hitpos = at.Results.HitPos;
+						wp2.hitdir = at.Results.HitVector;
+						if ( at.Results.HitType == TRACE_HitWall )
+						{
+							wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
+							if ( !at.Results.Side ) wp2.hitnormal *= -1;
+							if ( at.Results.HitLine.sidedef[1] )
+								ShootThroughList.Push(at.Results.HitLine);
+						}
+						else if ( at.Results.HitType == TRACE_HitCeiling )
+							wp2.hitnormal = at.Results.HitSector.ceilingplane.Normal;
+						else if ( at.Results.HitType == TRACE_HitFloor )
+							wp2.hitnormal = at.Results.HitSector.floorplane.Normal;
+						WallPenetrateList.Push(wp2);
+					}
+					return TRACE_Skip;
+				}
+			}
+		}
+		return TRACE_Stop;
 	}
 }
 
@@ -226,7 +383,7 @@ Class SilverBullet : SWWMWeapon
 		else Shader.SetEnabled(players[consoleplayer],"SilverScope",false);
 	}
 
-	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir )
+	action void ProcessTraceHit( SilverBulletTracer t, Vector3 origin, Vector3 dir )
 	{
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
@@ -268,6 +425,15 @@ Class SilverBullet : SWWMWeapon
 				p.special1 = 1;
 				p.target = self;
 			}
+		}
+		for ( int i=0; i<t.WallPenetrateList.Size(); i++ )
+		{
+			Vector3 hitpos = t.WallPenetrateList[i].hitpos;
+			Vector3 hitnormal = t.WallPenetrateList[i].hitnormal;
+			let p = Spawn("SilverImpact",hitpos+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.target = self;
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
 		{
@@ -316,12 +482,13 @@ Class SilverBullet : SWWMWeapon
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+1*y-1*z);
 		Vector3 x2, y2, z2;
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
-		SpreadSlugTracer sst = new("SpreadSlugTracer");
+		SilverBulletTracer sst = new("SilverBulletTracer");
 		sst.ignoreme = self;
 		sst.penetration = 2000.;
 		sst.hitlist.Clear();
 		sst.shootthroughlist.Clear();
 		sst.waterhitlist.Clear();
+		sst.wallpenetratelist.Clear();
 		sst.Trace(origin,level.PointInSector(origin.xy),x2,20000.,TRACE_HitSky);
 		ProcessTraceHit(sst,origin,x2);
 		for ( int i=0; i<10; i++ )

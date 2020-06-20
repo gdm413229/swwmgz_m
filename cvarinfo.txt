@@ -38,7 +38,7 @@ server int swwm_revivecooldown = 30;		// cooldown after using a revive, in secon
 user int swwm_intertype = 0;			// 0 - standard bg
 						// 1 - fanart
 						// 2 - 4komas
-server bool swwm_balluse = false;		// lead ball can "press" switches remotely
+server bool swwm_balluse = true;		// lead ball can "press" switches remotely
 user bool swwm_bosshealthbars = true;		// display large healthbars for vanilla boss encounters
 server bool swwm_upgradebosses = true;		// vanilla bosses will be "upgraded" to be less insta-die prone
 server bool swwm_extraalert = false;		// enables A_AlertMonsters calls for certain things which may be cpu-heavy
@@ -57,3 +57,4 @@ user noarchive int swwm_cbtmeme = 0;		// easter egg, hidden cvar
 user noarchive bool swwm_cbttime = false;	// debug: times how long a reload takes
 server bool swwm_crouchjump = false;		// allows crouch-jumping (which looks weird af but some maps may need it)
 user noarchive int swwm_cbtlast = 0;		// last selected ammo for the wallbuster
+server bool swwm_cbtall = true;			// wallbuster breaks any wall, not just movable ones

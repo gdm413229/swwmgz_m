@@ -217,6 +217,144 @@ Class SWWMUtility
 	{
 		return int(ceil(x/100.)*100.);
 	}
+
+	static play bool IsDoorSector( Sector s, int part )
+	{
+		// super-easy mode: check for boss special sectors
+		if ( (level.mapname ~== "E1M8") || (level.mapname ~== "E2M8") || (level.mapname ~== "E3M8")
+			|| (level.mapname ~== "E4M6") || (level.mapname ~== "E4M8") || (level.mapname ~== "E5M8")
+			|| (level.mapname ~== "MAP07") )
+		{
+			let si = level.CreateSectorTagIterator(666);
+			int idx;
+			while ( (idx = si.Next()) != -1 )
+				if ( level.Sectors[idx] == s )
+					return true;
+			if ( level.mapname ~== "MAP07" )
+			{
+				let si2 = level.CreateSectorTagIterator(667);
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		// easy mode: check if it's already moving
+		if ( part )
+		{
+			let ti = ThinkerIterator.Create("MovingCeiling",Thinker.STAT_SECTOREFFECT);
+			MovingCeiling mc;
+			while ( mc = MovingCeiling(ti.Next()) )
+				if ( mc.GetSector() == s )
+					return true;
+		}
+		else
+		{
+			let ti = ThinkerIterator.Create("MovingFloor",Thinker.STAT_SECTOREFFECT);
+			MovingFloor mf;
+			while ( mf = MovingFloor(ti.Next()) )
+				if ( mf.GetSector() == s )
+					return true;
+		}
+		// hard mode: look for all lines/actors with movement specials referencing us
+		for ( int i=0; i<level.Lines.Size(); i++ )
+		{
+			Line l = level.Lines[i];
+			if ( !l.special ) continue;
+			if ( (part && (l.special >= 10) && (l.special <= 13))
+				|| (!part && (l.special >= 20) && (l.special <= 25))
+				|| (!part && (l.special == 28))
+				|| ((l.special >= 29) && (l.special <= 30))
+				|| (!part && (l.special >= 35) && (l.special <= 37))
+				|| (part && (l.special >= 40) && (l.special <= 45))
+				|| (!part && (l.special == 46))
+				|| (part && (l.special == 47))
+				|| (!part && (l.special >= 60) && (l.special <= 68))
+				|| (part && (l.special == 69))
+				|| ((l.special >= 94) && (l.special <= 96))
+				|| (part && (l.special == 97))
+				|| (!part && (l.special == 99))
+				|| (part && (l.special == 104))
+				|| (part && (l.special >= 105) && (l.special <= 106))
+				|| (part && (l.special >= 168) && (l.special <= 169))
+				|| (!part && (l.special == 172))
+				|| (part && (l.special >= 192) && (l.special <= 199))
+				|| (!part && (l.special == 200))
+				|| (part && (l.special >= 201) && (l.special <= 202))
+				|| (!part && (l.special == 203))
+				|| (part && (l.special == 205))
+				|| (!part && (l.special >= 206) && (l.special <= 207))
+				|| (!part && (l.special == 228))
+				|| (!part && (l.special >= 230) && (l.special <= 231))
+				|| (!part && (l.special >= 238) && (l.special <= 242))
+				|| ((l.special >= 245) && (l.special <= 247))
+				|| (part && (l.special == 249))
+				|| (!part && (l.special >= 250) && (l.special <= 251))
+				|| (part && (l.special >= 251) && (l.special <= 255))
+				|| (!part && (l.special >= 256) && (l.special <= 261))
+				|| (part && (l.special >= 262) && (l.special <= 269))
+				|| (!part && (l.special == 275))
+				|| (part && (l.special == 276))
+				|| (!part && (l.special == 279))
+				|| (part && (l.special == 280)) )
+			{
+				let si = level.CreateSectorTagIterator(l.Args[0],l);
+				int idx;
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !a.special || !a.Args[0] ) continue;
+			if ( (part && (a.special >= 10) && (a.special <= 13))
+				|| (!part && (a.special >= 20) && (a.special <= 25))
+				|| (!part && (a.special == 28))
+				|| ((a.special >= 29) && (a.special <= 30))
+				|| (!part && (a.special >= 35) && (a.special <= 37))
+				|| (part && (a.special >= 40) && (a.special <= 45))
+				|| (!part && (a.special == 46))
+				|| (part && (a.special == 47))
+				|| (!part && (a.special >= 60) && (a.special <= 68))
+				|| (part && (a.special == 69))
+				|| ((a.special >= 94) && (a.special <= 96))
+				|| (part && (a.special == 97))
+				|| (!part && (a.special == 99))
+				|| (part && (a.special == 104))
+				|| (part && (a.special >= 105) && (a.special <= 106))
+				|| (part && (a.special >= 168) && (a.special <= 169))
+				|| (!part && (a.special == 172))
+				|| (part && (a.special >= 192) && (a.special <= 199))
+				|| (!part && (a.special == 200))
+				|| (part && (a.special >= 201) && (a.special <= 202))
+				|| (!part && (a.special == 203))
+				|| (part && (a.special == 205))
+				|| (!part && (a.special >= 206) && (a.special <= 207))
+				|| (!part && (a.special == 228))
+				|| (!part && (a.special >= 230) && (a.special <= 231))
+				|| (!part && (a.special >= 238) && (a.special <= 242))
+				|| ((a.special >= 245) && (a.special <= 247))
+				|| (part && (a.special == 249))
+				|| (!part && (a.special >= 250) && (a.special <= 251))
+				|| (part && (a.special >= 251) && (a.special <= 255))
+				|| (!part && (a.special >= 256) && (a.special <= 261))
+				|| (part && (a.special >= 262) && (a.special <= 269))
+				|| (!part && (a.special == 275))
+				|| (part && (a.special == 276))
+				|| (!part && (a.special == 279))
+				|| (part && (a.special == 280)) )
+			{
+				let si = level.CreateSectorTagIterator(a.Args[0]);
+				int idx;
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		return false;
+	}
 }
 
 // Stats

@@ -448,6 +448,7 @@ Class BusterWall : Thinker
 	bool busted;
 	Vector3 bustdir;
 	int busttics;
+	double cutheight;
 	// cached
 	Vector3 boundsmin, boundsmax, step;
 
@@ -513,7 +514,7 @@ Class BusterWall : Thinker
 		}
 	}
 
-	static void Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x )
+	static void Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
 	{
 		// we can't blow up 3D floors (yet)
 		if ( d.ffloor ) return;
@@ -521,7 +522,7 @@ Class BusterWall : Thinker
 		int hp;
 		if ( d.HitType == TRACE_HitWall )
 		{
-			// onesided wall? no bust
+			// onesided wall? no bust (TODO: bust polyobjects)
 			if ( !d.HitLine.sidedef[1] ) return;
 			// sector is opposite of side hit
 			hs = d.HitLine.sidedef[!d.Side].sector;
@@ -537,43 +538,54 @@ Class BusterWall : Thinker
 		int lcnt = 0;
 		for ( int i=0; i<hs.Lines.Size(); i++ ) if ( hs.Lines[i].sidedef[1] ) lcnt++;
 		if ( lcnt < 2 ) return;
-		// is this actually sticking out?
-		double thisheight, othersheight, partheight;
-		if ( hp )
-		{
-			thisheight = hs.FindLowestCeilingPoint();
-			othersheight = hs.FindHighestCeilingSurrounding();
-			if ( (thisheight-othersheight) >= -4. ) return;
-		}
-		else
-		{
-			thisheight = hs.FindHighestFloorPoint();
-			othersheight = hs.FindLowestFloorSurrounding();
-			if ( (thisheight-othersheight) <= 4. ) return;
-		}
-		partheight = abs(thisheight-othersheight);
+		// Check if it's a door
+		if ( !swwm_cbtall && !SWWMUtility.IsDoorSector(hs,hp) ) return;
 		let ti = ThinkerIterator.Create("BusterWall",STAT_USER);
 		BusterWall iter, bust = null;
 		while ( iter = BusterWall(ti.Next()) )
 		{
 			if ( (iter.hitsector != hs) || (iter.hitplane != hp) ) continue;
 			bust = iter;
-			bust.accdamage += accdamage;
-			bust.bustdir = (bust.bustdir+x)*.5;
 			break;
 		}
+		bool mnew = false;
 		if ( !bust )
 		{
 			bust = new("BusterWall");
 			bust.ChangeStatNum(STAT_USER);
 			bust.hitsector = hs;
-			bust.accdamage = accdamage;
+			bust.accdamage = 0;
 			bust.hitplane = hp;
 			bust.bustdir = x;
+			mnew = true;
 		}
+		bust.accdamage += accdamage;
+		bust.acchits.Push(accdamage);
+		bust.bustdir = (bust.bustdir+x)*.5;
+		double extracut = FRandom[Wallbuster](.01,.04)*bust.accdamage;
+		// is this actually sticking out?
+		double thisheight, othersheight, partheight, cutheight;
+		if ( hp )
+		{
+			thisheight = hs.FindLowestCeilingPoint();
+			othersheight = hs.FindHighestCeilingSurrounding();
+			if ( (thisheight-othersheight) >= -4. ) return;
+			cutheight = min(hitz+extracut,othersheight-4);
+		}
+		else
+		{
+			thisheight = hs.FindHighestFloorPoint();
+			othersheight = hs.FindLowestFloorSurrounding();
+			if ( (thisheight-othersheight) <= 4. ) return;
+			cutheight = max(hitz-extracut,othersheight+4);
+		}
+		if ( hp ) bust.cutheight = mnew?cutheight:max(bust.cutheight,cutheight);
+		else bust.cutheight = mnew?cutheight:min(bust.cutheight,cutheight);
+		partheight = abs(thisheight-bust.cutheight);
+		// skip if we don't cut off enough
+		if ( partheight < 4. ) return;
 		// skip if already busted
 		if ( bust.busted ) return;
-		bust.acchits.Push(accdamage);
 		// not enough total damage
 		if ( bust.accdamage < 1000 ) return;
 		// estimate sector volume
@@ -591,8 +603,18 @@ Class BusterWall : Thinker
 			if ( l.v2.p.y > b.y ) a.y = l.v2.p.y;
 		}
 		double girthitude = (b.x-a.x)*(b.y-a.y)*partheight;
+		// do a grid check to approximate "real" volume, useful for diagonal doors
+		double ystep = (b.y-a.y)/64.;
+		double xstep = (b.x-a.x)/64.;
+		int inspot = 0, allspot = 0;
+		for ( double y=a.y; y<b.y; y+=ystep ) for ( double x=a.x; x<b.x; x+=xstep )
+		{
+			allspot++;
+			if ( level.PointInSector((x,y)) == hs ) inspot++;
+		}
+		girthitude = (girthitude*inspot)/allspot;
 		// too fucking huge
-		if ( girthitude > 16777216 ) return;
+		if ( (girthitude > 16777216) || (max(partheight,max(b.x-a.x,b.y-a.y)) > 1024) ) return;
 		// not strong enough to bust
 		if ( bust.accdamage < girthitude/300. ) return;
 		bust.busted = true;
@@ -606,39 +628,6 @@ Class BusterWall : Thinker
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("LOOSERCK",TexMan.Type_Any);
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("WASTE03",TexMan.Type_Any);
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("SCHWAL01",TexMan.Type_Any);	// Strife has a dedicated "destroyed wall" texture, nice
-		hs.SetTexture(hp,rubble);
-		hs.SetXScale(hp,1.);
-		hs.SetYScale(hp,1.);
-		hs.SetAngle(hp,0.);
-		for ( int i=0; i<hs.Lines.Size(); i++ )
-		{
-			Line l = hs.Lines[i];
-			if ( !l.sidedef[1] )
-			{
-				if ( hp )
-				{
-					// shift down
-					if ( !(l.flags&Line.ML_DONTPEGBOTTOM) )
-						l.sidedef[0].AddTextureYOffset(1,-abs(othersheight-thisheight)+4);
-				}
-				else
-				{
-					// shift up
-					if ( l.flags&Line.ML_DONTPEGBOTTOM )
-						l.sidedef[0].AddTextureYOffset(1,abs(othersheight-thisheight)-4);
-				}
-				continue;
-			}
-			int away = 0;
-			if ( l.sidedef[0].sector == hs ) away = 1;
-			for ( int j=0; j<2; j++ )
-			{
-				if ( (j != away) && l.sidedef[j].GetTexture(hp?0:2).IsValid() ) continue;
-				l.sidedef[j].SetTexture(hp?0:2,rubble);
-				l.sidedef[j].SetTextureXScale(hp?0:2,1.);
-				l.sidedef[j].SetTextureYScale(hp?0:2,1.);
-			}
-		}
 		// activate all shoot/use specials (not locked) associated with this sector's two-sided lines
 		for ( int i=0; i<hs.Lines.Size(); i++ )
 		{
@@ -648,8 +637,17 @@ Class BusterWall : Thinker
 			if ( !l.sidedef[1] ) continue;
 			int away = 0;
 			if ( l.sidedef[0].sector == hs ) away = 1;
+			// temporarily set filler texture so switches don't play a sound
+			TextureID oldtex[3][2];
+			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
+			{
+				oldtex[j][k] = l.sidedef[k].GetTexture(j);
+				l.sidedef[k].SetTexture(j,rubble);
+			}
 			l.Activate(instigator,away,SPAC_Use);
 			l.Activate(instigator,away,SPAC_Impact);
+			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
+				l.sidedef[k].SetTexture(j,oldtex[j][k]);
 			// clear any use/impact specials
 			if ( l.Activation&(SPAC_Use|SPAC_Impact) )
 				l.Activation &= ~(SPAC_Use|SPAC_Impact);
@@ -662,27 +660,62 @@ Class BusterWall : Thinker
 			if ( se.GetSector() != hs ) continue;
 			se.Destroy();
 		}
-		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp((abs(othersheight-thisheight)-4)/4.,2.,32.));
+		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);
 		if ( hp )
 		{
 			// blow up that ceiling
-			double destheight = othersheight-4;
-			hs.MoveCeiling(abs(destheight-thisheight),destheight,0,1,false);
+			hs.MoveCeiling(abs(partheight),bust.cutheight,0,1,false);
 			bust.boundsmin = (a.x,a.y,thisheight)+(1,1,1);
-			bust.boundsmax = (b.x,b.y,destheight)-(1,1,1);
+			bust.boundsmax = (b.x,b.y,bust.cutheight)-(1,1,1);
 		}
 		else
 		{
 			// blow up that floor
-			double destheight = othersheight+4;
-			hs.MoveFloor(abs(destheight-thisheight),abs(destheight),0,-1,false,true);
-			bust.boundsmin = (a.x,a.y,destheight)+(1,1,1);
+			hs.MoveFloor(abs(partheight),abs(bust.cutheight),0,-1,false,true);
+			bust.boundsmin = (a.x,a.y,bust.cutheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,thisheight)-(1,1,1);
 		}
 		bust.SpawnDebris(true);
+		hs.SetTexture(hp,rubble);
+		hs.SetXScale(hp,1.);
+		hs.SetYScale(hp,1.);
+		hs.SetAngle(hp,0.);
+		for ( int i=0; i<hs.Lines.Size(); i++ )
+		{
+			Line l = hs.Lines[i];
+			if ( !l.sidedef[1] )
+			{
+				if ( hp && !(l.flags&Line.ML_DONTPEGBOTTOM) )
+					l.sidedef[0].AddTextureYOffset(1,-partheight); // shift down
+				else if ( !hp && (l.flags&Line.ML_DONTPEGBOTTOM) )
+					l.sidedef[0].AddTextureYOffset(1,partheight); // shift up
+				continue;
+			}
+			int away = 0;
+			if ( l.sidedef[0].sector == hs ) away = 1;
+			for ( int j=0; j<2; j++ )
+			{
+				if ( l.sidedef[j].GetTexture(hp?0:2).IsValid() )
+				{
+					if ( j == away )
+					{
+						if ( hp && !(l.flags&Line.ML_DONTPEGTOP) )
+							l.sidedef[j].AddTextureYOffset(0,-partheight); // shift down
+						else if ( !hp && !(l.flags&Line.ML_DONTPEGBOTTOM) )
+							l.sidedef[j].AddTextureYOffset(2,partheight); // shift up
+					}
+				}
+				else
+				{
+					l.sidedef[j].SetTexture(hp?0:2,rubble);
+					l.sidedef[j].SetTextureXScale(hp?0:2,1.);
+					l.sidedef[j].SetTextureYScale(hp?0:2,1.);
+				}
+			}
+		}
 		// damnums
 		Vector3 bcenter = (bust.boundsmin+bust.boundsmax)*.5;
 		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
@@ -886,7 +919,7 @@ Class Wallbuster : SWWMWeapon
 		// Wall busting
 		int bustdmg = dmg;
 		if ( t is 'SpreadSlugTracer' ) bustdmg = int(SpreadSlugTracer(t).penetration);
-		BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector);
+		BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector,t.Results.HitPos.z);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);

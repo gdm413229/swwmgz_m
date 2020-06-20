@@ -823,7 +823,7 @@ Class Demolitionist : PlayerPawn
 		}
 		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
 		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
-			dodge.z += .15;
+			dodge.z += (player.cmd.buttons&BT_CROUCH)?.05:.15;
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) )
 		{
 			dashdir = dodge.unit();

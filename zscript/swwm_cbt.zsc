@@ -443,18 +443,73 @@ Class BusterWall : Thinker
 {
 	Sector hitsector;
 	int accdamage;
+	Array<int> acchits;
 	int hitplane;
 	bool busted;
 	Vector3 bustdir;
+	int busttics;
+	// cached
+	Vector3 boundsmin, boundsmax, step;
 
 	override void Tick()
 	{
+		if ( busted )
+		{
+			busttics++;
+			if ( busttics > 16 )
+			{
+				Destroy();
+				return;
+			}
+			SpawnDebris();
+			return;
+		}
 		// fade out damage
 		accdamage = int(accdamage*.9-10);
 		if ( accdamage <= 0 )
 		{
 			Destroy();
 			return;
+		}
+	}
+
+	private void SpawnDebris( bool initial = false )
+	{
+		double x, y, z;
+		for ( z=boundsmin.z; z<boundsmax.z; z+=step.z )
+		for ( y=boundsmin.y; y<boundsmax.y; y+=step.y )
+		for ( x=boundsmin.x; x<boundsmax.x; x+=step.x )
+		{
+			Vector3 spot = (x,y,z);
+			if ( level.PointInSector(spot.xy) != hitsector ) continue;
+			spot += (FRandom[Wallbuster](-step.x,step.x),FRandom[Wallbuster](-step.y,step.y),FRandom[Wallbuster](-step.z,step.z));
+			if ( !level.IsPointInLevel(spot) ) continue;
+			if ( initial || !(busttics%3) )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](-2.,8.);
+				let s = Actor.Spawn("SWWMSmoke",spot);
+				s.vel = pvel;
+				s.scale *= 2.5;
+				s.special1 = Random[Wallbuster](3,8);
+				s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
+			}
+			if ( (!initial && (busttics%2)) || (busttics > 4) ) continue;
+			int numpt = Random[Wallbuster](0,3);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](9.,24.);
+				let s = Actor.Spawn("SWWMSpark",spot);
+				s.vel = pvel;
+			}
+			numpt = Random[Wallbuster](1,2);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6))).unit()*FRandom[Wallbuster](2.,16.);
+				let s = Actor.Spawn("SWWMChip",spot);
+				s.vel = pvel;
+				s.scale *= FRandom[Wallbuster](2.,4.);
+				s.A_SetTranslation('Rubble');
+			}
 		}
 	}
 
@@ -518,6 +573,7 @@ Class BusterWall : Thinker
 		}
 		// skip if already busted
 		if ( bust.busted ) return;
+		bust.acchits.Push(accdamage);
 		// not enough total damage
 		if ( bust.accdamage < 1000 ) return;
 		// estimate sector volume
@@ -540,6 +596,7 @@ Class BusterWall : Thinker
 		// not strong enough to bust
 		if ( bust.accdamage < girthitude/300. ) return;
 		bust.busted = true;
+		bust.busttics = 0;
 		// shush
 		hs.flags |= Sector.SECF_SILENTMOVE;
 		// filler texture
@@ -605,9 +662,7 @@ Class BusterWall : Thinker
 			if ( se.GetSector() != hs ) continue;
 			se.Destroy();
 		}
-		double stepx = clamp((b.x-a.x)/4.,4.,32.);
-		double stepy = clamp((b.y-a.y)/4.,4.,32.);
-		double stepz = clamp((abs(othersheight-thisheight)-4)/4.,4.,32.);
+		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp((abs(othersheight-thisheight)-4)/4.,2.,32.));
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);
@@ -616,69 +671,24 @@ Class BusterWall : Thinker
 			// blow up that ceiling
 			double destheight = othersheight-4;
 			hs.MoveCeiling(abs(destheight-thisheight),destheight,0,1,false);
-			// spawn debris
-			double x, y, z;
-			for ( z=thisheight; z<destheight; z+=stepz ) for ( y=a.y; y<b.y; y+=stepy ) for ( x=a.x; x<b.x; x+=stepx )
-			{
-				if ( Random[Wallbuster](0,2) ) continue;
-				Vector3 spot = (x+FRandom[Wallbuster](-stepx,stepx)*.5,y+FRandom[Wallbuster](-stepy,stepy)*.5,z+FRandom[Wallbuster](-stepz,stepz)*.5);
-				if ( level.PointInSector(spot.xy) != hs ) continue;
-				int numpt = Random[Wallbuster](2,3);
-				for ( int i=0; i<numpt; i++ )
-				{
-					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](.3,4.);
-					let s = Actor.Spawn("SWWMSmoke",spot);
-					s.vel = pvel;
-					s.scale *= 2.5;
-					s.special1 = Random[Wallbuster](1,3);
-					s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
-				}
-				numpt = Random[Wallbuster](8,16);
-				for ( int i=0; i<numpt; i++ )
-				{
-					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](8.,16.);
-					let s = Actor.Spawn("SWWMChip",spot);
-					s.vel = pvel;
-					s.scale *= FRandom[Wallbuster](2.,3.);
-					s.A_SetTranslation('Rubble');
-					s.specialf1 = FRandom[Wallbuster](1.,1.5);
-				}
-			}
+			bust.boundsmin = (a.x,a.y,thisheight)+(1,1,1);
+			bust.boundsmax = (b.x,b.y,destheight)-(1,1,1);
 		}
 		else
 		{
 			// blow up that floor
 			double destheight = othersheight+4;
 			hs.MoveFloor(abs(destheight-thisheight),abs(destheight),0,-1,false,true);
-			// spawn debris
-			double x, y, z;
-			for ( z=destheight; z<thisheight; z+=stepz ) for ( y=a.y; y<b.y; y+=stepy ) for ( x=a.x; x<b.x; x+=stepx )
-			{
-				if ( Random[Wallbuster](0,2) ) continue;
-				Vector3 spot = (x+FRandom[Wallbuster](-stepx,stepx)*.5,y+FRandom[Wallbuster](-stepy,stepy)*.5,z+FRandom[Wallbuster](-stepz,stepz)*.5);
-				if ( level.PointInSector(spot.xy) != hs ) continue;
-				int numpt = Random[Wallbuster](2,3);
-				for ( int i=0; i<numpt; i++ )
-				{
-					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](.3,4.);
-					let s = Actor.Spawn("SWWMSmoke",spot);
-					s.vel = pvel;
-					s.scale *= 2.5;
-					s.special1 = Random[Wallbuster](1,3);
-					s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
-				}
-				numpt = Random[Wallbuster](8,16);
-				for ( int i=0; i<numpt; i++ )
-				{
-					Vector3 pvel = (bust.bustdir+(FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8),FRandom[Wallbuster](-.8,.8))).unit()*FRandom[Wallbuster](8.,16.);
-					let s = Actor.Spawn("SWWMChip",spot);
-					s.vel = pvel;
-					s.scale *= FRandom[Wallbuster](2.,3.);
-					s.A_SetTranslation('Rubble');
-					s.specialf1 = FRandom[Wallbuster](1.,1.5);
-				}
-			}
+			bust.boundsmin = (a.x,a.y,destheight)+(1,1,1);
+			bust.boundsmax = (b.x,b.y,thisheight)-(1,1,1);
 		}
+		bust.SpawnDebris(true);
+		// damnums
+		Vector3 bcenter = (bust.boundsmin+bust.boundsmax)*.5;
+		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
+			SWWMScoreObj.Spawn(bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
+		else for ( int i=0; i<bust.acchits.Size(); i++ )
+			SWWMScoreObj.Spawn(bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
 	}
 }
 

@@ -317,6 +317,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
 				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -693,6 +694,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
 				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -1180,6 +1182,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
 				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -1881,6 +1884,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
 			else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
 			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
+			else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
 			else str = StringTable.Localize("$SWWM_MISSION_NONE");
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);

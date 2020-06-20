@@ -1081,8 +1081,11 @@ Class SWWMCombatTracker : Thinker
 		int newhealth = mytarget.Health;
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
+			bool straifu = false;
+			if ( ((gameinfo.gametype&GAME_Strife) && !mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
+				straifu = true;
 			// enemies within 2000mu that have us as target
-			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) ) updated = level.maptime+70;
+			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) && !straifu ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// any visible enemies within 600mu
@@ -1558,7 +1561,7 @@ Class SWWMChip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		deadtimer = 0;
+		deadtimer = Random[Junk](-30,30);
 		rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		frame = Random[Junk](0,5);
 		scale *= Frandom[Junk](0.8,1.2);
@@ -1621,7 +1624,7 @@ Class FancyConfetti : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		deadtimer = 0;
+		deadtimer = Random[Junk](-30,30);
 		anglevel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
 		pitchvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
 		rollvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
@@ -2058,6 +2061,59 @@ Class UglyBoyGetsFuckedUp : Thinker
 		}
 		wedone = true;
 		level.ExecuteSpecial(Door_Open,null,null,false,145,8);
+		Destroy();
+	}
+}
+
+// Gotta force it someway
+Class ForcedFallerDamager : Thinker
+{
+	Actor mybody, instigator;
+	double lastvelz;
+	bool wasflying;
+
+	static void TrackBody( Actor b )
+	{
+		if ( !b ) return;
+		let ffd = new("ForcedFallerDamager");
+		ffd.ChangeStatNum(STAT_USER);
+		ffd.mybody = b;
+		ffd.lastvelz = b.vel.z;
+		ffd.wasflying = ((b.pos.z>b.floorz)&&b.TestMobjZ());
+	}
+	static void SetInstigator( Actor b, Actor whomst )
+	{
+		if ( !b || !whomst ) return;
+		let ti = ThinkerIterator.Create("ForcedFallerDamager",STAT_USER);
+		ForcedFallerDamager ffd;
+		while ( ffd = ForcedFallerDamager(ti.Next()) )
+		{
+			if ( ffd.mybody != b ) continue;
+			ffd.instigator = whomst;
+			break;
+		}
+	}
+	override void Tick()
+	{
+		if ( !mybody )
+		{
+			Destroy();
+			return;
+		}
+		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ());
+		if ( wasflying && !isflying && (lastvelz < -23) && !level.monsterfallingdamage && !(mybody.floorsector.flags&Sector.SECF_NOFALLINGDAMAGE) && swwm_doomfall )
+		{
+			// big hurt
+			int dmg;
+			if ( lastvelz < -35 ) dmg = Actor.TELEFRAG_DAMAGE;
+			else dmg = int((-lastvelz-23)*6);
+			mybody.DamageMobj(instigator,instigator,dmg,'Falling');
+		}
+		if ( !isflying && wasflying ) instigator = null;
+		wasflying = isflying;
+		lastvelz = mybody.vel.z;
+		// wait until body is dead
+		if ( mybody.Health > 0 ) return;
 		Destroy();
 	}
 }
@@ -2605,6 +2661,8 @@ Class SWWMHandler : EventHandler
 					break;
 				}
 			}
+			// fall dmg
+			ForcedFallerDamager.SetInstigator(e.Thing,e.DamageSource);
 		}
 		if ( e.Thing.player )
 		{
@@ -2621,7 +2679,7 @@ Class SWWMHandler : EventHandler
 		}
 		if ( e.DamageSource && (e.DamageSource != e.Thing) )
 		{
-			if ( (e.DamageSource.bISMONSTER || e.DamageSource.player) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+			if ( (e.DamageSource.bISMONSTER || e.DamageSource.player || (e.DamageSource is 'ScriptedMarine')) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
 			{
 				if ( !lastcombat || (gametic > lastcombat+40) )
 				{
@@ -2632,7 +2690,7 @@ Class SWWMHandler : EventHandler
 				highesttic = gametic;
 			}
 			// friendly fire lines only fire up if we didn't kill them right away (because then the teamkill line should take priority)
-			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player) && (e.Thing.Health > 0) )
+			if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player || (e.Thing is 'ScriptedMarine')) && (e.Thing.Health > 0) )
 			{
 				// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
 				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing)) && !(e.Thing is 'LampMoth') )
@@ -2644,7 +2702,7 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
-		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill ) return;
+		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
 		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
 		{
 			let s = SWWMStats.Find(e.DamageSource.player);
@@ -2664,7 +2722,8 @@ Class SWWMHandler : EventHandler
 						lastcombat = AddOneliner("scorekill",1,15);
 				}
 			}
-			if ( !e.Thing.default.bCountKill )	// no credits
+			// no credits unless it's a counted kill or marine (that isn't friendly)
+			if ( e.Thing.IsFriend(e.DamageSource) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
 				return;
 			int pnum = e.DamageSource.PlayerNumber();
 			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
@@ -2801,6 +2860,8 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Thing is 'Inventory' )
 			CopyFloatBob(e.Thing);
+		if ( e.Thing.bISMONSTER && !level.monsterfallingdamage )
+			ForcedFallerDamager.TrackBody(e.Thing);
 		if ( e.Thing is 'Key' )
 		{
 			DoKeyTagFix(e.Thing);

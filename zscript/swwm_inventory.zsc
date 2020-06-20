@@ -371,7 +371,7 @@ Class SWWMCasing : Actor abstract
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		deadtimer = 0;
+		deadtimer = Random[Junk](-30,30);
 		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		heat = 1.0;

@@ -367,7 +367,10 @@ Class DeepImpact : SWWMWeapon
 			Vector3 rdir = level.Vec3Diff(origin,m.pos).unit();
 			if ( LineTrace(atan2(rdir.y,rdir.x),rdist,asin(-rdir.z),TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y) || (rdist > 150) || (rdir dot x < 0.7) ) continue;
 			m.speed = m.vel.length();
-			m.vel = m.speed*(m.vel.unit()*.2+rdir).unit();
+			m.vel = m.speed*1.5*(m.vel.unit()*.2+rdir).unit();
+			Vector3 ndir = m.vel.unit();
+			m.angle = atan2(ndir.y,ndir.x);
+			m.pitch = asin(-ndir.z);
 			if ( m.target == self ) continue;
 			if ( m.bSEEKERMISSILE ) m.tracer = m.target;
 			m.target = self;

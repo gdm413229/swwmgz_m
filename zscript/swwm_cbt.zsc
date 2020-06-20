@@ -457,7 +457,7 @@ Class BusterWall : Thinker
 		if ( busted )
 		{
 			busttics++;
-			if ( busttics > 16 )
+			if ( busttics > 12 )
 			{
 				Destroy();
 				return;
@@ -485,7 +485,7 @@ Class BusterWall : Thinker
 			if ( level.PointInSector(spot.xy) != hitsector ) continue;
 			spot += (FRandom[Wallbuster](-step.x,step.x),FRandom[Wallbuster](-step.y,step.y),FRandom[Wallbuster](-step.z,step.z));
 			if ( !level.IsPointInLevel(spot) ) continue;
-			if ( initial || !(busttics%3) )
+			if ( (initial || !(busttics%3)) && !Random[Wallbuster](0,2) )
 			{
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](-2.,8.);
 				let s = Actor.Spawn("SWWMSmoke",spot);
@@ -508,7 +508,7 @@ Class BusterWall : Thinker
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6))).unit()*FRandom[Wallbuster](2.,16.);
 				let s = Actor.Spawn("SWWMChip",spot);
 				s.vel = pvel;
-				s.scale *= FRandom[Wallbuster](2.,4.);
+				s.scale *= FRandom[Wallbuster](1.2,2.4);
 				s.A_SetTranslation('Rubble');
 			}
 		}

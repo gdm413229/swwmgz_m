@@ -933,7 +933,11 @@ Class SWWMStatusBar : BaseStatusBar
 		for ( int i=1; i<=10; i++ )
 		{
 			int ncolor = Font.CR_WHITE;
+			SWWMGesture hasgesture = null;
+			if ( CPlayer.PendingWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.PendingWeapon);
+			else if ( CPlayer.ReadyWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.ReadyWeapon);
 			if ( !CPlayer.HasWeaponsInSlot(i%10) ) ncolor = Font.CR_DARKGRAY;
+			else if ( hasgesture && (hasgesture.formerweapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( (!CPlayer.PendingWeapon || (CPlayer.PendingWeapon == WP_NOCHANGE)) && CPlayer.ReadyWeapon && (CPlayer.ReadyWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else

@@ -1832,7 +1832,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		Super.Drawer();
 		Font fnt = LangFont(TewiFont);
 		String str;
-		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		double hs;
+		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 400) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.)/2.;
+		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		Vector2 origin = (ss.x-640,ss.y-400)/2.;
 		if ( !fuzz ) fuzz = CVar.GetCvar('swwm_fuzz',players[consoleplayer]);

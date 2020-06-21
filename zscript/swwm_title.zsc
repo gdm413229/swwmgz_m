@@ -3,7 +3,16 @@
 Class SWWMTitleStuff : EventHandler
 {
 	transient ui TextureID tex[3];
-	transient ui Font TewiFont;
+	transient ui Font TewiFont, MPlusFont;
+	transient ui CVar lang;
+
+	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	private ui Font LangFont( Font req )
+	{
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		return req;
+	}
 
 	override void WorldTick()
 	{
@@ -17,6 +26,8 @@ Class SWWMTitleStuff : EventHandler
 		if ( !tex[1] ) tex[1] = TexMan.CheckForTexture("graphics/SWWMGZLogo.png",TexMan.Type_Any);
 		if ( !tex[2] ) tex[2] = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_Any);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShadedInverse');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShadedInverse');
+		Font fnt = LangFont(TewiFont);
 		double ar = Screen.GetAspectRatio();
 		Vector2 tsize = TexMan.GetScaledSize(tex[2]);
 		double sar = tsize.x/tsize.y;
@@ -34,14 +45,14 @@ Class SWWMTitleStuff : EventHandler
 		double alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-2,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-8,0.,1.);
 		Screen.DrawTexture(tex[0],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
-		String str = "presents";
+		String str = StringTable.Localize("$SWWM_TITLEPRESENTS");
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-10,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-16,0.,1.);
-		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
-		str = "a mod by \cxMarisa Kirisame";
+		Screen.DrawText(fnt,Font.CR_WHITE,(320-fnt.StringWidth(str))/2,(200-fnt.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+		str = StringTable.Localize("$SWWM_TITLEMODBY");
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-18,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-24,0.,1.);
-		Screen.DrawText(TewiFont,Font.CR_WHITE,(320-TewiFont.StringWidth(str))/2,(200-TewiFont.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+		Screen.DrawText(fnt,Font.CR_WHITE,(320-fnt.StringWidth(str))/2,(200-fnt.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
 		tsize = TexMan.GetScaledSize(tex[1]);
 		sar = tsize.x/tsize.y;
 		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);

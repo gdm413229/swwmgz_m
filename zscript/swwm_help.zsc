@@ -1,0 +1,235 @@
+// Hey Graf how about you let us replace the class used for the "Read This!"
+// menu in mapinfo/gameinfo or something so I don't have to do this hack here?
+Class SWWMReadThisHijacker : StaticEventHandler
+{
+	override void UiTick()
+	{
+		Menu cur = Menu.GetCurrentMenu();
+		if ( cur is 'ReadThisMenu' )
+		{
+			cur.Close();
+			Menu.SetMenu('SWWMHelpMenu');
+		}
+	}
+}
+
+Class SWWMHelpMenu : GenericMenu
+{
+	int curpage, prevpage;
+	int fadetic;
+	TextureID bgtex;
+	transient Font TewiFont, MPlusFont;
+	transient CVar lang;
+	bool isrclick;
+	int pagedir;
+
+	enum EHelpPage
+	{
+		PAGE_STORY,
+		PAGE_DEMO,
+		PAGE_ARSENAL1,
+		PAGE_ARSENAL2,
+		PAGE_ARSENAL3,
+		PAGE_KBASE,
+		PAGE_TECH,
+		PAGE_CREDITS,
+		NUM_HELP_PAGES
+	};
+
+	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	Font LangFont( Font req )
+	{
+		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
+		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		return req;
+	}
+
+	override void Init( Menu parent )
+	{
+		curpage = CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).GetInt();
+		prevpage = -1;
+		fadetic = gametic;
+		pagedir = 0;
+		bgtex = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_Any);
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		double alph = clamp((gametic-fadetic)*(5./Thinker.TICRATE),0.,1.);
+		switch ( mkey )
+		{
+		case MKEY_Enter:
+		case MKEY_Right:
+		case MKEY_Down:
+		case MKEY_PageDown:
+			if ( (curpage < NUM_HELP_PAGES-1) && ((prevpage == -1) || (alph >= 1.)) )
+			{
+				MenuSound("menu/choose");
+				prevpage = curpage;
+				curpage++;
+				CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).SetInt(curpage);
+				pagedir = 1;
+				fadetic = gametic;
+			}
+			return true;
+			break;
+		case MKEY_Clear:
+		case MKEY_Left:
+		case MKEY_Up:
+		case MKEY_PageUp:
+			if ( (curpage > 0) && ((prevpage == -1) || (alph >= 1.)) )
+			{
+				MenuSound("menu/choose");
+				prevpage = curpage;
+				curpage--;
+				CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).SetInt(curpage);
+				pagedir = -1;
+				fadetic = gametic;
+			}
+			return true;
+			break;
+		}
+		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	override bool MouseEvent( int type, int x, int y )
+	{
+		if ( (type == MOUSE_Click) && (y != -1) )
+			return MenuEvent(isrclick?MKEY_Clear:MKEY_Enter,true);
+		return false;
+	}
+
+	override bool OnUiEvent( UIEvent ev )
+	{
+		int y;
+		bool res;
+		switch ( ev.type )
+		{
+		case UIEvent.Type_WheelDown:
+			return MenuEvent(MKEY_Enter,true);
+			break;
+		case UIEvent.Type_WheelUp:
+			return MenuEvent(MKEY_Clear,true);
+			break;
+		case UIEvent.Type_LButtonDown:
+			isrclick = false;
+			return Super.OnUIEvent(ev);
+			break;
+		case UIEvent.Type_RButtonDown:
+			isrclick = true;
+			// copy over what base menus do for L click
+			y = ev.MouseY;
+			res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_RButtonUp:
+			// copy over what base menus do for L release
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				y = ev.MouseY;
+				res = MouseEventBack(MOUSE_Release,ev.MouseX,y);
+				if ( res ) y = -1;
+				res |= MouseEvent(MOUSE_Release,ev.MouseX,y);
+			}
+			return false;
+			break;
+		}
+		return Super.OnUIEvent(ev);
+	}
+
+	// big bulk of code
+	private void DrawPage( int page, Vector2 ss, Vector2 origin, double alpha = 1. )
+	{
+		Font fnt = LangFont(TewiFont);
+		int h = fnt.GetHeight();
+		String str;
+		BrokenLines l;
+		int maxlen = 0, lh;
+		double y = 0;
+		switch ( page )
+		{
+		case PAGE_STORY:
+			if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_HELP_STORYHERETIC");
+			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_HELP_STORYHEXEN");
+			else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize("$SWWM_HELP_STORYSTRIFE");
+			else str = StringTable.Localize("$SWWM_HELP_STORYDOOM");
+			l = fnt.BreakLines(str,600);
+			lh = l.Count()*h;
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				int len = l.StringWidth(i);
+				if ( len > maxlen ) maxlen = len;
+			}
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+				y += h;
+			}
+			str = StringTable.Localize("$SWWM_HELP_STORY");
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-(h*4+lh)/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			break;
+		case PAGE_DEMO:
+			str = StringTable.Localize("$SWWM_HELP_DEMOTXT");
+			l = fnt.BreakLines(str,600);
+			lh = l.Count()*h;
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				int len = l.StringWidth(i);
+				if ( len > maxlen ) maxlen = len;
+			}
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+				y += h;
+			}
+			str = StringTable.Localize("$SWWM_HELP_DEMO");
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-(h*4+lh)/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			break;
+		default:
+			str = String.Format("(Unimplemented help page #%d)",page);
+			Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-h/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			break;
+		}
+	}
+
+	override void Drawer()
+	{
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
+		double ar = Screen.GetAspectRatio();
+		Vector2 tsize = TexMan.GetScaledSize(bgtex);
+		double sar = tsize.x/tsize.y;
+		Vector2 vsize;
+		if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+		else if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+		else vsize = tsize;
+		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_ColorOverlay,Color(192,0,0,0),DTA_Alpha,.8);
+		double hs;
+		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 400) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.)/2.;
+		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		double alph = clamp((gametic-fadetic)*(5./Thinker.TICRATE),0.,1.);
+		if ( (prevpage == -1) || (alph >= 1.) ) DrawPage(curpage,ss,origin);
+		else
+		{
+			DrawPage(prevpage,ss,origin-(pagedir*alph*32,0),(1.-alph)**3);
+			DrawPage(curpage,ss,origin+(pagedir*(1.-alph)*32,0),alph**3);
+		}
+		int h = TewiFont.GetHeight();
+		double y = ss.y/2-(h*2);
+		for ( int i=0; i<4; i++ )
+		{
+			if ( curpage > 0 )
+				Screen.DrawText(TewiFont,Font.CR_GOLD,12,y,"<",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( curpage < NUM_HELP_PAGES-1 )
+				Screen.DrawText(TewiFont,Font.CR_GOLD,ss.x-18,y,">",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			y += h;
+		}
+		Super.Drawer();
+	}
+}

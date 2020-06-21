@@ -9,7 +9,7 @@ Mixin Class SWWMAutoUseFix
 			// sell excess if there's a price
 			if ( bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
 			{
-				int sellprice = SWWMUtility.Round100(Stamina*.7);
+				int sellprice = int(Stamina*.5);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
@@ -963,7 +963,7 @@ Class SWWMWeapon : Weapon abstract
 					if ( ammogiven2 > 0 )
 						sellprice -= int(Ammo2.Stamina*(1.+.75*(ammogiven2-1)));
 				}
-				sellprice = SWWMUtility.Round100(sellprice*.7);
+				sellprice = int(sellprice*.5);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )

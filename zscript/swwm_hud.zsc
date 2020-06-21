@@ -695,8 +695,6 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				// damage falls down
 				int initspd = (128-snum.seed);
-				//if ( initspd >= 0 && initspd < 32 ) initspd = 32;
-				//if ( initspd < 0 && initspd > -32 ) initspd = -32;
 				int boostup = 64+snum.seed2;
 				fo.x = (.05*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.8);
 				fo.y = -((snum.initialspan-(snum.lifespan-fractic))**1.5)+boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
@@ -705,8 +703,6 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				// health falls up (?)
 				int initspd = (128-snum.seed);
-				//if ( initspd >= 0 && initspd < 32 ) initspd = 32;
-				//if ( initspd < 0 && initspd > -32 ) initspd = -32;
 				int boostup = 16+snum.seed2/4;
 				fo.x = (.15*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.6);
 				fo.y = ((snum.initialspan-(snum.lifespan-fractic))**1.2)-boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));

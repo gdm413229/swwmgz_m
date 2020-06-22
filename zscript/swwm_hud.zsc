@@ -437,6 +437,7 @@ Class SWWMStatusBar : BaseStatusBar
 				// ignore player unless chasecamming
 				if ( (trk.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 				if ( trk.myplayer && deathmatch ) continue;	// no players in dm
+				if ( trk.mytarget is 'PlayerGone' ) continue; // ignore "gone" players
 				int mtime = 35;
 				if ( thesight && (trk.lasthealth > 0) ) mtime += 105;
 				if ( level.maptime > trk.updated+mtime ) continue;
@@ -1164,16 +1165,18 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		// death prompt
 		let demo = Demolitionist(CPlayer.mo);
-		if ( !demo || (CPlayer.Health > 0) || (CPlayer != players[consoleplayer]) ) return;
+		let goner = PlayerGone(CPlayer.mo);
+		if ( (!demo && !goner) || (CPlayer.Health > 0) || (CPlayer != players[consoleplayer]) ) return;
 		String str;
 		double alph;
 		int len;
 		double xx, yy;
 		Font fnt;
-		if ( demo.player.viewheight <= 6 )
+		int deadtimer = goner?goner.deadtimer:demo.deadtimer;
+		if ( goner || (demo.player.viewheight <= 6) )
 		{
-			Screen.Dim("Black",min(demo.deadtimer/80.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
-			if ( demo.revivefail > level.maptime )
+			Screen.Dim("Black",goner?1.:min(deadtimer/80.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+			if ( demo && (demo.revivefail > level.maptime) )
 			{
 				Screen.Dim("Red",clamp((demo.revivefail-level.maptime)/60.,0.,.2),0,0,Screen.GetWidth(),Screen.GetHeight());
 				str = StringTable.Localize("$SWWM_REFAIL");
@@ -1184,7 +1187,7 @@ Class SWWMStatusBar : BaseStatusBar
 				if ( ((demo.revivefail-level.maptime)%16) < 8 )
 					Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
-			alph = clamp((demo.deadtimer-60)/60.,0.,1.);
+			alph = clamp((deadtimer-60)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
@@ -1194,7 +1197,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
 			{
 				if ( sv_norespawn ) return;
-				alph = clamp((demo.deadtimer-90)/60.,0.,1.);
+				alph = clamp((deadtimer-90)/60.,0.,1.);
 				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"),CPlayer.GetUserName());
 				fnt = LangFont(mTewiFont);
 				len = fnt.StringWidth(str);
@@ -1203,16 +1206,16 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				return;
 			}
-			alph = clamp((demo.deadtimer-140)/60.,0.,1.);
+			alph = clamp((deadtimer-140)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
 			xx = (ss.x-len)/2.;
 			yy = ss.y/2.;
 			Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			if ( !swwm_revive )
+			if ( goner || !swwm_revive )
 				return;
-			alph = clamp((demo.deadtimer-160)/60.,0.,1.);
+			alph = clamp((deadtimer-160)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED3"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);

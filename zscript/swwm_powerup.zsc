@@ -1015,7 +1015,7 @@ Class LampMoth : Actor
 				mindist = dist;
 				lamp = a;
 				master = a.target;
-				if ( CompanionLamp(lamp).moff.Find(self) == -1 )
+				if ( CompanionLamp(lamp).moff.Find(self) == CompanionLamp(lamp).moff.Size() )
 					CompanionLamp(lamp).moff.Push(self);
 				if ( master && master.player ) SetFriendPlayer(master.player);
 				else bFRIENDLY = false;

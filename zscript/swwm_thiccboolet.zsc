@@ -204,7 +204,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 							ShootThroughList.Push(Results.HitLine);
 						// trace backwards to find exit surface
 						let at = new("AuxiliarySilverBulletTracer");
-						at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_HitSky);
+						at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_NoSky);
 						if ( at.Results.HitType != TRACE_HitNone )
 						{
 							let wp2 = new("WallPenetrate");
@@ -255,7 +255,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 					WallPenetrateList.Push(wp);
 					// trace backwards to find exit surface
 					let at = new("AuxiliarySilverBulletTracer");
-					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_HitSky);
+					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_NoSky);
 					if ( at.Results.HitType != TRACE_HitNone )
 					{
 						let wp2 = new("WallPenetrate");

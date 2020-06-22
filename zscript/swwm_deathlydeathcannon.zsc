@@ -1,6 +1,768 @@
 // Ynykron Artifact (from UnSX Series, featured in SWWM Platinum as a secret weapon)
 // Slot 0, replaces BFG9000, Firemace, Wraithverge (arc)
 
+// cheap way to let players know they just got fucking erased from existence
+Class PlayerGone : PlayerChunk
+{
+	int deadtimer;
+
+	override void DeathThink()
+	{
+		player.damagecount--;
+		player.poisoncount--;
+		deadtimer++;
+		if ( (deadtimer == 60) && (player == players[consoleplayer]) )
+			A_StartSound("demolitionist/youdied",CHAN_DEMOVOICE,CHANF_OVERLAP|CHANF_UI);
+		if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
+		{
+			// standard behaviour, respawn normally
+			if ( (((player.cmd.buttons&BT_USE) && !player.Bot) || ((deathmatch || alwaysapplydmflags) && sv_forcerespawn && (Level.maptime >= player.respawn_time))) && !sv_norespawn )
+			{
+				player.cls = null;
+				player.playerstate = PST_REBORN;
+				if ( special1 > 2 ) special1 = 0;
+			}
+		}
+		else if ( (player.cmd.buttons&BT_USE) && (deadtimer > 120) )
+		{
+			// gross hackfix for library "vanishing"
+			SWWMExcuseMeWhatTheFuckHandler.ThisIsSomeSeriousBullshit();
+			// reload save
+			player.cls = null;
+			player.playerstate = PST_ENTER;
+			if ( special1 > 2 ) special1 = 0;
+		}
+		// no revive (for obvious reasons)
+	}
+
+	static void FeckOff( Actor p )
+	{
+		// doesn't affect voodoo dolls (convenient, isn't it?)
+		if ( !p.player || (p.player.mo != p) ) return;
+		let c = PlayerGone(Spawn("PlayerGone",(32767,32767,0)));
+		c.player = p.player;
+		c.Health = p.Health;
+		p.player = null;
+		c.ObtainInventory(p);
+		if ( c.player ) c.player.mo = c;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( playeringame[i] && (players[i].camera == p) )
+				players[i].camera = c;
+		}
+	}
+}
+
+Class IDontFeelSoGood : Thinker
+{
+	Actor goner;
+
+	static void DeletThis( Actor whomst )
+	{
+		let ti = ThinkerIterator.Create("IDontFeelSoGood",STAT_USER);
+		IDontFeelSoGood i;
+		while ( i = IDontFeelSoGood(ti.Next()) )
+			if ( i.goner == whomst ) return;
+		i = new("IDontFeelSoGood");
+		i.ChangeStatNum(STAT_USER);
+		i.goner = whomst;
+	}
+
+	override void Tick()
+	{
+		if ( !goner )
+		{
+			Destroy();
+			return;
+		}
+		if ( (goner.Health > 0) || (goner.tics != -1) ) return;
+		goner.Destroy();
+	}
+}
+
+Class YnykronImpactLight : PaletteLight
+{
+	Default
+	{
+		Tag "WhiteExpl2";
+		ReactionTime 50;
+		Args 0,0,0,300;
+	}
+}
+
+Class YnykronShotLight : PaletteLight
+{
+	Default
+	{
+		Tag "WhiteExpl";
+		ReactionTime 100;
+		Args 0,0,0,1200;
+	}
+}
+
+Class YnykronBeamLight : PaletteLight
+{
+	Default
+	{
+		Tag "WhiteExpl2";
+		ReactionTime 200;
+		Args 0,0,0,600;
+	}
+}
+
+Class YnykronImpactArm : Actor
+{
+	Default
+	{
+		PROJECTILE;
+		+THRUACTORS;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		-NOGRAVITY;
+		Gravity 0.35;
+		BounceFactor 1.0;
+		Radius 4;
+		Height 4;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		reactiontime = Random[ExploS](10,20);
+		double ang, pt;
+		ang = FRandom[ExploS](0,360);
+		pt = FRandom[ExploS](-90,90);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](8.,20.);
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			A_CountDown();
+			Spawn("YnykronImpactTrail",pos);
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel+vel*.2;
+			s.special1 = Random[ExploS](1,3);
+			s.scale *= 2.4;
+			s.alpha *= 0.1+.4*(ReactionTime/15.);
+		}
+		Wait;
+	}
+}
+
+Class YnykronImpactTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		Scale 2.;
+	}
+	States
+	{
+	Spawn:
+		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 1 Bright;
+		Stop;
+	}
+}
+
+Class YnykronImpact : Actor
+{
+	Default
+	{
+		Obituary "$O_YNYKRON";
+		DamageType "Ynykron";
+		RenderStyle "Add";
+		Scale 4.;
+		Alpha .4;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		// only the initial impact plays a sound
+		if ( !special2 )
+		{
+			// no need to call A_AlertMonsters on this, all monsters on the entire map were already alerted by the initial shot
+			A_QuakeEx(4,4,4,50,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollintensity:.6);
+			A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_DEFAULT,.15,0.);
+		}
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](5,10);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,8);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.special1 = Random[ExploS](2,6);
+			s.scale *= 3.;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,24);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Spawn("YnykronImpactLight",pos);
+		Spawn("YnykronImpactRing",pos);
+		numpt = Random[ExploS](0,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("YnykronImpactArm",pos);
+			s.target = target;
+		}
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		special1++;
+		if ( special1 != 3 ) return;
+		let bt = BlockThingsIterator.Create(self,250);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || !t.bSHOOTABLE || !SWWMUtility.SphereIntersect(t,pos,250) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t) < YnykronShot(master).hitlist.Size()) )
+				continue;
+			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
+			double dist = dirto.length();
+			dirto /= dist;
+			// voodoo dolls just get erased (how convenient)
+			// otherwise instantly vaporize the fucker
+			if ( t.player && (t.player.mo != t) ) t.Destroy();
+			else t.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+			if ( t && (t.Health <= 0) )
+			{
+				if ( t.player ) PlayerGone.FeckOff(t);
+				// poof away
+				t.bINVISIBLE = true;
+				t.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+				IDontFeelSoGood.DeletThis(t);	// ensures corpse is deleted too
+			}
+			else if ( t && YnykronShot(master) )
+				YnykronShot(master).hitlist.Push(t);
+			if ( special2 > 4 ) continue;
+			// spawn blast that will propagate
+			let b = Spawn("YnykronImpact",level.Vec3Offset(pos,dirto*min(250,dist)));
+			b.target = target;
+			b.master = master;
+			b.angle = atan2(dirto.y,dirto.x);
+			b.pitch = asin(-dirto.z);
+			b.special2 = special2+1;
+			if ( YnykronShot(master) )
+				YnykronShot(master).blastcount++;
+		}
+	}
+	override void OnDestroy()
+	{
+		if ( YnykronShot(master) )
+			YnykronShot(master).blastcount--;
+		Super.OnDestroy();
+	}
+	States
+	{
+	Spawn:
+		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 2 Bright;
+		Stop;
+	}
+}
+
+Class YnykronTracer : LineTracer
+{
+	Actor ignore;
+	Array<Line> ShootThroughList;
+	Array<WaterHit> WaterHitList;
+	Array<HitListEntry> HitList;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignore ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				hitlist.Push(ent);
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&Line.ML_BlockHitscan) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class YnykronBeamTrail : Actor
+{
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		roll = FRandom[Ynykron](0,360);
+		SetState(FindState("Spawn")+Random[Ynykron](0,8));
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		A_FadeOut(FRandom[Ynykron](.001,.002));
+	}
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Alpha .2;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+	}
+	States
+	{
+	Spawn:
+		MOTR ABCDEFGHI -1 Bright;
+		Stop;
+	}
+}
+
+Class YnykronBeam : Actor
+{
+	void SpreadOut()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		let t = new("YnykronTracer");
+		t.ignore = target;
+		t.ShootThroughList.Clear();
+		t.WaterHitList.Clear();
+		t.HitList.Clear();
+		t.Trace(pos,cursector,x,128,TRACE_HitSky);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=0; i<t.Results.Distance; i+=16 )
+		{
+			if ( Random[Ynykron](0,8) ) continue;
+			let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*i));
+			b.Scale *= FRandom[Ynykron](1.6,1.8);
+			b.special1 = Random[Ynykron](3,6);
+			b.A_SetRenderStyle(.3,STYLE_AddShaded);
+			b.vel += x*FRandom[Ynykron](.1,.5);
+		}
+		for ( int i=0; i<t.HitList.Size(); i++ )
+		{
+			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t.HitList[i].hitactor) < YnykronShot(master).hitlist.Size()) )
+				continue;
+			// voodoo dolls just get erased (how convenient)
+			// otherwise instantly vaporize the fucker
+			if ( t.hitlist[i].hitactor.player && (t.hitlist[i].hitactor.player.mo != t.hitlist[i].hitactor) ) t.hitlist[i].hitactor.Destroy();
+			else t.hitlist[i].hitactor.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+			if ( t.hitlist[i].hitactor && (t.hitlist[i].hitactor.Health <= 0) )
+			{
+				if ( t.hitlist[i].hitactor.player ) PlayerGone.FeckOff(t.hitlist[i].hitactor);
+				// poof away
+				t.hitlist[i].hitactor.bINVISIBLE = true;
+				t.hitlist[i].hitactor.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+				IDontFeelSoGood.DeletThis(t.hitlist[i].hitactor);	// ensures corpse is deleted too
+			}
+			else if ( t.hitlist[i].hitactor && YnykronShot(master) )
+				YnykronShot(master).hitlist.Push(t.hitlist[i].hitactor);
+			// spawn blast that will propagate
+			let b = Spawn("YnykronImpact",t.hitlist[i].hitlocation);
+			b.target = target;
+			b.master = master;
+			b.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x);
+			b.pitch = asin(-t.HitList[i].x.z);
+			if ( YnykronShot(master) )
+				YnykronShot(master).blastcount++;
+		}
+		if ( t.Results.HitType == TRACE_HasHitSky ) return;	// goodbye
+		if ( t.Results.HitType != TRACE_HitNone )
+		{
+			// hit something
+			Vector3 norm = -t.Results.HitVector;
+			if ( t.Results.HitType == TRACE_HitWall )
+			{
+				norm = (t.Results.HitLine.delta.y,-t.Results.HitLine.delta.x,0).unit();
+				if ( t.Results.Side ) norm *= -1;
+				t.Results.HitLine.RemoteActivate(tracer,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			}
+			else if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.top.Normal;
+				else norm = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.bottom.Normal;
+				else norm = t.Results.HitSector.ceilingplane.Normal;
+			}
+			let b = Spawn("YnykronImpact",level.Vec3Offset(t.Results.HitPos,norm*4));
+			b.target = target;
+			b.master = master;
+			b.angle = atan2(norm.y,norm.x);
+			b.pitch = asin(-norm.z);
+			b.A_SprayDecal("YnykronBlast",-172);
+			if ( YnykronShot(master) ) YnykronShot(master).blastcount++;
+			// find exit point
+			int maxdist = (25600-special1);
+			for ( int i=128; i<maxdist; i++ )
+			{
+				Vector3 ofs = level.Vec3Offset(pos,x*i);
+				if ( !level.IsPointInLevel(ofs) ) continue;
+				// we got out, spawn a beam here (delayed)
+				let next = Spawn("DelayedWallBeam",ofs);
+				next.angle = atan2(x.y,x.x);
+				next.pitch = asin(-x.z);
+				next.roll = roll;
+				next.target = target;
+				next.master = master;
+				next.special1 = special1+i;
+				next.special2 = i/40;
+				next.bAMBUSH = bAMBUSH;
+				break;
+			}
+			return;
+		}
+		if ( bAMBUSH && ((special1%256) < 128) )	// only central beam emits light
+			Spawn("YnykronBeamLight",level.Vec3Offset(pos,x*64));
+		if ( special1 >= 25600 )
+		{
+			// end of the line, dissipate
+			int numpt = Random[Ynykron](4,8);
+			for ( int i=0; i<numpt; i++ )
+			{
+				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*128));
+				b.Scale *= FRandom[Ynykron](.6,.8);
+				b.special1 = Random[Ynykron](1,2);
+				b.A_SetRenderStyle(.3,STYLE_AddShaded);
+				b.SetShade(Color(255,255,255));
+				b.vel += x*FRandom[Ynykron](0.,5.);
+			}
+			return;
+		}
+		// propagate
+		let next = Spawn("YnykronBeam",level.Vec3Offset(pos,x*128));
+		next.angle = atan2(x.y,x.x);
+		next.pitch = asin(-x.z);
+		next.roll = roll;
+		next.target = target;
+		next.master = master;
+		next.special1 = special1+128;
+		next.bAMBUSH = bAMBUSH;
+		next.SetStateLabel("TrailSpawn");
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		// central beam sprite trail
+		if ( !bAMBUSH ) return;
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		for ( int i=0; i<128; i+=16 )
+		{
+			let t = Spawn("YnykronBeamTrail",level.Vec3Offset(pos,x*i));
+			t.Scale *= .3+.001*(special1+i);
+		}
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		A_FadeOut(FRandom[Ynykron](.001,.003));
+		special2++;
+		if ( special2 == 2 )
+			SpreadOut();
+	}
+	override void OnDestroy()
+	{
+		if ( YnykronShot(master) && !special1 )
+			YnykronShot(master).beamcount--;
+		Super.OnDestroy();
+	}
+	Default
+	{
+		Obituary "$O_YNYKRON";
+		DamageType "Ynykron";
+		RenderStyle "Add";
+		Radius .1;
+		Height 0;
+		Alpha .2;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOCLIP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FOILINVUL;
+		+EXTREMEDEATH;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright NoDelay
+		{
+			return FindState("StarterDev")+Random[Ynykron](0,3)*2;
+		}
+		Stop;
+	TrailSpawn:
+		XZW2 A -1 Bright
+		{
+			return FindState("TrailerDev")+Random[Ynykron](0,3)*2;
+		}
+		Stop;
+	StarterDev:
+		#### # 200 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+	TrailerDev:
+		#### # 200 Bright;
+		XZW2 B -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW2 C -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW2 D -1 Bright;
+		Stop;
+		#### # 200 Bright;
+		XZW2 E -1 Bright;
+		Stop;
+	}
+}
+
+Class DelayedWallBeam : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		special2--;
+		if ( special2 > 0 ) return;
+		let next = Spawn("YnykronBeam",pos);
+		next.angle = angle;
+		next.pitch = pitch;
+		next.roll = roll;
+		next.target = target;
+		next.master = master;
+		next.special1 = special1;
+		next.bAMBUSH = bAMBUSH;
+		next.SetStateLabel("TrailSpawn");
+		// exit blast
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		let b = Spawn("YnykronImpact",level.Vec3Offset(pos,x*4));
+		b.target = target;
+		b.master = master;
+		b.angle = atan2(x.y,x.x);
+		b.pitch = asin(-x.z);
+		b.A_SprayDecal("YnykronBlast",-172);
+		if ( YnykronShot(master) )
+			YnykronShot(master).blastcount++;
+		// trace back to get the proper "exit surface" so we can trigger lines if needed
+		let at = new("AuxiliarySilverBulletTracer");
+		at.Trace(pos,CurSector,-x,2.,TRACE_NoSky);
+		if ( at.Results.HitType == TRACE_HitWall )
+		{
+			if ( at.Results.HitLine.sidedef[1] )
+			{
+				at.Results.HitLine.Activate(target,0,SPAC_PCross);
+				if ( at.Results.HitLine.special == GlassBreak )	// fuck glass
+					at.Results.HitLine.Activate(target,0,SPAC_Impact);
+			}
+			else at.Results.HitLine.Activate(tracer,at.Results.Side,SPAC_Impact);
+		}
+		Destroy();
+	}
+}
+
+Class YnykronRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale .6;
+		Alpha .1;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+	}
+	States
+	{
+	Spawn:
+		XRG4 AAABBBCCCDDDEEEFFFGGGHHHIIIJJJKKKLLLMMMNNNOOOPPPQQQRRRSSSTTTUUUVVVWWWXXX 1 Bright A_SetScale(scale.x*0.988);
+		Stop;
+	}
+}
+
+// non-model version, for impacts
+Class YnykronImpactRing : YnykronRing
+{
+	Default
+	{
+		Alpha .8;
+	}
+	States
+	{
+	Spawn:
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.02);
+		Stop;
+	}
+}
+
+Class YnykronShot : Actor
+{
+	Array<Actor> hitlist;
+	int beamcount;
+	int blastcount;
+
+	Default
+	{
+		Radius .1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+	}
+	override void PostBeginPlay()
+	{
+		A_QuakeEx(6,6,6,150,0,65536,"",QF_RELATIVE|QF_SCALEDOWN,falloff:65536,rollIntensity:1.);
+		A_StartSound("ynykron/beam",CHAN_VOICE,CHANF_DEFAULT,1.,0.);
+		hitlist.Clear();
+		beamcount = 0;
+		blastcount = 0;
+		int rings = 1;
+		Vector3 x, y, z, dir;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		for ( double i=0; i<.05; i+=.01 )
+		{
+			for ( int j=0; j<360; j+=(360/rings) )
+			{
+				if ( i==0 ) dir = x;	// central beam always precise
+				else
+				{
+					a = j+FRandom[Ynykron](-15.,15.);
+					s = i+FRandom[Ynykron](-.01,.01);
+					dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
+				}
+				let b = Spawn("YnykronBeam",pos);
+				b.target = target;
+				b.master = self;
+				b.angle = atan2(dir.y,dir.x);
+				b.pitch = asin(-dir.z);
+				b.roll = FRandom[Ynykron](0,360);
+				b.bAMBUSH = (i==0);	// central beam spawns trail sprites, makes cone more "dense"
+				beamcount++;
+			}
+			rings += 4;
+		}
+		Spawn("YnykronShotLight",level.Vec3Offset(pos,x*30));
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		// spawn rings
+		special1++;
+		if ( !(special1%10) && (special1 <= 30) )
+		{
+			Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+			for ( int i=0; i<8; i++ )
+			{
+				let r = Spawn("YnykronRing",level.Vec3Offset(pos,dir*(special1*16+i*2)));
+				r.scale *= special1/10.;
+				r.angle = angle;
+				r.pitch = pitch;
+				r.roll = FRandom[Ynykron](0,360);
+			}
+		}
+		// wait until we're no longer needed and all effects are over
+		if ( IsActorPlayingSound(CHAN_VOICE) || (beamcount > 0) || (blastcount > 0) ) return;
+		// we're done here, but wait for a while just in case
+		if ( special1 > 350 ) Destroy();
+	}
+}
+
 Class Ynykron : SWWMWeapon
 {
 	transient ui TextureID WeaponBox, ChargeBar[2], BoxSide[2];
@@ -95,6 +857,40 @@ Class Ynykron : SWWMWeapon
 		A_OverlayAlpha(PSP_WEAPON+1,0.);
 		invoker.chargestate = CS_IDLE;
 		invoker.clipcount = 0;
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*15+y*4);
+		if ( invoker.inverted )
+		{
+			// TODO altfire
+			Console.Printf("\cgYNYKRON ALTFIRE NOT DONE, FALLBACK TO PRIMARY\c-");
+		}
+		//else
+		{
+			let s = Spawn("YnykronShot",origin);
+			s.target = self;
+			s.angle = angle;
+			s.pitch = BulletSlope();
+		}
+		invoker.specialf1 = 1.;
+		A_Overlay(PSP_WEAPON+3,"FireBlast");
+	}
+
+	action void A_Backblast()
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*15+y*4);
+		int numpt = Random[Ynykron](40,80);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= 2.4;
+			s.alpha *= .5*invoker.specialf1;
+			s.special1 = Random[Ynykron](2,8);
+			s.vel += x*FRandom[Ynykron](-20.,-4.)+y*FRandom[Ynykron](-1.,1.)+z*FRandom[Ynykron](-1.,1.);
+		}
+		invoker.specialf1 -= .2;
 	}
 
 	override void DoEffect()
@@ -175,7 +971,7 @@ Class Ynykron : SWWMWeapon
 			if ( invoker.chargestate == CS_DISCHARGING )
 				return ResolveState("Discharge");
 			int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 1) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true))) )
+			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true))) )
 				flg |= WRF_ALLOWRELOAD;
 			if ( (invoker.clipcount <= 0) || (invoker.chargestate > CS_IDLE) )
 				flg |= WRF_NOSECONDARY;
@@ -228,7 +1024,7 @@ Class Ynykron : SWWMWeapon
 	Fire:
 		XZW2 A 1
 		{
-			if ( (invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 1) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+			if ( (invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
 				return ResolveState("Reload");
 			if ( invoker.chargestate == CS_IDLE )
 				return ResolveState("Charge");
@@ -241,6 +1037,9 @@ Class Ynykron : SWWMWeapon
 		XZW3 Q 3 A_StartSound("ynykron/ventclose",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 R 3;
 		Goto Ready;
+	FireBlast:
+		TNT1 AAAAA 1 A_Backblast();
+		Stop;
 	FireSmoke:
 		XZWA J 1
 		{

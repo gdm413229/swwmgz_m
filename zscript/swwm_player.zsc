@@ -1975,7 +1975,7 @@ Class DemolitionistSelfLight : Actor
 	override void Tick()
 	{
 		Super.Tick();
-		if ( !target || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
+		if ( !target || !target.player || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
 		{
 			Destroy();
 			return;

@@ -189,39 +189,57 @@ Class SWWMVanillaBossHandler : EventHandler
 		}
 		else if ( bossmap == MAP_HMAP38 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 2;
-			bosstag = "$BT_CLERIC";
+			if ( e.Thing is 'ClericBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 2;
+				bosstag = "$BT_CLERIC";
+			}
 		}
 		else if ( bossmap == MAP_HMAP36 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 2;
-			bosstag = "$BT_FIGHTER";
+			if ( e.Thing is 'FighterBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 2;
+				bosstag = "$BT_FIGHTER";
+			}
 		}
 		else if ( bossmap == MAP_HMAP37 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 2;
-			bosstag = "$BT_MAGE";
+			if ( e.Thing is 'MageBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 2;
+				bosstag = "$BT_MAGE";
+			}
 		}
 		else if ( bossmap == MAP_HMAP12 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 4;
-			bosstag = "$BT_DRAGON";
+			if ( e.Thing is 'Dragon' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 4;
+				bosstag = "$BT_DRAGON";
+			}
 		}
 		else if ( bossmap == MAP_HMAP23_HMAP27 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 6;
-			bosstag = "$BT_HERESIARCH";
+			if ( e.Thing is 'Heresiarch' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 6;
+				bosstag = "$BT_HERESIARCH";
+			}
 		}
 		else if ( bossmap == MAP_HMAP40 )
 		{
-			bossactors.Push(e.Thing);
-			if ( upgrademe ) e.Thing.Health *= 8;
-			bosstag = "$BT_KORAX";
+			if ( e.Thing is 'Korax' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 8;
+				bosstag = "$BT_KORAX";
+			}
 		}
 	}
 

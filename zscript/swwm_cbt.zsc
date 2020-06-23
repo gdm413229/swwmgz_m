@@ -600,18 +600,19 @@ Class BusterWall : Thinker
 			if ( l.v1.p.x > b.x ) b.x = l.v1.p.x;
 			if ( l.v2.p.x > b.x ) b.x = l.v2.p.x;
 			if ( l.v1.p.y > b.y ) b.y = l.v1.p.y;
-			if ( l.v2.p.y > b.y ) a.y = l.v2.p.y;
+			if ( l.v2.p.y > b.y ) b.y = l.v2.p.y;
 		}
 		double girthitude = (b.x-a.x)*(b.y-a.y)*partheight;
 		// do a grid check to approximate "real" volume, useful for diagonal doors
 		double ystep = (b.y-a.y)/64.;
 		double xstep = (b.x-a.x)/64.;
 		int inspot = 0, allspot = 0;
-		for ( double y=a.y; y<b.y; y+=ystep ) for ( double x=a.x; x<b.x; x+=xstep )
+		for ( double y=a.y; y<=b.y; y+=ystep ) for ( double x=a.x; x<=b.x; x+=xstep )
 		{
 			allspot++;
 			if ( level.PointInSector((x,y)) == hs ) inspot++;
 		}
+		if ( allspot <= 0 ) return;	// what the fuck?
 		girthitude = (girthitude*inspot)/allspot;
 		// too fucking huge
 		if ( (girthitude > 16777216) || (max(partheight,max(b.x-a.x,b.y-a.y)) > 1024) ) return;

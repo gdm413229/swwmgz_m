@@ -921,9 +921,9 @@ Class OnFire : Actor
 		double mult = max(victim.radius,victim.height)/30.;
 		if ( victim is 'FlamingChunk' ) mult *= 20.-victim.special1*3.;
 		if ( delay > 0 ) delay--;
-		if ( (level.maptime+special1)%5 ) return;
+		if ( (level.maptime+special1)%6 ) return;
 		A_SoundVolume(CHAN_5,min(1.,mult*amount/80.));
-		int numpt = clamp(int(Random[FlameT](2,4)*amount*0.02),1,4);
+		int numpt = clamp(int(Random[FlameT](2,4)*amount*.01),1,4);
 		numpt = int(clamp(numpt*mult**.5,1,3));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -1058,7 +1058,7 @@ Class OnFireTrail : Actor
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
 			s.vel += vel*.3;
-			s.alpha *= alpha*4;
+			s.alpha *= alpha*2;
 			s.scale *= .5+abs(scale.x)*(.5+GetAge()/6.);
 			Destroy();
 			return;
@@ -1068,7 +1068,7 @@ Class OnFireTrail : Actor
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
 			s.vel += vel*.3;
-			s.alpha *= alpha*3;
+			s.alpha *= alpha*1.5;
 			s.scale *= .5+abs(scale.x)*(.5+GetAge()/6.);
 		}
 	}
@@ -1078,7 +1078,7 @@ Class OnFireTrail : Actor
 		Speed 2;
 		Radius 4;
 		Height 4;
-		Alpha .3;
+		Alpha .6;
 		Scale .8;
 		+NOBLOCKMAP;
 		+NOGRAVITY;
@@ -1101,7 +1101,7 @@ Class OnFireTrail : Actor
 		{
 			A_Flame();
 			A_SetScale(scale.x*0.98);
-			A_FadeOut(0.01);
+			A_FadeOut(0.02);
 		}
 		Wait;
 	}
@@ -1605,8 +1605,8 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(40000);
-		SWWMHandler.DoBlast(self,600,40000);
-		A_Explode(7777,600);
+		SWWMHandler.DoBlast(self,500,40000);
+		A_Explode(7777,600,fulldamagedistance:500);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1732,8 +1732,8 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,400,30000);
-		A_Explode(777,400);
+		SWWMHandler.DoBlast(self,300,30000);
+		A_Explode(777,400,fulldamagedistance:300);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigScorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -1857,8 +1857,8 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,200,20000);
-		A_Explode(77,200);
+		SWWMHandler.DoBlast(self,100,20000);
+		A_Explode(77,200,fulldamagedistance:100);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("Scorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);

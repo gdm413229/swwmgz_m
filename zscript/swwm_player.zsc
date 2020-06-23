@@ -1267,7 +1267,7 @@ Class Demolitionist : PlayerPawn
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( lastdamage > 90 )
 		{
-			A_StartSound("demolitionist/lopain",CHAN_VOICE);
+			A_StartSound("demolitionist/hipain",CHAN_VOICE);
 			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
@@ -1281,8 +1281,8 @@ Class Demolitionist : PlayerPawn
 		}
 		else if ( lastdamage > 0 )
 		{
-			A_StartSound("demolitionist/hipain",CHAN_VOICE);
-			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
+			A_StartSound("demolitionist/lopain",CHAN_VOICE);
+			if ( !player || (player.mo != self) || (lastdamage < 5) ) return;	// voodoo dolls have no voice
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
@@ -2014,7 +2014,7 @@ Class DemolitionistSelfLight : Actor
 	override void Tick()
 	{
 		Super.Tick();
-		if ( !target || !target.player || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
+		if ( !target || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
 		{
 			Destroy();
 			return;
@@ -2022,7 +2022,7 @@ Class DemolitionistSelfLight : Actor
 		if ( !activelight() )
 			target.A_RemoveLight('DemoSelfLight');
 		else if ( activelight() )
-			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(12,0,target.player.viewz-target.pos.z),0,30,90,target.pitch);
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(12,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
 		if ( target.bINVISIBLE || (target.alpha <= double.epsilon) )
 			target.A_RemoveLight('DemoSelfLight2');
 		else

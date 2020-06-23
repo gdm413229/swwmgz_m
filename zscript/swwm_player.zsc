@@ -1267,19 +1267,22 @@ Class Demolitionist : PlayerPawn
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( lastdamage > 90 )
 		{
-			A_StartSound("*pain25",CHAN_VOICE);
+			A_StartSound("demolitionist/lopain",CHAN_VOICE);
+			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 30 )
 		{
-			A_StartSound("*pain50",CHAN_VOICE);
+			A_StartSound("demolitionist/pain",CHAN_VOICE);
+			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/pain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 0 )
 		{
-			A_StartSound("*pain100",CHAN_VOICE);
+			A_StartSound("demolitionist/hipain",CHAN_VOICE);
+			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
@@ -1289,7 +1292,13 @@ Class Demolitionist : PlayerPawn
 		A_StopSound(CHAN_DEMOVOICE);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		A_PlayerScream();
+		Sound snd = "demolitionist/death";
+		if ( special1 < 10 )
+			snd = "demolitionist/wdeath";
+		if ( health < 50 )
+			snd = "demolitionist/xdeath";
+		A_StartSound(snd,CHAN_VOICE);
+		if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
 		if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 			A_StartSound(String.Format("voice/%s/death",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 	}
@@ -1466,7 +1475,11 @@ Class Demolitionist : PlayerPawn
 	Spawn:
 		// normal idle
 		#### # 2;
-		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(abs(player.cmd.yaw|player.cmd.pitch)>128),"Turn");
+		XZW1 A 1
+		{
+			if ( !player || (player.mo != self) ) return ResolveState("VoodooSpawn");
+			return A_JumpIf(player&&(player.mo==self)&&(abs(player.cmd.yaw|player.cmd.pitch)>128),"Turn");
+		}
 		Wait;
 	See:
 		// normal walking
@@ -1504,14 +1517,22 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	Pain:
 		// ouchy
-		XZW1 A 1 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
+		XZW1 A 1
+		{
+			if ( !player || (player.mo != self) ) return ResolveState("VoodooPain");
+			return A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchPain");
+		}
 		XZW2 M 1 A_DemoPain();
 		XZW2 NOPQ 1;
 		Goto Spawn+1;
 	Death:
 	XDeath:
 		// ded
-		XZW1 A 0 A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchDeath");
+		XZW1 A 0
+		{
+			if ( !player || (player.mo != self) ) return ResolveState("VoodooDeath");
+			return A_JumpIf(player&&(player.mo==self)&&(player.crouchdir==-1),"CrouchDeath");
+		}
 		XZW1 A 2
 		{
 			A_DemoScream();
@@ -1685,6 +1706,24 @@ Class Demolitionist : PlayerPawn
 		#### # 2 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.45);
 		XZW8 MNOPQRS 2;
 		Goto Spawn+1;
+	VoodooSpawn:
+		XZWZ A -1;
+		Loop;
+	VoodooPain:
+		XZWZ A 1;
+		XZWZ B 1 A_DemoPain();
+		XZWZ CDEF 1;
+		Goto VoodooSpawn;
+	VoodooDeath:
+		XZWZ A 2
+		{
+			A_DemoScream();
+			A_NoBlocking();
+		}
+		XZWZ GHIJKLMNO 2;
+		XZWZ PQR 2;
+		XZWZ S -1;
+		Stop;
 	}
 }
 

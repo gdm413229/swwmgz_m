@@ -1168,7 +1168,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			if ( ut.uses[i].hitactor )
 			{
-				if ( ut.uses[i].hitactor == self ) continue;
+				if ( (ut.uses[i].hitactor == self) || (ut.uses[i].hitactor is 'Demolitionist') ) continue;
 				if ( ut.uses[i].hitactor.Used(self) ) break;
 			}
 			else if ( ut.uses[i].hitline )
@@ -1181,9 +1181,7 @@ Class SWWMWeapon : Weapon abstract
 		}
 		// fuck glass
 		for ( int i=0; i<ut.glass.Size(); i++ )
-		{
 			ut.glass[i].Activate(self,0,SPAC_Impact);
-		}
 		let raging = RagekitPower(FindInventory("RagekitPower"));
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )

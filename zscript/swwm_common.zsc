@@ -399,7 +399,7 @@ Class SWWMStats : Thinker
 		else if ( (inflictor is 'HellblazerRavagerArm') || (inflictor is 'HellblazerWarheadArm') ) which = 'Hellblazer';
 		else if ( (inflictor is 'BigBiospark') || (inflictor is 'BiosparkBall') || (inflictor is 'BiosparkBeamImpact') || (inflictor is 'BiosparkComboImpact') || (inflictor is 'BiosparkBeam') || (inflictor is 'BiosparkArc') ) which = 'Sparkster';
 		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
-		// TODO Silver Bullet / Ynykron projs when implemented
+		else if ( (inflictor is 'YnykronBeam') || (inflictor is 'YnykronImpact') ) which = 'Ynykron';
 		if ( !which ) return;
 		for ( int i=0; i<wstats.Size(); i++ )
 		{
@@ -984,6 +984,13 @@ Class SWWMCombatTracker : Thinker
 	int tcnt;
 	double height;
 
+	void UpdateTag()
+	{
+		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain')) )
+			mytag = mytarget.player?(mytarget.player.mo!=mytarget)?String.Format(StringTable.Localize("$FN_VOODOO"),mytarget.player.GetUserName()):mytarget.player.GetUserName():mytarget.GetTag();
+		else mytag = "";
+	}
+
 	static SWWMCombatTracker Spawn( Actor target )
 	{
 		let ti = ThinkerIterator.Create("SWWMCombatTracker",STAT_USER);
@@ -996,9 +1003,7 @@ Class SWWMCombatTracker : Thinker
 		t = new("SWWMCombatTracker");
 		t.ChangeStatNum(STAT_USER);
 		t.mytarget = target;
-		if ( target.player || target.bISMONSTER || (target is 'BossBrain') )
-			t.mytag = target.player?target.player.GetUserName():target.GetTag();
-		else t.mytag = "";
+		t.UpdateTag();
 		if ( target.player )
 		{
 			t.lasthealth = target.health;
@@ -2487,10 +2492,7 @@ Class SWWMHandler : EventHandler
 		{
 			// manually refresh some tags if language has changed
 			for ( SWWMCombatTracker t=trackers; t; t=t.next )
-			{
-				if ( !t.mytarget || (!t.mytarget.player && !t.mytarget.bISMONSTER) ) continue;
-				t.mytag = t.mytarget.player?t.mytarget.player.GetUserName():t.mytarget.GetTag();
-			}
+				t.UpdateTag();
 			for ( SWWMInterest p=intpoints; p; p=p.next )
 			{
 				if ( (p.type != INT_Key) || !p.trackedkey ) continue;

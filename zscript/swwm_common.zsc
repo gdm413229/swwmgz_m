@@ -2647,7 +2647,8 @@ Class SWWMHandler : EventHandler
 				for ( SWWMScoreObj d=damnums; d; d=d.next )
 				{
 					if ( (d.starttic < level.maptime) || (d.acc != e.Thing) ) continue;
-					d.score -= e.Damage;
+					if ( d.score-e.Damage > d.score ) d.score = int.min;
+					else d.score -= e.Damage;
 					spawnme = false;
 					break;
 				}
@@ -2665,19 +2666,22 @@ Class SWWMHandler : EventHandler
 			}
 			// fall dmg
 			ForcedFallerDamager.SetInstigator(e.Thing,e.DamageSource);
-		}
-		if ( e.Thing.player )
-		{
-			tookdamage[e.Thing.PlayerNumber()] = true;
-			let s = SWWMStats.Find(e.Thing.player);
-			s.damagetaken += e.Damage;
-			if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
-		}
-		if ( e.DamageSource && e.DamageSource.player )
-		{
-			let s = SWWMStats.Find(e.DamageSource.player);
-			s.damagedealt += e.Damage;
-			if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+			// stats
+			if ( e.Thing.player )
+			{
+				tookdamage[e.Thing.PlayerNumber()] = true;
+				let s = SWWMStats.Find(e.Thing.player);
+				if ( s.damagetaken+e.Damage < s.damagetaken ) s.damagetaken = int.max;
+				else s.damagetaken += e.Damage;
+				if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
+			}
+			if ( e.DamageSource && e.DamageSource.player )
+			{
+				let s = SWWMStats.Find(e.DamageSource.player);
+				if ( s.damagedealt+e.Damage < s.damagedealt ) s.damagedealt = int.max;
+				else s.damagedealt += e.Damage;
+				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+			}
 		}
 		if ( e.DamageSource && (e.DamageSource != e.Thing) )
 		{

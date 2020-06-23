@@ -272,7 +272,7 @@ Class YnykronImpact : Actor
 			}
 			else if ( t && YnykronShot(master) )
 				YnykronShot(master).hitlist.Push(t);
-			if ( special2 > 4 ) continue;
+			if ( swwm_capmcrange && (special2 > 3) ) continue;
 			// spawn blast that will propagate
 			let b = Spawn("YnykronImpact",level.Vec3Offset(pos,dirto*min(300,dist)));
 			b.target = target;

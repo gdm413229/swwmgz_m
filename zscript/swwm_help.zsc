@@ -30,9 +30,8 @@ Class SWWMHelpMenu : GenericMenu
 		PAGE_ARSENAL1,
 		PAGE_ARSENAL2,
 		PAGE_ARSENAL3,
-		PAGE_KBASE,
 		PAGE_TECH,
-		PAGE_CREDITS,
+		PAGE_KBASE,
 		NUM_HELP_PAGES
 	};
 
@@ -146,7 +145,7 @@ Class SWWMHelpMenu : GenericMenu
 	{
 		Font fnt = LangFont(TewiFont);
 		int h = fnt.GetHeight();
-		String str;
+		String str = "";
 		BrokenLines l;
 		int maxlen = 0, lh;
 		double y = 0;
@@ -158,23 +157,41 @@ Class SWWMHelpMenu : GenericMenu
 			else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize("$SWWM_HELP_STORYSTRIFE");
 			else str = StringTable.Localize("$SWWM_HELP_STORYDOOM");
 			l = fnt.BreakLines(str,600);
-			lh = l.Count()*h;
-			for ( int i=0; i<l.Count(); i++ )
-			{
-				int len = l.StringWidth(i);
-				if ( len > maxlen ) maxlen = len;
-			}
-			for ( int i=0; i<l.Count(); i++ )
-			{
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
-				y += h;
-			}
 			str = StringTable.Localize("$SWWM_HELP_STORY");
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-(h*4+lh)/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			break;
 		case PAGE_DEMO:
 			str = StringTable.Localize("$SWWM_HELP_DEMOTXT");
 			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_DEMO");
+			break;
+		case PAGE_ARSENAL1:
+			str = StringTable.Localize("$SWWM_HELP_ARSE1TXT");
+			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_ARSE1");
+			break;
+		case PAGE_ARSENAL2:
+			str = StringTable.Localize("$SWWM_HELP_ARSE2TXT");
+			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_ARSE2");
+			break;
+		case PAGE_ARSENAL3:
+			str = StringTable.Localize("$SWWM_HELP_ARSE3TXT");
+			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_ARSE3");
+			break;
+		case PAGE_KBASE:
+			str = StringTable.Localize("$SWWM_HELP_KBASETXT");
+			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_KBASE");
+			break;
+		case PAGE_TECH:
+			str = StringTable.Localize("$SWWM_HELP_TECHTXT");
+			l = fnt.BreakLines(str,600);
+			str = StringTable.Localize("$SWWM_HELP_TECH");
+			break;
+		}
+		if ( str && (l.Count() > 0) )
+		{
 			lh = l.Count()*h;
 			for ( int i=0; i<l.Count(); i++ )
 			{
@@ -186,14 +203,11 @@ Class SWWMHelpMenu : GenericMenu
 				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 				y += h;
 			}
-			str = StringTable.Localize("$SWWM_HELP_DEMO");
 			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-(h*4+lh)/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
-			break;
-		default:
-			str = String.Format("(Unimplemented help page #%d)",page);
-			Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-h/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
-			break;
+			return;
 		}
+		str = String.Format("(Unknown help page #%d)",page);
+		Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-h/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 	}
 
 	override void Drawer()

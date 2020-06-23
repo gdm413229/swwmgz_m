@@ -196,19 +196,17 @@ Class YnykronImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		// only the initial impact plays a sound
-		if ( !special2 )
+		// no need to call A_AlertMonsters on this, all monsters on the entire map were already alerted by the initial shot
+		A_QuakeEx(4,4,4,50,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollintensity:.6);
+		if ( YnykronShot(master) )
 		{
-			// no need to call A_AlertMonsters on this, all monsters on the entire map were already alerted by the initial shot
-			A_QuakeEx(4,4,4,50,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollintensity:.6);
-			if ( YnykronShot(master) )
+			if ( YnykronShot(master).lastimpact < gametic )
 			{
-				if ( YnykronShot(master).lastimpact < gametic )
-					master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,1.,0.);
-				YnykronShot(master).lastimpact = gametic+5;
+				master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special2?.2:1.,.0);
+				YnykronShot(master).lastimpact = gametic+(special2?3:5);
 			}
-			else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_DEFAULT,1.,0.);
 		}
+		else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special2?.2:1.,.0);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);

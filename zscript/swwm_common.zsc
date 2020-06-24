@@ -3065,6 +3065,12 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	override void CheckReplacee( ReplacedEvent e )
+	{
+		if ( e.Replacement is 'DSparilHax' )
+			e.Replacee = 'Sorcerer2';
+	}
+
 	override void CheckReplacement( ReplaceEvent e )
 	{
 		// shell types (sorted by rarity

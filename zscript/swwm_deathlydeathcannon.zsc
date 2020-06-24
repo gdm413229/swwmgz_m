@@ -53,9 +53,20 @@ Class PlayerGone : PlayerChunk
 	}
 }
 
+Class DSparilHax : Sorcerer2
+{
+	override void PostBeginPlay()
+	{
+		Thing_Destroy(0);
+		A_BossDeath();
+		Destroy();
+	}
+}
+
 Class IDontFeelSoGood : Thinker
 {
 	Actor goner;
+	int cnt;
 
 	static void DeletThis( Actor whomst )
 	{
@@ -75,7 +86,20 @@ Class IDontFeelSoGood : Thinker
 			Destroy();
 			return;
 		}
-		if ( (goner.Health > 0) || (goner.tics != -1) ) return;
+		if ( goner.Health > 0 ) return;
+		// special handling for some bosses:
+		// - D'Sparil does not spawn, he's already gone
+		// - Korax doesn't leave ghosts
+		if ( (goner.tics != -1) && !(goner is 'Sorcerer1') && !(goner is 'Korax') ) return;
+		cnt++;
+		if ( cnt < 15 ) return;
+		if ( goner is 'Sorcerer1' )
+		{
+			let h = Actor.Spawn("DSparilHax",goner.pos);
+			h.CopyFriendliness(goner,true);
+		}
+		else if ( goner is 'Korax' )
+			level.ExecuteSpecial(80,goner,null,0,255);
 		goner.Destroy();
 	}
 }

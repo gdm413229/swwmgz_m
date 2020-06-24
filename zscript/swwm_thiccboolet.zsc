@@ -563,8 +563,8 @@ Class SilverBullet : SWWMWeapon
 		bool reduceme = (player.mo.CanCrouch()&&(player.crouchfactor != 1));
 		vel += x*min(1.,invoker.specialf1)*((reduceme?60.:600.)/Mass);
 		A_OverlayAlpha(PSP_WEAPON+2,clamp(invoker.specialf1*3.,0.,1.));
-		if ( Random[SilverBullet](0,int(invoker.specialf1*4)) )
-			self.DamageMobj(invoker,self,2,'jet');
+		if ( Random[SilverBullet](0,int(invoker.specialf1*2)) )
+			self.DamageMobj(invoker,self,1,'jet');
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*10-z*10);
 		for ( int i=0; i<4; i++ )
 		{

@@ -649,13 +649,18 @@ Class Demolitionist : PlayerPawn
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
+		if ( damage <= 0 )
+		{
+			lastdamage = 0;
+			return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		}
 		// lucky collar
-		if ( source == self ) damage /= 2;
-		if ( Health-damage < 25 )
+		if ( (source == self) ) damage = max(1,damage/2);
+		if ( (Health-damage < 25) )
 		{
 			int splitdmg[2];
 			splitdmg[0] = max(0,Health-25);	// non-reduced part (>=25% health)
-			splitdmg[1] = (damage-splitdmg[0])/4;	// reduced part (<25% health)
+			splitdmg[1] = max(1,(damage-splitdmg[0])/4);	// reduced part (<25% health)
 			damage = splitdmg[0]+splitdmg[1];
 		}
 		if ( !inflictor && !source && (CurSector.flags&Sector.SECF_ENDLEVEL) )
@@ -665,6 +670,8 @@ Class Demolitionist : PlayerPawn
 			flags |= DMG_FORCED|DMG_NO_ARMOR;
 			mod = 'EndLevel';
 		}
+		int oldpchance = PainChance;
+		if ( damage < 5 ) PainChance = 0;
 		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage/2,10,40));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
@@ -672,6 +679,7 @@ Class Demolitionist : PlayerPawn
 			lastmpain = level.maptime;
 			A_DemoPain();
 		}
+		PainChance = oldpchance;
 		return lastdamage;
 	}
 	override void CalcHeight()

@@ -163,6 +163,7 @@ Class YnykronImpactTrail : Actor
 		+NOGRAVITY;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+NOINTERACTION;
 		Scale 2.;
 		Alpha .4;
 	}
@@ -192,6 +193,7 @@ Class YnykronImpact : Actor
 		+FORCEXYBILLBOARD;
 		+OLDRADIUSDMG;
 		+EXTREMEDEATH;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -355,9 +357,15 @@ Class YnykronBeamTrail : Actor
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( isFrozen() ) return;
 		A_FadeOut(FRandom[Ynykron](.0005,.001));
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	Default
 	{
@@ -372,6 +380,7 @@ Class YnykronBeamTrail : Actor
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -518,7 +527,6 @@ Class YnykronBeam : Actor
 	}
 	override void PostBeginPlay()
 	{
-		Super.PostBeginPlay();
 		if ( YnykronShot(master) )
 			YnykronShot(master).beamcount++;
 		// sprite trail
@@ -533,12 +541,18 @@ Class YnykronBeam : Actor
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( isFrozen() ) return;
 		A_FadeOut(FRandom[Ynykron](.001,.002));
 		special2++;
 		if ( special2 == 2 )
 			SpreadOut();
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	override void OnDestroy()
 	{
@@ -566,6 +580,7 @@ Class YnykronBeam : Actor
 		+FORCERADIUSDMG;
 		+FOILINVUL;
 		+EXTREMEDEATH;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -620,16 +635,15 @@ Class DelayedWallBeam : Actor
 		+NOBLOCKMAP;
 		+NOTELEPORT;
 		+DONTSPLASH;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
-		Super.PostBeginPlay();
 		if ( YnykronShot(master) )
 			YnykronShot(master).beamcount++;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( isFrozen() ) return;
 		special2--;
 		if ( special2 > 0 ) return;
@@ -687,6 +701,7 @@ Class YnykronRing : Actor
 		+DONTSPLASH;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -727,6 +742,7 @@ Class YnykronShot : Actor
 		+NOBLOCKMAP;
 		+NOTELEPORT;
 		+DONTSPLASH;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{

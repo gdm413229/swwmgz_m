@@ -435,6 +435,7 @@ Class SWWMBulletImpact : Actor
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 		Scale 0.25;
 	}
 	override void PostBeginPlay()
@@ -514,6 +515,7 @@ Class PunchImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -564,6 +566,7 @@ Class BigPunchSplash : Actor
 		+NOTELEPORT;
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -584,6 +587,7 @@ Class BigPunchImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -701,6 +705,7 @@ Class ParryRing : Actor
 		+NOBLOCKMAP;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -724,6 +729,7 @@ Class ParryField : Actor
 		+NONSHOOTABLE;
 		+NOBLOOD;
 		+DONTTHRUST;
+		+NOINTERACTION;
 		Health int.max;
 		Mass int.max;
 		Radius 20;
@@ -740,7 +746,6 @@ Class ParryField : Actor
 
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !master )
 		{
 			Destroy();
@@ -870,13 +875,6 @@ Class ParryField : Actor
 			}
 		}
 		return 0;
-	}
-
-	States
-	{
-	Spawn:
-		TNT1 A -1;
-		Stop;
 	}
 }
 

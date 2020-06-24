@@ -1507,7 +1507,6 @@ Class SWWMSpark : Actor
 		+FORCEXYBILLBOARD;
 		+MISSILE;
 		+DROPOFF;
-		+MOVEWITHSECTOR;
 		+THRUACTORS;
 		+NOTELEPORT;
 		+DONTSPLASH;
@@ -1575,7 +1574,7 @@ Class SWWMChip : Actor
 	{
 		Super.Tick();
 		if ( isFrozen() ) return;
-		if ( InStateSequence(CurState,ResolveState("Death")) )
+		if ( CurState == ResolveState("Death") )
 		{
 			deadtimer++;
 			if ( deadtimer > 300 ) A_FadeOut(0.05);
@@ -1643,7 +1642,7 @@ Class FancyConfetti : Actor
 		if ( isFrozen() ) return;
 		vel.xy *= 0.98;
 		if ( vel.z > 0 ) vel.z *= 0.98;
-		if ( InStateSequence(CurState,ResolveState("Death")) )
+		if ( CurState == ResolveState("Death") )
 		{
 			deadtimer++;
 			if ( deadtimer > 300 ) A_FadeOut(0.05);
@@ -1713,6 +1712,7 @@ Class SWWMItemFog : Actor
 		+DONTSPLASH;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -1791,6 +1791,7 @@ Class SWWMTeleportFog : Actor
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -2282,23 +2283,99 @@ Class SWWMHandler : EventHandler
 		ah = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
 		bl = (l.v2.p,lowestfloor.ZatPoint(l.v2.p));
 		bh = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
-		if ( (al-ah).length() > 0 && (bl-bh).length() > 0 )
+		if ( ((al-ah).length() > 0) && ((bl-bh).length() > 0) )
 			return (al+ah+bl+bh)*.25;
 		// check if upper part available
 		al = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
 		ah = (l.v1.p,highestceiling.ZatPoint(l.v1.p));
 		bl = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
 		bh = (l.v2.p,highestceiling.ZatPoint(l.v2.p));
-		if ( (al-ah).length() > 0 && (bl-bh).length() > 0 )
+		if ( ((al-ah).length() > 0) && ((bl-bh).length() > 0) )
 			return (al+ah+bl+bh)*.25;
-		// TODO check for any 3d floors
-		for ( int i=0; i<l.frontsector.Get3DFloorCount(); i++ )
-		{
-		}
+		// check for 3d floors
+		bool floorfound = false;
+		Vector3 fal, fah, fbl, fbh;
 		for ( int i=0; i<l.backsector.Get3DFloorCount(); i++ )
 		{
+			let ff = l.backsector.Get3DFloor(i);
+			fal = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fah = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fbl = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			fbh = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			// skip if higher, we'll go with the lowest 3d floor (may not be right, but whatever)
+			if ( floorfound && (fah.z > ah.z) && (fbh.z > bh.z) && (fal.z > al.z) && (fbl.z > bl.z) ) continue;
+			al = fal;
+			ah = fah;
+			bl = fbl;
+			bh = fbh;
+			floorfound = true;
 		}
-		// TODO check for midtex
+		if ( floorfound ) return (al+ah+bl+bh)*.25;
+		for ( int i=0; i<l.frontsector.Get3DFloorCount(); i++ )
+		{
+			let ff = l.frontsector.Get3DFloor(i);
+			fal = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fah = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fbl = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			fbh = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			// skip if higher, we'll go with the lowest 3d floor (may not be right, but whatever)
+			if ( floorfound && (fah.z > ah.z) && (fbh.z > bh.z) && (fal.z > al.z) && (fbl.z > bl.z) ) continue;
+			al = fal;
+			ah = fah;
+			bl = fbl;
+			bh = fbh;
+			floorfound = true;
+		}
+		if ( floorfound ) return (al+ah+bl+bh)*.25;
+		// check for midtex
+		if ( !l.sidedef[0].GetTexture(1).IsNull() )
+		{
+			double ofs = l.sidedef[0].GetTextureYOffset(1);
+			Vector2 siz = TexMan.GetScaledSize(l.sidedef[0].GetTexture(1));
+			Vector2 tofs = TexMan.GetScaledOffset(l.sidedef[0].GetTexture(1));
+			ofs += tofs.y;
+			ofs *= l.sidedef[0].GetTextureYScale(1);
+			siz.y *= l.sidedef[0].GetTextureYScale(1);
+			if ( l.flags&Line.ML_DONTPEGBOTTOM )
+			{
+				al = (l.v1.p,highestfloor.ZAtPoint(l.v1.p)+ofs);
+				bl = (l.v2.p,highestfloor.ZAtPoint(l.v2.p)+ofs);
+				ah = al+(0,0,siz.y);
+				bh = bl+(0,0,siz.y);
+			}
+			else
+			{
+				ah = (l.v1.p,lowestceiling.ZAtPoint(l.v1.p)+ofs);
+				bh = (l.v2.p,lowestceiling.ZAtPoint(l.v2.p)+ofs);
+				al = ah-(0,0,siz.y);
+				bl = bh-(0,0,siz.y);
+			}
+			return (al+ah+bl+bh)*.25;
+		}
+		if ( !l.sidedef[1].GetTexture(1).IsNull() )
+		{
+			double ofs = l.sidedef[1].GetTextureYOffset(1);
+			Vector2 siz = TexMan.GetScaledSize(l.sidedef[1].GetTexture(1));
+			Vector2 tofs = TexMan.GetScaledOffset(l.sidedef[1].GetTexture(1));
+			ofs += tofs.y;
+			ofs *= l.sidedef[1].GetTextureYScale(1);
+			siz.y *= l.sidedef[1].GetTextureYScale(1);
+			if ( l.flags&Line.ML_DONTPEGBOTTOM )
+			{
+				al = (l.v1.p,highestfloor.ZAtPoint(l.v1.p)+ofs);
+				bl = (l.v2.p,highestfloor.ZAtPoint(l.v2.p)+ofs);
+				ah = al+(0,0,siz.y);
+				bh = bl+(0,0,siz.y);
+			}
+			else
+			{
+				ah = (l.v1.p,lowestceiling.ZAtPoint(l.v1.p)+ofs);
+				bh = (l.v2.p,lowestceiling.ZAtPoint(l.v2.p)+ofs);
+				al = ah-(0,0,siz.y);
+				bl = bh-(0,0,siz.y);
+			}
+			return (al+ah+bl+bh)*.25;
+		}
 		// just use the intersection
 		al = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
 		ah = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
@@ -2315,7 +2392,7 @@ Class SWWMHandler : EventHandler
 		if ( !e.IsSaveGame && !e.IsReopen )
 		{
 			// for skipping over merged exit lines (sharing vertices)
-			Array<int> skipme;
+			Array<Line> skipme;
 			skipme.Clear();
 			// find exit lines, and use lines that aren't exits
 			for ( int i=0; i<level.lines.Size(); i++ )
@@ -2323,7 +2400,7 @@ Class SWWMHandler : EventHandler
 				Line l = level.lines[i];
 				if ( !SWWMUtility.IsExitLine(l) )
 					continue;
-				if ( skipme.Find(l.Index()) < skipme.Size() ) continue;
+				if ( skipme.Find(l) < skipme.Size() ) continue;
 				Vector3 lpos = UseLinePos(l);
 				// look for connected lines
 				int xcnt = 1;
@@ -2333,7 +2410,20 @@ Class SWWMHandler : EventHandler
 					{
 						let l2 = l.frontsector.Lines[j];
 						if ( (l2 == l) || (l2.special != l.special) ) continue;
-						skipme.Push(l2.Index());
+						// needs to have a point in common with this one or any of the added lines
+						if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+						{
+							bool nomatches = true;
+							for ( int k=0; k<skipme.Size(); k++ )
+							{
+								if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
+									continue;
+								nomatches = false;
+								break;
+							}
+							if ( nomatches ) continue;
+						}
+						skipme.Push(l2);
 						xcnt++;
 						lpos += UseLinePos(l2);
 					}
@@ -2344,7 +2434,20 @@ Class SWWMHandler : EventHandler
 					{
 						let l2 = l.backsector.Lines[j];
 						if ( (l2 == l) || (l2.special != l.special) ) continue;
-						skipme.Push(l2.Index());
+						// needs to have a point in common with this one or any of the added lines
+						if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+						{
+							bool nomatches = true;
+							for ( int k=0; k<skipme.Size(); k++ )
+							{
+								if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
+									continue;
+								nomatches = false;
+								break;
+							}
+							if ( nomatches ) continue;
+						}
+						skipme.Push(l2);
 						xcnt++;
 						lpos += UseLinePos(l2);
 					}

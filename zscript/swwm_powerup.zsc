@@ -136,10 +136,10 @@ Class GhostSnd : Actor
 	{
 		+NOBLOCKMAP;
 		+NOGRAVITY;
+		+NOINTERACTION;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !master )
 		{
 			Destroy();
@@ -228,6 +228,7 @@ Class GhostArtifactX : Actor
 		+NOGRAVITY;
 		+NOCLIP;
 		+DONTSPLASH;
+		+NOINTERACTION;
 		Radius 0.1;
 		Height 0;
 		+FLOATBOB;
@@ -309,10 +310,10 @@ Class GravSnd : Actor
 	{
 		+NOBLOCKMAP;
 		+NOGRAVITY;
+		+NOINTERACTION;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !master )
 		{
 			Destroy();
@@ -473,10 +474,10 @@ Class InvinciSnd : Actor
 	{
 		+NOBLOCKMAP;
 		+NOGRAVITY;
+		+NOINTERACTION;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !master )
 		{
 			Destroy();
@@ -585,8 +586,6 @@ Class InvinciballPower : Powerup
 	{
 		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
 			return;	// this damage type is ignored, so don't flash
-		if ( damageType == 'Ynykron' )
-			return;	// can't block this
 		if ( damageType == 'EndLevel' )
 			return; // don't trigger on endlevel damage
 		if ( damage > 0 )
@@ -700,10 +699,10 @@ Class RageSnd : Actor
 	{
 		+NOBLOCKMAP;
 		+NOGRAVITY;
+		+NOINTERACTION;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !master )
 		{
 			Destroy();
@@ -1273,13 +1272,14 @@ Class CompanionLamp : Actor
 	void A_Moth()
 	{
 		// count up
+		special1++;
 		for ( int i=0; i<moff.Size(); i++ )
 		{
 			if ( moff[i] && (moff[i].lamp == self) && moff[i].isEntranced() ) continue;
 			moff.Delete(i);
 			i--;
 		}
-		if ( (GetAge()%35) || Random[Moth](0,9) || (moff.Size() >= 30) ) return;
+		if ( (special1%35) || Random[Moth](0,9) || (moff.Size() >= 30) ) return;
 		// spawn a moth at a random offset
 		double ang = FRandom[Moth](0,360);
 		double pt = FRandom[Moth](-30,30);
@@ -1614,10 +1614,10 @@ Class BarrierSnd : Actor
 	{
 		+NOBLOCKMAP;
 		+NOGRAVITY;
+		+NOINTERACTION;
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !master )
 		{
 			Destroy();

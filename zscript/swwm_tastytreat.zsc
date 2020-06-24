@@ -172,6 +172,17 @@ Class CandyBeam : Actor
 		b.special2 = special2;
 		b.frame = frame;
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	Default
 	{
 		Obituary "$O_CANDYGUN";
@@ -186,6 +197,7 @@ Class CandyBeam : Actor
 		+DONTSPLASH;
 		+INTERPOLATEANGLES;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -214,6 +226,7 @@ Class CandyPop : Actor
 		+ROLLSPRITE;
 		+ROLLCENTER;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	void FlashPlayer( int str, double rad )
 	{
@@ -397,6 +410,7 @@ Class CandyMagTrail : Actor
 		+NOGRAVITY;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+NOINTERACTION;
 		Scale 2.4;
 		Alpha 0.7;
 	}
@@ -713,6 +727,7 @@ Class CandyBulletImpact : Actor
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -788,6 +803,7 @@ Class CandyRing : Actor
 		+NOBLOCKMAP;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	States
 	{

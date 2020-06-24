@@ -1739,6 +1739,7 @@ Class DashTrail : Actor
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1785,6 +1786,7 @@ Class DashTrail2 : Actor
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1826,6 +1828,7 @@ Class DemolitionistRadiusShockwaveTail : Actor
 		+DONTSPLASH;
 		+WALLSPRITE;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -1910,6 +1913,7 @@ Class DemolitionistShockwave : Actor
 		+NOTELEPORT;
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1999,6 +2003,7 @@ Class DemolitionistSelfLight : Actor
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
+		+NOINTERACTION;
 	}
 	bool activelight()
 	{
@@ -2013,7 +2018,6 @@ Class DemolitionistSelfLight : Actor
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( !target || !(target is 'Demolitionist') || (Demolitionist(target).selflight != self) )
 		{
 			Destroy();

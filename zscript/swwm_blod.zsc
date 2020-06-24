@@ -105,6 +105,7 @@ Class mkBloodSpray : Actor
 Class mkBloodDrop : Actor
 {
 	int deadtimer;
+	bool dead;
 
 	Default
 	{
@@ -125,7 +126,7 @@ Class mkBloodDrop : Actor
 	{
 		Super.Tick();
 		if ( waterlevel > 0 ) A_FadeOut();
-		if ( !InStateSequence(CurState,ResolveState("Spawn")) )
+		if ( dead )
 		{
 			deadtimer++;
 			if ( deadtimer > 350 ) A_FadeOut(.01);
@@ -150,6 +151,7 @@ Class mkBloodDrop : Actor
 	Death:
 		SBLD E 0
 		{
+			invoker.dead = true;
 			A_StartSound("misc/blooddrop",volume:.1);
 			if ( pos.z > floorz )
 			{

@@ -11,6 +11,7 @@ Class PusherImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -55,6 +56,7 @@ Class BigPusherImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -374,7 +376,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(3,3,3,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(1200);
-			int dmg = int(10+invoker.chargelevel*5);
+			int dmg = int(5+invoker.chargelevel*3);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));

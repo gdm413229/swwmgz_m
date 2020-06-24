@@ -224,6 +224,7 @@ Class SpreadImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -270,6 +271,7 @@ Class SlugImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -452,7 +454,7 @@ Class DragonBreathArm : Actor
 				l.ReactionTime = int(2+8*(ReactionTime/20.));
 				l.target = p;
 			}
-			if ( !(GetAge()%2) )
+			if ( !(ReactionTime%2) )
 			{
 				SWWMHandler.DoBlast(self,150-6*reactiontime,1000+200*reactiontime,bHITOWNER?null:target);
 				A_Explode(1+int(reactiontime/1.5),150-6*reactiontime,bHITOWNER?XF_HURTSOURCE:0);
@@ -561,6 +563,7 @@ Class SaltImpact : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+FOILINVUL;
+		+NOINTERACTION;
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
@@ -640,6 +643,7 @@ Class SaltBeam : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		+FOILINVUL;
+		+NOINTERACTION;
 	}
 
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
@@ -748,15 +752,22 @@ Class SaltBeam : Actor
 
 	override void Tick()
 	{
-		Super.Tick();
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
-		if ( Random[Spreadgun](-2,GetAge()/10) == 0 )
+		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
 		{
 			SWWMHandler.DoBlast(self,64,5000,target);
 			A_Explode(5+Accuracy,64,0);
 		}
-		if ( ((special2%5) || GetAge()) && !special1 ) SpreadOut();
+		args[2]++;
+		if ( ((special2%5) || args[2]) && !special1 ) SpreadOut();
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 
 	States
@@ -1007,6 +1018,7 @@ Class OnFire : Actor
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOEXTREMEDEATH;
+		+NOINTERACTION;
 		Obituary "$O_SPREADGUN_BLACK";
 	}
 }
@@ -1046,6 +1058,7 @@ Class OnFireTrail : Actor
 	}
 	action void A_Flame()
 	{
+		special1++;
 		if ( waterlevel > 0 )
 			vel *= .9;
 		else
@@ -1059,7 +1072,7 @@ Class OnFireTrail : Actor
 			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
 			s.vel += vel*.3;
 			s.alpha *= alpha*2;
-			s.scale *= .5+abs(scale.x)*(.5+GetAge()/6.);
+			s.scale *= .5+abs(scale.x)*(.5+special1/6.);
 			Destroy();
 			return;
 		}
@@ -1069,7 +1082,7 @@ Class OnFireTrail : Actor
 			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
 			s.vel += vel*.3;
 			s.alpha *= alpha*1.5;
-			s.scale *= .5+abs(scale.x)*(.5+GetAge()/6.);
+			s.scale *= .5+abs(scale.x)*(.5+special1/6.);
 		}
 	}
 	Default
@@ -1084,8 +1097,6 @@ Class OnFireTrail : Actor
 		+NOGRAVITY;
 		+NOFRICTION;
 		+SLIDESONWALLS;
-		+ACTIVATEPCROSS;
-		+ACTIVATEIMPACT;
 		+NOTELEPORT;
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;
@@ -1093,6 +1104,7 @@ Class OnFireTrail : Actor
 		+DROPOFF;
 		+NOBLOCKMONST;
 		+DONTSPLASH;
+		+NOINTERACTION;
 	}
 	States
 	{
@@ -1269,6 +1281,7 @@ Class BallImpact : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1600,6 +1613,7 @@ Class GoldenImpact : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+FOILINVUL;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1728,6 +1742,7 @@ Class GoldenSubImpact : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+FOILINVUL;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{
@@ -1853,6 +1868,7 @@ Class GoldenSubSubImpact : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+FOILINVUL;
+		+NOINTERACTION;
 	}
 	override void PostBeginPlay()
 	{

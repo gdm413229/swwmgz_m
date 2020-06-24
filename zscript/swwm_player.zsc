@@ -995,11 +995,11 @@ Class Demolitionist : PlayerPawn
 		// center pitch
 		double dpitch = clamp(deltaangle(pitch,0),-6,6);
 		if ( abs(dpitch) < 3. ) pitch = 0.;
-		else pitch = A_SetPitch(pitch+dpitch,SPF_INTERPOLATE);
+		else A_SetPitch(pitch+dpitch,SPF_INTERPOLATE);
 		// add roll
 		double droll = clamp(deltaangle(roll,50)*.5,-5,5);
 		if ( abs(droll) < 2. ) roll = 50.;
-		else roll = A_SetRoll(roll+droll,SPF_INTERPOLATE);
+		else A_SetRoll(roll+droll,SPF_INTERPOLATE);
 		player.mo.CalcHeight();
 		if ( player.damagecount ) player.damagecount--;
 		if ( player.poisoncount ) player.poisoncount--;

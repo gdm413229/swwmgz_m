@@ -739,16 +739,15 @@ Class Demolitionist : PlayerPawn
 				orient = orient.qmul(angles);
 				double npitch, nangle, nroll;
 				[npitch, nangle, nroll] = orient.to_euler();
-				angle = nangle;
-				pitch = npitch;
-				roll = nroll;
+				A_SetAngle(nangle,SPF_INTERPOLATE);
+				A_SetPitch(npitch,SPF_INTERPOLATE);
+				A_SetRoll(nroll,SPF_INTERPOLATE);
 			}
 			else
 			{
-				angle += guideangle;
-				pitch += guidepitch;
-				pitch = clamp(pitch,player.MinPitch,player.MaxPitch);
-				roll += guideroll;
+				A_SetAngle(angle+guideangle,SPF_INTERPOLATE);
+				A_SetPitch(clamp(pitch+guidepitch,player.MinPitch,player.MaxPitch),SPF_INTERPOLATE);
+				A_SetRoll(roll+guideroll,SPF_INTERPOLATE);
 			}
 			if ( (abs(roll) <= 1./65536.) && (abs(pitch) <= 1./65536.) )
 			{
@@ -793,7 +792,7 @@ Class Demolitionist : PlayerPawn
 				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
 				else vel = vel+accel/TICRATE;
 			}
-			if ( abs(roll) > 0. ) roll += clamp(deltaangle(roll,0),-3.,3.);
+			if ( abs(roll) > 0. ) A_SetRoll(roll+clamp(deltaangle(roll,0),-3.,3.),SPF_INTERPOLATE);
 		}
 		guideangle *= .9;
 		guidepitch *= .9;
@@ -996,11 +995,11 @@ Class Demolitionist : PlayerPawn
 		// center pitch
 		double dpitch = clamp(deltaangle(pitch,0),-6,6);
 		if ( abs(dpitch) < 3. ) pitch = 0.;
-		else pitch += dpitch;
+		else pitch = A_SetPitch(pitch+dpitch,SPF_INTERPOLATE);
 		// add roll
 		double droll = clamp(deltaangle(roll,50)*.5,-5,5);
 		if ( abs(droll) < 2. ) roll = 50.;
-		else roll += droll;
+		else roll = A_SetRoll(roll+droll,SPF_INTERPOLATE);
 		player.mo.CalcHeight();
 		if ( player.damagecount ) player.damagecount--;
 		if ( player.poisoncount ) player.poisoncount--;

@@ -357,7 +357,7 @@ Class BlueShell : Ammo
 	Default
 	{
 		Tag "$T_BLUESHELLS";
-		Stamina 1500;
+		Stamina 2500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 24;
@@ -404,7 +404,7 @@ Class BlackShell : Ammo
 	Default
 	{
 		Tag "$T_BLACKSHELLS";
-		Stamina 3500;
+		Stamina 4000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsFuck.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 12;
@@ -444,7 +444,7 @@ Class PurpleShell : Ammo
 	Default
 	{
 		Tag "$T_PURPLESHELLS";
-		Stamina 1200;
+		Stamina 1500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
@@ -554,7 +554,7 @@ Class EvisceratorShell : Ammo
 	{
 		Tag "$T_EVISHELLS";
 		Inventory.PickupMessage "$T_EVISHELL";
-		Stamina 2500;
+		Stamina 3000;
 		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 24;
@@ -562,6 +562,11 @@ Class EvisceratorShell : Ammo
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,4);
 	}
 	States
 	{
@@ -593,7 +598,7 @@ Class HellblazerMissiles : Ammo
 	{
 		Tag "$T_HELLMISSILES";
 		Inventory.PickupMessage "$T_HELLMISSILE";
-		Stamina 6000;
+		Stamina 8000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 30;
@@ -601,6 +606,11 @@ Class HellblazerMissiles : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,3);
 	}
 	States
 	{
@@ -627,7 +637,7 @@ Class HellblazerCrackshots : Ammo
 	{
 		Tag "$T_HELLCLUSTERS";
 		Inventory.PickupMessage "$T_HELLCLUSTER";
-		Stamina 8000;
+		Stamina 15000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerCrackshot.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 18;
@@ -635,6 +645,11 @@ Class HellblazerCrackshots : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,2);
 	}
 	States
 	{
@@ -661,7 +676,7 @@ Class HellblazerRavagers : Ammo
 	{
 		Tag "$T_HELLBURNINATORS";
 		Inventory.PickupMessage "$T_HELLBURNINATOR";
-		Stamina 12000;
+		Stamina 25000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 9;
@@ -669,6 +684,11 @@ Class HellblazerRavagers : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -695,7 +715,7 @@ Class HellblazerWarheads : Ammo
 	{
 		Tag "$T_HELLNUKES";
 		Inventory.PickupMessage "$T_HELLNUKE";
-		Stamina 25000;
+		Stamina 40000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerWarhead.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
@@ -703,6 +723,11 @@ Class HellblazerWarheads : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -761,7 +786,7 @@ Class SilverBulletAmmo : Ammo
 	{
 		Tag "$T_XSBMAG";
 		Inventory.PickupMessage "$T_XSBMAG";
-		Stamina 70000;
+		Stamina 80000;
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 3;

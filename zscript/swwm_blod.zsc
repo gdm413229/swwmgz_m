@@ -435,6 +435,13 @@ Class BlueBloodReference : Actor
 		BloodColor "Blue";
 	}
 }
+Class PurpleBloodReference : Actor
+{
+	Default
+	{
+		BloodColor "Purple";
+	}
+}
 
 // corpse thump handler
 Class CorpseFallTracker : Thinker
@@ -484,7 +491,7 @@ Class SWWMGoreHandler : EventHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		// vanilla blood color changes
-		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") )
+		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )
 		{
 			let gb = Actor.Spawn("GreenBloodReference");
 			e.Thing.CopyBloodColor(gb);
@@ -495,6 +502,12 @@ Class SWWMGoreHandler : EventHandler
 			let bb = Actor.Spawn("BlueBloodReference");
 			e.Thing.CopyBloodColor(bb);
 			bb.Destroy();
+		}
+		else if ( (e.Thing.GetClass() == "Wizard") || (e.Thing.GetClass() == "Heresiarch") || (e.Thing.GetClass() == "Sorcerer2") )
+		{
+			let pb = Actor.Spawn("PurpleBloodReference");
+			e.Thing.CopyBloodColor(pb);
+			pb.Destroy();
 		}
 	}
 

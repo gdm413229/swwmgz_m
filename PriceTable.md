@@ -19,22 +19,22 @@ respective weapon.
    Red Shell	| 500
    Green Shell	| 800
    White Shell	| 1000
-   Blue Shell	| 1500
-   Black Shell	| 3500
-   Purple Shell	| 1200
+   Blue Shell	| 2500
+   Black Shell	| 4000
+   Purple Shell	| 1500
    Golden Shell | N/A
   Wallbuster	| 35000
   Eviscerator	| 50000
-   Evisc. Shell	| 2500
+   Evisc. Shell	| 3000
   Hellblazer	| 90000
-   Missiles	| 6000
-   Crackshots	| 8000
-   Ravagers	| 12000
-   Warheads	| 25000
+   Missiles	| 8000
+   Crackshots	| 15000
+   Ravagers	| 25000
+   Warheads	| 40000
   Sparkster S-5	| 200000
    Spark Unit	| 50000
   Silver Bullet	| 400000
-   S.B. Mag	| 70000
+   S.B. Mag	| 80000
   Candygun	| 1000000
    Candy Mag	| 100000
    Spare Gun	| 600000
@@ -54,7 +54,7 @@ These will be available long after the first release.
   Quadravol	| 80000
    Quad. Ammo	| 10000
   Blackfire Ig.	| 120000
-   Blackfire C.	| 15000
+   Blackfire C.	| 20000
   Sparkster x3	| 250000
    Nokron Unit	| 35000
    Kinylum Unit	| 25000

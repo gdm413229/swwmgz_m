@@ -3216,27 +3216,29 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'RocketBox') || (e.Replacee == 'PhoenixRodHefty') || (e.Replacee == 'MaceHefty') )
 		{
-			switch ( Random[Replacements](0,9) )
+			switch ( Random[Replacements](0,11) )
 			{
 			case 0:
 			case 1:
 			case 2:
 			case 3:
+			case 4:
 				if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerMissiles';
 				else e.Replacement = 'HellblazerMissileMag';
 				break;
-			case 4:
 			case 5:
 			case 6:
+			case 7:
+			case 8:
 				if ( Random[Replacements](0,3) ) e.Replacement = 'HellblazerCrackshots';
 				else e.Replacement = 'HellblazerCrackshotMag';
 				break;
-			case 7:
-			case 8:
+			case 9:
+			case 10:
 				if ( Random[Replacements](0,8) ) e.Replacement = 'HellblazerRavagers';
 				else e.Replacement = 'HellblazerRavagerMag';
 				break;
-			case 9:
+			case 11:
 				if ( Random[Replacements](0,10) ) e.Replacement = 'HellblazerWarheads';
 				else e.Replacement = 'HellblazerWarheadMag';
 				break;
@@ -3244,8 +3246,12 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'Cell') || (e.Replacee == 'SkullRodAmmo') )
 		{
-			if ( Random[Replacements](0,6) ) e.Replacement = 'SparkUnit';
-			else e.Replacement = 'SilverBulletAmmo';
+			if ( Random[Replacements](0,6) )
+			{
+				if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerRavagers';
+				else e.Replacement = 'HellblazerWarheads';
+			}
+			else e.Replacement = 'SparkUnit';
 		}
 		else if ( (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') )
 		{
@@ -3255,6 +3261,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'CellPack') || (e.Replacee == 'SkullRodHefty') )
 		{
 			if ( !Random[Replacements](0,2) ) e.Replacement = 'SilverBulletAmmo';
+			else if ( Random[Replacements](0,1) ) e.Replacement = 'SparkUnit';
 			else e.Replacement = 'CandyGunAmmo';
 		}
 		else if ( e.Replacee == 'Mana1' ) e.Replacement = 'FabricatorTier1';

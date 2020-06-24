@@ -11,7 +11,7 @@ Class EvisceratorChunkLight : DynamicLight
 	override void Tick()
 	{
 		Super.Tick();
-		if ( !target )
+		if ( !EvisceratorChunk(target) || EvisceratorChunk(target).justdied )
 		{
 			Destroy();
 			return;
@@ -98,7 +98,6 @@ Class EvisceratorChunk : Actor
 		+DONTBOUNCEONSKY;
 		+CANBOUNCEWATER;
 		+INTERPOLATEANGLES;
-		+HITTRACER;
 		+ROLLSPRITE;
 		+ROLLCENTER;
 		Scale 0.4;
@@ -135,7 +134,7 @@ Class EvisceratorChunk : Actor
 		A_SetTranslation(tls[clamp(int(lifetime*10),0,7)]);
 		if ( !Random[Eviscerator](0,3) && (lifetime < .7) )
 		{
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = .2*vel+(FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1));
 			s.scale *= .5;
 			s.alpha *= scale.x*max(0,.7-lifetime)*1.5;

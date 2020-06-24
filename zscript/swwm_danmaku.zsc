@@ -228,6 +228,9 @@ Class EvisceratorChunk : Actor
 		// with this we can guarantee that the chunk won't just keep on dealing damage
 		// this is something I wish Unreal's boulders did
 		lasthit = victim;
+		// don't knock back if already dead
+		int oldamt = SWWMDamageAccumulator.GetAmount(victim);
+		if ( victim.health-oldamt > 0 ) SWWMHandler.DoKnockback(victim,vel.unit(),12000);
 		// gather damage
 		SWWMDamageAccumulator.Accumulate(victim,GetMissileDamage(0,0),self,target,damagetype);
 		int amt = SWWMDamageAccumulator.GetAmount(victim);
@@ -242,7 +245,6 @@ Class EvisceratorChunk : Actor
 			}
 			return 1;
 		}
-		SWWMHandler.DoKnockback(victim,vel.unit(),12000);
 		return -1;
 	}
 	States

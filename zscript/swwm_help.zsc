@@ -45,7 +45,7 @@ Class SWWMHelpMenu : GenericMenu
 
 	override void Init( Menu parent )
 	{
-		curpage = CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).GetInt();
+		curpage = 0;
 		prevpage = -1;
 		fadetic = gametic;
 		pagedir = 0;
@@ -66,7 +66,6 @@ Class SWWMHelpMenu : GenericMenu
 				MenuSound("menu/choose");
 				prevpage = curpage;
 				curpage++;
-				CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).SetInt(curpage);
 				pagedir = 1;
 				fadetic = gametic;
 			}
@@ -81,7 +80,6 @@ Class SWWMHelpMenu : GenericMenu
 				MenuSound("menu/choose");
 				prevpage = curpage;
 				curpage--;
-				CVar.GetCVar('swwm_lasthelp',players[consoleplayer]).SetInt(curpage);
 				pagedir = -1;
 				fadetic = gametic;
 			}
@@ -145,54 +143,49 @@ Class SWWMHelpMenu : GenericMenu
 	{
 		Font fnt = LangFont(TewiFont);
 		int h = fnt.GetHeight();
-		String str = "";
+		String hdr = "", txt = "";
 		BrokenLines l;
 		int maxlen = 0, lh;
 		double y = 0;
 		switch ( page )
 		{
 		case PAGE_STORY:
-			if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_HELP_STORYHERETIC");
-			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_HELP_STORYHEXEN");
-			else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize("$SWWM_HELP_STORYSTRIFE");
-			else str = StringTable.Localize("$SWWM_HELP_STORYDOOM");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_STORY");
+			hdr = StringTable.Localize("$SWWM_HELP_STORY");
+			if ( gameinfo.gametype&GAME_Heretic ) txt = StringTable.Localize("$SWWM_HELP_STORYHERETIC");
+			else if ( gameinfo.gametype&GAME_Hexen ) txt = StringTable.Localize("$SWWM_HELP_STORYHEXEN");
+			else if ( gameinfo.gametype&GAME_Strife ) txt = StringTable.Localize("$SWWM_HELP_STORYSTRIFE");
+			else txt = StringTable.Localize("$SWWM_HELP_STORYDOOM");
 			break;
 		case PAGE_DEMO:
-			str = StringTable.Localize("$SWWM_HELP_DEMOTXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_DEMO");
+			hdr = StringTable.Localize("$SWWM_HELP_DEMO");
+			txt = StringTable.Localize("$SWWM_HELP_DEMOTXT");
 			break;
 		case PAGE_ARSENAL1:
-			str = StringTable.Localize("$SWWM_HELP_ARSE1TXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_ARSE1");
+			hdr = StringTable.Localize("$SWWM_HELP_ARSE1");
+			txt = StringTable.Localize("$SWWM_HELP_ARSE1TXT");
 			break;
 		case PAGE_ARSENAL2:
-			str = StringTable.Localize("$SWWM_HELP_ARSE2TXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_ARSE2");
+			hdr = StringTable.Localize("$SWWM_HELP_ARSE2");
+			txt = StringTable.Localize("$SWWM_HELP_ARSE2TXT");
 			break;
 		case PAGE_ARSENAL3:
-			str = StringTable.Localize("$SWWM_HELP_ARSE3TXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_ARSE3");
+			hdr = StringTable.Localize("$SWWM_HELP_ARSE3");
+			txt = StringTable.Localize("$SWWM_HELP_ARSE3TXT");
 			break;
 		case PAGE_KBASE:
-			str = StringTable.Localize("$SWWM_HELP_KBASETXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_KBASE");
+			hdr = StringTable.Localize("$SWWM_HELP_KBASE");
+			txt = StringTable.Localize("$SWWM_HELP_KBASETXT");
 			break;
 		case PAGE_TECH:
-			str = StringTable.Localize("$SWWM_HELP_TECHTXT");
-			l = fnt.BreakLines(str,600);
-			str = StringTable.Localize("$SWWM_HELP_TECH");
+			hdr = StringTable.Localize("$SWWM_HELP_TECH");
+			txt = StringTable.Localize("$SWWM_HELP_TECHTXT");
 			break;
 		}
-		if ( str && (l.Count() > 0) )
+		if ( txt && hdr )
 		{
+			l = fnt.BreakLines(txt,480);
 			lh = l.Count()*h;
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(hdr)/2,origin.y+200-(h*4+lh)/2,hdr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			for ( int i=0; i<l.Count(); i++ )
 			{
 				int len = l.StringWidth(i);
@@ -203,24 +196,19 @@ Class SWWMHelpMenu : GenericMenu
 				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 				y += h;
 			}
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-(h*4+lh)/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			return;
 		}
-		str = String.Format("(Unknown help page #%d)",page);
-		Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(str)/2,origin.y+200-h/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+		txt = String.Format("(Unknown help page #%d)",page);
+		Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(txt)/2,origin.y+200-h/2,txt,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 	}
 
 	override void Drawer()
 	{
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
-		double ar = Screen.GetAspectRatio();
 		Vector2 tsize = TexMan.GetScaledSize(bgtex);
-		double sar = tsize.x/tsize.y;
-		Vector2 vsize;
-		if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
-		else if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
-		else vsize = tsize;
+		double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));
+		Vector2 vsize = (Screen.GetWidth(),Screen.GetHeight())/zoom;
 		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_ColorOverlay,Color(192,0,0,0),DTA_Alpha,.8);
 		double hs;
 		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 400) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.)/2.;

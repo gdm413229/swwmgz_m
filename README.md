@@ -299,9 +299,9 @@ Popularly known as the "Death Cannon". One of the four ultimate weapons
 commissioned by the mad dictator god Nedoshiaan, before his defeat.
 
 Primary fire initiates the charge process for one shot. Once it has completed
-charging, using either fire button will release the shot. Make sure to keep
-some distance from your targets, because the resulting blast has a pretty
-nasty amount of splash damage.
+charging, pressing it again then will release the shot. Make sure to keep
+some distance from your targets, because the resulting blast might catch you in
+its violent chain reaction.
 
 Secondary fire swaps the orientation of the ammo box, allowing for a "reverse
 charge". The result of this is an implosion of massive strength located at a
@@ -470,10 +470,9 @@ messages are compressed with a multiplier suffix.
 
 Current score.
 
-The scoring system is pretty straightforward. Each thing you kill (even if not
-an enemy) will give you points according to a quarter of its base health,
-rounded up to the nearest multiple of 10 and capped to 1000, plus these bonuses
-(in order of application):
+The scoring system is pretty straightforward. Each enemy you kill will give you
+points according to a quarter of its base health, rounded up to the nearest
+multiple of 10 and capped to 1000, plus some bonuses (in order of application):
  * x1.25 for an overkill (enemy received twice its base health in damage).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered
    combos if multiple enemies are killed within 5 seconds of each other.

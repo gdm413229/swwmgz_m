@@ -27,13 +27,14 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, midcol, midbcol, midduration;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, midcol, midbcol, midduration;
 
 	// shared stuff
 	Vector2 ss, hs;
 	Vector2 ssb, hsb;
 	Vector2 ssn, hsn;
 	Vector2 sss, hss;
+	Vector2 ssi, hsi;
 	int margin;
 	double FracTic;
 	int chatopen;
@@ -359,6 +360,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !targetter ) targetter = CVar.GetCVar('swwm_targeter',players[consoleplayer]);
 		if ( !healthnums ) healthnums = CVar.GetCVar('swwm_healthnums',players[consoleplayer]);
 		if ( !scorenums ) scorenums = CVar.GetCVar('swwm_scorenums',players[consoleplayer]);
+		if ( !pois ) pois = CVar.GetCVar('swwm_pois',players[consoleplayer]);
 		if ( !maxtarg ) maxtarg = CVar.GetCVar('swwm_maxtargets',players[consoleplayer]);
 		if ( !maxscore ) maxscore = CVar.GetCVar('swwm_maxscorenums',players[consoleplayer]);
 		if ( !maxdamns ) maxdamns = CVar.GetCVar('swwm_maxdamnums',players[consoleplayer]);
@@ -404,7 +406,7 @@ Class SWWMStatusBar : BaseStatusBar
 		let cam = players[consoleplayer].camera;
 		Vector3 viewvec = (cos(viewrot.x)*cos(viewrot.y),sin(viewrot.x)*cos(viewrot.y),sin(-viewrot.y));
 		int sz;
-		if ( thesight )
+		if ( thesight && pois.GetBool() )
 		{
 			// update omnisight stuff
 			if ( intpoints.Size() != hnd.intpoints_cnt )
@@ -620,9 +622,9 @@ Class SWWMStatusBar : BaseStatusBar
 					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 				}
 				Font fnt = LangFont(mMiniwiFont);
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y-hsb.y*fnt.GetHeight()/2.)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y-hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsb.x*fnt.StringWidth(tag)/2.)/hsb.x,(vpos.y+hsb.y*fnt.GetHeight()/2.)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y+hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true);
 			}
 		}
 		// targetting array
@@ -1237,6 +1239,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !bscale ) bscale = CVar.GetCVar('swwm_barscale',players[consoleplayer]);
 		if ( !nscale ) nscale = CVar.GetCVar('swwm_numscale',players[consoleplayer]);
 		if ( !sscale ) sscale = CVar.GetCVar('swwm_scrscale',players[consoleplayer]);
+		if ( !iscale ) iscale = CVar.GetCVar('swwm_poiscale',players[consoleplayer]);
 		BeginHUD();
 		if ( hscale.GetInt() <= 0 ) hs = GetHUDScale();
 		else
@@ -1268,6 +1271,13 @@ Class SWWMStatusBar : BaseStatusBar
 			hss.y = hss.x;
 		}
 		sss = (Screen.GetWidth()/hss.x,Screen.GetHeight()/hss.y);
+		if ( iscale.GetInt() <= 0 ) hsi = GetHUDScale();
+		else
+		{
+			hsi.x = iscale.GetInt();
+			hsi.y = hsi.x;
+		}
+		ssi = (Screen.GetWidth()/hsi.x,Screen.GetHeight()/hsi.y);
 		FracTic = TicFrac;
 		DrawTarget();
 		DrawScore();

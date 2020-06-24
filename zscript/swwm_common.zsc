@@ -2106,7 +2106,7 @@ Class ForcedFallerDamager : Thinker
 			Destroy();
 			return;
 		}
-		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ());
+		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ())||mybody.bNOGRAVITY;
 		if ( wasflying && !isflying && (lastvelz < -23) && !level.monsterfallingdamage && !(mybody.floorsector.flags&Sector.SECF_NOFALLINGDAMAGE) && swwm_doomfall )
 		{
 			// big hurt

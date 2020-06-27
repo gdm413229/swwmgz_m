@@ -398,7 +398,7 @@ certain encounters, or prepare surprise attacks.
 
 This powerup lasts 60 seconds and cannot be toggled.
 
-### Ragekit, replaces Berserk, Tome of Power, Dark Servant, Dragonskin Bracers
+### Ragekit, replaces Berserk, Tome of Power, Dark Servant, Boots of Speed
 
 The ragekit is a special item that has some... interesting effects.
 
@@ -415,7 +415,7 @@ from previous SWWM versions.
 For 60 seconds, you can walk on hazardous floors or even take a nice swim in
 corrosive slime, scorching magma, freezing waters, or other extremes.
 
-### Gravity suppressor, replaces Wings of Wrath, Boots of Speed
+### Gravity suppressor, replaces Wings of Wrath
 
 Continuing with the "replace jump boots with flight" decision in previous mods,
 this time you'll be getting a proper easy to control antigravity powerup.
@@ -430,7 +430,7 @@ Artifact.
 
 You're fucking invincible for a total of 30 seconds.
 
-### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator
+### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator, Dragonskin Bracers
 
 Each of these you pick up increase ammo capacity by half of its base value, up
 to 5x, and also give you some extra ammo like a normal backpack.

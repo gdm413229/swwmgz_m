@@ -145,7 +145,7 @@ Class CandyBeam : Actor
 		invoker.nextpos = level.Vec3Offset(t.Results.HitPos,normal);
 		invoker.nextdir = (dir+cos(a)*y*s+sin(a)*z*s).unit();
 	}
-	action void A_Spread( Class<Actor> pop = "CandyPop", Class<Actor> smk = "SWWMSmoke" )
+	action void A_Spread( Class<Actor> pop = "CandyPop", Class<Actor> smk = "SWWMHalfSmoke" )
 	{
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
 		Vector3 pvel = .1*tdir+(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.1,.3);
@@ -378,7 +378,7 @@ Class CandyMagArm : Actor
 			vel = (vel*.1+(FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7))).unit()*spd;
 			A_Explode(80+reactiontime*7,50+6*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
 			s.special1 = Random[ExploS](2,7);
@@ -455,7 +455,7 @@ Class CandyMagArmBig : CandyMagArm
 			vel = (vel*.1+(FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5))).unit()*spd;
 			A_Explode(120+reactiontime*10,100+8*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
 			s.special1 = Random[ExploS](2,7);

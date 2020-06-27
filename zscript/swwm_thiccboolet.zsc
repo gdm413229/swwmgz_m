@@ -403,7 +403,7 @@ Class SilverBullet : SWWMWeapon
 			if ( !Random[Boolet](0,1) ) continue;
 			Vector3 ofs = level.Vec3Offset(origin,dir*i);
 			if ( !level.IsPointInLevel(ofs) ) continue;
-			let b = Spawn("SWWMSmoke",ofs);
+			let b = Spawn("SWWMHalfSmoke",ofs);
 			b.Scale *= FRandom[Boolet](.9,1.6);
 			b.alpha *= .5;
 			b.special1 = Random[Boolet](0,2);

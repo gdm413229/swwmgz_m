@@ -199,9 +199,11 @@ Class mkBloodSmoke : Actor
 		A_FadeOut(.03);
 		A_SetScale(scale.x*1.02);
 		if ( tics > 0 ) tics--;
-		if ( !SetState(CurState.NextState) )
-			return;
-		tics = CurState.tics;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{

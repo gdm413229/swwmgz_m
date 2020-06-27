@@ -168,7 +168,7 @@ Class YnykronImpactArm : Actor
 			A_CountDown();
 			Spawn("YnykronImpactTrail",pos);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.special1 = Random[ExploS](1,3);
 			s.scale *= 2.4;
@@ -245,16 +245,6 @@ Class YnykronImpact : Actor
 			s.special1 = Random[ExploS](2,10);
 			s.scale *= 3.;
 			s.alpha *= .4;
-		}
-		if ( bAMBUSH )
-		{
-			numpt = Random[ExploS](2,4);
-			for ( int i=0; i<numpt; i++ )
-			{
-				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,24);
-				let s = Spawn("SWWMChip",pos);
-				s.vel = pvel;
-			}
 		}
 		Spawn("YnykronImpactLight",pos);
 		Spawn("YnykronImpactRing",pos);
@@ -371,49 +361,6 @@ Class YnykronTracer : LineTracer
 	}
 }
 
-Class YnykronBeamTrail : Actor
-{
-	override void PostBeginPlay()
-	{
-		Super.PostBeginPlay();
-		roll = FRandom[Ynykron](0,360);
-		SetState(FindState("Spawn")+Random[Ynykron](0,8));
-	}
-	override void Tick()
-	{
-		if ( isFrozen() ) return;
-		A_FadeOut(FRandom[Ynykron](.0005,.001));
-		if ( !CheckNoDelay() || (tics == -1) ) return;
-		if ( tics > 0 ) tics--;
-		while ( !tics )
-		{
-			if ( !SetState(CurState.NextState) )
-				return;
-		}
-	}
-	Default
-	{
-		RenderStyle "Add";
-		Radius 0.1;
-		Height 0;
-		Alpha .1;
-		+NOGRAVITY;
-		+NOBLOCKMAP;
-		+NOTELEPORT;
-		+DONTSPLASH;
-		+FORCEXYBILLBOARD;
-		+ROLLSPRITE;
-		+ROLLCENTER;
-		+NOINTERACTION;
-	}
-	States
-	{
-	Spawn:
-		MOTR ABCDEFGHI -1 Bright;
-		Stop;
-	}
-}
-
 Class YnykronBeam : Actor
 {
 	void SpreadOut()
@@ -439,12 +386,12 @@ Class YnykronBeam : Actor
 		}
 		for ( int i=0; i<t.Results.Distance; i+=32 )
 		{
-			if ( Random[Ynykron](0,8) ) continue;
-			let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*i));
-			b.Scale *= FRandom[Ynykron](1.6,1.8);
+			if ( Random[Ynykron](0,10) ) continue;
+			let b = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
+			b.Scale *= FRandom[Ynykron](1.6,2.8);
 			b.special1 = Random[Ynykron](3,10);
 			b.A_SetRenderStyle(.3,STYLE_AddShaded);
-			b.vel += x*FRandom[Ynykron](.1,.5);
+			b.vel += x*FRandom[Ynykron](-.2,.4);
 		}
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
@@ -501,7 +448,6 @@ Class YnykronBeam : Actor
 			b.angle = atan2(norm.y,norm.x);
 			b.pitch = asin(-norm.z);
 			b.A_SprayDecal("YnykronBlast",-172);
-			b.bAMBUSH = true;
 			if ( YnykronShot(master) ) YnykronShot(master).blastcount++;
 			// find exit point
 			int maxdist = (25600-special1);
@@ -522,7 +468,7 @@ Class YnykronBeam : Actor
 			}
 			return;
 		}
-		if ( ((special1%256) < 128) && !Random[Ynykron](0,3) )
+		if ( ((special1%256) < 128) && !Random[Ynykron](0,5) )
 			Spawn("YnykronBeamLight",level.Vec3Offset(pos,x*64));
 		if ( special1 >= 25600 )
 		{
@@ -531,7 +477,7 @@ Class YnykronBeam : Actor
 			for ( int i=0; i<numpt; i++ )
 			{
 				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*128));
-				b.Scale *= FRandom[Ynykron](.6,.8);
+				b.Scale *= FRandom[Ynykron](.6,1.8);
 				b.special1 = Random[Ynykron](1,2);
 				b.A_SetRenderStyle(.3,STYLE_AddShaded);
 				b.SetShade(Color(255,255,255));
@@ -553,15 +499,6 @@ Class YnykronBeam : Actor
 	{
 		if ( YnykronShot(master) )
 			YnykronShot(master).beamcount++;
-		// sprite trail
-		Vector3 x, y, z;
-		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		for ( int i=0; i<128; i+=8 )
-		{
-			if ( Random[Ynykron](0,3) ) return;
-			let t = Spawn("YnykronBeamTrail",level.Vec3Offset(pos,x*i));
-			t.Scale *= .15+.0005*(special1+i);
-		}
 	}
 	override void Tick()
 	{
@@ -689,7 +626,6 @@ Class DelayedWallBeam : Actor
 		b.angle = atan2(x.y,x.x);
 		b.pitch = asin(-x.z);
 		b.A_SprayDecal("YnykronBlast",-172);
-		b.bAMBUSH = true;
 		if ( YnykronShot(master) )
 			YnykronShot(master).blastcount++;
 		// trace back to get the proper "exit surface" so we can trigger lines if needed
@@ -797,7 +733,7 @@ Class YnykronShot : Actor
 				b.pitch = asin(-dir.z);
 				b.roll = FRandom[Ynykron](0,360);
 			}
-			rings += 4;
+			rings += 3;
 		}
 		Spawn("YnykronShotLight",level.Vec3Offset(pos,x*30));
 	}
@@ -947,11 +883,11 @@ Class Ynykron : SWWMWeapon
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*15+y*4);
-		int numpt = Random[Ynykron](40,80);
+		int numpt = Random[Ynykron](10,20);
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);
-			s.scale *= 2.4;
+			s.scale *= 3.;
 			s.alpha *= .4*invoker.specialf1;
 			s.special1 = Random[Ynykron](2,8);
 			s.vel += x*FRandom[Ynykron](-40.,-4.)*invoker.specialf1+y*FRandom[Ynykron](-1.,1.)+z*FRandom[Ynykron](-1.,1.);

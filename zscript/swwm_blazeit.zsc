@@ -213,7 +213,7 @@ Class HellblazerMissile : Actor
 		Vector3 traildir = -(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
 		for ( int i=0; i<3; i++ )
 		{
-			let s = Spawn("SWWMSmoke",level.Vec3Offset(pos,traildir*3));
+			let s = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,traildir*3));
 			s.SetShade(smokecol*Random[Hellblazer](48,63));
 			s.scale *= FRandom[Hellblazer](.8,1.2);
 			s.special1 = Random[Hellblazer](0,2);
@@ -759,7 +759,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		Vector3 traildir = -(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
 		for ( int i=0; i<2; i++ )
 		{
-			let s = Spawn("SWWMSmoke",level.Vec3Offset(pos,traildir*3));
+			let s = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,traildir*3));
 			s.SetShade(smokecol*Random[Hellblazer](48,63));
 			s.scale *= FRandom[Hellblazer](.6,.8);
 			s.special1 = Random[Hellblazer](0,1);
@@ -1045,7 +1045,7 @@ Class HellblazerRavagerArm : Actor
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			if ( !(ReactionTime%2) )
 			{
-				let s = Spawn("SWWMSmoke",pos);
+				let s = Spawn("SWWMHalfSmoke",pos);
 				s.vel = pvel+vel*.2;
 				s.SetShade(Color(4,2,2)*Random[ExploS](48,63));
 				s.special1 = Random[ExploS](2,4);
@@ -1124,7 +1124,7 @@ Class HellblazerWarheadArm : Actor
 			SWWMHandler.DoBlast(self,30+2*reactiontime,3000+500*reactiontime);
 			A_Explode(10+reactiontime*4,120+4*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(4,3,2)*Random[ExploS](48,63));
 			s.special1 = Random[ExploS](1,3);

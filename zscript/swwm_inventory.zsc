@@ -650,14 +650,14 @@ Class ParriedBuff : Inventory
 		Actor s;
 		if ( special1&1 )
 		{
-			s = Spawn("SWWMSmoke",Owner.pos);
+			s = Spawn("SWWMHalfSmoke",Owner.pos);
 			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,.6);
 			s.scale *= 1.2;
 			s.alpha *= .3;
 		}
 		if ( special1 > 1 )
 		{
-			s = Spawn("SWWMSmoke",Owner.pos);
+			s = Spawn("SWWMHalfSmoke",Owner.pos);
 			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,1.2);
 			s.scale *= 2.;
 			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);

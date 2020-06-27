@@ -69,7 +69,7 @@ Class ExplodiumMagArm : Actor
 			SWWMHandler.DoBlast(self,30+2*reactiontime,3000+500*reactiontime);
 			A_Explode(2+reactiontime/3,30+2*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMSmoke",pos);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
 			s.special1 = Random[ExploS](1,3);

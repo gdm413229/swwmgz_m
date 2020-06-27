@@ -464,7 +464,7 @@ Class DragonBreathArm : Actor
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			if ( !(ReactionTime%2) )
 			{
-				let s = Spawn("SWWMSmoke",pos);
+				let s = Spawn("SWWMHalfSmoke",pos);
 				s.vel = pvel+vel*.2;
 				s.SetShade(Color(1,1,1)*Random[ExploS](96,192));
 				s.special1 = Random[ExploS](2,4);
@@ -673,7 +673,7 @@ Class SaltBeam : Actor
 		for ( int i=4; i<t.Results.Distance; i+=8 )
 		{
 			if ( Random[Spreadgun](0,Stamina) ) continue;
-			let b = Actor.Spawn("SWWMSmoke",level.Vec3Offset(pos,x*i));
+			let b = Actor.Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
 			b.Scale *= FRandom[Spreadgun](.6,.8);
 			b.special1 = Random[Spreadgun](1,2);
 			b.A_SetRenderStyle(.3,STYLE_AddShaded);
@@ -1447,7 +1447,7 @@ Class TheBall : Actor
 		heat -= 0.004+0.0004*vel.length();
 		A_SoundVolume(CHAN_WEAPON,vel.length()/75.);
 		if ( heat <= 0 ) return;
-		let s = Spawn("SWWMSmoke",pos);
+		let s = Spawn("SWWMHalfSmoke",pos);
 		s.alpha *= heat;
 	}
 	void A_HandleBounce()

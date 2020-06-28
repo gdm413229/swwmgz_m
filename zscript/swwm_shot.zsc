@@ -195,9 +195,17 @@ Class SpreadSlugTracer : SpreadgunTracer
 				ent.hitactor = Results.HitActor;
 				ent.hitlocation = Results.HitPos;
 				ent.x = Results.HitVector;
-				ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
+				if ( (Results.HitActor.Health >= int(penetration)) || Results.HitActor.bNODAMAGE )
+				{
+					ent.hitdamage = int(penetration);
+					penetration = 0;
+				}
+				else
+				{
+					ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
+					penetration = max(0,penetration-ent.hitdamage);
+				}
 				hitlist.Push(ent);
-				penetration = max(0,penetration-ent.hitdamage);
 				if ( penetration <= 0 ) return TRACE_Stop;
 				return TRACE_Skip;
 			}

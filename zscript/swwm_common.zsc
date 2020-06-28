@@ -3761,6 +3761,8 @@ Class SWWMBrutalHandler : StaticEventHandler
 			break;
 		}
 		SetRandomSeed[bdscreen](Random[bdscreen]()+consoleplayer+MSTime());
+		if ( detected )
+			Console.Printf("\cg========\n\cgIf you have BD on your autoload, you really shouldn't.\n\cgIf you manually loaded it with this mod, why would you?\n\cgThey're not compatible and never will be.\n\cg========");
 	}
 
 	override void UiTick()
@@ -3821,6 +3823,8 @@ Class SWWMHDoomHandler : StaticEventHandler
 			break;
 		}
 		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
+		if ( detected )
+			Console.Printf("\cg========\n\cgHa ha very funny.\n\cgIf you want the Demolitionist to fuck some hot demon girls go commission a porn artist.\n\cg========");
 	}
 
 	override void UiTick()

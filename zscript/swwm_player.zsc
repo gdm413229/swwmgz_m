@@ -263,6 +263,12 @@ Class Demolitionist : PlayerPawn
 	override void GiveDefaultInventory()
 	{
 		Super.GiveDefaultInventory();
+		// reset score (optional)
+		if ( swwm_resetscore )
+		{
+			let creds = SWWMCredits.Find(player);
+			if ( creds ) creds.credits = creds.hcredits = 0;
+		}
 		// preloaded gun
 		let dp = DeepImpact(FindInventory("DeepImpact"));
 		if ( dp ) SWWMLoreLibrary.Add(player,"DeepImpact");
@@ -271,6 +277,16 @@ Class Demolitionist : PlayerPawn
 		SWWMLoreLibrary.Add(player,"ExplodiumGun");
 		eg.clipcount = 7;
 		eg.chambered = true;
+	}
+	override void ClearInventory()
+	{
+		Super.ClearInventory();
+		// reset score (optional)
+		if ( swwm_resetscore )
+		{
+			let creds = SWWMCredits.Find(player);
+			if ( creds ) creds.credits = creds.hcredits = 0;
+		}
 	}
 	override void PostBeginPlay()
 	{

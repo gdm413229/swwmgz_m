@@ -2185,6 +2185,9 @@ Class SWWMHandler : EventHandler
 
 	static int AddOneliner( String type, int level, int delay = 5 )
 	{
+		// only Demolitionist can play voice lines
+		if ( !(players[consoleplayer].mo is 'Demolitionist') )
+			return 0;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return 0;
 		String voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]).GetString();

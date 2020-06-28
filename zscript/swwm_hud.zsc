@@ -915,6 +915,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,xx,yy,astr2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 14;
 			}
+			xx = ss.x-(margin+13);
 			if ( CPlayer.ReadyWeapon.Ammo1 )
 			{
 				Screen.DrawTexture(GenericAmmoTex[2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);

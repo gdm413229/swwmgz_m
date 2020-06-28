@@ -74,9 +74,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
-		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) )
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 		{
 			// can't open this menu outside of the game or if dead
+			// also can't if you're not the Demolitionist
 			Close();
 			return;
 		}

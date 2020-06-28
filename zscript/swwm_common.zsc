@@ -737,7 +737,7 @@ Class SWWMLoreLibrary : Thinker
 		e.assoc = "$"..assoc;
 		e.read = false;
 		// "new lore" message
-		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) && (!menuactive || (menuactive == Menu.OnNoPause)) )
+		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) && (!menuactive || (menuactive == Menu.OnNoPause)) && (myplayer.mo is 'Demolitionist') )
 			Console.Printf(StringTable.Localize("$SWWM_NEWLORE"));
 		lastaddtic = gametic;
 		// sorted add

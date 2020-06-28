@@ -756,6 +756,12 @@ Class RagekitPower : Powerup
 	{
 		Super.InitEffect();
 		if ( !Owner ) return;
+		if ( !(Owner is 'Demolitionist') )
+		{
+			// only usable by Demolitionist
+			Destroy();
+			return;
+		}
 		if ( Owner.player == players[consoleplayer] )
 			lastrage = SWWMHandler.AddOneliner("ragekit",2,20);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
@@ -932,6 +938,7 @@ Class Omnisight : Inventory
 		Inventory.PickupMessage "$I_OMNISIGHT";
 		Inventory.MaxAmount 1;
 		Inventory.InterHubAmount 0;
+		Inventory.RestrictedTo "Demolitionist";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+COUNTITEM;

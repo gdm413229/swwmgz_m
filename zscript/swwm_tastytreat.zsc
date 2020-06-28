@@ -198,6 +198,7 @@ Class CandyBeam : Actor
 		+INTERPOLATEANGLES;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		+FOILINVUL;
 	}
 	States
 	{
@@ -227,6 +228,7 @@ Class CandyPop : Actor
 		+ROLLCENTER;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		+FOILINVUL;
 	}
 	void FlashPlayer( int str, double rad )
 	{
@@ -352,6 +354,7 @@ Class CandyMagArm : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		-NOGRAVITY;
+		+FOILINVUL;
 		Gravity 0.35;
 		BounceFactor 1.0;
 		Radius 4;
@@ -514,6 +517,7 @@ Class CandyGunProj : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
+		+FOILINVUL;
 	}
 	override void PostBeginPlay()
 	{
@@ -624,6 +628,7 @@ Class CandyMagProj : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
+		+FOILINVUL;
 	}
 	override void PostBeginPlay()
 	{
@@ -728,6 +733,7 @@ Class CandyBulletImpact : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		+FOILINVUL;
 	}
 	override void PostBeginPlay()
 	{
@@ -935,8 +941,8 @@ Class CandyGun : SWWMWeapon
 		{
 			int dmg = 900;
 			SWWMHandler.DoKnockback(d.HitActor,d.HitDir,72000);
-			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-			if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS|DMG_FOILINVUL,atan2(d.HitDir.y,d.HitDir.x));
+			if ( d.HitActor.bNOBLOOD )
 			{
 				let p = Spawn("SWWMBulletImpact",d.HitLocation);
 				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;

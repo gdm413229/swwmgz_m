@@ -33,6 +33,7 @@ Class SWWMDamageAccumulator : Thinker
 	int total;
 	Name type;
 	bool dontgib;
+	int flags;
 
 	override void Tick()
 	{
@@ -57,7 +58,7 @@ Class SWWMDamageAccumulator : Thinker
 		for ( int i=0; i<amounts.Size(); i++ )
 		{
 			if ( !victim ) break;
-			victim.DamageMobj(inflictor,source,amounts[i],type,DMG_THRUSTLESS);
+			victim.DamageMobj(inflictor,source,amounts[i],type,DMG_THRUSTLESS|flags);
 		}
 		// clean up
 		if ( inflictor )
@@ -68,7 +69,7 @@ Class SWWMDamageAccumulator : Thinker
 		Destroy();
 	}
 
-	static void Accumulate( Actor victim, int amount, Actor inflictor, Actor source, Name type, bool dontgib = false )
+	static void Accumulate( Actor victim, int amount, Actor inflictor, Actor source, Name type, bool dontgib = false, int flags = 0 )
 	{
 		if ( !victim ) return;
 		let ti = ThinkerIterator.Create("SWWMDamageAccumulator",STAT_USER);
@@ -92,6 +93,7 @@ Class SWWMDamageAccumulator : Thinker
 		match.source = source;
 		match.type = type;
 		match.dontgib = dontgib;
+		match.flags = flags;
 	}
 
 	static clearscope int GetAmount( Actor victim )

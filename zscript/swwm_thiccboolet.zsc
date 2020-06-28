@@ -419,9 +419,9 @@ Class SilverBullet : SWWMWeapon
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
 			int realdmg = t.HitList[i].HitDamage;
-			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot');
+			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',false,DMG_FOILINVUL);
 			SWWMHandler.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),realdmg*20.*FRandom[SilverBullet](.8,1.2));
-			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE )
+			if ( t.HitList[i].HitActor.bNOBLOOD )
 			{
 				let p = Spawn("SilverImpact",t.HitList[i].HitLocation);
 				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;

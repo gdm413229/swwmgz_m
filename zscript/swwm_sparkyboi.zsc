@@ -816,17 +816,29 @@ Class BiosparkComboImpactSub : Actor
 {
 	Default
 	{
+		Obituary "$O_SPARKSTER";
+		DamageType "Electricity";
 		RenderStyle "Add";
 		Scale 1.4;
 		Alpha .4;
 		Radius .1;
 		Height 0;
+		+FOILINVUL;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
 		+FORCEXYBILLBOARD;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( !bAMBUSH ) return;
+		SWWMHandler.DoBlast(self,300,10000);
+		A_Explode(200,300);
 	}
 	States
 	{
@@ -879,8 +891,8 @@ Class BiosparkComboImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoBlast(self,700,480000);
-		A_Explode(1500,700);
+		SWWMHandler.DoBlast(self,bAMBUSH?1200:700,480000);
+		A_Explode(bAMBUSH?1600+Args[0]*100:1500,bAMBUSH?1200:700);
 		A_QuakeEx(9,9,9,25,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -914,6 +926,7 @@ Class BiosparkComboImpact : Actor
 			s.vel = pvel;
 		}
 		numpt = Random[ExploS](6,8);
+		if ( bAMBUSH ) numpt -= Args[0]/2;
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
@@ -923,18 +936,37 @@ Class BiosparkComboImpact : Actor
 			s.angle = ang;
 			s.pitch = pt;
 			s.ReactionTime += Random[Sparkster](0,10);
+			if ( bAMBUSH ) s.ReactionTime += 4+Args[0]*4;
+		}
+		if ( bAMBUSH )
+		{
+			for ( int i=0; i<(Args[0]/2); i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("BiosparkBeam",pos);
+				s.target = target;
+				s.angle = ang;
+				s.pitch = pt;
+			}
 		}
 		Spawn("BiosparkExplLight2",pos);
 		FlashPlayer(600,3000);
 	}
 	void A_SparkSubExpl()
 	{
+		double mx = bAMBUSH?30.:20.;
 		special1++;
-		if ( special1 > 20 ) return;
-		double factor = (20-special1)/20.;
+		if ( special1 > mx ) return;
+		double factor = (mx-special1)/mx;
 		double invfct = 1.-factor;
+		if ( bAMBUSH )
+		{
+			factor *= 1.5;
+			invfct *= 1.5;
+		}
 		SWWMHandler.DoBlast(self,800*invfct,-10000*factor);
-		A_Explode(int(1500*factor),int(600*invfct));
+		A_Explode(int((1500+Args[0]*50)*factor),int(600*invfct));
 		int numpt = int(Random[ExploS](8,16)*factor);
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -964,17 +996,20 @@ Class BiosparkComboImpact : Actor
 			s.roll = FRandom[ExploS](0,360);
 		}
 		if ( special1%2 ) return;
-		numpt = int(Random[ExploS](2,5)*factor);
+		numpt = Random[ExploS](2,5);
+		if ( bAMBUSH ) numpt -= 2;
+		numpt = int(numpt*factor);
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
 			double pt = FRandom[ExploS](-90,90);
-			let s = Spawn("BiosparkArc",pos);
+			let s = Spawn(bAMBUSH?"BiosparkArcBig":"BiosparkArc",pos);
 			s.target = target;
 			s.master = self;
 			s.angle = ang;
 			s.pitch = pt;
 			s.ReactionTime += Random[Sparkster](0,int(10*factor));
+			if ( bAMBUSH ) s.ReactionTime += 2+Args[0]*2;
 		}
 	}
 	void A_SparkSubExpl2()
@@ -983,13 +1018,14 @@ Class BiosparkComboImpact : Actor
 		if ( (special2 > 30) || !(special2%2) ) return;
 		int numpt = Random[Sparkster](0,30-special2);
 		double ang, pt;
+		double mul = bAMBUSH?8:4;
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[Sparkster](0,360);
 			pt = FRandom[Sparkster](-90,90);
 			FLineTraceData d;
 			Vector3 HitNormal;
-			LineTrace(ang,FRandom[Sparkster](10,20)+4*special2,pt,TRF_THRUACTORS,data:d);
+			LineTrace(ang,FRandom[Sparkster](10,20)+mul*special2,pt,TRF_THRUACTORS,data:d);
 			hitnormal = -d.HitDir;
 			if ( d.HitType == TRACE_HitFloor )
 			{
@@ -1012,6 +1048,7 @@ Class BiosparkComboImpact : Actor
 			p.target = target;
 			p.scale *= 2-special2*.02;
 			p.alpha *= 1-special2*.02;
+			p.bAMBUSH = bAMBUSH;
 		}
 	}
 	States
@@ -1059,6 +1096,11 @@ Class BiosparkBeam : Actor
 				s.target = target;
 				s.angle = atan2(t.hitlist[i].x.y,t.hitlist[i].x.x);
 				s.pitch = asin(-t.hitlist[i].x.z);
+				if ( (t.hitlist[i].hitactor is 'BigBiosparkHitbox') )
+				{
+					s.bAMBUSH = true;
+					s.Args[0] = t.hitlist[i].hitactor.target.special1;
+				}
 				t.hitlist[i].hitactor.target.Destroy();
 			}
 			else

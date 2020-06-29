@@ -534,11 +534,20 @@ Class Demolitionist : PlayerPawn
 		bool dummy;
 		Actor encroached;
 		[dummy, encroached] = TestMobjZ();
-		if ( encroached )
+		// add special check so corpses don't get stuck on top of monsters and players
+		if ( encroached && encroached.bSOLID && (bSOLID || encroached.bACTLIKEBRIDGE) )
 		{
 			// try to follow movement (this method is awkward but works with monsters)
 			if ( encroached == oldencroached )
-				SetOrigin(level.Vec3Offset(pos,level.Vec3Diff(oldencroachedpos,encroached.pos)),true);
+			{
+				Vector3 oldp = pos;
+				Vector3 newp = level.Vec3Offset(pos,level.Vec3Diff(oldencroachedpos,encroached.pos));
+				if ( level.IsPointInLevel(newp) )
+				{
+					SetOrigin(newp,true);
+					if ( !TestMobjLocation() ) SetOrigin(oldp,true);
+				}
+			}
 			oldencroached = encroached;
 			oldencroachedpos = encroached.pos;
 		}
@@ -548,7 +557,7 @@ Class Demolitionist : PlayerPawn
 			if ( oldencroached && (dashboost <= 0.) && (lastvelz >= -25) ) vel += oldencroached.vel+level.Vec3Diff(oldencroachedpos,oldencroached.pos);
 			oldencroached = null;
 		}
-		if ( encroached && encroached.bSHOOTABLE && (lastvelz <= 0) && !encroached.player )
+		if ( encroached && encroached.bSHOOTABLE && !encroached.bNODAMAGE && (lastvelz <= 0) && !(encroached is 'Demolitionist') )
 		{
 			if ( (lastvelz < -5) || !(level.maptime%5) )
 			{
@@ -839,14 +848,11 @@ Class Demolitionist : PlayerPawn
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
 		if ( player.cmd.buttons&BT_CROUCH ) dodge = (0,0,-1);	// death from above
-		if ( player.onground )
-		{
-			if ( !level.IsJumpingAllowed() ) dodge.z = 0;
-			else dodge.z = max(0,dodge.z);
-		}
+		if ( player.onground ) dodge.z = max(0,dodge.z);
 		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
 		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
-			dodge.z += (player.cmd.buttons&BT_CROUCH)?.05:.15;
+			dodge.z += (player.cmd.buttons&BT_CROUCH)?-.05:.15;
+		if ( !level.IsJumpingAllowed() ) dodge.z = min(0,dodge.z);
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) )
 		{
 			dashdir = dodge.unit();
@@ -1429,6 +1435,7 @@ Class Demolitionist : PlayerPawn
 	bool AllowCrouch()
 	{
 		if ( player.cmd.buttons&BT_JUMP ) return false;
+		if ( InStateSequence(CurState,FindState("Dash")) ) return false;	// no crouch during dash
 		if ( swwm_crouchjump ) return true;	// allowed
 		if ( (waterlevel >= 2) || bNOGRAVITY ) return false;	// no crouch while swimming/floating
 		if ( !player.onground ) return false;	// no crouch while in air

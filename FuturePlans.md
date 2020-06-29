@@ -20,7 +20,7 @@ after the first release.
   - Pong minigame
   - Selling items at the store
 * Achievements
-* Collectable items
+* Collectable items (will recycle Chanceboxes for this)
   - Saya Miyamoto - My Maid Is A Sex Robot (Volumes 1/2/3)
   - Mashiro Plushie (May cause her to appear)
   - The Black Rat's Coven - Walpurgisnacht (Debut album)
@@ -35,15 +35,17 @@ after the first release.
   - Hoagie (Can't eat it, but looks delicious)
   - Lithium - Volume One (A work of art, one of the finest graphic novels)
   - [Heretic] Demolitionist Plush ("You're getting famous, Demo-chan")
-  - [Heretic] Lord Vilkreath - Fundamentals of Puzzle Design ("The hell is this crap?")
+  - [Heretic] Firemace ("What kind of ridiculous weapon is this?")
   - [Heretic] Doomguy Action Figure ("Oh, he gets one too?")
   - [Heretic] Tyketto's Tome of Power ("I think I heard it talk once")
   - [Heretic] Quartz Flask ("Tastes funny")
+  - [Heretic] Haunted Saya Bean Plush (Eats your snacks and calls you a horny)
+  - [Hexen] Lord Vilkreath - Fundamentals of Puzzle Design ("The hell is this crap?")
   - [Hexen] Toot Froot™ Peach Juice ("The taste reminds me of Kirin")
-  - [Hexen] Haunted Saya Bean Plush (Eats your snacks and calls you a horny)
   - [Hexen] Kirin Plushie ("I don't know who made it but I love it")
   - [Hexen] Akkouxhei Milk Bread (Absolutely delicious, in moderation)
   - [Hexen] Obelisk of the Golden Vale ("I puked out my guts when I touched that fucking thing")
+  - [Hexen] Saya Miyamoto - I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie?! ("I wrote this in three days")
   - ... and more as I come up with them
 * 4komas on the intermission screen
 * Actually make a fancy titlemap

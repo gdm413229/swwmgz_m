@@ -69,6 +69,13 @@ Class GrilledCheeseSandwich : Inventory
 			return;	// this damage type is ignored by the player, so it does not affect us
 		if ( damageType == 'EndLevel' )
 			return; // don't trigger on endlevel damage
+		if ( damageType == 'Telefrag' )
+		{
+			if ( source.player == Owner.player )
+				return;	// we can't avoid voodoo telefrag, it would break things
+			else
+				Owner.DamageMobj(Owner,Owner,damage,damageType,flags); // kill what attempted the telefrag
+		}
 		if ( (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
 			newdamage = 0;

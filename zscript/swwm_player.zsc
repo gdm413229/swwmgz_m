@@ -479,6 +479,7 @@ Class Demolitionist : PlayerPawn
 			selflight.target = self;
 			selflight.Tick();
 		}
+		if ( player.mo != self ) return;	// no voodoo dolls past this point
 		oldlagvel = lagvel;
 		oldlagready = lagready;
 		if ( player.weaponstate&WF_WEAPONBOBBING ) lagready = lagready*.9+.1;

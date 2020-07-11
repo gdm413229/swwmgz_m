@@ -1,27 +1,37 @@
-Fundamental things:
- - Ynykron Artifact
+Fundamental things before beta:
+ - Ynykron Artifact altfire
 
-Not so fundamental things:
+Not so fundamental things during beta:
  - Extra Demolitionist animations (swimming, additional gestures)
+ - Item detection button (highlights nearby, visible items)
+ - Dual wielding Explodium Gun
+ - Quick grenade function (Explodium Mag)
+ - Mag refilling system (no more wasted ammo)
+ - Randomized vanilla monster retagging with multiple options
+ - Fun options
+   - Omnibusting (all weapons can bust walls)
+   - Infinite fuel
+   - Confetti gibs
+ - Keen replacement (need ideas)
+ - Achievements
+ - Collectables
 
-Extra things:
- - Art for custom intermission
+Extra things for later:
+ - More art for custom intermission
    - Commission fanart or something idk
    - Draw some 4Komas myself
  - Titlemap stuff
    - A background with a bit more flair than just the fuzz shader.
    - Some sort of flyby featuring the Demolitionist booting up, closeups of
      weapons/items etc.
- - Dual wielding Explodium Gun
- - Quick grenade function (Explodium Mag)
- - Mag refilling system (no more wasted ammo)
- - Randomized vanilla monster retagging with multiple options
  - Japanese localization
- - Keen replacement (need ideas)
+ - Extra Demolitionist Menu tabs
  - Mod trailer video
 
-Very extra things:
+Very extra things for the future:
+ - DLC
  - Strife support
    - Rewrite all the game's dialogue
    - Rewrite all the shop systems and other things
    - Rewrite the cutscenes
+ - Saya and Ibuki companion add-ons

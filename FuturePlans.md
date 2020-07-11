@@ -34,6 +34,7 @@ after the first release.
   - Frispy™ Tasty Corn Snack (Saya's favorite)
   - Hoagie (Can't eat it, but looks delicious)
   - Lithium - Volume One (A work of art, one of the finest graphic novels)
+  - PISS Whiskey ("Is it actually piss or is that just the brand name? Either way, I don't want to know what's inside")
   - [Heretic] Demolitionist Plush ("You're getting famous, Demo-chan")
   - [Heretic] Firemace ("What kind of ridiculous weapon is this?")
   - [Heretic] Doomguy Action Figure ("Oh, he gets one too?")

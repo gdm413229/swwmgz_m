@@ -497,8 +497,8 @@ Class HellblazerWarhead : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("WumboScorch",150);
 		A_SetScale(7.);
-		SWWMHandler.DoBlast(self,500,600000);
-		A_Explode(2500,500);
+		SWWMHandler.DoBlast(self,600,600000);
+		A_Explode(3000,600);
 		A_NoGravity();
 		A_QuakeEx(9,9,9,150,0,12000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:4000,rollIntensity:2.);
 		A_StopSound(CHAN_BODY);
@@ -539,8 +539,8 @@ Class HellblazerWarhead : HellblazerMissile
 	{
 		if ( special1 < 40 )
 		{
-			SWWMHandler.DoBlast(self,300+special1*10,600000-special1*12000);
-			A_Explode(200-special1*5,300+special1*10);
+			SWWMHandler.DoBlast(self,600+special1*15,600000-special1*12000);
+			A_Explode(320-special1*8,600+special1*15);
 		}
 		special1++;
 		if ( (special1 <= 30) && !(special1%2) )
@@ -553,7 +553,7 @@ Class HellblazerWarhead : HellblazerMissile
 				pt = FRandom[Hellblazer](-90,90);
 				FLineTraceData d;
 				Vector3 HitNormal;
-				LineTrace(ang,FRandom[Hellblazer](30,40)+10*special1,pt,TRF_THRUACTORS,data:d);
+				LineTrace(ang,FRandom[Hellblazer](30,40)+20*special1,pt,TRF_THRUACTORS,data:d);
 				hitnormal = -d.HitDir;
 				if ( d.HitType == TRACE_HitFloor )
 				{
@@ -1078,7 +1078,7 @@ Class HellblazerWarheadTrail : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+NOINTERACTION;
-		Scale 1.5;
+		Scale 2.4;
 	}
 	States
 	{
@@ -1112,7 +1112,7 @@ Class HellblazerWarheadArm : Actor
 		double ang, pt;
 		ang = FRandom[ExploS](0,360);
 		pt = FRandom[ExploS](-90,90);
-		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](10.,25.);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](20.,35.);
 	}
 	States
 	{
@@ -1121,14 +1121,14 @@ Class HellblazerWarheadArm : Actor
 		{
 			A_CountDown();
 			Spawn("HellblazerWarheadTrail",pos);
-			SWWMHandler.DoBlast(self,30+2*reactiontime,3000+500*reactiontime);
-			A_Explode(10+reactiontime*4,120+4*reactiontime);
+			SWWMHandler.DoBlast(self,120+3*reactiontime,3000+500*reactiontime);
+			A_Explode(30+reactiontime*5,120+3*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
 			s.SetShade(Color(4,3,2)*Random[ExploS](48,63));
 			s.special1 = Random[ExploS](1,3);
-			s.scale *= 4.;
+			s.scale *= 6.;
 			s.alpha *= 0.1+.4*(ReactionTime/15.);
 		}
 		Wait;

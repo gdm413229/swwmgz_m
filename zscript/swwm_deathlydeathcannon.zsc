@@ -70,6 +70,7 @@ Class IDontFeelSoGood : Thinker
 
 	static void DeletThis( Actor whomst )
 	{
+		if ( !whomst || (whomst.Health > 0) ) return;
 		let ti = ThinkerIterator.Create("IDontFeelSoGood",STAT_USER);
 		IDontFeelSoGood i;
 		while ( i = IDontFeelSoGood(ti.Next()) )
@@ -86,7 +87,13 @@ Class IDontFeelSoGood : Thinker
 			Destroy();
 			return;
 		}
-		if ( goner.Health > 0 ) return;
+		if ( goner.Health > 0 )
+		{
+			goner.bINVISIBLE = goner.default.bINVISIBLE;
+			goner.A_ChangeLinkFlags(!goner.default.bNOBLOCKMAP);
+			Destroy();
+			return;
+		}
 		// special handling for some bosses:
 		// - D'Sparil does not spawn, he's already gone
 		// - Korax doesn't leave ghosts
@@ -199,6 +206,37 @@ Class YnykronImpactTrail : Actor
 	}
 }
 
+Class YnykronDelayedImpact : Actor
+{
+	Vector3 ofs;
+
+	Default
+	{
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		special1++;
+		if ( special1 < 3 )
+		{
+			if ( tracer ) SetOrigin(level.Vec3Offset(tracer.pos,ofs),true);
+			return;
+		}
+		let b = Spawn("YnykronImpact",pos);
+		b.target = target;
+		b.master = master;
+		b.angle = atan2(dirto.y,dirto.x);
+		b.pitch = asin(-dirto.z);
+		b.special1 = special2;
+		if ( YnykronShot(master) )
+			YnykronShot(master).blastcount++;
+		Destroy();
+	}
+}
+
 Class YnykronImpact : Actor
 {
 	Default
@@ -222,45 +260,9 @@ Class YnykronImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		// no need to call A_AlertMonsters on this, all monsters on the entire map were already alerted by the initial shot
+		// no need to call A_AlertMonsters if all monsters on the entire map were already alerted by the initial shot
+		if ( swwm_ynykronimpact && (!special1 || swwm_extraalert) ) A_AlertMonsters();
 		A_QuakeEx(4,4,4,50,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollintensity:.6);
-		if ( YnykronShot(master) )
-		{
-			if ( YnykronShot(master).lastimpact < gametic )
-			{
-				master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special2?.2:1.,.0);
-				YnykronShot(master).lastimpact = gametic+(special2?3:5);
-			}
-		}
-		else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special2?.2:1.,.0);
-		Scale *= FRandom[ExploS](0.8,1.1);
-		Scale.x *= RandomPick[ExploS](-1,1);
-		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](3,5);
-		for ( int i=0; i<numpt; i++ )
-		{
-			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,8);
-			let s = Spawn("SWWMSmoke",pos);
-			s.vel = pvel;
-			s.special1 = Random[ExploS](2,10);
-			s.scale *= 3.;
-			s.alpha *= .4;
-		}
-		Spawn("YnykronImpactLight",pos);
-		Spawn("YnykronImpactRing",pos);
-		numpt = Random[ExploS](0,2);
-		for ( int i=0; i<numpt; i++ )
-		{
-			let s = Spawn("YnykronImpactArm",pos);
-			s.target = target;
-		}
-	}
-	override void Tick()
-	{
-		Super.Tick();
-		if ( isFrozen() ) return;
-		special1++;
-		if ( special1 != 3 ) return;
 		SWWMHandler.DoBlast(self,400,15000);
 		let bt = BlockThingsIterator.Create(self,500);
 		while ( bt.Next() )
@@ -286,17 +288,47 @@ Class YnykronImpact : Actor
 			}
 			else if ( t && YnykronShot(master) )
 				YnykronShot(master).hitlist.Push(t);
-			if ( swwm_capmcrange && (special2 > 3) ) continue;
+			if ( swwm_capmcrange && (special1 > 3) ) continue;
 			// spawn blast that will propagate
-			let b = Spawn("YnykronImpact",level.Vec3Offset(pos,dirto*min(300,dist)));
+			let b = Spawn("YnykronDelayedImpact",pos);
+			YnykronDelayedImpact(b).ofs = dirto*min(300,dist);
+			b.tracer = t;
 			b.target = target;
 			b.master = master;
 			b.angle = atan2(dirto.y,dirto.x);
 			b.pitch = asin(-dirto.z);
-			b.special2 = special2+(Random[Ynykron](0,4)?1:0);
-			b.special1 = Random[Ynykron](-2,0);
-			if ( YnykronShot(master) )
-				YnykronShot(master).blastcount++;
+			b.special2 = special1+(Random[Ynykron](0,4)?1:0);
+			b.special1 = Random[Ynykron](-3,0);
+		}
+		if ( YnykronShot(master) )
+		{
+			if ( YnykronShot(master).lastimpact < gametic )
+			{
+				master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.2:1.,.0);
+				YnykronShot(master).lastimpact = gametic+(special1?3:5);
+			}
+		}
+		else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.2:1.,.0);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](3,5);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,8);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.special1 = Random[ExploS](2,10);
+			s.scale *= 3.;
+			s.alpha *= .4;
+		}
+		Spawn("YnykronImpactLight",pos);
+		Spawn("YnykronImpactRing",pos);
+		numpt = Random[ExploS](special1?-2:0,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("YnykronImpactArm",pos);
+			s.target = target;
 		}
 	}
 	override void OnDestroy()
@@ -676,13 +708,13 @@ Class YnykronImpactRing : YnykronRing
 {
 	Default
 	{
-		Scale 1.;
+		Scale 1.5;
 		Alpha .8;
 	}
 	States
 	{
 	Spawn:
-		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.02);
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.03);
 		Stop;
 	}
 }

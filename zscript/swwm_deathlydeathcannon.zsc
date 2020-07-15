@@ -228,8 +228,8 @@ Class YnykronDelayedImpact : Actor
 		let b = Spawn("YnykronImpact",pos);
 		b.target = target;
 		b.master = master;
-		b.angle = atan2(dirto.y,dirto.x);
-		b.pitch = asin(-dirto.z);
+		b.angle = angle;
+		b.pitch = pitch;
 		b.special1 = special2;
 		if ( YnykronShot(master) )
 			YnykronShot(master).blastcount++;
@@ -261,7 +261,7 @@ Class YnykronImpact : Actor
 	{
 		Super.PostBeginPlay();
 		// no need to call A_AlertMonsters if all monsters on the entire map were already alerted by the initial shot
-		if ( swwm_ynykronimpact && (!special1 || swwm_extraalert) ) A_AlertMonsters();
+		if ( swwm_ynykronalert && (!special1 || swwm_extraalert) ) A_AlertMonsters();
 		A_QuakeEx(4,4,4,50,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollintensity:.6);
 		SWWMHandler.DoBlast(self,400,15000);
 		let bt = BlockThingsIterator.Create(self,500);

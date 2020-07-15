@@ -763,7 +763,7 @@ Class Demolitionist : PlayerPawn
 			}
 			else guideangle += .2*player.cmd.yaw*(360./65536.);
 			guidepitch -= .2*player.cmd.pitch*(360./65536.);
-			if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',players[consoleplayer]);
+			if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',player);
 			if ( player.centering ) guidepitch = clamp(deltaangle(pitch,0),-3.,3.);
 			if ( player.centering || !fly6dof.GetBool() ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
 			if ( fly6dof.GetBool() )
@@ -1416,7 +1416,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override bool Used( Actor user )
 	{
-		if ( !(user is 'Demolitionist') || !user.player ) return false;
+		if ( !(user is 'Demolitionist') || !player || (player.mo != self) ) return false;
 		if ( (user.player == players[consoleplayer]) && (health > 0) )
 		{
 			SWWMHandler.AddOneliner("greet",2);

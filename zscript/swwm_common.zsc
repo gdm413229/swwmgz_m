@@ -977,7 +977,7 @@ Class SWWMCombatTracker : Thinker
 	String mytag;
 	int updated, lasthealth, maxhealth;
 	DynamicValueInterpolator intp;
-	Vector3 pos, prevpos, oldpos;
+	Vector3 pos, prevpos, oldpos, oldprev;
 	PlayerInfo myplayer;
 	SWWMCombatTracker prev, next;
 	bool legged;
@@ -1015,6 +1015,7 @@ Class SWWMCombatTracker : Thinker
 		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
 		t.prevpos = level.Vec3Offset(target.prev,(0,0,t.height));
 		t.oldpos = target.pos;
+		t.oldprev = target.prev;
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -1056,9 +1057,10 @@ Class SWWMCombatTracker : Thinker
 			return;
 		}
 		// update
-		if ( mytarget && (mytarget.pos != oldpos) )
+		if ( mytarget && ((mytarget.pos != oldpos) || (mytarget.prev != oldprev)) )
 		{
 			oldpos = mytarget.pos;
+			oldprev = mytarget.prev;
 			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
 			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
 		}

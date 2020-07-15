@@ -282,6 +282,7 @@ Class SWWMHealth : Inventory abstract
 		SWWMHandler.HealthFlash(Owner.PlayerNumber());
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
+		AutoUseExtra();
 		return true;
 	}
 

@@ -8,6 +8,7 @@ Not so fundamental things during beta:
  - Quick grenade function (Explodium Mag)
  - Mag refilling system (no more wasted ammo)
  - Randomized vanilla monster retagging with multiple options
+ - Parrying for hitscan weapons (currently parrying only handles vanilla LineAttack)
  - Fun options
    - Omnibusting (all weapons can bust walls)
    - Infinite fuel
@@ -34,4 +35,9 @@ Very extra things for the future:
    - Rewrite all the game's dialogue
    - Rewrite all the shop systems and other things
    - Rewrite the cutscenes
+ - Support for additional IWADs beyond the "main four"
+   - Hacx
+   - Chex Quest
+   - Freedoom
  - Saya and Ibuki companion add-ons
+ - Modelled Monster/Decoration replacers for all IWADs done in the style of the mod

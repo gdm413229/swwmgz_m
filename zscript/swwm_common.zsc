@@ -977,7 +977,7 @@ Class SWWMCombatTracker : Thinker
 	String mytag;
 	int updated, lasthealth, maxhealth;
 	DynamicValueInterpolator intp;
-	Vector3 pos, prevpos;
+	Vector3 pos, prevpos, oldpos;
 	PlayerInfo myplayer;
 	SWWMCombatTracker prev, next;
 	bool legged;
@@ -1014,6 +1014,7 @@ Class SWWMCombatTracker : Thinker
 		t.height = t.mytarget.height;
 		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
 		t.prevpos = level.Vec3Offset(target.prev,(0,0,t.height));
+		t.oldpos = target.pos;
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -1049,9 +1050,15 @@ Class SWWMCombatTracker : Thinker
 
 	override void Tick()
 	{
-		// update
-		if ( mytarget )
+		if ( swwm_notrack )
 		{
+			Destroy();
+			return;
+		}
+		// update
+		if ( mytarget && (mytarget.pos != oldpos) )
+		{
+			oldpos = mytarget.pos;
 			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
 			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
 		}
@@ -1083,14 +1090,15 @@ Class SWWMCombatTracker : Thinker
 				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
 			}
 		}
-		int newhealth = mytarget.Health;
+		lasthealth = mytarget.Health;
+		intp.Update(lasthealth);
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
 		{
 			bool straifu = false;
-			if ( ((gameinfo.gametype&GAME_Strife) && !mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
+			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
 			// enemies within 2000mu that have us as target
-			if ( mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && mytarget.CheckSight(mytarget.target) && (mytarget.Vec3To(mytarget.target).length() < 2000) && !straifu ) updated = level.maptime+70;
+			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && (mytarget.Vec3To(mytarget.target).length() < 2000) && mytarget.CheckSight(mytarget.target) ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// any visible enemies within 600mu
@@ -1101,8 +1109,6 @@ Class SWWMCombatTracker : Thinker
 			// teh romero, only if visible
 			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
 		}
-		lasthealth = newhealth;
-		intp.Update(lasthealth);
 	}
 }
 
@@ -2116,13 +2122,13 @@ Class ForcedFallerDamager : Thinker
 	}
 	override void Tick()
 	{
-		if ( !mybody )
+		if ( !swwm_doomfall || !mybody )
 		{
 			Destroy();
 			return;
 		}
 		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ())||mybody.bNOGRAVITY;
-		if ( wasflying && !isflying && (lastvelz < -23) && !level.monsterfallingdamage && !(mybody.floorsector.flags&Sector.SECF_NOFALLINGDAMAGE) && swwm_doomfall )
+		if ( wasflying && !isflying && (lastvelz < -23) && !level.monsterfallingdamage && !(mybody.floorsector.flags&Sector.SECF_NOFALLINGDAMAGE) )
 		{
 			// big hurt
 			int dmg;
@@ -2565,7 +2571,8 @@ Class SWWMHandler : EventHandler
 		tookdamage[e.playernumber] = false;
 		lastkill[e.playernumber] = int.min;
 		// reset combat tracker
-		SWWMCombatTracker.Spawn(players[e.playernumber].mo);
+		if ( !swwm_notrack )
+			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
 		// initialize some player vars
 		if ( p.mo is 'Demolitionist' )
 		{
@@ -2583,8 +2590,10 @@ Class SWWMHandler : EventHandler
 	override void WorldThingRevived( WorldEvent e )
 	{
 		// reattach combat tracker
-		if ( (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
+		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
 			SWWMCombatTracker.Spawn(e.Thing);
+		if ( swwm_doomfall && e.Thing.bISMONSTER && !level.monsterfallingdamage )
+			ForcedFallerDamager.TrackBody(e.Thing);
 		if ( !(e.Thing is 'PlayerPawn') ) return;
 		// reset some vars
 		if ( e.Thing.playernumber() != -1 )
@@ -2987,7 +2996,7 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Thing is 'Inventory' )
 			CopyFloatBob(e.Thing);
-		if ( e.Thing.bISMONSTER && !level.monsterfallingdamage )
+		if ( swwm_doomfall && e.Thing.bISMONSTER && !level.monsterfallingdamage )
 			ForcedFallerDamager.TrackBody(e.Thing);
 		if ( e.Thing is 'Key' )
 		{
@@ -3000,7 +3009,7 @@ Class SWWMHandler : EventHandler
 			e.Thing.A_SetSize(20,70);
 		}
 		else if ( e.Thing is 'CommanderKeen' ) e.Thing.SetTag("$FN_KEEN");
-		if ( (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
+		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}
 
 	override void PostUiTick()

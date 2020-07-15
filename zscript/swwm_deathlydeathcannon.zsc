@@ -840,14 +840,18 @@ Class Ynykron : SWWMWeapon
 		A_SWWMFlash();
 		A_StopSound(CHAN_WEAPONEXTRA2);
 		A_StartSound(invoker.inverted?"ynykron/altfire":"ynykron/fire",CHAN_WEAPON,CHANF_OVERLAP,1.,.0);
-		// alert everyone in the entire map
-		int ns = level.Sectors.Size();
-		for ( int i=0; i<ns; i++ )
+		if ( !swwm_ynykronalert )
 		{
-			Sector s = level.Sectors[i];
-			for ( Actor a=s.thinglist; a; a=a.snext )
-				a.LastHeard = self;
+			// global alert
+			int ns = level.Sectors.Size();
+			for ( int i=0; i<ns; i++ )
+			{
+				Sector s = level.Sectors[i];
+				for ( Actor a=s.thinglist; a; a=a.snext )
+					a.LastHeard = self;
+			}
 		}
+		else A_AlertMonsters();	// full range alert
 		A_QuakeEx(9,9,9,4,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:2.5);
 		A_ZoomFactor(.7,ZOOM_INSTANT);
 		A_ZoomFactor(1.);

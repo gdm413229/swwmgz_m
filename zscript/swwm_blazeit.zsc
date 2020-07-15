@@ -1035,7 +1035,7 @@ Class HellblazerRavagerArm : Actor
 				l.ReactionTime = int(2+8*(ReactionTime/20.));
 				l.target = p;
 			}
-			if ( !(ReactionTime%2) )
+			if ( !(ReactionTime%1) )
 			{
 				SWWMHandler.DoBlast(self,250-6*reactiontime,1000+200*reactiontime,bHITOWNER?null:target);
 				A_Explode(4+reactiontime*4,250-6*reactiontime,bHITOWNER?XF_HURTSOURCE:0);

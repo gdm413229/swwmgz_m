@@ -792,7 +792,6 @@ Class Demolitionist : PlayerPawn
 			double jcmove = 0.;
 			if ( player.cmd.buttons&BT_JUMP ) jcmove += 4096.;
 			if ( player.cmd.buttons&BT_CROUCH ) jcmove -= 4096.;
-			if ( FastCheck() ) jcmove *= 2.;
 			if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
 			Vector3 x, y, z;
 			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -931,11 +930,10 @@ Class Demolitionist : PlayerPawn
 				wallclimb = false;
 				jumpactor = null;
 			}
-			double mult = FastCheck()?2.:1.;
 			if ( player.crouchoffset ) player.crouching = 1;
-			else if ( waterlevel >= 2 ) vel.z = 4*Speed*mult;
+			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
 			else if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) ) return;
-			else if ( bNoGravity ) vel.z = 3*mult;
+			else if ( bNoGravity ) vel.z = 3;
 			else if ( level.IsJumpingAllowed()
 				&& ((player.onground && (player.jumptics == 0))
 				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
@@ -1427,9 +1425,7 @@ Class Demolitionist : PlayerPawn
 	bool FastCheck( bool notfast = false )
 	{
 		if ( !player ) return false;
-		bool rslt = (player.cmd.buttons&BT_SPEED);
-		if ( !clrun ) clrun = CVar.GetCVar('cl_run',player);
-		if ( clrun.GetBool() ) rslt = !rslt;
+		bool rslt = max(abs(player.cmd.forwardmove),abs(player.cmd.sidemove))>6400;
 		if ( notfast ) rslt = !rslt;
 		return rslt;
 	}
@@ -1477,9 +1473,8 @@ Class Demolitionist : PlayerPawn
 		// crouch to swim/float down
 		if ( !totallyfrozen && (player.cmd.buttons&BT_CROUCH) )
 		{
-			double mult = FastCheck()?2.:1.;
-			if ( waterlevel >= 2 ) vel.z = -4*Speed*mult;
-			else if ( bNOGRAVITY ) vel.z = -3*mult;
+			if ( waterlevel >= 2 ) vel.z = -4*Speed;
+			else if ( bNOGRAVITY ) vel.z = -3;
 		}
 		bool wascrouching = !!(player.cmd.buttons&BT_CROUCH);
 		if ( !AllowCrouch() ) player.cmd.buttons &= ~BT_CROUCH;

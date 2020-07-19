@@ -58,3 +58,4 @@ after the first release.
 * Saya model, for scenes or something idk
 * Japanese localization???
 * Strife support, with rewritten dialogue
+* Monster/decoration replacements add-on

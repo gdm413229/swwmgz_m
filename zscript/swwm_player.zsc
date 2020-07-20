@@ -853,7 +853,7 @@ Class Demolitionist : PlayerPawn
 		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
 			dodge.z += (player.cmd.buttons&BT_CROUCH)?-.05:.15;
 		if ( !level.IsJumpingAllowed() ) dodge.z = min(0,dodge.z);
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) )
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) && (gamestate == GS_LEVEL) )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 10;
@@ -921,7 +921,7 @@ Class Demolitionist : PlayerPawn
 			}
 			if ( walljump ) break;
 		}
-		if ( player.cmd.buttons&BT_JUMP )
+		if ( (player.cmd.buttons&BT_JUMP) && (gamestate == GS_LEVEL) )
 		{
 			// cooldown before we can do these, avoids accidental walljumps off ledges we just fell off from
 			if ( level.maptime < (lastgroundtic+4) )
@@ -967,7 +967,7 @@ Class Demolitionist : PlayerPawn
 					{
 						if ( vel.z < 10. )
 							vel.z += jumpvelz+clamp(-pvelz*.8,0.,30.);
-						vel.xy += walldir*5*Speed;
+						vel.xy -= walldir*5*Speed;
 					}
 					if ( jumpactor && jumpactor.bSHOOTABLE )
 					{

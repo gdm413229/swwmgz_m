@@ -4,7 +4,7 @@ Class SWWMTitleStuff : EventHandler
 {
 	transient ui TextureID tex[3];
 	transient ui Font TewiFont, MPlusFont;
-	transient ui CVar lang;
+	transient ui CVar lang, fuzz;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	private ui Font LangFont( Font req )
@@ -28,11 +28,17 @@ Class SWWMTitleStuff : EventHandler
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShadedInverse');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShadedInverse');
 		Font fnt = LangFont(TewiFont);
-		Vector2 tsize = TexMan.GetScaledSize(tex[2]);
-		double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));
-		Vector2 vsize = (Screen.GetWidth(),Screen.GetHeight())/zoom;
-		Screen.DrawTexture(tex[2],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_ColorOverlay,Color(192,0,0,0));
-		Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/Thinker.TICRATE)*.05,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+		Vector2 tsize, vsize;
+		if ( !fuzz ) fuzz = CVar.GetCvar('swwm_fuzz',players[consoleplayer]);
+		if ( fuzz.GetBool() )
+		{
+			tsize = TexMan.GetScaledSize(tex[2]);
+			double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));
+			vsize = (Screen.GetWidth(),Screen.GetHeight())/zoom;
+			Screen.DrawTexture(tex[2],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_ColorOverlay,Color(192,0,0,0));
+			Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/Thinker.TICRATE)*.05,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+		}
+		else Screen.Dim("Black",1.,0,0,Screen.GetWidth(),Screen.GetHeight());
 		double ar = Screen.GetAspectRatio();
 		tsize = TexMan.GetScaledSize(tex[0]);
 		double sar = tsize.x/tsize.y;

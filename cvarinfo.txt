@@ -25,7 +25,7 @@ server int swwm_enforceautousearmor = 0;	// 1: server enforces auto use, -1: ser
 server int swwm_enforceautousehealth = 0;	// likewise for health
 server int swwm_enforceautouseammo = 0;		// likewise for fabricators
 user bool swwm_targeter = true;			// show targeter healthbars
-user bool swwm_targettags = false;		// show enemy tags above healthbars
+user bool swwm_targettags = true;		// show enemy tags above healthbars
 user bool swwm_healthnums = true;		// show damage/healing numbers
 user bool swwm_scorenums = true;		// show score numbers
 user bool swwm_scorebonus = true;		// show score bonuses
@@ -34,9 +34,9 @@ user bool swwm_fly6dof = false;			// flying uses 6dof movement, toggleable for t
 user bool swwm_othervoice = true;		// can hear other player's voice lines in coop
 user bool swwm_shaders = true;			// use pp shaders for some effects
 user bool swwm_earbuster = false;		// limits loudness of wallbuster fire sounds
-server bool swwm_revive = false;		// allows the player to do an "emergency reboot" when dying
-server int swwm_revivecooldown = 30;		// cooldown after using a revive, in seconds (0: no limit)
-user int swwm_intertype = 0;			// 0 - standard bg
+server bool swwm_revive = true;			// allows the player to do an "emergency reboot" when dying
+server int swwm_revivecooldown = 60;		// cooldown after using a revive, in seconds (0: no limit)
+user int swwm_intertype = 1;			// 0 - standard bg
 						// 1 - fanart
 						// 2 - 4komas
 server bool swwm_balluse = true;		// lead ball can "press" switches remotely
@@ -65,3 +65,4 @@ server bool swwm_capmcrange = false;		// cap ynykron chain reaction range
 server bool swwm_resetscore = true;		// reset score back to 0 on pistol starts
 server bool swwm_notrack = false;		// disables all combat tracking (useful to speed up slaughterwads)
 server bool swwm_ynykronalert = false;		// caps ynykron alert (so it doesn't wake everyone up)
+user bool swwm_menupause = true;		// pause the game when demolitionist menu is open

@@ -17,7 +17,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
 		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
-	transient CVar lang, fuzz;
+	transient CVar lang, fuzz, pauseme;
 	transient Font TewiFont, MPlusFont;
 	int curtab, oldtab;
 	// for scrolling
@@ -1465,6 +1465,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			Close();
 			return;
 		}
+		if ( !pauseme ) pauseme = CVar.GetCVar('swwm_menupause',players[consoleplayer]);
+		if ( pauseme.GetBool() ) menuactive = Menu.On;
+		else menuactive = Menu.OnNoPause;
 		if ( !multiplayer && ((curtab == TAB_TRADING) || (curtab == TAB_CHAT)) )
 		{
 			MenuSound("menu/demotab");

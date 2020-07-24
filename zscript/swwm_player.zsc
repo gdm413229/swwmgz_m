@@ -298,16 +298,16 @@ Class Demolitionist : PlayerPawn
 	{
 		vel += dashdir*dashboost;
 		player.vel = vel.xy;
-		if ( dashboost < 0.1 ) dashboost = 0.;
+		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
 			if ( swwm_extraalert ) A_AlertMonsters(800);
-			dashboost *= (player.cmd.buttons&BT_USER2)?.8:.1;
+			dashboost *= (player.cmd.buttons&BT_USER2)?.9:.1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
 		dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
-		fuelcooldown = max(60,fuelcooldown);
+		fuelcooldown = max(30,fuelcooldown);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
 			SetStateLabel("DashEnd");
 	}
@@ -315,7 +315,7 @@ Class Demolitionist : PlayerPawn
 	{
 		vel += (0,0,1)*dashboost;
 		player.vel = vel.xy;
-		if ( dashboost < 0.1 ) dashboost = 0.;
+		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
 			if ( swwm_extraalert ) A_AlertMonsters(800);

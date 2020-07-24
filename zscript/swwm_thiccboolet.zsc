@@ -56,8 +56,8 @@ Class SilverAirRip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,50,2000.,target);
-		A_Explode(10,50,0);
+		SWWMHandler.DoBlast(self,80,2000.,target);
+		A_Explode(40,80,0);
 		Destroy();
 	}
 }
@@ -80,9 +80,9 @@ Class SilverImpact : Actor
 	{
 		Super.PostBeginPlay();
 		SWWMHandler.DoBlast(self,100,8000.);
-		A_Explode(40,100);
+		A_Explode(100,100);
 		if ( swwm_extraalert ) A_AlertMonsters(2500);
-		A_QuakeEx(4,4,4,20,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
+		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )
 		{
 			Destroy();
@@ -186,7 +186,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 				{
 					ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
 					int killdamage = min(Results.HitActor.health,int(penetration));
-					penetration = max(0,penetration-killdamage*.6);
+					penetration = max(0,penetration-killdamage*.4);
 				}
 				hitlist.Push(ent);
 				if ( penetration <= 0 ) return TRACE_Stop;
@@ -203,7 +203,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 					Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
 					if ( level.IsPointInLevel(ofs) )
 					{
-						penetration = max(0,penetration-i*6);
+						penetration = max(0,penetration-i*4);
 						let wp = new("WallPenetrate");
 						wp.hitpos = Results.HitPos;
 						wp.hitdir = Results.HitVector;
@@ -248,7 +248,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 				Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
 				if ( level.IsPointInLevel(ofs) )
 				{
-					penetration = max(0,penetration-i*6);
+					penetration = max(0,penetration-i*4);
 					let wp = new("WallPenetrate");
 					wp.hitpos = Results.HitPos;
 					wp.hitdir = Results.HitVector;

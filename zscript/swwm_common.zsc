@@ -1056,6 +1056,9 @@ Class SWWMCombatTracker : Thinker
 			Destroy();
 			return;
 		}
+		// don't update
+		if ( mytarget && mytarget.bDORMANT )
+			return;
 		// update
 		if ( mytarget && ((mytarget.pos != oldpos) || (mytarget.prev != oldprev)) )
 		{

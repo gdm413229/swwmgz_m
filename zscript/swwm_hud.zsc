@@ -436,6 +436,8 @@ Class SWWMStatusBar : BaseStatusBar
 			int i = 0;
 			for ( SWWMCombatTracker trk=hnd.trackers; trk; trk=trk.next )
 			{
+				// ignore dormant targets
+				if ( !trk.mytarget || trk.mytarget.bDORMANT ) continue;
 				// ignore player unless chasecamming
 				if ( (trk.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 				if ( trk.myplayer && deathmatch ) continue;	// no players in dm
@@ -767,6 +769,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
+		// TODO draw stats and timer when automap is open
 		// in doom/heretic (draw key icons)
 		if ( !(gameinfo.gametype&(GAME_DOOMCHEX|GAME_HERETIC)) ) return;
 		Vector2 keypos = (ss.x-(margin+2),margin+19);

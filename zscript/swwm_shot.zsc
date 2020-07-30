@@ -581,7 +581,7 @@ Class SaltImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoExplosion(self,25+special2*5,15000,90);
+		SWWMHandler.DoExplosion(self,25+special2*5,15000,100,40);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
 		A_SprayDecal("ShockMarkSmall",-172);
@@ -1413,7 +1413,7 @@ Class TheBall : Actor
 			}
 		}
 		if ( crit )
-			SWWMHandler.DoExplosion(self,dmg/2,25000,150,ignoreme:target);
+			SWWMHandler.DoExplosion(self,dmg/2,25000,150,80,ignoreme:target);
 		// only rip shootables
 		if ( (slamforce > girth) && is_schutt )
 		{

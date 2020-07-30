@@ -251,7 +251,7 @@ Class HellblazerMissile : Actor
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigScorch",50);
 		A_SetScale(4.5);
-		SWWMHandler.DoExplosion(self,500,320000,200);
+		SWWMHandler.DoExplosion(self,500,320000,200,90);
 		A_NoGravity();
 		A_QuakeEx(5,5,5,15,0,1500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:.8);
 		A_StopSound(CHAN_BODY);
@@ -347,7 +347,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigScorch",50);
 		A_SetScale(6.);
-		SWWMHandler.DoExplosion(self,500,320000,250);
+		SWWMHandler.DoExplosion(self,500,320000,250,100);
 		A_NoGravity();
 		A_QuakeEx(6,6,6,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StopSound(CHAN_BODY);
@@ -416,7 +416,7 @@ Class HellblazerRavager : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("HugeScorch",50);
 		A_SetScale(8.);
-		SWWMHandler.DoExplosion(self,800,320000,300);
+		SWWMHandler.DoExplosion(self,800,320000,300,120);
 		A_NoGravity();
 		A_QuakeEx(6,6,6,30,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StopSound(CHAN_BODY);
@@ -494,7 +494,7 @@ Class HellblazerWarhead : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("WumboScorch",150);
 		A_SetScale(7.);
-		SWWMHandler.DoExplosion(self,3000,600000,400);
+		SWWMHandler.DoExplosion(self,3000,600000,400,200);
 		A_NoGravity();
 		A_QuakeEx(9,9,9,150,0,12000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:4000,rollIntensity:2.);
 		A_StopSound(CHAN_BODY);
@@ -782,7 +782,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigScorch",50);
 		A_SetScale(2.5);
-		SWWMHandler.DoExplosion(self,100,200000,150);
+		SWWMHandler.DoExplosion(self,100,200000,150,60);
 		A_NoGravity();
 		A_QuakeEx(4,4,4,12,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:400,rollIntensity:.6);
 		A_StopSound(CHAN_BODY);

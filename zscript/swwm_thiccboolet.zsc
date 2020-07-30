@@ -78,7 +78,7 @@ Class SilverImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoExplosion(self,100,8000,100);
+		SWWMHandler.DoExplosion(self,100,8000,100,20);
 		if ( swwm_extraalert ) A_AlertMonsters(2500);
 		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )

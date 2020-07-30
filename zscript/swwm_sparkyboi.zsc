@@ -276,7 +276,7 @@ Class BigBiospark : Actor
 	{
 		A_StopSound(CHAN_VOICE);
 		A_AlertMonsters(15000);
-		SWWMHandler.DoExplosion(self,450,200000,300);
+		SWWMHandler.DoExplosion(self,450,200000,300,100);
 		A_QuakeEx(9,9,9,30,0,1400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -536,7 +536,7 @@ Class BiosparkBall : Actor
 	{
 		A_StopSound(CHAN_VOICE);
 		A_AlertMonsters(5000);
-		SWWMHandler.DoExplosion(self,50,120000,150);
+		SWWMHandler.DoExplosion(self,50,120000,150,80);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		A_StartSound("biospark/hit",CHAN_ITEM,attenuation:.8);
 		A_StartSound("biospark/hit",CHAN_WEAPON,attenuation:.6);
@@ -699,7 +699,7 @@ Class BiosparkBeamImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(2000);
-		SWWMHandler.DoExplosion(self,30,120000,100);
+		SWWMHandler.DoExplosion(self,30,120000,100,40);
 		A_QuakeEx(3,3,3,12,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.4);
 		A_StartSound("biospark/beamhit",CHAN_ITEM,attenuation:1.1);
 		A_StartSound("biospark/beamhit",CHAN_WEAPON,attenuation:.8);
@@ -834,7 +834,7 @@ Class BiosparkComboImpactSub : Actor
 	{
 		Super.PostBeginPlay();
 		if ( !bAMBUSH ) return;
-		SWWMHandler.DoExplosion(self,200,10000,300);
+		SWWMHandler.DoExplosion(self,200,10000,300,120);
 	}
 	States
 	{
@@ -887,7 +887,7 @@ Class BiosparkComboImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoExplosion(self,bAMBUSH?(1600+Args[0]*100):1500,480000,bAMBUSH?1200:700);
+		SWWMHandler.DoExplosion(self,bAMBUSH?(1600+Args[0]*100):1500,480000,bAMBUSH?1200:700,bAMBUSH?900:400);
 		A_QuakeEx(9,9,9,25,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -1765,7 +1765,7 @@ Class BiosparkCore : Actor
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
 		A_AlertMonsters(5000);
-		SWWMHandler.DoExplosion(self,50,120000,150);
+		SWWMHandler.DoExplosion(self,50,120000,150,60);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);

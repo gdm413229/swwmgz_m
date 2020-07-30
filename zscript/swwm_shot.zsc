@@ -581,7 +581,7 @@ Class SaltImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoExplosion(self,25+special2*5,15000,120);
+		SWWMHandler.DoExplosion(self,25+special2*5,15000,90);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
 		A_SprayDecal("ShockMarkSmall",-172);
@@ -761,7 +761,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-			SWWMHandler.DoExplosion(self,5+Accuracy,5000,64);
+			SWWMHandler.DoExplosion(self,5+Accuracy,5000,32,ignoreme:target);
 		args[2]++;
 		if ( ((special2%5) || args[2]) && !special1 ) SpreadOut();
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -1388,7 +1388,7 @@ Class TheBall : Actor
 		}
 		SWWMHandler.DoKnockback(victim,vel.unit(),slamforce);
 		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && is_schutt);
-		dmg = victim.DamageMobj(self,target,dmg,'Concussion',crit?(DMG_THRUSTLESS|DMG_FOILINVUL):DMG_THRUSTLESS);	// crits ignore invulnerability
+		int newdmg = victim.DamageMobj(self,target,dmg,'Concussion',crit?(DMG_THRUSTLESS|DMG_FOILINVUL):DMG_THRUSTLESS);	// crits ignore invulnerability
 		Vector3 dir = -vel.unit();
 		// slam jam
 		if ( bleeds )
@@ -1397,7 +1397,7 @@ Class TheBall : Actor
 			if ( victim )
 			{
 				victim.A_StartSound("spreadgun/ballf",CHAN_DAMAGE,CHANF_OVERLAP,(vel.length()/30.)**.5);
-				victim.TraceBleed(dmg,self);
+				victim.TraceBleed((newdmg>0)?newdmg:dmg,self);
 				victim.SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
 			}
 		}

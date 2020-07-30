@@ -66,7 +66,7 @@ Class ExplodiumMagArm : Actor
 		{
 			A_CountDown();
 			Spawn("ExplodiumMagTrail",pos);
-			SWWMHandler.DoExplosion(self,2+reactiontime/3,3000+500*reactiontime,30+2*reactiontime);
+			SWWMHandler.DoExplosion(self,2+reactiontime/3,3000+500*reactiontime,40+3*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
@@ -135,7 +135,7 @@ Class ExplodiumMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters(6000);
-		SWWMHandler.DoExplosion(self,20+15*special1,80000+8000*special1,120+30*special1);
+		SWWMHandler.DoExplosion(self,20+15*special1,80000+8000*special1,90+10*special1);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -229,7 +229,7 @@ Class ExplodiumBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(3000);
-		SWWMHandler.DoExplosion(self,25,80000,120);
+		SWWMHandler.DoExplosion(self,25,80000,90);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
 		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);

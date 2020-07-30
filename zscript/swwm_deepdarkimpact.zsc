@@ -54,7 +54,7 @@ Class AirBullet : FastProjectile
 			s.alpha *= .2;
 		}
 		bAMBUSH = true;
-		SWWMHandler.DoExplosion(self,GetMissileDamage(0,0),0,80,ignoreme:target);
+		SWWMHandler.DoExplosion(self,GetMissileDamage(0,0),0,50,ignoreme:target);
 		bAMBUSH = false;
 		tcnt++;
 		if ( tcnt < 2 ) return;
@@ -74,7 +74,7 @@ Class AirBullet : FastProjectile
 			if ( (target.pos.z > target.floorz) && target.TestMobjZ() ) mm *= 1.6;
 			SWWMHandler.DoKnockback(target,dir,mm);
 		}
-		SWWMHandler.DoExplosion(self,0,100000,400,ignoreme:target);
+		SWWMHandler.DoExplosion(self,0,100000,150,ignoreme:target);
 		A_QuakeEx(6,6,6,20,0,250,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		A_StartSound("deepimpact/bullethit",CHAN_VOICE,CHANF_DEFAULT,1.,.3);
 		A_SprayDecal("ImpactMark");

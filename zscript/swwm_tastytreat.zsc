@@ -639,7 +639,7 @@ Class CandyMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters(20000);
-		SWWMHandler.DoExplosion(self,700+600*special1,80000+8000*special1,250+25*special1);
+		SWWMHandler.DoExplosion(self,700+600*special1,80000+8000*special1,150+15*special1);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -719,7 +719,7 @@ Class CandyBulletImpact : Actor
 		Obituary "$O_CANDYGUN";
 		DamageType "Explodium";
 		RenderStyle "Add";
-		Scale 2.;
+		Scale 3.5;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NODAMAGETHRUST;
@@ -795,7 +795,7 @@ Class CandyRing : Actor
 	Default
 	{
 		RenderStyle "Add";
-		Scale 1.;
+		Scale 1.2;
 		Radius 0.1;
 		Height 0;
 		+NOGRAVITY;
@@ -807,7 +807,7 @@ Class CandyRing : Actor
 	States
 	{
 	Spawn:
-		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.05);
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.08);
 		Stop;
 	}
 }
@@ -815,12 +815,12 @@ Class CandyRing2 : CandyRing
 {
 	Default
 	{
-		Scale 3.;
+		Scale 3.5;
 	}
 	States
 	{
 	Spawn:
-		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.04);
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.05);
 		Stop;
 	}
 }

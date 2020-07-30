@@ -257,7 +257,7 @@ Class BigBiospark : Actor
 			if ( !t || !t.bSHOOTABLE ) continue;
 			if ( SWWMUtility.SphereIntersect(t,pos,40) )
 			{
-				t.DamageMobj(self,target,4+special1*4,'Electricity');
+				t.DamageMobj(self,target,4+special1*4,'Electric');
 				Health--;
 			}
 			if ( SWWMUtility.SphereIntersect(t,pos,120) )
@@ -377,7 +377,7 @@ Class BigBiospark : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electricity";
+		DamageType "Electric";
 		RenderStyle "Add";
 		Health 1600;
 		Radius 2;
@@ -422,7 +422,7 @@ Class BiosparkBall : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electricity";
+		DamageType "Electric";
 		RenderStyle "Add";
 		Radius 3;
 		Height 6;
@@ -685,7 +685,7 @@ Class BiosparkBeamImpact : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electricity";
+		DamageType "Electric";
 		RenderStyle "Add";
 		Radius .1;
 		Height 0;
@@ -814,7 +814,7 @@ Class BiosparkComboImpactSub : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electricity";
+		DamageType "Electric";
 		RenderStyle "Add";
 		Scale 1.4;
 		Alpha .4;
@@ -849,7 +849,7 @@ Class BiosparkComboImpact : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electricity";
+		DamageType "Electric";
 		RenderStyle "Add";
 		Scale 2.;
 		Radius .1;
@@ -1101,7 +1101,7 @@ Class BiosparkBeam : Actor
 			else
 			{
 				SWWMHandler.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,15000);
-				t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electricity',DMG_THRUSTLESS);
+				t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electric',DMG_THRUSTLESS);
 			}
 		}
 		Vector3 normal = -t.Results.HitVector, dir = t.Results.HitVector;
@@ -1244,7 +1244,7 @@ Class BiosparkBeam : Actor
 			else
 			{
 				SWWMHandler.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,15000);
-				t.hitlist[i].hitactor.DamageMobj(self,target,int(GetMissileDamage(0,0)*alpha),'Electricity',DMG_THRUSTLESS);
+				t.hitlist[i].hitactor.DamageMobj(self,target,int(GetMissileDamage(0,0)*alpha),'Electric',DMG_THRUSTLESS);
 			}
 		}
 	}
@@ -1433,7 +1433,7 @@ Class BiosparkArc : Actor
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
 			SWWMHandler.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x,GetMissileDamage(0,0)*1000);
-			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electricity',DMG_THRUSTLESS);
+			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electric',DMG_THRUSTLESS);
 		}
 		Vector3 normal = -t.Results.HitVector, dir = t.Results.HitVector;
 		if ( t.Results.HitType == TRACE_HitWall )

@@ -1676,7 +1676,9 @@ Class BarrierPower : PowerIronFeet
 
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage )
 	{
-		// don't remove drowning dmg
+		// negate elemental damage
+		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Electric') || (damageType == 'Wind') || (damageType == 'Water') )
+			newdamage = 0;
 	}
 
 	override void InitEffect()

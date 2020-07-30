@@ -572,8 +572,7 @@ Class BigPunchSplash : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,120,40000,target);
-		A_Explode(special1,120,0);
+		SWWMHandler.DoExplosion(self,special1,40000,120,ignoreme:target);
 		Destroy();
 	}
 }

@@ -9,6 +9,7 @@ Not so fundamental things during beta:
  - Mag refilling system (no more wasted ammo)
  - Randomized vanilla monster retagging with multiple options
  - Parrying for hitscan weapons (currently parrying only handles vanilla LineAttack)
+ - 16:9 version of Demolitionist Menu (for people playing in 720p and similar)
  - Fun options
    - Omnibusting (all weapons can bust walls)
    - Infinite fuel

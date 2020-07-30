@@ -1876,7 +1876,7 @@ Class DemolitionistRadiusShockwave : Actor
 	{
 		RenderStyle "Translucent";
 		Speed 15;
-		DamageFunction int(50*alpha);
+		DamageFunction int(100*alpha);
 		DamageType "GroundPound";
 		Radius 16;
 		Height 8;
@@ -1911,7 +1911,7 @@ Class DemolitionistRadiusShockwave : Actor
 			SetZ(floorz);
 			Spawn("InvisibleSplasher",Vec3Offset(0,0,2));
 			let s = Spawn("DemolitionistRadiusShockwaveTail",pos);
-			s.vel = vel*.8;
+			s.vel = vel*.2;
 			s.scale = scale;
 			s.alpha = alpha;
 			s.angle = angle;

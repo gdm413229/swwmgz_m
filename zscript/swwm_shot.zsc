@@ -465,10 +465,7 @@ Class DragonBreathArm : Actor
 				l.target = p;
 			}
 			if ( !(ReactionTime%2) )
-			{
-				SWWMHandler.DoBlast(self,150-6*reactiontime,1000+200*reactiontime,bHITOWNER?null:target);
-				A_Explode(1+int(reactiontime/1.5),150-6*reactiontime,bHITOWNER?XF_HURTSOURCE:0);
-			}
+				SWWMHandler.DoExplosion(self,1+(reactiontime/1.5),1000+200*reactiontime,150-6*reactiontime,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -584,8 +581,7 @@ Class SaltImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoBlast(self,120,15000);
-		A_Explode(25+special2*5,120);
+		SWWMHandler.DoExplosion(self,25+special2*5,15000,120);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
 		A_SprayDecal("ShockMarkSmall",-172);
@@ -765,10 +761,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-		{
-			SWWMHandler.DoBlast(self,64,5000,target);
-			A_Explode(5+Accuracy,64,0);
-		}
+			SWWMHandler.DoExplosion(self,5+Accuracy,5000,64);
 		args[2]++;
 		if ( ((special2%5) || args[2]) && !special1 ) SpreadOut();
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -1420,10 +1413,7 @@ Class TheBall : Actor
 			}
 		}
 		if ( crit )
-		{
-			SWWMHandler.DoBlast(self,150,25000,target);
-			A_Explode(dmg/2,150,0);
-		}
+			SWWMHandler.DoExplosion(self,dmg/2,25000,150,ignoreme:target);
 		// only rip shootables
 		if ( (slamforce > girth) && is_schutt )
 		{
@@ -1629,8 +1619,7 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(40000);
-		SWWMHandler.DoBlast(self,500,40000);
-		A_Explode(7777,600,fulldamagedistance:500);
+		SWWMHandler.DoExplosion(self,7777,40000,600,500);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1757,8 +1746,7 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,300,30000);
-		A_Explode(777,400,fulldamagedistance:300);
+		SWWMHandler.DoExplosion(self,777,30000,400,300);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigScorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -1883,8 +1871,7 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,100,20000);
-		A_Explode(77,200,fulldamagedistance:100);
+		SWWMHandler.DoExplosion(self,77,20000,200,100);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("Scorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);

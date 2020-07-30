@@ -56,8 +56,7 @@ Class SilverAirRip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,80,2000.,target);
-		A_Explode(40,80,0);
+		SWWMHandler.DoExplosion(self,40,2000,80,ignoreme:target);
 		Destroy();
 	}
 }
@@ -79,8 +78,7 @@ Class SilverImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoBlast(self,100,8000.);
-		A_Explode(100,100);
+		SWWMHandler.DoExplosion(self,100,8000,100);
 		if ( swwm_extraalert ) A_AlertMonsters(2500);
 		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )

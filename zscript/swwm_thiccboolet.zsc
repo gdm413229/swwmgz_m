@@ -452,7 +452,8 @@ Class SilverBullet : SWWMWeapon
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
 			p.target = self;
-			t.WallPenetrateList[i].hitline.Activate(self,t.WallPenetrateList[i].hitside,SPAC_Impact);
+			if ( t.WallPenetrateList[i].hitline )
+				t.WallPenetrateList[i].hitline.Activate(self,t.WallPenetrateList[i].hitside,SPAC_Impact);
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
 		{

@@ -399,14 +399,14 @@ Class SWWMStats : Thinker
 	{
 		int upper = dmg/1000000000;
 		int lower = dmg%1000000000;
-		if ( hdamagedealt+upper < hdamagedealt ) hdamagedealt = 999999999;
+		if ( hdamagedealt+upper > 999999999 ) hdamagedealt = 999999999;
 		else hdamagedealt += upper;
 		damagedealt += lower;
 		if ( damagedealt > 999999999 )
 		{
 			upper = damagedealt/1000000000;
 			lower = damagedealt%1000000000;
-			if ( hdamagedealt+upper < hdamagedealt ) hdamagedealt = 999999999;
+			if ( hdamagedealt+upper > 999999999 ) hdamagedealt = 999999999;
 			else hdamagedealt += upper;
 			damagedealt = lower;
 		}
@@ -415,14 +415,14 @@ Class SWWMStats : Thinker
 	{
 		int upper = dmg/1000000000;
 		int lower = dmg%1000000000;
-		if ( hdamagetaken+upper < hdamagetaken ) hdamagetaken = 999999999;
+		if ( hdamagetaken+upper > 999999999 ) hdamagetaken = 999999999;
 		else hdamagetaken += upper;
 		damagetaken += lower;
 		if ( damagetaken > 999999999 )
 		{
 			upper = damagetaken/1000000000;
 			lower = damagetaken%1000000000;
-			if ( hdamagetaken+upper < hdamagetaken ) hdamagetaken = 999999999;
+			if ( hdamagetaken+upper > 999999999 ) hdamagetaken = 999999999;
 			else hdamagetaken += upper;
 			damagetaken = lower;
 		}

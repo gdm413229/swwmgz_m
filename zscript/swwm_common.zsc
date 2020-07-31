@@ -15,6 +15,16 @@ enum ESWWMGZChannels
 	CHAN_AMBEXTRA = 63211		// player ambience when submerged
 };
 
+enum EDoExplosionFlags
+{
+	DE_BLAST = 1,		// sets BLASTED flag on pushed actors
+	DE_NOBLEED = 2,		// does not spawn blood decals on hit
+	DE_NOSPLASH = 4,	// like XF_NOSPLASH
+	DE_THRUWALLS = 8,	// damages through geometry (no sight check)
+	DE_NOTMISSILE = 16,	// instigator is the source itself (normally it'd be its target pointer)
+	DE_EXTRAZTHRUST = 32,	// applies a higher Z thrust to enemies on ground
+};
+
 // Misc. Utility code
 Class SWWMUtility
 {
@@ -368,8 +378,8 @@ Class SWWMStats : Thinker
 {
 	PlayerInfo myplayer;
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
-		deaths,	damagedealt, damagetaken, mkill, hiscore, hhiscore,
-		topdealt, toptaken, skill;
+		deaths,	damagedealt, hdamagedealt, damagetaken, hdamagetaken,
+		mkill, hiscore, hhiscore, topdealt, toptaken, skill;
 	double grounddist, airdist, fuelusage, topspeed;
 	Array<WeaponUsage> wstats;
 	Array<Class<Weapon> > alreadygot;
@@ -383,6 +393,39 @@ Class SWWMStats : Thinker
 		}
 		alreadygot.Push(which);
 		return false;
+	}
+
+	void AddDamageDealt( int dmg )
+	{
+		int upper = dmg/1000000000;
+		int lower = dmg%1000000000;
+		if ( hdamagedealt+upper < hdamagedealt ) hdamagedealt = 999999999;
+		else hdamagedealt += upper;
+		damagedealt += lower;
+		if ( damagedealt > 999999999 )
+		{
+			upper = damagedealt/1000000000;
+			lower = damagedealt%1000000000;
+			if ( hdamagedealt+upper < hdamagedealt ) hdamagedealt = 999999999;
+			else hdamagedealt += upper;
+			damagedealt = lower;
+		}
+	}
+	void AddDamageTaken( int dmg )
+	{
+		int upper = dmg/1000000000;
+		int lower = dmg%1000000000;
+		if ( hdamagetaken+upper < hdamagetaken ) hdamagetaken = 999999999;
+		else hdamagetaken += upper;
+		damagetaken += lower;
+		if ( damagetaken > 999999999 )
+		{
+			upper = damagetaken/1000000000;
+			lower = damagetaken%1000000000;
+			if ( hdamagetaken+upper < hdamagetaken ) hdamagetaken = 999999999;
+			else hdamagetaken += upper;
+			damagetaken = lower;
+		}
 	}
 
 	void AddWeaponKill( Actor inflictor )
@@ -829,6 +872,8 @@ Class SWWMScoreObj : Thinker
 
 	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, Actor acc = null )
 	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
 		let o = new("SWWMScoreObj");
 		o.ChangeStatNum(STAT_USER);
 		o.score = score;
@@ -841,23 +886,19 @@ Class SWWMScoreObj : Thinker
 		o.damnum = (tcolor == Font.CR_RED) || (tcolor == Font.CR_GREEN) || (tcolor == Font.CR_BLUE);
 		o.xcnt = 0;
 		o.acc = acc;
-		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( hnd )
+		if ( o.damnum )
 		{
-			if ( o.damnum )
-			{
-				o.next = hnd.damnums;
-				if ( hnd.damnums ) hnd.damnums.prev = o;
-				hnd.damnums = o;
-				hnd.damnums_cnt++;
-			}
-			else
-			{
-				o.next = hnd.scorenums;
-				if ( hnd.scorenums ) hnd.scorenums.prev = o;
-				hnd.scorenums = o;
-				hnd.scorenums_cnt++;
-			}
+			o.next = hnd.damnums;
+			if ( hnd.damnums ) hnd.damnums.prev = o;
+			hnd.damnums = o;
+			hnd.damnums_cnt++;
+		}
+		else
+		{
+			o.next = hnd.scorenums;
+			if ( hnd.scorenums ) hnd.scorenums.prev = o;
+			hnd.scorenums = o;
+			hnd.scorenums_cnt++;
 		}
 		return o;
 	}
@@ -914,6 +955,8 @@ Class SWWMInterest : Thinker
 
 	static SWWMInterest Spawn( Vector3 pos = (0,0,0), Key thekey = null, Line theline = null )
 	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
 		if ( (!thekey && !theline) || (thekey && theline) ) return null;
 		let i = new("SWWMInterest");
 		i.ChangeStatNum(STAT_USER);
@@ -931,14 +974,10 @@ Class SWWMInterest : Thinker
 			return null;
 		}
 		i.pos = thekey?thekey.Vec3Offset(0,0,thekey.height/2):pos;
-		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( hnd )
-		{
-			i.next = hnd.intpoints;
-			if ( hnd.intpoints ) hnd.intpoints.prev = i;
-			hnd.intpoints = i;
-			hnd.intpoints_cnt++;
-		}
+		i.next = hnd.intpoints;
+		if ( hnd.intpoints ) hnd.intpoints.prev = i;
+		hnd.intpoints = i;
+		hnd.intpoints_cnt++;
 		return i;
 	}
 
@@ -993,9 +1032,10 @@ Class SWWMCombatTracker : Thinker
 
 	static SWWMCombatTracker Spawn( Actor target )
 	{
-		let ti = ThinkerIterator.Create("SWWMCombatTracker",STAT_USER);
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
 		SWWMCombatTracker t;
-		while ( t = SWWMCombatTracker(ti.Next()) )
+		for ( t=hnd.trackers; t; t=t.next )
 		{
 			if ( t.mytarget != target ) continue;
 			return t;
@@ -1018,14 +1058,10 @@ Class SWWMCombatTracker : Thinker
 		t.oldprev = target.prev;
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
-		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( hnd )
-		{
-			t.next = hnd.trackers;
-			if ( hnd.trackers ) hnd.trackers.prev = t;
-			hnd.trackers = t;
-			hnd.trackers_cnt++;
-		}
+		t.next = hnd.trackers;
+		if ( hnd.trackers ) hnd.trackers.prev = t;
+		hnd.trackers = t;
+		hnd.trackers_cnt++;
 		return t;
 	}
 
@@ -2202,6 +2238,10 @@ Class SWWMHandler : EventHandler
 	transient CVar lang;
 	transient String curlang;
 
+	// optimization
+	OnFire fires;
+	int fires_cnt;
+
 	static void HealthFlash( int p )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -2825,15 +2865,13 @@ Class SWWMHandler : EventHandler
 			{
 				tookdamage[e.Thing.PlayerNumber()] = true;
 				let s = SWWMStats.Find(e.Thing.player);
-				if ( s.damagetaken+e.Damage < s.damagetaken ) s.damagetaken = int.max;
-				else s.damagetaken += e.Damage;
+				s.AddDamageTaken(e.Damage);
 				if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
 			}
 			if ( e.DamageSource && e.DamageSource.player )
 			{
 				let s = SWWMStats.Find(e.DamageSource.player);
-				if ( s.damagedealt+e.Damage < s.damagedealt ) s.damagedealt = int.max;
-				else s.damagedealt += e.Damage;
+				s.AddDamageDealt(e.Damage);
 				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
 			}
 		}
@@ -2966,7 +3004,7 @@ Class SWWMHandler : EventHandler
 				SWWMScoreObj.Spawn(2000,e.DamageSource.Vec3Offset(0,0,e.DamageSource.Height/2));
 			}
 			spreecount[pnum]++;
-			if ( s && spreecount[pnum] > s.skill )
+			if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
 				s.skill = spreecount[pnum];
 		}
 	}
@@ -3084,7 +3122,9 @@ Class SWWMHandler : EventHandler
 			if ( e.KeyScan == 33 ) // assuming that's the F key on all keyboards (hopefully)
 			{
 				let demo = Demolitionist(players[consoleplayer].mo);
-				if ( demo && (demo.Health <= 0) && (demo.deadtimer > 40) )
+				let gone = PlayerGone(players[consoleplayer].mo);
+				if ( (demo && (demo.Health <= 0) && (demo.deadtimer > 40))
+					|| (gone && (gone.Health <= 0) && (gone.deadtimer > 40)) )
 				{
 					// pay respects
 					int numf = Random[FInTheChat](1,6);
@@ -3660,7 +3700,7 @@ Class SWWMHandler : EventHandler
 			if ( a.bNORADIUSDMG && !Source.bFORCERADIUSDMG && !forceblast )
 				continue;
 			// massive, no knockback
-			if ( a.bCANNOTPUSH || (a.Mass >= 10000000) )
+			if ( a.bDONTTHRUST || (a.Mass >= Actor.LARGE_MASS) )
 				continue;
 			// check the DONTHARMCLASS/DONTHARMSPECIES flags
 			if ( !a.player && ((Source.bDONTHARMCLASS && (a.GetClass() == Source.GetClass())) || (Source.bDONTHARMSPECIES && (a.GetSpecies() == Source.GetSpecies()))) )
@@ -3695,7 +3735,7 @@ Class SWWMHandler : EventHandler
 			return;
 		if ( !Victim.bSHOOTABLE && !Victim.bVULNERABLE )
 			return;
-		if ( Victim.bCANNOTPUSH || (Victim.Mass >= 10000000) )
+		if ( Victim.bDONTTHRUST || (Victim.Mass >= Actor.LARGE_MASS) )
 			return;
 		Vector3 Momentum = HitDirection*MomentumTransfer;
 		if ( (Victim.pos.z <= Victim.floorz) || !Victim.TestMobjZ() )
@@ -3706,7 +3746,7 @@ Class SWWMHandler : EventHandler
 
 	// complete spherical and more accurate replacement of A_Explode
 	// 100% free of the buggery GZDoom's own splash damage has
-	static void DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., Name DamageType = '', Actor ignoreme = null )
+	static void DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
 	{
 		// debug, display radius sphere
 		if ( swwm_explosiondebug )
@@ -3721,8 +3761,9 @@ Class SWWMHandler : EventHandler
 				s.SetShade("Red");
 			}
 		}
+		if ( !(flags&DE_NOSPLASH) ) Source.CheckSplash(ExplosionRadius);
 		double brange = 1./(ExplosionRadius-FullDamageRadius);
-		Actor Instigator = Source.bMISSILE?Source.target:Source;
+		Actor Instigator = (flags&DE_NOTMISSILE)?Source:Source.target;
 		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius*2);	// test with doubled radius, just to be sure
 		while ( bi.Next() )
 		{
@@ -3740,7 +3781,7 @@ Class SWWMHandler : EventHandler
 			if ( !a.player && ((Source.bDONTHARMCLASS && (a.GetClass() == Source.GetClass())) || (Source.bDONTHARMSPECIES && (a.GetSpecies() == Source.GetSpecies()))) )
 				continue;
 			// can we see it
-			if ( !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+			if ( !(flags&DE_THRUWALLS) && !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 				continue;
 			// intersecting?
 			if ( !SWWMUtility.SphereIntersect(a,Source.pos,ExplosionRadius) )
@@ -3760,19 +3801,20 @@ Class SWWMHandler : EventHandler
 			double damagescale = 1.-clamp((dist-a.Radius)*brange,0.,1.);
 			double mm = MomentumTransfer*damagescale;
 			// no knockback if massive/unpushable
-			if ( (abs(mm) > 0.) && !a.bCANNOTPUSH && (a.Mass < 10000000) )
+			if ( (abs(mm) > 0.) && !a.bDORMANT && !a.bDONTTHRUST && (a.Mass < Actor.LARGE_MASS) )
 			{
 				Vector3 Momentum = dir*mm;
 				if ( (a.pos.z <= a.floorz) || !a.TestMobjZ() )
-					Momentum.z = max(Momentum.z,.1*Momentum.length());
+					Momentum.z = max(Momentum.z,(flags&DE_EXTRAZTHRUST?.4:.1)*Momentum.length());
 				Momentum /= Thinker.TICRATE*max(50,a.Mass);	// prevent tiny things from getting yeeted at warp speed
 				a.vel += Momentum;
+				if ( (flags&DE_BLAST) && a.bCANBLAST && !a.bDONTBLAST ) a.bBLASTED = true;
 			}
 			// hit it
 			int dmg = int(Damage*damagescale);
 			if ( dmg <= 0 ) continue;	// no harm
-			int ndmg = a.DamageMobj(Instigator,Source,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
-			a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
+			int ndmg = a.DamageMobj(Instigator,Source,dmg,(DamageType!='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
+			if ( !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
 		}
 		// TODO destructible geometry support
 	}

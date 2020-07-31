@@ -886,9 +886,30 @@ Class OnFireLight : DynamicLight
 
 Class OnFire : Actor
 {
+	OnFire prevfire, nextfire;
 	Actor victim, instigator, lite;
 	int amount, cnt, delay;
 	double oangle;
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.fires_cnt--;
+			if ( !prevfire )
+			{
+				hnd.fires = nextfire;
+				if ( nextfire ) nextfire.prevfire = null;
+			}
+			else
+			{
+				prevfire.nextfire = nextfire;
+				if ( nextfire ) nextfire.prevfire = prevfire;
+			}
+		}
+		Super.OnDestroy();
+	}
 
 	override void Tick()
 	{
@@ -967,17 +988,25 @@ Class OnFire : Actor
 			let t = bt.Thing;
 			if ( !t || !t.bSHOOTABLE || (t.Health <= 0) || (t == victim) || ((t == instigator) && (delay > 0)) || (victim.Distance3D(t) > victim.radius+t.radius+40) || !victim.CheckSight(t) ) continue;
 			int amt = max(1,amount/10);
-			if ( IsOnFire(t) ) amt = min(5,amt);
-			Apply(t,instigator,amt);
+			OnFire of = IsOnFire(t);
+			if ( of )
+			{
+				amt = min(5,amt);
+				if ( instigator ) of.instigator = instigator;
+				of.amount = min(500,of.amount+amt);
+				of.cnt = min(of.cnt,5);
+			}
+			else Apply(t,instigator,amt);
 		}
 	}
 
 	static OnFire Apply( Actor victim, Actor instigator, int amount, int delay = 0 )
 	{
 		if ( amount <= 0 ) return null;
-		let ti = ThinkerIterator.Create("OnFire");
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
 		OnFire t;
-		while ( t = OnFire(ti.Next()) )
+		for ( t=hnd.fires; t; t=t.nextfire )
 		{
 			if ( t.victim != victim ) continue;
 			if ( instigator ) t.instigator = instigator;
@@ -1000,19 +1029,26 @@ Class OnFire : Actor
 		t.lite = Actor.Spawn("OnFireLight",victim.pos);
 		OnFireLight(t.lite).of = t;
 		t.oangle = victim.angle;
+		// append
+		t.nextfire = hnd.fires;
+		if ( hnd.fires ) hnd.fires.prevfire = t;
+		hnd.fires = t;
+		hnd.fires_cnt++;
 		return t;
 	}
 
-	static bool IsOnFire( Actor victim )
+	static OnFire IsOnFire( Actor victim )
 	{
-		let ti = ThinkerIterator.Create("OnFire");
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
 		OnFire t;
-		while ( t = OnFire(ti.Next()) )
+		for ( t=hnd.fires; t; t=t.nextfire )
 		{
 			if ( t.victim != victim ) continue;
-			return (t.amount>0);
+			if ( t.amount <= 0 ) return null;
+			return t;
 		}
-		return false;
+		return null;
 	}
 
 	Default
@@ -1619,7 +1655,7 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(40000);
-		SWWMHandler.DoExplosion(self,7777,40000,600,500);
+		SWWMHandler.DoExplosion(self,7777,40000,600,500,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1746,7 +1782,7 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoExplosion(self,777,30000,400,300);
+		SWWMHandler.DoExplosion(self,777,30000,400,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigScorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -1871,7 +1907,7 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoExplosion(self,77,20000,200,100);
+		SWWMHandler.DoExplosion(self,77,20000,200,100,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("Scorch",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);

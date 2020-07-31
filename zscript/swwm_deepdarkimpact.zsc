@@ -355,7 +355,7 @@ Class DeepImpact : SWWMWeapon
 			Vector3 avgdir = list[i].avgdir/list[i].nhits;
 			double avgdist = list[i].avgdist/list[i].nhits;
 			double dmg = 4000.*(1.-clamp(avgdist/300.,0.,1.));
-			if ( !list[i].a.bCANNOTPUSH && (list[i].a.mass < LARGE_MASS) )
+			if ( !list[i].a.bDONTTHRUST && (list[i].a.mass < LARGE_MASS) )
 				list[i].a.vel += ((avgdir+(0,0,.35))*dmg/max(50,list[i].a.mass));
 			list[i].a.DamageMobj(self,self,int(dmg/500.),'Push',DMG_THRUSTLESS);
 		}

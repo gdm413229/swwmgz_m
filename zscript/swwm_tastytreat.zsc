@@ -529,7 +529,7 @@ Class CandyGunProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 6.+.2*special1;
 		A_AlertMonsters(40000);
-		SWWMHandler.DoExplosion(self,3500+500*special1,80000+8000*special1,300+20*special1,120);
+		SWWMHandler.DoExplosion(self,3500+500*special1,80000+8000*special1,300+20*special1,120,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
@@ -639,7 +639,7 @@ Class CandyMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters(20000);
-		SWWMHandler.DoExplosion(self,700+600*special1,80000+8000*special1,150+15*special1,90);
+		SWWMHandler.DoExplosion(self,700+600*special1,80000+8000*special1,150+15*special1,90,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -733,7 +733,7 @@ Class CandyBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(9000);
-		SWWMHandler.DoExplosion(self,700,48000,200,80);
+		SWWMHandler.DoExplosion(self,700,48000,200,80,DE_EXTRAZTHRUST);
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);

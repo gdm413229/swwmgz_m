@@ -624,6 +624,12 @@ Class BusterWall : Thinker
 		if ( (girthitude > 16777216) || (max(partheight,max(b.x-a.x,b.y-a.y)) > 1024) ) return;
 		// not strong enough to bust
 		if ( bust.accdamage < girthitude/300. ) return;
+		// report bust
+		if ( Instigator.player )
+		{
+			let s = SWWMStats.Find(Instigator.player);
+			if ( s ) s.busts++;
+		}
 		bust.busted = true;
 		bust.busttics = 0;
 		// shush

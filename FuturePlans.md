@@ -11,11 +11,6 @@ after the first release.
   - Rail Carbine ("Tesla Beamer" in Ultra Suite 2 & 3)
   - PROWEL & TADEL (Ultra Suite 2 & 3)
 * Additional Demolitionist Menu features
-  - Stats tab subsections
-    - Monster kill tracker
-    - Item pickup tracker
-    - Level stats tracker
-    - Achevements tracker (see below)
   - Radio (add-on)
   - Pong minigame
   - Selling items at the store
@@ -55,7 +50,8 @@ after the first release.
 * Character and item images for the library
 * Full Mashiro model for Lämp easter egg
 * Ibuki companion add-on (w/ optional "stream friendly" clothing)
-* Saya model, for scenes or something idk
+* Saya model, for scenes or something idk (or maybe a companion add-on too)
 * Japanese localization???
 * Strife support, with rewritten dialogue
 * Monster/decoration replacements add-on
+* Second DLC Weapon Set?

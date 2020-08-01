@@ -18,6 +18,9 @@
  - Collectables. Froggy Chair was only the beginning.
  - Maybe try to do the fancy titlemap now, mod trailer, etc.
 
+*Extra Funtimes*:
+ - DLC weapons.
+
 *LODS OF LORE*:
  - Finish writing all those damn side stories.
  - Make 'em fancy, maybe add some lil' art to them.
@@ -29,3 +32,12 @@
  - Oh god I have to do dialogue sprites for all characters. Maybe I can get
    someone else for the job?
 
+*Funny Fellas*:
+ - Monster/decoration replacement packs. All of it modelled and tweaked to fit
+   the style and theme of the mod. Expect enhanced enemy behaviour, not gonna
+   keep it "vanilla".
+ - Porting weapons to Hideous Destructor as a meme.
+
+*At this point I'm just making shit up*:
+ - Official comic.
+ - Official merch.

@@ -15,6 +15,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_HELP
 	};
 
+	enum EStatsTab
+	{
+		STAT_MAIN = 0,
+		STAT_KILLS,
+		STAT_LEVEL,
+		STAT_ACHIEVEMENT,
+	};
+
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
 		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
 	transient CVar lang, fuzz, pauseme;
@@ -95,6 +103,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
 		if ( (curtab < TAB_MISSION) || (curtab > maxtab) ) curtab = TAB_MISSION;
 		if ( curtab == TAB_LIBRARY ) sel1 = CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).GetInt();
+		else if ( curtab == TAB_STATS ) sel1 = CVar.GetCVar('swwm_laststattab',players[consoleplayer]).GetInt();
 		MenuSound("menu/demoopen");
 		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
@@ -389,6 +398,19 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs1 = ++sel1;
 				}
 			}
+			else if ( curtab == TAB_STATS )
+			{
+				int cnt = 0;
+				if ( sel1 == STAT_KILLS )
+					cnt = stats.mstats.Size();
+				else if ( sel1 == STAT_LEVEL )
+					cnt = stats.lstats.Size();
+				if ( (cnt > 22) && (sel0 < cnt-22) )
+				{
+					MenuSound("menu/demoscroll");
+					ofs0 = ++sel0;
+				}
+			}
 			return true;
 		case MKEY_UP:
 			if ( (curtab == TAB_HELP) && (sel0 > 0) )
@@ -458,6 +480,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs1 = --sel1;
 				}
 			}
+			else if ( (curtab == TAB_STATS) && (sel0 > 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+			}
 			return true;
 		case MKEY_RIGHT:
 			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
@@ -490,6 +517,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
+			else if ( curtab == TAB_STATS )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				ofs1 = ++sel1;
+				if ( ofs1 > STAT_LEVEL ) ofs1 = sel1 = STAT_MAIN;
+				CVar.GetCVar('swwm_laststattab',players[consoleplayer]).SetInt(sel1);
+			}
 			return true;
 		case MKEY_LEFT:
 			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
@@ -515,6 +550,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				ofs0 = sel0 -= 22;
 				MenuSound("menu/demoscroll");
+			}
+			else if ( curtab == TAB_STATS )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				ofs1 = --sel1;
+				if ( ofs1 < STAT_MAIN ) ofs1 = sel1 = STAT_LEVEL;
+				CVar.GetCVar('swwm_laststattab',players[consoleplayer]).SetInt(sel1);
 			}
 			return true;
 		case MKEY_ENTER:
@@ -1174,6 +1217,45 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				ofs0 = sel0 = step;
 				drag = 1;
 			}
+			else if ( (curtab == TAB_STATS) && !isrclick )
+			{
+				double midp = (lang.GetString()~=="jp")?206:126;
+				if ( mpos.x < midp )
+				{
+					// check what item we clicked
+					int xx = 9;
+					int yy = 23;
+					for ( int i=0; i<=STAT_ACHIEVEMENT; i++ )
+					{
+						// check boundary
+						if ( (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel1 != i )
+							{
+								MenuSound("menu/demoscroll");
+								ofs0 = sel0 = 0;
+								sel1 = i;
+								CVar.GetCVar('swwm_laststattab',players[consoleplayer]).SetInt(sel1);
+							}
+							return res;
+						}
+						yy += 16;
+					}
+					return res;
+				}
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				int cnt = 0;
+				if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
+				if ( cnt <= 28 ) return res;	// no scrollbar
+				// calculate offset
+				int szr = cnt-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
 		}
 		else if ( (type == MOUSE_Move) && drag )	// scroll dragging
 		{
@@ -1351,6 +1433,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else return res;	// no scrollbar
 				// calculate offset
 				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+			else if ( curtab == TAB_STATS )
+			{
+				int cnt = 0;
+				if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
+				if ( cnt <= 22 ) return res;	// no scrollbar
+				// calculate offset
+				int szr = cnt-22;
 				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -1857,6 +1951,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			"$SWWM_LORETAB0", "$SWWM_LORETAB1", "$SWWM_LORETAB2"
 		};
+		static const string stabnames[] =
+		{
+			"$SWWM_STATTAB0", "$SWWM_STATTAB1", "$SWWM_STATTAB2", "$SWWM_STATTAB3"
+		};
 		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
 		int mx = maxtab;
 		if ( (curtab > TAB_CHAT) ) mx++;
@@ -1915,83 +2013,213 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( curtab == TAB_STATS )
 		{
+			// categories
 			xx = 9;
 			yy = 23;
-			// wish I could use macros for this
-			int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
-			int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
-			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
-			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.);
-			else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.);
-			else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%g\cul\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%g\cukm/h\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE));
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			thour = (stats.airtime/(3600*Thinker.TICRATE));
-			tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
-			tsec = (stats.airtime/Thinker.TICRATE)%60;
-			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			if ( stats.hdamagedealt > 0 ) str = str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDDEALT"),stats.hdamagedealt,stats.damagedealt);
-			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			if ( stats.hdamagetaken > 0 ) str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.hdamagetaken,stats.damagetaken);
-			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
-			if ( stats.favweapon == -1 ) str = str.."N/A";
-			else
+			int twidth = (lang.GetString()~=="jp")?194:114;
+			for ( int i=0; i<=STAT_ACHIEVEMENT; i++ )
 			{
-				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
-				str = str..def.GetTag();
+				str = StringTable.Localize(stabnames[i]);
+				Screen.DrawText(fnt,(i==sel1)?Font.CR_FIRE:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
 			}
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
-			if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
-			else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
-			Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += 16;
+			xx += twidth+2;
+			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// stat contents
+			if ( sel1 == STAT_MAIN )
+			{
+				xx += 9;
+				yy = 23;
+				// wish I could use macros for this
+				int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
+				int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
+				int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
+				str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.);
+				else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.);
+				else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.swimdist > 32000. ) str = String.Format("\cx%s\c-%g\cukm\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32000.);
+				else str = String.Format("\cx%s\c-%g\cum\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32.);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%g\cul\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%g\cukm/h\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE));
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				thour = (stats.airtime/(3600*Thinker.TICRATE));
+				tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
+				tsec = (stats.airtime/Thinker.TICRATE)%60;
+				str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUSTS"),stats.busts);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.hdamagedealt > 0 ) str = str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDDEALT"),stats.hdamagedealt,stats.damagedealt);
+				else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.hdamagetaken > 0 ) str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.hdamagetaken,stats.damagetaken);
+				else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
+				if ( stats.favweapon == -1 ) str = str.."N/A";
+				else
+				{
+					let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
+					str = str..def.GetTag();
+				}
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+				if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
+				else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+			}
+			else if ( sel1 == STAT_KILLS )
+			{
+				xx += 9;
+				yy = 23;
+				int cnt = stats.mstats.Size();
+				if ( cnt <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				int ofs = clamp(sel1,0,max(0,cnt-22));
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = GetDefaultByType(stats.mstats[i].m).GetTag();
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					str = String.Format("%d",stats.mstats[i].kills);
+					int len = fnt.StringWidth(str);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+((cnt>22)?623:631)-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 16;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sel1 == STAT_LEVEL )
+			{
+				xx += 9;
+				yy = 23;
+				int cnt = stats.lstats.Size();
+				if ( cnt <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				int ofs = clamp(sel1,0,max(0,cnt-22));
+				// calc lengths
+				int len[4], maxlen[4];
+				for ( int i=0; i<4; i++ ) maxlen[i] = 0;
+				for ( int i=0; i<cnt; i++ )
+				{
+					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
+					str = String.Format("T %02d:%02d:%02d",sec/3600,(sec%3600)/60,sec%60);
+					len[0] = fnt.StringWidth(str);
+					if ( len[0] > maxlen[0] ) maxlen[0] = len[0];
+					str = String.Format("S %d/%d",stats.lstats[i].scount,stats.lstats[i].stotal);
+					len[1] = fnt.StringWidth(str);
+					if ( len[1] > maxlen[1] ) maxlen[1] = len[1];
+					str = String.Format("I %d/%d",stats.lstats[i].icount,stats.lstats[i].itotal);
+					len[2] = fnt.StringWidth(str);
+					if ( len[2] > maxlen[2] ) maxlen[2] = len[2];
+					str = String.Format("K %d/%d",stats.lstats[i].kcount,stats.lstats[i].ktotal);
+					len[3] = fnt.StringWidth(str);
+					if ( len[3] > maxlen[3] ) maxlen[3] = len[3];
+				}
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = stats.lstats[i].hub?stats.lstats[i].levelname:String.Format("%s - %s",stats.lstats[i].mapname.MakeUpper(),stats.lstats[i].levelname);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					int ox = ((cnt>22)?623:631);
+					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
+					str = String.Format("%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+ox-fnt.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+ox-maxlen[0],origin.y+yy,"T",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[0]+16;
+					str = String.Format("%d\cu/\c-%d",stats.lstats[i].scount,stats.lstats[i].stotal);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+ox-fnt.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+ox-maxlen[1],origin.y+yy,"S",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[1]+16;
+					str = String.Format("%d\cu/\c-%d",stats.lstats[i].icount,stats.lstats[i].itotal);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+ox-fnt.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+ox-maxlen[2],origin.y+yy,"I",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[2]+16;
+					str = String.Format("%d\cu/\c-%d",stats.lstats[i].kcount,stats.lstats[i].ktotal);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+ox-fnt.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+ox-maxlen[3],origin.y+yy,"K",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 16;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sel1 == STAT_ACHIEVEMENT )
+			{
+				xx += 9;
+				yy = 23;
+				str = StringTable.Localize("$SWWM_COMINGSOON");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((631-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 		else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
 		{

@@ -933,6 +933,7 @@ Class SWWMWeapon : Weapon abstract
 
 	private int SWeaponFlags;
 	Actor pfield;	// instance of parry field for current melee attack
+	bool wallponch;	// is punching a wall (for activation checks)
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 
@@ -1162,6 +1163,7 @@ Class SWWMWeapon : Weapon abstract
 		ut.uses.Clear();
 		ut.glass.Clear();
 		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE*rangemul,0);
+		invoker.wallponch = true;
 		for ( int i=0; i<ut.uses.Size(); i++ )
 		{
 			if ( ut.uses[i].hitactor )
@@ -1177,6 +1179,7 @@ Class SWWMWeapon : Weapon abstract
 				if ( !(ut.uses[i].hitline.activation&SPAC_UseThrough) ) break;
 			}
 		}
+		invoker.wallponch = false;
 		// fuck glass
 		for ( int i=0; i<ut.glass.Size(); i++ )
 			ut.glass[i].Activate(self,0,SPAC_Impact);

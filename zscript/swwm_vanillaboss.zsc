@@ -19,14 +19,15 @@ Class SWWMVanillaBossHandler : EventHandler
 	ui int thealth, hmax;
 	ui int oldhealth[30];
 	ui int cummdamage, lastcummtic;	// please do not misread
-	transient ui CVar dodrawbossbar;
+	transient ui CVar dodrawbossbar, funtags;
 
 	enum EVanillaMap
 	{
 		MAP_NONE,
 		MAP_DE1M8,
 		MAP_DE2M8,
-		MAP_DE3M8_DE4M8,
+		MAP_DE3M8,
+		MAP_DE4M8,
 		MAP_HE1M8_HE4M8,
 		MAP_HE2M8_HE5M8,
 		MAP_HE3M8,
@@ -49,9 +50,10 @@ Class SWWMVanillaBossHandler : EventHandler
 			return MAP_DE1M8;
 		if ( mapsum ~== "EFFE91DF41AD41F6973C06F0AD67DDB9" )
 			return MAP_DE2M8;
-		if ( (mapsum ~== "EF128313112110ED6C1549AF96AF26C9")
-			|| (mapsum ~== "2DC939E508AB8EB68AF79D5B60568711") )
-			return MAP_DE3M8_DE4M8;
+		if ( mapsum ~== "EF128313112110ED6C1549AF96AF26C9" )
+			return MAP_DE3M8;
+		if ( mapsum ~== "2DC939E508AB8EB68AF79D5B60568711" )
+			return MAP_DE4M8;
 		if ( (mapsum ~== "27639D04F8090D57A47D354992435893")
 			|| (mapsum ~== "30D1480A6D4F3A3153739D4CCF659C4E") )
 			return MAP_HE1M8_HE4M8;
@@ -116,18 +118,23 @@ Class SWWMVanillaBossHandler : EventHandler
 			}
 			bosstag = "$BT_CYBIE";
 		}
-		else if ( bossmap == MAP_DE3M8_DE4M8 )
+		else if ( bossmap == MAP_DE3M8 )
 		{
 			if ( e.Thing is 'Spidermastermind' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe )
-				{
-					if ( level.mapname ~== "E3M8" ) e.Thing.Health *= 5;
-					else e.Thing.Health *= 3;
-				}
+				if ( upgrademe ) e.Thing.Health *= 5;
 			}
 			bosstag = "$BT_SPIDER";
+		}
+		else if ( bossmap == MAP_DE4M8 )
+		{
+			if ( e.Thing is 'Spidermastermind' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.Health *= 3;
+			}
+			bosstag = "$BT_SPIDER2";
 		}
 		else if ( bossmap == MAP_DMAP07 )
 		{
@@ -311,6 +318,7 @@ Class SWWMVanillaBossHandler : EventHandler
 		if ( !ui_initialized || (alpha <= 0.) ) return;
 		if ( !dodrawbossbar ) dodrawbossbar = CVar.GetCVar('swwm_bosshealthbars',players[consoleplayer]);
 		if ( !dodrawbossbar.GetBool() ) return;
+		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
 		if ( !bbar_f ) bbar_f = TexMan.CheckForTexture("graphics/HUD/BossHealthBarBox.png",TexMan.Type_Any);
 		if ( !bbar_r ) bbar_r = TexMan.CheckForTexture("graphics/HUD/BossHealthBar.png",TexMan.Type_Any);
 		if ( !bbar_d ) bbar_d = TexMan.CheckForTexture("graphics/HUD/BossHealthBarDecay.png",TexMan.Type_Any);
@@ -328,7 +336,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			string dnum = String.Format("%d",cummdamage);
 			Screen.DrawText(dmgfnt,Font.CR_RED,vpos.x+300-dmgfnt.StringWidth(dnum),vpos.y-(dmgfnt.GetHeight()+2),dnum,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha*calph);
 		}
-		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(funtags.GetBool()?(bosstag.."_FUN"):bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 	}
 
 	// can't use this until I actually figure out how to make those walls damageable

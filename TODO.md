@@ -7,9 +7,8 @@ Not so fundamental things during beta:
  - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
  - Mag refilling system (no more wasted ammo)
- - Randomized vanilla monster retagging with multiple options
+ - 1.150 FCB alternate ammo for Silver Bullet
  - Parrying for hitscan weapons (currently parrying only handles vanilla LineAttack)
- - 16:9 version of Demolitionist Menu (for people playing in 720p and similar)
  - Fun options
    - Omnibusting (all weapons can bust walls)
    - Infinite fuel
@@ -23,12 +22,12 @@ Extra things for later:
    - Commission fanart or something idk
    - Draw some 4Komas myself
  - Titlemap stuff
-   - A background with a bit more flair than just the fuzz shader.
-   - Some sort of flyby featuring the Demolitionist booting up, closeups of
-     weapons/items etc.
+   - A background with a bit more flair than just the fuzz shader
+   - Some sort of flyby featuring the Demolitionist booting up, closeups of weapons/items etc.
  - Japanese localization
- - Extra Demolitionist Menu tabs
+ - Extra Demolitionist Menu tabs (radio, pong minigame)
  - Mod trailer video
+ - Rewrite the entire Demolitionist Menu code from the ground up to be more easily extensible and adapt to any window size
 
 Very extra things for the future:
  - DLC

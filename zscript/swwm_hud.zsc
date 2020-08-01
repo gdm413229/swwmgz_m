@@ -738,6 +738,18 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 	}
 
+	override void DrawMyPos()
+	{
+		String str = String.Format("(%d,%d,%d)",CPlayer.mo.pos.X,CPlayer.mo.pos.Y,CPlayer.mo.pos.Z);
+		let fnt = LangFont(mMiniwiFont);
+		Screen.DrawText(fnt,Font.CR_GREEN,(ss.x-fnt.StringWidth(str))/2,4,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override void DrawAutomapHUD( double ticFrac )
+	{
+		// do nothing, DrawScore handles this
+	}
+
 	private void DrawScore()
 	{
 		if ( ScoreInter2.GetValue() > 0 )
@@ -769,10 +781,49 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
-		// TODO draw stats and timer when automap is open
+		// draw stats and timer when automap is open
+		int yy = margin+19;
+		if ( automapactive )
+		{
+			int xx = int(ss.x-(margin+2));
+			String str;
+			if ( level.clusterflags&level.CLUSTER_HUB ) str = level.levelname;
+			else str = String.Format("%s - %s",level.mapname.MakeUpper(),level.levelname);
+			let fnt = LangFont(mTewiFont);
+			Screen.DrawText(fnt,Font.CR_FIRE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += fnt.GetHeight();
+			fnt = LangFont(mMiniwiFont);
+			if ( level.total_monsters > 0 )
+			{
+				str = String.Format("\cxK \c-%d\cu/\c-%d",level.killed_monsters,level.total_monsters);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
+			if ( level.total_items > 0 )
+			{
+				str = String.Format("\cxI \c-%d\cu/\c-%d",level.found_items,level.total_items);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
+			if ( level.total_secrets > 0 )
+			{
+				str = String.Format("\cxS \c-%d\cu/\c-%d",level.found_secrets,level.total_secrets);
+				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
+			int sec = Thinker.Tics2Seconds(level.maptime);
+			str = String.Format("\cxT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
+			Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += fnt.GetHeight();
+			sec = Thinker.Tics2Seconds(level.totaltime);
+			str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
+			Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += fnt.GetHeight();
+			yy += 3;
+		}
 		// in doom/heretic (draw key icons)
 		if ( !(gameinfo.gametype&(GAME_DOOMCHEX|GAME_HERETIC)) ) return;
-		Vector2 keypos = (ss.x-(margin+2),margin+19);
+		Vector2 keypos = (ss.x-(margin+2),yy);
 		int colc = 0;
 		double colh = 0;
 		int n = Key.GetKeyTypeCount();

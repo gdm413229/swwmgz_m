@@ -90,7 +90,7 @@ Class IDontFeelSoGood : Thinker
 		if ( goner.Health > 0 )
 		{
 			goner.bINVISIBLE = goner.default.bINVISIBLE;
-			goner.A_ChangeLinkFlags(!goner.default.bNOBLOCKMAP);
+			goner.A_ChangeLinkFlags(goner.default.bNOBLOCKMAP);
 			Destroy();
 			return;
 		}
@@ -117,7 +117,17 @@ Class YnykronImpactLight : PaletteLight
 	{
 		Tag "WhiteExpl2";
 		ReactionTime 40;
-		Args 0,0,0,300;
+		Args 0,0,0,400;
+	}
+}
+
+Class YnykronSubImpactLight : PaletteLight
+{
+	Default
+	{
+		Tag "WhiteExpl2";
+		ReactionTime 10;
+		Args 0,0,0,200;
 	}
 }
 
@@ -136,7 +146,7 @@ Class YnykronBeamLight : PaletteLight
 	Default
 	{
 		Tag "WhiteExpl2";
-		ReactionTime 80;
+		ReactionTime 50;
 		Args 0,0,0,600;
 	}
 }
@@ -174,13 +184,15 @@ Class YnykronImpactArm : Actor
 		{
 			A_CountDown();
 			if ( !(reactiontime%2) )
+			{
 				Spawn("YnykronImpactTrail",pos);
-			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
-			let s = Spawn("SWWMHalfSmoke",pos);
-			s.vel = pvel+vel*.2;
-			s.special1 = Random[ExploS](1,3);
-			s.scale *= 2.4;
-			s.alpha *= 0.1+.4*(ReactionTime/15.);
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+				let s = Spawn("SWWMHalfSmoke",pos);
+				s.vel = pvel+vel*.2;
+				s.special1 = Random[ExploS](1,3);
+				s.scale *= 2.4;
+				s.alpha *= 0.1+.4*(ReactionTime/15.);
+			}
 		}
 		Wait;
 	}
@@ -202,7 +214,7 @@ Class YnykronImpactTrail : Actor
 	States
 	{
 	Spawn:
-		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 2 Bright;
+		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 1 Bright;
 		Stop;
 	}
 }
@@ -220,8 +232,9 @@ Class YnykronDelayedImpact : Actor
 	}
 	override void Tick()
 	{
+		if ( isFrozen() ) return;
 		special1++;
-		if ( special1 < 3 )
+		if ( special1 < 4 )
 		{
 			if ( tracer ) SetOrigin(level.Vec3Offset(tracer.pos,ofs),true);
 			return;
@@ -260,14 +273,52 @@ Class YnykronImpact : Actor
 		+EXTREMEDEATH;
 		+NOINTERACTION;
 	}
+
+	private bool CmpDist( Actor a, Actor b )
+	{
+		double dista = Vec3To(a).length();
+		double distb = Vec3To(b).length();
+		return (dista > distb);
+	}
+
+	// quicksort (candidates)
+	private int partition_candidates( Array<Actor> a, int l, int h )
+	{
+		Actor pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpDist(pv,a[j]) )
+			{
+				i++;
+				Actor tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Actor tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_candidates( Array<Actor> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_candidates(a,l,h);
+		qsort_candidates(a,l,p-1);
+		qsort_candidates(a,p+1,h);
+	}
+
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
 		// no need to call A_AlertMonsters if all monsters on the entire map were already alerted by the initial shot
-		if ( swwm_ynykronalert && (!special1 || swwm_extraalert) ) A_AlertMonsters();
-		rad = args[0]+300+10*clamp(special1/10,0,10);
+		if ( swwm_ynykronalert && (!special2 || swwm_extraalert) ) A_AlertMonsters();
+		rad = args[0]+300+10*clamp(special1/10,0,15);
 		A_QuakeEx(4,4,4,50,0,rad*4,"",QF_RELATIVE|QF_SCALEDOWN,falloff:rad*2,rollintensity:.6);
 		let bt = BlockThingsIterator.Create(self,rad+200);
+		Array<Actor> candidates;
+		candidates.Clear();
 		while ( bt.Next() )
 		{
 			let t = bt.Thing;
@@ -277,18 +328,18 @@ Class YnykronImpact : Actor
 			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
 			double dist = dirto.length();
 			if ( (dist > rad/2) && (t == target) ) continue;
+			candidates.Push(t);
+		}
+		qsort_candidates(candidates,0,candidates.Size()-1);
+		candidates.Resize(2);
+		for ( int i=0; i<candidates.Size(); i++ )
+		{
+			let t = candidates[i];
+			if ( !t ) continue;
+			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
+			double dist = dirto.length();
 			dirto /= dist;
 			int trad = int(max(t.radius,t.height));
-			for ( int i=0; i<8; i++ )
-			{
-				let p = t.Vec3Offset(t.radius*FRandom[Ynykron](-.8,.8),t.radius*FRandom[Ynykron](-.8,.8),t.height*FRandom[Ynykron](.1,.9));
-				Vector3 pvel = (dirto*2.+(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1))).unit()*FRandom[ExploS](.5,8);
-				let s = Spawn("SWWMHalfSmoke",p);
-				s.vel = pvel;
-				s.special1 = Random[ExploS](2,3);
-				s.scale *= 3.;
-				s.alpha *= .2;
-			}
 			// voodoo dolls just get erased (how convenient)
 			// otherwise instantly vaporize the fucker
 			if ( t.player && (t.player.mo != t) ) t.Destroy();
@@ -303,7 +354,7 @@ Class YnykronImpact : Actor
 			}
 			if ( t && YnykronShot(master) )
 				YnykronShot(master).hitlist.Push(t);
-			if ( swwm_capmcrange && (special1 > 3) ) continue;
+			if ( swwm_capmcrange && (special1 > 2) ) continue;
 			// spawn blast that will propagate
 			let b = Spawn("YnykronDelayedImpact",pos);
 			YnykronDelayedImpact(b).ofs = dirto*min(rad,dist);
@@ -312,54 +363,42 @@ Class YnykronImpact : Actor
 			b.master = master;
 			b.angle = atan2(dirto.y,dirto.x);
 			b.pitch = asin(-dirto.z);
-			b.special2 = special1+(Random[Ynykron](0,4)?1:0);
-			b.special1 = Random[Ynykron](-3,0);
+			b.special2 = special1+(Random[Ynykron](0,8)?1:0);
+			b.special1 = Random[Ynykron](-5,0)-min(special1/2,10);
 			b.args[0] = trad;
 		}
 		if ( YnykronShot(master) )
 		{
 			if ( YnykronShot(master).lastimpact < gametic )
 			{
-				master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.2:1.,.0);
-				YnykronShot(master).lastimpact = gametic+(special1?3:5);
+				master.A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.4:1.,.0);
+				YnykronShot(master).lastimpact = gametic+(special1?2:5);
 			}
 		}
-		else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.2:1.,.0);
+		else A_StartSound("ynykron/hit",CHAN_VOICE,CHANF_OVERLAP,special1?.4:1.,.0);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](3,5);
+		int numpt = Random[ExploS](2,4);
 		if ( special2 ) numpt -= 3;
 		for ( int i=0; i<numpt; i++ )
 		{
-			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,8);
-			let s = Spawn("SWWMSmoke",pos);
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.5,2);
+			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel;
-			s.special1 = Random[ExploS](2,10);
+			s.special1 = Random[ExploS](1,8);
 			s.scale *= 3.;
 			s.alpha *= .4;
 		}
-		Spawn("YnykronImpactLight",pos);
-		Spawn("YnykronImpactRing",pos);
+		if ( special2 ) Spawn("YnykronSubImpactLight",pos);
+		else Spawn("YnykronImpactLight",pos);
+		let r = Spawn("YnykronImpactRing",pos);
+		r.special2 = special2;
 		numpt = Random[ExploS](special2?-4:0,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("YnykronImpactArm",pos);
 			s.target = target;
-		}
-	}
-	override void Tick()
-	{
-		Super.Tick();
-		if ( isFrozen() || (rad <= 0) ) return;
-		specialf1 += .1;
-		SWWMHandler.DoExplosion(self,150*specialf1,-150*specialf1,rad/4,ignoreme:target);
-		SWWMHandler.DoExplosion(self,50*specialf1,-50*specialf1,rad/8);
-		rad += 5;
-		if ( specialf1 > 1. )
-		{
-			specialf1 += .1;
-			rad -= 20;
 		}
 	}
 	override void OnDestroy()
@@ -371,7 +410,7 @@ Class YnykronImpact : Actor
 	States
 	{
 	Spawn:
-		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 3 Bright;
+		MOXP ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 3 Bright A_SetTics(special2?1:3);
 		Stop;
 	}
 }
@@ -493,7 +532,7 @@ Class YnykronBeam : Actor
 			let b = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
 			b.Scale *= FRandom[Ynykron](1.6,2.8);
 			b.special1 = Random[Ynykron](3,5);
-			b.A_SetRenderStyle(.3,STYLE_AddShaded);
+			b.alpha *= .3;
 			b.vel += x*FRandom[Ynykron](-.2,.4);
 		}
 		for ( int i=0; i<t.HitList.Size(); i++ )
@@ -601,7 +640,7 @@ Class YnykronBeam : Actor
 				let b = Spawn("SWWMHalfSmoke",ofs);
 				b.Scale *= FRandom[Ynykron](1.6,2.8);
 				b.special1 = Random[Ynykron](3,5);
-				b.A_SetRenderStyle(.3,STYLE_AddShaded);
+				b.alpha *= .3;
 				b.vel += x*FRandom[Ynykron](-.2,.4);
 			}
 			for ( int i=0; i<it.HitList.Size(); i++ )
@@ -865,10 +904,16 @@ Class YnykronImpactRing : Actor
 		+DONTSPLASH;
 		+NOINTERACTION;
 	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*1.03);
+	}
 	States
 	{
 	Spawn:
-		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.03);
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetTics(special2?1:2);
 		Stop;
 	}
 }

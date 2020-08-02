@@ -1406,6 +1406,7 @@ Class TheBall : Actor
 			String snd = String.Format("misc/clonk%d",whichclonk);
 			A_AlertMonsters(2500);
 			A_StartSound(snd,CHAN_VOICE,CHANF_OVERLAP,1.,.2);
+			A_StartSound(snd,CHAN_VOICE,CHANF_OVERLAP,1.,.2);
 			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 			victim.A_StartSound(snd,CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
 			slamforce *= 4;

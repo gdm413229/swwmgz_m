@@ -35,7 +35,7 @@ HardwareShader PostProcess scene
 HardwareShader PostProcess scene
 {
 	Name "Glitch"
-	Shader "shaders/glsl/Glitch.frag" 330
+	Shader "shaders/glsl/Glitch.fp" 330
 	Uniform float Timer
 	Uniform float str1
 	Uniform float str2
@@ -43,7 +43,7 @@ HardwareShader PostProcess scene
 HardwareShader PostProcess scene
 {
 	Name "Grain"
-	Shader "shaders/glsl/Grain.frag" 330
+	Shader "shaders/glsl/Grain.fp" 330
 	Uniform float Timer
 	Uniform float ni
 	Texture NoiseTexture "textures/rgbnoise.png"

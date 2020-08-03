@@ -2744,6 +2744,7 @@ Class SWWMHandler : EventHandler
 
 	override void WorldLoaded( WorldEvent e )
 	{
+		if ( level.levelname ~== "Modder Test Map" ) level.ReplaceTextures("-noflat-","kinstile",0);
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
 			AddOneliner("mapstart",3);

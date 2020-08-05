@@ -46,6 +46,25 @@ Class SWWMUtility
 		}
 	}
 
+	static void BeautifyClassName( out String str )
+	{
+		String workstr = str;
+		str.Truncate(0);
+		workstr.Replace("_"," ");
+		int len = workstr.CodePointCount();
+		for ( int i=0; i<len; i++ )
+		{
+			int cp1 = workstr.GetNextCodePoint(i);
+			str.AppendCharacter(cp1);
+			if ( i < len-1 )
+			{
+				int cp2 = workstr.GetNextCodePoint(i+1);
+				if ( (String.CharLower(cp1) == cp1) && (String.CharUpper(cp2) == cp2) )
+					str.AppendCharacter(0x20);
+			}
+		}
+	}
+
 	static int GetLineLock( Line l )
 	{
 		int locknum = l.locknumber;

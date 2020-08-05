@@ -386,9 +386,9 @@ Class SWWMUtility
 	}
 
 	// because GetTag() returns the localized string, we need to do things the hard way
-	static clearscope String GetFunTag( Actor a )
+	static clearscope String GetFunTag( Actor a, String defstr = "" )
 	{
-		if ( a is 'SWWMMonster' ) return SWWMMonster(a).GetFunTag();
+		if ( a is 'SWWMMonster' ) return SWWMMonster(a).GetFunTag(defstr);
 		int ntags = 1;
 		String basetag = "";
 		switch ( a.GetClassName() )
@@ -566,13 +566,13 @@ Class SWWMUtility
 			basetag = "HERESIARCH";
 			break;
 		}
-		if ( basetag == "" ) return a.GetTag();
+		if ( basetag == "" ) return a.GetTag(defstr);
 		String funtag = "FN_"..basetag.."_FUN";
 		String lfuntag = StringTable.Localize(funtag,false);
 		if ( lfuntag != funtag ) return lfuntag;
 		String nfuntag = "FN_"..basetag.."_FUNN";
 		String lnfuntag = StringTable.Localize(nfuntag,false);
-		if ( lnfuntag == nfuntag ) return a.GetTag();
+		if ( lnfuntag == nfuntag ) return a.GetTag(defstr);
 		ntags = lnfuntag.ToInt();
 		return StringTable.Localize(String.Format("$FN_%s_FUN%d",basetag,Random[FunTags](1,ntags)));
 	}
@@ -1305,7 +1305,12 @@ Class SWWMCombatTracker : Thinker
 		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
 		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain')) )
 		{
-			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget):mytarget.GetTag();
+			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget,"AWESOME IT'S PENIS"):mytarget.GetTag("AWESOME IT'S PENIS");
+			if ( realtag == "AWESOME IT'S PENIS" )
+			{
+				realtag = mytarget.GetClassName();
+				SWWMUtility.BeautifyClassName(realtag);
+			}
 			mytag = mytarget.player?(mytarget.player.mo!=mytarget)?String.Format(StringTable.Localize("$FN_VOODOO"),mytarget.player.GetUserName()):mytarget.player.GetUserName():realtag;
 		}
 		else mytag = "";

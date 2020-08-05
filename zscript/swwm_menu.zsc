@@ -2164,9 +2164,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				for ( int i=ofs; i<cnt; i++ )
 				{
 					if ( yy >= 370 ) break;
-					str = GetDefaultByType(sorted_mstats[i].m).GetTag();
+					str = GetDefaultByType(sorted_mstats[i].m).GetTag("AWESOME IT'S PENIS");
 					// beautify if there's no tag
-					if ( str == sorted_mstats[i].m.GetClassName() ) SWWMUtility.BeautifyClassName(str);
+					if ( str == "AWESOME IT'S PENIS" )
+					{
+						str = sorted_mstats[i].m.GetClassName();
+						SWWMUtility.BeautifyClassName(str);
+					}
 					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					str = String.Format("%d",sorted_mstats[i].kills);
 					int len = fnt.StringWidth(str);

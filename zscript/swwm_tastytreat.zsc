@@ -1055,7 +1055,7 @@ Class CandyGun : SWWMWeapon
 		if ( dropamt > 0 ) ma.CreateTossable(dropamt);
 		ma.Amount = min(ma.MaxAmount,ma.Amount+invoker.clipcount);
 		if ( CheckLocalView() ) for ( int i=0; i<(invoker.clipcount-dropamt); i++ ) ma.PrintPickupMessage(true,ma.PickupMessage());
-		ma.PlayPickupSound(self);
+		if ( (invoker.clipcount-dropamt) > 0 ) ma.PlayPickupSound(self);
 		invoker.clipcount = 0;
 	}
 

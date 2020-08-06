@@ -996,6 +996,251 @@ Class YnykronShot : Actor
 	}
 }
 
+Class YnykronAltTracer : LineTracer
+{
+	Actor ignore;
+	Array<Line> ShootThroughList;
+	Array<WaterHit> WaterHitList;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignore ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&Line.ML_BlockHitscan) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class YnykronAltBeam : Actor
+{
+	bool nospread;
+
+	void TraceOut()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		let t = new("YnykronAltTracer");
+		t.ignore = target;
+		t.ShootThroughList.Clear();
+		t.WaterHitList.Clear();
+		t.Trace(pos,cursector,x,64,TRACE_HitSky);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=0; i<t.Results.Distance; i+=32 )
+		{
+			if ( Random[Ynykron](0,5) ) continue;
+			let b = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
+			b.Scale *= FRandom[Ynykron](1.6,2.8);
+			b.special1 = Random[Ynykron](3,5);
+			b.A_SetRenderStyle(b.alpha*.3,STYLE_Subtract);
+			b.vel += x*FRandom[Ynykron](-.2,.4);
+		}
+		if ( t.Results.HitType == TRACE_HasHitSky )
+		{
+			// goodbye
+			nospread = true;
+			return;
+		}
+		if ( t.Results.HitType != TRACE_HitNone )
+		{
+			// hit something
+			Vector3 norm = -t.Results.HitVector;
+			if ( t.Results.HitType == TRACE_HitWall )
+			{
+				norm = (t.Results.HitLine.delta.y,-t.Results.HitLine.delta.x,0).unit();
+				if ( t.Results.Side ) norm *= -1;
+				t.Results.HitLine.RemoteActivate(tracer,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			}
+			else if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.top.Normal;
+				else norm = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.bottom.Normal;
+				else norm = t.Results.HitSector.ceilingplane.Normal;
+			}
+			/*let b = Spawn("YnykronSingularity",level.Vec3Offset(t.Results.HitPos,norm*16));
+			b.target = target;
+			b.angle = atan2(norm.y,norm.x);
+			b.pitch = asin(-norm.z);*/
+			nospread = true;
+			return;
+		}
+		if ( special1 >= 25600 )
+		{
+			// end of the line, dissipate
+			int numpt = Random[Ynykron](4,8);
+			for ( int i=0; i<numpt; i++ )
+			{
+				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*128));
+				b.Scale *= FRandom[Ynykron](.6,1.8);
+				b.special1 = Random[Ynykron](1,2);
+				b.A_SetRenderStyle(.3,STYLE_Subtract);
+				b.vel += x*FRandom[Ynykron](0.,5.);
+			}
+			nospread = true;
+			return;
+		}
+	}
+	void SpreadOut()
+	{
+		if ( nospread ) return;
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		// propagate
+		let next = Spawn("YnykronAltBeam",level.Vec3Offset(pos,x*128));
+		next.angle = atan2(x.y,x.x);
+		next.pitch = asin(-x.z);
+		next.roll = roll;
+		next.target = target;
+		next.master = master;
+		next.special1 = special1+64;
+		next.SetStateLabel("TrailSpawn");
+	}
+	override void PostBeginPlay()
+	{
+		special2 = Random[Ynykron](-1,0);
+		TraceOut();
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_FadeOut(FRandom[Ynykron](.01,.02));
+		special2++;
+		if ( special2 == 1 )
+			SpreadOut();
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+
+	Default
+	{
+		RenderStyle "Subtract";
+		Radius .1;
+		Height 0;
+		Alpha .4;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOCLIP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+NOINTERACTION;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright NoDelay
+		{
+			return FindState("StarterDev")+Random[Ynykron](0,3)*2;
+		}
+		Stop;
+	TrailSpawn:
+		XZW2 A -1 Bright
+		{
+			return FindState("TrailerDev")+Random[Ynykron](0,3)*2;
+		}
+		Stop;
+	StarterDev:
+		#### # 50 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+	TrailerDev:
+		#### # 50 Bright;
+		XZW2 B -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW2 C -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW2 D -1 Bright;
+		Stop;
+		#### # 50 Bright;
+		XZW2 E -1 Bright;
+		Stop;
+	}
+}
+
+Class YnykronAltShot : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		A_QuakeEx(4,4,4,80,0,65536,"",QF_RELATIVE|QF_SCALEDOWN,falloff:65536,rollIntensity:.8);
+		A_StartSound("ynykron/altbeam",CHAN_VOICE,CHANF_DEFAULT,1.,0.);
+		let b = Spawn("YnykronAltBeam",pos);
+		b.target = target;
+		b.angle = angle;
+		b.pitch = pitch;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() || IsActorPlayingSound(CHAN_VOICE) ) return;
+		Destroy();
+	}
+}
+
 Class Ynykron : SWWMWeapon
 {
 	transient ui TextureID WeaponBox, ChargeBar[2], BoxSide[2];

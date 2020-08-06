@@ -20,17 +20,15 @@ Class ExplodiumMag : SWWMCasing
 	States
 	{
 	Death:
-		#### # -1
+		XZW1 BC -1
 		{
-			pitch = 0;
+			pitch = roll = 0;
 			angle = FRandom[Junk](0,360);
-			roll = RandomPick[Junk](-90,90);
+			frame = RandomPick[Junk](1,2);
 		}
 		Stop;
 	}
 }
-
-Class ExplodiumMagEmpty : ExplodiumMag {}
 
 Class ExplodiumMagArm : Actor
 {
@@ -391,12 +389,12 @@ Class ExplodiumGun : SWWMWeapon
 		p.vel += vel*.5;
 	}
 
-	action void A_DropMag( bool loaded = false )
+	action void A_DropMag()
 	{
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
-		let c = Spawn(loaded?"ExplodiumMag":"ExplodiumMagEmpty",origin);
+		let c = Spawn("ExplodiumMag",origin);
 		c.angle = angle;
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
@@ -501,7 +499,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW3 C 1;
 		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 EFGH 1;
-		XZW3 I 1 A_DropMag(true);
+		XZW3 I 1 A_DropMag();
 		Goto ReloadEnd;
 	ReloadEmpty:
 		XZW2 A 1;

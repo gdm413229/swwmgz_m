@@ -253,16 +253,18 @@ their small size.
 
 ### Silver Bullet JET (slot 8), replaces Plasma Rifle, Hellstaff, Quietus (hilt)
 
-A lighter (43kg), higher caliber (1.150 XSB) variant of the original Silver
+A lighter (43kg), higher caliber (1.150) variant of the original Silver
 Bullet, with built-in recoil compensation. A joint project of Blackmann Arms
 and Forx Industries. This thing kills almost everything in one shot, provided
 you can aim straight.
 
 Primary fire shoots, duh. A second press chambers another round.
 
-Secondary fire uses the scope. Can be held to go up to 16x.
+Secondary fire picks the ammo for the next reload.
 
-Reload reloads (what else is new).
+Reload reloads (what else is new) or switches ammo types.
+
+Zoom uses the scope. Can be held to go up to 16x.
 
 This weapon is generally not recommended for human use outside of power armor.
 Good thing you're not a human, then. Still, the recoil compensator jet engines
@@ -272,9 +274,22 @@ careful.
 ### 1.150 XSB Bullets, replaces Cells, Runes
 
 The 1.150 caliber eXplosive Super Burst bullets employ an explodium microcharge
-to be shot with enough energy to reach a relatively high velocity. They are
-hard to come by, so spawns are scarce, and they won't even pop up in
-Hammerspace Embiggeners, only on higher tier Fabricators.
+to be shot with enough energy to reach a relatively high velocity, allowing
+their massive bulk to penetrate several targets including walls. They are hard
+to come by, so spawns are scarce, and they won't even pop up in Hammerspace
+Embiggeners, only on higher tier Fabricators.
+
+In the world, they may pop up as spare bullets or full mags. Each five bullets
+picked up will be automatically converted to a full mag in your inventory.
+
+### 1.150 FCB Bullets, replaces Cells, Runes
+
+The more directly explosive counterpart of the XSB. Personally baptized by
+Hermann E. Ischer himself as "Fat Chode Bombs", these High-Explosive Squash
+Head rounds will blast through walls on impact, hitting anything standing
+behind them, and in some cases, tearing down the wall itself too.
+
+Same spawn conditions as the standard bullets.
 
 ### Candy Gun (slot 9), replaces BFG9000, Firemace, Bloodscourge (stub)
 
@@ -292,6 +307,15 @@ Reload does what you'd expect.
 Holding primary fire during the first few moments of altfire will throws the
 weapon away, armed and ready to explode if it hits anyone or anything. The
 blast area for this is pretty ridiculous. You can hold spare guns, by the way.
+
+### Candy Gun Bullets, replaces Cells, Runes
+
+The ammo for this beast. Mags don't pop up on embiggeners, only on the highest
+tier fabricator.
+
+In the world, you may find either spare bullets or full mags. Each seven
+bullets picked up will be automatically converted to a full mag in your
+inventory.
 
 ### Ynykron Artifact (slot 0), replaces BFG9000, Firemace, Wraithverge (arc)
 
@@ -433,7 +457,7 @@ You're fucking invincible for a total of 30 seconds.
 ### Hammerspace Embiggener, replaces Backpack, Bag of Holding, Porkalator, Dragonskin Bracers
 
 Each of these you pick up increase ammo capacity by half of its base value, up
-to 5x, and also give you some extra ammo like a normal backpack.
+to 16x, and also give you some extra ammo like a normal backpack.
 
 ### Universal Ammo Fabricator, replaces Mana / Krater of Might in Hexen
 

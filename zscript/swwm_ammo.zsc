@@ -160,6 +160,115 @@ Mixin Class SWWMAmmo
 	}
 }
 
+// Common code for individual bullets
+Class MagAmmo : Inventory abstract
+{
+	Mixin SWWMOverlapPickupSound;
+
+	Class<Ammo> ParentAmmo;
+	Ammo pamo;
+	int ClipSize;
+	int countdown;
+
+	Property ParentAmmo : ParentAmmo;
+	Property ClipSize : ClipSize;
+
+	default
+	{
+		+INVENTORY.KEEPDEPLETED;
+		Inventory.PickupSound "misc/bullet_pkup";
+	}
+
+	private Inventory DoDrop( Class<Inventory> type )
+	{
+		let copy = Inventory(Spawn(type,Owner.Pos,NO_REPLACE));
+		if ( !copy ) return null;
+		copy.DropTime = 30;
+		copy.bSpecial = copy.bSolid = false;
+		copy.SetOrigin(Owner.Vec3Offset(0,0,10.),false);
+		copy.Angle = Owner.Angle;
+		copy.VelFromAngle(5.);
+		copy.Vel.Z = 1.;
+		copy.Vel += Owner.Vel;
+		copy.bNoGravity = false;
+		copy.ClearCounters();
+		copy.OnDrop(Owner);
+		copy.vel += (RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),Owner.angle),FRandom[Junk](2.,5.));
+		return copy;
+	}
+
+	override bool SpecialDropAction( Actor dropper )
+	{
+		if ( Amount != default.Amount )
+		{
+			// needed for positioning to work
+			Owner = dropper;
+			CreateTossable(Amount);
+			return true;
+		}
+		return false;
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !pamo )
+		{
+			pamo = Ammo(Owner.FindInventory(ParentAmmo));
+			if ( !pamo )
+			{
+				pamo = Ammo(Spawn(ParentAmmo));
+				pamo.AttachToOwner(Owner);
+				pamo.Amount = 0;
+			}
+		}
+		// check if we can fill a mag (delayed)
+		if ( (Amount < ClipSize) || (pamo.Amount >= pamo.MaxAmount) )
+		{
+			countdown = 35;
+			return;
+		}
+		if ( countdown-- > 0 ) return;
+		bool given = false;
+		while ( (pamo.Amount < pamo.MaxAmount) && (Amount >= ClipSize) )
+		{
+			pamo.Amount++;
+			Amount -= ClipSize;
+			given = true;
+			if ( Owner.CheckLocalView() )
+				pamo.PrintPickupMessage(true,pamo.PickupMessage());
+		}
+		if ( given ) pamo.PlayPickupSound(Owner);
+	}
+
+	override inventory CreateTossable( int amt )
+	{
+		if ( bUndroppable || bUntossable || !Owner || (Amount <= 0) || (amt == 0) )
+			return null;
+		// cap
+		amt = min(amount,amt);
+		// perform subdivision
+		Inventory last = null;
+		let pammo = GetDefaultByType(ParentAmmo);
+		while ( amt > 0 )
+		{
+			// drop full mag if possible
+			if ( amt >= pammo.Amount )
+			{
+				last = DoDrop(ParentAmmo);
+				amt -= pammo.Amount;
+				Amount -= pammo.Amount;
+				continue;
+			}
+			// drop individual bullets
+			last = DoDrop(GetClass());
+			amt--;
+			Amount--;
+		}
+		return last;
+	}
+}
+
 // ============================================================================
 // Spreadgun / Wallbuster ammo
 // ============================================================================
@@ -786,12 +895,84 @@ Class SilverBulletAmmo : Ammo
 	{
 		Tag "$T_XSBMAG";
 		Inventory.PickupMessage "$T_XSBMAG";
-		Stamina 80000;
+		Stamina 70000;
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
 		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SilverBulletAmmo2 : Ammo
+{
+	Mixin SWWMOverlapPickupSound;
+
+	Default
+	{
+		Tag "$T_FCBMAG";
+		Inventory.PickupMessage "$T_FCBMAG";
+		Stamina 80000;
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet2.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SilverBullets : MagAmmo
+{
+	Mixin SWWMOverlapPickupSound;
+
+	Default
+	{
+		Tag "$T_XSBBULLET";
+		Inventory.PickupMessage "$T_XSBBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 5;
+		MagAmmo.ParentAmmo "SilverBulletAmmo";
+		MagAmmo.ClipSize 5;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SilverBullets2 : MagAmmo
+{
+	Mixin SWWMOverlapPickupSound;
+
+	Default
+	{
+		Tag "$T_FCBBULLET";
+		Inventory.PickupMessage "$T_FCBBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet2.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 5;
+		MagAmmo.ParentAmmo "SilverBulletAmmo2";
+		MagAmmo.ClipSize 5;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -818,9 +999,33 @@ Class CandyGunAmmo : Ammo
 		Stamina 100000;
 		Inventory.Icon "graphics/HUD/Icons/A_CandyGun.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 2;
+		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
 		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class CandyGunBullets : MagAmmo
+{
+	Mixin SWWMOverlapPickupSound;
+
+	Default
+	{
+		Tag "$T_CANDYBULLET";
+		Inventory.PickupMessage "$T_CANDYBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_CandyBullet.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 7;
+		MagAmmo.ParentAmmo "CandyGunAmmo";
+		MagAmmo.ClipSize 7;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -942,6 +1147,8 @@ Class AmmoFabricator : Inventory abstract
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
 			let a = (Class<Ammo>)(AllActorClasses[i]);
+			// skip over candy gun spares, they're "special ammo"
+			if ( a == 'CandyGunSpares' ) continue;
 			// only direct descendants of ammo with a set price below our max unit price
 			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
 			let def = GetDefaultByType(a);
@@ -1145,8 +1352,9 @@ Class HammerspaceEmbiggener : Inventory
 				// The player did not have the ammoitem. Add it.
 				ammoitem = Ammo(Spawn(type));
 				ammoitem.Amount = amount;
-				if ( ammoitem.BackpackMaxAmount != ammoitem.default.MaxAmount )
-					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				if ( ammoitem.BackpackMaxAmount > 0 )
+					ammoitem.MaxAmount = min(ammoitem.MaxAmount,ammoitem.BackpackMaxAmount);
 				if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
 					ammoitem.Amount = ammoitem.MaxAmount;
 				ammoitem.AttachToOwner(other);
@@ -1154,8 +1362,9 @@ Class HammerspaceEmbiggener : Inventory
 			else
 			{
 				// The player had the ammoitem. Give some more.
-				if ( ammoitem.BackpackMaxAmount != ammoitem.default.MaxAmount )
-					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount/2.));
+				if ( ammoitem.BackpackMaxAmount > 0 )
+					ammoitem.MaxAmount = min(ammoitem.MaxAmount,ammoitem.BackpackMaxAmount);
 				if ( ammoitem.Amount < ammoitem.MaxAmount )
 				{
 					ammoitem.Amount += amount;
@@ -1174,11 +1383,13 @@ Class HammerspaceEmbiggener : Inventory
 		{
 			if ( !HammerspaceEmbiggener(item).cheatedin ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 			// readjust ammo values to new capacity
+			// also do the same for spare bullets
 			for ( Inventory i=Owner.Inv; i; i=i.Inv )
 			{
 				if ( !(i is 'Ammo') ) continue;
-				if ( Ammo(i).BackpackMaxAmount != i.default.MaxAmount )
-					i.MaxAmount = int(i.Default.MaxAmount*(1+self.Amount/2.));
+				i.MaxAmount = int(i.Default.MaxAmount*(1+self.Amount/2.));
+				if ( Ammo(i).BackpackMaxAmount > 0 )
+					i.MaxAmount = min(i.MaxAmount,Ammo(i).BackpackMaxAmount);
 				int amount = Ammo(i).BackpackAmount;
 				if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
 				i.Amount += amount;
@@ -1194,7 +1405,7 @@ Class HammerspaceEmbiggener : Inventory
 		// reset upgrade
 		for ( Inventory i=Owner.Inv; i; i=i.Inv )
 		{
-			if ( !(i is 'Ammo') ) continue;
+			if ( !(i is 'Ammo') && !(i is 'MagAmmo') ) continue;
 			i.MaxAmount = i.Default.MaxAmount;
 			if ( i.Amount > i.MaxAmount )
 				i.Amount = i.MaxAmount;
@@ -1205,8 +1416,8 @@ Class HammerspaceEmbiggener : Inventory
 	{
 		Tag "$T_EMBIGGENER";
 		Inventory.PickupMessage "$T_EMBIGGENER";
-		Inventory.MaxAmount 8;
-		Inventory.InterHubAmount 8;
+		Inventory.MaxAmount 16;
+		Inventory.InterHubAmount 16;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.ALWAYSPICKUP;

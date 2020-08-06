@@ -2155,7 +2155,7 @@ Class Sparkster : SWWMWeapon
 		XZW2 A 20;
 		Goto Ready;
 	Reload:
-		XZW2 A 0 A_JumpIf((invoker.clipcount>=invoker.default.clipcount)||((invoker.Ammo1.Amount<=0)&&!sv_infiniteammo&&!FindInventory('PowerInfiniteAmmo',true)),"Idle");
+		XZW2 A 0 A_JumpIf((invoker.clipcount>0)||((invoker.Ammo1.Amount<=0)&&!sv_infiniteammo&&!FindInventory('PowerInfiniteAmmo',true)),"Idle");
 		XZW2 A 2
 		{
 			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);

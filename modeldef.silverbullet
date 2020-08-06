@@ -12,19 +12,21 @@ Model "SilverBulletCasing"
 
 	FrameIndex XZW1 A 0 0
 }
-Model "SilverBulletMag"
+Model "SilverBulletCasing2"
 {
 	Path "models"
 
-	Model 0 "SilverbulletMag_d.3d"
-	Skin 0 "SilverbulletAmmo.png"
-	Scale 0.2 0.2 0.2
+	Model 0 "SilverbulletCase_FCB_d.3d"
+	Skin 0 "SilverbulletBullet_FCB.png"
+	Scale 0.04 0.04 0.04
+	ZOffset 1
+	AngleOffset 90
 	USEACTORPITCH
 	USEACTORROLL
 
 	FrameIndex XZW1 A 0 0
 }
-Model "SilverBulletMagEmpty"
+Model "SilverBulletMag"
 {
 	Path "models"
 
@@ -35,6 +37,28 @@ Model "SilverBulletMagEmpty"
 	USEACTORROLL
 
 	FrameIndex XZW1 A 0 0
+	RollOffset 90
+	ZOffset 2
+	FrameIndex XZW1 B 0 0
+	RollOffset -90
+	FrameIndex XZW1 C 0 0
+}
+Model "SilverBulletMag2"
+{
+	Path "models"
+
+	Model 0 "SilverbulletMag_d.3d"
+	Skin 0 "SilverbulletAmmo_FCB_EmptyMag.png"
+	Scale 0.2 0.2 0.2
+	USEACTORPITCH
+	USEACTORROLL
+
+	FrameIndex XZW1 A 0 0
+	RollOffset 90
+	ZOffset 2
+	FrameIndex XZW1 B 0 0
+	RollOffset -90
+	FrameIndex XZW1 C 0 0
 }
 
 Model "SilverBullet"
@@ -75,7 +99,7 @@ Model "SilverBullet"
 	Scale -0.005 0.0025 0.005
 	DONTCULLBACKFACES
 
-	// Casing
+	// Casing (XSB)
 	SurfaceSkin 2 5 "SilverbulletBullet.png"
 	FrameIndex XZW7 D 2 30
 	FrameIndex XZW7 E 2 31
@@ -89,6 +113,20 @@ Model "SilverBullet"
 	FrameIndex XZW7 M 2 39
 	FrameIndex XZW7 N 2 40
 	FrameIndex XZW7 O 2 41
+	// Casing (FCB)
+	SurfaceSkin 2 5 "SilverbulletBullet_FCB.png"
+	FrameIndex XZWD D 2 30
+	FrameIndex XZWD E 2 31
+	FrameIndex XZWD F 2 32
+	FrameIndex XZWD G 2 33
+	FrameIndex XZWD H 2 34
+	FrameIndex XZWD I 2 35
+	FrameIndex XZWD J 2 36
+	FrameIndex XZWD K 2 37
+	FrameIndex XZWD L 2 38
+	FrameIndex XZWD M 2 39
+	FrameIndex XZWD N 2 40
+	FrameIndex XZWD O 2 41
 	// Jets
 	SurfaceSkin 2 5 ""
 	SurfaceSkin 2 6 "SilverbulletJetSmoke.png"
@@ -116,6 +154,7 @@ Model "SilverBullet"
 	AngleOffset -90
 	Scale -0.005 0.0025 0.005
 
+	// EXPLOSIVE SUPER BURST
 	// Still / Deselect
 	FrameIndex XZW2 A 1 0
 	FrameIndex XZW2 B 1 1
@@ -260,4 +299,150 @@ Model "SilverBullet"
 	FrameIndex XZW7 A 1 125
 	FrameIndex XZW7 B 1 126
 	FrameIndex XZW7 C 1 127
+	//// FAT CHODE BOMB
+	SurfaceSkin 1 4 "SilverbulletAmmo_FCB.png"
+	// Still / Deselect
+	FrameIndex XZW8 A 1 0
+	FrameIndex XZW8 B 1 1
+	FrameIndex XZW8 C 1 2
+	FrameIndex XZW8 D 1 3
+	FrameIndex XZW8 E 1 4
+	FrameIndex XZW8 F 1 5
+	FrameIndex XZW8 G 1 6	// Select
+	FrameIndex XZW8 H 1 7
+	FrameIndex XZW8 I 1 8
+	FrameIndex XZW8 J 1 9
+	FrameIndex XZW8 K 1 10
+	FrameIndex XZW8 L 1 11
+	FrameIndex XZW8 M 1 12
+	FrameIndex XZW8 N 1 13
+	// Fire
+	FrameIndex XZW8 O 1 15
+	FrameIndex XZW8 P 1 16
+	FrameIndex XZW8 Q 1 17
+	FrameIndex XZW8 R 1 18
+	FrameIndex XZW8 S 1 19
+	FrameIndex XZW8 T 1 20
+	FrameIndex XZW8 U 1 21
+	FrameIndex XZW8 V 1 22
+	FrameIndex XZW8 W 1 23
+	// Bolt
+	FrameIndex XZW8 X 1 25
+	FrameIndex XZW8 Y 1 26
+	FrameIndex XZW8 Z 1 27
+	FrameIndex XZW9 A 1 28
+	FrameIndex XZW9 B 1 29
+	FrameIndex XZW9 C 1 30	// StartCasing
+	FrameIndex XZW9 D 1 31
+	FrameIndex XZW9 E 1 32
+	FrameIndex XZW9 F 1 33
+	FrameIndex XZW9 G 1 34
+	FrameIndex XZW9 H 1 35
+	FrameIndex XZW9 I 1 36
+	FrameIndex XZW9 J 1 37
+	FrameIndex XZW9 K 1 38
+	FrameIndex XZW9 L 1 39
+	FrameIndex XZW9 M 1 40
+	FrameIndex XZW9 N 1 41	// EndCasing
+	FrameIndex XZW9 O 1 42
+	FrameIndex XZW9 P 1 43
+	FrameIndex XZW9 Q 1 44
+	FrameIndex XZW9 R 1 45
+	// ZoomIn
+	FrameIndex XZW9 S 1 47
+	FrameIndex XZW9 T 1 48
+	FrameIndex XZW9 U 1 49
+	FrameIndex XZW9 V 1 50
+	FrameIndex XZW9 W 1 51
+	FrameIndex XZW9 X 1 52	// ZoomStill / ZoomOut
+	FrameIndex XZW9 Y 1 53
+	FrameIndex XZW9 Z 1 54
+	FrameIndex XZWA A 1 55
+	FrameIndex XZWA B 1 56
+	FrameIndex XZWA C 1 57
+	// Unload
+	FrameIndex XZWA D 1 59
+	FrameIndex XZWA E 1 60
+	FrameIndex XZWA F 1 61
+	FrameIndex XZWA G 1 62
+	FrameIndex XZWA H 1 63
+	FrameIndex XZWA I 1 64
+	FrameIndex XZWA J 1 65
+	FrameIndex XZWA K 1 66
+	FrameIndex XZWA L 1 67
+	FrameIndex XZWA M 1 68
+	FrameIndex XZWA N 1 69
+	// UnloadEmpty
+	SurfaceSkin 1 4 "SilverbulletAmmo_FCB_EmptyMag.png"
+	FrameIndex XZWA O 1 59
+	FrameIndex XZWA P 1 60
+	FrameIndex XZWA Q 1 61
+	FrameIndex XZWA R 1 62
+	FrameIndex XZWA S 1 63
+	FrameIndex XZWA T 1 64
+	FrameIndex XZWA U 1 65
+	FrameIndex XZWA V 1 66
+	FrameIndex XZWA W 1 67
+	FrameIndex XZWA X 1 68
+	FrameIndex XZWA Y 1 69
+	SurfaceSkin 1 4 "SilverbulletAmmo_FCB.png"
+	// Load
+	FrameIndex XZWA Z 1 70
+	FrameIndex XZWB A 1 71
+	FrameIndex XZWB B 1 72
+	FrameIndex XZWB C 1 73
+	FrameIndex XZWB D 1 74
+	FrameIndex XZWB E 1 75
+	FrameIndex XZWB F 1 76
+	FrameIndex XZWB G 1 77
+	FrameIndex XZWB H 1 78
+	FrameIndex XZWB I 1 79
+	FrameIndex XZWB J 1 80
+	FrameIndex XZWB K 1 81
+	FrameIndex XZWB L 1 82
+	FrameIndex XZWB M 1 83
+	FrameIndex XZWB N 1 84
+	// Idle
+	FrameIndex XZWB O 1 86
+	FrameIndex XZWB P 1 87
+	FrameIndex XZWB Q 1 88
+	FrameIndex XZWB R 1 89
+	FrameIndex XZWB S 1 90
+	FrameIndex XZWB T 1 91
+	FrameIndex XZWB U 1 92
+	FrameIndex XZWB V 1 93
+	FrameIndex XZWB W 1 94
+	FrameIndex XZWB X 1 95
+	FrameIndex XZWB Y 1 96
+	FrameIndex XZWB Z 1 97
+	FrameIndex XZWC A 1 98
+	FrameIndex XZWC B 1 99
+	FrameIndex XZWC C 1 100
+	FrameIndex XZWC D 1 101
+	FrameIndex XZWC E 1 102
+	FrameIndex XZWC F 1 103
+	FrameIndex XZWC G 1 104
+	FrameIndex XZWC H 1 105
+	// Melee
+	FrameIndex XZWC I 1 107
+	FrameIndex XZWC J 1 108
+	FrameIndex XZWC K 1 109
+	FrameIndex XZWC L 1 110
+	FrameIndex XZWC M 1 111
+	FrameIndex XZWC N 1 112
+	FrameIndex XZWC O 1 113
+	FrameIndex XZWC P 1 114
+	FrameIndex XZWC Q 1 115
+	FrameIndex XZWC R 1 116
+	FrameIndex XZWC S 1 117
+	FrameIndex XZWC T 1 118
+	FrameIndex XZWC U 1 119
+	FrameIndex XZWC V 1 120
+	FrameIndex XZWC W 1 121
+	FrameIndex XZWC X 1 122
+	FrameIndex XZWC Y 1 123
+	FrameIndex XZWC Z 1 124
+	FrameIndex XZWD A 1 125
+	FrameIndex XZWD B 1 126
+	FrameIndex XZWD C 1 127
 }

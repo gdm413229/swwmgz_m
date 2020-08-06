@@ -6,8 +6,7 @@ Not so fundamental things during beta:
  - Item detection button (highlights nearby, visible items)
  - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
- - Mag refilling system (no more wasted ammo)
- - 1.150 FCB alternate ammo for Silver Bullet
+ - Allow loading partial mags from spare bullets
  - Parrying for hitscan weapons (currently parrying only handles vanilla LineAttack)
  - Fun options
    - Omnibusting (all weapons can bust walls)

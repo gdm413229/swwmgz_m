@@ -1459,13 +1459,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	{
 		int ta = 0, tb = 0;
 		if ( a is 'Weapon' ) ta = 2;
-		else if ( (a is 'Ammo') || (a is 'BackpackItem') || (a is 'HammerspaceEmbiggener') ) ta = 3;
+		else if ( (a is 'BackpackItem') || (a is 'HammerspaceEmbiggener') ) ta = 3;
+		else if ( (a is 'Ammo') ) ta = 4;
+		else if ( (a is 'MagAmmo') ) ta = 5;
 		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || a.bBIGPOWERUP ) ta = -3;
 		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = -2;
 		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = -1;
 		else if ( a is 'PuzzleItem' ) ta = 1;
 		if ( b is 'Weapon' ) tb = 2;
-		else if ( (b is 'Ammo') || (b is 'BackpackItem') || (b is 'HammerspaceEmbiggener') ) tb = 3;
+		else if ( (b is 'BackpackItem') || (b is 'HammerspaceEmbiggener') ) tb = 3;
+		else if ( (b is 'Ammo') ) tb = 4;
+		else if ( (b is 'MagAmmo') ) tb = 5;
 		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || b.bBIGPOWERUP ) tb = -3;
 		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = -2;
 		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = -1;
@@ -1610,7 +1614,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -1774,7 +1778,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				// alphabetically sorted inventory
 				for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 				{
-					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') ) continue;
+					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
 					String tag = inv.GetTag();
 					bool greater = false;
 					for ( int i=0; i<invlist.Size(); i++ )
@@ -2293,7 +2297,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else str = invlist[i].GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
-				else if ( (invlist[i] is 'Ammo') || (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_BROWN;
+				else if ( invlist[i] is 'MagAmmo' ) clscol = Font.CR_TAN;
+				else if ( (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_DARKBROWN;
+				else if ( invlist[i] is 'Ammo' ) clscol = Font.CR_BROWN;
 				else if ( (invlist[i] is 'PowerupGiver') || (invlist[i] is 'AmmoFabricator') || invlist[i].bBIGPOWERUP ) clscol = Font.CR_PURPLE;
 				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;

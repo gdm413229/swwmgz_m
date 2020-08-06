@@ -520,6 +520,25 @@ Class BusterWall : Thinker
 		}
 	}
 
+	private static bool IsIOSWall( Line l )
+	{
+		TextureID facetex[5];
+		facetex[0] = TexMan.CheckForTexture("ZZZFACE1",TexMan.Type_Wall);
+		facetex[1] = TexMan.CheckForTexture("ZZZFACE2",TexMan.Type_Wall);
+		facetex[2] = TexMan.CheckForTexture("ZZZFACE3",TexMan.Type_Wall);
+		facetex[3] = TexMan.CheckForTexture("ZZZFACE4",TexMan.Type_Wall);
+		facetex[4] = TexMan.CheckForTexture("ZZZFACE5",TexMan.Type_Wall);
+		for ( int i=0; i<5; i++ )
+		{
+			for ( int j=0; j<3; j++ )
+			{
+				if ( l.sidedef[0].GetTexture(j) == facetex[i] ) return true;
+				if ( l.sidedef[1] && l.sidedef[1].GetTexture(j) == facetex[i] ) return true;
+			}
+		}
+		return false;
+	}
+
 	static void Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
 	{
 		// we can't blow up 3D floors (yet)
@@ -528,6 +547,8 @@ Class BusterWall : Thinker
 		int hp;
 		if ( d.HitType == TRACE_HitWall )
 		{
+			// no busting the goat
+			if ( IsIOSWall(d.HitLine) ) return;
 			// onesided wall? no bust (TODO: bust polyobjects)
 			if ( !d.HitLine.sidedef[1] ) return;
 			// sector is opposite of side hit

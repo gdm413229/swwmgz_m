@@ -7,8 +7,6 @@ Class CandyMag : ExplodiumMag
 {
 }
 
-Class CandyMagEmpty : ExplodiumMag {}
-
 Class CandyLight : PaletteLight
 {
 	Default
@@ -529,7 +527,7 @@ Class CandyGunProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 6.+.2*special1;
 		A_AlertMonsters(40000);
-		SWWMHandler.DoExplosion(self,3500+500*special1,80000+8000*special1,300+20*special1,120,DE_EXTRAZTHRUST);
+		SWWMHandler.DoExplosion(self,4000+700*special1,80000+15000*special1,400+20*special1,250,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
@@ -639,7 +637,7 @@ Class CandyMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters(20000);
-		SWWMHandler.DoExplosion(self,700+600*special1,80000+8000*special1,150+15*special1,90,DE_EXTRAZTHRUST);
+		SWWMHandler.DoExplosion(self,800+700*special1,60000+15000*special1,200+15*special1,100,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -1031,16 +1029,34 @@ Class CandyGun : SWWMWeapon
 		p.vel += vel*.5;
 	}
 
-	action void A_DropMag( bool loaded = false )
+	action void A_DropMag()
 	{
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
-		let c = Spawn(loaded?"CandyMag":"CandyMagEmpty",origin);
+		let c = Spawn("CandyMag",origin);
 		c.angle = angle;
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
 		c.vel += vel*.5;
+	}
+
+	action void A_EmptyMag()
+	{
+		MagAmmo ma = MagAmmo(FindInventory("CandyGunBullets"));
+		if ( !ma )
+		{
+			ma = MagAmmo(Spawn("CandyGunBullets"));
+			ma.Amount = 0;
+			ma.AttachToOwner(self);
+		}
+		int maxgiveamt = min(ma.MaxAmount-ma.Amount,invoker.clipcount);
+		int dropamt = invoker.clipcount-maxgiveamt;
+		if ( dropamt > 0 ) ma.CreateTossable(dropamt);
+		ma.Amount = min(ma.MaxAmount,ma.Amount+invoker.clipcount);
+		if ( CheckLocalView() ) for ( int i=0; i<(invoker.clipcount-dropamt); i++ ) ma.PrintPickupMessage(true,ma.PickupMessage());
+		ma.PlayPickupSound(self);
+		invoker.clipcount = 0;
 	}
 
 	action void A_DropCasing()
@@ -1186,11 +1202,11 @@ Class CandyGun : SWWMWeapon
 		}
 		XZW2 TUVWXYZ 1;
 		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
-		XZW3 B 1 { invoker.clipcount = 0; }
+		XZW3 B 1 A_EmptyMag();
 		XZW3 C 1;
 		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 EFGH 1;
-		XZW3 I 1 A_DropMag(true);
+		XZW3 I 1 A_DropMag();
 		Goto ReloadEnd;
 	ReloadEmpty:
 		XZW2 A 1;

@@ -243,6 +243,7 @@ Class EvisceratorChunk : Actor
 				victim.SpawnBlood(pos,AngleTo(victim),damage);
 				A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
 			}
+			vel *= .65;	// reduce velocity as it rips
 			return 1;
 		}
 		return -1;

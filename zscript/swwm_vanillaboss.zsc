@@ -114,7 +114,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Cyberdemon' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 4;
+				if ( upgrademe ) e.Thing.Health *= 5;
 			}
 			bosstag = "$BT_CYBIE";
 		}
@@ -123,7 +123,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Spidermastermind' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 5;
+				if ( upgrademe ) e.Thing.Health *= 6;
 			}
 			bosstag = "$BT_SPIDER";
 		}
@@ -132,7 +132,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Spidermastermind' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.Health *= 4;
 			}
 			bosstag = "$BT_SPIDER2";
 		}
@@ -152,7 +152,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			{
 				bossbrainactor = e.Thing;
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 16;	// goodbye, instakills
+				if ( upgrademe ) e.Thing.Health *= 40;	// goodbye, instakills
 			}
 			if ( e.Thing is 'BossEye' )
 				bossviewactor = e.Thing;
@@ -172,7 +172,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Minotaur' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.Health *= 3;
 			}
 			bosstag = "$BT_MINOTAUR";
 		}
@@ -190,7 +190,7 @@ Class SWWMVanillaBossHandler : EventHandler
 				bossactors.Clear();
 				initialized = false;
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.Health *= 8;
 				bosstag = "$BT_DSPARIL2";
 			}
 		}
@@ -235,7 +235,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Heresiarch' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 6;
+				if ( upgrademe ) e.Thing.Health *= 8;
 				bosstag = "$BT_HERESIARCH";
 			}
 		}
@@ -244,7 +244,7 @@ Class SWWMVanillaBossHandler : EventHandler
 			if ( e.Thing is 'Korax' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 8;
+				if ( upgrademe ) e.Thing.Health *= 10;
 				bosstag = "$BT_KORAX";
 			}
 		}

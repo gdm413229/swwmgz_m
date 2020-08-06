@@ -904,6 +904,11 @@ Class SilverBulletAmmo : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -928,6 +933,11 @@ Class SilverBulletAmmo2 : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{

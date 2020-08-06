@@ -177,6 +177,7 @@ Class MagAmmo : Inventory abstract
 	{
 		+INVENTORY.KEEPDEPLETED;
 		Inventory.PickupSound "misc/bullet_pkup";
+		Inventory.Amount 1;
 	}
 
 	private Inventory DoDrop( Class<Inventory> type )
@@ -266,6 +267,12 @@ Class MagAmmo : Inventory abstract
 			Amount--;
 		}
 		return last;
+	}
+
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Random[ShellDrop](1,ClipSize),Amount);
 	}
 }
 
@@ -946,17 +953,12 @@ Class SilverBullets : MagAmmo
 		Tag "$T_XSBBULLET";
 		Inventory.PickupMessage "$T_XSBBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet.png";
-		Inventory.Amount 1;
-		Inventory.MaxAmount 5;
 		MagAmmo.ParentAmmo "SilverBulletAmmo";
 		MagAmmo.ClipSize 5;
+		Inventory.MaxAmount 15;
+		Inventory.InterHubAmount 15;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
 	}
 	States
 	{
@@ -974,17 +976,12 @@ Class SilverBullets2 : MagAmmo
 		Tag "$T_FCBBULLET";
 		Inventory.PickupMessage "$T_FCBBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet2.png";
-		Inventory.Amount 1;
-		Inventory.MaxAmount 5;
 		MagAmmo.ParentAmmo "SilverBulletAmmo2";
 		MagAmmo.ClipSize 5;
+		Inventory.MaxAmount 10;
+		Inventory.InterHubAmount 10;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
 	}
 	States
 	{
@@ -1032,17 +1029,12 @@ Class CandyGunBullets : MagAmmo
 		Tag "$T_CANDYBULLET";
 		Inventory.PickupMessage "$T_CANDYBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_CandyBullet.png";
-		Inventory.Amount 1;
-		Inventory.MaxAmount 7;
 		MagAmmo.ParentAmmo "CandyGunAmmo";
 		MagAmmo.ClipSize 7;
+		Inventory.MaxAmount 27;
+		Inventory.InterHubAmount 27;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
 	}
 	States
 	{

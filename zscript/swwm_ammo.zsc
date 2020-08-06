@@ -253,11 +253,11 @@ Class MagAmmo : Inventory abstract
 		while ( amt > 0 )
 		{
 			// drop full mag if possible
-			if ( amt >= pammo.Amount )
+			if ( amt >= ClipSize )
 			{
 				last = DoDrop(ParentAmmo);
-				amt -= pammo.Amount;
-				Amount -= pammo.Amount;
+				amt -= ClipSize;
+				Amount -= ClipSize;
 				continue;
 			}
 			// drop individual bullets
@@ -904,11 +904,6 @@ Class SilverBulletAmmo : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -934,11 +929,6 @@ Class SilverBulletAmmo2 : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -963,6 +953,11 @@ Class SilverBullets : MagAmmo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
+	}
 	States
 	{
 	Spawn:
@@ -985,6 +980,11 @@ Class SilverBullets2 : MagAmmo
 		MagAmmo.ClipSize 5;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
 	}
 	States
 	{
@@ -1038,6 +1038,11 @@ Class CandyGunBullets : MagAmmo
 		MagAmmo.ClipSize 7;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Random[ShellDrop](1,MaxAmount),Amount);
 	}
 	States
 	{

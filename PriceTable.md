@@ -49,7 +49,7 @@ These will be available long after the first release.
   ------------- | -----
   Sledgehammer	| 9000
   Puntzer Beta	| 10000
-   SMW.05 Bull.	| 1000
+   SMW.05 Bull.	| 400
   Puntzer Gamma	| 50000
   Quadravol	| 80000
    Quad. Ammo	| 10000
@@ -62,6 +62,17 @@ These will be available long after the first release.
    EMP Core	| 60000
   PROWEL&TADEL	| 1600000
    Madness Core	| 150000
+
+  Item          | Price
+  ------------- | -----
+  Sheen HMG	| 100000
+   HMG Bull.	| 250
+  Skull Launch.	| 80000
+   Skull	| 4000
+  Cryolance	| 240000
+   Cryo Mag	| 60000
+  Ray-Khom	| 1600000
+   Ray Bolt	| 20000
 
 #### Other items
 

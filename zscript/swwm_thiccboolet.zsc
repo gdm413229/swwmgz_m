@@ -1282,7 +1282,7 @@ Class SilverBullet : SWWMWeapon
 				invoker.dezoomstate = invoker.fcbloaded?ResolveState("Unload2"):ResolveState("Unload");
 				return ResolveState("UnZoom");
 			}
-			return ResolveState(null);
+			return A_JumpIf(invoker.fcbloaded,"Unload2");
 		}
 	Unload:
 		XZW2 A 2
@@ -1306,7 +1306,7 @@ Class SilverBullet : SWWMWeapon
 		{
 			A_PlayerReload();
 			A_StartSound("silverbullet/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
-			return A_JumpIf(invoker.clipcount<=0,"UnloadEmpty");
+			return A_JumpIf(invoker.clipcount<=0,"UnloadEmpty2");
 		}
 		XZWA DEFGHI 2;
 		XZWA J 2 A_StartSound("silverbullet/magout",CHAN_WEAPON,CHANF_OVERLAP);

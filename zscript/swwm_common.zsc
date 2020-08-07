@@ -2133,10 +2133,14 @@ Class SWWMTeleportFog : Actor
 {
 	Default
 	{
+		RenderStyle "Add";
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOINTERACTION;
+		+FORCEXYBILLBOARD;
+		Radius .1;
+		Height 0.;
 	}
 	override void PostBeginPlay()
 	{
@@ -2144,6 +2148,7 @@ Class SWWMTeleportFog : Actor
 		SetOrigin(Vec3Offset(0,0,28),false);
 		A_StartSound("misc/teleport",CHAN_VOICE);
 		Spawn("TeleLight",pos);
+		if ( swwm_simplefog ) SetStateLabel("Simple");
 	}
 	States
 	{
@@ -2179,6 +2184,9 @@ Class SWWMTeleportFog : Actor
 			A_FadeOut(.07);
 		}
 		Wait;
+	Simple:
+		SPEX ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		Stop;
 	}
 }
 

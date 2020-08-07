@@ -1,7 +1,7 @@
 This is just a bit of "future planning" for stuff that I *might* add
 after the first release.
 
-* DLC Weapon Set:
+* DLC Weapon Set 1:
   - Itamex Reinforced Hammer (UnSX 5)
   - Puntzer Beta (SWWM Iridium)
   - Puntzer Gamma (Ultra Suite 2)
@@ -10,6 +10,11 @@ after the first release.
   - Sparkster x3 (UnSX 2)
   - Rail Carbine ("Tesla Beamer" in Ultra Suite 2 & 3)
   - PROWEL & TADEL (Ultra Suite 2 & 3)
+* DLC Weapon Set 2:
+  - Sheen HMG (SWWM Platinum Ep2)
+  - Skull Launcher (Weird Weapons)
+  - Cryolance (SWWM Platinum Ep2)
+  - Ray-Khom (UnSX)
 * Additional Demolitionist Menu features
   - Radio (add-on)
   - Pong minigame
@@ -54,4 +59,3 @@ after the first release.
 * Japanese localization???
 * Strife support, with rewritten dialogue
 * Monster/decoration replacements add-on
-* Second DLC Weapon Set?

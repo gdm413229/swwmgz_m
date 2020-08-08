@@ -3482,6 +3482,8 @@ Class SWWMHandler : EventHandler
 
 	override void CheckReplacement( ReplaceEvent e )
 	{
+		// respect final replacements
+		if ( e.IsFinal ) return;
 		// shell types (sorted by rarity
 		static const Class<Actor> redpool[] = {"RedShell","RedShell2","RedShell4","RedShell8","RedShell12","RedShell16"};
 		static const Class<Actor> greenpool[] = {"GreenShell","GreenShell2","GreenShell4","GreenShell8","GreenShell12"};

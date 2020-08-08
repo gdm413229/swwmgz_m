@@ -895,6 +895,7 @@ Class UseLineTracer : LineTracer
 	{
 		if ( u.hitpart != TIER_MIDDLE ) return true;	// lower/upper/ffloor
 		Line l = u.HitLine;
+		if ( !l.sidedef[1] ) return true; // onesided line
 		Side s = l.sidedef[u.hitside];
 		if ( s.GetTexture(1).IsNull() ) return false;	// no midtex
 		double ofs = s.GetTextureYOffset(1);

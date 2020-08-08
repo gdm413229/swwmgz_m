@@ -881,7 +881,7 @@ Class ParryField : Actor
 Class UseList
 {
 	Line hitline;
-	int hitside;
+	int hitside, hitpart;
 	Actor hitactor;
 	Vector3 pos;
 }
@@ -890,6 +890,44 @@ Class UseLineTracer : LineTracer
 {
 	Array<UseList> uses;
 	Array<Line> glass;
+
+	static play bool TangibleLine( UseList u )
+	{
+		if ( u.hitpart != TIER_MIDDLE ) return true;	// lower/upper/ffloor
+		Line l = u.HitLine;
+		Side s = l.sidedef[u.hitside];
+		if ( s.GetTexture(1).IsNull() ) return false;	// no midtex
+		double ofs = s.GetTextureYOffset(1);
+		Vector2 siz = TexMan.GetScaledSize(s.GetTexture(1));
+		Vector2 tofs = TexMan.GetScaledOffset(s.GetTexture(1));
+		ofs += tofs.y;
+		ofs *= s.GetTextureYScale(1);
+		siz.y *= s.GetTextureYScale(1);
+		SecPlane ceil, flor;
+		if ( (l.frontsector.floorplane.ZatPoint(l.v1.p) > l.backsector.floorplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.floorplane.ZatPoint(l.v2.p) > l.backsector.floorplane.ZatPoint(l.v2.p)) )
+			flor = l.frontsector.floorplane;
+		else flor = l.backsector.floorplane;
+		if ( (l.frontsector.ceilingplane.ZatPoint(l.v1.p) < l.backsector.ceilingplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.ceilingplane.ZatPoint(l.v2.p) < l.backsector.ceilingplane.ZatPoint(l.v2.p)) )
+			ceil = l.frontsector.ceilingplane;
+		else ceil = l.backsector.ceilingplane;
+		double ceilpoint = max(ceil.ZatPoint(l.v1.p),ceil.ZatPoint(l.v2.p));
+		double florpoint = min(flor.ZatPoint(l.v1.p),flor.ZatPoint(l.v2.p));
+		if ( l.flags&Line.ML_DONTPEGBOTTOM )
+		{
+			if ( u.pos.z > florpoint+ofs+siz.y ) return false;
+			if ( u.pos.z < florpoint+ofs ) return false;
+			return true;
+		}
+		else
+		{
+			if ( u.pos.z > ceilpoint+ofs ) return false;
+			if ( u.pos.z < (ceilpoint+ofs)-siz.y ) return false;
+			return true;
+		}
+		return false;
+	}
 
 	override ETraceStatus TraceCallback()
 	{
@@ -909,6 +947,7 @@ Class UseLineTracer : LineTracer
 				let u = new("UseList");
 				u.hitline = Results.HitLine;
 				u.hitside = Results.Side;
+				u.hitpart = Results.FFloor?TIER_FFLOOR:Results.Tier;
 				u.hitactor = null;
 				u.pos = Results.HitPos;
 				uses.Push(u);
@@ -1171,7 +1210,7 @@ Class SWWMWeapon : Weapon abstract
 				if ( (ut.uses[i].hitactor == self) || (ut.uses[i].hitactor is 'Demolitionist') ) continue;
 				if ( ut.uses[i].hitactor.Used(self) ) break;
 			}
-			else if ( ut.uses[i].hitline )
+			else if ( ut.uses[i].hitline && UseLineTracer.TangibleLine(ut.uses[i]) )
 			{
 				int locknum = SWWMUtility.GetLineLock(ut.uses[i].hitline);
 				if ( !locknum || CheckKeys(locknum,false,true) )

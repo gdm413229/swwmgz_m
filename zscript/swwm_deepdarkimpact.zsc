@@ -482,10 +482,11 @@ Class DeepImpact : SWWMWeapon
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<100,"Reload");
 		XZW2 A 0 A_BeginCharge();
 		XZW2 A 1 A_ChargeUp();
+		XZW2 V 1 A_ChargeUp();
 		Wait;
 	AltRelease:
-		XZW2 A 1 A_AltBullet();
-		XZW2 VW 1;
+		XZW2 V 1 A_AltBullet();
+		XZW2 W 1;
 		XZW2 X 2;
 		XZW2 YZ 3;
 		XZW3 AB 5;

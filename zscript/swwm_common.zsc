@@ -3386,8 +3386,14 @@ Class SWWMHandler : EventHandler
 	{
 		if ( (gametic == onelinertic) && (oneliner != "") && (players[consoleplayer].health > 0) )
 		{
-			let l = SWWMOneLiner.Make(oneliner,onelinerspan);
-			StatusBar.AttachMessage(l,-3473);
+			int mute;
+			if ( mutevoice ) mute = mutevoice.GetInt();
+			else mute = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt();	// we can't assign the variable here since it's play scope
+			if ( onelinerlevel > mute )
+			{
+				let l = SWWMOneLiner.Make(oneliner,onelinerspan);
+				StatusBar.AttachMessage(l,-3473);
+			}
 			SendNetworkEvent("swwmremotelinertxt."..oneliner,consoleplayer,onelinerlevel);
 		}
 		for ( int i=0; i<flashes.size(); i++ )

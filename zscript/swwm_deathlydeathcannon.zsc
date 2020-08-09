@@ -240,6 +240,7 @@ Class YnykronDelayedImpact : Actor
 			return;
 		}
 		let b = Spawn("YnykronImpact",pos);
+		b.tracer = tracer;
 		b.target = target;
 		b.master = master;
 		b.angle = angle;
@@ -247,8 +248,6 @@ Class YnykronDelayedImpact : Actor
 		b.special1 = special2;
 		b.special2 = 1;
 		b.args[0] = args[0];
-		if ( YnykronShot(master) )
-			YnykronShot(master).blastcount++;
 		Destroy();
 	}
 }
@@ -267,11 +266,11 @@ Class YnykronImpact : Actor
 		+NOBLOCKMAP;
 		+NOTELEPORT;
 		+DONTSPLASH;
+		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
-		+FORCEXYBILLBOARD;
 		+EXTREMEDEATH;
-		+NOINTERACTION;
 	}
 
 	private bool CmpDist( Actor a, Actor b )
@@ -316,56 +315,20 @@ Class YnykronImpact : Actor
 		if ( swwm_ynykronalert && (!special2 || swwm_extraalert) ) A_AlertMonsters();
 		rad = args[0]+300+10*clamp(special1/10,0,15);
 		A_QuakeEx(4,4,4,50,0,rad*4,"",QF_RELATIVE|QF_SCALEDOWN,falloff:rad*2,rollintensity:.6);
-		let bt = BlockThingsIterator.Create(self,rad+200);
-		Array<Actor> candidates;
-		candidates.Clear();
-		while ( bt.Next() )
+		if ( tracer )
 		{
-			let t = bt.Thing;
-			if ( !t || !t.bSHOOTABLE || !SWWMUtility.SphereIntersect(t,pos,rad) || (!SWWMUtility.SphereIntersect(t,pos,100) && !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY)) ) continue;
-			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t) < YnykronShot(master).hitlist.Size()) )
-				continue;
-			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
-			double dist = dirto.length();
-			if ( (dist > rad/2) && (t == target) ) continue;
-			candidates.Push(t);
-		}
-		qsort_candidates(candidates,0,candidates.Size()-1);
-		candidates.Resize(2);
-		for ( int i=0; i<candidates.Size(); i++ )
-		{
-			let t = candidates[i];
-			if ( !t ) continue;
-			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
-			double dist = dirto.length();
-			dirto /= dist;
-			int trad = int(max(t.radius,t.height));
 			// voodoo dolls just get erased (how convenient)
 			// otherwise instantly vaporize the fucker
-			if ( t.player && (t.player.mo != t) ) t.Destroy();
-			else t.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-			if ( t && (t.Health <= 0) )
+			if ( tracer.player && (tracer.player.mo != tracer) ) tracer.Destroy();
+			else tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+			if ( tracer && (tracer.Health <= 0) )
 			{
-				if ( t.player ) PlayerGone.FeckOff(t);
+				if ( tracer.player ) PlayerGone.FeckOff(tracer);
 				// poof away
-				t.bINVISIBLE = true;
-				t.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-				IDontFeelSoGood.DeletThis(t);	// ensures corpse is deleted too
+				tracer.bINVISIBLE = true;
+				tracer.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+				IDontFeelSoGood.DeletThis(tracer);	// ensures corpse is deleted too
 			}
-			if ( t && YnykronShot(master) )
-				YnykronShot(master).hitlist.Push(t);
-			if ( swwm_capmcrange && (special1 > 2) ) continue;
-			// spawn blast that will propagate
-			let b = Spawn("YnykronDelayedImpact",pos);
-			YnykronDelayedImpact(b).ofs = dirto*min(rad,dist);
-			b.tracer = t;
-			b.target = target;
-			b.master = master;
-			b.angle = atan2(dirto.y,dirto.x);
-			b.pitch = asin(-dirto.z);
-			b.special2 = special1+(Random[Ynykron](0,8)?1:0);
-			b.special1 = Random[Ynykron](-5,0)-min(special1/2,10);
-			b.args[0] = trad;
 		}
 		if ( YnykronShot(master) )
 		{
@@ -399,6 +362,47 @@ Class YnykronImpact : Actor
 		{
 			let s = Spawn("YnykronImpactArm",pos);
 			s.target = target;
+		}
+		if ( swwm_capmcrange && (special1 > 2) ) return;
+		let bt = BlockThingsIterator.Create(self,rad+200);
+		Array<Actor> candidates;
+		candidates.Clear();
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || !t.bSHOOTABLE || !SWWMUtility.SphereIntersect(t,pos,rad) || (!SWWMUtility.SphereIntersect(t,pos,100) && !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY)) ) continue;
+			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t) < YnykronShot(master).hitlist.Size()) )
+				continue;
+			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
+			double dist = dirto.length();
+			if ( (dist > rad/2) && (t == target) ) continue;
+			candidates.Push(t);
+		}
+		qsort_candidates(candidates,0,candidates.Size()-1);
+		candidates.Resize(2);
+		for ( int i=0; i<candidates.Size(); i++ )
+		{
+			let t = candidates[i];
+			if ( !t ) continue;
+			Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.Height/2));
+			double dist = dirto.length();
+			dirto /= dist;
+			int trad = int(max(t.radius,t.height));
+			if ( t && YnykronShot(master) )
+				YnykronShot(master).hitlist.Push(t);
+			// spawn blast that will propagate
+			let b = Spawn("YnykronDelayedImpact",pos);
+			YnykronDelayedImpact(b).ofs = dirto*min(rad,dist);
+			b.tracer = t;
+			b.target = target;
+			b.master = master;
+			b.angle = atan2(dirto.y,dirto.x);
+			b.pitch = asin(-dirto.z);
+			b.special2 = special1+(Random[Ynykron](0,8)?1:0);
+			b.special1 = Random[Ynykron](-5,0)-min(special1/2,10);
+			b.args[0] = trad;
+			if ( YnykronShot(master) )
+				YnykronShot(master).blastcount++;
 		}
 	}
 	override void OnDestroy()
@@ -539,24 +543,12 @@ Class YnykronBeam : Actor
 		{
 			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t.HitList[i].hitactor) < YnykronShot(master).hitlist.Size()) )
 				continue;
-			SWWMHandler.DoKnockback(t.hitlist[i].hitactor,x,15000);
-			// voodoo dolls just get erased (how convenient)
-			// otherwise instantly vaporize the fucker
 			int trad = int(max(t.hitlist[i].hitactor.radius,t.hitlist[i].hitactor.height));
-			if ( t.hitlist[i].hitactor.player && (t.hitlist[i].hitactor.player.mo != t.hitlist[i].hitactor) ) t.hitlist[i].hitactor.Destroy();
-			else t.hitlist[i].hitactor.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-			if ( t.hitlist[i].hitactor && (t.hitlist[i].hitactor.Health <= 0) )
-			{
-				if ( t.hitlist[i].hitactor.player ) PlayerGone.FeckOff(t.hitlist[i].hitactor);
-				// poof away
-				t.hitlist[i].hitactor.bINVISIBLE = true;
-				t.hitlist[i].hitactor.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-				IDontFeelSoGood.DeletThis(t.hitlist[i].hitactor);	// ensures corpse is deleted too
-			}
 			if ( t.hitlist[i].hitactor && YnykronShot(master) )
 				YnykronShot(master).hitlist.Push(t.hitlist[i].hitactor);
 			// spawn blast that will propagate
 			let b = Spawn("YnykronImpact",t.hitlist[i].hitlocation);
+			b.tracer = t.HitList[i].hitactor;
 			b.target = target;
 			b.master = master;
 			b.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x);
@@ -647,24 +639,12 @@ Class YnykronBeam : Actor
 			{
 				if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(it.HitList[i].hitactor) < YnykronShot(master).hitlist.Size()) )
 					continue;
-				SWWMHandler.DoKnockback(it.hitlist[i].hitactor,x,15000);
-				// voodoo dolls just get erased (how convenient)
-				// otherwise instantly vaporize the fucker
 				int trad = int(max(it.hitlist[i].hitactor.radius,it.hitlist[i].hitactor.height));
-				if ( it.hitlist[i].hitactor.player && (it.hitlist[i].hitactor.player.mo != it.hitlist[i].hitactor) ) it.hitlist[i].hitactor.Destroy();
-				else it.hitlist[i].hitactor.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-				if ( it.hitlist[i].hitactor && (it.hitlist[i].hitactor.Health <= 0) )
-				{
-					if ( it.hitlist[i].hitactor.player ) PlayerGone.FeckOff(it.hitlist[i].hitactor);
-					// poof away
-					it.hitlist[i].hitactor.bINVISIBLE = true;
-					it.hitlist[i].hitactor.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-					IDontFeelSoGood.DeletThis(it.hitlist[i].hitactor);	// ensures corpse is deleted too
-				}
 				if ( it.hitlist[i].hitactor && YnykronShot(master) )
 					YnykronShot(master).hitlist.Push(it.hitlist[i].hitactor);
 				// spawn blast that will propagate
 				let b = Spawn("YnykronImpact",it.hitlist[i].hitlocation);
+				b.tracer = it.hitlist[i].hitactor;
 				b.target = target;
 				b.master = master;
 				b.angle = atan2(it.HitList[i].x.y,it.HitList[i].x.x);
@@ -978,7 +958,7 @@ Class YnykronShot : Actor
 			Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 			for ( int i=0; i<16; i++ )
 			{
-				let r = Spawn("YnykronRing",level.Vec3Offset(pos,dir*(special1*16+i*2)));
+				let r = Spawn("YnykronRing",level.Vec3Offset(pos,dir*(special1*16+i)));
 				r.scale *= special1/8.;
 				r.angle = angle;
 				r.pitch = pitch;

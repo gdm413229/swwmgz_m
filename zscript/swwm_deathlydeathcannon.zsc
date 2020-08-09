@@ -1358,7 +1358,7 @@ Class Ynykron : SWWMWeapon
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( !Owner ) return;
+		if ( !Owner || !Owner.player ) return;
 		if ( chargestate == CS_IDLE ) chargelevel = 0.;
 		else if ( chargestate == CS_CHARGING )
 		{

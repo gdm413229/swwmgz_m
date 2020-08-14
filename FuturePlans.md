@@ -15,6 +15,7 @@ after the first release.
   - Skull Launcher (Weird Weapons)
   - Cryolance (SWWM Platinum Ep2)
   - Ray-Khom (UnSX)
+  - Angels of Death (SWWM Platinum Ep2)
 * Additional Demolitionist Menu features
   - Radio (add-on)
   - Minigames (pong and other stuff)

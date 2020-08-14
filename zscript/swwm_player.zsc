@@ -845,6 +845,7 @@ Class Demolitionist : PlayerPawn
 		{
 			// test for gap crossing (i.e: climbing up platforms with holes between them)
 			Vector3 storepos = pos;
+			double storefloorz = floorz;
 			bool crossgap = false;
 			for ( int i=1; i<=4; i++ )	// test up to 4 steps ahead, should be enough for most cases
 			{
@@ -854,6 +855,7 @@ Class Demolitionist : PlayerPawn
 				break;
 			}
 			SetOrigin(storepos,false);
+			floorz = storefloorz;
 			if ( !crossgap )
 			{
 				ssup = max(0,(pos.z-floorz));

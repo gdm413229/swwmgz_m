@@ -830,6 +830,11 @@ Class Demolitionist : PlayerPawn
 				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
 				else vel = vel+accel/TICRATE;
 			}
+			else if ( player.onground && !bNOGRAVITY && (waterlevel < 2) )
+			{
+				// quickly decelerate if we're not holding movement keys
+				if ( !(player.cmd.forwardmove|player.cmd.sidemove) ) vel *= .97;
+			}
 			if ( abs(roll) > 0. ) A_SetRoll(roll+clamp(deltaangle(roll,0),-3.,3.),SPF_INTERPOLATE);
 		}
 		guideangle *= .9;
@@ -838,9 +843,23 @@ Class Demolitionist : PlayerPawn
 		// anchor to ground when going down steps
 		if ( lastground && !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
 		{
-			ssup = max(0,(pos.z-floorz));
-			SetOrigin(Vec2OffsetZ(0,0,floorz),true);
-			lastground = player.onground = true;
+			// test for gap crossing (i.e: climbing up platforms with holes between them)
+			Vector3 storepos = pos;
+			bool crossgap = false;
+			for ( int i=1; i<=4; i++ )	// test up to 4 steps ahead, should be enough for most cases
+			{
+				SetOrigin(Vec3Offset(vel.x,vel.y,vel.z),false);
+				if ( floorz < storepos.z ) continue;
+				crossgap = true;
+				break;
+			}
+			SetOrigin(storepos,false);
+			if ( !crossgap )
+			{
+				ssup = max(0,(pos.z-floorz));
+				SetOrigin(Vec2OffsetZ(0,0,floorz),true);
+				lastground = player.onground = true;
+			}
 		}
 		if ( player.onground ) lastgroundtic = level.maptime;
 		if ( !(player.cheats & CF_PREDICTING) && !(player.cmd.forwardmove|player.cmd.sidemove) )
@@ -1439,7 +1458,7 @@ Class Demolitionist : PlayerPawn
 		if ( player.cmd.buttons&BT_JUMP ) return false;
 		if ( InStateSequence(CurState,FindState("Dash")) ) return false;	// no crouch during dash
 		if ( swwm_crouchjump ) return true;	// allowed
-		if ( (waterlevel >= 2) || bNOGRAVITY ) return false;	// no crouch while swimming/floating
+		if ( (waterlevel > 2) || bNOGRAVITY ) return false;	// no crouch while swimming/floating
 		if ( !player.onground ) return false;	// no crouch while in air
 		return true;
 	}

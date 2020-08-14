@@ -17,7 +17,7 @@ after the first release.
   - Ray-Khom (UnSX)
 * Additional Demolitionist Menu features
   - Radio (add-on)
-  - Pong minigame
+  - Minigames (pong and other stuff)
   - Selling items at the store
 * Achievements
 * Collectable items (will recycle Chanceboxes for this)

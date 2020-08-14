@@ -9,6 +9,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_KEYS,
 		TAB_LIBRARY,
 		TAB_STORE,
+		TAB_RADIO,
+		TAB_GAME,
 		TAB_TRADING,
 		TAB_CHAT,
 		TAB_SECRET,
@@ -101,7 +103,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
 		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
 		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
-		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
 		if ( (curtab < TAB_MISSION) || (curtab > maxtab) ) curtab = TAB_MISSION;
 		if ( curtab == TAB_LIBRARY ) sel1 = CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).GetInt();
 		else if ( curtab == TAB_STATS ) sel1 = CVar.GetCVar('swwm_laststattab',players[consoleplayer]).GetInt();
@@ -274,7 +276,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			kcode = 0;
 			break;
 		}
-		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
 		switch ( mkey )
 		{
 		case MKEY_BACK:
@@ -705,10 +707,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				static const string tabnames[] =
 				{
 					"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB"
+					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_RADIOTAB", "$SWWM_GAMETAB",
+					"$SWWM_TRADETAB", "$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 				};
 				xx = 0;
-				int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+				int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
 				for ( int i=TAB_MISSION; i<=maxtab; i++ )
 				{
 					len = fnt.StringWidth(tabnames[i])+6;
@@ -1981,8 +1984,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		static const string tabnames[] =
 		{
 			"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
-			"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_RADIOTAB", "$SWWM_GAMETAB",
+			"$SWWM_TRADETAB", "$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 		};
 		static const string ltabnames[] =
 		{
@@ -1992,7 +1995,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			"$SWWM_STATTAB0", "$SWWM_STATTAB1", "$SWWM_STATTAB2", "$SWWM_STATTAB3"
 		};
-		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
 		int mx = maxtab;
 		if ( (curtab > TAB_CHAT) ) mx++;
 		for ( int i=0; i<=mx; i++ )
@@ -2525,6 +2528,16 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
+		}
+		else if ( curtab == TAB_RADIO )
+		{
+			str = StringTable.Localize("$SWWM_COMINGSOON");
+			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+		else if ( curtab == TAB_GAME )
+		{
+			str = StringTable.Localize("$SWWM_COMINGSOON");
+			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 		else if ( curtab == TAB_TRADING )
 		{

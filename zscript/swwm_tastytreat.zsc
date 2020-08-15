@@ -857,7 +857,7 @@ Class CandyGun : SWWMWeapon
 	// re-edit to allow picking up spares in coop
 	override bool HandlePickup( Inventory item )
 	{
-		if ( item.GetClass() == GetClass() )
+		if ( (item.GetClass() == GetClass()) && !item.ShouldStay() )
 		{
 			bool ammoget, spareget;
 			[ammoget, spareget] = CandyGun(item).PickupForAmmoAndSpares(self);

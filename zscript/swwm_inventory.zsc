@@ -979,7 +979,7 @@ Class SWWMWeapon : Weapon abstract
 
 	override bool HandlePickup( Inventory item )
 	{
-		if ( (GetClass() == item.GetClass()) )
+		if ( (GetClass() == item.GetClass()) && !item.ShouldStay() )
 		{
 			int oldammo1 = Ammo1?Ammo1.Amount:0;
 			int oldammo2 = Ammo2?Ammo2.Amount:0;

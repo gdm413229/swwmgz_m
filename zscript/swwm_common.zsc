@@ -1285,6 +1285,77 @@ Class SWWMInterest : Thinker
 	}
 }
 
+Class SWWMItemSense : Thinker
+{
+	Inventory item;
+	String tag;
+	int updated;
+	Demolitionist parent;
+	SWWMItemSense prev, next;
+	Vector3 pos;
+
+	static SWWMItemSense Spawn( Demolitionist parent, Inventory item )
+	{
+		if ( !parent || !item ) return null;
+		// only refresh the updated time if existing
+		for ( SWWMItemSense s=parent.itemsense; s; s=s.next )
+		{
+			if ( s.item != item ) continue;
+			s.updated = level.maptime+35;
+			s.pos = item.Vec3Offset(0,0,16);
+			return s;
+		}
+		let i = new("SWWMItemSense");
+		i.ChangeStatNum(STAT_USER);
+		i.item = item;
+		i.parent = parent;
+		i.updated = level.maptime+35;
+		i.UpdateTag();
+		i.pos = item.Vec3Offset(0,0,16);
+		i.next = parent.itemsense;
+		if ( parent.itemsense ) parent.itemsense.prev = i;
+		parent.itemsense = i;
+		parent.itemsense_cnt++;
+		return i;
+	}
+
+	void UpdateTag()
+	{
+		if ( !item ) return;
+		tag = item.GetTag();
+	}
+
+	override void OnDestroy()
+	{
+		if ( parent )
+		{
+			parent.itemsense_cnt--;
+			if ( !prev )
+			{
+				parent.itemsense = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		if ( !parent )
+		{
+			Destroy();
+			return;
+		}
+		// expire
+		if ( level.maptime > updated+70 ) Destroy();
+	}
+}
+
 // enemy combat tracker
 Class SWWMCombatTracker : Thinker
 {
@@ -2527,6 +2598,9 @@ Class SWWMHandler : EventHandler
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
 
+	// for menu events
+	transient Array<MenuTransaction> checklist;
+
 	transient CVar mutevoice, accdamage;
 	transient ui CVar useshaders;
 	transient CVar lang;
@@ -2775,6 +2849,13 @@ Class SWWMHandler : EventHandler
 		SWWMStats s;
 		while ( s = SWWMStats(ti.Next()) )
 			s.AddLevelStats();
+		PlayerInfo p = players[consoleplayer];
+		Shader.SetEnabled(p,"ZoomBlur",false);
+		Shader.SetEnabled(p,"RagekitShader",false);
+		Shader.SetEnabled(p,"GhostShader",false);
+		Shader.SetEnabled(p,"InvinciShader",false);
+		Shader.SetEnabled(p,"Glitch",false);
+		Shader.SetEnabled(p,"Grain",false);
 	}
 
 	override void WorldLoaded( WorldEvent e )
@@ -2865,6 +2946,7 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		PlayerInfo p = players[consoleplayer];
+		Shader.SetEnabled(p,"ZoomBlur",false);
 		Shader.SetEnabled(p,"RagekitShader",false);
 		Shader.SetEnabled(p,"GhostShader",false);
 		Shader.SetEnabled(p,"InvinciShader",false);
@@ -3778,6 +3860,7 @@ Class SWWMHandler : EventHandler
 				if ( amt > maxgive ) amt = maxgive;
 			}
 			else if ( amt > def.MaxAmount ) amt = def.MaxAmount;
+			bool rslt = false;
 			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(item,amt,true) )
 			{
 				players[e.Args[0]].mo.TakeInventory(item,amt);
@@ -3787,6 +3870,17 @@ Class SWWMHandler : EventHandler
 				// add messages
 				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),amt,def.GetTag(),players[e.Args[1]].GetUserName());
 				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),amt,def.GetTag());
+				rslt = true;
+			}
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[2];
+				t.type = MenuTransaction.TT_ITEMSEND;
+				t.result = rslt;
+				t.used = item;
+				t.usedup = (players[e.Args[1]].mo.CountInv(item)<=0);
+				checklist.Push(t);
 			}
 		}
 		else if ( e.Name.Left(17) ~== "swwmmarkloreread." )
@@ -3801,7 +3895,19 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			let i = players[e.Args[0]].mo.FindInventory(item);
 			if ( !i ) return;
-			players[e.Args[0]].mo.UseInventory(i);
+			bool rslt = players[e.Args[0]].mo.UseInventory(i);
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[1];
+				t.type = MenuTransaction.TT_ITEMUSE;
+				let w = (Class<Weapon>)(item);
+				if ( w ) t.result = (players[e.Args[0]].PendingWeapon==Weapon(i));
+				else t.result = rslt;
+				t.used = item;
+				t.usedup = (!i||(i.Amount<=0));
+				checklist.Push(t);
+			}
 		}
 		else if ( e.Name.Left(13) ~== "swwmdropitem." )
 		{
@@ -3824,6 +3930,16 @@ Class SWWMHandler : EventHandler
 			let drop = players[e.Args[0]].mo.DropInventory(i,amt);
 			// add some random velocity so multiple drops don't get bunched together
 			if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[1];
+				t.type = MenuTransaction.TT_ITEMDROP;
+				t.used = item;
+				t.result = drop;
+				t.usedup = (!i||(i.Amount<=0));
+				checklist.Push(t);
+			}
 		}
 		else if ( e.Name ~== "swwmkoraxline" )
 		{
@@ -3905,6 +4021,21 @@ Class SWWMHandler : EventHandler
 			}
 			cbt.waitreload = false;
 		}
+		else if ( e.Name ~== "swwmcleartransaction" )
+		{
+			if ( e.Args[1] != consoleplayer ) return;
+			for ( int i=0; i<checklist.Size(); i++ )
+			{
+				if ( checklist[i].uid != e.Args[0] ) continue;
+				checklist.Delete(i);
+				i--;
+			}
+		}
+		else if ( e.Name ~== "swwmclearalltransactions" )
+		{
+			if ( e.Args[0] != consoleplayer ) return;
+			checklist.Clear();
+		}
 	}
 
 	// stuff for hud
@@ -3983,11 +4114,37 @@ Class SWWMHandler : EventHandler
 			Shader.SetUniform1f(p,"Glitch","str1",noiz);
 			noiz = min(lastdmg*.03*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),3.5);
 			Shader.SetUniform1f(p,"Glitch","str2",noiz);
+			Shader.SetEnabled(p,"ZoomBlur",true);
+			if ( !demo.InStateSequence(demo.CurState,demo.FindState("Dash")) )
+			{
+				Shader.SetEnabled(p,"ZoomBlur",false);
+				return;
+			}
+			Vector3 vel = demo.vel+demo.dashdir*demo.dashboost;
+			double baumpu = max(0.,(demo.bumptic-(gametic+e.Fractic))/35.);
+			vel *= 1.+baumpu;
+			double spd = vel.length();
+			Vector3 worlddir = vel/spd;
+			Shader.SetUniform1f(p,"ZoomBlur","Fade",clamp((spd-20.)/60.,0.,.5));
+			double str = min(spd/50.,10.);
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(e.ViewPitch,e.ViewAngle,e.ViewRoll);
+			Vector3 reldir = (worlddir dot y, worlddir dot z, worlddir dot x);
+			Vector2 centerspot = (.5+reldir.x*.5,.5+reldir.y*.5);
+			if ( reldir.z < 0 )
+			{
+				centerspot.x = 1.-centerspot.x;
+				centerspot.y = 1.-centerspot.y;
+				str *= -1;
+			}
+			Shader.SetUniform1f(p,"ZoomBlur","Str",str);
+			Shader.SetUniform2f(p,"ZoomBlur","CenterSpot",centerspot);
 		}
 		else
 		{
 			Shader.SetEnabled(p,"Glitch",false);
 			Shader.SetEnabled(p,"Grain",false);
+			Shader.SetEnabled(p,"ZoomBlur",false);
 		}
 	}
 

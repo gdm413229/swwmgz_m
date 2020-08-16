@@ -1,9 +1,8 @@
 Fundamental things before beta:
  - Ynykron Artifact altfire
 
-Not so fundamental things during beta:
+Not so fundamental things during first beta:
  - Extra Demolitionist animations (swimming, additional gestures)
- - Item detection button (highlights nearby, visible items)
  - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
  - Allow loading partial mags from spare bullets
@@ -14,6 +13,7 @@ Not so fundamental things during beta:
    - Confetti gibs
  - Keen replacement (need ideas)
  - Achievements
+ - Extra Demolitionist Menu tabs (radio, pong minigame)
  - Collectables
 
 Extra things for later:
@@ -24,7 +24,6 @@ Extra things for later:
    - A background with a bit more flair than just the fuzz shader
    - Some sort of flyby featuring the Demolitionist booting up, closeups of weapons/items etc.
  - Japanese localization
- - Extra Demolitionist Menu tabs (radio, pong minigame)
  - Mod trailer video
  - Rewrite the entire Demolitionist Menu code from the ground up to be more easily extensible and adapt to any window size
 

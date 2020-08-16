@@ -1,4 +1,18 @@
 // internal "knowledge base" and more
+Class MenuTransaction
+{
+	enum ETransactionType
+	{
+		TT_ITEMUSE,
+		TT_ITEMDROP,
+		TT_ITEMSEND
+	};
+
+	int uid, type;
+	Class<Inventory> used;
+	bool result, usedup;
+}
+
 Class SWWMKnowledgeBaseMenu : GenericMenu
 {
 	enum EDemoTab
@@ -61,11 +75,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	// color for chat
 	CVar ccol, tcol;
 	// for checks (duh)
-	Class<Inventory> lastuse;
-	int lastuseamt;
-	int checkuse;
-	int checkdrop;
-	int checksend;
+	Array<MenuTransaction> checklist;
+	int lasttuid;
+	SWWMHandler hnd;
 	// seeeeecret
 	int kcode;
 	// crimey clock stuff
@@ -82,6 +94,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		return req;
 	}
 
+	int GenTUID()
+	{
+		return lasttuid++;
+	}
+
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
@@ -89,6 +106,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			// can't open this menu outside of the game or if dead
 			// also can't if you're not the Demolitionist
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			Close();
 			return;
 		}
@@ -119,6 +137,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		stats = SWWMStats.Find(players[consoleplayer]);
 		tmsg = "$SWWM_MAINCONTROLS";
 		tmsgtic = gametic+70;
+		lasttuid = Random[TUID]();
+		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( gameinfo.gametype&GAME_Heretic )
 		{
 			c_year = 2171;
@@ -281,6 +301,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 		case MKEY_BACK:
 			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			Close();
 			return true;
 		case MKEY_PAGEUP:
@@ -568,12 +589,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				// can't use this
 				if ( invlist[sel0] is 'Ammo' ) return true;
-				lastuse = invlist[sel0].GetClass();
-				lastuseamt = invlist[sel0].Amount;
-				// don't check weapons (or the lamp)
-				if ( !(invlist[sel0] is 'Weapon') && !(invlist[sel0] is 'SWWMLamp') )
-					checkuse = gametic+(multiplayer?5:1);
-				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer);
+				let t = new("MenuTransaction");
+				t.uid = GenTUID();
+				t.type = MenuTransaction.TT_ITEMUSE;
+				t.result = false;
+				// don't check weapons, always assume check succeeded
+				if ( invlist[sel0] is 'Weapon' ) t.result = true;
+				checklist.Push(t);
+				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
 			}
 			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
 			{
@@ -639,20 +662,24 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( sub && (sel0 != -1) && (invlist.Size() > 0) )
 				{
 					// trade item
-					lastuse = invlist[sel1].GetClass();
-					lastuseamt = invlist[sel1].Amount;
-					checksend = gametic+(multiplayer?5:1);
-					EventHandler.SendNetworkEvent(String.Format("swwmtrade.%s",invlist[sel1].GetClassName()),consoleplayer,playerlist[sel0]);
+					let t = new("MenuTransaction");
+					t.uid = GenTUID();
+					t.type = MenuTransaction.TT_ITEMSEND;
+					t.result = false;
+					checklist.Push(t);
+					EventHandler.SendNetworkEvent(String.Format("swwmtrade.%s",invlist[sel1].GetClassName()),consoleplayer,playerlist[sel0],t.uid);
 				}
 			}
 			return true;
 		case MKEY_CLEAR:
 			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) )
 			{
-				lastuse = invlist[sel0].GetClass();
-				lastuseamt = invlist[sel0].Amount;
-				checkdrop = gametic+(multiplayer?5:1);
-				EventHandler.SendNetworkEvent(String.Format("swwmdropitem.%s",invlist[sel0].GetClassName()),consoleplayer);
+				let t = new("MenuTransaction");
+				t.uid = GenTUID();
+				t.type = MenuTransaction.TT_ITEMDROP;
+				t.result = false;
+				checklist.Push(t);
+				EventHandler.SendNetworkEvent(String.Format("swwmdropitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
 			}
 			else if ( (curtab == TAB_LIBRARY) && sub )
 			{
@@ -764,7 +791,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -808,7 +836,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -836,7 +865,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -880,7 +910,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1288,7 +1319,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				for ( int i=0; i<invlist.Size(); i++ )
 				{
 					if ( !invlist[i] ) continue;
-					if ( (invlist[i] is 'Ammo') || (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+					if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+					else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 					else str = invlist[i].GetTag();
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
@@ -1591,6 +1623,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		if ( players[consoleplayer].Health <= 0 )
 		{
 			// ded
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			Close();
 			return;
 		}
@@ -1633,6 +1666,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			// re-sort by category
 			qsort_inventory(invlist,0,invlist.Size()-1);
+			// crop selection
+			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
 		}
 		else if ( (curtab == TAB_STATS) && (sel1 == STAT_KILLS) )
 		{
@@ -1649,6 +1684,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
 				if ( k ) invlist.Push(k);
 			}
+			// crop selection
+			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
 		}
 		else if ( curtab == TAB_STORE )
 		{
@@ -1732,6 +1769,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			// re-sort by category
 			qsort_store(storelist,storeunits,0,storelist.Size()-1);
+			// crop selection
+			if ( sel0 >= storelist.Size() ) sel0 = max(0,storelist.Size()-1);
 		}
 		else if ( curtab == TAB_LIBRARY )
 		{
@@ -1797,57 +1836,70 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				}
 				// re-sort by category
 				qsort_inventory(invlist,0,invlist.Size()-1);
+				// crop selection
+				if ( sel1 >= invlist.Size() ) sel1 = max(0,invlist.Size()-1);
 			}
 		}
-		// check if use succeeded
-		if ( checkuse && (gametic > checkuse) )
+		// ui->play transaction checks
+		for ( int i=0; i<checklist.Size(); i++ )
 		{
-			checkuse = 0;
-			int amt = players[consoleplayer].mo.CountInv(lastuse);
-			if ( amt == lastuseamt )
+			bool deleteme = false;
+			for ( int j=0; j<hnd.checklist.Size(); j++ )
 			{
-				tmsg = StringTable.Localize("$SWWM_INVFAIL");
-				tmsgtic = gametic+70;
-				MenuSound("menu/noinvuse");
+				if ( hnd.checklist[j].uid != checklist[i].uid ) continue;
+				if ( checklist[i].type == MenuTransaction.TT_ITEMUSE )
+				{
+					// check if use succeeded
+					if ( checklist[i].result || hnd.checklist[j].result )
+					{
+						// only play use sound if game isn't frozen
+						if ( !multiplayer && (menuactive == Menu.On) )
+						{
+							// if it's a weapon, play the select sound
+							let w = (Class<Weapon>)(hnd.checklist[j].used);
+							if ( w )
+							{
+								// play if actually switching
+								if ( hnd.checklist[j].result ) MenuSound(GetDefaultByType(w).UpSound);
+							}
+							else MenuSound(GetDefaultByType(hnd.checklist[j].used).UseSound);
+						}
+					}
+					else
+					{
+						tmsg = StringTable.Localize("$SWWM_INVFAIL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMDROP )
+				{
+					// check if drop succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_INVNDROP");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMSEND )
+				{
+					// check if trade succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_TRADEFULL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+					else MenuSound("menu/demosel");
+				}
+				EventHandler.SendNetworkEvent("swwmcleartransaction",checklist[i].uid,consoleplayer);
+				deleteme = true;
+				break;
 			}
-			else
-			{
-				MenuSound(GetDefaultByType(lastuse).UseSound);
-				if ( (amt == 0) && (sel0 >= invlist.Size()) )
-					sel0 = max(0,sel0-1);
-			}
-		}
-		// check if drop succeeded
-		if ( checkdrop && (gametic > checkdrop) )
-		{
-			checkdrop = 0;
-			int amt = players[consoleplayer].mo.CountInv(lastuse);
-			if ( amt == lastuseamt )
-			{
-				tmsg = StringTable.Localize("$SWWM_INVNDROP");
-				tmsgtic = gametic+70;
-				MenuSound("menu/noinvuse");
-			}
-			else if ( (amt == 0) && (sel0 >= invlist.Size()) )
-				sel0 = max(0,sel0-1);
-		}
-		// check if trade succeeded
-		if ( checksend && (gametic > checksend) )
-		{
-			checksend = 0;
-			int amt = players[consoleplayer].mo.CountInv(lastuse);
-			if ( amt == lastuseamt )
-			{
-				tmsg = StringTable.Localize("$SWWM_TRADEFULL");
-				tmsgtic = gametic+70;
-				MenuSound("menu/noinvuse");
-			}
-			else
-			{
-				MenuSound("menu/demosel");
-				if ( (amt == 0) && (sel1 >= invlist.Size()) )
-					sel1 = max(0,sel1-1);
-			}
+			if ( !deleteme ) continue;
+			checklist.Delete(i);
+			i--;
 		}
 	}
 
@@ -1893,6 +1945,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if( (ikey[0] && (ev.keystring == mkey[0])) || (ikey[1] && (ev.keystring == mkey[1])) )
 			{
 				MenuSound("menu/democlose");
+				EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 				Close();
 				return true;
 			}
@@ -1933,41 +1986,41 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			break;
 		case UIEvent.Type_LButtonDown:
 			isrclick = false;
-			return Super.OnUIEvent(ev);
+			// copy over what base menus do for L click
+			// but ignore back button, since we don't use it
+			bool lres = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( lres ) SetCapture(true);
+			return lres;
 			break;
 		case UIEvent.Type_RButtonDown:
 			isrclick = true;
-			// copy over what base menus do for L click
-			int y = ev.MouseY;
-			bool res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
-			if ( res ) y = -1;
-			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
-			if ( res ) SetCapture(true);
-			return false;
+			// same as L click
+			bool rres = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( rres ) SetCapture(true);
+			return rres;
 			break;
+		case UIEvent.Type_LButtonUp:
 		case UIEvent.Type_RButtonUp:
-			// copy over what base menus do for L release
+			// copy over what base menus do for release
+			// but ignore back button, since we don't use it
 			if ( mMouseCapture )
 			{
 				SetCapture(false);
-				int y = ev.MouseY;
-				bool res = MouseEventBack(MOUSE_Release,ev.MouseX,y);
-				if ( res ) y = -1;
-				res |= MouseEvent(MOUSE_Release,ev.MouseX,y);
+				return MouseEvent(MOUSE_Release,ev.MouseX,ev.MouseY);
 			}
-			return false;
 			break;
 		case UIEvent.Type_MouseMove:
-			// store coords
+			// store coords beforehand
 			curmouse = (ev.MouseX,ev.MouseY);
+			if ( mMouseCapture || (m_use_mouse == 1) )
+				return MouseEvent(MOUSE_Move,ev.MouseX,ev.MouseY);
 			break;
 		}
-		return Super.OnUIEvent(ev);
+		return false;
 	}
 
 	override void Drawer()
 	{
-		Super.Drawer();
 		Font fnt = LangFont(TewiFont);
 		String str;
 		double hs;

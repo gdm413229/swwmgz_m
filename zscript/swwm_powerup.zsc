@@ -236,7 +236,7 @@ Class GhostArtifactX : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOINTERACTION;
-		Radius 0.1;
+		Radius .1;
 		Height 0;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -249,7 +249,8 @@ Class GhostArtifactX : Actor
 			Destroy();
 			return;
 		}
-		Warp(target,flags:WARPF_COPYINTERPOLATION|WARPF_NOCHECKPOSITION);
+		Warp(target,flags:WARPF_INTERPOLATE|WARPF_NOCHECKPOSITION);
+		FloatBobPhase = target.FloatBobPhase;
 		bInvisible = target.bInvisible||!target.InStateSequence(target.CurState,target.FindState("Spawn"));
 	}
 	States

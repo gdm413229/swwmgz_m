@@ -46,9 +46,15 @@ Class Demolitionist : PlayerPawn
 	int deadtimer;
 	transient int revivefail;
 
+	transient int bumptic;
+
 	Actor selflight;
 	Actor oldencroached;
 	Vector3 oldencroachedpos;
+
+	SWWMItemSense itemsense;
+	int itemsense_cnt;
+	int lastsense;
 
 	Default
 	{
@@ -335,6 +341,21 @@ Class Demolitionist : PlayerPawn
 		}
 		fuelcooldown = max(20,fuelcooldown);
 	}
+	void SenseItems()
+	{
+		if ( level.maptime < lastsense+5 )
+			return;
+		lastsense = level.maptime;
+		let thesight = FindInventory("Omnisight");
+		let bt = BlockThingsIterator.Create(self,1200);
+		while ( bt.Next() )
+		{
+			let i = Inventory(bt.Thing);
+			if ( !i || i.bINVISIBLE || !i.bSPECIAL || i.Owner || !SWWMUtility.SphereIntersect(i,pos,thesight?1200:800) ) continue;
+			if ( !thesight && !CheckSight(i) ) continue;
+			SWWMItemSense.Spawn(self,i);
+		}
+	}
 	void CheckUnderwaterAmb( bool restore = false )
 	{
 		Vector3 headpos = Vec3Offset(0,0,player.viewheight);
@@ -502,6 +523,7 @@ Class Demolitionist : PlayerPawn
 		}
 		else mystats.swimdist += traveldist;
 		CheckUnderwaterAmb();
+		if ( player.cmd.buttons&BT_USER3 ) SenseItems();
 		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
@@ -593,7 +615,7 @@ Class Demolitionist : PlayerPawn
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
-			dashfuel = min(240.,dashfuel+max(dashfuel*.01,.05));
+			dashfuel = min(240.,dashfuel+max(dashfuel*.015,.1));
 		if ( (dashboost > 0.) && (InStateSequence(CurState,FindState("Dash")) || (InStateSequence(CurState,FindState("Jump")) && player.cmd.buttons&BT_JUMP)) )
 			dashsnd = true;
 		else
@@ -634,6 +656,7 @@ Class Demolitionist : PlayerPawn
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+				bumptic = gametic+int(5+spd/4.);
 				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5)) )
 				{
 					if ( bumped ) continue;

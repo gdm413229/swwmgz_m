@@ -20,6 +20,7 @@ Class SWWMStatusBar : BaseStatusBar
 	Array<SWWMInterest> intpoints;
 	Array<SWWMScoreObj> scoreobjs;
 	Array<SWWMCombatTracker> trackers;
+	Array<SWWMItemSense> senseitems;
 
 	// the event handler, holding all sorts of stuff
 	SWWMHandler hnd;
@@ -27,7 +28,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, midcol, midbcol, midduration;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -35,6 +36,7 @@ Class SWWMStatusBar : BaseStatusBar
 	Vector2 ssn, hsn;
 	Vector2 sss, hss;
 	Vector2 ssi, hsi;
+	Vector2 ssd, hsd;
 	int margin;
 	double FracTic;
 	int chatopen;
@@ -350,6 +352,34 @@ Class SWWMStatusBar : BaseStatusBar
 		qsort_scoreobjs(a,p+1,h);
 	}
 
+	// quicksort (item sense)
+	private int partition_itemsense( Array<SWWMItemSense> a, int l, int h )
+	{
+		SWWMItemSense pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpDist(pv.pos,a[j].pos) )
+			{
+				i++;
+				SWWMItemSense tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		SWWMItemSense tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_itemsense( Array<SWWMItemSense> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_itemsense(a,l,h);
+		qsort_itemsense(a,l,p-1);
+		qsort_itemsense(a,p+1,h);
+	}
+
 	override void Tick()
 	{
 		Super.Tick();
@@ -507,6 +537,31 @@ Class SWWMStatusBar : BaseStatusBar
 			scoreobjs.Resize(i);
 		// sort by distance
 		qsort_scoreobjs(scoreobjs,0,scoreobjs.Size()-1);
+		// check if player has item sense
+		let demo = Demolitionist(CPlayer.mo);
+		if ( demo && (demo.itemsense_cnt > 0) )
+		{
+			if ( senseitems.Size() != demo.itemsense_cnt )
+				senseitems.Resize(demo.itemsense_cnt);
+			total_sz = demo.itemsense_cnt;
+			i = 0;
+			for ( SWWMItemSense s=demo.itemsense; s && (i<total_sz); s=s.next )
+			{
+				// ignore points clearly outside of player view
+				Vector3 tdir = level.Vec3Diff(viewpos,s.pos);
+				if ( viewvec dot tdir < 0 ) continue;
+				proj.ProjectWorldPos(viewpos+tdir);
+				proj.ProjectToNormal();
+				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
+				if ( !thesight && (level.maptime > s.updated+35) ) continue;
+				senseitems[i++] = s;
+			}
+			// squeeze if some were discarded
+			if ( i != total_sz )
+				senseitems.Resize(i);
+			// sort by distance
+			qsort_itemsense(senseitems,0,senseitems.Size()-1);
+		}
 		// part of gross hackery to override nametag display
 		if ( !ntags ) ntags = CVar.GetCVar('displaynametags',players[consoleplayer]);
 		if ( CPlayer.inventorytics > 0 )
@@ -629,6 +684,29 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y+hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true);
 			}
 		}
+		// sensed items
+		let demo = Demolitionist(CPlayer.mo);
+		if ( demo && (demo.itemsense_cnt > 0) )
+		{
+			for ( int i=0; i<senseitems.Size(); i++ )
+			{
+				let s = senseitems[i];
+				if ( !s || !s.item ) continue;
+				Vector3 tdir = Level.Vec3Diff(ViewPos,s.pos);
+				proj.ProjectWorldPos(ViewPos+tdir);
+				Vector2 npos = proj.ProjectToNormal();
+				if ( !proj.IsInFront() ) continue;
+				Vector2 vpos = viewport.SceneToWindow(npos);
+				Font fnt = LangFont(mMiniwiFont);
+				int mtime = thesight?70:35;
+				double alph = clamp(((s.updated+mtime)-level.maptime)/35.,0.,1.);
+				alph *= clamp(1.5-1.5*(tdir.length()/(thesight?1200.:800.)),0.,1.);
+				tag = s.tag;
+				Screen.DrawText(fnt,Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			}
+		}
 		// targetting array
 		for ( int i=0; i<trackers.Size(); i++ )
 		{
@@ -653,7 +731,8 @@ Class SWWMStatusBar : BaseStatusBar
 			barsiz.y *= hsb.y;
 			Vector2 barpos = vpos-(barsiz/2.);
 			barpos.y -= 16.;
-			Font fnt = LangFont(mMiniwiFont);
+			if ( !bigtags ) bigtags = CVar.GetCVar('swwm_bigtags',players[consoleplayer]);
+			Font fnt = LangFont(bigtags.GetBool()?mTewiFont:mMiniwiFont);
 			if ( targettag.GetBool() || targ.myplayer && (tag != "") )
 				Screen.DrawText(fnt,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
@@ -1295,6 +1374,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !nscale ) nscale = CVar.GetCVar('swwm_numscale',players[consoleplayer]);
 		if ( !sscale ) sscale = CVar.GetCVar('swwm_scrscale',players[consoleplayer]);
 		if ( !iscale ) iscale = CVar.GetCVar('swwm_poiscale',players[consoleplayer]);
+		if ( !dscale ) dscale = CVar.GetCVar('swwm_detscale',players[consoleplayer]);
 		BeginHUD();
 		if ( hscale.GetInt() <= 0 ) hs = GetHUDScale();
 		else
@@ -1333,6 +1413,13 @@ Class SWWMStatusBar : BaseStatusBar
 			hsi.y = hsi.x;
 		}
 		ssi = (Screen.GetWidth()/hsi.x,Screen.GetHeight()/hsi.y);
+		if ( dscale.GetInt() <= 0 ) hsd = GetHUDScale();
+		else
+		{
+			hsd.x = dscale.GetInt();
+			hsd.y = hsd.x;
+		}
+		ssd = (Screen.GetWidth()/hsd.x,Screen.GetHeight()/hsd.y);
 		FracTic = TicFrac;
 		DrawTarget();
 		DrawScore();

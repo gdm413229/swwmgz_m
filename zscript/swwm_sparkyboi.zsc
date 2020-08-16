@@ -887,7 +887,7 @@ Class BiosparkComboImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMHandler.DoExplosion(self,bAMBUSH?(1600+Args[0]*100):1500,480000,bAMBUSH?1200:700,bAMBUSH?900:400);
+		SWWMHandler.DoExplosion(self,bAMBUSH?(700+Args[0]*100):300,bAMBUSH?480000:200000,bAMBUSH?800:400,bAMBUSH?400:200);
 		A_QuakeEx(9,9,9,25,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -930,8 +930,8 @@ Class BiosparkComboImpact : Actor
 			s.target = target;
 			s.angle = ang;
 			s.pitch = pt;
-			s.ReactionTime += Random[Sparkster](0,10);
-			if ( bAMBUSH ) s.ReactionTime += 4+Args[0]*4;
+			s.ReactionTime += Random[Sparkster](0,5);
+			if ( bAMBUSH ) s.ReactionTime += 8+Args[0]*4;
 		}
 		if ( bAMBUSH )
 		{
@@ -950,18 +950,13 @@ Class BiosparkComboImpact : Actor
 	}
 	void A_SparkSubExpl()
 	{
-		double mx = bAMBUSH?30.:20.;
+		double mx = bAMBUSH?40.:30.;
 		special1++;
 		if ( special1 > mx ) return;
 		double factor = (mx-special1)/mx;
 		double invfct = 1.-factor;
-		if ( bAMBUSH )
-		{
-			factor *= 1.5;
-			invfct *= 1.5;
-		}
-		SWWMHandler.DoExplosion(self,(1500+Args[0]*50)*factor,0.,600*invfct);
-		SWWMHandler.DoExplosion(self,0.,-10000*factor,800*invfct);
+		SWWMHandler.DoExplosion(self,(bAMBUSH?(500+Args[0]*50):200)*factor,0.,(bAMBUSH?900.:300.)*invfct);
+		SWWMHandler.DoExplosion(self,0.,-12000*factor,(bAMBUSH?1500:500)*invfct);
 		int numpt = int(Random[ExploS](8,16)*factor);
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -979,7 +974,7 @@ Class BiosparkComboImpact : Actor
 		{
 			double ang = FRandom[ExploS](0,360);
 			double pt = FRandom[ExploS](-90,90);
-			double dist = (FRandom[ExploS](5,20)+100*invfct);
+			double dist = (FRandom[ExploS](5,20)+60*invfct);
 			if ( LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN) ) continue;
 			Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
 			Vector3 spos = level.Vec3Offset(pos,ofs);
@@ -1010,10 +1005,11 @@ Class BiosparkComboImpact : Actor
 	void A_SparkSubExpl2()
 	{
 		special2++;
-		if ( (special2 > 30) || !(special2%2) ) return;
-		int numpt = Random[Sparkster](0,30-special2);
+		int mx = bAMBUSH?40:30;
+		if ( (special2 > mx) || !(special2%2) ) return;
+		int numpt = Random[Sparkster](0,mx-special2);
 		double ang, pt;
-		double mul = bAMBUSH?8:4;
+		double mul = bAMBUSH?8:3;
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[Sparkster](0,360);
@@ -1578,7 +1574,7 @@ Class BiosparkArc : Actor
 	States
 	{
 	Spawn:
-		XZW1 # 1 Bright;
+		XZW1 # 0 Bright;
 		XZW1 # 1 Bright A_Trace();
 		XZW1 # 1 Bright A_Spread("biospark/bigarc",.6,1);
 		XZW1 # 1 Bright A_FadeOut(.05);
@@ -1597,7 +1593,7 @@ Class BiosparkArcSmall : BiosparkArc
 	States
 	{
 	Spawn:
-		XZW1 # 1 Bright;
+		XZW1 # 0 Bright;
 		XZW1 # 1 Bright A_Trace();
 		XZW1 # 1 Bright A_Spread("biospark/arc",2.,0);
 		XZW1 # 1 Bright A_FadeOut(.1);
@@ -1616,7 +1612,7 @@ Class BiosparkArcBig : BiosparkArc
 	States
 	{
 	Spawn:
-		XZW1 # 1 Bright;
+		XZW1 # 0 Bright;
 		XZW1 # 1 Bright A_Trace();
 		XZW1 # 1 Bright A_Spread("biospark/hugearc",.4,2);
 		XZW1 # 1 Bright A_FadeOut(.025);
@@ -1871,7 +1867,7 @@ Class BiosparkCore : Actor
 			s.vel = pvel+vel*.5;
 			s.SetShade(Color(4,5,2)*Random[ExploS](40,50));
 			s.A_SetRenderStyle(s.alpha*.4,STYLE_AddShaded);
-			s.scale *= 2.;
+			s.scale *= 4.;
 			s.bAMBUSH = true;
 		}
 		Wait;

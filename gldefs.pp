@@ -1,5 +1,13 @@
 HardwareShader PostProcess beforebloom
 {
+	Name "ZoomBlur"
+	Shader "shaders/glsl/ZoomBlur.fp" 330
+	Uniform float Str
+	Uniform float Fade
+	Uniform vec2 CenterSpot
+}
+HardwareShader PostProcess beforebloom
+{
 	Name "SilverScope"
 	Shader "shaders/glsl/SilverScope.fp" 330
 }

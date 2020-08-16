@@ -54,7 +54,6 @@ Class Demolitionist : PlayerPawn
 
 	SWWMItemSense itemsense;
 	int itemsense_cnt;
-	int lastsense;
 
 	Default
 	{
@@ -343,9 +342,6 @@ Class Demolitionist : PlayerPawn
 	}
 	void SenseItems()
 	{
-		if ( level.maptime < lastsense+5 )
-			return;
-		lastsense = level.maptime;
 		let thesight = FindInventory("Omnisight");
 		let bt = BlockThingsIterator.Create(self,1200);
 		while ( bt.Next() )

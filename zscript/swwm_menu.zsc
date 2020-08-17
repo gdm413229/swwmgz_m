@@ -590,7 +590,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
 			{
 				// can't use this
-				if ( invlist[sel0] is 'Ammo' ) return true;
+				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectable') )
+					return true;
 				let t = new("MenuTransaction");
 				t.uid = GenTUID();
 				t.type = MenuTransaction.TT_ITEMUSE;
@@ -663,6 +664,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				}
 				else if ( sub && (sel0 != -1) && (invlist.Size() > 0) )
 				{
+					// cannot trade these
+					if ( invlist[sel1].bUNDROPPABLE || invlist[sel1].bUNTOSSABLE )
+					{
+						MenuSound("menu/noinvuse");
+						tmsg = StringTable.Localize("$SWWM_TRADEFAIL");
+						tmsgtic = gametic+70;
+						return true;
+					}
 					// trade item
 					let t = new("MenuTransaction");
 					t.uid = GenTUID();
@@ -1698,6 +1707,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				let type = (Class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
+				// no collectables
+				if ( type is 'SWWMCollectable' ) continue;
 				// no fabricators outside of hexen
 				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
 				// skip maxed items
@@ -2366,6 +2377,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
+				else if ( invlist[i] is 'SWWMCollectable' ) clscol = Font.CR_FIRE;
 				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )

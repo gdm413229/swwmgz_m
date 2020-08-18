@@ -223,7 +223,7 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators outside of hexen
+				if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) && (type is 'AmmoFabricator') ) continue;	// no fabricators before hexen
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
 					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )

@@ -590,7 +590,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
 			{
 				// can't use this
-				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectable') )
+				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectable')
+					 || (invlist[sel0] is 'HammerspaceEmbiggener') )
 					return true;
 				let t = new("MenuTransaction");
 				t.uid = GenTUID();
@@ -1709,8 +1710,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( !type ) continue;
 				// no collectables
 				if ( type is 'SWWMCollectable' ) continue;
-				// no fabricators outside of hexen
-				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
+				// no fabricators before hexen
+				if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) && (type is 'AmmoFabricator') ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;

@@ -548,7 +548,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
 				ofs1 = ++sel1;
-				if ( ofs1 > STAT_LEVEL ) ofs1 = sel1 = STAT_MAIN;
+				if ( ofs1 > STAT_ACHIEVEMENT ) ofs1 = sel1 = STAT_MAIN;
 				CVar.GetCVar('swwm_laststattab',players[consoleplayer]).SetInt(sel1);
 			}
 			return true;
@@ -582,7 +582,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
 				ofs1 = --sel1;
-				if ( ofs1 < STAT_MAIN ) ofs1 = sel1 = STAT_LEVEL;
+				if ( ofs1 < STAT_MAIN ) ofs1 = sel1 = STAT_ACHIEVEMENT;
 				CVar.GetCVar('swwm_laststattab',players[consoleplayer]).SetInt(sel1);
 			}
 			return true;

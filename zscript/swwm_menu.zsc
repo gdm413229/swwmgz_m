@@ -2213,8 +2213,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( stats.favweapon == -1 ) str = str.."N/A";
 				else
 				{
-					let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
-					str = str..def.GetTag();
+					if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' )
+						str = str..StringTable.Localize("$SWWM_YOURSELF");
+					else
+					{
+						let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
+						str = str..def.GetTag();
+					}
 				}
 				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += 16;

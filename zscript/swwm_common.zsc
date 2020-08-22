@@ -4371,8 +4371,13 @@ Class SWWMCrashHandler : StaticEventHandler
 			if ( timer == 1 )
 			{
 				Console.Printf(TEXTCOLOR_GOLD.."Oopsie Woopsie!"..TEXTCOLOR_NORMAL);
-				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
-				S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
+				if ( hnd && hnd.detected )
+				{
+					S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+					S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				}
+				else S_StartSound("crash/crash",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 140 )
 			{
@@ -4384,6 +4389,7 @@ Class SWWMCrashHandler : StaticEventHandler
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
 				if ( hnd && hnd.detected ) Console.Printf(TEXTCOLOR_GOLD.."Don't blame me. Shouldn't have tried running this with Brutal Doom."..TEXTCOLOR_NORMAL);
 				else Console.Printf(TEXTCOLOR_GOLD.."If you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa."..TEXTCOLOR_NORMAL);
+				Console.Printf(TEXTCOLOR_GOLD.."Version Information: %s"..TEXTCOLOR_NORMAL,StringTable.Localize("SWWM_MODVER"));
 			}
 			timer++;
 		}

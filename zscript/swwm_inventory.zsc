@@ -572,7 +572,7 @@ Class BigPunchSplash : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMHandler.DoExplosion(self,special1,40000,120,60,ignoreme:target);
+		SWWMUtility.DoExplosion(self,special1,40000,120,60,ignoreme:target);
 		Destroy();
 	}
 }
@@ -1149,7 +1149,7 @@ Class SWWMWeapon : Weapon abstract
 			bool bloodless = true;
 			double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 			self.angle += clamp(diff,-5.,5.);
-			SWWMHandler.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
+			SWWMUtility.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
 			if ( raging )
 			{
 				invoker.bEXTREMEDEATH = true;

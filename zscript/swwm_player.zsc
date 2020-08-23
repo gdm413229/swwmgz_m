@@ -1016,7 +1016,7 @@ Class Demolitionist : PlayerPawn
 					}
 					if ( jumpactor && jumpactor.bSHOOTABLE )
 					{
-						SWWMHandler.DoKnockback(jumpactor,(-walldir,0),12000);
+						SWWMUtility.DoKnockback(jumpactor,(-walldir,0),12000);
 						int dmg = jumpactor.DamageMobj(self,self,10,'Jump');
 						if ( FindInventory("RagekitPower") )
 						{
@@ -2006,7 +2006,7 @@ Class DemolitionistShockwave : Actor
 			A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,attenuation:.2,pitch:.7);
 			A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,attenuation:.1,pitch:.4);
 		}
-		SWWMHandler.DoExplosion(self,40+min(special1,120),100000+min(special1*2000,150000),100+min(special1*2,130),80,DE_BLAST|DE_EXTRAZTHRUST,'GroundPound',target);
+		SWWMUtility.DoExplosion(self,40+min(special1,120),100000+min(special1*2000,150000),100+min(special1*2,130),80,DE_BLAST|DE_EXTRAZTHRUST,'GroundPound',target);
 		for ( int i=0; i<360; i+=5 )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);

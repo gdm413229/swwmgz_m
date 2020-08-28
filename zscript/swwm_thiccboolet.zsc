@@ -810,8 +810,8 @@ Class SilverBullet : SWWMWeapon
 			}
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
-				SWWMUtility.DoKnockback(t.Results.HitActor,t.Results.HitVector+(0,0,.025),dmg*20.*FRandom[SilverBullet](.8,1.2));
 				int dmg = t.Results.HitActor.DamageMobj(invoker,self,1000,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
+				SWWMUtility.DoKnockback(t.Results.HitActor,t.Results.HitVector+(0,0,.025),dmg*20.*FRandom[SilverBullet](.8,1.2));
 				if ( t.Results.HitActor && !t.Results.HitActor.bNOBLOOD )
 				{
 					t.Results.HitActor.TraceBleed(dmg,self);

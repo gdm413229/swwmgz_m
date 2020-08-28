@@ -736,14 +736,6 @@ Class ParryField : Actor
 		Height 40;
 	}
 
-	static bool ValidMissile( Actor a )
-	{
-		// fuuuuuuuuuuuuck why can't you just subclass them all from one base class, also wtf hexen, what's with all these things having +MISSILE
-		if ( (a is 'Rock1') || (a is 'Rock2') || (a is 'Rock3') || (a is 'Dirt1') || (a is 'Dirt2') || (a is 'Dirt3') || (a is 'Dirt4') || (a is 'Dirt5') || (a is 'Dirt6') || (a is 'GlassShard') || (a is 'PotteryBit') || (a is 'CorpseBloodDrip') || (a is 'Leaf1') || (a is 'HWaterDrip') || (a is 'IceGuyWisp1') || (a is 'WraithFX3') || (a is 'WraithFX4') || (a is 'Bat') || (a is 'SorcBall') )
-			return false;
-		return true;
-	}
-
 	override void Tick()
 	{
 		if ( !master )
@@ -760,10 +752,9 @@ Class ParryField : Actor
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !((a.bMISSILE && (a.target != master) && ValidMissile(a)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
+			if ( !((a.bMISSILE && !a.IsZeroDamage()) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
-			if ( dir dot vdir > 0 ) continue;	// already moving away
 			if ( a.bMISSILE )
 			{
 				// deflect directly to target

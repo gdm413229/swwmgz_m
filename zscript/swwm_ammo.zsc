@@ -235,6 +235,17 @@ Class MagAmmo : Inventory abstract
 
 	bool MagFill()
 	{
+		// double-check that parent ammo exists
+		if ( !pamo )
+		{
+			pamo = Ammo(Owner.FindInventory(ParentAmmo));
+			if ( !pamo )
+			{
+				pamo = Ammo(Spawn(ParentAmmo));
+				pamo.AttachToOwner(Owner);
+				pamo.Amount = 0;
+			}
+		}
 		bool given = false;
 		while ( (pamo.Amount < pamo.MaxAmount) && (Amount >= ClipSize) )
 		{

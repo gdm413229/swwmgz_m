@@ -752,7 +752,7 @@ Class ParryField : Actor
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !((a.bMISSILE && !a.IsZeroDamage()) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
+			if ( !((a.bMISSILE && !a.IsZeroDamage() && (a.target != master)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,Vec3Offset(0,0,20)).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			if ( a.bMISSILE )

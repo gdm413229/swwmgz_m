@@ -186,7 +186,7 @@ Class CandyBeam : Actor
 		Obituary "$O_CANDYGUN";
 		RenderStyle "Add";
 		Alpha 0.4;
-		DamageFunction 25;
+		DamageFunction 30;
 		ReactionTime 12;
 		Radius 0.1;
 		Height 0;
@@ -250,7 +250,7 @@ Class CandyPop : Actor
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			SWWMUtility.DoExplosion(self,200,60000,120,40);
+			SWWMUtility.DoExplosion(self,500,60000,250,60);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
@@ -314,7 +314,7 @@ Class TinyCandyPop : CandyPop
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			SWWMUtility.DoExplosion(self,60,32000,80,20);
+			SWWMUtility.DoExplosion(self,120,32000,100,20);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
@@ -359,7 +359,7 @@ Class CandyMagArm : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		reactiontime = Random[ExploS](4,7);
+		reactiontime = Random[ExploS](6,8);
 		double ang, pt;
 		ang = FRandom[ExploS](0,360);
 		pt = FRandom[ExploS](-90,90);
@@ -372,7 +372,7 @@ Class CandyMagArm : Actor
 		{
 			A_CountDown();
 			Spawn("CandyMagTrail",pos);
-			SWWMUtility.DoExplosion(self,80+reactiontime*7,3000+800*reactiontime,50+6*reactiontime);
+			SWWMUtility.DoExplosion(self,100+reactiontime*8,3000+800*reactiontime,80+6*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.1+(FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7),FRandom[ExploS](-.7,.7))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -424,7 +424,7 @@ Class CandyMagTrailBig : CandyMagTrail
 {
 	Default
 	{
-		Scale 3.;
+		Scale 4.;
 	}
 	States
 	{
@@ -439,7 +439,8 @@ Class CandyMagArmBig : CandyMagArm
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		vel *= 1.4;
+		reactiontime = Random[ExploS](10,16);
+		vel *= FRandom[ExploS](.8,1.5);
 	}
 	States
 	{
@@ -448,7 +449,7 @@ Class CandyMagArmBig : CandyMagArm
 		{
 			ReactionTime--;
 			Spawn("CandyMagTrailBig",pos);
-			SWWMUtility.DoExplosion(self,120+reactiontime*10,3000+900*reactiontime,100+8*reactiontime);
+			SWWMUtility.DoExplosion(self,200+reactiontime*20,3000+900*reactiontime,200+16*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.1+(FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5),FRandom[ExploS](-.5,.5))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -527,7 +528,7 @@ Class CandyGunProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 6.+.2*special1;
 		A_AlertMonsters(40000);
-		SWWMUtility.DoExplosion(self,4000+700*special1,80000+15000*special1,400+20*special1,250,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,4000+900*special1,80000+15000*special1,300+30*special1,200,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
@@ -593,7 +594,12 @@ Class CandyGunProj : Actor
 				s.angle = ang;
 				s.pitch = pt;
 				s.special2 = 1;
-				s.ReactionTime += Random[ExploS](-12,32)+(25-frame)/2;
+				s.ReactionTime += Random[ExploS](-12,48)+(25-frame)/2;
+			}
+			if ( (frame < 6) && (Random[ExploS](-frame,5) > 0) )
+			{
+				let s = Spawn("CandyMagArmBig",pos);
+				s.target = target;
 			}
 		}
 		Stop;
@@ -637,7 +643,7 @@ Class CandyMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 3.+.2*special1;
 		A_AlertMonsters(20000);
-		SWWMUtility.DoExplosion(self,800+700*special1,60000+15000*special1,200+15*special1,100,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,1000+900*special1,60000+15000*special1,200+20*special1,100,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
@@ -717,7 +723,7 @@ Class CandyBulletImpact : Actor
 		Obituary "$O_CANDYGUN";
 		DamageType "Explodium";
 		RenderStyle "Add";
-		Scale 3.5;
+		Scale 2.5;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NODAMAGETHRUST;
@@ -731,7 +737,7 @@ Class CandyBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(9000);
-		SWWMUtility.DoExplosion(self,700,48000,200,80,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,1200,48000,250,80,DE_EXTRAZTHRUST);
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);
@@ -826,12 +832,12 @@ Class CandyRing3 : CandyRing
 {
 	Default
 	{
-		Scale 5.;
+		Scale 4.;
 	}
 	States
 	{
 	Spawn:
-		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.03);
+		XRG5 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.08);
 		Stop;
 	}
 }
@@ -937,7 +943,7 @@ Class CandyGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 900;
+			int dmg = 500;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,72000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS|DMG_FOILINVUL,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD )

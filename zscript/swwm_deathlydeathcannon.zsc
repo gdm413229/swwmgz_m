@@ -331,10 +331,15 @@ Class YnykronImpact : Actor
 			if ( tracer && (tracer.Health <= 0) )
 			{
 				if ( tracer.player ) PlayerGone.FeckOff(tracer);
-				// poof away
-				tracer.bINVISIBLE = true;
-				tracer.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-				IDontFeelSoGood.DeletThis(tracer);	// ensures corpse is deleted too
+				if ( tracer.FindState("YnykronDeath",true) )
+					tracer.SetStateLabel("YnykronDeath");	// dedicated state
+				else
+				{
+					// poof away manually
+					tracer.bINVISIBLE = true;
+					tracer.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+					IDontFeelSoGood.DeletThis(tracer);	// ensures corpse is deleted too
+				}
 			}
 		}
 		if ( YnykronShot(master) )

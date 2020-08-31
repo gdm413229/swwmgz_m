@@ -238,7 +238,7 @@ Class HellblazerMissile : Actor
 		while ( bt.Next() )
 		{
 			let t = bt.Thing;
-			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || !SWWMUtility.SphereIntersect(t,level.Vec3Offset(pos,vel),bNOGRAVITY?50:90) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || !SWWMUtility.SphereIntersect(t,level.Vec3Offset(pos,vel),bNOGRAVITY?50:90) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			deto++;
 			break;
 		}
@@ -769,7 +769,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		while ( bt.Next() )
 		{
 			let t = bt.Thing;
-			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || !SWWMUtility.SphereIntersect(t,level.Vec3Offset(pos,vel),60) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || !SWWMUtility.SphereIntersect(t,level.Vec3Offset(pos,vel),60) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			deto++;
 			break;
 		}

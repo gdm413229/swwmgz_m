@@ -225,7 +225,7 @@ Class BigBiospark : Actor
 			{
 				let t = bt.Thing;
 				double dist;
-				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 8000) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 8000) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.height/2)).unit();
 				if ( dist > closest ) continue;
 				closest = dist;
@@ -491,7 +491,7 @@ Class BiosparkBall : Actor
 			{
 				let t = bt.Thing;
 				double dist;
-				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 dirto = level.Vec3Diff(pos,t.Vec3Offset(0,0,t.height/2)).unit();
 				if ( dir dot dirto < .5 ) continue;	// don't seek stuff that's behind us
 				if ( dist > closest ) continue;
@@ -1143,7 +1143,7 @@ Class BiosparkBeam : Actor
 		{
 			let t = bt.Thing;
 			double dist;
-			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 2000) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 2000) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			Vector3 dirto = level.Vec3Diff(invoker.nextpos,t.Vec3Offset(0,0,t.height/2));
 			if ( dir dot dirto < .2 ) continue;
 			if ( dist > closest ) continue;
@@ -1482,7 +1482,7 @@ Class BiosparkArc : Actor
 			{
 				let t = bt.Thing;
 				double dist;
-				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain')) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 1500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				if ( !t || !t.bSHOOTABLE || (!t.bISMONSTER && !(t is 'BossBrain') && !t.player) || (t.Health <= 0) || (target && t.IsFriend(target)) || ((dist=Distance3D(t)) > 1500) || !CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 dirto = level.Vec3Diff(invoker.nextpos,t.Vec3Offset(0,0,t.height/2));
 				if ( dir dot dirto < .2 ) continue;
 				if ( dist > closest ) continue;

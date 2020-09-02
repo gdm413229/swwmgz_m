@@ -344,7 +344,9 @@ Class SWWMHealth : Inventory abstract
 // Base casing classes
 Class SWWMCasing : Actor abstract
 {
-	int deadtimer, numbounces;
+	SWWMCasing prevcasing, nextcasing;
+	bool killme;
+	int numbounces;
 	double pitchvel, anglevel;
 	double heat;
 
@@ -372,25 +374,31 @@ Class SWWMCasing : Actor abstract
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		deadtimer = Random[Junk](-30,30);
 		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		heat = 1.0;
+		SWWMHandler.QueueCasing(self);
+	}
+	override void OnDestroy()
+	{
+		SWWMHandler.DeQueueCasing(self);
+		Super.OnDestroy();
 	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( isFrozen() ) return;
-		if ( InStateSequence(CurState,ResolveState("Death")) )
+		if ( killme ) A_FadeOut(.01);
+		if ( waterlevel > 0 )
 		{
-			deadtimer++;
-			if ( deadtimer > 300 ) A_FadeOut(0.05);
-			return;
+			vel.xy *= .98;
+			anglevel *= .98;
+			pitchvel *= .98;
 		}
-		heat -= 0.05;
 		if ( heat <= 0 ) return;
 		let s = Spawn("SWWMSmallSmoke",pos);
 		s.alpha *= heat;
+		heat -= 0.05;
 	}
 	States
 	{

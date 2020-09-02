@@ -1,40 +1,5 @@
 // event handlers and whatnot
 
-// so apparently on restart after dying, static thinkers don't get reloaded until AFTER the player has spawned
-// and the player calls GiveDefaultInventory even though it's all later discarded and they're given the saved inventory
-// all I can ask is: WHY
-Class SWWMExcuseMeWhatTheFuckHandler : StaticEventHandler
-{
-	bool reborn_hackfix;
-	int clear_hackfix;
-
-	override void WorldTick()
-	{
-		if ( gamestate != GS_LEVEL ) return;
-		if ( clear_hackfix > 0 )
-		{
-			clear_hackfix--;
-			if ( clear_hackfix <= 0 )
-				reborn_hackfix = false;
-		}
-	}
-
-	static bool WhyTheFuckIsThisAThing()
-	{
-		let hnd = SWWMExcuseMeWhatTheFuckHandler(StaticEventHandler.Find("SWWMExcuseMeWhatTheFuckHandler"));
-		if ( !hnd ) return false;
-		return hnd.reborn_hackfix;
-	}
-
-	static void ThisIsSomeSeriousBullshit()
-	{
-		let hnd = SWWMExcuseMeWhatTheFuckHandler(StaticEventHandler.Find("SWWMExcuseMeWhatTheFuckHandler"));
-		if ( !hnd ) return;
-		hnd.reborn_hackfix = true;
-		hnd.clear_hackfix = 2;
-	}
-}
-
 // preload fonts and stuff
 Class SWWMPreloader : StaticEventHandler
 {
@@ -140,6 +105,81 @@ Class SWWMHandler : EventHandler
 	// optimization
 	OnFire fires;
 	int fires_cnt;
+
+	// junk
+	SWWMCasing casings, casings_end;
+	int casings_cnt, oldmaxcasings;
+	SWWMChip chips, chips_end;
+	int chips_cnt, oldmaxdebris;
+
+	static void QueueCasing( SWWMCasing c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.casings_cnt++;
+		if ( !hnd.casings )
+		{
+			// this is the initial one
+			hnd.casings = c;
+			hnd.casings_end = c;
+		}
+		else
+		{
+			hnd.casings_end.nextcasing = c;
+			c.prevcasing = hnd.casings_end;
+			hnd.casings_end = c;
+		}
+		while ( hnd.casings && (swwm_maxcasings >= 0) && (hnd.casings_cnt > swwm_maxcasings) )
+			DeQueueCasing(hnd.casings);
+	}
+	static void DeQueueCasing( SWWMCasing c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.casings ) return;
+		if ( (hnd.casings != c) && !c.prevcasing && !c.nextcasing ) return;
+		hnd.casings_cnt--;
+		if ( !c.prevcasing ) hnd.casings = c.nextcasing;
+		else c.prevcasing.nextcasing = c.nextcasing;
+		if ( c == hnd.casings_end ) hnd.casings_end = c.prevcasing;
+		if ( c.nextcasing ) c.nextcasing.prevcasing = c.prevcasing;
+		c.killme = true;
+		c.prevcasing = null;
+		c.nextcasing = null;
+	}
+	static void QueueChip( SWWMChip c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.chips_cnt++;
+		if ( !hnd.chips )
+		{
+			// this is the initial one
+			hnd.chips = c;
+			hnd.chips_end = c;
+		}
+		else
+		{
+			hnd.chips_end.nextchip = c;
+			c.prevchip = hnd.chips_end;
+			hnd.chips_end = c;
+		}
+		while ( hnd.chips && (swwm_maxdebris >= 0) && (hnd.chips_cnt > swwm_maxdebris) )
+			DeQueueChip(hnd.chips);
+	}
+	static void DeQueueChip( SWWMChip c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.chips ) return;
+		if ( (hnd.chips != c) && !c.prevchip && !c.nextchip ) return;
+		hnd.chips_cnt--;
+		if ( !c.prevchip ) hnd.chips = c.nextchip;
+		else c.prevchip.nextchip = c.nextchip;
+		if ( c == hnd.chips_end ) hnd.chips_end = c.prevchip;
+		if ( c.nextchip ) c.nextchip.prevchip = c.prevchip;
+		c.killme = true;
+		c.prevchip = null;
+		c.nextchip = null;
+	}
 
 	static void HealthFlash( int p )
 	{
@@ -558,7 +598,7 @@ Class SWWMHandler : EventHandler
 		// initialize some player vars
 		if ( p.mo is 'Demolitionist' )
 		{
-			Demolitionist(p.mo).dashfuel = 240.;
+			Demolitionist(p.mo).dashfuel = Demolitionist(p.mo).default.dashfuel;
 			Demolitionist(p.mo).last_boost = 0;
 			Demolitionist(p.mo).last_kick = 0;
 		}
@@ -620,6 +660,18 @@ Class SWWMHandler : EventHandler
 		}
 		curlang = lang.GetString();
 		curfuntags = funtags.GetBool();
+		if ( swwm_maxcasings != oldmaxcasings )
+		{
+			while ( casings && (swwm_maxcasings >= 0) && (casings_cnt > swwm_maxcasings) )
+				DeQueueCasing(casings);
+		}
+		if ( swwm_maxdebris != oldmaxdebris )
+		{
+			while ( chips && (swwm_maxdebris >= 0) && (chips_cnt > swwm_maxdebris) )
+				DeQueueChip(chips);
+		}
+		oldmaxcasings = swwm_maxcasings;
+		oldmaxdebris = swwm_maxdebris;
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( onelinertic && (onelinertic < gametic) )
 		{
@@ -1696,8 +1748,8 @@ Class SWWMHandler : EventHandler
 			vel += demo.dashdir*baumpu;
 			double spd = vel.length();
 			Vector3 worlddir = vel/spd;
-			Shader.SetUniform1f(p,"ZoomBlur","Fade",clamp((spd-20.)/60.,0.,.75));
-			double str = min(spd/50.,10.);
+			Shader.SetUniform1f(p,"ZoomBlur","Fade",clamp((spd-20.)/60.,0.,1.));
+			double str = min(spd/40.,15.);
 			Vector3 x, y, z;
 			[x, y, z] = swwm_CoordUtil.GetAxes(e.ViewPitch,e.ViewAngle,e.ViewRoll);
 			Vector3 reldir = (worlddir dot y, worlddir dot z, worlddir dot x);

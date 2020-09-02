@@ -141,7 +141,11 @@ Class mkBloodDrop : Actor
 				SetZ(floorz);
 				UpdateWaterLevel(false);
 			}
-			if ( waterlevel > 0 ) A_FadeOut();
+			if ( (waterlevel > 0) || GetFloorTerrain().isliquid )
+			{
+				scale *= 1.005;
+				A_FadeOut(.01);
+			}
 			return;	// we don't need to update states when we're dead
 		}
 		else
@@ -345,11 +349,6 @@ Class mkFlyingGib : Actor
 	{
 		Super.Tick();
 		if ( isFrozen() ) return;
-		if ( bleeding && !Random[Blood](0,3) )
-		{
-			let s = Spawn("mkBloodSmoke",pos);
-			s.SetShade(shadecol);
-		}
 		if ( killme ) A_FadeOut(.01);
 		if ( CurState == ResolveState("Death2") )
 		{
@@ -361,8 +360,13 @@ Class mkFlyingGib : Actor
 		if ( waterlevel > 0 )
 		{
 			rollvel *= .98;
-			vel *= .98;
-			if ( vel.length() < 10. ) A_FadeOut(.01);
+			vel.xy *= .98;
+			return;
+		}
+		if ( bleeding && !Random[Blood](0,3) )
+		{
+			let s = Spawn("mkBloodSmoke",pos);
+			s.SetShade(shadecol);
 		}
 	}
 
@@ -585,9 +589,9 @@ Class CorpseFallTracker : Thinker
 Class SWWMGoreHandler : EventHandler
 {
 	mkBloodDrop blods, blods_end;
-	int blods_cnt;
+	int blods_cnt, oldmaxblood;
 	mkFlyingGib meats, meats_end;
-	int meats_cnt;
+	int meats_cnt, oldmaxgibs;
 
 	override void WorldLoaded( WorldEvent e )
 	{
@@ -615,7 +619,7 @@ Class SWWMGoreHandler : EventHandler
 			b.prevblod = hnd.blods_end;
 			hnd.blods_end = b;
 		}
-		while ( hnd.blods && (hnd.blods_cnt > swwm_maxblood) )
+		while ( hnd.blods && (swwm_maxblood >= 0) && (hnd.blods_cnt > swwm_maxblood) )
 			DeQueueBlod(hnd.blods);
 	}
 	static void DeQueueBlod( mkBloodDrop b )
@@ -649,7 +653,7 @@ Class SWWMGoreHandler : EventHandler
 			m.prevmeat = hnd.meats_end;
 			hnd.meats_end = m;
 		}
-		while ( hnd.meats && (hnd.meats_cnt > swwm_maxgibs) )
+		while ( hnd.meats && (swwm_maxgibs >= 0) && (hnd.meats_cnt > swwm_maxgibs) )
 			DeQueueMeat(hnd.meats);
 	}
 	static void DeQueueMeat( mkFlyingGib m )
@@ -665,6 +669,22 @@ Class SWWMGoreHandler : EventHandler
 		m.killme = true;
 		m.prevmeat = null;
 		m.nextmeat = null;
+	}
+
+	override void WorldTick()
+	{
+		if ( swwm_maxblood != oldmaxblood )
+		{
+			while ( blods && (swwm_maxblood >= 0) && (blods_cnt > swwm_maxblood) )
+				DeQueueBlod(blods);
+		}
+		if ( swwm_maxgibs != oldmaxgibs )
+		{
+			while ( meats && (swwm_maxgibs >= 0) && (meats_cnt > swwm_maxgibs) )
+				DeQueueMeat(meats);
+		}
+		oldmaxblood = swwm_maxblood;
+		oldmaxgibs = swwm_maxgibs;
 	}
 
 	override void CheckReplacement( ReplaceEvent e )

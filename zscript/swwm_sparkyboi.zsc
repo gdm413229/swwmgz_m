@@ -1206,6 +1206,8 @@ Class BiosparkBeam : Actor
 			s.specialf2 = FRandom[ExploS](.02,.04);
 			s.roll = FRandom[ExploS](0,360);
 		}
+		A_StartSound("biospark/zap",CHAN_WEAPON,0,.5,.7);
+		let p = Spawn("SparkBeamLight",level.Vec3Offset(pos,tdir/2));
 		if ( bAMBUSH ) return;
 		let b = Spawn(GetClass(),invoker.nextpos);
 		b.frame = 1;
@@ -1213,8 +1215,6 @@ Class BiosparkBeam : Actor
 		b.pitch = asin(-invoker.nextdir.z);
 		b.target = target;
 		b.special1 = special1+1;
-		A_StartSound("biospark/zap",CHAN_WEAPON,0,.5,.7);
-		let p = Spawn("SparkBeamLight",level.Vec3Offset(pos,tdir/2));
 	}
 
 	action void A_Fade()
@@ -1863,11 +1863,11 @@ Class BiosparkCore : Actor
 			pitch += invoker.pitchvel;
 			roll += invoker.rollvel;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.1,.4);
-			let s = Spawn("SWWMSmallSmoke",pos);
-			s.vel = pvel+vel*.5;
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = pvel+vel*.1;
 			s.SetShade(Color(4,5,2)*Random[ExploS](40,50));
 			s.A_SetRenderStyle(s.alpha*.4,STYLE_AddShaded);
-			s.scale *= 4.;
+			s.scale *= 2.;
 			s.bAMBUSH = true;
 		}
 		Wait;

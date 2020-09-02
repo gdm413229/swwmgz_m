@@ -52,8 +52,12 @@ Class Demolitionist : PlayerPawn
 	Actor oldencroached;
 	Vector3 oldencroachedpos;
 
+	Vector3 pretelepos;
+
 	SWWMItemSense itemsense;
 	int itemsense_cnt;
+
+	Property DashFuel : dashfuel;
 
 	Default
 	{
@@ -73,6 +77,7 @@ Class Demolitionist : PlayerPawn
 		DamageFactor "Poison", 0.0;
 		DamageFactor "PoisonCloud", 0.0;
 		DamageFactor "Falling", 0.0;
+		Demolitionist.DashFuel 240.;
 		+NOBLOOD;
 		+DONTGIB;
 		+NOICEDEATH;
@@ -276,10 +281,8 @@ Class Demolitionist : PlayerPawn
 		}
 		// preloaded gun
 		let dp = DeepImpact(FindInventory("DeepImpact"));
-		if ( dp ) SWWMLoreLibrary.Add(player,"DeepImpact");
 		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
 		if ( !eg ) return;
-		SWWMLoreLibrary.Add(player,"ExplodiumGun");
 		eg.clipcount = 7;
 		eg.chambered = true;
 	}
@@ -611,7 +614,7 @@ Class Demolitionist : PlayerPawn
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
-			dashfuel = min(240.,dashfuel+max(dashfuel*.015,.1));
+			dashfuel = min(default.dashfuel,dashfuel+max(dashfuel*.015,.1));
 		if ( (dashboost > 0.) && (InStateSequence(CurState,FindState("Dash")) || (InStateSequence(CurState,FindState("Jump")) && player.cmd.buttons&BT_JUMP)) )
 			dashsnd = true;
 		else
@@ -1100,8 +1103,6 @@ Class Demolitionist : PlayerPawn
 			}
 			else if ( (player.cmd.buttons&BT_USE) && (deadtimer > 120) )
 			{
-				// gross hackfix for library "vanishing"
-				SWWMExcuseMeWhatTheFuckHandler.ThisIsSomeSeriousBullshit();
 				// reload save
 				player.cls = null;
 				player.playerstate = PST_ENTER;
@@ -1547,6 +1548,62 @@ Class Demolitionist : PlayerPawn
 		// we need the crouch button state to be preserved for other functions
 		if ( wascrouching ) player.cmd.buttons |= BT_CROUCH;
 	}
+	/* // requires PR #1169
+	override void Travelled()
+	{
+		// reinitialize
+		dashfuel = default.dashfuel;
+		last_boost = 0;
+		last_kick = 0;
+		// cancel dash/boost
+		A_StopSound(CHAN_JETPACK);
+		fuelcooldown = 0.;
+		dashcooldown = 0.;
+		dashboost = 0.;
+		dashsnd = false;
+		// prevent sudden stomping if we were previously falling
+		lastvelz = vel.z;
+		// early cancel gestures
+		if ( player && (player.ReadyWeapon is 'SWWMGesture') )
+		{
+			player.PendingWeapon = SWWMGesture(player.ReadyWeapon).formerweapon;
+			player.SetPSprite(PSP_WEAPON,player.ReadyWeapon.ResolveState("Deselect"));
+		}
+	}
+	*/
+	/* // requires PR #1173
+	override bool PreTeleport( Vector3 destpos, double destangle, int flags )
+	{
+		// store old pos
+		pretelepos = pos;
+		return true;
+	}
+	override void PostTeleport( Vector3 destpos, double destangle, int flags )
+	{
+		// subtract travel distance from the stats, and add it to a separate stat
+		double traveldist = level.Vec3Diff(pretelepos,pos).length();
+		if ( waterlevel < 2 )
+		{
+			if ( !player.onground || bNoGravity )
+				mystats.airdist -= traveldist;
+			else mystats.grounddist -= traveldist;
+		}
+		else mystats.swimdist -= traveldist;
+		mystats.teledist += traveldist;
+		// reset all smooth bob variables if angles/velocity aren't carried over
+		if ( !(flags&TELF_KEEPORIENTATION) )
+		{
+			oldlagangle = lagangle = oldangle = angle;
+			oldlagpitch = lagpitch = oldpitch = pitch;
+		}
+		if ( !(flags&TELF_KEEPVELOCITY) )
+			oldlagvel = lagvel = vel;
+		// notify carried lamp that we just moved
+		let l = SWWMLamp(FindInventory("SWWMLamp"));
+		if ( l && l.thelamp )
+			CompanionLamp(l.thelamp).justteleport = true;
+	}
+	*/
 	States
 	{
 	Spawn:

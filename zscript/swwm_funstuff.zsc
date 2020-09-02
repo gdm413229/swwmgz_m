@@ -459,7 +459,7 @@ Class Chancebox : Actor
 	{
 		A_StartSound("misc/tada",CHAN_ITEM);
 		double ang, pt;
-		int numpt = Random[ExploS](64,128);
+		int numpt = Random[ExploS](100,120);
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[ExploS](0,360);
@@ -480,6 +480,8 @@ Class Chancebox : Actor
 		Height 32;
 		+MOVEWITHSECTOR;
 		+ROLLSPRITE;
+		+SOLID;
+		Species "Chancebox";
 	}
 	States
 	{
@@ -530,7 +532,9 @@ Class ChanceboxTop : Actor
 	{
 		Radius 16;
 		Height 4;
+		Species "Chancebox";
 		PROJECTILE;
+		+THRUSPECIES;
 	}
 	override void PostBeginPlay()
 	{
@@ -563,7 +567,9 @@ Class ChanceboxSide : Actor
 	{
 		Radius 16;
 		Height 32;
+		Species "Chancebox";
 		PROJECTILE;
+		+THRUSPECIES;
 	}
 	override void PostBeginPlay()
 	{

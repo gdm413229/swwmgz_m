@@ -1,6 +1,5 @@
 // various stat tracking thinkers and others
 
-
 // Stats
 Class WeaponUsage
 {
@@ -31,7 +30,7 @@ Class SWWMStats : Thinker
 		deaths,	damagedealt, hdamagedealt, damagetaken, hdamagetaken,
 		mkill, hiscore, hhiscore, topdealt, toptaken, skill, wponch,
 		busts;
-	double grounddist, airdist, swimdist, fuelusage, topspeed;
+	double grounddist, airdist, swimdist, fuelusage, topspeed, teledist;
 	Array<WeaponUsage> wstats;
 	Array<MonsterKill> mstats;
 	Array<LevelStat> lstats;
@@ -334,12 +333,21 @@ Class SWWMLoreLibrary : Thinker
 		{
 			if ( ref ~== "Cronos" ) return true;
 			if ( ref ~== "Kirin" ) return true;	// not met
-			if ( ref ~== "AmmoFabricator" ) return true;	// not yet introduced
+			if ( ref ~== "Fabricator" ) return true;	// not yet introduced
 		}
 		if ( !(gameinfo.gametype&GAME_Strife) )
 		{
 			if ( ref ~== "TheOrder" ) return true;
 			if ( ref ~== "TheFront" ) return true;
+		}
+		// check if entry is for a collectable
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let c = (Class<SWWMCollectable>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectable') ) continue;
+			let def = GetDefaultByType(c);
+			// skip if we match and it's not for this game
+			if ( (c.GetClassName() != ref) && !(gameinfo.gametype&def.avail) ) return true;
 		}
 		ref = ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
@@ -457,8 +465,6 @@ Class SWWMLoreLibrary : Thinker
 
 	static void Add( PlayerInfo p, String ref )
 	{
-		// ignore this call on player rebirth, otherwise a new thinker will be created when the player calls GiveDefaultInventory
-		if ( SWWMExcuseMeWhatTheFuckHandler.WhyTheFuckIsThisAThing() ) return;
 		SWWMLoreLibrary ll = Find(p);
 		if ( !ll )
 		{

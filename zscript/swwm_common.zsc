@@ -348,7 +348,8 @@ Class SWWMSpark : Actor
 
 Class SWWMChip : Actor
 {
-	int deadtimer;
+	SWWMChip prevchip, nextchip;
+	bool killme;
 	double rollvel;
 
 	Default
@@ -374,20 +375,25 @@ Class SWWMChip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		deadtimer = Random[Junk](-30,30);
 		rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		frame = Random[Junk](0,5);
 		scale *= Frandom[Junk](0.8,1.2);
+		SWWMHandler.QueueChip(self);
+	}
+	override void OnDestroy()
+	{
+		SWWMHandler.DeQueueChip(self);
+		Super.OnDestroy();
 	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( isFrozen() ) return;
-		if ( CurState == ResolveState("Death") )
+		if ( killme ) A_FadeOut(.01);
+		if ( waterlevel > 0 )
 		{
-			deadtimer++;
-			if ( deadtimer > 300 ) A_FadeOut(0.05);
-			return;
+			vel.xy *= .98;
+			rollvel *= .98;
 		}
 	}
 	States

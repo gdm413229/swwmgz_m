@@ -624,7 +624,7 @@ Class SilverBullet : SWWMWeapon
 	{
 		if ( (chambered && !fired) || (clipcount > 0) ) return true;
 		if ( (Ammo1.Amount <= 0) && (Ammo2.Amount <= 0) && (CountInv("SilverBullets") <= 0) && (CountInv("SilverBullets2") <= 0) ) return false;
-		return Super.ReportHUDAmmo();
+		return true;
 	}
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
 	{

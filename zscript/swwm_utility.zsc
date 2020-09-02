@@ -661,7 +661,7 @@ Class SWWMUtility
 			// hit it
 			int dmg = int(Damage*damagescale);
 			if ( dmg <= 0 ) continue;	// no harm
-			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType!='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
+			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
 			if ( !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
 		}
 		// TODO destructible geometry support

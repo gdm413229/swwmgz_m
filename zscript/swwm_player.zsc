@@ -657,7 +657,7 @@ Class Demolitionist : PlayerPawn
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
-				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5)) )
+				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5)) && a.bSOLID )
 				{
 					if ( bumped ) continue;
 					bumped = true;

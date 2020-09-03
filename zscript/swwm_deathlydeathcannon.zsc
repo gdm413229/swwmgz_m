@@ -65,8 +65,9 @@ Class IDontFeelSoGood : Thinker
 {
 	Actor goner;
 	int cnt;
+	bool silence;
 
-	static void DeletThis( Actor whomst )
+	static void DeletThis( Actor whomst, bool silence = false )
 	{
 		if ( !whomst || (whomst.Health > 0) ) return;
 		let ti = ThinkerIterator.Create("IDontFeelSoGood",STAT_USER);
@@ -76,6 +77,7 @@ Class IDontFeelSoGood : Thinker
 		i = new("IDontFeelSoGood");
 		i.ChangeStatNum(STAT_USER);
 		i.goner = whomst;
+		i.silence = silence;
 	}
 
 	override void Tick()
@@ -92,6 +94,7 @@ Class IDontFeelSoGood : Thinker
 			Destroy();
 			return;
 		}
+		if ( silence ) goner.A_StopAllSounds();
 		// special handling for some bosses:
 		// - D'Sparil does not spawn, he's already gone
 		// - Korax doesn't leave ghosts
@@ -1046,13 +1049,13 @@ Class YnykronHalo : Actor
 	override void Tick()
 	{
 		if ( isFrozen() ) return;
-		if ( !target )
+		if ( !target || target.InStateSequence(target.CurState,target.FindState("Death")) )
 		{
 			Destroy();
 			return;
 		}
 		SetOrigin(target.pos,true);
-		Scale = 1.5*target.Scale;
+		A_SetScale(1.5*target.scale.x);
 	}
 	States
 	{
@@ -1080,42 +1083,42 @@ Class GatherDust : Actor
 	override void PostBeginPlay()
 	{
 		SetState(FindState("Spawn")+Random[ExploS](0,19));
-		Scale *= FRandom[ExploS](.8,1.2);
+		Scale *= FRandom[ExploS](.75,1.5);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
 	}
 
 	void A_Gravitate()
 	{
-		if ( target )
+		if ( target && !target.InStateSequence(target.CurState,target.FindState("Death")) )
 		{
-			if ( alpha < .02 ) A_FadeIn(.001);
+			if ( alpha < .02 ) A_FadeIn(FRandom[ExploS](.0002,.001));
 			Vector3 dirto = level.Vec3Diff(pos,target.pos);
 			double distto = dirto.length();
 			if ( distto < (32.*target.scale.x) )
 			{
 				// sucked in
-				target.specialf1 += .00001;
+				target.specialf2 += 1.;
 				Destroy();
 				return;
 			}
 			dirto /= distto;
-			vel = dirto*8.*(clamp((1200.-distto)/1200.,0.,1.)**3.);
+			double mxdist = 5000.*target.scale.x;
+			vel = dirto*16.*(clamp((mxdist-distto)/mxdist,.5,1.)**3.);
+			vel += target.vel;
+			return;
 		}
-		else
-		{
-			vel *= .98;
-			A_FadeOut(.001);
-		}
+		vel *= .98;
+		A_FadeOut(.001);
 	}
 
 	Default
 	{
 		RenderStyle "Shaded";
-		StencilColor "White";
+		StencilColor "f8 a0 ff";
 		Radius .1;
 		Height 0.;
-		Alpha .001;
+		Alpha 0.;
 		Scale 2.;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
@@ -1138,30 +1141,40 @@ Class YnykronVoidBeam : Actor
 	Actor basebeam, prevbeam, nextbeam;
 	YnykronTracer t;
 	double baseang, basept;
+	int angledir, pitchdir;
+	int maxlen, curlen, segnum;
+	int spreadtimer;
+	int maxlife, lifetimer;
 
 	Default
 	{
+		DamageType 'YnykronAlt';
+		Obituary "$O_YNYKRONALT";
 		RenderStyle "Add";
 		Radius .1;
 		Height 0.;
+		Alpha 0.;
+		Stamina 3;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 		+INTERPOLATEANGLES;
+		+NODAMAGETHRUST;
+		+FOILINVUL;
 	}
 
 	override void PostBeginPlay()
 	{
 		angle = baseang = FRandom[Ynykron](0,360);
 		pitch = basept = FRandom[Ynykron](-90,90);
-		Args[0] = RandomPick[Ynykron](-1,1);
-		Args[1] = RandomPick[Ynykron](-1,1);
-		Args[2] = Random[Ynykron](40,80);
-		Scale *= FRandom[Ynykron](.5,1.5);
-		Alpha = .01;
-		Special2 = -1;
+		angledir = RandomPick[Ynykron](-1,1);
+		pitchdir = RandomPick[Ynykron](-1,1);
+		maxlen = Random[Ynykron](40,60);
+		maxlife = Random[Ynykron](20,30);
+		Scale *= FRandom[Ynykron](.75,1.5);
+		lifetimer = -1;
 	}
 
 	void A_UpdateBeam()
@@ -1173,8 +1186,8 @@ Class YnykronVoidBeam : Actor
 		}
 		if ( basebeam == self )
 		{
-			baseang += FRandom[Ynykron](0.,2.)*Args[0];
-			basept += FRandom[Ynykron](0.,2.)*Args[1];
+			baseang += FRandom[Ynykron](0.,5.)*angledir;
+			basept += FRandom[Ynykron](0.,5.)*pitchdir;
 			Vector3 ofs = master.scale.x*32.*(cos(baseang)*cos(basept),sin(baseang)*cos(basept),-sin(basept));
 			SetOrigin(level.Vec3Offset(master.pos,ofs),true);
 			double da = deltaangle(angle,baseang+FRandom[Ynykron](-5,5)),
@@ -1197,25 +1210,25 @@ Class YnykronVoidBeam : Actor
 				closest = dist;
 				tracer = a;
 			}
-			if ( special2 == -1 )
+			if ( lifetimer == -1 )
 			{
-				A_FadeIn(FRandom[Ynykron](.003,.03));
+				A_FadeIn(FRandom[Ynykron](.003,.05));
 				if ( Alpha >= .2 )
 				{
 					Alpha = .2;
-					special2 = 0;
+					lifetimer = 0;
 				}
 			}
-			else if ( special2 == -2 ) A_FadeOut(FRandom[Ynykron](.003,.03));
+			else if ( lifetimer == -2 ) A_FadeOut(FRandom[Ynykron](.003,.05));
 			else
 			{
-				special2++;
-				if ( special2 > 30 ) special2 = -2;
+				lifetimer++;
+				if ( lifetimer > maxlife ) lifetimer = -2;
 			}
 			// check total length
 			int cnt = 0;
 			for ( YnykronVoidBeam b=self; b; b=YnykronVoidBeam(b.nextbeam) ) cnt++;
-			Args[4] = cnt;
+			curlen = cnt;
 		}
 		else if ( !prevbeam )
 		{
@@ -1236,11 +1249,15 @@ Class YnykronVoidBeam : Actor
 		}
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
-			// TODO pull in actors we hit
+			// yoink
+			SWWMUtility.DoKnockback(t.HitList[i].HitActor,-t.HitList[i].x,80000*scale.x*alpha);
 		}
-		Args[3]++;
-		if ( (t.Results.HitType != TRACE_HitNone) || (special1 > Args[2]) || (Args[3] < 3) )
+		spreadtimer++;
+		if ( (t.Results.HitType != TRACE_HitNone) || (segnum > maxlen) || (spreadtimer < stamina) )
 		{
+			// trigger walls
+			if ( t.Results.HitType == TRACE_HitWall )
+				t.Results.HitLine.RemoteActivate(target,t.Results.Side,SPAC_Impact,t.Results.HitPos);
 			// end of the line
 			if ( nextbeam ) nextbeam.Destroy();
 			if ( basebeam == self ) frame = 3;
@@ -1263,11 +1280,9 @@ Class YnykronVoidBeam : Actor
 			nextbeam.tracer = tracer;
 			YnykronVoidBeam(nextbeam).basebeam = basebeam;
 			YnykronVoidBeam(nextbeam).prevbeam = self;
-			nextbeam.Args[2] = Args[2];
-			nextbeam.special1 = special1+1;
-			// somehow this can happen???????
-			if ( basebeam ) nextbeam.alpha = alpha*(1.-(special1/double(basebeam.Args[4])));
-			else nextbeam.alpha = alpha;
+			YnykronVoidBeam(nextbeam).maxlen = maxlen;
+			YnykronVoidBeam(nextbeam).segnum = segnum+1;
+			nextbeam.alpha = alpha*(1.-(segnum/double(maxlen)));
 			nextbeam.scale = scale;
 			nextbeam.frame = 1;
 			Vector3 newdir = t.Results.HitVector;
@@ -1276,7 +1291,7 @@ Class YnykronVoidBeam : Actor
 			{
 				Vector3 dirto = level.Vec3Diff(nextbeam.pos,tracer.Vec3Offset(0,0,tracer.Height/2));
 				dirto /= dirto.length();
-				newdir = (newdir+dirto*FRandom[Ynykron](0.,.3)).unit();
+				newdir = (newdir+dirto*FRandom[Ynykron](0.,.5)).unit();
 			}
 			double da = deltaangle(nextbeam.angle,atan2(newdir.y,newdir.x)),
 				dp = deltaangle(nextbeam.pitch,asin(-newdir.z));
@@ -1300,7 +1315,7 @@ Class YnykronVoidBeam : Actor
 	States
 	{
 	Spawn:
-		XZW1 # 1 A_UpdateBeam();
+		XZW1 # 1 Bright A_UpdateBeam();
 		Wait;
 	}
 }
@@ -1309,19 +1324,31 @@ Class YnykronSingularity : Actor
 {
 	Actor beamers[16];
 
+	const MION_CONST = 48538.;	// miön v-force compression constant (approximate)
+	const YNON_CONST = .063738;	// ÿnon v-force field constant (approximate)
+	const AXAN_CONST = 29.2761;	// axan u-force field constant (approximate)
+	const GOAL_MASS = 26741.;	// mass required to compensate Ynykron altfire negative energy release (-2.4×10¹⁵ J, approximately)
+
+	double critmass;	// actual mass required (cummulative with absorbed vortices)
+
 	override void PostBeginPlay()
 	{
 		let g = Spawn("YnykronHalo",pos);
 		g.target = self;
-		A_StartSound("ynykron/vortex",CHAN_BODY,CHANF_LOOP,1.,1.5);
+		A_StartSound("ynykron/vortex",CHAN_BODY,CHANF_LOOP);
+		// initial mass and radius
 		specialf1 = scale.x;
+		specialf2 = scale.x*scale.x*MION_CONST;
+		critmass = GOAL_MASS;
 	}
 
 	// lightweight tick, we don't need anything else other than states
 	override void Tick()
 	{
 		if ( isFrozen() ) return;
-		SetOrigin(level.Vec3Offset(pos,vel),true);
+		Vector3 newpos = level.Vec3Offset(pos,vel);
+		if ( level.IsPointInLevel(newpos) )
+			SetOrigin(newpos,true);
 		if ( !CheckNoDelay() || (tics == -1) ) return;
 		if ( tics > 0 ) tics--;
 		while ( !tics )
@@ -1331,16 +1358,24 @@ Class YnykronSingularity : Actor
 		}
 	}
 
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( mod == 'Ynykron' )
+			return StringTable.Localize("$O_YNYKRON");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+
 	void A_SingularityTick()
 	{
 		// gather dust particles (very minor "background" mass gain)
-		for ( int i=0; i<8; i++ )
+		int numpt = int(max(2,16*scale.x));
+		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
 			double pt = FRandom[ExploS](-90,90);
 			FLineTraceData d;
-			double dst = FRandom[ExploS](800,1200);
-			LineTrace(ang,dst*scale.x,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d);
+			double dst = FRandom[ExploS](1500,2000)*scale.x;
+			LineTrace(ang,dst,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d);
 			Vector3 norm;
 			if ( d.HitType == TRACE_HitWall )
 			{
@@ -1361,8 +1396,7 @@ Class YnykronSingularity : Actor
 			let gd = Spawn("GatherDust",level.Vec3Offset(d.HitLocation,norm*8));
 			gd.target = self;
 		}
-		// TODO storm clouds
-		// TODO lightning
+		// TODO storm clouds and lightning
 		// ol' crazy purple beams from original
 		for ( int i=0; i<16; i++ )
 		{
@@ -1372,16 +1406,67 @@ Class YnykronSingularity : Actor
 			beamers[i].target = target;
 			beamers[i].master = self;
 		}
-		// TODO suck in reachable targets (w/ radiation dmg)
-		// TODO accrue mass (w/ extra gravity damage)
+		// suck in reachable targets
+		let bi = BlockThingsIterator.Create(self,20000*scale.x);
+		while ( bi.Next() )
+		{
+			let a = bi.Thing;
+			if ( !a || (a == self) || (!a.bSHOOTABLE && !(a is 'YnykronSingularity')) || !SWWMUtility.SphereIntersect(a,pos,20000.*scale.x) || !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+				continue;
+			if ( a.player && (a.player.cheats&CF_NOCLIP2) )	// for safety
+				continue;
+			double capmass = a.mass;
+			// succ
+			if ( SWWMUtility.SphereIntersect(a,pos,32.*scale.x) )
+			{
+				// merge with other vortices
+				if ( a is 'YnykronSingularity' )
+				{
+					critmass += YnykronSingularity(a).critmass;
+					specialf2 += a.specialf2;
+					a.Destroy();
+					continue;
+				}
+				// voodoo dolls just get erased (how convenient)
+				// otherwise instantly vaporize the fucker
+				if ( a.player && (a.player.mo != a) ) a.Destroy();
+				else a.DamageMobj(self,a,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+				if ( a && (a.Health <= 0) )
+				{
+					if ( a.player ) PlayerGone.FeckOff(a);
+					// poof away, always
+					a.bINVISIBLE = true;
+					a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+					IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
+				}
+				if ( !a || (a.Health <= 0) )
+					specialf2 += capmass;
+				continue;
+			}
+			capmass = max(50.,a.mass);
+			Vector3 dirto = level.Vec3Diff(a.Vec3Offset(0,0,a.Height/2),pos);
+			double dist = dirto.length();
+			dirto /= dist;
+			// weak gravitational force as per v-field (approximate)
+			double grav = (3.*YNON_CONST*specialf2*capmass)/(dist**.5);
+			// strong gravitational force as per u-field (approximate)
+			grav += (4.*AXAN_CONST*specialf2*capmass)/(dist**2.);
+			if ( a.mass < LARGE_MASS )
+			{
+				// v-force field compression (very rough approximation)
+				a.vel *= max(0.,1.-.0002*(grav*grav)/(MION_CONST*MION_CONST));
+				a.vel += dirto*grav/(capmass*TICRATE);
+			}
+		}
 		// push away from nearby geometry
+		double pushdist = 50+32*scale.x;
 		for ( int i=0; i<8; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
 			double pt = FRandom[ExploS](-90,90);
 			FLineTraceData d;
-			if ( !LineTrace(ang,80*scale.x,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d) ) continue;
-			double mag = (80.*scale.x)-d.Distance;
+			if ( !LineTrace(ang,pushdist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d) ) continue;
+			double mag = pushdist-d.Distance;
 			vel -= (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*.02*mag;
 		}
 		double magvel = vel.length();
@@ -1389,40 +1474,83 @@ Class YnykronSingularity : Actor
 		if ( magvel <= double.epsilon ) dir = (cos(angle)*cos(pitch),sin(angle)+cos(pitch),-sin(pitch));
 		else dir = vel/magvel;
 		// wander
-		dir = (dir+(FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1))*FRandom[Ynykron](.05,.1)).unit();
+		dir = (dir+(FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1))*FRandom[Ynykron](.05,.2)).unit();
 		magvel *= .93;
-		if ( magvel > 5. ) magvel = 5.;
+		if ( magvel > 5. ) magvel *= .95;
+		if ( magvel > 20. ) magvel *= .65;
 		if ( magvel < .1 ) magvel = .1;
 		vel = magvel*dir;
+		// calculate target scale based on radius of event horizon
+		specialf1 = (specialf2/MION_CONST)**.5;
 		// shift to target scale
 		// hopefully this supports interpolation someday
 		double diffscale = specialf1-scale.x;
 		if ( abs(diffscale) <= .01 ) A_SetScale(specialf1);
 		else A_SetScale(scale.x+diffscale*.3);
+		// detonate if we reach critical mass
+		if ( specialf2 >= critmass )
+			SetStateLabel("Death");
 	}
 
 	void A_SingularityBlast()
 	{
+		Console.Printf("// TODO explosion goes here");
+		A_StopSound(CHAN_BODY);
+		A_StartSound("ynykron/vortexend",CHAN_VOICE,attenuation:0.);
+		vel *= 0;
+		// kill off and detach any leftover beams
+		for ( int i=0; i<16; i++ )
+		{
+			if ( !beamers[i] ) continue;
+			YnykronVoidBeam(beamers[i]).maxlife = 0;
+			beamers[i] = null;
+		}
 	}
 	void A_SingularityExtraBlast()
 	{
+		special1++;
+		if ( special1 > 80 )
+		{
+			if ( IsActorPlayingSound(CHAN_VOICE) ) return;
+			for ( int i=0; i<16; i++ ) if ( beamers[i] ) return;
+			Destroy();
+			return;
+		}
+		for ( int i=0; i<16; i++ )
+		{
+			if ( beamers[i] )
+			{
+				YnykronVoidBeam(beamers[i]).maxlife = 0;
+				continue;
+			}
+			beamers[i] = Spawn("YnykronVoidBeam",pos);
+			YnykronVoidBeam(beamers[i]).basebeam = beamers[i];
+			beamers[i].target = target;
+			beamers[i].master = self;
+			beamers[i].stamina = 1;
+			beamers[i].scale *= scale.x*10.;
+		}
+		scale.x *= .97;
 	}
 
 	Default
 	{
+		DamageType 'YnykronAlt';
+		Obituary "$O_YNYKRONALT";
 		+NOGRAVITY;
+		+MISSILE;
+		+DROPOFF;
 		+DONTSPLASH;
 		+NOTELEPORT;
-		+NOBLOCKMAP;
 		+NOINTERACTION;
 		Radius .1;
 		Height 0.;
-		Scale .2;
+		Scale .4;
 	}
 	States
 	{
 	Spawn:
-		XZW1 A 1 A_SingularityTick();
+		XZW1 A 1 BRIGHT A_SingularityTick();
 		Wait;
 	Death:
 		TNT1 A 0 A_SingularityBlast();

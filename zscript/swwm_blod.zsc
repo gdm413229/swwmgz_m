@@ -721,8 +721,7 @@ Class SWWMGoreHandler : EventHandler
 	{
 		if ( e.Thing.Health > 0 ) return;
 		// no gib if it was erased
-		if ( e.DamageType == 'YnykronDeath' || e.DamageType == 'YnykronAltDeath' )
-			return;
+		if ( e.DamageType == 'Ynykron' ) return;
 		// only do special handling if they use our blood
 		if ( (e.Thing.GetBloodType(0) != "mkBlood") || e.Thing.bNOBLOOD )
 			return;

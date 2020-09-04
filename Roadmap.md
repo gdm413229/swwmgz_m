@@ -1,21 +1,20 @@
 *Swimming in Jizz*:
  - This is where I make all the stuff before beta.
- - It's been over six months already, still a shorter dev time than my previous
-   projects.
+ - It's been over nine months already, still a shorter dev time than my
+   previous projects.
 
 *Icarus pls play*:
  - Beta release.
  - Finetuning the basics, rebalances, etc.
  - See if I can add those damn swimming anims.
  - Beg more artists for intermission fanart.
- - Stuff to maybe add during this stage: Explodium Guns akimbo, Quick grenade,
-   Mag refill system.
+ - Stuff to maybe add during this stage: Explodium Guns akimbo, Quick grenade.
+ - Collectables. Froggy Chair was only the beginning.
 
 *Cutie Robutt Adventures*:
  - Going Gold™.
  - Think about the future. There are lots of things I could do now (see
    FuturePlans.md).
- - Collectables. Froggy Chair was only the beginning.
  - Maybe try to do the fancy titlemap now, mod trailer, etc.
 
 *Extra Funtimes*:
@@ -40,4 +39,3 @@
 
 *At this point I'm just making shit up*:
  - Official comic.
- - Official merch.

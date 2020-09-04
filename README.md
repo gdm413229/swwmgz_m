@@ -304,6 +304,7 @@ Can handle a total of 150 damage points before breaking.
 ![](docimg/wararmor.png)
 
 Decent armor, protects very well against all damage. Reduction factors are as follows:
+
  * 80% reduction for elemental (fire, ice, electric, etc.)
  * 50% reduction to everything else
  * 70% reduction for all splash damage (multiplicative on top of the other two)

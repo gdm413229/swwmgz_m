@@ -44,7 +44,7 @@ All weapons also have a quick melee attack using the **Weapon State 1** button, 
 
 If a weapon has no actions on either the reload or zoom buttons, it may be replaced with some special idle action, such as spinning or fiddling around with it.
 
-For now the, following are all weapons planned for the first release. More will be added afterwards (until then I'll tease you with some empty ZScript files :P).
+For now, the following are all weapons planned for the first release. More will be added afterwards (until then I'll tease you with some empty ZScript files :P).
 
 ### Deep Impact (slot 1) ~ Replaces Fist, Staff, Hexen starting weapons
 ![](docimg/deepimpact.png)

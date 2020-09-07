@@ -623,7 +623,7 @@ Class SilverBullet : SWWMWeapon
 	override bool ReportHUDAmmo()
 	{
 		if ( (chambered && !fired) || (clipcount > 0) ) return true;
-		if ( (Ammo1.Amount <= 0) && (Ammo2.Amount <= 0) && (CountInv("SilverBullets") <= 0) && (CountInv("SilverBullets2") <= 0) ) return false;
+		if ( (Ammo1.Amount <= 0) && (Ammo2.Amount <= 0) && (Owner.CountInv("SilverBullets") <= 0) && (Owner.CountInv("SilverBullets2") <= 0) ) return false;
 		return true;
 	}
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
@@ -634,7 +634,7 @@ Class SilverBullet : SWWMWeapon
 			// allow player to still use the zoom even if there's no ammo left
 			// (should work fine, assuming I've correctly interpreted the execution chain of all this stuff)
 			if ( autoswitch && (fireMode == AltFire) ) return true;
-			return ((chambered && !fired) || (clipcount > 0) || (Ammo1.Amount > 0) || (Ammo2.Amount > 0) || (CountInv("SilverBullets") > 0) || (CountInv("SilverBullets2") > 0));
+			return ((chambered && !fired) || (clipcount > 0) || (Ammo1.Amount > 0) || (Ammo2.Amount > 0) || (Owner.CountInv("SilverBullets") > 0) || (Owner.CountInv("SilverBullets2") > 0));
 		}
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
 	}

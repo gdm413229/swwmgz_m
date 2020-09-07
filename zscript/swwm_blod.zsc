@@ -109,6 +109,8 @@ Class mkBloodDrop : Actor
 	bool killme;
 	bool dead;
 	mkBloodDrop prevblod, nextblod;
+	Sector tracksector;
+	int trackplane;
 
 	Default
 	{
@@ -136,10 +138,16 @@ Class mkBloodDrop : Actor
 		if ( dead )
 		{
 			// do nothing but follow floor movement and eventually fade out
-			if ( pos.z != floorz )
+			if ( tracksector )
 			{
-				SetZ(floorz);
-				UpdateWaterLevel(false);
+				double trackz;
+				if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy);
+				else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
+				if ( trackz != pos.z )
+				{
+					SetZ(trackz);
+					UpdateWaterLevel(false);
+				}
 			}
 			if ( (waterlevel > 0) || GetFloorTerrain().isliquid )
 			{
@@ -198,6 +206,20 @@ Class mkBloodDrop : Actor
 						A_StartSound("misc/blooddrop",volume:.1);
 						dead = true;
 						SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
+						tracksector = CurSector;
+						trackplane = 0;
+						F3DFloor ff;
+						for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+						{
+							if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+							ff = CurSector.Get3DFloor(i);
+							break;
+						}
+						if ( ff )
+						{
+							tracksector = ff.model;
+							trackplane = 1;
+						}
 						frame = Random[Blood](5,8);
 						return;
 					}

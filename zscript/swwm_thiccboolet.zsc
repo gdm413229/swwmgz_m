@@ -561,6 +561,7 @@ Class SilverBullet : SWWMWeapon
 	ui TextureID reticle;
 	bool initialized;
 	int rezoom;
+	bool proneme;
 
 	State dezoomstate;
 
@@ -665,6 +666,22 @@ Class SilverBullet : SWWMWeapon
 		Super.DoEffect();
 		if ( zoomed ) crosshair = 99;
 		else crosshair = 0;
+		if ( !Owner || !Owner.player )
+		{
+			proneme = false;
+			lookscale = 1.;
+			return;
+		}
+		if ( (Owner.player.ReadyWeapon == self) && Owner.player.mo.CanCrouch() && (Owner.player.crouchfactor <= .5) )
+		{
+			if ( !proneme ) Owner.A_StartSound("silverbullet/crouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
+			proneme = true;
+			lookscale = .25;
+			return;
+		}
+		if ( proneme ) Owner.A_StartSound("silverbullet/uncrouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
+		proneme = false;
+		lookscale = 1.;
 	}
 	override void RenderUnderlay( RenderEvent e )
 	{
@@ -810,7 +827,7 @@ Class SilverBullet : SWWMWeapon
 			}
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
-				int dmg = t.Results.HitActor.DamageMobj(invoker,self,1000,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
+				int dmg = t.Results.HitActor.DamageMobj(invoker,self,invoker.proneme?1000:500,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
 				SWWMUtility.DoKnockback(t.Results.HitActor,t.Results.HitVector+(0,0,.025),dmg*20.*FRandom[SilverBullet](.8,1.2));
 				if ( t.Results.HitActor && !t.Results.HitActor.bNOBLOOD )
 				{
@@ -822,7 +839,7 @@ Class SilverBullet : SWWMWeapon
 			else if ( t.Results.HitType == TRACE_HitWall )
 			{
 				t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
-				BusterWall.Bust(t.Results,2500,self,t.Results.HitVector,t.Results.HitPos.z);
+				BusterWall.Bust(t.Results,invoker.proneme?2500:2000,self,t.Results.HitVector,t.Results.HitPos.z);
 			}
 			let p = Spawn("FatChodeImpact",t.Results.HitPos+hitnormal*4);
 			p.angle = atan2(hitnormal.y,hitnormal.x);
@@ -851,7 +868,6 @@ Class SilverBullet : SWWMWeapon
 		A_ZoomFactor(basezoom);
 		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(110,255,192,80),8);
-		A_Overlay(-9999,"Jet");
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+1*y-1*z);
@@ -870,7 +886,7 @@ Class SilverBullet : SWWMWeapon
 		{
 			SilverBulletTracer sst = new("SilverBulletTracer");
 			sst.ignoreme = self;
-			sst.penetration = 2500.;
+			sst.penetration = invoker.proneme?2500.:1500.;
 			sst.hitlist.Clear();
 			sst.shootthroughlist.Clear();
 			sst.waterhitlist.Clear();
@@ -912,7 +928,8 @@ Class SilverBullet : SWWMWeapon
 			s.vel += vel*.5+x*FRandom[Silverbullet](4.,8.)+y*FRandom[Silverbullet](-1,1)+z*FRandom[Silverbullet](-1,1);
 		}
 		double fact = invoker.fcbchambered?270000.:320000.;
-		if ( player.mo.CanCrouch() && (player.crouchfactor != 1) ) fact /= 10.;
+		if ( invoker.proneme ) fact /= 8.;
+		else A_Overlay(-9999,"Jet");
 		SWWMUtility.DoKnockback(self,-x,fact);
 	}
 	action void A_DropCasing( bool fcb = false )
@@ -978,8 +995,7 @@ Class SilverBullet : SWWMWeapon
 		invoker.specialf1 -= .06;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		bool reduceme = (player.mo.CanCrouch()&&(player.crouchfactor != 1));
-		vel += x*min(1.,invoker.specialf1)*((reduceme?60.:600.)/Mass);
+		vel += x*min(1.,invoker.specialf1)*(600./Mass);
 		A_OverlayAlpha(PSP_WEAPON+2,clamp(invoker.specialf1*3.,0.,1.));
 		if ( Random[SilverBullet](0,int(invoker.specialf1*2)) )
 			self.DamageMobj(invoker,self,1,'jet');

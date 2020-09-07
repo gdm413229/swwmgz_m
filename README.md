@@ -205,6 +205,8 @@ The definitive model of **Blackmann Arms**'s legendary **Silver Bullet** series.
 
 This weapon is generally not recommended for human use outside of power armor. Good thing you're not a human, then. Still, the recoil compensator jet engines can potentially deal damage to yourself if you don't have any armor, so be careful.
 
+Note that going prone (crouching) will automatically disable the recoil compensators, increasing the potential damage of the bullets, but also reducing your mobility.
+
 ### 1.150 XSB Bullets ~ Replaces Cells, Runes
 ![](docimg/xsbbullet.png)
 

@@ -23,14 +23,16 @@ Mixin Class SWWMAmmo
 
 	override bool SpecialDropAction( Actor dropper )
 	{
-		if ( Amount != default.Amount )
+		if ( swwm_enemydrops )
 		{
-			// needed for positioning to work
-			Owner = dropper;
+			if ( Amount == default.Amount ) return false;
+			// subdivide
+			Owner = dropper; // needed for positioning to work
 			CreateTossable(Amount);
 			return true;
 		}
-		return false;
+		// no ammo drops from enemies
+		return true;
 	}
 
 	private bool CmpAmmo( Class<Ammo> a, Class<Ammo> b )
@@ -200,14 +202,16 @@ Class MagAmmo : Inventory abstract
 
 	override bool SpecialDropAction( Actor dropper )
 	{
-		if ( Amount != default.Amount )
+		if ( swwm_enemydrops )
 		{
-			// needed for positioning to work
-			Owner = dropper;
+			if ( Amount == default.Amount ) return false;
+			// subdivide
+			Owner = dropper; // needed for positioning to work
 			CreateTossable(Amount);
 			return true;
 		}
-		return false;
+		// no ammo drops from enemies
+		return true;
 	}
 
 	override void DoEffect()
@@ -332,7 +336,7 @@ Class RedShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsNormal.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 50;
-		Ammo.BackpackAmount 8;
+		Ammo.BackpackAmount 3;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -393,7 +397,7 @@ Class GreenShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsSlug.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 48;
-		Ammo.BackpackAmount 4;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -447,7 +451,7 @@ Class WhiteShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsDragon.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 32;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 1;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -494,7 +498,7 @@ Class BlueShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 40;
-		Ammo.BackpackAmount 4;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -541,7 +545,7 @@ Class BlackShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsFuck.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 0;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -581,7 +585,7 @@ Class PurpleShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 32;
-		Ammo.BackpackAmount 4;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -691,7 +695,7 @@ Class EvisceratorShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 48;
-		Ammo.BackpackAmount 3;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -757,7 +761,7 @@ Class HellblazerMissiles : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 48;
-		Ammo.BackpackAmount 3;
+		Ammo.BackpackAmount 2;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -817,7 +821,7 @@ Class HellblazerCrackshots : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerCrackshot.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 30;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 1;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -856,7 +860,7 @@ Class HellblazerRavagers : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 18;
-		Ammo.BackpackAmount 1;
+		Ammo.BackpackAmount 0;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1373,7 +1377,7 @@ Class FabricatorTier1 : AmmoFabricator
 		Tag "$T_FABRICATOR1";
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
-		Inventory.MaxAmount 30;
+		Inventory.MaxAmount 20;
 		AmmoFabricator.Budget 5000;
 		AmmoFabricator.PerType 2;
 		AmmoFabricator.MaxUnitPrice 2500;
@@ -1389,7 +1393,7 @@ Class FabricatorTier2 : AmmoFabricator
 		Tag "$T_FABRICATOR2";
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
-		Inventory.MaxAmount 20;
+		Inventory.MaxAmount 15;
 		AmmoFabricator.Budget 15000;
 		AmmoFabricator.PerType 4;
 		AmmoFabricator.MaxUnitPrice 10000;

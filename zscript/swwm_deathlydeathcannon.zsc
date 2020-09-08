@@ -328,7 +328,15 @@ Class YnykronImpact : Actor
 			// voodoo dolls just get erased (how convenient)
 			// otherwise instantly vaporize the fucker
 			if ( tracer.player && (tracer.player.mo != tracer) ) tracer.Destroy();
-			else tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+			else if ( tracer.CountInv("GrilledCheeseSandwich") > 0 )
+			{
+				// force use the sandwich
+				let gc = GrilledCheeseSandwich(tracer.FindInventory("GrilledCheeseSandwich"));
+				tracer.A_StartSound(gc.UseSound,CHAN_ITEMEXTRA);
+				gc.DoTheThing(true);
+				gc.Amount--;
+			}
+			else if ( !tracer.FindInventory("GrilledCheeseSafeguard") ) tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
 			if ( tracer && (tracer.Health <= 0) )
 			{
 				if ( tracer.player ) PlayerGone.FeckOff(tracer);
@@ -1430,7 +1438,24 @@ Class YnykronSingularity : Actor
 				// voodoo dolls just get erased (how convenient)
 				// otherwise instantly vaporize the fucker
 				if ( a.player && (a.player.mo != a) ) a.Destroy();
-				else a.DamageMobj(self,a,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+				else if ( a.CountInv("GrilledCheeseSandwich") > 0 )
+				{
+					// force use the sandwich, warp to safe spot
+					let gc = GrilledCheeseSandwich(a.FindInventory("GrilledCheeseSandwich"));
+					Spawn("SWWMItemFog",a.Vec3Offset(0,0,a.Height/2));
+					Vector3 safepos;
+					int safeangle;
+					if ( deathmatch ) [safepos, safeangle] = level.PickDeathmatchStart();
+					else [safepos, safeangle] = level.PickPlayerStart(a.PlayerNumber());
+					a.vel *= 0.;
+					a.SetOrigin(safepos,false);
+					a.angle = safeangle;
+					a.pitch = 0;
+					a.A_StartSound(gc.UseSound,CHAN_ITEMEXTRA);
+					gc.DoTheThing(true);
+					gc.Amount--;
+				}
+				else if ( !a.FindInventory("GrilledCheeseSafeguard") ) a.DamageMobj(self,a,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
 				if ( a && (a.Health <= 0) )
 				{
 					if ( a.player ) PlayerGone.FeckOff(a);

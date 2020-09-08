@@ -2115,32 +2115,37 @@ Class Sparkster : SWWMWeapon
 		XZW4 Y 12;
 		XZW4 Y 1 A_FireSpark(0);
 		XZW2 NOPQ 2;
-		XZW2 A 1 A_JumpIf(!(player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK))||(invoker.ClipCount<=0),"Vent");
-		XZW4 Y 3;
-		XZW4 Y 0
-		{
-			if ( player.cmd.buttons&BT_ALTATTACK )
-				return ResolveState("AltFire")+3;
-			return ResolveState("Fire")+3;
-		}
-		Goto Ready;
+		Goto PreVent;
 	AltFire:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
 		XZW2 A 1 A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 Z 12;
 		XZW4 Z 1 A_FireSpark(1);
 		XZW2 RSTU 2;
-		XZW2 A 1 A_JumpIf(!(player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK))||(invoker.ClipCount<=0),"Vent");
-		XZW4 Y 3;
-		XZW4 Y 0
+		Goto PreVent;
+	PreVent:
+		XZW2 AAAAAAAA 1
 		{
-			if ( player.cmd.buttons&BT_ATTACK )
-				return ResolveState("Fire")+3;
-			return ResolveState("AltFire")+3;
+			if ( invoker.ClipCount > 0 )
+			{
+				if ( player.cmd.buttons&BT_ATTACK )
+					return ResolveState("Refire");
+				if ( player.cmd.buttons&BT_ALTATTACK )
+					return ResolveState("AltRefire");
+			}
+			return ResolveState(null);
 		}
-		Goto Ready;
+		Goto Vent;
+	Refire:
+		XZW2 A 1;
+		XZW4 Y 3;
+		Goto Fire+3;
+	AltRefire:
+		XZW2 A 1;
+		XZW4 Y 3;
+		Goto AltFire+3;
 	Vent:
-		XZW2 A 12
+		XZW2 A 8
 		{
 			A_Overlay(PSP_WEAPON+2,"VentFlash");
 			A_OverlayFlags(PSP_WEAPON+2,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);

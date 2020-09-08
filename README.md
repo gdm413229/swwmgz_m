@@ -29,7 +29,7 @@ Additional features:
  - **Forx JetBurst™ Units:** Can be used for quick dashes in any direction, or even for short bursts of flight.
  - **Targetting Array:** Tracks nearby foes and provides basic information on their health. Compatible with **Omnisight™** mapping modules for tracking key items and nearby exits. Can also highlight nearby pickups by holding a dedicated button.
  - **Akari Labs CuteEmotion™ Display:** Equipped onto your visor to show a wide range of predefined facial expressions in order to convey simple emotions to others.
- - **Akari Labs LoudBoi™ Voicebox:** Allows you to ｅｍｉｔ. Additional voice options will be available through add-ons. Note that the default voice is in Japanese, but subtitles will be provided when available.
+ - **Akari Labs LoudBoi™ Voicebox:** Allows you to 🇪 🇲 🇮 🇹. Additional voice options will be available through add-ons. Note that the default voice is in Japanese, but subtitles will be provided when available.
 
 **Note:** Since you're a robutt you pretty much can swim indefinitely and are also inmune to poison.
 
@@ -94,7 +94,7 @@ Coming from the **Doom** modding side of things, this gun really packs a punch, 
 
 The **Spreadgun** uses 10 gauge ammunition, apparently just for the sake of making it feel more powerful due to the increased recoil.
 
-### 10Ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Flechette, Chaos Device/Banishment Device
+### 10Ga shells ~ Replaces Shells, Ethereal Arrows, Chaos Device/Banishment Device
 ![](docimg/shells.png)
 
 Available in the following types, with varying chances of appearing depending
@@ -155,7 +155,7 @@ Another signature weapon of the **SWWM** series. This time in its third and far 
 
 **Secondary fire:** Lob the rocket as a grenade that will bounce around.
 
-**Tertiary fire:** Change the ammo type, there are four options (see ammo section below).
+**Tertiary fire (Zoom):** Change the ammo type, there are four options (see ammo section below).
 
 This thing is more explosive than it looks, so if you're reading this, Icarus, ***DO NOT*** use it at close range.
 
@@ -174,16 +174,13 @@ Ammo for the **Hellblazer**, found either as single units or packs. There are fo
 
 A relic from the olden days of **UnSX**. A potent energy weapon that uses what's best described as *"sentient lightning"*.
 
-**Primary fire:** Small blobs of energy that explode violently on impact.
+**Primary fire:** Small blobs of energy that explode violently on impact. Hold for rapid fire.
 
-**Secondary fire:** Concentrated beam shot. A very old thing from the original **UnSX I** incarnation. Can penetrate multiple solid targets.
+**Secondary fire:** Concentrated beam shot. A very old thing from the original **UnSX I** incarnation. Can penetrate multiple solid targets. Can also be held for rapid fire.
 
-Zoom deploys a capsule that releases a massive sphere of pure energy that
-tracks down any hostile targets. It will rip through everything and even bounce
-off surfaces, but it has a rather limited lifespan.
+**Tertiary fire (Zoom):** Deploy a capsule that releases a massive sphere of pure energy, which will track down any hostile targets. It will rip through everything and even bounce off surfaces, but it has a rather limited lifespan.
 
-If the beam hits either of the other energy blobs, they will detonate with
-highly amplified damage and range.
+If the beam hits either of the other energy blobs, they will detonate with highly amplified damage and range. Note that it is possible to alternate between primary and secondary modes while rapid firing, making this combo just a matter of precise timing.
 
 ### Biospark Unit ~ Replaces Cells, Runes
 ![](docimg/biosparkammo.png)
@@ -273,24 +270,24 @@ All of these can be carried in your inventory indefinitely before use, except in
 ### Health Nugget ~ Replaces Health Bonus, Crystal Vial
 ![](docimg/nuggethealth.png)
 
-+5 health boost, up to a cap of 200 points.
++1 health boost, up to a cap of 200 points.
 
 ### Health Tetrahedron ~ Replaces Stimpak, Quartz Flask
 ![](docimg/tetrahealth.png)
 
-+15 health boost, up to a cap of 100 points.
++10 health boost, up to a cap of 100 points.
 
 ### Health Cube ~ Replaces Medkit, Mystic Urn (Hexen), Quartz Flask (Heretic)
 ![](docimg/cubehealth.png)
 
-+30 health boost, up to a cap of 100 points.
++20 health boost, up to a cap of 100 points.
 
 ### Refresher ~ Replaces Soulsphere, Mystic Urn (Heretic), Mystic Ambit Incant
 ![](docimg/refresher.png)
 
-This artifact provides a massive boost of health to 500, plus a regeneration effect that heals 5% every 2 seconds, for up to 60 seconds, thus it doubles as a powerup. Like other health items, the **Refresher** is auto-activated if you're about to die, though it sometimes won't be enough to save you.
+This artifact provides a massive +200 health boost plus a regeneration effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles as a powerup. Its overhealing effects cap at 500 points (including the regen). Like other health items, the **Refresher** is auto-activated if you're about to die, though it sometimes won't be enough to save you.
 
-### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion
+### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette
 ![](docimg/nuggetarmor.png)
 
 Cumulative armor items that can increase resistance to all damage by as much as you can find. Each nugget adds 5% to the total. Above 100%, damage gets turned into additional health (up to the standard 100% cap). The upper cap for these is 200%.
@@ -316,7 +313,7 @@ Can eat up a total of 250 damage points before breaking.
 ### Grilled Cheese Sandwich ~ Replaces Megasphere, Morph Ovum, Platinum Helm
 ![](docimg/sandwich.png)
 
-The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (although not even this wondrous artifact can save you from the destruction of the **Ynykron Artifact**).
+The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**).
 
 ### Ghost Artifact ~ Replaces Blur Sphere, Shadowsphere, Amulet of Warding
 ![](docimg/ghost.png)
@@ -355,7 +352,7 @@ For 60 seconds, you can fly around in the air at 2x your normal walking speed, b
 
 This thing makes you impervious to pretty much everything excluding the **Ynykron Artifact**.
 
-You're fucking invincible for a total of 30 seconds.
+You're fucking invincible for a total of 20 seconds.
 
 ### Hammerspace Embiggener ~ Replaces Backpack, Bag of Holding, Porkalator, Dragonskin Bracers
 ![](docimg/embiggener.png)
@@ -389,16 +386,16 @@ Message display. Can be configured to show different numbers of messages dependi
 
 Current score.
 
-The scoring system is pretty straightforward. Each enemy you kill will give you points according to a quarter of its base health, rounded up to the nearest multiple of 10 and capped to 1000, plus some bonuses (in order of application):
+The scoring system is pretty straightforward. Each enemy you kill will give you points according to 5% of its base health, rounded up to the nearest multiple of 10 and capped to 1000, plus some bonuses (in order of application):
 
- * x1.25 for an overkill (enemy received twice its base health in damage).
+ * +500 if the enemy was killed with the **Deep Impact** primary (humiliation).
+ * x2 for an overkill (enemy was gibbed or received twice its base health in damage).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered combos if multiple enemies are killed within 5 seconds of each other.
  * +100 for killing an enemy without having taken damage since last spawn, with extra +10 boosts for consecutive kills (extra boosts taper off after 10x).
- * +5000 if the enemy killed is a boss.
- * +2000 if you've killed the last enemy in the map.
- * +1000 if the enemy was killed with the **Deep Impact** primary (humiliation).
+ * +2000 if the enemy killed is a boss.
+ * +1000 if you've killed the last enemy in the map.
 
-You are also given +500 points for each secret found, +5000 if it's the final secret. Countable items give +25 points each or +2500 if it's the final item.
+You are also given +100 points for each secret found, +1000 if it's the final secret. Countable items give +10 points each or +500 if it's the final item.
 
 Score can be used to buy items on the in-game store, and it is preserved between hubs.
 

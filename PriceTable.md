@@ -82,11 +82,11 @@ Other items that can be bought at any moment. **Omnisights** and **Embiggeners**
 
   Item               | Price
   ------------------ | -------
-  Health Nugget      | 1200
+  Health Nugget      | 200
   Health Tetrahedron | 3000
   Health Cube        | 8000
   Refresher          | 160000
-  Armor Nugget       | 1000
+  Armor Nugget       | 300
   Blast Suit         | 40000
   War Armor          | 100000
   Elemental Coating  | 80000

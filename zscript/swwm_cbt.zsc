@@ -916,10 +916,10 @@ Class Wallbuster : SWWMWeapon
 		Super.AttachToOwner(other);
 		if ( !initialized )
 		{
-			// first wallbuster is fully loaded
+			// first wallbuster has five barrels loaded
 			initialized = true;
 			for ( int i=0; i<25; i++ )
-				loaded[i] = "RedShell";
+				loaded[i] = (i<5)?(Class<Ammo>)("RedShell"):null;
 			for ( int i=0; i<25; i++ )
 				fired[i] = false;
 		}
@@ -1474,7 +1474,7 @@ Class Wallbuster : SWWMWeapon
 		Weapon.SelectionOrder 400;
 		Weapon.UpSound "wallbuster/select";
 		Weapon.AmmoType1 "RedShell";
-		Weapon.AmmoGive1 25;
+		Weapon.AmmoGive1 5;
 		Stamina 35000;
 		+SWWMWEAPON.NOFIRSTGIVE;
 	}

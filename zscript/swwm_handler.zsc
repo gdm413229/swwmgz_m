@@ -696,12 +696,12 @@ Class SWWMHandler : EventHandler
 			if ( !playeringame[i] ) continue;
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
-				int score = 25*(players[i].itemcount-lastitemcount[i]);
+				int score = 10*(players[i].itemcount-lastitemcount[i]);
 				if ( (level.total_items == level.found_items) && !allitems )
 				{
 					allitems = true;
-					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),2500);
-					score += 2475;
+					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),500);
+					score += 490;
 				}
 				SWWMCredits.Give(players[i],score);
 				SWWMScoreObj.Spawn(score,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
@@ -909,14 +909,14 @@ Class SWWMHandler : EventHandler
 				s.mkill = multilevel[pnum]+1;
 			lastkill[pnum] = level.maptime;
 			// scoring
-			int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.25)*10));
+			int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.05)*10));
 			SWWMScoreObj scr = null;
 			if ( e.DamageSource.player == players[consoleplayer] )
 				scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			int ofs = 0;
 			if ( e.DamageType == 'Push' )
 			{
-				score += 1000;
+				score += 500;
 				if ( scr )
 				{
 					scr.xscore[ofs] = 0;
@@ -925,9 +925,9 @@ Class SWWMHandler : EventHandler
 					scr.xcnt = ++ofs;
 				}
 			}
-			if ( ((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) )
+			if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
 			{
-				score = int(score*1.25);
+				score *= 2;
 				if ( scr )
 				{
 					scr.xscore[ofs] = 0;
@@ -963,7 +963,7 @@ Class SWWMHandler : EventHandler
 			}
 			if ( e.Thing.bBOSS )
 			{
-				score += 5000;
+				score += 2000;
 				if ( scr )
 				{
 					scr.xscore[ofs] = 0;
@@ -977,9 +977,9 @@ Class SWWMHandler : EventHandler
 			if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
 			{
 				allkills = true;
-				SWWMCredits.Give(e.DamageSource.player,2000);
-				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),2000);
-				SWWMScoreObj.Spawn(2000,e.DamageSource.Vec3Offset(0,0,e.DamageSource.Height/2));
+				SWWMCredits.Give(e.DamageSource.player,1000);
+				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),1000);
+				SWWMScoreObj.Spawn(1000,e.DamageSource.Vec3Offset(0,0,e.DamageSource.Height/2));
 			}
 			spreecount[pnum]++;
 			if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
@@ -1195,29 +1195,8 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
-		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') || (e.Replacee is 'ArtiPoisonBag') )
-		{
-			switch( Random[Replacement](0,14) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				e.Replacement = redpool[Random[Replacement](0,1)];
-				break;
-			case 4:
-			case 5:
-			case 6:
-				e.Replacement = greenpool[Random[Replacement](0,1)];
-				break;
-			case 7:
-			case 8:
-				e.Replacement = purplepool[0];
-				break;
-			default:
-				e.Replacement = 'SWWMNothing';
-				break;
-			}
-		}
+		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') )
+			e.Replacement = 'SWWMNothing';
 		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
 			switch( Random[Replacement](0,13) )
@@ -1285,14 +1264,14 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Replacee == 'ClipBox' )
 		{
-			if ( Random[Replacements](0,2) ) e.Replacement = 'EvisceratorShell';
+			if ( Random[Replacements](0,3) ) e.Replacement = 'EvisceratorShell';
 			else if ( Random[Replacements](0,4) ) e.Replacement = 'EvisceratorTrioSpawn';
 			else e.Replacement = 'EvisceratorSixPack';
 		}
 		else if ( e.Replacee == 'BlasterAmmo' ) e.Replacement = 'EvisceratorShell';
 		else if ( e.Replacee == 'BlasterHefty' )
 		{
-			if ( Random[Replacements](0,3) ) e.Replacement = 'EvisceratorTrioSpawn';
+			if ( Random[Replacements](0,4) ) e.Replacement = 'EvisceratorTrioSpawn';
 			else e.Replacement = 'EvisceratorSixPack';
 		}
 		else if ( (e.Replacee == 'RocketAmmo') || (e.Replacee == 'PhoenixRodAmmo') || (e.Replacee == 'MaceAmmo') )
@@ -1321,7 +1300,7 @@ Class SWWMHandler : EventHandler
 			case 2:
 			case 3:
 			case 4:
-				if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerMissiles';
+				if ( Random[Replacements](0,3) ) e.Replacement = 'HellblazerMissiles';
 				else if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerMissileTrioSpawn';
 				else e.Replacement = 'HellblazerMissileMag';
 				break;
@@ -1329,7 +1308,7 @@ Class SWWMHandler : EventHandler
 			case 6:
 			case 7:
 			case 8:
-				if ( Random[Replacements](0,3) ) e.Replacement = 'HellblazerCrackshots';
+				if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerCrackshots';
 				else e.Replacement = 'HellblazerCrackshotMag';
 				break;
 			case 9:
@@ -1346,7 +1325,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'Cell') || (e.Replacee == 'SkullRodAmmo') )
 		{
 			if ( Random[Replacements](0,3) ) e.Replacement = 'SparkUnit';
-			else if ( !Random[Replacements](0,2) ) e.Replacement = 'CandyGunBullets';
+			else if ( !Random[Replacements](0,3) ) e.Replacement = 'CandyGunBullets';
 			else e.Replacement = Random[Replacements](0,2)?'SilverBullets':'SilverBullets2';
 		}
 		else if ( (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') )
@@ -1358,7 +1337,7 @@ Class SWWMHandler : EventHandler
 		{
 			if ( !Random[Replacements](0,2) )
 			{
-				if ( Random[Replacements](0,2) ) e.Replacement = Random[Replacements](0,2)?'SilverBulletsBundleSpawn':'SilverBullets2BundleSpawn';
+				if ( Random[Replacements](0,3) ) e.Replacement = Random[Replacements](0,2)?'SilverBulletsBundleSpawn':'SilverBullets2BundleSpawn';
 				else e.Replacement = Random[Replacements](0,2)?'SilverBulletAmmo':'SilverBulletAmmo2';
 			}
 			else if ( Random[Replacements](0,2) ) e.Replacement = 'CandyGunBulletsBundleSpawn';
@@ -1377,7 +1356,7 @@ Class SWWMHandler : EventHandler
 			else if ( Random[Replacements](0,5) ) e.Replacement = 'HammerspaceEmbiggener';
 			else e.Replacement = 'GoldShell';
 		}
-		else if ( (e.Replacee == 'ArmorBonus') || (e.Replacee == 'ArtiTimeBomb') || (e.Replacee == 'ArtiBlastRadius') ) e.Replacement = 'ArmorNuggetItem';
+		else if ( (e.Replacee == 'ArmorBonus') || (e.Replacee == 'ArtiTimeBomb') || (e.Replacee == 'ArtiBlastRadius') || (e.Replacee is 'ArtiPoisonBag') ) e.Replacement = 'ArmorNuggetItem';
 		else if ( (e.Replacee == 'HealthBonus') || (e.Replacee == 'CrystalVial') ) e.Replacement = 'HealthNuggetItem';
 		else if ( e.Replacee == 'Stimpack' ) e.Replacement = 'TetraHealthItem';
 		else if ( e.Replacee == 'Medikit' ) e.Replacement = 'CubeHealthItem';

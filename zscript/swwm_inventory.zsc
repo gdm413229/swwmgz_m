@@ -1312,6 +1312,12 @@ Class SWWMWeapon : Weapon abstract
 		if ( (AmmoGive2 <= 0) && (default.AmmoGive2 > 0) )
 			AmmoGive2 = 1;
 	}
+	override bool SpecialDropAction( Actor dropper )
+	{
+		if ( swwm_enemydrops ) return false;
+		// no weapon drops from enemies
+		return true;
+	}
 	override Inventory CreateTossable( int amt )
 	{
 		// disallow dropping if weapon isn't ready for switching

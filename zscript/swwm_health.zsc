@@ -3,7 +3,7 @@ Class HealthNugget : Health
 {
 	Default
 	{
-		Inventory.Amount 5;
+		Inventory.Amount 1;
 		Inventory.MaxAmount 200;
 	}
 }
@@ -12,7 +12,7 @@ Class TetraHealth : Health
 {
 	Default
 	{
-		Inventory.Amount 15;
+		Inventory.Amount 10;
 		Inventory.MaxAmount 100;
 	}
 }
@@ -21,7 +21,7 @@ Class CubeHealth : Health
 {
 	Default
 	{
-		Inventory.Amount 30;
+		Inventory.Amount 20;
 		Inventory.MaxAmount 100;
 	}
 }
@@ -30,7 +30,7 @@ Class RefresherHealth : Health
 {
 	Default
 	{
-		Inventory.Amount 500;
+		Inventory.Amount 200;
 		Inventory.MaxAmount 500;
 	}
 	override bool TryPickup( in out Actor other )
@@ -53,7 +53,7 @@ Class RefresherRegen : Powerup
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Refresher.png";
 		Powerup.Duration -60;
-		Powerup.Strength 5;
+		Powerup.Strength 10;
 	}
 
 	override void EndEffect()
@@ -65,7 +65,7 @@ Class RefresherRegen : Powerup
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner && (Owner.health > 0) && !(EffectTics%70) )
+		if ( Owner && (Owner.health > 0) && !(EffectTics%175) )
 		{
 			if ( Owner.GiveBody(int(Strength),500) )
 			{
@@ -88,7 +88,7 @@ Class HealthNuggetItem : SWWMHealth
 	Default
 	{
 		Tag "$T_NUGGETH";
-		Stamina 1200;
+		Stamina 200;
 		Inventory.Icon "graphics/HUD/Icons/I_HealthNugget.png";
 		Inventory.PickupMessage "$T_NUGGETH";
 		Inventory.MaxAmount 20;

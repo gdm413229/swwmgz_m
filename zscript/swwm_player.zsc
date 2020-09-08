@@ -640,6 +640,7 @@ Class Demolitionist : PlayerPawn
 			dir = dir/spd;
 			Vector3 viewdir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 			// look for things we could potentially bump into
+			// TODO check for wall/ceiling collision
 			let bi = BlockThingsIterator.Create(self,500);
 			bool bumped = false;
 			bool raging = FindInventory("RagekitPower");
@@ -1385,13 +1386,13 @@ Class Demolitionist : PlayerPawn
 	override bool OnGiveSecret( bool printmsg, bool playsound )
 	{
 		if ( !player ) return false;
-		int score = 500;
+		int score = 100;
 		// last secret (this is called before counting it up, so have to subtract)
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
 		{
 			if ( hnd ) hnd.allsecrets = true;
-			score = 5000;
+			score = 1000;
 			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
 		}
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
@@ -1411,10 +1412,10 @@ Class Demolitionist : PlayerPawn
 		if ( (item is 'Key') && !key_reentrant && !deathmatch )
 		{
 			// score
-			int score = 250;
+			int score = 100;
 			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
 			SWWMCredits.Give(player,score);
-			SWWMScoreObj.Spawn(250,Vec3Offset(0,0,Height/2));
+			SWWMScoreObj.Spawn(100,Vec3Offset(0,0,Height/2));
 			if ( !swwm_sharekeys ) return;
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )

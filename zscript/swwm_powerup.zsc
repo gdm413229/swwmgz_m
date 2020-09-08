@@ -24,7 +24,7 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMLoreLibrary.Add(other.player,"GCSandwich");
 		return Super.CreateCopy(other);
 	}
-	private void DoTheThing()
+	void DoTheThing( bool extrasafe = false )
 	{
 		SWWMHandler.DoFlash(Owner,Color(64,255,255,64),10);
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
@@ -52,6 +52,10 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
 		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
+		if ( !extrasafe ) return;
+		let s = Owner.FindInventory("GrilledCheeseSafeguard");
+		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
+		else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
 	}
 	override bool Use( bool pickup )
 	{
@@ -80,10 +84,7 @@ Class GrilledCheeseSandwich : Inventory
 		{
 			newdamage = 0;
 			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
-			DoTheThing();
-			let s = Owner.FindInventory("GrilledCheeseSafeguard");
-			if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
-			else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
+			DoTheThing(true);
 			Amount--;
 		}
 	}

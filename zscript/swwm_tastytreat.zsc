@@ -234,7 +234,7 @@ Class CandyPop : Actor
 		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
 		let mo = players[consoleplayer].camera;
 		Vector3 pp;
-		if ( !mo.CheckSight(self) ) return;
+		if ( !CheckSight(mo) ) return;
 		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
 		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
 		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));

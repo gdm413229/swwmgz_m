@@ -609,13 +609,15 @@ Class Demolitionist : PlayerPawn
 		lastground = player.onground;
 		lastvelz = prevvelz;
 		prevvelz = vel.z;
-		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat&&!(player.cheats&CF_NOCLIP2)))||InStateSequence(CurState,FindState("Dash")));
+		bool isdashing = InStateSequence(CurState,FindState("Dash"));
+		bool isboosting = InStateSequence(CurState,FindState("Jump"));
+		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat&&!(player.cheats&CF_NOCLIP2)))||isdashing);
 		fuelcooldown = max(0,fuelcooldown-1);
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
 			dashfuel = min(default.dashfuel,dashfuel+max(dashfuel*.015,.1));
-		if ( (dashboost > 0.) && (InStateSequence(CurState,FindState("Dash")) || (InStateSequence(CurState,FindState("Jump")) && player.cmd.buttons&BT_JUMP)) )
+		if ( (dashboost > 0.) && (isdashing || (isboosting && player.cmd.buttons&BT_JUMP)) )
 			dashsnd = true;
 		else
 		{
@@ -623,53 +625,55 @@ Class Demolitionist : PlayerPawn
 				A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 			dashsnd = false;
 		}
-		PainChance = InStateSequence(CurState,FindState("Dash"))?0:255;
-		if ( dashboost <= 0. ) return;
-		if ( InStateSequence(CurState,FindState("Dash")) )
+		PainChance = isdashing?0:255;
+		if ( isdashing || (vel.length() > 50) )
 		{
 			Actor a;
-			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
+			if ( isdashing && (dashboost > 0.) )
 			{
-				a = Spawn("DashTrail",Vec3Angle(15,angle+i*140,35));
-				a.target = self;
-				a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
-				a.vel -= vel*.5;
+				for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
+				{
+					a = Spawn("DashTrail",Vec3Angle(15,angle+i*140,35));
+					a.target = self;
+					a.vel = (RotateVector((j,0),angle+i*160),0)-(0,0,1)*j;
+					a.vel -= vel*.5;
+				}
 			}
-			Vector3 dir = vel+dashdir*dashboost;
+			Vector3 dir = vel;
 			double spd = dir.length();
 			dir = dir/spd;
 			Vector3 viewdir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 			// look for things we could potentially bump into
-			// TODO check for wall/ceiling collision
-			let bi = BlockThingsIterator.Create(self,500);
 			bool bumped = false;
+			let bi = BlockThingsIterator.Create(self,500);
 			bool raging = FindInventory("RagekitPower");
 			while ( (spd > 0) && bi.Next() )
 			{
 				a = bi.Thing;
-				if ( !a || (a == self) || !a.bSHOOTABLE || a.bTHRUACTORS ) continue;
+				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS ) continue;
 				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*spd,8,16) ) continue;
 				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
 				Vector3 dirto = diff.unit();
-				if ( dir dot dirto < 0 ) continue;
+				if ( dir dot dirto < .1 ) continue;
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
-				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5)) && a.bSOLID )
+				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= Mass*1.5) || (!a.bSHOOTABLE && !a.bPUSHABLE && (a.Health > 0))) && a.bSOLID && (dir dot dirto > .65) )
 				{
 					if ( bumped ) continue;
 					bumped = true;
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-					vel *= .4;
-					vel -= dir*(15+(spd*40/mass));
+					vel *= .2;
+					vel -= dir*(10+(spd*30/mass));
+					vel -= dirto*(10+(spd*50/mass));
 					vel.z += 5+(spd*(10/mass));
-					dashboost *= .3;
+					dashboost *= 0.;
 				}
 				Vector3 pushdir = dirto*.1+dir*.9;
-				if ( !a.bDONTTHRUST && (a.Mass < Mass*1.5) )
+				if ( !a.bDONTTHRUST && (a.Mass < Mass*1.5) && (a.bSHOOTABLE || a.bPUSHABLE) )
 				{
 					a.vel += pushdir*(15+(spd*20/max(50,a.mass)));
 					if ( (a.pos.z <= a.floorz) || !a.TestMobjZ() )
@@ -681,7 +685,7 @@ Class Demolitionist : PlayerPawn
 				int dmg = int(15+spd*2.5);
 				if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
 				dmg = a.DamageMobj(self,self,dmg,'Dash',flg);
-				if ( a && !a.bNOBLOOD && (raging || !a.bINVULNERABLE) )
+				if ( a && !a.bNOBLOOD && (raging || !a.bINVULNERABLE) && a.bSHOOTABLE )
 				{
 					a.TraceBleed(dmg,self);
 					a.SpawnBlood(level.Vec3Offset(pos,diff/2),atan2(dir.y,dir.x)+180,dmg);
@@ -694,8 +698,76 @@ Class Demolitionist : PlayerPawn
 					ps.special1 = dmg;
 				}
 			}
+			// check for ceiling collision
+			if ( (spd > 0) && !bumped && ((pos.z+Height+dir.z*spd) >= ceilingz) )
+			{
+				F3DFloor ff;
+				for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+				{
+					if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+					ff = CurSector.Get3DFloor(i);
+					break;
+				}
+				Vector3 ceilnorm;
+				if ( ff ) ceilnorm = ff.model.floorplane.Normal;
+				else ceilnorm = CurSector.ceilingplane.Normal;
+				// don't bump if we're only grazing it
+				if ( dir dot ceilnorm < -.6 )
+				{
+					// headbump
+					bumped = true;
+					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+					bumptic = gametic+int(20+spd/4.);
+					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+					vel *= .2;
+					vel -= dir*(10+(spd*30/mass));
+					vel.z += 5+(spd*(10/mass));
+					vel += ceilnorm*(15+(spd*40/mass));
+					dashboost *= 0.;
+					if ( raging )
+					{
+						let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
+						ps.damagetype = 'Dash';
+						ps.target = self;
+						ps.special1 = int(15+spd*2.5);
+					}
+				}
+			}
+			// check for wall collision
+			FCheckPosition tm;
+			Vector2 steppy = dir.xy*spd/8.;
+			for ( int i=1; i<=8; i++ )
+			{
+				if ( (spd > 0) && !bumped && !CheckMove(Vec2Offset(steppy.x*i,steppy.y*i),PCM_DROPOFF|PCM_NOACTORS,tm) && BlockingLine )
+				{
+					Vector3 wallnorm = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+					if ( !BlockingLine.sidedef[1] || !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
+						wallnorm *= -1;
+					// don't bump if we're only grazing it
+					if ( dir dot wallnorm > -.6 )
+						continue;
+					// wallbump
+					bumped = true;
+					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+					bumptic = gametic+int(20+spd/4.);
+					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+					vel *= .2;
+					vel -= dir*(10+(spd*30/mass));
+					vel += wallnorm*(10+(spd*50/mass));
+					vel.z += 5+(spd*(10/mass));
+					dashboost *= 0.;
+					if ( raging )
+					{
+						let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,Height/2.));
+						ps.damagetype = 'Dash';
+						ps.target = self;
+						ps.special1 = int(15+spd*2.5);
+					}
+					break;
+				}
+			}
 		}
-		else if ( InStateSequence(CurState,FindState("Jump")) )
+		else if ( isboosting && (dashboost > 0.) )
 		{
 			Actor a;
 			for ( int i=-1; i<=1; i+=2 ) for ( int j=1; j<4; j++ )
@@ -1957,23 +2029,22 @@ Class DemolitionistRadiusShockwaveTail : Actor
 {
 	Default
 	{
-		RenderStyle "Translucent";
+		RenderStyle "Add";
 		Radius 16;
 		Height 8;
 		+NOBLOCKMAP;
 		+NOGRAVITY;
 		+DONTSPLASH;
-		+FLATSPRITE;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
 	States
 	{
 	Spawn:
-		SDST A 1
+		XZW1 A 1
 		{
-			pitch = min(175,pitch*1.1);
-			A_FadeOut(.05);
+			pitch = min(85,(pitch+2)*1.05);
+			A_FadeOut(.02);
 			A_SetScale(scale.x*1.08,scale.y);
 			vel *= .98;
 		}
@@ -1987,13 +2058,13 @@ Class DemolitionistRadiusShockwave : Actor
 
 	Default
 	{
-		RenderStyle "Translucent";
+		RenderStyle "Add";
 		Speed 15;
-		DamageFunction int(100*alpha);
+		DamageFunction int(200*alpha);
 		DamageType "GroundPound";
 		Radius 16;
 		Height 8;
-		Alpha .8;
+		Alpha .4;
 		XScale .65;
 		YScale 3.;
 		PROJECTILE;
@@ -2012,37 +2083,38 @@ Class DemolitionistRadiusShockwave : Actor
 		if ( damage <= 0 ) return damage;
 		if ( (target.mass < LARGE_MASS) && !target.bDONTTHRUST )
 		{
-			target.vel.xy += vel.xy.unit()*(14000./max(50,target.mass))*alpha;
+			target.vel.xy += vel.xy.unit()*(30000./max(50,target.mass))*alpha;
 			if ( (target.pos.z <= floorz) || !target.TestMobjZ() )
-				target.vel.z += (1500./max(50,target.mass))*alpha;
+				target.vel.z += (4000./max(50,target.mass))*alpha;
 		}
 		return damage;
 	}
 	States
 	{
 	Spawn:
-		SDST A 1
+		XZW1 A 1
 		{
 			SetZ(floorz);
-			pitch = min(175,pitch*1.1);
-			Spawn("InvisibleSplasher",Vec3Offset(0,0,2));
+			pitch = min(85,(pitch+2)*1.05);
+			if ( !Random[ExploS](0,3) )
+				Spawn("InvisibleSplasher",Vec3Offset(0,0,2));
 			let s = Spawn("DemolitionistRadiusShockwaveTail",pos);
 			s.vel = vel*.35;
 			s.scale = scale;
-			s.alpha = alpha*.8;
+			s.alpha = alpha*.4;
 			s.angle = angle;
 			s.pitch = pitch;
 			s.roll = roll;
-			A_FadeOut(.03);
+			A_FadeOut(.015);
 			A_SetScale(scale.x*1.08,scale.y);
 			vel *= .98;
 		}
 		Wait;
 	Death:
-		SDST A 1
+		XZW1 A 1
 		{
 			SetZ(floorz);
-			A_FadeOut(.1);
+			A_FadeOut(.05);
 			A_SetScale(scale.x*1.1,scale.y*.97);
 		}
 		Wait;
@@ -2087,7 +2159,6 @@ Class DemolitionistShockwave : Actor
 			let r = Spawn("DemolitionistRadiusShockwave",Vec3Angle(5,i));
 			r.target = target;
 			r.angle = i;
-			r.pitch = 105;
 			r.vel.xy = (cos(i),sin(i))*(r.speed+min(special1*.15,30));
 			r.alpha *= .1+min(special1*.03,.9);
 		}

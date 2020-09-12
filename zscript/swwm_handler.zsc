@@ -20,11 +20,49 @@ Class SWWMPreloader : StaticEventHandler
 	}
 }
 
-// Fancy crash effect
+// save version holder
+Class SWWMSaveVerData : Thinker
+{
+	String ver;
+}
+
+// Fancy crash effect / also handles save version stuff, for the sake of debugging
 Class SWWMCrashHandler : StaticEventHandler
 {
 	ui bool wasinmap;
 	ui int timer;
+	bool tainted;
+	String taintver;
+
+	override void NewGame()
+	{
+		let svd = new("SWWMSaveVerData");
+		svd.ChangeStatNum(Thinker.STAT_STATIC);
+		svd.ver = StringTable.Localize("$SWWM_MODVER");
+	}
+
+	override void WorldLoaded( WorldEvent e )
+	{
+		if ( !e.IsSaveGame ) return;
+		let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+		let svd = SWWMSaveVerData(ti.Next());
+		if ( !svd )
+		{
+			tainted = true;
+			taintver = "\cg(no version information)\c-";
+			Console.Printf("\cgWARNING: \cjLoaded save contains no version data. Issues may happen.");
+			return;
+		}
+		String cver = StringTable.Localize("$SWWM_MODVER");
+		if ( svd.ver != cver )
+		{
+			tainted = true;
+			taintver = svd.ver;
+			Console.Printf("\cgWARNING: \cjThis savegame is from a different version of SWWM GZ. Issues may happen.");
+			Console.Printf("\cgSaved:   \cj"..svd.ver);
+			Console.Printf("\cgCurrent: \cj"..cver);
+		}
+	}
 
 	override void UiTick()
 	{
@@ -38,7 +76,7 @@ Class SWWMCrashHandler : StaticEventHandler
 			wasinmap = false;
 			if ( timer == 1 )
 			{
-				Console.Printf(TEXTCOLOR_GOLD.."Oopsie Woopsie!"..TEXTCOLOR_NORMAL);
+				Console.Printf("\cfOopsie Woopsie!");
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
 				if ( hnd && hnd.detected )
 				{
@@ -49,15 +87,16 @@ Class SWWMCrashHandler : StaticEventHandler
 			}
 			else if ( timer == 140 )
 			{
-				Console.Printf(TEXTCOLOR_GOLD.."Looks like GZDoom made a fucky wucky! owo"..TEXTCOLOR_NORMAL);
+				Console.Printf("\cfLooks like GZDoom made a fucky wucky! owo");
 				S_StartSound("crash/curb",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 350 )
 			{
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
-				if ( hnd && hnd.detected ) Console.Printf(TEXTCOLOR_GOLD.."Don't blame me. Shouldn't have tried running this with Brutal Doom."..TEXTCOLOR_NORMAL);
-				else Console.Printf(TEXTCOLOR_GOLD.."If you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa."..TEXTCOLOR_NORMAL);
-				Console.Printf(TEXTCOLOR_GOLD.."Version Information: %s"..TEXTCOLOR_NORMAL,StringTable.Localize("$SWWM_MODVER"));
+				if ( hnd && hnd.detected ) Console.Printf("\cfDon't blame me. Shouldn't have tried running this with Brutal Doom.");
+				else Console.Printf("\cfIf you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa.");
+				Console.Printf("\cfLoaded Version: \cj%s",StringTable.Localize("$SWWM_MODVER"));
+				if ( tainted ) Console.Printf("\cfSavegame Version: \cj%s",taintver);
 			}
 			timer++;
 		}

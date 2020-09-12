@@ -772,7 +772,8 @@ Class RagekitPower : Powerup
 			return;
 		}
 		if ( Owner.player == players[consoleplayer] )
-			lastrage = SWWMHandler.AddOneliner("ragekit",2,20);
+			lastrage = SWWMHandler.AddOneliner("ragekit",2,20)+40;
+		Owner.A_AlertMonsters(5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
@@ -792,6 +793,7 @@ Class RagekitPower : Powerup
 		if ( !(level.maptime%30) )
 		{
 			SWWMHandler.DoFlash(Owner,Color(16,255,0,0),5);
+			Owner.A_AlertMonsters(2000);
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
@@ -806,6 +808,7 @@ Class RagekitPower : Powerup
 		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA);
 		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
+		Owner.A_AlertMonsters(2000);
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_RAGEKIT"));
 	}
 
@@ -842,6 +845,7 @@ Class RagekitPower : Powerup
 	void DoHitFX()
 	{
 		if ( level.maptime <= lasteffect+5 ) return;
+		Owner.A_AlertMonsters(5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )

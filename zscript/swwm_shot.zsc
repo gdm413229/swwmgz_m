@@ -315,10 +315,10 @@ Class DragonBreathArm : Actor
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFloor(i);
 				break;
 			}
 			if ( ff ) HitNormal = -ff.top.Normal;
@@ -327,10 +327,10 @@ Class DragonBreathArm : Actor
 		else if ( BlockingCeiling )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
 				break;
 			}
 			if ( ff ) HitNormal = -ff.bottom.Normal;
@@ -1121,10 +1121,10 @@ Class FlamingChunk : Actor
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFloor(i);
 				break;
 			}
 			if ( ff ) HitNormal = -ff.top.Normal;
@@ -1133,10 +1133,10 @@ Class FlamingChunk : Actor
 		else if ( BlockingCeiling )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
 				break;
 			}
 			if ( ff ) HitNormal = -ff.bottom.Normal;
@@ -1426,10 +1426,10 @@ Class TheBall : Actor
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFloor(i);
 				break;
 			}
 			if ( ff )
@@ -1444,10 +1444,10 @@ Class TheBall : Actor
 		else if ( BlockingCeiling )
 		{
 			// find closest 3d floor for its normal
-			for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
-				if ( !(CurSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-				ff = CurSector.Get3DFloor(i);
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
 				break;
 			}
 			if ( ff )

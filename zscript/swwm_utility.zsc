@@ -219,13 +219,13 @@ Class SWWMUtility
 	// Thanks to ZZYZX and Nash
 	static play void SetToSlope( Actor a, double dang )
 	{
-		vector3 fnormal = a.CurSector.floorplane.Normal;
+		vector3 fnormal = a.FloorSector.floorplane.Normal;
 		// find closest 3d floor for its normal
 		F3DFloor ff;
-		for ( int i=0; i<a.CurSector.Get3DFloorCount(); i++ )
+		for ( int i=0; i<a.FloorSector.Get3DFloorCount(); i++ )
 		{
-			if ( !(a.CurSector.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
-			ff = a.CurSector.Get3DFloor(i);
+			if ( !(a.FloorSector.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
+			ff = a.FloorSector.Get3DFloor(i);
 			break;
 		}
 		if ( ff ) fnormal = -ff.top.Normal;

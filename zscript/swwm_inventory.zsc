@@ -1269,7 +1269,6 @@ Class SWWMWeapon : Weapon abstract
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
 		A_StartSound(raging?"pusher/althit":(hitsound!="")?hitsound:"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(100);
-		if ( raging ) raging.DoHitFX();
 	}
 	override void PlayUpSound( Actor origin )
 	{

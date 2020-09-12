@@ -709,34 +709,58 @@ Class Demolitionist : PlayerPawn
 			if ( (spd > 0) && !bumped && ((pos.z+Height+dir.z*spd) >= ceilingz) )
 			{
 				F3DFloor ff;
-				for ( int i=0; i<CurSector.Get3DFloorCount(); i++ )
+				for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
 				{
-					if ( !(CurSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-					ff = CurSector.Get3DFloor(i);
+					if ( !(CeilingSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+					ff = CeilingSector.Get3DFloor(i);
 					break;
 				}
 				Vector3 ceilnorm;
 				if ( ff ) ceilnorm = ff.model.floorplane.Normal;
-				else ceilnorm = CurSector.ceilingplane.Normal;
+				else ceilnorm = CeilingSector.ceilingplane.Normal;
 				// don't bump if we're only grazing it
 				if ( dir dot ceilnorm < -.6 )
 				{
-					// headbump
-					bumped = true;
-					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
-					bumptic = gametic+int(20+spd/4.);
-					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-					vel *= .2;
-					vel -= dir*(10+(spd*30/mass));
-					vel.z += 5+(spd*(10/mass));
-					vel += ceilnorm*(15+(spd*40/mass));
-					dashboost *= 0.;
+					bool busted = false;
 					if ( raging )
 					{
-						let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
-						ps.damagetype = 'Dash';
-						ps.target = self;
-						ps.special1 = int(15+spd*2.5);
+						// see if we can bust it
+						let tempme = new("LineTracer"); // gross hack to pass needed data
+						int dmg = int(128+spd*20);
+						if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
+						if ( ff ) tempme.Results.ffloor = ff;
+						tempme.Results.HitSector = CeilingSector;
+						tempme.Results.HitType = TRACE_HitCeiling;
+						if ( BusterWall.Bust(tempme.Results,dmg,self,dir,pos.z+Height) )
+						{
+							// busted through
+							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
+							ps.damagetype = 'Dash';
+							ps.target = self;
+							ps.special1 = int(15+spd*2.5);
+							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+							busted = true;
+						}
+					}
+					if ( !busted )
+					{
+						// headbump
+						bumped = true;
+						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+						bumptic = gametic+int(20+spd/4.);
+						A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+						vel *= .2;
+						vel -= dir*(10+(spd*30/mass));
+						vel.z += 5+(spd*(10/mass));
+						vel += ceilnorm*(15+(spd*40/mass));
+						dashboost *= 0.;
+						if ( raging )
+						{
+							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
+							ps.damagetype = 'Dash';
+							ps.target = self;
+							ps.special1 = int(15+spd*2.5);
+						}
 					}
 				}
 			}
@@ -748,11 +772,45 @@ Class Demolitionist : PlayerPawn
 				if ( (spd > 0) && !bumped && !CheckMove(Vec2Offset(steppy.x*i,steppy.y*i),PCM_DROPOFF|PCM_NOACTORS,tm) && BlockingLine )
 				{
 					Vector3 wallnorm = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+					int lside = 1;
 					if ( !BlockingLine.sidedef[1] || !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
+					{
+						lside = 0;
 						wallnorm *= -1;
+					}
 					// don't bump if we're only grazing it
 					if ( dir dot wallnorm > -.6 )
 						continue;
+					if ( raging )
+					{
+						// see if we can bust it
+						let tempme = new("LineTracer"); // gross hack to pass needed data
+						int dmg = int(128+spd*20);
+						if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
+						tempme.Results.HitLine = BlockingLine;
+						tempme.Results.HitType = TRACE_HitWall;
+						tempme.Results.Side = lside;
+						tempme.Results.Tier = TIER_MIDDLE;
+						if ( BlockingLine.sidedef[1] )
+						{
+							double ceilz = BlockingLine.sidedef[!lside].sector.ceilingplane.ZAtPoint(pos.xy);
+							double florz = BlockingLine.sidedef[!lside].sector.floorplane.ZAtPoint(pos.xy);
+							if ( pos.z+Height >= ceilz )
+								tempme.Results.Tier = TIER_UPPER;
+							else if ( pos.z <= florz )
+								tempme.Results.Tier = TIER_LOWER;
+						}
+						if ( BusterWall.Bust(tempme.Results,dmg,self,dir,pos.z+Height/2) )
+						{
+							// busted through
+							let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
+							ps.damagetype = 'Dash';
+							ps.target = self;
+							ps.special1 = int(15+spd*2.5);
+							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
+							continue;
+						}
+					}
 					// wallbump
 					bumped = true;
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
@@ -770,6 +828,11 @@ Class Demolitionist : PlayerPawn
 						ps.target = self;
 						ps.special1 = int(15+spd*2.5);
 					}
+					// activate it
+					int locknum = SWWMUtility.GetLineLock(BlockingLine);
+					if ( !locknum || CheckKeys(locknum,false,true) )
+						BlockingLine.Activate(self,lside,SPAC_Use);
+					BlockingLine.Activate(self,lside,SPAC_Impact);
 					break;
 				}
 			}
@@ -802,7 +865,7 @@ Class Demolitionist : PlayerPawn
 			splitdmg[1] = max(1,(damage-splitdmg[0])/4);	// reduced part (<25% health)
 			damage = splitdmg[0]+splitdmg[1];
 		}
-		if ( !inflictor && !source && (CurSector.flags&Sector.SECF_ENDLEVEL) )
+		if ( !inflictor && !source && (FloorSector.flags&Sector.SECF_ENDLEVEL) )
 		{
 			// end level hax
 			damage = max(50,health-100);
@@ -2175,6 +2238,23 @@ Class DemolitionistShockwave : Actor
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
+		}
+		if ( target.FindInventory("RagekitPower") )
+		{
+			// bust the floor if we can
+			let tempme = new("LineTracer"); // gross hack to pass needed data
+			int dmg = (40+min(special1,120))*8;
+			F3DFloor ff;
+			for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
+			{
+				if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = FloorSector.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) tempme.Results.ffloor = ff;
+			tempme.Results.HitSector = FloorSector;
+			tempme.Results.HitType = TRACE_HitFloor;
+			BusterWall.Bust(tempme.Results,dmg,target,(0,0,-1),pos.z);
 		}
 	}
 	States

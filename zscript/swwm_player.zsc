@@ -488,11 +488,11 @@ Class Demolitionist : PlayerPawn
 		oldlagpitch = lagpitch;
 		lagangle = lagangle*.8+angle*.2;
 		lagpitch = lagpitch*.8+pitch*.2;
-		if ( (player.playerstate != PST_DEAD) && (player.jumptics != 0) && player.onground )
+		if ( (player.playerstate != PST_DEAD) && (player.jumptics != 0) )
 		{
 			// faster falloff
-			player.jumptics -= 2;
-			if ( player.jumptics < -18 )
+			player.jumptics -= 5;
+			if ( player.onground && (player.jumptics < -18) )
 				player.jumptics = 0;
 		}
 	}

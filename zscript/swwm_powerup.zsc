@@ -1431,6 +1431,7 @@ Class CompanionLamp : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
 				normal = -BlockingFloor.Get3DFLoor(i).top.Normal;
 				break;
@@ -1445,6 +1446,7 @@ Class CompanionLamp : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
 				normal = -BlockingCeiling.Get3DFloor(i).bottom.Normal;
 				break;

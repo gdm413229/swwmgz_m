@@ -94,7 +94,7 @@ Coming from the **Doom** modding side of things, this gun really packs a punch, 
 
 The **Spreadgun** uses 10 gauge ammunition, apparently just for the sake of making it feel more powerful due to the increased recoil.
 
-### 10Ga shells ~ Replaces Shells, Ethereal Arrows, Chaos Device/Banishment Device
+### 10Ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Chaos Device / Banishment Device
 ![](docimg/shells.png)
 
 Available in the following types, with varying chances of appearing depending

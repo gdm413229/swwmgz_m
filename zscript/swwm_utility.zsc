@@ -224,6 +224,7 @@ Class SWWMUtility
 		F3DFloor ff;
 		for ( int i=0; i<a.FloorSector.Get3DFloorCount(); i++ )
 		{
+			if ( !(a.FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 			if ( !(a.FloorSector.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
 			ff = a.FloorSector.Get3DFloor(i);
 			break;

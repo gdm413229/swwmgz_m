@@ -975,7 +975,7 @@ Class Wallbuster : SWWMWeapon
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
 			int realdmg = dmg?dmg:t.HitList[i].HitDamage;
-			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large);
+			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large&&!swwm_shotgib);
 			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),mm*FRandom[Wallbuster](0.4,1.2));
 			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE )
 			{

@@ -161,7 +161,7 @@ Class mkBloodDrop : Actor
 			FCheckPosition tm;
 			// gravitational pull
 			vel.z -= GetGravity();
-			// movement subdivision (these damn things are tiny
+			// movement subdivision (these damn things are tiny)
 			int steps = 8;
 			while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
 				steps++;
@@ -211,6 +211,7 @@ Class mkBloodDrop : Actor
 						F3DFloor ff;
 						for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
 						{
+							if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 							if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
 							ff = FloorSector.Get3DFloor(i);
 							break;

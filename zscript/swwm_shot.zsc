@@ -317,6 +317,7 @@ Class DragonBreathArm : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
 				ff = BlockingFloor.Get3DFloor(i);
 				break;
@@ -329,6 +330,7 @@ Class DragonBreathArm : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
 				ff = BlockingCeiling.Get3DFloor(i);
 				break;
@@ -1123,6 +1125,7 @@ Class FlamingChunk : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
 				ff = BlockingFloor.Get3DFloor(i);
 				break;
@@ -1135,6 +1138,7 @@ Class FlamingChunk : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
 				ff = BlockingCeiling.Get3DFloor(i);
 				break;
@@ -1428,6 +1432,7 @@ Class TheBall : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
 				ff = BlockingFloor.Get3DFloor(i);
 				break;
@@ -1446,6 +1451,7 @@ Class TheBall : Actor
 			// find closest 3d floor for its normal
 			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
 			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
 				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
 				ff = BlockingCeiling.Get3DFloor(i);
 				break;
@@ -2056,7 +2062,7 @@ Class Spreadgun : SWWMWeapon
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
 			int realdmg = dmg?dmg:t.HitList[i].HitDamage;
-			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large);
+			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large&&!swwm_shotgib);
 			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),mm*FRandom[Spreadgun](0.4,1.2));
 			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE )
 			{

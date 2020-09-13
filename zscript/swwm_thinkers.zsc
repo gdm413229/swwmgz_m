@@ -848,24 +848,27 @@ Class SWWMCombatTracker : Thinker
 		if ( mytarget && mytarget.bDORMANT )
 			return;
 		// update
-		if ( mytarget && ((mytarget.pos != oldpos) || (mytarget.prev != oldprev)) )
+		if ( !mytarget || (mytarget.Health <= 0) )
+		{
+			// we're done
+			if ( updated > level.maptime ) updated = level.maptime;
+			lasthealth = 0;
+			prevpos = pos;	// prevent stuttering
+			intp.Update(lasthealth);
+			if ( level.maptime > updated+35 ) Destroy();
+			return;
+		}
+		// only update height/position while alive
+		bool heightchanged = false;
+		if ( height != mytarget.height ) heightchanged = true;
+		height = mytarget.height;
+		if ( mytarget && (heightchanged || (mytarget.pos != oldpos) || (mytarget.prev != oldprev)) )
 		{
 			oldpos = mytarget.pos;
 			oldprev = mytarget.prev;
 			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
 			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
 		}
-		if ( !mytarget || (mytarget.Health <= 0) )
-		{
-			// we're done
-			if ( updated > level.maptime ) updated = level.maptime;
-			lasthealth = 0;
-			intp.Update(lasthealth);
-			if ( level.maptime > updated+35 ) Destroy();
-			return;
-		}
-		// only update height while alive
-		height = mytarget.height;
 		tcnt++;
 		if ( (tcnt == 1) && !mytarget.player )
 		{

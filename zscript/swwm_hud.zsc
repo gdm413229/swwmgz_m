@@ -736,28 +736,28 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( targettag.GetBool() || targ.myplayer && (tag != "") )
 				Screen.DrawText(fnt,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			int ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*10);
-			int hw = int((min(ht,targ.maxhealth)*50.)/targ.maxhealth);
+			double ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*10);
+			double hw = (min(ht,targ.maxhealth)*50.)/targ.maxhealth;
 			if ( targ.mytarget && (targ.mytarget.bInvulnerable || (targ.myplayer && (targ.myplayer.cheats&(CF_GODMODE|CF_GODMODE2))) || targ.mytarget.FindInventory("InvinciballPower")) )
 			{
-				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
+				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 				continue;
 			}
-			Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
+			Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 			if ( ht > targ.maxhealth )
 			{
-				hw = int((min(ht-targ.maxhealth,targ.maxhealth)*50.)/targ.maxhealth);
-				Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
+				hw = (min(ht-targ.maxhealth,targ.maxhealth)*50.)/targ.maxhealth;
+				Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 			}
 			if ( ht > targ.maxhealth*2 )
 			{
-				hw = int((min(ht-targ.maxhealth*2,targ.maxhealth*3)*50.)/(targ.maxhealth*3));
-				Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
+				hw = (min(ht-targ.maxhealth*2,targ.maxhealth*3)*50.)/(targ.maxhealth*3);
+				Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 			}
 			if ( ht > targ.maxhealth*5 )
 			{
-				hw = int((min(ht-targ.maxhealth*5,targ.maxhealth*5)*50.)/(targ.maxhealth*5));
-				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRight,hw);
+				hw = (min(ht-targ.maxhealth*5,targ.maxhealth*5)*50.)/(targ.maxhealth*5);
+				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 			}
 		}
 		if ( !scorebonus ) scorebonus = CVar.GetCVar('swwm_scorebonus',players[consoleplayer]);
@@ -1106,35 +1106,35 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		Screen.DrawTexture(StatusTex,false,margin,ss.y-(margin+26),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		let d = Demolitionist(CPlayer.mo);
-		int dw = DashInter.GetValue();
+		double dw = DashInter.GetValue();
 		double alph = .6;
 		if ( !d || (d.dashfuel > 20) || ((gametic%10) < 5) ) alph = 1.;
-		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+20),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,dw,DTA_Alpha,alph);
-		int fw = FuelInter.GetValue()/2;
-		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,fw);
-		int ht = clamp(HealthInter.GetValue(),0,10000);
-		int hw = min(ht,100);
+		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+20),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,dw,DTA_Alpha,alph);
+		double fw = FuelInter.GetValue()/2.;
+		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,fw);
+		double ht = clamp(HealthInter.GetValue(),0,10000);
+		double hw = min(ht,100);
 		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
 		{
-			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+15),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			return;
 		}
-		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
 		if ( ht > 100 )
 		{
 			hw = min(ht-100,100);
-			Screen.DrawTexture(HealthTex[1],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			Screen.DrawTexture(HealthTex[1],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
 		}
 		if ( ht > 200 )
 		{
-			hw = int(min(ht-200,300)/3.);
-			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			hw = min(ht-200,300)/3.;
+			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
 		}
 		if ( ht > 500 )
 		{
-			hw = int(min(ht-500,500)/5.);
-			Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,hw);
+			hw = min(ht-500,500)/5.;
+			Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
 		}
 		int hcolor = Font.CR_RED;
 		if ( ht > 500 ) hcolor = Font.CR_GOLD;

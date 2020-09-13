@@ -57,6 +57,8 @@ Class Demolitionist : PlayerPawn
 	SWWMItemSense itemsense;
 	int itemsense_cnt;
 
+	int healcooldown, healtimer, oldhealth;
+
 	Property DashFuel : dashfuel;
 
 	Default
@@ -507,6 +509,31 @@ Class Demolitionist : PlayerPawn
 			selflight.Tick();
 		}
 		if ( player.mo != self ) return;	// no voodoo dolls past this point
+		// overheal fading
+		if ( (health <= 200) || (health > oldhealth) )
+		{
+			healtimer = 0;
+			healcooldown = 80;
+		}
+		else if ( health > 200 )
+		{
+			if ( healcooldown > 0 ) healcooldown--;
+			else
+			{
+				if ( health > 500 )
+				{
+					if ( !FindInventory("GrilledCheeseSafeguard") && !(healtimer%5) )
+						A_SetHealth(health-1);
+				}
+				else if ( health > 200 )
+				{
+					if ( !FindInventory("RefresherRegen") && !(healtimer%15) )
+						A_SetHealth(health-1);
+				}
+				healtimer++;
+			}
+		}
+		oldhealth = health;
 		oldlagvel = lagvel;
 		oldlagready = lagready;
 		if ( player.weaponstate&WF_WEAPONBOBBING ) lagready = lagready*.9+.1;

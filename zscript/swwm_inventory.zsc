@@ -310,6 +310,12 @@ Class SWWMHealth : Inventory abstract
 		if ( (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
 		{
 			newdamage = damage;
+			// lesser healing items can't prevent lethal damage
+			// bigger healing items only autoactivate on lethal damage
+			if ( !bBIGPOWERUP && (Owner.Health-damage <= 0) )
+				return;
+			else if ( bBIGPOWERUP && (Owner.Health-damage > 0) )
+				return;
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			int tgive = 0;
 			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();

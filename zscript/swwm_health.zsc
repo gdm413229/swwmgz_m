@@ -30,7 +30,7 @@ Class RefresherHealth : Health
 {
 	Default
 	{
-		Inventory.Amount 200;
+		Inventory.Amount 100;
 		Inventory.MaxAmount 500;
 	}
 	override bool TryPickup( in out Actor other )
@@ -52,7 +52,7 @@ Class RefresherRegen : Powerup
 	Default
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Refresher.png";
-		Powerup.Duration -60;
+		Powerup.Duration -50;
 		Powerup.Strength 10;
 	}
 
@@ -65,7 +65,7 @@ Class RefresherRegen : Powerup
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner && (Owner.health > 0) && !(EffectTics%175) )
+		if ( Owner && (Owner.health > 0) && !((EffectTics-5)%175) )
 		{
 			if ( Owner.GiveBody(int(Strength),500) )
 			{

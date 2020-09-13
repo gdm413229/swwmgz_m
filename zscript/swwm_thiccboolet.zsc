@@ -588,8 +588,8 @@ Class SilverBullet : SWWMWeapon
 		if ( zl >= 10 )
 		{
 			Screen.DrawTexture(WeaponBox[1],false,bx-35,by-56,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			int zw = int(zl*31./160.);
-			Screen.DrawTexture(ZoomBar,false,bx-33,by-54,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,zw);
+			double zw = zl*31./160.;
+			Screen.DrawTexture(ZoomBar,false,bx-33,by-54,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,zw);
 		}
 		Screen.DrawTexture(WeaponBox[0],false,bx-55,by-44,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		if ( chambered ) Screen.DrawTexture(BulletIcon[fcbchambered],false,bx-53,by-30,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,fired?Color(128,0,0,0):Color(0,0,0,0));

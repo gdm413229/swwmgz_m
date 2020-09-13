@@ -265,7 +265,7 @@ Of course, one cannot go without little helpers along their journey.
 
 Healing items restore health (duh), armor items do exactly what you'd expect, and then there's all the various powerups that grant you useful abilities.
 
-All of these can be carried in your inventory indefinitely before use, except in deathmatch, where they're activated immediately. Healing items are always used immediately if they can heal you or you're about to die (with the lowest tier healing items taking priority). Armor is immediately carried if you don't have any of that type on you, or if your existing armor drains and you have a spare. Most powerups can be toggled, unless specified otherwise.
+All of these can be carried in your inventory indefinitely before use, except in deathmatch, where they're activated immediately. Healing items are automatically used whenever possible (with the lowest tier healing items taking priority). Armor is immediately carried if you don't have any of that type on you, or if your existing armor drains and you have a spare. Most powerups can be toggled, unless specified otherwise.
 
 ### Health Nugget ~ Replaces Health Bonus, Crystal Vial
 ![](docimg/nuggethealth.png)
@@ -285,7 +285,7 @@ All of these can be carried in your inventory indefinitely before use, except in
 ### Refresher ~ Replaces Soulsphere, Mystic Urn (Heretic), Mystic Ambit Incant
 ![](docimg/refresher.png)
 
-This artifact provides a massive +200 health boost plus a regeneration effect that heals 10% every 5 seconds, for up to 60 seconds, thus it doubles as a powerup. Its overhealing effects cap at 500 points (including the regen). Like other health items, the **Refresher** is auto-activated if you're about to die, though it sometimes won't be enough to save you.
+This artifact provides a +100 health boost plus a regeneration effect that heals +10 every 5 seconds, for up to 50 seconds, thus it doubles as a powerup. Its overhealing effects cap at 500 points (including the regen). Once its effects wear out, however, your excess health will gradually settle towards the typical 200 point cap. Unlike other health items, the **Refresher** auto-activates only if you're about to die. This usually prevents such a grim outcome... unless the damage is too high to counter.
 
 ### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette
 ![](docimg/nuggetarmor.png)
@@ -313,7 +313,7 @@ Can eat up a total of 250 damage points before breaking.
 ### Grilled Cheese Sandwich ~ Replaces Megasphere, Morph Ovum, Platinum Helm
 ![](docimg/sandwich.png)
 
-The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**).
+The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**). Keep in mind that this overhealing above 500 points fades away much quicker than the **Refresher**'s.
 
 ### Ghost Artifact ~ Replaces Blur Sphere, Shadowsphere, Amulet of Warding
 ![](docimg/ghost.png)

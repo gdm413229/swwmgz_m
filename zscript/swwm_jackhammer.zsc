@@ -346,8 +346,8 @@ Class PusherWeapon : SWWMWeapon
 		if ( !ChargeBar ) ChargeBar = TexMan.CheckForTexture("graphics/HUD/PusherBar.png",TexMan.Type_Any);
 		Screen.DrawTexture(WeaponBox,false,bx-60,by-9,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		int chg = clamp(ChargeInter?ChargeInter.GetValue():int(chargelevel*100),0,100);
-		int cw = int(chg*56./100.);
-		Screen.DrawTexture(ChargeBar,false,bx-58,by-7,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRight,cw);
+		double cw = chg*56./100.;
+		Screen.DrawTexture(ChargeBar,false,bx-58,by-7,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,cw);
 	}
 
 	override void HudTick()

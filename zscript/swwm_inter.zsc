@@ -1,4 +1,9 @@
 // Custom intermission screens
+Class SWWMStatScreenData : Thinker
+{
+	// to prevent repetition
+	Array<int> lasttip, lastart, last4koma;
+}
 
 Class SWWMStatScreen : StatusScreen abstract
 {
@@ -25,12 +30,67 @@ Class SWWMStatScreen : StatusScreen abstract
 	private void drawSWWMBg()
 	{
 		if ( !intertype ) intertype = CVar.GetCVar('swwm_intertype',players[consoleplayer]);
+		let pdata = SWWMStatScreenData(ThinkerIterator.Create("SWWMStatScreenData",Thinker.STAT_STATIC).Next());
+		if ( !pdata )
+		{
+			pdata = new("SWWMStatScreenData");
+			pdata.ChangeStatNum(Thinker.STAT_STATIC);
+		}
 		if ( !whichart )
 		{
 			int no = 0;
-			if ( intertype.GetInt() == 1 ) no = StringTable.Localize("$SWWM_NFANART").ToInt();
-			//else if ( intertype.GetInt() == 2 ) no = StringTable.Localize("$SWWM_N4KOMA").ToInt();
-			whichart = Random[InterArt](1,no);
+			if ( intertype.GetInt() == 1 )
+			{
+				no = StringTable.Localize("$SWWM_NFANART").ToInt();
+				Array<Int> ents;
+				ents.Clear();
+				for ( int i=1; i<=no; i++ )
+					ents.Push(i);
+				if ( pdata.lastart.Size() >= no )
+				{
+					// exclude last one, start over
+					int excludeme = pdata.lastart[pdata.lastart.Size()-1];
+					ents.Delete(excludeme-1);
+					pdata.lastart.Clear();
+				}
+				else
+				{
+					for ( int i=0; i<pdata.lastart.Size(); i++ )
+					{
+						int f = ents.Find(pdata.lastart[i]);
+						if ( f != ents.Size() )
+							ents.Delete(f);
+					}
+				}
+				whichart = ents[Random[InterArt](0,ents.Size()-1)];
+				pdata.lastart.Push(whichart);
+			}
+			else if ( intertype.GetInt() == 2 )
+			{
+				no = StringTable.Localize("$SWWM_N4KOMA").ToInt();
+				Array<Int> ents;
+				ents.Clear();
+				for ( int i=1; i<=no; i++ )
+					ents.Push(i);
+				if ( pdata.last4koma.Size() >= no )
+				{
+					// exclude last one, start over
+					int excludeme = pdata.last4koma[pdata.last4koma.Size()-1];
+					ents.Delete(excludeme-1);
+					pdata.last4koma.Clear();
+				}
+				else
+				{
+					for ( int i=0; i<pdata.last4koma.Size(); i++ )
+					{
+						int f = ents.Find(pdata.last4koma[i]);
+						if ( f != ents.Size() )
+							ents.Delete(f);
+					}
+				}
+				whichart = ents[Random[InterArt](0,ents.Size()-1)];
+				pdata.last4koma.Push(whichart);
+			}
 		}
 		if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
 		double ar = Screen.GetAspectRatio();
@@ -68,7 +128,28 @@ Class SWWMStatScreen : StatusScreen abstract
 		if ( !whichtip )
 		{
 			int maxtip = StringTable.Localize("$SWWM_NINTERTIP").ToInt();
-			whichtip = Random[InterArt](1,maxtip);
+			Array<Int> ents;
+			ents.Clear();
+			for ( int i=1; i<=maxtip; i++ )
+				ents.Push(i);
+			if ( pdata.lasttip.Size() >= maxtip )
+			{
+				// exclude last one, start over
+				int excludeme = pdata.lasttip[pdata.lasttip.Size()-1];
+				ents.Delete(excludeme-1);
+				pdata.lasttip.Clear();
+			}
+			else
+			{
+				for ( int i=0; i<pdata.lasttip.Size(); i++ )
+				{
+					int f = ents.Find(pdata.lasttip[i]);
+					if ( f != ents.Size() )
+						ents.Delete(f);
+				}
+			}
+			whichtip = ents[Random[InterArt](0,ents.Size()-1)];
+			pdata.lasttip.Push(whichtip);
 		}
 		String tipstr = "\cd"..String.Format(StringTable.Localize("$SWWM_INTERTIP"),whichtip).."\c-\n"..StringTable.Localize(String.Format("$SWWM_INTERTIP%d",whichtip));
 		BrokenLines l = fnt.BreakLines(tipstr,300);

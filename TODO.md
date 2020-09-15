@@ -1,7 +1,3 @@
-**Fundamental things before beta:**
-
- - Ynykron Artifact altfire
-
 **Not so fundamental things during first beta:**
 
  - Extra Demolitionist animations (swimming, additional gestures)

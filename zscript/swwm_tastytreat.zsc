@@ -245,6 +245,17 @@ Class CandyPop : Actor
 			SWWMHandler.DoFlash(mo,Color(str,224,0,255),3);
 		}
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -411,6 +422,17 @@ Class CandyMagTrail : Actor
 		+NOINTERACTION;
 		Scale 2.4;
 		Alpha 0.7;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{
@@ -773,6 +795,17 @@ Class CandyBulletImpact : Actor
 		Spawn("CandyLight",pos);
 		Spawn("CandyRing",pos);
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -807,6 +840,17 @@ Class CandyRing : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{

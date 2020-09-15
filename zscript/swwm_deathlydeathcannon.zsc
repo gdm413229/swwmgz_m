@@ -219,6 +219,17 @@ Class YnykronImpactTrail : Actor
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -451,6 +462,17 @@ Class YnykronImpact : Actor
 		if ( YnykronShot(master) )
 			YnykronShot(master).blastcount--;
 		Super.OnDestroy();
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{
@@ -901,6 +923,17 @@ Class YnykronRing : Actor
 		+ROLLCENTER;
 		+NOINTERACTION;
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -927,9 +960,15 @@ Class YnykronImpactRing : Actor
 	}
 	override void Tick()
 	{
-		Super.Tick();
 		if ( isFrozen() ) return;
 		A_SetScale(scale.x*(special2?1.06:1.03));
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{
@@ -1830,6 +1869,168 @@ Class SimpleMoveTracer : LineTracer
 	}
 }
 
+Class YnykronSingularityRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale 4.;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*1.05);
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 2 Bright;
+		Stop;
+	}
+}
+
+Class YnykronVoidExplLight : PaletteLight
+{
+	Default
+	{
+		Tag "Purple";
+		ReactionTime 60;
+		Args 0,0,0,1200;
+	}
+}
+
+Class YnykronVoidSparkle : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[ExploS](.75,1.5);
+		specialf1 = FRandom[ExploS](.95,.98);
+		specialf2 = FRandom[ExploS](.005,.015);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch))*FRandom[ExploS](1,16);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*specialf1);
+		A_FadeOut(specialf2);
+		Vector3 dir = vel;
+		double magvel = dir.length();
+		magvel *= .99;
+		if ( magvel > 0. )
+		{
+			dir /= magvel;
+			dir += .2*(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1));
+			vel = dir.unit()*magvel;
+		}
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+	}
+	States
+	{
+	Spawn:
+		MOPF A -1 Bright;
+		Stop;
+	}
+}
+
+Class YnykronSingularityExplosion : Actor
+{
+	Default
+	{
+		Obituary "$O_YNYKRONALT";
+		DamageType "YnykronAlt";
+		RenderStyle "Add";
+		Scale 5.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( !Random[ExploS](0,5) )
+			A_StartSound("ynykron/impact",CHAN_VOICE);
+		SWWMUtility.DoExplosion(self,10000,5000,400,200);
+		A_SprayDecal("WumboScorch",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](8,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](4,20);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](128,160)+Color(28,0,31));
+			s.A_SetRenderStyle(.2,STYLE_AddShaded);
+			s.special1 = Random[ExploS](2,5);
+			s.scale *= 8.;
+		}
+		numpt = Random[ExploS](5,10);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			double ofs = FRandom[ExploS](0.,30.);
+			let s = Spawn("YnykronVoidSparkle",level.Vec3Offset(pos,ofs*(cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))));
+			s.angle = ang;
+			s.pitch = pt;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		scale *= 1.01;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX4 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 2 Bright;
+		Stop;
+	}
+}
+
 Class YnykronSingularity : Actor
 {
 	const MAXBEAMS = 20;
@@ -2110,45 +2311,90 @@ Class YnykronSingularity : Actor
 	}
 	void A_SingularityBlast()
 	{
-		Console.Printf("// TODO explosion goes here");
-		A_QuakeEx(8,8,8,80,0,65536,"",QF_RELATIVE|QF_SCALEDOWN,falloff:65536,rollIntensity:1.6);
+		A_AlertMonsters();
+		SWWMUtility.DoExplosion(self,int.max,500000,800,400);
+		A_QuakeEx(8,8,8,100,0,65536,"",QF_RELATIVE|QF_SCALEDOWN,falloff:65536,rollIntensity:1.6);
 		A_StopAllSounds();
 		A_StartSound("ynykron/vortexend",CHAN_VOICE,attenuation:0.);
 		FlashPlayer(250,9000);
 		vel *= 0;
-		// kill off and detach any leftover beams
+		// kill off any leftover beams
 		for ( int i=0; i<MAXBEAMS; i++ )
 		{
 			if ( !beamers[i] ) continue;
 			YnykronVoidBeam(beamers[i]).maxlife = 0;
-			beamers[i] = null;
+		}
+		Spawn("YnykronSingularityRing",pos);
+		Spawn("YnykronVoidExplLight",pos);
+		int numpt = Random[ExploS](40,60);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("YnykronVoidSparkle",pos);
+			s.angle = FRandom[ExploS](0,360);
+			s.pitch = FRandom[ExploS](-90,90);
+			s.scale *= 8.;
+			s.alpha *= 5.;
 		}
 	}
 	void A_SingularityExtraBlast()
 	{
 		special1++;
-		if ( special1 > 80 )
+		if ( special1 > 60 )
 		{
 			if ( IsActorPlayingSound(CHAN_VOICE) ) return;
 			for ( int i=0; i<MAXBEAMS; i++ ) if ( beamers[i] ) return;
 			Destroy();
 			return;
 		}
-		for ( int i=0; i<MAXBEAMS; i++ )
+		double factor = (60-special1)/60.;
+		double invfct = 1.-factor;
+		SWWMUtility.DoExplosion(self,0,-50000*factor,2000*invfct);
+		FlashPlayer(int(100*factor),9000);
+		FLineTraceData d;
+		Vector3 HitNormal;
+		Vector3 origin;
+		double ang, pt;
+		int numpt = clamp(special1/6,2,8);
+		for ( int i=0; i<numpt; i++ )
 		{
-			if ( beamers[i] )
+			double totaldist = 30+(special1**2.5)*.05;
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,90);
+			origin = pos;
+			while ( totaldist > 0 )
 			{
-				YnykronVoidBeam(beamers[i]).maxlife = 0;
-				continue;
+				LineTrace(ang,totaldist,pt,TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+				hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				totaldist -= d.Distance;
+				if ( totaldist > 0 )
+				{
+					Vector3 bounced = d.HitDir-(2*hitnormal*(d.HitDir dot HitNormal));
+					ang = atan2(bounced.y,bounced.x);
+					pt = asin(-bounced.z);
+					origin = d.HitLocation+hitnormal;
+				}
 			}
-			beamers[i] = Spawn("YnykronVoidBeam",pos);
-			YnykronVoidBeam(beamers[i]).basebeam = beamers[i];
-			beamers[i].target = target;
-			beamers[i].master = self;
-			beamers[i].stamina = 1;
-			beamers[i].scale *= scale.x*10.;
+			let p = Spawn("YnykronSingularityExplosion",d.HitLocation+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.target = target;
+			p.scale *= 1.+special1/40.;
 		}
-		scale.x *= .97;
 	}
 
 	Default

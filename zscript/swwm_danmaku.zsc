@@ -483,6 +483,17 @@ Class EvisceratorSubExpl : Actor
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -504,6 +515,17 @@ Class EvisceratorRing : Actor
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{

@@ -1077,6 +1077,9 @@ Class SWWMHandler : EventHandler
 			CopyFloatBob(e.Thing);
 		if ( swwm_doomfall && e.Thing.bISMONSTER && !level.monsterfallingdamage )
 			ForcedFallerDamager.TrackBody(e.Thing);
+		// alternate form without extra thinker, just needs PR #1153
+		//if ( swwm_doomfall && e.Thing.bISMONSTER )
+		//	e.Thing.bFALLDAMAGE = true;
 		if ( e.Thing is 'Key' )
 		{
 			DoKeyTagFix(e.Thing);

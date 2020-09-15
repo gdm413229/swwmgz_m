@@ -151,6 +151,17 @@ Class AirBulletRing : Actor
 		Radius 0.1;
 		Height 0;
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:

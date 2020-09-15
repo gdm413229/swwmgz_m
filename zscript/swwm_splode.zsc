@@ -89,6 +89,17 @@ Class ExplodiumMagTrail : Actor
 		+NOINTERACTION;
 		Scale 1.1;
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -261,6 +272,17 @@ Class ExplodiumBulletImpact : Actor
 			s.vel = pvel;
 		}
 		Spawn("ExploLight",pos);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{

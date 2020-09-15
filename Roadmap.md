@@ -1,4 +1,4 @@
-**Swimming in Jizz:**
+~~**Swimming in Jizz:**~~
 
  - This is where I make all the stuff before beta.
  - It's been over nine months already, still a shorter dev time than my previous projects.

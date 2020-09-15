@@ -796,6 +796,17 @@ Class BiosparkBeamImpact : Actor
 			s.ReactionTime += Random[Sparkster](0,int(5*factor));
 		}
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -835,6 +846,17 @@ Class BiosparkComboImpactSub : Actor
 		Super.PostBeginPlay();
 		if ( !bAMBUSH ) return;
 		SWWMUtility.DoExplosion(self,100,10000,300,120);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{
@@ -1040,6 +1062,17 @@ Class BiosparkComboImpact : Actor
 			p.scale *= 2-special2*.02;
 			p.alpha *= 1-special2*.02;
 			p.bAMBUSH = bAMBUSH;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
 		}
 	}
 	States
@@ -1635,6 +1668,17 @@ Class BiosparkSpark : Actor
 		+ROLLCENTER;
 		+FORCEXYBILLBOARD;
 		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
 	}
 	States
 	{

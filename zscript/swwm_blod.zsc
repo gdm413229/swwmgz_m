@@ -24,6 +24,17 @@ Class mkBlood : Actor
 		else b.SetShade(Color(80,0,0));
 		b.CopyBloodColor(target);
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:

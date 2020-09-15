@@ -533,6 +533,17 @@ Class SaltImpact : Actor
 		}
 		Spawn("SaltLight2",pos);
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -832,13 +843,14 @@ Class OnFire : Actor
 
 	override void Tick()
 	{
+		if ( isFrozen() ) return;
 		if ( !victim )
 		{
 			A_StopSound(CHAN_5);
 			Destroy();
 			return;
 		}
-		SetOrigin(victim.pos,true);
+		SetOrigin(victim.pos,false);
 		if ( victim.waterlevel > 0 )
 		{
 			if ( lite ) lite.Destroy();
@@ -1041,6 +1053,19 @@ Class OnFireTrail : Actor
 			s.vel += vel*.3;
 			s.alpha *= alpha*1.5;
 			s.scale *= .5+abs(scale.x)*(.5+special1/6.);
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+		UpdateWaterLevel();
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
 		}
 	}
 	Default
@@ -1683,6 +1708,17 @@ Class GoldenImpact : Actor
 			p.target = target;
 		}
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -1808,6 +1844,17 @@ Class GoldenSubImpact : Actor
 			p.target = target;
 		}
 	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
 	States
 	{
 	Spawn:
@@ -1859,6 +1906,17 @@ Class GoldenSubSubImpact : Actor
 			s.special1 = Random[ExploS](0,2);
 			s.scale *= 1.6;
 			s.alpha *= .2;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
 		}
 	}
 	States

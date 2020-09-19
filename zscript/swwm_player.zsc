@@ -275,14 +275,7 @@ Class Demolitionist : PlayerPawn
 	override void GiveDefaultInventory()
 	{
 		Super.GiveDefaultInventory();
-		// reset score (optional)
-		if ( swwm_resetscore )
-		{
-			let creds = SWWMCredits.Find(player);
-			if ( creds ) creds.credits = creds.hcredits = 0;
-		}
 		// preloaded gun
-		let dp = DeepImpact(FindInventory("DeepImpact"));
 		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
 		if ( !eg ) return;
 		eg.clipcount = 7;
@@ -719,7 +712,13 @@ Class Demolitionist : PlayerPawn
 				if ( raging ) flg |= DMG_FOILINVUL;
 				if ( !a.player && !a.bDONTBLAST ) a.bBLASTED = true;
 				int dmg = int(15+spd*2.5);
-				if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
+				bool buttslam = false;
+				// BUTTSLAM
+				if ( dir dot viewdir < -.3 )
+				{
+					dmg *= 3;
+					buttslam = true;
+				}
 				if ( a.bSHOOTABLE )
 				{
 					dmg = a.DamageMobj(self,self,dmg,'Dash',flg);
@@ -727,6 +726,12 @@ Class Demolitionist : PlayerPawn
 					{
 						a.TraceBleed(dmg,self);
 						a.SpawnBlood(level.Vec3Offset(pos,diff/2),atan2(dir.y,dir.x)+180,dmg);
+					}
+					if ( buttslam && (!a || (a.Health <= 0)) )
+					{
+						A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
+						Spawn("SWWMItemFog",level.Vec3Offset(pos,diff/2));
+						A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 					}
 				}
 				if ( raging )
@@ -760,7 +765,13 @@ Class Demolitionist : PlayerPawn
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
 						int dmg = int(128+spd*20);
-						if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
+						bool buttslam = false;
+						// BUTTSLAM
+						if ( dir dot viewdir < -.3 )
+						{
+							dmg *= 3;
+							buttslam = true;
+						}
 						if ( ff ) tempme.Results.ffloor = ff;
 						tempme.Results.HitSector = CeilingSector;
 						tempme.Results.HitType = TRACE_HitCeiling;
@@ -774,6 +785,12 @@ Class Demolitionist : PlayerPawn
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 							busted = true;
 							raging.DoHitFX();
+							if ( buttslam )
+							{
+								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
+								Spawn("SWWMItemFog",Vec3Offset(0,0,Height));
+								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+							}
 						}
 					}
 					if ( !busted )
@@ -802,9 +819,12 @@ Class Demolitionist : PlayerPawn
 			// check for wall collision
 			FCheckPosition tm;
 			Vector2 steppy = dir.xy*spd/8.;
+			Vector3 oldpos = pos;
+			bool oldthru = bTHRUACTORS;
+			bTHRUACTORS = true;
 			for ( int i=1; i<=8; i++ )
 			{
-				if ( (spd > 0) && !bumped && !CheckMove(Vec2Offset(steppy.x*i,steppy.y*i),PCM_DROPOFF|PCM_NOACTORS,tm) && BlockingLine )
+				if ( (spd > 0) && !bumped && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) && BlockingLine )
 				{
 					Vector3 wallnorm = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
 					int lside = 1;
@@ -821,7 +841,13 @@ Class Demolitionist : PlayerPawn
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
 						int dmg = int(128+spd*20);
-						if ( dir dot viewdir < -.3 ) dmg *= 3;	// BUTTSLAM
+						bool buttslam = false;
+						// BUTTSLAM
+						if ( dir dot viewdir < -.3 )
+						{
+							dmg *= 3;
+							buttslam = true;
+						}
 						tempme.Results.HitLine = BlockingLine;
 						tempme.Results.HitType = TRACE_HitWall;
 						tempme.Results.Side = lside;
@@ -844,6 +870,12 @@ Class Demolitionist : PlayerPawn
 							ps.special1 = int(15+spd*2.5);
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 							raging.DoHitFX();
+							if ( buttslam )
+							{
+								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
+								Spawn("SWWMItemFog",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
+								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+							}
 							continue;
 						}
 					}
@@ -873,6 +905,8 @@ Class Demolitionist : PlayerPawn
 					break;
 				}
 			}
+			SetOrigin(oldpos,true);
+			bTHRUACTORS = oldthru;
 		}
 		else if ( isboosting && (dashboost > 0.) )
 		{
@@ -964,8 +998,8 @@ Class Demolitionist : PlayerPawn
 	}
 	override void MovePlayer()
 	{
-		if ( InStateSequence(CurState,FindState("Dash")) )
-			player.cmd.forwardmove = player.cmd.sidemove = 0;
+		bool isdashing = InStateSequence(CurState,FindState("Dash"));
+		if ( isdashing ) player.cmd.forwardmove = player.cmd.sidemove = 0;
 		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
 		{
 			player.onground = false;
@@ -1049,7 +1083,7 @@ Class Demolitionist : PlayerPawn
 		guidepitch *= .9;
 		guideroll *= .9;
 		// anchor to ground when going down steps
-		if ( lastground && !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) )
+		if ( lastground && !player.onground && !bFly && !bFlyCheat && (waterlevel < 2) && (abs(pos.z-floorz) <= maxdropoffheight) && (player.jumptics == 0) && (vel.z < 0) && !isdashing )
 		{
 			// test for gap crossing (i.e: climbing up platforms with holes between them)
 			Vector3 storepos = pos;
@@ -1082,12 +1116,10 @@ Class Demolitionist : PlayerPawn
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
 		if ( player.cmd.buttons&BT_CROUCH ) dodge = (0,0,-1);	// death from above
-		if ( player.onground ) dodge.z = max(0,dodge.z);
 		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
-		if ( (waterlevel < 2) && !(bFly || bFlyCheat) )
-			dodge.z += (player.cmd.buttons&BT_CROUCH)?-.05:.15;
 		if ( !level.IsJumpingAllowed() ) dodge.z = min(0,dodge.z);
-		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed()) && (gamestate == GS_LEVEL) )
+		if ( player.onground ) dodge.z = max(0,dodge.z);
+		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed() || (player.cmd.buttons&BT_CROUCH)) && (gamestate == GS_LEVEL) )
 		{
 			dashdir = dodge.unit();
 			dashcooldown = 10;

@@ -571,7 +571,7 @@ Class SWWMHandler : EventHandler
 
 	override void PlayerEntered( PlayerEvent e )
 	{
-		// create some static thinkers for this player
+		// create some static thinkers for this player if needed
 		PlayerInfo p = players[e.playernumber];
 		SWWMTradeHistory th = SWWMTradeHistory.Find(p);
 		if ( !th )
@@ -634,13 +634,30 @@ Class SWWMHandler : EventHandler
 		// reset combat tracker
 		if ( !swwm_notrack )
 			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
-		// initialize some player vars
 		if ( p.mo is 'Demolitionist' )
 		{
+			// reinitialize
 			Demolitionist(p.mo).dashfuel = Demolitionist(p.mo).default.dashfuel;
 			Demolitionist(p.mo).last_boost = 0;
 			Demolitionist(p.mo).last_kick = 0;
+			// cancel dash/boost
+			p.mo.A_StopSound(CHAN_JETPACK);
+			Demolitionist(p.mo).fuelcooldown = 0.;
+			Demolitionist(p.mo).dashcooldown = 0.;
+			Demolitionist(p.mo).dashboost = 0.;
+			Demolitionist(p.mo).dashsnd = false;
+			// prevent sudden stomping if we were previously falling
+			Demolitionist(p.mo).lastvelz = p.mo.vel.z;
+			// early cancel gestures
+			if ( p.ReadyWeapon is 'SWWMGesture' )
+			{
+				p.PendingWeapon = SWWMGesture(p.ReadyWeapon).formerweapon;
+				p.SetPSprite(PSP_WEAPON,p.ReadyWeapon.ResolveState("Deselect"));
+			}
 		}
+		// reset score (optional) if inventory should be cleared
+		if ( level.removeitems && !e.IsReturn && swwm_resetscore )
+			c.credits = c.hcredits = 0;
 	}
 
 	override void PlayerRespawned( PlayerEvent e )

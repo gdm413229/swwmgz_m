@@ -739,13 +739,7 @@ Class ParryField : Actor
 		+NOCLIP;
 		+DONTSPLASH;
 		+NOTELEPORT;
-		+SHOOTABLE;
-		+NONSHOOTABLE;
-		+NOBLOOD;
-		+DONTTHRUST;
 		+NOINTERACTION;
-		Health int.max;
-		Mass int.max;
 		Radius 20;
 		Height 40;
 	}
@@ -813,73 +807,6 @@ Class ParryField : Actor
 			}
 		}
 		if ( --special1 <= 0 ) Destroy();
-	}
-
-	override bool CanCollideWith( Actor other, bool passive )
-	{
-		return false;
-	}
-
-	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
-	{
-		if ( (flags&DMG_INFLICTOR_IS_PUFF) && (source != master) )
-		{
-			Vector3 vdir = (cos(angle),sin(angle),0);
-			Vector3 vpos = inflictor.pos;	// puff goes here
-			let raging = RagekitPower(master.FindInventory("RagekitPower"));
-			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",vpos);
-			if ( raging ) raging.DoHitFX();
-			i.angle = angle+180;
-			i.bAMBUSH = true;
-			// deflect hitscan
-			A_StartSound("misc/ricochet",CHAN_VOICE,CHANF_OVERLAP,.7);
-			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
-			A_StartSound("demolitionist/parry",CHAN_WEAPON);
-			double mult = 1.5;
-			if ( raging ) mult = 8.;
-			if ( (level.maptime > lasteggtic) && !Random[Parry](0,4) )
-			{
-				for ( int i=1; i<6; i++ )
-				{
-					let r = Spawn("ParryRing",vpos);
-					r.specialf1 = i*.04;
-				}
-				mult *= 2.;
-				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
-				lasteggtic = level.maptime+5;
-			}
-			// three options:
-			switch ( Random[Parry](0,7) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				//  1. just block the bullet, making it bounce off
-				let b = Spawn("ReflectedBullet",vpos);
-				b.angle = angle;
-				b.target = master;
-				b.vel = (-vdir+(FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4),FRandom[Parry](-.4,.4))).unit()*FRandom[Parry](1,2)*mult+(0,0,4);
-				break;
-			case 3:
-			case 4:
-			case 5:
-				//  2. ricochet in random direction
-				Vector3 rdir = (-vdir+(FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6),FRandom[Parry](-.6,.6))).unit();
-				bSHOOTABLE = false;
-				master.LineAttack(atan2(rdir.y,rdir.x),8000,asin(-rdir.z),int(damage*mult),mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
-				bSHOOTABLE = true;
-				break;
-			case 6:
-			case 7:
-				//  3. ricochet directly back to source
-				Vector3 tdir = source?(level.Vec3Diff(vpos,source.Vec3Offset(0,0,source.height/2))).unit():(-vdir);
-				bSHOOTABLE = false;
-				master.LineAttack(atan2(tdir.y,tdir.x),8000,asin(-tdir.z),int(damage*mult),mod,inflictor.GetClass(),LAF_ABSPOSITION,null,vpos.z,vpos.x,vpos.y);
-				bSHOOTABLE = true;
-				break;
-			}
-		}
-		return 0;
 	}
 }
 

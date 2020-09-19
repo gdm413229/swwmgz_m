@@ -3,7 +3,6 @@
  - Extra Demolitionist animations (swimming, additional gestures)
  - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
- - Parrying for hitscan weapons (currently parrying only handles vanilla LineAttack)
  - Fun options
    - Omnibusting (all weapons can bust walls)
    - Infinite fuel

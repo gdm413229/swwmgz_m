@@ -152,8 +152,12 @@ Class SWWMStatScreen : StatusScreen abstract
 			pdata.lasttip.Push(whichtip);
 		}
 		String tipstr = "\cd"..String.Format(StringTable.Localize("$SWWM_INTERTIP"),whichtip).."\c-\n"..StringTable.Localize(String.Format("$SWWM_INTERTIP%d",whichtip));
-		BrokenLines l = fnt.BreakLines(tipstr,300);
-		int bw = int(308*hs), bh = int((fnt.GetHeight()*l.Count()+12)*hs);
+		BrokenLines l = fnt.BreakLines(tipstr,400);
+		int lw = 0;
+		for ( int i=0; i<l.Count(); i++ )
+			if ( l.StringWidth(i) > lw )
+				lw = l.StringWidth(i);
+		int bw = int((lw+8)*hs), bh = int((fnt.GetHeight()*l.Count()+12)*hs);
 		double xx = 10, yy = (ss.y-10)-(fnt.GetHeight()*l.Count()+4);
 		Screen.Dim("Black",.8,int((xx-4)*hs),int((yy-4)*hs),bw,bh);
 		for ( int i=0; i<l.Count(); i++ )

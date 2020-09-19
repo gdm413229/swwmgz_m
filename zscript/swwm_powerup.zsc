@@ -857,7 +857,7 @@ Class RagekitPower : Powerup
 
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
-		if ( !passive && ((damageType == 'Melee') || (damageType == 'Jump') || (damageType == 'Dash') || (damageType == 'GroundPound')) )
+		if ( !passive && ((damageType == 'Melee') || (damageType == 'Jump') || (damageType == 'Dash') || (damageType == 'Buttslam') || (damageType == 'GroundPound')) )
 		{
 			newdamage = damage*8;
 			DoHitFX();

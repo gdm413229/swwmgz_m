@@ -51,6 +51,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int drag;	// when dragging with the mouse, which scroller to affect (1 = ofs0 and so on)
 	// stats
 	SWWMStats stats;
+	Array<String> statlist;
 	Array<MonsterKill> sorted_mstats; // sorted by killcount
 	// inventory lists
 	Array<Inventory> invlist;
@@ -429,7 +430,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else if ( curtab == TAB_STATS )
 			{
 				int cnt = 0;
-				if ( sel1 == STAT_KILLS )
+				if ( sel1 == STAT_MAIN )
+					cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS )
 					cnt = sorted_mstats.Size();
 				else if ( sel1 == STAT_LEVEL )
 					cnt = stats.lstats.Size();
@@ -1295,7 +1298,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
 				int cnt = 0;
-				if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
 				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
 				if ( cnt <= 28 ) return res;	// no scrollbar
 				// calculate offset
@@ -1490,7 +1494,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			else if ( curtab == TAB_STATS )
 			{
 				int cnt = 0;
-				if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
 				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
 				if ( cnt <= 22 ) return res;	// no scrollbar
 				// calculate offset
@@ -1856,6 +1861,83 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel1 >= invlist.Size() ) sel1 = max(0,invlist.Size()-1);
 			}
 		}
+		else if ( (curtab == TAB_STATS) && (sel1 == STAT_MAIN) )
+		{
+			statlist.Clear();
+			// wish I could use macros for this
+			int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
+			int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
+			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
+			String str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
+			statlist.Push(str);
+			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_METER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.swimdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.teledist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATTELE"),stats.teledist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATTELE"),stats.teledist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.,StringTable.Localize("$SWWM_UNIT_LITER"));
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE),StringTable.Localize("$SWWM_UNIT_KPH"));
+			statlist.Push(str);
+			thour = (stats.airtime/(3600*Thinker.TICRATE));
+			tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
+			tsec = (stats.airtime/Thinker.TICRATE)%60;
+			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUSTS"),stats.busts);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUTTS"),stats.buttslams);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATITEMS"),stats.items);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSECRETS"),stats.secrets);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
+			statlist.Push(str);
+			if ( stats.hdamagedealt > 0 ) str = str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDDEALT"),stats.hdamagedealt,stats.damagedealt);
+			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
+			statlist.Push(str);
+			if ( stats.hdamagetaken > 0 ) str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.hdamagetaken,stats.damagetaken);
+			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
+			if ( stats.favweapon == -1 ) str = str.."N/A";
+			else if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' ) str = str..StringTable.Localize("$SWWM_YOURSELF");
+			else
+			{
+				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
+				str = str..def.GetTag();
+			}
+			statlist.Push(str);
+			if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
+			else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
+			statlist.Push(str);
+		}
 		// ui->play transaction checks
 		for ( int i=0; i<checklist.Size(); i++ )
 		{
@@ -2140,96 +2222,30 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				xx += 9;
 				yy = 23;
-				// wish I could use macros for this
-				int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
-				int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
-				int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
-				str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_METER"));
-				else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
-				else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.swimdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
-				else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.,StringTable.Localize("$SWWM_UNIT_LITER"));
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE),StringTable.Localize("$SWWM_UNIT_KPH"));
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				thour = (stats.airtime/(3600*Thinker.TICRATE));
-				tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
-				tsec = (stats.airtime/Thinker.TICRATE)%60;
-				str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUSTS"),stats.busts);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.hdamagedealt > 0 ) str = str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDDEALT"),stats.hdamagedealt,stats.damagedealt);
-				else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.hdamagetaken > 0 ) str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.hdamagetaken,stats.damagetaken);
-				else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
-				if ( stats.favweapon == -1 ) str = str.."N/A";
-				else
+				int cnt = statlist.Size();
+				if ( cnt <= 0 )
 				{
-					if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' )
-						str = str..StringTable.Localize("$SWWM_YOURSELF");
-					else
-					{
-						let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
-						str = str..def.GetTag();
-					}
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
 				}
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
-				if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
-				else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				yy += 16;
+				int ofs = clamp(sel0,0,max(0,cnt-22));
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = statlist[i];
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 16;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
 			}
 			else if ( sel1 == STAT_KILLS )
 			{
@@ -2246,9 +2262,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				for ( int i=ofs; i<cnt; i++ )
 				{
 					if ( yy >= 370 ) break;
-					str = GetDefaultByType(sorted_mstats[i].m).GetTag("AWESOME IT'S PENIS");
+					str = GetDefaultByType(sorted_mstats[i].m).GetTag(FallbackTag);
 					// beautify if there's no tag
-					if ( str == "AWESOME IT'S PENIS" )
+					if ( str == FallbackTag )
 					{
 						str = sorted_mstats[i].m.GetClassName();
 						SWWMUtility.BeautifyClassName(str);

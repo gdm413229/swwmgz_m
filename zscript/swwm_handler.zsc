@@ -762,6 +762,8 @@ Class SWWMHandler : EventHandler
 				SWWMCredits.Give(players[i],score);
 				SWWMScoreObj.Spawn(score,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
 				lastitemcount[i] = players[i].itemcount;
+				let s = SWWMStats.Find(players[i]);
+				s.items++;
 			}
 		}
 		// combat tracking
@@ -978,6 +980,17 @@ Class SWWMHandler : EventHandler
 					scr.xscore[ofs] = 0;
 					scr.xtcolor[ofs] = Font.CR_FIRE;
 					scr.xstr[ofs] = StringTable.Localize("$SWWM_SHAMEFUL");
+					scr.xcnt = ++ofs;
+				}
+			}
+			else if ( e.DamageType == 'Buttslam' )
+			{
+				score += 200;
+				if ( scr )
+				{
+					scr.xscore[ofs] = 0;
+					scr.xtcolor[ofs] = Font.CR_FIRE;
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_BUTTSLAM");
 					scr.xcnt = ++ofs;
 				}
 			}

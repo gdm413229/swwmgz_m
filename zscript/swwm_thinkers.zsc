@@ -29,7 +29,7 @@ Class SWWMStats : Thinker
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
 		deaths,	damagedealt, hdamagedealt, damagetaken, hdamagetaken,
 		mkill, hiscore, hhiscore, topdealt, toptaken, skill, wponch,
-		busts;
+		busts, buttslams, secrets, items;
 	double grounddist, airdist, swimdist, fuelusage, topspeed, teledist;
 	Array<WeaponUsage> wstats;
 	Array<MonsterKill> mstats;
@@ -771,8 +771,8 @@ Class SWWMCombatTracker : Thinker
 		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
 		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain')) )
 		{
-			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget,"AWESOME IT'S PENIS"):mytarget.GetTag("AWESOME IT'S PENIS");
-			if ( realtag == "AWESOME IT'S PENIS" )
+			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
+			if ( realtag == FallbackTag )
 			{
 				realtag = mytarget.GetClassName();
 				SWWMUtility.BeautifyClassName(realtag);

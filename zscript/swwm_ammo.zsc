@@ -23,7 +23,7 @@ Mixin Class SWWMAmmo
 
 	override bool SpecialDropAction( Actor dropper )
 	{
-		if ( swwm_enemydrops )
+		if ( swwm_enemydrops >= 0 )
 		{
 			if ( Amount == default.Amount ) return false;
 			// subdivide
@@ -202,7 +202,7 @@ Class MagAmmo : Inventory abstract
 
 	override bool SpecialDropAction( Actor dropper )
 	{
-		if ( swwm_enemydrops )
+		if ( swwm_enemydrops >= 0 )
 		{
 			if ( Amount == default.Amount ) return false;
 			// subdivide

@@ -18,6 +18,12 @@ OptionValue "SWWMInterType"
 	1, "$SWWM_INTERART"
 	//2, "$SWWM_INTER4KOMA"
 }
+OptionValue "SWWMEnemyDropType"
+{
+	-1, "$SWWM_DROPS_NONE"
+	0, "$SWWM_DROPS_AMMO"
+	1, "$SWWM_DROPS_WEAPONS"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -76,7 +82,7 @@ OptionMenu "SWWMOptionMenu"
 	//Option "$SWWM_PARTYTIME", "swwm_partytime", "YesNo"
 	StaticText " "
 	StaticText "$SWWM_BTITLE", "Gold"
-	Option "$SWWM_ENEMYDROPS", "swwm_enemydrops", "YesNo"
+	Option "$SWWM_ENEMYDROPS", "swwm_enemydrops", "SWWMEnemyDropType"
 	Option "$SWWM_RESETSCORE", "swwm_resetscore", "YesNo"
 	Option "$SWWM_EXTRAALERT", "swwm_extraalert", "YesNo"
 	Option "$SWWM_BOSSENHANCE", "swwm_upgradebosses", "YesNo"

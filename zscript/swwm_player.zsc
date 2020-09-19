@@ -269,6 +269,7 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( mod == 'Jump' ) return StringTable.Localize("$O_JUMP");
 		if ( mod == 'Dash' ) return StringTable.Localize("$O_DASH");
+		if ( mod == 'Buttslam' ) return StringTable.Localize("$O_BUTT");
 		if ( mod == 'GroundPound' ) return StringTable.Localize("$O_POUND");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
@@ -721,7 +722,7 @@ Class Demolitionist : PlayerPawn
 				}
 				if ( a.bSHOOTABLE )
 				{
-					dmg = a.DamageMobj(self,self,dmg,'Dash',flg);
+					dmg = a.DamageMobj(self,self,dmg,buttslam?'Buttslam':'Dash',flg);
 					if ( a && !a.bNOBLOOD && (raging || !a.bINVULNERABLE) )
 					{
 						a.TraceBleed(dmg,self);
@@ -732,12 +733,13 @@ Class Demolitionist : PlayerPawn
 						A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
 						Spawn("SWWMItemFog",level.Vec3Offset(pos,diff/2));
 						A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+						mystats.buttslams++;
 					}
 				}
 				if ( raging )
 				{
 					let ps = Spawn("BigPunchSplash",level.Vec3Offset(pos,diff/2));
-					ps.damagetype = 'Dash';
+					ps.damagetype = buttslam?'Buttslam':'Dash';
 					ps.target = self;
 					ps.special1 = dmg;
 					raging.DoHitFX();
@@ -779,7 +781,7 @@ Class Demolitionist : PlayerPawn
 						{
 							// busted through
 							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
-							ps.damagetype = 'Dash';
+							ps.damagetype = buttslam?'Buttslam':'Dash';
 							ps.target = self;
 							ps.special1 = int(15+spd*2.5);
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
@@ -790,6 +792,7 @@ Class Demolitionist : PlayerPawn
 								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
 								Spawn("SWWMItemFog",Vec3Offset(0,0,Height));
 								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+								mystats.buttslams++;
 							}
 						}
 					}
@@ -808,7 +811,7 @@ Class Demolitionist : PlayerPawn
 						if ( raging )
 						{
 							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
-							ps.damagetype = 'Dash';
+							ps.damagetype = (dir dot viewdir < -3.)?'Buttslam':'Dash';
 							ps.target = self;
 							ps.special1 = int(15+spd*2.5);
 							raging.DoHitFX();
@@ -865,7 +868,7 @@ Class Demolitionist : PlayerPawn
 						{
 							// busted through
 							let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
-							ps.damagetype = 'Dash';
+							ps.damagetype = buttslam?'Buttslam':'Dash';
 							ps.target = self;
 							ps.special1 = int(15+spd*2.5);
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
@@ -875,6 +878,7 @@ Class Demolitionist : PlayerPawn
 								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
 								Spawn("SWWMItemFog",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
 								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+								mystats.buttslams++;
 							}
 							continue;
 						}
@@ -892,7 +896,7 @@ Class Demolitionist : PlayerPawn
 					if ( raging )
 					{
 						let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,Height/2.));
-						ps.damagetype = 'Dash';
+						ps.damagetype = (dir dot viewdir < -3.)?'Buttslam':'Dash';
 						ps.target = self;
 						ps.special1 = int(15+spd*2.5);
 						raging.DoHitFX();
@@ -1610,6 +1614,7 @@ Class Demolitionist : PlayerPawn
 		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);
 		SWWMCredits.Give(player,score);
 		SWWMScoreObj.Spawn(score,Vec3Offset(0,0,Height/2));
+		mystats.secrets++;
 		return true;
 	}
 	override void AddInventory( Inventory item )

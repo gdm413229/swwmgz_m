@@ -10,6 +10,8 @@ enum EDoExplosionFlags
 	DE_EXTRAZTHRUST = 32,	// applies a higher Z thrust to enemies on ground
 };
 
+const FallbackTag = "AWESOME IT'S PENIS"; // used on tag processing, please don't mind the actual string used)
+
 Class SWWMUtility
 {
 	static clearscope void StripColor( out String str )
@@ -57,7 +59,15 @@ Class SWWMUtility
 			if ( i < len-1 )
 			{
 				int cp2 = workstr.GetNextCodePoint(i+1);
-				if ( (String.CharLower(cp1) == cp1) && (String.CharUpper(cp2) == cp2) )
+				// this looks awkward, but I have to also account for non-letter characters
+				// uppercase after lowercase
+				if ( (String.CharUpper(cp1) != cp1) && (String.CharLower(cp2) != cp2) )
+					str.AppendCharacter(0x20);
+				// uppercase after non-letter
+				else if ( (String.CharUpper(cp1) == cp1) && (String.CharLower(cp1) == cp1) && (String.CharLower(cp2) != cp2) )
+					str.AppendCharacter(0x20);
+				// non-letter after lowercase
+				else if ( (String.CharUpper(cp1) != cp1) && (String.CharLower(cp2) == cp2) && (String.CharUpper(cp2) == cp2) )
 					str.AppendCharacter(0x20);
 			}
 		}

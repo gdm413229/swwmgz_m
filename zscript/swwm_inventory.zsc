@@ -907,6 +907,10 @@ Class SWWMWeapon : Weapon abstract
 	Actor pfield;	// instance of parry field for current melee attack
 	bool wallponch;	// is punching a wall (for activation checks)
 
+	Class<Ammo> dropammotype;
+
+	Property DropAmmoType : dropammotype;
+
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 
 	override bool HandlePickup( Inventory item )
@@ -1247,7 +1251,24 @@ Class SWWMWeapon : Weapon abstract
 	}
 	override bool SpecialDropAction( Actor dropper )
 	{
-		if ( swwm_enemydrops ) return false;
+		if ( swwm_enemydrops > 0 ) return false;
+		else if ( swwm_enemydrops == 0 )
+		{
+			// drop our corresponding ammo
+			if ( !DropAmmoType ) return true;
+			let a = Inventory(Spawn(DropAmmoType,pos,ALLOW_REPLACE));
+			if ( !a ) return true;
+			a.bDROPPED = true;
+			a.bNOGRAVITY = false;
+			if ( !(level.compatflags&COMPATF_NOTOSSDROPS) )
+				a.TossItem();
+			if ( a is 'Ammo' )
+				a.ModifyDropAmount(Ammo(a).DropAmount);
+			a.bTOSSED = true;
+			if ( a.SpecialDropAction(dropper) )
+				a.Destroy();
+			return true;
+		}
 		// no weapon drops from enemies
 		return true;
 	}

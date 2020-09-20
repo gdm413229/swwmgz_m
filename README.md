@@ -79,7 +79,9 @@ Primary firearm, another staple of the series, but more volatile than ever. A po
 
 **Reload:** Just a plain ol' reload, nothing else, no explosions or anything.
 
-Equipped by default on spawned players. Cannot be dual wielded (yet). Has infinite ammo.
+Equipped by default on spawned players. Has infinite ammo.
+
+If you manage to get a second one, you can dual wield them, in which case secondary fire instead shoots your off-hand gun.
 
 ### Spreadgun (slot 3) ~ Replaces Shotgun, Ethereal Crossbow, Serpent Staff
 ![](docimg/spreadgun.png)

@@ -1696,7 +1696,7 @@ Class GoldenImpact : Actor
 				totaldist -= d.Distance;
 				if ( totaldist > 0 )
 				{
-					Vector3 bounced = d.HitDir-(2*hitnormal*(d.HitDir dot HitNormal));
+					Vector3 bounced = d.HitDir-(1.2*hitnormal*(d.HitDir dot HitNormal));
 					ang = atan2(bounced.y,bounced.x);
 					pt = asin(-bounced.z);
 					origin = d.HitLocation+hitnormal;
@@ -1832,7 +1832,7 @@ Class GoldenSubImpact : Actor
 				totaldist -= d.Distance;
 				if ( totaldist > 0 )
 				{
-					Vector3 bounced = d.HitDir-(2*hitnormal*(d.HitDir dot HitNormal));
+					Vector3 bounced = d.HitDir-(1.2*hitnormal*(d.HitDir dot HitNormal));
 					ang = atan2(bounced.y,bounced.x);
 					pt = asin(-bounced.z);
 					origin = d.HitLocation+hitnormal;

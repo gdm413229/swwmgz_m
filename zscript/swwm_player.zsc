@@ -342,11 +342,11 @@ Class Demolitionist : PlayerPawn
 	void SenseItems()
 	{
 		let thesight = FindInventory("Omnisight");
-		let bt = BlockThingsIterator.Create(self,1200);
+		let bt = BlockThingsIterator.Create(self,800);
 		while ( bt.Next() )
 		{
 			let i = Inventory(bt.Thing);
-			if ( !i || i.bINVISIBLE || !i.bSPECIAL || i.Owner || !SWWMUtility.SphereIntersect(i,pos,thesight?1200:800) ) continue;
+			if ( !i || i.bINVISIBLE || !i.bSPECIAL || i.Owner || !SWWMUtility.SphereIntersect(i,pos,800) ) continue;
 			if ( !thesight && !CheckSight(i) ) continue;
 			SWWMItemSense.Spawn(self,i);
 		}

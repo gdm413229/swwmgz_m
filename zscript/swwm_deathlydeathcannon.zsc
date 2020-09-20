@@ -1214,7 +1214,7 @@ Class GatherDust : Actor
 			if ( distto < (32.*target.scale.x) )
 			{
 				// sucked in
-				target.specialf2 += FRandom[ExploS](.1,.4);
+				target.specialf2 += FRandom[ExploS](.2,2.);
 				Destroy();
 				return;
 			}
@@ -1959,6 +1959,92 @@ Class YnykronVoidSparkle : Actor
 		Stop;
 	}
 }
+Class YnykronSingularityExplosionArm : Actor
+{
+	Default
+	{
+		PROJECTILE;
+		+THRUACTORS;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		-NOGRAVITY;
+		Gravity 0.35;
+		BounceFactor 1.0;
+		Radius 4;
+		Height 4;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		reactiontime = Random[ExploS](10,20);
+		double ang, pt;
+		ang = FRandom[ExploS](0,360);
+		pt = FRandom[ExploS](-90,90);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[ExploS](20.,40.);
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			A_CountDown();
+			if ( !(reactiontime%2) )
+			{
+				Spawn("YnykronSingularityExplosionTrail",pos);
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+				let s = Spawn("SWWMHalfSmoke",pos);
+				s.SetShade(Color(1,1,1)*Random[ExploS](128,160)+Color(28,0,31));
+				s.A_SetRenderStyle(s.alpha*(.1+.4*(ReactionTime/15.)),STYLE_AddShaded);
+				s.vel = pvel+vel*.2;
+				s.special1 = Random[ExploS](1,3);
+				s.scale *= 2.4;
+			}
+		}
+		Wait;
+	}
+}
+
+Class YnykronSingularityExplosionTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+		Scale 3.;
+		Alpha .2;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX4 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 1 Bright;
+		Stop;
+	}
+}
 
 Class YnykronSingularityExplosion : Actor
 {
@@ -2009,6 +2095,12 @@ Class YnykronSingularityExplosion : Actor
 			let s = Spawn("YnykronVoidSparkle",level.Vec3Offset(pos,ofs*(cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))));
 			s.angle = ang;
 			s.pitch = pt;
+		}
+		numpt = Random[ExploS](-1,3);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("YnykronSingularityExplosionArm",pos);
+			s.target = target;
 		}
 	}
 	override void Tick()
@@ -2183,7 +2275,7 @@ Class YnykronSingularity : Actor
 			beamers[i].master = self;
 		}
 		// suck in reachable targets
-		let bi = BlockThingsIterator.Create(self,20000*scale.x);
+		let bi = BlockThingsIterator.Create(self,12800*scale.x);
 		while ( bi.Next() )
 		{
 			let a = bi.Thing;
@@ -2233,7 +2325,7 @@ Class YnykronSingularity : Actor
 					IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
 				}
 				if ( !a || (a.Health <= 0) )
-					specialf2 += capmass;
+					specialf2 += capmass*.6;	// partial absorption
 				continue;
 			}
 			capmass = max(50.,a.mass);
@@ -2254,7 +2346,7 @@ Class YnykronSingularity : Actor
 			if ( a.mass < LARGE_MASS )
 			{
 				// v-force field compression (very rough approximation)
-				a.vel *= max(0.,1.-.0002*(grav*grav)/(MION_CONST*MION_CONST));
+				a.vel *= max(.0,1.-.03*(grav*grav)/(MION_CONST*MION_CONST));
 				a.vel += dirto*grav/(capmass*TICRATE);
 			}
 		}
@@ -2348,8 +2440,8 @@ Class YnykronSingularity : Actor
 		}
 		double factor = (60-special1)/60.;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,0,-50000*factor,2000*invfct);
-		FlashPlayer(int(100*factor),9000);
+		SWWMUtility.DoExplosion(self,0,-50000*factor,4000*invfct);
+		FlashPlayer(int(100*factor),10000);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
@@ -2357,7 +2449,7 @@ Class YnykronSingularity : Actor
 		int numpt = clamp(special1/6,2,8);
 		for ( int i=0; i<numpt; i++ )
 		{
-			double totaldist = 30+(special1**2.5)*.05;
+			double totaldist = 30+(special1**2.5)*.1;
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,90);
 			origin = pos;
@@ -2383,7 +2475,7 @@ Class YnykronSingularity : Actor
 				totaldist -= d.Distance;
 				if ( totaldist > 0 )
 				{
-					Vector3 bounced = d.HitDir-(2*hitnormal*(d.HitDir dot HitNormal));
+					Vector3 bounced = d.HitDir-(1.2*hitnormal*(d.HitDir dot HitNormal));
 					ang = atan2(bounced.y,bounced.x);
 					pt = asin(-bounced.z);
 					origin = d.HitLocation+hitnormal;
@@ -2447,7 +2539,7 @@ Class YnykronAltBeam : Actor
 			let b = Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
 			b.A_CheckTerrain();
 		}
-		for ( int i=0; i<t.Results.Distance; i+=32 )
+		for ( int i=0; i<t.Results.Distance; i+=16 )
 		{
 			if ( Random[Ynykron](0,2) ) continue;
 			let b = Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
@@ -2495,7 +2587,7 @@ Class YnykronAltBeam : Actor
 			int numpt = Random[Ynykron](16,24);
 			for ( int i=0; i<numpt; i++ )
 			{
-				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*128));
+				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*64));
 				b.Scale *= FRandom[Ynykron](.6,1.8);
 				b.special1 = Random[Ynykron](1,2);
 				b.A_SetRenderStyle(.3,STYLE_Subtract);
@@ -2511,7 +2603,7 @@ Class YnykronAltBeam : Actor
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		// propagate
-		let next = Spawn("YnykronAltBeam",level.Vec3Offset(pos,x*128));
+		let next = Spawn("YnykronAltBeam",level.Vec3Offset(pos,x*64));
 		next.angle = atan2(x.y,x.x);
 		next.pitch = asin(-x.z);
 		next.roll = roll;

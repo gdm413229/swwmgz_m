@@ -39,7 +39,7 @@ Class PaletteLight : DynamicLight
 	}
 	private void UpdateLight()
 	{
-		int index = 255-((255*ReactionTime)/abs(default.ReactionTime));
+		int index = clamp(255-((255*ReactionTime)/abs(default.ReactionTime)),0,255);
 		args[LIGHT_RED] = pal[index].r;
 		args[LIGHT_GREEN] = pal[index].g;
 		args[LIGHT_BLUE] = pal[index].b;
@@ -622,7 +622,7 @@ Class SWWMChip : Actor
 {
 	SWWMChip prevchip, nextchip;
 	bool killme;
-	double rollvel;
+	double anglevel, pitchvel, rollvel;
 	bool dead;
 	Sector tracksector;
 	int trackplane;
@@ -645,8 +645,10 @@ Class SWWMChip : Actor
 	}
 	override void PostBeginPlay()
 	{
+		anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+		pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
-		frame = Random[Junk](0,5);
+		frame = Random[Junk](0,7);
 		scale *= Frandom[Junk](0.8,1.2);
 		SWWMHandler.QueueChip(self);
 	}
@@ -768,6 +770,8 @@ Class SWWMChip : Actor
 					trackplane = 0;
 				}
 				vel = (0,0,0);
+				pitch = 0;
+				roll = 0;
 				dead = true;
 				SetStateLabel("Death");
 				return;
@@ -790,22 +794,23 @@ Class SWWMChip : Actor
 	States
 	{
 	Spawn:
-		JUNK # 1
+		XZW1 # 1
 		{
+			angle += anglevel;
+			pitch += pitchvel;
 			roll += rollvel;
 		}
 		Loop;
 	Bounce:
-		JUNK # 0
+		XZW1 # 0
 		{
+			anglevel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
+			pitchvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 			rollvel = FRandom[Junk](10,30)*RandomPick[Junk](-1,1);
 		}
 		Goto Spawn;
 	Death:
-		JUNK # -1;
-		Stop;
-	Dummy:
-		JUNK ABCDEF -1;
+		XZW2 # -1;
 		Stop;
 	}
 }

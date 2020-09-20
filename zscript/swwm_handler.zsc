@@ -1573,7 +1573,13 @@ Class SWWMHandler : EventHandler
 				t.uid = e.Args[1];
 				t.type = MenuTransaction.TT_ITEMUSE;
 				let w = (Class<Weapon>)(item);
-				if ( w ) t.result = (players[e.Args[0]].PendingWeapon==Weapon(i));
+				if ( w )
+				{
+					t.result = (players[e.Args[0]].PendingWeapon==Weapon(i));
+					// dual wield gun support
+					if ( (i is 'ExplodiumGun') && (players[e.Args[0]].PendingWeapon==Weapon(i).SisterWeapon) )
+						t.result = true;
+				}
 				else t.result = rslt;
 				t.used = item;
 				t.usedup = (!i||(i.Amount<=0));

@@ -1,7 +1,6 @@
 **Not so fundamental things during first beta:**
 
  - Extra Demolitionist animations (swimming, additional gestures)
- - Dual wielding Explodium Gun
  - Quick grenade function (Explodium Mag)
  - Fun options
    - Omnibusting (all weapons can bust walls)

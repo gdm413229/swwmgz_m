@@ -1669,7 +1669,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+				// no hidden weapons
+				if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
 				String tag = inv.GetTag();
 				bool greater = false;
 				for ( int i=0; i<invlist.Size(); i++ )
@@ -1841,7 +1843,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				// alphabetically sorted inventory
 				for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 				{
-					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (inv is 'SWWMGesture') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+					// no hidden weapons
+					if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
 					String tag = inv.GetTag();
 					bool greater = false;
 					for ( int i=0; i<invlist.Size(); i++ )

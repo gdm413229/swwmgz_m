@@ -912,6 +912,7 @@ Class SWWMWeapon : Weapon abstract
 	Property DropAmmoType : dropammotype;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
+	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
 
 	override bool HandlePickup( Inventory item )
 	{

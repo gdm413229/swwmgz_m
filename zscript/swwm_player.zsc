@@ -279,8 +279,12 @@ Class Demolitionist : PlayerPawn
 		// preloaded gun
 		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
 		if ( !eg ) return;
-		eg.clipcount = 7;
+		eg.clipcount = eg.default.clipcount;
 		eg.chambered = true;
+		let eg2 = DualExplodiumGun(eg.SisterWeapon);
+		if ( !eg2 ) return;
+		eg2.clipcount = eg2.default.clipcount;
+		eg2.chambered = true;
 	}
 	override void ClearInventory()
 	{
@@ -2492,6 +2496,7 @@ Class SWWMGesture : SWWMWeapon
 	{
 		+WEAPON.CHEATNOTWEAPON;
 		+WEAPON.WIMPY_WEAPON;
+		+SWWMWEAPON.HIDEINMENU;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.UNCLEARABLE;

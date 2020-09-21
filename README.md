@@ -392,6 +392,7 @@ The scoring system is pretty straightforward. Each enemy you kill will give you 
 
  * +500 if the enemy was killed with the **Deep Impact** primary (humiliation).
  * +300 if the enemy was killed with your butt while dashing (no, seriously).
+ * +600 if the enemy was killed with a blown kiss (oh my~).
  * x2 for an overkill (enemy was gibbed or received twice its base health in damage).
  * x1.5 for each combo level, up to x8 in steps of x0.5. Kills are considered combos if multiple enemies are killed within 5 seconds of each other.
  * +100 for killing an enemy without having taken damage since last spawn, with extra +10 boosts for consecutive kills (extra boosts taper off after 10x).

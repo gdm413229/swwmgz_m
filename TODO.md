@@ -6,7 +6,7 @@
    - Omnibusting (all weapons can bust walls)
    - Infinite fuel
    - Confetti gibs
- - Keen replacement (need ideas)
+ - Keen replacement
  - Achievements
  - Extra Demolitionist Menu tabs (radio, minigames)
  - Collectables

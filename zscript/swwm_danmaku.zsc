@@ -87,9 +87,10 @@ Class EvisceratorChunkGlow : Actor
 	override void Tick()
 	{
 		if ( isFrozen() ) return;
-		if ( !EvisceratorChunk(target) )
+		if ( !EvisceratorChunk(target) || EvisceratorChunk(target).justdied )
 		{
-			Destroy();
+			Scale *= .9;
+			A_FadeOut();
 			return;
 		}
 		SetOrigin(target.pos,true);

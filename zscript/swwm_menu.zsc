@@ -1932,6 +1932,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
 			if ( stats.favweapon == -1 ) str = str.."N/A";
 			else if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' ) str = str..StringTable.Localize("$SWWM_YOURSELF");
+			else if ( stats.wstats[stats.favweapon].w == 'SWWMGesture' ) str = str..StringTable.Localize("$SWWM_DOKIDOKI");
 			else
 			{
 				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);

@@ -503,6 +503,13 @@ Class ExplodiumGun : SWWMWeapon
 			copy.chambered = DualExplodiumGun(SisterWeapon).chambered;
 			copy.clipcount = DualExplodiumGun(SisterWeapon).clipcount;
 			copy.preinit = true;	// signal that this copy has preset info
+			// forcibly switch back from sister weapon
+			if ( Owner.player.ReadyWeapon == SisterWeapon )
+			{
+				Owner.player.ReadyWeapon = self;
+				Owner.player.SetPSprite(PSP_WEAPON,FindState("Ready"));
+				Owner.player.SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+			}
 		}
 		return copy;
 	}
@@ -849,13 +856,6 @@ Class DualExplodiumGun : SWWMWeapon
 		// disallow dropping if weapon isn't ready for switching
 		if ( (Owner.player.ReadyWeapon == self) && (!(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH)) )
 			return null;
-		// forcibly switch back to sister weapon
-		if ( Owner.player.ReadyWeapon == self )
-		{
-			Owner.player.ReadyWeapon = SisterWeapon;
-			Owner.player.SetPSprite(PSP_WEAPON,SisterWeapon.FindState("Ready"));
-			Owner.player.SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
-		}
 		// call toss on sister
 		return SisterWeapon.CreateTossable(amt);
 	}
@@ -904,7 +904,8 @@ Class DualExplodiumGun : SWWMWeapon
 					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
 				else if ( (invoker.clipcount > 0) && !invoker.chambered )
 					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftPreSlide"));
-				else if ( (player.cmd.buttons&BT_RELOAD) && (ExplodiumGun(invoker.SisterWeapon).clipcount < ExplodiumGun(invoker.SisterWeapon).default.clipcount) )
+				else if ( (player.cmd.buttons&BT_RELOAD) && (ExplodiumGun(invoker.SisterWeapon).clipcount < ExplodiumGun(invoker.SisterWeapon).default.clipcount)
+					&& (ExplodiumGun(invoker.SisterWeapon).clipcount <= invoker.clipcount) )	// give priority only if less than left hand
 					player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
 				else if ( (player.cmd.buttons&BT_RELOAD) && (invoker.clipcount < invoker.default.clipcount) )
 					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
@@ -993,7 +994,7 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZW4 STUV 1;
 		XZW2 A 0 A_JumpIf(!ExplodiumGun(invoker.SisterWeapon).chambered,"Slide");
-		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
 		Goto Ready;
 	PreSlide:
 		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
@@ -1010,7 +1011,7 @@ Class DualExplodiumGun : SWWMWeapon
 		XZW5 EFG 1;
 		XZW5 H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 IJKLM 1;
-		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
 		Goto Ready;
 	LeftReload:
 		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
@@ -1049,7 +1050,7 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZWD STUV 1;
 		XZWB A 0 A_JumpIf(!invoker.chambered,"LeftSlide");
-		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
 		Goto LeftReady;
 	LeftPreSlide:
 		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
@@ -1066,14 +1067,13 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWE EFG 1;
 		XZWE H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWE IJKLM 1;
-		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
 		Goto LeftReady;
 	Zoom:
 		XZW2 A 1 A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW9 ABCDEFG 1;
 		XZW9 H 1 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftZoom")); }
 		XZW9 IJKLMNOPQRSTUVW 1;
-		XZW2 A 9;
 		Goto Ready;
 	LeftZoom:
 		XZWB A 1;

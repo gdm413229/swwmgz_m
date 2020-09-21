@@ -1771,6 +1771,7 @@ Class Hellblazer : SWWMWeapon
 	Reload:
 		XZW2 A 2
 		{
+			if ( (invoker.clipcount <= 0) && (CountInv(invoker.nextammo) <= 0) ) A_PickNextAmmo();
 			if ( (invoker.clipcount >= invoker.LoadedCapacity()) && (invoker.loadammo == invoker.nextammo) )
 				return A_JumpByAmmoType("Idle_1","Idle_2","Idle_3","Idle_4","Idle_G");
 			return A_JumpByAmmoType("Unload_1","Unload_2","Unload_3","Unload_4","Unload_G");

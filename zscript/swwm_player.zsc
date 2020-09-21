@@ -100,7 +100,7 @@ Class Demolitionist : PlayerPawn
 				health = min(health+amount,1000);
 				player.health = health;
 			}
-			else player.health = health = 1000;
+			else player.health = health = 200;
 		}
 		if ( giveall || (name ~== "backpack") )
 		{
@@ -210,6 +210,9 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Weapon>)(AllActorClasses[i]);
 				if ( !type || (type == "Weapon") ) continue;
+				// Don't give already owned weapons
+				let owned = FindInventory(type);
+				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
 				// Don't give replaced weapons unless the replacement was done by Dehacked.
 				let rep = GetReplacement(type);
 				if ( (rep == type) || (rep is "DehackedPickup") )
@@ -231,6 +234,9 @@ Class Demolitionist : PlayerPawn
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
 				if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) && (type is 'AmmoFabricator') ) continue;	// no fabricators before hexen
+				// Don't give maxed items
+				let owned = FindInventory(type);
+				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() &&
 					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )
@@ -495,6 +501,9 @@ Class Demolitionist : PlayerPawn
 			if ( player.onground && (player.jumptics < -18) )
 				player.jumptics = 0;
 		}
+		// quick grenade
+		if ( (player.playerstate != PST_DEAD) && (player.cmd.buttons&BT_USER4) )
+			SWWMGesture.SetGesture(self,-1);
 	}
 	override void Tick()
 	{
@@ -690,12 +699,13 @@ Class Demolitionist : PlayerPawn
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
 				Vector3 dirto = diff.unit();
 				if ( dir dot dirto < .1 ) continue;
+				if ( a.bACTLIKEBRIDGE && (diff.z <= -a.Height) ) continue;	// don't bump bridges if hit by above
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
-				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || (a.Mass >= maxmass) || (!a.bSHOOTABLE && !a.bPUSHABLE && (a.Health > 0))) && a.bSOLID && (dir dot dirto > .65) )
+				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || a.bACTLIKEBRIDGE || (a.Mass >= maxmass) || (!a.bSHOOTABLE && !a.bPUSHABLE && (a.Health > 0))) && a.bSOLID && (dir dot dirto > .65) )
 				{
 					if ( bumped ) continue;
 					bumped = true;
@@ -1970,6 +1980,10 @@ Class Demolitionist : PlayerPawn
 		#### # 3;
 		XZW6 EFGHIJKLMNOPQRSTUVW 3;
 		Goto Spawn+1;
+	BlowKiss:
+		#### # 3;
+		XZWD EFGHIJKLMNOPQRSTUVW 3;
+		Goto Spawn+1;
 	Missile:
 		// attacking
 		#### # 2;
@@ -2447,6 +2461,240 @@ Class CastDemolitionist : Actor
 	}
 }
 
+Class LoveHeartTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		Alpha .1;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCEXYBILLBOARD;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_FadeOut(.01);
+		scale *= .95;
+	}
+	States
+	{
+	Spawn:
+		DOKI A -1 Bright;
+		Stop;
+	}
+}
+
+Class LoveHeartSparkle : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		Scale .03;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[ExploS](.75,1.5);
+		specialf1 = FRandom[ExploS](.95,.98);
+		specialf2 = FRandom[ExploS](.01,.03);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch))*FRandom[ExploS](2,8);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*specialf1);
+		A_FadeOut(specialf2);
+		Vector3 dir = vel;
+		double magvel = dir.length();
+		magvel *= .99;
+		if ( magvel > 0. )
+		{
+			dir /= magvel;
+			dir += .2*(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1));
+			vel = dir.unit()*magvel;
+		}
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+	}
+	States
+	{
+	Spawn:
+		DOKI A -1 Bright;
+		Stop;
+	}
+}
+
+Class LoveHeartBurstLight : PaletteLight
+{
+	Default
+	{
+		Tag "LovePal";
+		ReactionTime 15;
+		Args 0,0,0,150;
+	}
+}
+
+Class LoveHeart : Actor
+{
+	Default
+	{
+		Obituary "$O_DOKIDOKI";
+		DamageType 'Love';
+		DamageFunction (clamp(special2,5,15));
+		Radius 4;
+		Height 4;
+		Speed 10;
+		Scale .2;
+		PROJECTILE;
+		+BLOODLESSIMPACT;
+		+FORCEXYBILLBOARD;
+		+SEEKERMISSILE;
+		+FOILINVUL;
+		+PAINLESS;
+		+NODAMAGETHRUST;
+	}
+
+	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
+	{
+		let raging = RagekitPower(self.target.FindInventory("RagekitPower"));
+		if ( target.IsFriend(self.target) || (target is 'MBFHelperDog') )
+		{
+			int healamt = clamp(special2,5,15);
+			if ( raging )
+			{
+				healamt *= 8;
+				raging.DoHitFX();
+			}
+			if ( target.GiveBody(healamt,target.GetSpawnHealth()) )
+			{
+				SWWMScoreObj.Spawn(healamt,target.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+target.Height/2),Font.CR_BLUE);
+				SWWMHandler.DoFlash(target,Color(32,224,128,255),10);
+			}
+			if ( target is 'MBFHelperDog' )
+			{
+				// befriend good doggo
+				target.bFRIENDLY = true;
+				if ( deathmatch )
+					target.SetFriendPlayer(self.target.player);
+			}
+			return 0;
+		}
+		let bread = target.FindState("Pain");
+		if ( bread ) target.SetState(bread);
+		if ( raging )
+		{
+			damage *= 8;
+			raging.DoHitFX();
+		}
+		return damage;
+	}
+
+	override int SpecialMissileHit( Actor victim )
+	{
+		if ( !victim.bSHOOTABLE && (victim != tracer) ) return 1;
+		if ( tracer && (victim != tracer) ) return 1;
+		return -1;
+	}
+
+	action void A_HeartTick()
+	{
+		special1++;
+		if ( !(special1%3) && (special2 > 0) ) special2--;
+		A_SetScale(.2+.02*sin(special1*.25*TICRATE));
+		double magvel = vel.length();
+		if ( magvel > 0 )
+		{
+			Vector3 dir = vel/magvel;
+			vel = dir*min(30,magvel*1.1);
+		}
+		double steppy = vel.length()/4.;
+		for ( int i=2; i<6; i++ )
+		{
+			Vector3 dir2 = vel.unit();
+			let t = Spawn("LoveHeartTrail",level.Vec3Offset(pos,-dir2*steppy*i));
+			t.scale = scale;
+		}
+		int numpt = Random[ExploS](1,3);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("LoveHeartSparkle",pos);
+			s.angle = FRandom[ExploS](0,360);
+			s.pitch = FRandom[ExploS](-90,90);
+		}
+		if ( !tracer || (tracer.Health <= 0) ) return;
+		double mag = vel.length();
+		vel = mag*(level.Vec3Diff(pos,tracer.Vec3Offset(0,0,tracer.height/2)).unit()*mag*6./TICRATE+vel).unit();
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("misc/heart",CHAN_WEAPON);
+		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
+		special2 = 25;
+	}
+	action void A_HeartBurst()
+	{
+		A_SetRenderStyle(1.,STYLE_Add);
+		A_RemoveLight('LOVELIGHT');
+		A_QuakeEx(2,2,2,8,0,300,"",QF_RELATIVE|QF_SCALEDOWN);
+		A_StartSound("bestsound",CHAN_VOICE);
+		Spawn("LoveHeartBurstLight",pos);
+		int numpt = Random[ExploS](10,15);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.5,4);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(10,8,9)*Random[ExploS](20,25));
+			s.special1 = Random[ExploS](1,3);
+			s.scale *= 2.;
+			s.alpha *= .6;
+		}
+		numpt = Random[ExploS](40,50);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("LoveHeartSparkle",pos);
+			s.angle = FRandom[ExploS](0,360);
+			s.pitch = FRandom[ExploS](-90,90);
+			s.scale *= RandomPick[ExploS](1,3);
+			s.alpha *= 2;
+		}
+	}
+	action void A_HeartDie()
+	{
+		scale *= 1.2;
+		A_FadeOut();
+	}
+
+	States
+	{
+	Spawn:
+		DOKI A 1 Bright A_HeartTick();
+		Wait;
+	Death:
+		DOKI A 0 Bright A_HeartBurst();
+		DOKI A 1 Bright A_HeartDie();
+		Wait;
+	}
+}
+
+Class HHitList
+{
+	Actor a;
+	Vector3 dir;
+}
+
 // First person gestures
 Class SWWMGesture : SWWMWeapon
 {
@@ -2480,9 +2728,13 @@ Class SWWMGesture : SWWMWeapon
 		mo.player.PendingWeapon = w;
 	}
 
-	action void A_CallPlayerGesture( statelabel st )
+	action void A_CallPlayerGesture( statelabel st, statelabel cst )
 	{
-		if ( invoker.Owner.FindState(st) && (invoker.Owner.Health > 0) )
+		if ( invoker.Owner.Health <= 0 ) return;
+		// crouched gestures not yet added
+		/*if ( (player.crouchdir == -1) && invoker.Owner.FindState(cst) )
+			invoker.Owner.SetStateLabel(cst);
+		else */if ( invoker.Owner.FindState(st) )
 			invoker.Owner.SetStateLabel(st);
 	}
 
@@ -2490,6 +2742,88 @@ Class SWWMGesture : SWWMWeapon
 	{
 		player.PendingWeapon = invoker.formerweapon;
 		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
+	action void A_ThrowMag()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.005);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("ExplodiumMagProj",origin);
+		p.special1 = 7;
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		p.vel.z += 5.;
+		p.vel += vel*.5;
+	}
+
+	action void A_Smooch()
+	{
+		if ( (player == players[consoleplayer]) && (CVar.GetCVar('swwm_mutevoice',player).GetInt() < 4) )
+			A_StartSound("demolitionist/smooch",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
+	}
+
+	action void A_BlowKiss()
+	{
+		if ( (player == players[consoleplayer]) && (CVar.GetCVar('swwm_mutevoice',player).GetInt() < 4) )
+			A_StartSound("demolitionist/blowkiss",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2, dir;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-1*z);
+		let p = Spawn("LoveHeart",origin);
+		p.target = self;
+		p.angle = angle;
+		p.pitch = BulletSlope();
+		p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*p.speed;
+		// try to catch target in cone of vision
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(p.pitch,p.angle,0);
+		Array<HHitList> hits;
+		hits.Clear();
+		int rings = 1;
+		FLineTraceData d;
+		for ( double i=0; i<.2; i+=.02 )
+		{
+			for ( int j=0; j<360; j+=(360/rings) )
+			{
+				dir = (x2+y2*cos(j)*i+z2*sin(j)*i).unit();
+				LineTrace(atan2(dir.y,dir.x),8000.,asin(-dir.z),TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+				if ( d.HitType != TRACE_HitActor ) continue;
+				bool addme = true;
+				for ( int k=0; k<hits.Size(); k++ )
+				{
+					if ( hits[k].a != d.HitActor ) continue;
+					if ( (hits[k].dir dot x2) < (dir dot x2) )
+						hits[k].dir = dir;	// closer to centerpoint
+					addme = false;
+					break;
+				}
+				if ( !addme ) continue;
+				let nhit = new("HHitList");
+				nhit.a = d.HitActor;
+				nhit.dir = dir;
+				hits.Push(nhit);
+			}
+			rings += 5;
+		}
+		int closest = -1;
+		double closestdot = -1;
+		for ( int i=0; i<hits.Size(); i++ )
+		{
+			double thisdot = (hits[i].dir dot x2);
+			if ( thisdot < closestdot ) continue;
+			closest = i;
+			closestdot = thisdot;
+		}
+		if ( closest != -1 ) p.tracer = hits[closest].a;
 	}
 
 	Default
@@ -2514,16 +2848,46 @@ Class SWWMGesture : SWWMWeapon
 	Ready:
 		TNT1 A 1
 		{
-			if ( invoker.whichgesture == 1 ) return ResolveState("Approve");
-			if ( invoker.whichgesture == 2 ) return ResolveState("Victory");
+			switch ( invoker.whichgesture )
+			{
+			case -1:
+				return ResolveState("QuickGrenade");
+			case 1:
+				return ResolveState("Approve");
+			case 2:
+				return ResolveState("Victory");
+			case 3:
+				return ResolveState("BlowKiss");
+			}
 			return ResolveState("Wave");
 		}
 		Wait;
 	Fire:
 		TNT1 A 1;
 		Goto Ready;
+	QuickGrenade:
+		TNT1 A 3;
+		XZW3 S 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 TU 3;
+		XZW3 V 3 A_PlayerReload();
+		XZW3 W 2 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 XY 2;
+		XZW3 Z 3;
+		XZW4 A 2
+		{
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
+		XZW4 BC 2;
+		XZW4 DEFGH 2;
+		XZW4 I 2 A_ThrowMag();
+		XZW4 JKLM 3;
+		TNT1 A 4;
+		TNT1 A 0 A_JumpIf(player.cmd.buttons&BT_USER4,"QuickGrenade");
+		TNT1 A -1 A_FinishGesture();
+		Stop;
 	Wave:
-		TNT1 A 3 A_CallPlayerGesture("Wave");
+		TNT1 A 3 A_CallPlayerGesture("Wave","CrouchWave");
 		XZW1 AB 3;
 		XZW1 C 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW1 DEFGHIJ 3;
@@ -2532,7 +2896,7 @@ Class SWWMGesture : SWWMWeapon
 		TNT1 A -1 A_FinishGesture();
 		Stop;
 	Approve:
-		TNT1 A 3 A_CallPlayerGesture("Approve");
+		TNT1 A 3 A_CallPlayerGesture("Approve","CrouchApprove");
 		XZW1 PQ 3;
 		XZW1 R 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW1 STUVWX 3;
@@ -2542,12 +2906,25 @@ Class SWWMGesture : SWWMWeapon
 		TNT1 A -1 A_FinishGesture();
 		Stop;
 	Victory:
-		TNT1 A 3 A_CallPlayerGesture("Victory");
+		TNT1 A 3 A_CallPlayerGesture("Victory","CrouchVictory");
 		XZW2 GH 3;
 		XZW2 I 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW2 JKLMNOPQ 3;
 		XZW2 R 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW2 STUVWXY 3;
+		TNT1 A -1 A_FinishGesture();
+		Stop;
+	BlowKiss:
+		TNT1 A 3 A_CallPlayerGesture("BlowKiss","CrouchBlowKiss");
+		XZW2 Z 3;
+		XZW3 A 3;
+		XZW3 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 CD 3;
+		XZW3 E 3 A_Smooch();
+		XZW3 FGHI 3;
+		XZW3 J 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 K 3 A_BlowKiss();
+		XZW3 LMNOPQR 3;
 		TNT1 A -1 A_FinishGesture();
 		Stop;
 	Deselect:

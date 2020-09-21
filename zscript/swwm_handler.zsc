@@ -994,6 +994,17 @@ Class SWWMHandler : EventHandler
 					scr.xcnt = ++ofs;
 				}
 			}
+			else if ( e.DamageType == 'Love' )
+			{
+				score += 600;
+				if ( scr )
+				{
+					scr.xscore[ofs] = 0;
+					scr.xtcolor[ofs] = Font.FindFontColor('BlushPink');
+					scr.xstr[ofs] = StringTable.Localize("$SWWM_LOVED");
+					scr.xcnt = ++ofs;
+				}
+			}
 			if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
 			{
 				score *= 2;
@@ -1484,18 +1495,7 @@ Class SWWMHandler : EventHandler
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
 			let mo = players[e.player].mo;
 			if ( (mo.Health <= 0) || !(mo is 'Demolitionist') ) return;
-			switch ( e.Args[0] )
-			{
-			case 1:
-				SWWMGesture.SetGesture(mo,1);
-				break;
-			case 2:
-				SWWMGesture.SetGesture(mo,2);
-				break;
-			default:
-				SWWMGesture.SetGesture(mo,0);
-				break;
-			}
+			SWWMGesture.SetGesture(mo,e.Args[0]);
 		}
 		if ( e.IsManual ) return;
 		if ( e.Name.Left(14) ~== "swwmstoregive." )

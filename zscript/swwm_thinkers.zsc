@@ -119,6 +119,7 @@ Class SWWMStats : Thinker
 		}
 		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
 		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
+		if ( which is 'DualExplodiumGun' ) which = 'ExplodiumGun';	// don't credit sister weapon
 		// properly credit some projectiles to their respective gun
 		if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
 		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';

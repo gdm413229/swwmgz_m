@@ -888,22 +888,14 @@ Class BiosparkComboImpact : Actor
 	}
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = min(int(str*(1.-(sc.z/rad))),255);
-			SWWMHandler.DoFlash(mo,Color(str,248,255,240),10);
-			SWWMHandler.DoFlash(mo,Color(str,248,255,240),20);
-			SWWMHandler.DoFlash(mo,Color(str/2,192,255,160),30);
-			SWWMHandler.DoFlash(mo,Color(str/2,192,255,160),50);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = min(int(str*(1.-(dist/rad))),255);
+		SWWMHandler.DoFlash(mo,Color(str,248,255,240),10);
+		SWWMHandler.DoFlash(mo,Color(str,248,255,240),20);
+		SWWMHandler.DoFlash(mo,Color(str/2,192,255,160),30);
+		SWWMHandler.DoFlash(mo,Color(str/2,192,255,160),50);
 	}
 	override void PostBeginPlay()
 	{

@@ -800,10 +800,9 @@ Class SWWMHandler : EventHandler
 			if ( (a is 'RatBuddy') || (a is 'Peasant') || (a is 'Beggar') ) continue;
 			// [Strife] ignore Oracle's spectre while it's inactive
 			if ( (a is 'AlienSpectre3') && a.InStateSequence(a.CurState,a.FindState("Spawn")) ) continue;
-			// ignore if not targetted or either actor can't see the other
+			// ignore if not targetted or player can't see it
 			if ( (a.target != players[consoleplayer].mo)
-				|| !a.CheckSight(players[consoleplayer].mo)
-				|| !players[consoleplayer].mo.CheckSight(a) ) continue;
+				|| !SWWMUtility.InPlayerFOV(players[consoleplayer],a) ) continue;
 			// is it already in?
 			bool addme = true;
 			for ( int i=0; i<combatactors.Size(); i++ )

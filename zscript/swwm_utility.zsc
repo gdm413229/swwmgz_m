@@ -677,6 +677,21 @@ Class SWWMUtility
 		}
 		// TODO destructible geometry support
 	}
+
+	static play bool InPlayerFOV( PlayerInfo p, Actor a, double maxdist = 0. )
+	{
+		double vfov = CVar.GetCVar('fov',p).GetFloat()*0.5;
+		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
+		let mo = p.camera;
+		Vector3 pp;
+		if ( !mo.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return false;
+		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
+		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
+		Vector3 sc = level.SphericalCoords(pp,a.pos,(mo.angle,mo.pitch));
+		if ( (abs(sc.x) > hfov) && (abs(sc.y) > vfov) ) return false;
+		if ( (maxdist > 0.) && (sc.z < maxdist) ) return false;
+		return true;
+	}
 }
 
 Class RadiusDebugSphere : Actor

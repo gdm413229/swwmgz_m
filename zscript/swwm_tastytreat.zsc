@@ -230,20 +230,12 @@ Class CandyPop : Actor
 	}
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,250,240,255),1);
-			SWWMHandler.DoFlash(mo,Color(str,224,0,255),3);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,250,240,255),1);
+		SWWMHandler.DoFlash(mo,Color(str,224,0,255),3);
 	}
 	override void Tick()
 	{

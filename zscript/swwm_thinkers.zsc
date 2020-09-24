@@ -348,7 +348,8 @@ Class SWWMLoreLibrary : Thinker
 			if ( !c || (c == 'SWWMCollectable') ) continue;
 			let def = GetDefaultByType(c);
 			// skip if we match and it's not for this game
-			if ( (c.GetClassName() != ref) && !(gameinfo.gametype&def.avail) ) return true;
+			if ( (c.GetClassName() == ref) && !(gameinfo.gametype&def.avail) )
+				return true;
 		}
 		ref = ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
@@ -449,17 +450,6 @@ Class SWWMLoreLibrary : Thinker
 		if ( (level.maptime > 0) && (gametic > lastaddtic) && (myplayer == players[consoleplayer]) && (!menuactive || (menuactive == Menu.OnNoPause)) && (myplayer.mo is 'Demolitionist') )
 			Console.Printf(StringTable.Localize("$SWWM_NEWLORE"));
 		lastaddtic = gametic;
-		// sorted add
-		String loca = StringTable.Localize(e.tag), locb;
-		int cpa, cpb;
-		for ( int i=0; i<ent.Size(); i++ )
-		{
-			locb = StringTable.Localize(ent[i].tag);
-			if ( locb < loca ) continue;
-			ent.Insert(i,e);
-			return true;
-		}
-		// append otherwise
 		ent.Push(e);
 		return true;
 	}
@@ -895,16 +885,16 @@ Class SWWMCombatTracker : Thinker
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
 			// enemies within 2000mu that have us as target
-			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && (mytarget.Vec3To(mytarget.target).length() < 2000) && mytarget.CheckSight(mytarget.target) ) updated = level.maptime+70;
+			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && (mytarget.Vec3To(mytarget.target).length() < 2000) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// any visible enemies within 600mu
-			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
+			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 		else if ( mytarget is 'BossBrain' )
 		{
 			// teh romero, only if visible
-			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget) ) updated = level.maptime;
+			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 	}
 }

@@ -257,7 +257,7 @@ Class SWWMVanillaBossHandler : EventHandler
 		for ( int i=0; i<bossactors.Size(); i++ )
 		{
 			if ( !bossactors[i] ) continue;
-			if ( (!bossactors[i].target || !bossactors[i].CheckSight(bossactors[i].target))
+			if ( (!bossactors[i].target || !bossactors[i].CheckSight(bossactors[i].target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
 				&& (!bossviewactor || (bossviewactor && !bossviewactor.target)) ) continue;
 			initialized = true;
 			break;

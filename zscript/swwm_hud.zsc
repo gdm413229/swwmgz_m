@@ -466,8 +466,8 @@ Class SWWMStatusBar : BaseStatusBar
 			int i = 0;
 			for ( SWWMCombatTracker trk=hnd.trackers; trk; trk=trk.next )
 			{
-				// ignore dormant targets
-				if ( !trk.mytarget || trk.mytarget.bDORMANT ) continue;
+				// ignore dormant/invisible targets
+				if ( !trk.mytarget || trk.mytarget.bDORMANT || trk.mytarget.bINVISIBLE ) continue;
 				// ignore player unless chasecamming
 				if ( (trk.mytarget == players[consoleplayer].mo) && (players[consoleplayer].Camera == players[consoleplayer].mo) && !(players[consoleplayer].cheats&CF_CHASECAM) ) continue;
 				if ( trk.myplayer && deathmatch ) continue;	// no players in dm

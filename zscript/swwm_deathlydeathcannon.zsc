@@ -329,20 +329,12 @@ Class YnykronImpact : Actor
 
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,255,255,255),2);
-			SWWMHandler.DoFlash(mo,Color(str/2,255,255,255),10);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,255,255,255),2);
+		SWWMHandler.DoFlash(mo,Color(str/2,255,255,255),10);
 	}
 	override void PostBeginPlay()
 	{
@@ -997,20 +989,12 @@ Class YnykronShot : Actor
 	}
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,255,255,255),3);
-			SWWMHandler.DoFlash(mo,Color(str/2,255,255,255),30);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,255,255,255),3);
+		SWWMHandler.DoFlash(mo,Color(str/2,255,255,255),30);
 	}
 	override void PostBeginPlay()
 	{
@@ -1731,20 +1715,12 @@ Class YnykronCloud : Actor
 
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,255,255,255),1);
-			SWWMHandler.DoFlash(mo,Color(str/2,240,224,255),10);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,255,255,255),1);
+		SWWMHandler.DoFlash(mo,Color(str/2,240,224,255),10);
 	}
 
 	override void PostBeginPlay()
@@ -2386,20 +2362,12 @@ Class YnykronSingularity : Actor
 
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,255,255,255),3);
-			SWWMHandler.DoFlash(mo,Color(str/2,240,224,255),30);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,255,255,255),3);
+		SWWMHandler.DoFlash(mo,Color(str/2,240,224,255),30);
 	}
 	void A_SingularityBlast()
 	{
@@ -2441,7 +2409,7 @@ Class YnykronSingularity : Actor
 		double factor = (60-special1)/60.;
 		double invfct = 1.-factor;
 		SWWMUtility.DoExplosion(self,0,-50000*factor,4000*invfct);
-		FlashPlayer(int(100*factor),10000);
+		FlashPlayer(int(min(100*factor,250)),10000);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
@@ -2706,20 +2674,12 @@ Class YnykronAltShot : Actor
 	}
 	void FlashPlayer( int str, double rad )
 	{
-		double vfov = CVar.GetCVar('fov',players[consoleplayer]).GetFloat()*0.5;
-		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
-		let mo = players[consoleplayer].camera;
-		Vector3 pp;
-		if ( !CheckSight(mo) ) return;
-		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
-		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
-		Vector3 sc = level.SphericalCoords(pp,pos,(mo.angle,mo.pitch));
-		if ( (abs(sc.x) < hfov) && (abs(sc.y) < vfov) && (sc.z < rad) )
-		{
-			str = int(str*(1.-(sc.z/rad)));
-			SWWMHandler.DoFlash(mo,Color(str,255,255,255),5);
-			SWWMHandler.DoFlash(mo,Color(str/2,0,0,0),15);
-		}
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,255,255,255),5);
+		SWWMHandler.DoFlash(mo,Color(str/2,0,0,0),15);
 	}
 	override void PostBeginPlay()
 	{

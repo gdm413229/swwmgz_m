@@ -746,8 +746,8 @@ Class RageSnd : Actor
 Class RagekitPower : Powerup
 {
 	Actor l, snd;
-	int lasteffect, lastrage;
-	transient int lastpulse;
+	int lasteffect;
+	transient int lastpulse, lastrage;
 
 	override double GetSpeedFactor()
 	{
@@ -1030,7 +1030,7 @@ Class LampMoth : Actor
 				if ( !bi.Thing || !(bi.Thing is 'CompanionLamp') ) continue;
 				Actor a = bi.Thing;
 				double dist = Distance3D(a);
-				if ( (a.frame == 0) || (dist > mindist) && !CheckSight(a) ) continue;
+				if ( (a.frame == 0) || (dist > mindist) && !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				mindist = dist;
 				lamp = a;
 				master = a.target;
@@ -1040,7 +1040,7 @@ Class LampMoth : Actor
 				else bFRIENDLY = false;
 			}
 		}
-		if ( !lamp || (lamp.frame == 0) || (Distance3D(lamp) > 250) || !CheckSight(lamp) ) return false;
+		if ( !lamp || (lamp.frame == 0) || (Distance3D(lamp) > 250) || !CheckSight(lamp,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return false;
 		return true;
 	}
 	void A_SmoothWander()

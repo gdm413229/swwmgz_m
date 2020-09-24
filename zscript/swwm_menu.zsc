@@ -1636,6 +1636,33 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		qsort_mstats(a,p+1,h);
 	}
 
+	private int partition_lore( Array<SWWMLore> a, int l, int h )
+	{
+		SWWMLore pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( StringTable.Localize(pv.tag) > StringTable.Localize(a[j].tag) )
+			{
+				i++;
+				SWWMLore tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		SWWMLore tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_lore( Array<SWWMLore> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_lore(a,l,h);
+		qsort_lore(a,l,p-1);
+		qsort_lore(a,p+1,h);
+	}
+
 	override void Ticker()
 	{
 		Super.Ticker();
@@ -1808,6 +1835,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( lorelib.ent[i].tab != sel1 ) continue;
 				lorelist.Push(lorelib.ent[i]);
 			}
+			// sort
+			qsort_lore(lorelist,0,lorelist.Size()-1);
 			// readjust
 			if ( oldone && (lorelist.Size() != oldsiz) )
 			{

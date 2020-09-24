@@ -917,7 +917,7 @@ Class OnFire : Actor
 		while ( bt.Next() )
 		{
 			let t = bt.Thing;
-			if ( !t || !t.bSHOOTABLE || (t.Health <= 0) || (t == victim) || ((t == instigator) && (delay > 0)) || (victim.Distance3D(t) > victim.radius+t.radius+40) || !victim.CheckSight(t) ) continue;
+			if ( !t || !t.bSHOOTABLE || (t.Health <= 0) || (t == victim) || ((t == instigator) && (delay > 0)) || (victim.Distance3D(t) > victim.radius+t.radius+40) || !victim.CheckSight(t,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			int amt = max(1,amount/10);
 			OnFire of = IsOnFire(t);
 			if ( of )

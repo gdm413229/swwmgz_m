@@ -13,6 +13,7 @@ Class SWWMStatScreen : StatusScreen abstract
 	transient CVar intertype, lang, origmus;
 	double hs, hs2;
 	Vector2 ss, ss2, origin, origin2;
+	double bgfade;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
@@ -247,6 +248,75 @@ Class SWWMStatScreen : StatusScreen abstract
 			drawNoState();
 			break;
 		}
+		if ( bgfade <= 0. ) return;
+		// redraw bgs on top, hiding the rest of the ui
+		if ( intertype.GetInt() == 1 )
+		{
+			double ar = Screen.GetAspectRatio();
+			Vector2 tsize = TexMan.GetScaledSize(arttex);
+			double sar = tsize.x/tsize.y;
+			Vector2 vsize;
+			if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+			else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+			else vsize = tsize;
+			Screen.DrawTexture(arttex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,bgfade);
+		}
+		/*else if ( intertype.GetInt() == 2 )
+		{
+			// TBD when there's art
+		}*/
+		else
+		{
+			double ar = Screen.GetAspectRatio();
+			Vector2 tsize = TexMan.GetScaledSize(bgtex);
+			double sar = tsize.x/tsize.y;
+			Vector2 vsize;
+			if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+			else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+			else vsize = tsize;
+			Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,bgfade);
+		}
+	}
+	protected void checkForAccelerateNew( void )
+	{
+		// check for button presses to skip delays (but only recognize fire/use buttons)
+		for ( int i=0; i < MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] ) continue;
+			{
+				PlayerInfo p = players[i];
+				if ( (p.cmd.buttons^p.oldbuttons) && ((p.cmd.buttons&p.oldbuttons) == p.oldbuttons) && !p.Bot && (p.cmd.buttons&(BT_ATTACK|BT_USE)) )
+				{
+					acceleratestage = 1;
+					playerready[i] = true;
+				}
+				p.oldbuttons = p.buttons;
+			}
+		}
+	}
+	override void Ticker( void )
+	{
+		bcnt++;
+		if ( bcnt == 1 ) StartMusic();
+		checkForAccelerateNew();
+		switch (CurState)
+		{
+		case StatCount:
+			updateStats();
+			break;
+		case ShowNextLoc:
+			updateShowNextLoc();
+			break;
+		case NoState:
+			updateNoState();
+			break;
+		case LeavingIntermission:
+			// sorry nothing
+			break;
+		}
+		// check fade
+		if ( players[consoleplayer].cmd.buttons&BT_ALTATTACK ) bgfade = min(1.,bgfade+3./Thinker.TICRATE);
+		else bgfade = max(0.,bgfade-4./Thinker.TICRATE);
 	}
 	protected String TimeStr( int secs )
 	{

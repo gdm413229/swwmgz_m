@@ -835,7 +835,7 @@ Class SWWMHandler : EventHandler
 
 	override void WorldThingDied( WorldEvent e )
 	{
-		if ( e.Thing.default.bBOSS && !Random[GoldDrop](0,2) )
+		if ( ((e.Thing.default.bBOSS) || (e.Thing.default.Health >= 1000)) && !Random[GoldDrop](0,2) )
 		{
 			let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			double ang = FRandom[SpareShells](0,360);
@@ -1202,6 +1202,8 @@ Class SWWMHandler : EventHandler
 					}
 				}
 			}
+			if ( (kcode > 2) || (lcode > 2) )
+				return true;	// eat keypresses from this point
 		}
 		return false;
 	}

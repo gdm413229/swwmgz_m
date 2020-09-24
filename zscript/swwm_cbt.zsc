@@ -54,7 +54,7 @@ Class WallbusterReloadMenu : GenericMenu
 		if ( !pauseme ) pauseme = CVar.GetCVar('swwm_cbtpause',players[consoleplayer]);
 		if ( pauseme.GetBool() ) menuactive = Menu.On;
 		else menuactive = Menu.OnNoPause;
-		if ( (players[consoleplayer].Health > 0) && (players[consoleplayer].ReadyWeapon is 'Wallbuster') ) return;
+		if ( (players[consoleplayer].Health > 0) && (players[consoleplayer].ReadyWeapon is 'Wallbuster') && (gamestate == GS_LEVEL) ) return;
 		MenuEvent(MKEY_BACK,false);
 	}
 

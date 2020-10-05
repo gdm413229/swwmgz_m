@@ -331,6 +331,7 @@ Class HellblazerMissile : Actor
 			s.scale *= FRandom[Hellblazer](0.9,1.8);
 		}
 		Spawn("HellblazerRing",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,350,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	void A_SubExpl( double xscale = 1. )
@@ -438,6 +439,7 @@ Class HellblazerCrackshot : HellblazerMissile
 			c.target = target;
 			c.ReactionTime += Random[Hellblazer](-10,10);
 		}
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,300,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	States
@@ -496,6 +498,7 @@ Class HellblazerRavager : HellblazerMissile
 			s.scale *= FRandom[Hellblazer](0.9,1.8);
 		}
 		Spawn("HellblazerRing",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,400,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	void A_RavagerSub()
@@ -574,6 +577,7 @@ Class HellblazerWarhead : HellblazerMissile
 			s.scale *= FRandom[Hellblazer](0.9,1.8);
 		}
 		Spawn("HellblazerRing2",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,2000,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	void A_WarheadSub()

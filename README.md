@@ -96,7 +96,7 @@ Coming from the **Doom** modding side of things, this gun really packs a punch, 
 
 The **Spreadgun** uses 10 gauge ammunition, apparently just for the sake of making it feel more powerful due to the increased recoil.
 
-### 10Ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows, Chaos Device / Banishment Device
+### 10Ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows
 ![](docimg/shells.png)
 
 Available in the following types, with varying chances of appearing depending
@@ -326,7 +326,7 @@ This powerup is capable of turning you absolutely invisible. However, it does no
 
 Lasts 60 seconds once activated.
 
-### Ragekit ~ Replaces Berserk, Tome of Power, Dark Servant, Boots of Speed
+### Ragekit ~ Replaces Berserk, Tome of Power, Boots of Speed
 ![](docimg/ragekit.png)
 
 A special item with some... interesting effects.
@@ -356,7 +356,7 @@ This thing makes you impervious to pretty much everything excluding the **Ynykro
 
 You're fucking invincible for a total of 20 seconds.
 
-### Hammerspace Embiggener ~ Replaces Backpack, Bag of Holding, Porkalator, Dragonskin Bracers
+### Hammerspace Embiggener ~ Replaces Backpack, Bag of Holding, Dragonskin Bracers
 ![](docimg/embiggener.png)
 
 Each of these you pick up increase ammo capacity by half of its base value, stacking up to 16 times for a maximum of 900% capacity. They also give you some extra ammo, like a vanilla backpack would (though not for all weapons).

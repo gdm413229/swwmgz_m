@@ -97,7 +97,7 @@ Class SWWMStats : Thinker
 		lstats.Push(ls);
 	}
 
-	void AddWeaponKill( Actor inflictor, Actor victim )
+	void AddWeaponKill( Actor inflictor, Actor victim, Name damagetype )
 	{
 		if ( victim )
 		{
@@ -132,6 +132,17 @@ Class SWWMStats : Thinker
 		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
 		else if ( (inflictor is 'YnykronBeam') || (inflictor is 'YnykronImpact') || (inflictor is 'YnykronSingularity') || (inflictor is 'YnykronCloud') || (inflictor is 'YnykronVoidBeam') || (inflictor is 'YnykronLightningArc') || (inflictor is 'YnykronLightningImpact') ) which = 'Ynykron';
 		else if ( (inflictor is 'Demolitionist') || (inflictor is 'DemolitionistShockwave') || (inflictor is 'DemolitionistRadiusShockwave') ) which = 'SWWMWeapon';	// hack to assume Demolitionist as weapon
+		else if ( inflictor is 'BigPunchSplash' )
+		{
+			// guess from damagetype
+			if ( (damagetype == 'Jump') || (damagetype == 'Dash') || (damagetype == 'Buttslam') || (damagetype == 'GroundPound') )
+				which = 'SWWMWeapon';
+			else if ( damagetype == 'Love' )
+				which = 'SWWMGesture';
+			// others are just weapon melee, so keep the readyweapon
+		}
+		if ( damagetype == 'Falling' )
+			which = 'Weapon';	// the gross hacks continue
 		if ( !which ) return;
 		for ( int i=0; i<wstats.Size(); i++ )
 		{
@@ -341,6 +352,15 @@ Class SWWMLoreLibrary : Thinker
 			if ( ref ~== "TheOrder" ) return true;
 			if ( ref ~== "TheFront" ) return true;
 		}
+		// restrict dlc weaponset until that's done
+		if ( ref ~== "ItamexHammer" ) return true;
+		if ( ref ~== "PuntzerBeta" ) return true;
+		if ( ref ~== "PuntzerGamma" ) return true;
+		if ( ref ~== "HeavyMahSheenGun" ) return true;
+		if ( ref ~== "Quadravol" ) return true;
+		if ( ref ~== "BlackfireIgniter" ) return true;
+		if ( ref ~== "EMPCarbine" ) return true;
+		if ( ref ~== "RayKhom" ) return true;
 		// check if entry is for a collectable
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
@@ -369,7 +389,7 @@ Class SWWMLoreLibrary : Thinker
 			else if ( text ~== "SWWM_LORETXT_HELL" )
 				text = "SWWM_LORETXT_HELL3";	// met father nostros during the wedding
 			else if ( text ~== "SWWM_LORETXT_GHOULHUNT" )
-				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the
+				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the wedding
 			else if ( text ~== "SWWM_LORETXT_RAGEKIT" )
 				text = "SWWM_LORETXT_RAGEKIT2";	// kirin's reactions to demo using this item
 			else if ( text ~== "SWWM_LORETXT_SANKAIDERIHA" )
@@ -382,6 +402,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_ZANAVETH22";	// met at wedding
 			else if ( text ~== "SWWM_LORETXT_YNYKRON" )
 				text = "SWWM_LORETXT_YNYKRON2";	// confirmed to harm (but not kill) gods
+			else if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
+				text = "SWWM_LORETXT_AKARIPROJECT3";	// mentions kirin
 		}
 		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
 		{
@@ -403,6 +425,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_ZANAVETH32";	// iagb happened
 			else if ( text ~== "SWWM_LORETXT_BIGSHOT" )
 				text = "SWWM_LORETXT_BIGSHOT2";	// predictions about crimes_m
+			else if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
+				text = "SWWM_LORETXT_AKARIPROJECT2";	// fiction becomes reality
 		}
 		// check that it's valid
 		if ( StringTable.Localize(tag,false) == tag ) return false;
@@ -755,12 +779,12 @@ Class SWWMCombatTracker : Thinker
 	bool legged;
 	int tcnt;
 	double height;
-	transient CVar funtags;
+	transient CVar funtags, maxdist;
 
 	void UpdateTag()
 	{
 		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
-		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain')) )
+		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen')) )
 		{
 			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
 			if ( realtag == FallbackTag )
@@ -879,22 +903,25 @@ Class SWWMCombatTracker : Thinker
 		}
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
-		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE )
+		if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
+		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE && !mytarget.bCORPSE )
 		{
 			bool straifu = false;
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
-			// enemies within 2000mu that have us as target
-			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && (mytarget.Vec3To(mytarget.target).length() < 2000) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
+			int mxdist = maxdist.GetInt();
+			// enemies within a set distance that have us as target
+			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(mytarget.target).length() < mxdist)) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
-			// any visible enemies within 600mu
-			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+			// any visible enemies within one quarter of the set distance
+			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
-		else if ( mytarget is 'BossBrain' )
+		else if ( (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') )
 		{
-			// teh romero, only if visible
-			if ( (mytarget.Vec3To(players[consoleplayer].mo).length() < 600) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+			int mxdist = maxdist.GetInt();
+			// special stuff, only if visible
+			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 	}
 }

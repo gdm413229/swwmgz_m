@@ -257,7 +257,7 @@ Class BigBiospark : Actor
 			if ( !t || !t.bSHOOTABLE ) continue;
 			if ( SWWMUtility.SphereIntersect(t,pos,40) )
 			{
-				t.DamageMobj(self,target,4+special1*4,'Electric');
+				t.DamageMobj(self,target,4+special1,'Electric');
 				Health--;
 			}
 			if ( SWWMUtility.SphereIntersect(t,pos,120) )
@@ -268,7 +268,7 @@ Class BigBiospark : Actor
 				if ( dist > 4. ) SWWMUtility.DoKnockback(t,-dirto,clamp(120.-dist,0.,120.)*100);
 			}
 		}
-		Health -= 2;
+		Health -= 3;
 		if ( Health <= 0 ) ExplodeMissile();
 	}
 
@@ -276,7 +276,7 @@ Class BigBiospark : Actor
 	{
 		A_StopSound(CHAN_VOICE);
 		A_AlertMonsters(15000);
-		SWWMUtility.DoExplosion(self,450,200000,300,100);
+		SWWMUtility.DoExplosion(self,250,200000,250,100);
 		A_QuakeEx(9,9,9,30,0,1400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -330,7 +330,7 @@ Class BigBiospark : Actor
 		if ( special1 > 40 ) return;
 		double factor = (40-special1)/40.;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,150*factor,0.,250*invfct);
+		SWWMUtility.DoExplosion(self,80*factor,0.,250*invfct);
 		SWWMUtility.DoExplosion(self,0,-8000*factor,500*invfct);
 		int numpt = int(Random[ExploS](16,32)*factor);
 		for ( int i=0; i<numpt; i++ )
@@ -536,7 +536,7 @@ Class BiosparkBall : Actor
 	{
 		A_StopSound(CHAN_VOICE);
 		A_AlertMonsters(5000);
-		SWWMUtility.DoExplosion(self,40,120000,150,80);
+		SWWMUtility.DoExplosion(self,30,120000,150,80);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		A_StartSound("biospark/hit",CHAN_ITEM,attenuation:.8);
 		A_StartSound("biospark/hit",CHAN_WEAPON,attenuation:.6);
@@ -581,6 +581,7 @@ Class BiosparkBall : Actor
 			s.ReactionTime += Random[Sparkster](0,10);
 		}
 		Spawn("BiosparkExplLight",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,30,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 	void A_SparkSubExpl()
 	{
@@ -588,7 +589,7 @@ Class BiosparkBall : Actor
 		if ( special1 > 30 ) return;
 		double factor = (30-special1)/30.;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,20*factor,0.,150*invfct);
+		SWWMUtility.DoExplosion(self,10*factor,0.,150*invfct);
 		SWWMUtility.DoExplosion(self,0,-5000*factor,300*invfct);
 		int numpt = int(Random[ExploS](16,32)*factor);
 		for ( int i=0; i<numpt; i++ )
@@ -699,7 +700,7 @@ Class BiosparkBeamImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(2000);
-		SWWMUtility.DoExplosion(self,30,120000,100,40);
+		SWWMUtility.DoExplosion(self,25,120000,100,40);
 		A_QuakeEx(3,3,3,12,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.4);
 		A_StartSound("biospark/beamhit",CHAN_ITEM,attenuation:1.1);
 		A_StartSound("biospark/beamhit",CHAN_WEAPON,attenuation:.8);
@@ -845,7 +846,7 @@ Class BiosparkComboImpactSub : Actor
 	{
 		Super.PostBeginPlay();
 		if ( !bAMBUSH ) return;
-		SWWMUtility.DoExplosion(self,100,10000,300,120);
+		SWWMUtility.DoExplosion(self,30,10000,300,120);
 	}
 	override void Tick()
 	{
@@ -901,7 +902,7 @@ Class BiosparkComboImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(6000);
-		SWWMUtility.DoExplosion(self,bAMBUSH?(700+Args[0]*100):300,bAMBUSH?480000:200000,bAMBUSH?800:400,bAMBUSH?400:200);
+		SWWMUtility.DoExplosion(self,bAMBUSH?(200+Args[0]*25):150,bAMBUSH?480000:200000,bAMBUSH?500:300,bAMBUSH?350:150);
 		A_QuakeEx(9,9,9,25,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
 		A_StartSound("biospark/bighit",CHAN_WEAPON,attenuation:.3);
@@ -969,8 +970,8 @@ Class BiosparkComboImpact : Actor
 		if ( special1 > mx ) return;
 		double factor = (mx-special1)/mx;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,(bAMBUSH?(400+Args[0]*40):100)*factor,0.,(bAMBUSH?900.:300.)*invfct);
-		SWWMUtility.DoExplosion(self,0.,-12000*factor,(bAMBUSH?1500:500)*invfct);
+		SWWMUtility.DoExplosion(self,(bAMBUSH?(80+Args[0]*10):50)*factor,0.,(bAMBUSH?600.:400.)*invfct);
+		SWWMUtility.DoExplosion(self,0.,-12000*factor,(bAMBUSH?800:600)*invfct);
 		int numpt = int(Random[ExploS](8,16)*factor);
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -1023,7 +1024,7 @@ Class BiosparkComboImpact : Actor
 		if ( (special2 > mx) || !(special2%2) ) return;
 		int numpt = Random[Sparkster](0,mx-special2);
 		double ang, pt;
-		double mul = bAMBUSH?8:3;
+		double mul = bAMBUSH?9:5;
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[Sparkster](0,360);
@@ -1160,6 +1161,7 @@ Class BiosparkBeam : Actor
 			s.angle = atan2(normal.y,normal.x);
 			s.pitch = asin(-normal.z);
 			bAMBUSH = true;
+			if ( swwm_omnibust ) BusterWall.Bust(t.Results,GetMissileDamage(0,0),target,t.Results.HitVector,t.Results.HitPos.z);
 			return;
 		}
 		double closest = double.infinity;
@@ -1583,7 +1585,7 @@ Class BiosparkArc : Actor
 	{
 		Obituary "$O_SPARKSTER";
 		RenderStyle "Add";
-		DamageFunction 5;
+		DamageFunction 3;
 		ReactionTime 12;
 		Speed 16;
 		Radius .1;
@@ -1631,7 +1633,7 @@ Class BiosparkArcBig : BiosparkArc
 	Default
 	{
 		ReactionTime 10;
-		DamageFunction 100;
+		DamageFunction 10;
 		Speed 64;
 	}
 	States

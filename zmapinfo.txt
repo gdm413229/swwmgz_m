@@ -1,6 +1,6 @@
 GameInfo
 {
-	AddEventHandlers = "SWWMCrashHandler", "SWWMBrutalHandler", "SWWMHDoomHandler", "SWWMVanillaBossHandler", "SWWMHandler", "SWWMGoreHandler", "CBTHandler", "SWWMPreloader", "SWWMReadThisHijacker"
+	AddEventHandlers = "SWWMCrashHandler", "SWWMBrutalHandler", "SWWMHDoomHandler", "SWWMVanillaBossHandler", "SWWMHandler", "SWWMGoreHandler", "CBTHandler", "SWWMPreloader", "SWWMReadThisHijacker", "EyeObeliskFlash"
 	PlayerClasses = "Demolitionist"
 	StatusBarClass = "SWWMStatusBar"
 	BackpackType = "HammerspaceEmbiggener"
@@ -39,6 +39,12 @@ Map TITLEMAP "SWWM GZ - Title Map"
 {
 	Music = ""
 	EventHandlers = "SWWMTitleStuff"
+}
+
+DamageType EndLevel
+{
+	NoArmor
+	Obituary = "$O_ENDLEVEL"
 }
 
 // edited Doom 2 cast to show the Demolitionist at the end

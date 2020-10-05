@@ -1,8 +1,9 @@
-// collectable items that may drop sometimes (future feature)
+// collectable items that may drop sometimes
 
 Class SWWMCollectable : Inventory abstract
 {
 	int avail;
+	bool propagated;
 
 	Property Availability : avail;
 
@@ -27,18 +28,46 @@ Class SWWMCollectable : Inventory abstract
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		// delet ourselves if wrong iwad
+		if ( !(gameinfo.gametype&avail) )
+			Destroy();
+	}
+	override bool CanPickup( Actor toucher )
+	{
+		// no pickup if wrong iwad
+		if ( !(gameinfo.gametype&avail) ) return false;
+		return Super.CanPickup(toucher);
+	}
 	override string PickupMessage()
 	{
-		return StringTable.Localize(PickupMsg)..String.Format(" \cj(\cg¥\cf%d\cj)\c-",Stamina);
+		if ( Stamina > 0 )
+			return StringTable.Localize(PickupMsg)..String.Format(" \cj(\cg¥\cf%d\cj)\c-",Stamina);
+		return Super.PickupMessage();
 	}
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
+		// we're only attaching to the other players
+		if ( propagated )
+			return;
 		// give credit
-		if ( other.player )
+		if ( other.player && (Stamina > 0) )
 		{
 			SWWMScoreObj.Spawn(Stamina,other.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+other.Height/2),Font.CR_GOLD);
 			SWWMCredits.Give(other.player,Stamina);
+		}
+		// send to all other players
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo || (i == other.PlayerNumber()) )
+				continue;
+			let c = SWWMCollectable(Spawn(GetClass(),pos));
+			c.propagated = true;
+			if ( !c.CallTryPickup(players[i].mo) )
+				c.Destroy();
 		}
 	}
 	States
@@ -63,11 +92,13 @@ Class FroggyChair : SWWMCollectable
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		cdown = 150;
+		if ( !propagated )
+			cdown = 150;
 	}
 	override void DoEffect()
 	{
 		Super.DoEffect();
+		if ( cdown <= 0 ) return;
 		if ( Owner && Owner.CheckLocalView() )
 		{
 			if ( cdown == 140 )
@@ -75,7 +106,7 @@ Class FroggyChair : SWWMCollectable
 			else if ( cdown == 70 )
 				Console.MidPrint(newsmallfont,"$D_FROGGY2");
 		}
-		if ( cdown > 0 ) cdown--;
+		cdown--;
 	}
 }
 
@@ -109,11 +140,32 @@ Class MMiaSRVol3 : SWWMCollectable
 }
 Class MothPlushy : SWWMCollectable
 {
+	int cdown;
+
 	Default
 	{
 		Tag "$T_MOTHPLUSH";
 		Inventory.PickupMessage "$T_MOTHPLUSH";
 		Stamina 5000;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		if ( !propagated )
+			cdown = 175;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( cdown <= 0 ) return;
+		if ( Owner && Owner.CheckLocalView() )
+		{
+			if ( cdown == 105 )
+				A_StartSound("mashiro/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
+			if ( cdown == 35 )
+				Console.MidPrint(newsmallfont,"$D_MASHIRO");
+		}
+		cdown--;
 	}
 }
 Class BRCDebutLP : SWWMCollectable
@@ -170,15 +222,6 @@ Class HegeCactus : SWWMCollectable
 		Stamina 8000;
 	}
 }
-Class RaideminFig : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_RAIDEMIN";
-		Inventory.PickupMessage "$T_RAIDEMIN";
-		Stamina 9000;
-	}
-}
 Class FrispyCorn : SWWMCollectable
 {
 	Default
@@ -186,15 +229,6 @@ Class FrispyCorn : SWWMCollectable
 		Tag "$T_FRISPYCORN";
 		Inventory.PickupMessage "$T_FRISPYCORN";
 		Stamina 500;
-	}
-}
-Class Hoagie : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_HOAGIE";
-		Inventory.PickupMessage "$T_HOAGIE";
-		Stamina 800;
 	}
 }
 Class LithiumVol1 : SWWMCollectable
@@ -206,15 +240,6 @@ Class LithiumVol1 : SWWMCollectable
 		Stamina 3500;
 	}
 }
-Class MeetTheSniper : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_PISS";
-		Inventory.PickupMessage "$T_PISS";
-		Stamina 1200;
-	}
-}
 // Heretic
 Class DemoPlush : SWWMCollectable
 {
@@ -224,26 +249,6 @@ Class DemoPlush : SWWMCollectable
 		Inventory.PickupMessage "$T_DEMOPLUSH";
 		SWWMCollectable.Availability AVAIL_Heretic;
 		Stamina 6400;
-	}
-}
-Class Firemace : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_FIREMACE";
-		Inventory.PickupMessage "$T_FIREMACE";
-		SWWMCollectable.Availability AVAIL_Heretic;
-		Stamina 10000;
-	}
-}
-Class DoomguyFig : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_DOOMFIG";
-		Inventory.PickupMessage "$T_DOOMFIG";
-		SWWMCollectable.Availability AVAIL_Heretic;
-		Stamina 9000;
 	}
 }
 Class TomeOfPower : SWWMCollectable
@@ -268,6 +273,8 @@ Class QuartzFlask : SWWMCollectable
 }
 Class SayaBean : SWWMCollectable
 {
+	int cdown;
+
 	Default
 	{
 		Tag "$T_SAYABEAN";
@@ -275,18 +282,25 @@ Class SayaBean : SWWMCollectable
 		SWWMCollectable.Availability AVAIL_Heretic;
 		Stamina 12000;
 	}
-}
-// Hexen
-Class PuzzleDesignBook : SWWMCollectable
-{
-	Default
+	override void AttachToOwner( Actor other )
 	{
-		Tag "$T_PUZZLEBOOK";
-		Inventory.PickupMessage "$T_PUZZLEBOOK";
-		SWWMCollectable.Availability AVAIL_Hexen;
-		Stamina 2500;
+		Super.AttachToOwner(other);
+		if ( !propagated )
+			cdown = 70;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( cdown <= 0 ) return;
+		if ( Owner && Owner.CheckLocalView() )
+		{
+			if ( cdown == 35 )
+				A_StartSound("saya/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
+		}
+		cdown--;
 	}
 }
+// Hexen
 Class KirinCummies : SWWMCollectable
 {
 	Default
@@ -309,12 +323,28 @@ Class MilkBreads : SWWMCollectable
 }
 Class EyeObelisk : SWWMCollectable
 {
+	int cdown;
+
 	Default
 	{
 		Tag "$T_OBELISK";
 		Inventory.PickupMessage "$T_OBELISK";
 		SWWMCollectable.Availability AVAIL_Hexen;
 		Stamina 24000;
+	}
+	override void PostBeginPlay()
+	{
+		if ( InStateSequence(CurState,FindState("Spawn")) )
+			A_StartSound("obelisk/idle",CHAN_BODY,CHANF_LOOPING);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		if ( propagated ) return;
+		// nauseatingly fast trip through images of the future
+		if ( other.player != players[consoleplayer] ) return;
+		let hnd = EyeObeliskFlash(StaticEventHandler.Find("EyeObeliskFlash"));
+		if ( hnd ) hnd.doit = true;
 	}
 }
 Class KirinManga : SWWMCollectable
@@ -325,6 +355,96 @@ Class KirinManga : SWWMCollectable
 		Inventory.PickupMessage "$T_KIRINMANGA";
 		SWWMCollectable.Availability AVAIL_Hexen;
 		Stamina 1600;
+	}
+}
+
+Class EyeObeliskFlash : StaticEventHandler
+{
+	bool doit;
+	int cd;
+	ui bool doit_ui;
+	ui int timeme;
+	ui TextureID ftex[29];
+
+	override void UiTick()
+	{
+		if ( !doit && !doit_ui )
+		{
+			timeme = 0;
+			return;
+		}
+		if ( timeme == 0 )
+		{
+			// do not trigger if the user doesn't want this
+			if ( CVar.GetCVar('swwm_noscare',players[consoleplayer]).GetBool() )
+				return;
+			doit_ui = true;
+			for ( int i=0; i<29; i++ )
+				ftex[i] = TexMan.CheckForTexture(String.Format("graphics/obelisk/O_SIGHT%d.png",i),TexMan.Type_Any);
+			S_StartSound("obelisk/sight",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE,1.,0.);
+		}
+		if ( timeme == 210 ) Console.MidPrint(newsmallfont,"$D_OBELISK");
+		if ( timeme == 240 ) doit_ui = false;
+		timeme++;
+	}
+	override void WorldTick()
+	{
+		if ( !doit ) return;
+		cd++;
+		if ( cd < 1 ) return;
+		cd = 0;
+		doit = false;
+	}
+	override void RenderOverlay( RenderEvent e )
+	{
+		if ( !doit_ui ) return;
+		double secs = (timeme+e.FracTic)/Thinker.TICRATE;
+		PlayerInfo p = players[consoleplayer];
+		if ( secs < .25 ) Screen.Dim("White",(secs*4.)**2.,0,0,Screen.GetWidth(),Screen.GetHeight());
+		else if ( secs < 2.25 )
+		{
+			Shader.SetEnabled(p,"ObPass0",true);
+			Shader.SetEnabled(p,"ObPass1",true);
+			Shader.SetEnabled(p,"ObPass2",true);
+			Shader.SetEnabled(p,"ObPass3",true);
+			Shader.SetUniform1f(p,"ObPass0","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
+			Shader.SetUniform1f(p,"ObPass1","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
+			Shader.SetUniform1f(p,"ObPass2","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
+			Shader.SetUniform1f(p,"ObPass3","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
+			secs -= .25;
+			Screen.Dim("Black",1.,0,0,Screen.GetWidth(),Screen.GetHeight());
+			// flash images:
+			//  0. mirror man (thievery at the forsaken manor redux)
+			//  1. viridescent lord (hexmas)
+			//  2. nightmare lord (spooktober)
+			//  3. dreadful lady (strife 25th anniversary project)
+			//  4. shinnovre (unsx 6)
+			//  5. hiikya (the hiikyan war)
+			//  6. rebirth of azadeku (project abyss dlc1: forgotten times)
+			//  7. heart of assimilation (project abyss dlc2: the void lords)
+			//  8. sage of blue (project abyss dlc3: assault on blue tower)
+			//  9. ser (project convergence)
+			int whichimg = clamp(int((10.*secs)/2.),0,9);
+			if ( !ftex[whichimg] ) return;
+			double ar = Screen.GetAspectRatio();
+			Vector2 tsize = TexMan.GetScaledSize(ftex[whichimg]);
+			double sar = tsize.x/tsize.y;
+			Vector2 vsize;
+			if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
+			else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
+			else vsize = tsize;
+			vsize *= .75;
+			Screen.DrawTexture(ftex[whichimg],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		}
+		else if ( secs < 6.25 )
+		{
+			Shader.SetEnabled(p,"ObPass0",false);
+			Shader.SetEnabled(p,"ObPass1",false);
+			Shader.SetEnabled(p,"ObPass2",false);
+			Shader.SetEnabled(p,"ObPass3",false);
+			secs -= 2.25;
+			Screen.Dim("White",(1.-secs*.25)**1.5,0,0,Screen.GetWidth(),Screen.GetHeight());
+		}
 	}
 }
 
@@ -397,6 +517,97 @@ Class FancyConfetti : Actor
 		Stop;
 	}
 }
+Class PartyTime : Actor
+{
+	bool ignite;
+
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		if ( target ) specialf1 = target.Height/2.;
+		else specialf1 = 16.;
+	}
+	override void Tick()
+	{
+		if ( ignite )
+		{
+			// wait for the sound to stop
+			if ( !IsActorPlayingSound(CHAN_ITEM) )
+				Destroy();
+			return;
+		}
+		if ( !target || (target.tics == -1) )
+		{
+			// burst into treats!
+			ignite = true;
+			A_Confetti();
+			return;
+		}
+		SetOrigin(target.pos,false);
+	}
+	action void A_Confetti()
+	{
+		A_StartSound("misc/tada",CHAN_ITEM);
+		double ang, pt;
+		int numpt = Random[ExploS](100,120);
+		for ( int i=0; i<numpt; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,30);
+			let c = Spawn("FancyConfetti",Vec3Offset(0,0,specialf1));
+			c.vel = (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[ExploS](2,8);
+		}
+	}
+}
+
+Class ChanceboxSpawner : Actor
+{
+	override void PostBeginPlay()
+	{
+		int numcol = 0;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let c = (Class<SWWMCollectable>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectable') ) continue;
+			let def = GetDefaultByType(c);
+			// check that we can collect it in this IWAD
+			if ( !(gameinfo.gametype&def.avail) ) continue;
+			numcol++;
+		}
+		let ti = ThinkerIterator.Create("SWWMCollectable");
+		while ( ti.Next() ) numcol--;
+		ti = ThinkerIterator.Create("Chancebox");
+		while ( ti.Next() ) numcol--;
+		if ( numcol <= 0 )
+		{
+			// can't spawn a box, everything's been collected
+			Destroy();
+			return;
+		}
+		let b = Spawn("Chancebox",pos);
+		// copy all our stuff
+		b.spawnangle = spawnangle;
+		b.angle = angle;
+		b.pitch = pitch;
+		b.roll = roll;
+		b.spawnpoint = spawnpoint;
+		b.special = special;
+		for ( int i=0; i<5; i++ )
+			b.Args[i] = Args[i];
+		b.spawnflags = spawnflags&~MTF_SECRET;
+		b.HandleSpawnFlags();
+		b.bCOUNTSECRET = spawnflags&MTF_SECRET;
+		b.ChangeTid(tid);
+	}
+}
 
 // Collectable box (recycling of discarded "chance box" item)
 Class Chancebox : Actor
@@ -424,14 +635,21 @@ Class Chancebox : Actor
 		SWWMCollectable c;
 		while ( c = SWWMCollectable(ti.Next()) )
 		{
-			int f = candidates.Find(inv.GetClass());
+			int f = candidates.Find(c.GetClass());
 			if ( f < candidates.Size() )
 				candidates.Delete(f);
 		}
 		if ( candidates.Size() <= 0 )
 		{
-			// TODO no candidates? just spawn some random loot
-			Console.Printf("\cg// TODO spawn random loot\c-");
+			// no candidates? just burst into treats
+			for ( int i=0; i<=30; i++ )
+			{
+				let a = Spawn((i==0)?"RefresherItem":(i%3)?"HealthNuggetItem":"ArmorNuggetItem",pos);
+				a.bDROPPED = true;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+				if ( i > 0 ) a.vel.xy = (cos(i*12),sin(i*12))*FRandom[Chancebox](4,12);
+			}
 		}
 		else
 		{
@@ -469,7 +687,19 @@ Class Chancebox : Actor
 	override bool Used( Actor user )
 	{
 		if ( CurState != FindState("Spawn") ) return false;
-		SetStateLabel("Active");
+		if ( bCountSecret )
+		{
+			user.GiveSecret();
+			bCountSecret = false;
+		}
+		if ( special )
+		{
+			user.A_CallSpecial(special,args[0],args[1],args[2],args[3],args[4]);
+			special = 0;
+		}
+		SWWMLoreLibrary.Add(user.player,"Chancebox");
+		specialf2 = AngleTo(user);
+		SetStateLabel("PreActive");
 		return true;
 	}
 	Default
@@ -479,6 +709,7 @@ Class Chancebox : Actor
 		+MOVEWITHSECTOR;
 		+ROLLSPRITE;
 		+SOLID;
+		+INTERPOLATEANGLES;
 		Species "Chancebox";
 	}
 	States
@@ -486,14 +717,26 @@ Class Chancebox : Actor
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	PreActive:
+		XZW1 A 1
+		{
+			double delta = deltaangle(angle,specialf2);
+			int sign = (delta>=0.)?1:-1;
+			delta = clamp(abs(delta)*.15,.1,10.)*sign;
+			angle += delta;
+			return A_JumpIf(abs(deltaangle(angle,specialf2))<1.,"Active");
+		}
+		Wait;
 	Active:
 		XZW1 A 1
 		{
+			angle = specialf2;
 			specialf1 = angle;
 			A_StartSound("misc/drumroll",CHAN_WEAPON);
 		}
 		XZW1 A 1
 		{
+			bINTERPOLATEANGLES = false;
 			angle = specialf1+FRandom[Chancebox](-5,5);
 			pitch = FRandom[Chancebox](-5,5);
 			roll = FRandom[Chancebox](-5,5);

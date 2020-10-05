@@ -429,6 +429,7 @@ Class BustedQuake : Actor
 		if ( special1 < 3 ) A_StartSound("wallbuster/smallbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.32),1./max(1.,special1*.35),1.-special1*.05);
 		else A_StartSound("wallbuster/bigbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.16),1./max(1.,special1*.35),1.-special1*.03);
 		A_QuakeEx(special1,special1,special1,20+special1*5,0,300+special1*90,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:special1*.1);
+		A_AlertMonsters(2500);
 	}
 	override void Tick()
 	{
@@ -453,7 +454,7 @@ Class BusterWall : Thinker
 	int hitplane;
 	bool busted;
 	Vector3 bustdir;
-	int busttics;
+	int busttics, delay;
 	double cutheight;
 	// cached
 	Vector3 boundsmin, boundsmax, step;
@@ -472,7 +473,12 @@ Class BusterWall : Thinker
 			return;
 		}
 		// fade out damage
-		accdamage = int(accdamage*.9-10);
+		if ( delay > 0 )
+		{
+			delay--;
+			return;
+		}
+		accdamage = int(accdamage*.9-5);
 		if ( accdamage <= 0 )
 		{
 			Destroy();
@@ -522,13 +528,17 @@ Class BusterWall : Thinker
 
 	private static bool IsIOSWall( Line l )
 	{
-		TextureID facetex[5];
+		TextureID facetex[9];
 		facetex[0] = TexMan.CheckForTexture("ZZZFACE1",TexMan.Type_Wall);
 		facetex[1] = TexMan.CheckForTexture("ZZZFACE2",TexMan.Type_Wall);
 		facetex[2] = TexMan.CheckForTexture("ZZZFACE3",TexMan.Type_Wall);
 		facetex[3] = TexMan.CheckForTexture("ZZZFACE4",TexMan.Type_Wall);
 		facetex[4] = TexMan.CheckForTexture("ZZZFACE5",TexMan.Type_Wall);
-		for ( int i=0; i<5; i++ )
+		facetex[5] = TexMan.CheckForTexture("DBRAIN1",TexMan.Type_Wall);
+		facetex[6] = TexMan.CheckForTexture("DBRAIN2",TexMan.Type_Wall);
+		facetex[7] = TexMan.CheckForTexture("DBRAIN3",TexMan.Type_Wall);
+		facetex[8] = TexMan.CheckForTexture("DBRAIN4",TexMan.Type_Wall);
+		for ( int i=0; i<9; i++ )
 		{
 			for ( int j=0; j<3; j++ )
 			{
@@ -537,6 +547,88 @@ Class BusterWall : Thinker
 			}
 		}
 		return false;
+	}
+
+	static bool ProjectileBust( Actor a, int accdamage, Vector3 x )
+	{
+		LineTracer faketracer = new("LineTracer");
+		F3DFloor ff;
+		Vector3 HitNormal;
+		if ( a.BlockingFloor )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<a.BlockingFloor.Get3DFloorCount(); i++ )
+			{
+				if ( !(a.BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(a.BlockingFloor.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
+				ff = a.BlockingFloor.Get3DFloor(i);
+				break;
+			}
+			if ( ff )
+			{
+				faketracer.Results.ffloor = ff;
+				HitNormal = -ff.top.Normal;
+			}
+			else HitNormal = a.BlockingFloor.floorplane.Normal;
+			faketracer.Results.HitType = TRACE_HitFloor;
+			faketracer.Results.HitSector = a.BlockingFloor;
+		}
+		else if ( a.BlockingCeiling )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<a.BlockingCeiling.Get3DFloorCount(); i++ )
+			{
+				if ( !(a.BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(a.BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(a.pos.xy) ~== a.ceilingz) ) continue;
+				ff = a.BlockingCeiling.Get3DFloor(i);
+				break;
+			}
+			if ( ff )
+			{
+				faketracer.Results.ffloor = ff;
+				HitNormal = -ff.bottom.Normal;
+			}
+			else HitNormal = a.BlockingCeiling.ceilingplane.Normal;
+			faketracer.Results.HitType = TRACE_HitCeiling;
+			faketracer.Results.HitSector = a.BlockingCeiling;
+		}
+		else if ( a.BlockingLine )
+		{
+			HitNormal = (-a.BlockingLine.delta.y,a.BlockingLine.delta.x,0).unit();
+			int wside = SWWMUtility.PointOnLineSide(a.pos.xy,a.BlockingLine);
+			if ( !wside ) HitNormal *= -1;
+			faketracer.Results.HitType = TRACE_HitWall;
+			faketracer.Results.HitLine = a.BlockingLine;
+			faketracer.Results.Side = wside;
+			faketracer.Results.Tier = TIER_Middle;
+			// guess the tier hit
+			if ( a.BlockingLine.sidedef[1] )
+			{
+				double ceil = a.BlockingLine.sidedef[!wside].sector.ceilingplane.ZAtPoint(a.pos.xy);
+				double flor = a.BlockingLine.sidedef[!wside].sector.floorplane.ZAtPoint(a.pos.xy);
+				if ( a.pos.z >= ceil ) faketracer.Results.Tier = TIER_Upper;
+				else if ( (a.pos.z+a.Height) <= flor ) faketracer.Results.Tier = TIER_Lower;
+			}
+		}
+		else if ( a.BlockingMobj )
+		{
+			Vector3 diff = level.Vec3Diff(a.BlockingMobj.Vec3Offset(0,0,a.BlockingMobj.Height/2),a.pos);
+			HitNormal = diff.unit();
+			faketracer.Results.HitType = TRACE_HitActor;
+		}
+		return Bust(faketracer.Results,accdamage,a.target,x,a.pos.z+a.Height/2.);
+	}
+
+	static bool BustLinetrace( FLineTraceData d, int accdamage, Actor instigator, Vector3 x, double hitz )
+	{
+		LineTracer faketracer = new("LineTracer");
+		faketracer.Results.HitType = d.HitType;
+		faketracer.Results.HitSector = d.HitSector;
+		faketracer.Results.HitLine = d.HitLine;
+		faketracer.Results.ffloor = d.Hit3DFloor;
+		faketracer.Results.Side = d.LineSide;
+		faketracer.Results.Tier = (d.LinePart==Side.Top)?TIER_UPPER:(d.LinePart==Side.Bottom)?TIER_LOWER:TIER_Middle;
+		return Bust(faketracer.Results,accdamage,instigator,x,hitz);
 	}
 
 	static bool Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
@@ -586,6 +678,7 @@ Class BusterWall : Thinker
 			bust.bustdir = x;
 			mnew = true;
 		}
+		bust.delay = max(bust.delay,5+min(20,accdamage>>4));
 		bust.accdamage += accdamage;
 		bust.acchits.Push(accdamage);
 		bust.bustdir = (bust.bustdir+x)*.5;
@@ -614,7 +707,7 @@ Class BusterWall : Thinker
 		// skip if already busted
 		if ( bust.busted ) return true;
 		// not enough total damage
-		if ( bust.accdamage < 1000 ) return false;
+		if ( bust.accdamage < 100 ) return false;
 		// estimate sector volume
 		Vector2 a = (32767,32767), b = (-32768,-32768);
 		for ( int i=0; i<hs.lines.Size(); i++ )
@@ -753,9 +846,9 @@ Class BusterWall : Thinker
 		// damnums
 		Vector3 bcenter = (bust.boundsmin+bust.boundsmax)*.5;
 		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
-			SWWMScoreObj.Spawn(bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
+			SWWMScoreObj.Spawn(-bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
 		else for ( int i=0; i<bust.acchits.Size(); i++ )
-			SWWMScoreObj.Spawn(bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
+			SWWMScoreObj.Spawn(-bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
 		return true;
 	}
 }
@@ -949,12 +1042,15 @@ Class Wallbuster : SWWMWeapon
 		A_OverlayFlags(PSP_FLASH-index,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
 		A_OverlayRenderStyle(PSP_FLASH-index,STYLE_Add);
 	}
-	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false )
+	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false, bool bust = false )
 	{
 		// Wall busting
-		int bustdmg = dmg;
-		if ( t is 'SpreadSlugTracer' ) bustdmg = int(SpreadSlugTracer(t).penetration);
-		BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector,t.Results.HitPos.z);
+		if ( bust )
+		{
+			int bustdmg = dmg;
+			if ( t is 'SpreadSlugTracer' ) bustdmg = int(SpreadSlugTracer(t).penetration);
+			BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector,t.Results.HitPos.z);
+		}
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
@@ -1164,7 +1260,7 @@ Class Wallbuster : SWWMWeapon
 				sst.shootthroughlist.Clear();
 				sst.waterhitlist.Clear();
 				sst.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-				ProcessTraceHit(sst,origin,dir,0,12000,"SlugImpact",1+howmany/8,true);
+				ProcessTraceHit(sst,origin,dir,0,12000,"SlugImpact",1+howmany/8,true,(howmany>1));
 				for ( int i=0; i<(3-howmany/10); i++ )
 				{
 					let s = Spawn("SWWMViewSmoke",origin);
@@ -1202,7 +1298,7 @@ Class Wallbuster : SWWMWeapon
 					b.pitch = asin(-x2.z);
 					b.Stamina += howmany*16;
 					b.Accuracy += 2+howmany/5;
-					b.Args[1] = 1;	// came from wallbuster
+					b.Args[1] = (howmany>1)?2:1;	// came from wallbuster
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{
@@ -1240,7 +1336,7 @@ Class Wallbuster : SWWMWeapon
 				p.angle = atan2(dir.y,dir.x);
 				p.pitch = asin(-dir.z);
 				p.vel = dir*p.speed*1.25;
-				p.special1 = 1;	// came from wallbuster
+				p.special1 = (howmany>1)?2:1;	// came from wallbuster
 				for ( int i=0; i<(4-howmany/8); i++ )
 				{
 					let s = Spawn("SWWMViewSmoke",origin);
@@ -1283,7 +1379,7 @@ Class Wallbuster : SWWMWeapon
 					st.shootthroughlist.Clear();
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-					ProcessTraceHit(st,origin,dir,individualdmg,7000,bc:5+howmany/6);
+					ProcessTraceHit(st,origin,dir,individualdmg,7000,bc:5+howmany/6,false,(howmany>1));
 				}
 				for ( int i=0; i<(9-howmany/3); i++ )
 				{

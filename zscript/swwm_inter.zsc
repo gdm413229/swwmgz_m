@@ -10,7 +10,7 @@ Class SWWMStatScreen : StatusScreen abstract
 	transient TextureID bgtex, arttex;
 	transient Font TewiFont, MPlusFont;
 	int whichart, whichtip;
-	transient CVar intertype, lang, origmus;
+	transient CVar interart, lang, origmus;
 	double hs, hs2;
 	Vector2 ss, ss2, origin, origin2;
 	double bgfade;
@@ -30,68 +30,38 @@ Class SWWMStatScreen : StatusScreen abstract
 	}
 	private void drawSWWMBg()
 	{
-		if ( !intertype ) intertype = CVar.GetCVar('swwm_intertype',players[consoleplayer]);
+		if ( !interart ) interart = CVar.GetCVar('swwm_interart',players[consoleplayer]);
 		let pdata = SWWMStatScreenData(ThinkerIterator.Create("SWWMStatScreenData",Thinker.STAT_STATIC).Next());
 		if ( !pdata )
 		{
 			pdata = new("SWWMStatScreenData");
 			pdata.ChangeStatNum(Thinker.STAT_STATIC);
 		}
-		if ( !whichart )
+		if ( !whichart && interart.GetBool() )
 		{
-			int no = 0;
-			if ( intertype.GetInt() == 1 )
+			int no = StringTable.Localize("$SWWM_NFANART").ToInt();
+			Array<Int> ents;
+			ents.Clear();
+			for ( int i=1; i<=no; i++ )
+				ents.Push(i);
+			if ( pdata.lastart.Size() >= no )
 			{
-				no = StringTable.Localize("$SWWM_NFANART").ToInt();
-				Array<Int> ents;
-				ents.Clear();
-				for ( int i=1; i<=no; i++ )
-					ents.Push(i);
-				if ( pdata.lastart.Size() >= no )
-				{
-					// exclude last one, start over
-					int excludeme = pdata.lastart[pdata.lastart.Size()-1];
-					ents.Delete(excludeme-1);
-					pdata.lastart.Clear();
-				}
-				else
-				{
-					for ( int i=0; i<pdata.lastart.Size(); i++ )
-					{
-						int f = ents.Find(pdata.lastart[i]);
-						if ( f != ents.Size() )
-							ents.Delete(f);
-					}
-				}
-				whichart = ents[Random[InterArt](0,ents.Size()-1)];
-				pdata.lastart.Push(whichart);
+				// exclude last one, start over
+				int excludeme = pdata.lastart[pdata.lastart.Size()-1];
+				ents.Delete(excludeme-1);
+				pdata.lastart.Clear();
 			}
-			else if ( intertype.GetInt() == 2 )
+			else
 			{
-				no = StringTable.Localize("$SWWM_N4KOMA").ToInt();
-				Array<Int> ents;
-				ents.Clear();
-				for ( int i=1; i<=no; i++ )
-					ents.Push(i);
-				if ( pdata.last4koma.Size() >= no )
+				for ( int i=0; i<pdata.lastart.Size(); i++ )
 				{
-					// exclude last one, start over
-					int excludeme = pdata.last4koma[pdata.last4koma.Size()-1];
-					ents.Delete(excludeme-1);
-					pdata.last4koma.Clear();
+					int f = ents.Find(pdata.lastart[i]);
+					if ( f != ents.Size() )
+						ents.Delete(f);
 				}
-				else
-				{
-					for ( int i=0; i<pdata.last4koma.Size(); i++ )
-					{
-						int f = ents.Find(pdata.last4koma[i]);
-						if ( f != ents.Size() )
-							ents.Delete(f);
-					}
-				}
-				whichart = ents[Random[InterArt](0,ents.Size()-1)];
-				pdata.last4koma.Push(whichart);
 			}
+			whichart = ents[Random[InterArt](0,ents.Size()-1)];
+			pdata.lastart.Push(whichart);
 		}
 		if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
 		double ar = Screen.GetAspectRatio();
@@ -103,8 +73,8 @@ Class SWWMStatScreen : StatusScreen abstract
 		else vsize = tsize;
 		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
 		Font fnt = LangFont(TewiFont);
-		// background pics (fanart, 4komas)
-		if ( intertype.GetInt() == 1 )
+		// background pics
+		if ( whichart )
 		{
 			String artstr = StringTable.Localize(String.Format("$SWWM_FANART%d",whichart));
 			int semic = artstr.IndexOf(";");
@@ -121,10 +91,6 @@ Class SWWMStatScreen : StatusScreen abstract
 			Screen.Dim("Black",.8,Screen.GetWidth()-bw,Screen.GetHeight()-bh,bw,bh);
 			Screen.DrawText(fnt,Font.CR_GOLD,ss.x-(len+4),ss.y-(fnt.GetHeight()+2),bstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
-		/*else if ( intertype.GetInt() == 2 )
-		{
-			// TBD when there's art
-		}*/
 		// intermission tips at the bottom
 		if ( !whichtip )
 		{
@@ -250,7 +216,7 @@ Class SWWMStatScreen : StatusScreen abstract
 		}
 		if ( bgfade <= 0. ) return;
 		// redraw bgs on top, hiding the rest of the ui
-		if ( intertype.GetInt() == 1 )
+		if ( whichart )
 		{
 			double ar = Screen.GetAspectRatio();
 			Vector2 tsize = TexMan.GetScaledSize(arttex);
@@ -261,10 +227,6 @@ Class SWWMStatScreen : StatusScreen abstract
 			else vsize = tsize;
 			Screen.DrawTexture(arttex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,bgfade);
 		}
-		/*else if ( intertype.GetInt() == 2 )
-		{
-			// TBD when there's art
-		}*/
 		else
 		{
 			double ar = Screen.GetAspectRatio();

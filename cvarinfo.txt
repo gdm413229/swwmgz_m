@@ -37,23 +37,22 @@ user bool swwm_shaders = true;			// use pp shaders for some effects
 user bool swwm_earbuster = false;		// limits loudness of wallbuster fire sounds
 server bool swwm_revive = true;			// allows the player to do an "emergency reboot" when dying
 server int swwm_revivecooldown = 60;		// cooldown after using a revive, in seconds (0: no limit)
-user int swwm_intertype = 1;			// 0 - standard bg
-						// 1 - fanart
-						// 2 - 4komas
+user bool swwm_interart = true;			// show fanart on intermissions
 server bool swwm_balluse = true;		// lead ball can "press" switches remotely
 user bool swwm_bosshealthbars = true;		// display large healthbars for vanilla boss encounters
 server bool swwm_upgradebosses = true;		// vanilla bosses will be "upgraded" to be less insta-die prone
 server bool swwm_extraalert = false;		// enables A_AlertMonsters calls for certain things which may be cpu-heavy
 user bool swwm_accdamage = false;		// damage within the same tic is grouped into a single damage number
+user int swwm_maxtargetdist = 2000;		// maximum distance for target healthbars to be updated
 user int swwm_maxtargets = 40;			// maximum targeter healthbars to display (0 = unlimited)
 user int swwm_maxscorenums = 0;			// maximum score numbers to display (0 = unlimited)
 user int swwm_maxdamnums = 0;			// maximum damage/healing numbers to display (0 = unlimited)
 user int swwm_hudscale = 0;			// HUD scaling (0 = use GZDoom scaling)
-user int swwm_barscale = 0;			// target healthbar scaling (0 = use GZDoom scaling)
-user int swwm_scrscale = 0;			// score scaling (0 = use GZDoom scaling)
-user int swwm_numscale = 0;			// damnum scaling (0 = use GZDoom scaling)
-user int swwm_poiscale = 0;			// point of interest scaling (0 = use GZDoom scaling)
-user int swwm_detscale = 0;			// item sense scaling (0 = use GZDoom scaling)
+user int swwm_barscale = 2;			// target healthbar scaling (0 = use GZDoom scaling)
+user int swwm_scrscale = 2;			// score scaling (0 = use GZDoom scaling)
+user int swwm_numscale = 3;			// damnum scaling (0 = use GZDoom scaling)
+user int swwm_poiscale = 1;			// point of interest scaling (0 = use GZDoom scaling)
+user int swwm_detscale = 2;			// item sense scaling (0 = use GZDoom scaling)
 server bool swwm_blood = false;			// custom blood/gibbing
 server int swwm_maxblood = 400;			// max blood effects at any time
 server int swwm_maxgibs = 100;			// max gibs at any time
@@ -64,7 +63,7 @@ user bool swwm_cbtpause = true;			// wallbuster menu pauses the game
 user noarchive int swwm_cbtmeme = 0;		// easter egg, hidden cvar
 user noarchive bool swwm_cbttime = false;	// debug: times how long a reload takes
 user noarchive int swwm_cbtlast = 0;		// last selected ammo for the wallbuster
-server bool swwm_cbtall = true;			// wallbuster breaks any wall, not just movable ones
+server bool swwm_cbtall = false;		// wallbuster breaks any wall, not just movable ones
 server bool swwm_doomfall = false;		// monsters take fall damage outside of hexen
 server bool swwm_capmcrange = false;		// cap ynykron chain reaction range
 server bool swwm_resetscore = true;		// reset score back to 0 on pistol starts
@@ -72,12 +71,13 @@ server bool swwm_notrack = false;		// disables all combat tracking (useful to sp
 server bool swwm_ynykronalert = false;		// caps ynykron alert (so it doesn't wake everyone up)
 user bool swwm_menupause = true;		// pause the game when demolitionist menu is open
 server noarchive bool swwm_explosiondebug = false;	// debug visual aid for DoExplosion
-user bool swwm_funtags = true;			// replace vanilla monster names with silly ones
-//server bool swwm_omnibust = false;		// TODO add wallbusting effect to all weapons
-//server bool swwm_superfuel = false;		// TODO enable unlimited fuel
-//server bool swwm_partytime = false;		// TODO killed enemies burst into confetti
+user bool swwm_funtags = false;			// replace vanilla monster names with silly ones
+server bool swwm_omnibust = false;		// TODO add wallbusting effect to all weapons
+server bool swwm_superfuel = false;		// TODO enable unlimited fuel
+server bool swwm_partytime = false;		// TODO killed enemies burst into confetti
 server bool swwm_simplefog = false;		// simplified teleport fogs (useful to speed up slaughterwads)
 user bool swwm_bigtags = false;			// use a bigger font for targeter tags
 user bool swwm_intermusic = false;		// use original intermission music
 server int swwm_enemydrops = 0;			// allow enemies to drop ammo and weapons (-1 - no ammo or weapons, 0 - ammo only, 1 - both)
 server bool swwm_shotgib = true;		// buckshot can gib (some people don't like this for some reason, so it's an option now)
+user bool swwm_noscare = false;			// disables the Obelisk of the Golden Vale jumpscare

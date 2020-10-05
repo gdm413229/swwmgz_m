@@ -275,7 +275,14 @@ Class PusherProjectile : Actor
 			let p = Spawn("BigPusherImpact",d.HitLocation+HitNormal*4);
 			p.angle = atan2(HitNormal.y,HitNormal.x);
 			p.pitch = asin(-HitNormal.z);
-			bNOGRAVITY = true;
+			bool busted = false;
+			if ( swwm_omnibust )
+			{
+				if ( BusterWall.BustLinetrace(d,100,target,d.HitDir,d.HitLocation.z) )
+					busted = true;
+			}
+			if ( busted ) pitch = 0.;
+			else bNOGRAVITY = true;
 		}
 		else pitch = 0;
 		gravity = 1.;
@@ -376,7 +383,7 @@ Class PusherWeapon : SWWMWeapon
 		LineTrace(angle,60,pitch,TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
 		if ( d.HitType != TRACE_HitNone )
 		{
-			A_QuakeEx(3,3,3,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
+			A_QuakeEx(2,2,2,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(1200);
 			int dmg = int(5+invoker.chargelevel*3);
 			if ( d.HitType == TRACE_HitActor )
@@ -384,7 +391,7 @@ Class PusherWeapon : SWWMWeapon
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
 				self.angle += clamp(diff,-5.,5.);
 				SWWMUtility.DoKnockback(d.HitActor,d.HitDir,8500);
-				d.HitActor.A_QuakeEx(4,4,4,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.1);
+				d.HitActor.A_QuakeEx(3,3,3,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.1);
 				dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Tenderize',DMG_THRUSTLESS);
 				if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
 				{
@@ -398,8 +405,9 @@ Class PusherWeapon : SWWMWeapon
 					d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
 					d.HitActor.A_StartSound("pusher/meat",CHAN_DAMAGE,CHANF_OVERLAP);
 				}
-				// move towards target
-				bJUSTATTACKED = true;
+				// move towards target (unless we're standing on it)
+				if ( !(self is 'Demolitionist') || (Demolitionist(self).oldencroached != d.HitActor) )
+					bJUSTATTACKED = true;
 			}
 			else
 			{
@@ -424,6 +432,7 @@ Class PusherWeapon : SWWMWeapon
 				p.angle = atan2(HitNormal.y,HitNormal.x);
 				p.pitch = asin(-HitNormal.z);
 			}
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,dmg,self,d.HitDir,d.HitLocation.z);
 		}
 		int numpt = Random[Pusher](1,3);
 		for ( int i=0; i<numpt; i++ )
@@ -507,6 +516,7 @@ Class PusherWeapon : SWWMWeapon
 				p.angle = atan2(HitNormal.y,HitNormal.x);
 				p.pitch = asin(-HitNormal.z);
 			}
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,dmg,self,d.HitDir,d.HitLocation.z);
 		}
 		else if ( !Random[Pusher](0,3-int(invoker.chargelevel*3)) )
 		{
@@ -576,6 +586,7 @@ Class PusherWeapon : SWWMWeapon
 		Inventory.Icon "graphics/HUD/Icons/W_Pusher.png";
 		Weapon.UpSound "pusher/select";
 		Weapon.SlotNumber 1;
+		Weapon.SlotPriority 2.;
 		Weapon.SelectionOrder 2100;
 		Stamina 10000;
 		+WEAPON.MELEEWEAPON;

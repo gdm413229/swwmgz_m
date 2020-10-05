@@ -43,6 +43,7 @@ Class Demolitionist : PlayerPawn
 	};
 
 	int lastunder;
+	Color undercol;
 	int deadtimer;
 	transient int revivefail;
 
@@ -75,10 +76,9 @@ Class Demolitionist : PlayerPawn
 		Player.AirCapacity 0;
 		Player.GruntSpeed 20;
 		Player.SoundClass "demolitionist";
-		DamageFactor "Drowning", 0.0;
-		DamageFactor "Poison", 0.0;
-		DamageFactor "PoisonCloud", 0.0;
-		DamageFactor "Falling", 0.0;
+		DamageFactor "Drowning", 0.;
+		DamageFactor "Poison", 0.;
+		DamageFactor "PoisonCloud", 0.;
 		Demolitionist.DashFuel 240.;
 		+NOBLOOD;
 		+DONTGIB;
@@ -162,6 +162,12 @@ Class Demolitionist : PlayerPawn
 				if ( !type || (type == 'SWWMArmor') ) continue;
 				if ( GetReplacement(type) == type )
 				{
+					let owned = FindInventory(type);
+					if ( owned )
+					{
+						owned.Amount = owned.MaxAmount;
+						continue;
+					}
 					let item = Inventory(Spawn(type));
 					item.ClearCounters();	// don't increase item counts
 					item.Amount = item.MaxAmount;
@@ -175,6 +181,12 @@ Class Demolitionist : PlayerPawn
 				if ( !type || (type == 'SWWMSpareArmor') ) continue;
 				if ( GetReplacement(type) == type )
 				{
+					let owned = FindInventory(type);
+					if ( owned )
+					{
+						owned.Amount = owned.MaxAmount;
+						continue;
+					}
 					let item = Inventory(Spawn(type));
 					item.ClearCounters();	// don't increase item counts
 					item.Amount = item.MaxAmount;
@@ -262,6 +274,19 @@ Class Demolitionist : PlayerPawn
 			}
 			if ( !giveall ) return;
 		}
+		if ( (giveall == ALL_YESYES) || (name ~== "collectables") )
+		{
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<SWWMCollectable>)(AllActorClasses[i]);
+				if ( !type || (type == 'SWWMCollectable') ) continue;
+				let def = GetDefaultByType(type);
+				// check that we can collect it in this IWAD
+				if ( !(gameinfo.gametype&def.avail) ) continue;
+				let item = Inventory(Spawn(AllActorClasses[i]));
+				if ( !item.CallTryPickup(self) ) item.Destroy();
+			}
+		}
 		if ( giveall ) return;
 		let type = name;
 		if ( !type )
@@ -319,7 +344,7 @@ Class Demolitionist : PlayerPawn
 			dashboost *= (player.cmd.buttons&BT_USER2)?.9:.1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
-		dashfuel = max(0.,dashfuel-dashboost);
+		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
 		fuelcooldown = max(30,fuelcooldown);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
@@ -337,7 +362,7 @@ Class Demolitionist : PlayerPawn
 			last_boost = level.maptime+1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
-		dashfuel = max(0.,dashfuel-dashboost);
+		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		if ( ((dashfuel <= 0.) || (dashboost <= 0.)) )
 		{
 			if ( !initial )
@@ -416,6 +441,7 @@ Class Demolitionist : PlayerPawn
 				curunder = UNDER_WATER;
 				break;
 			}
+			undercol = headregion.ColorMap.LightColor;
 		}
 		if ( (curunder != lastunder) || restore )
 		{
@@ -567,7 +593,7 @@ Class Demolitionist : PlayerPawn
 		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
-		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) && (health > 0) )
+		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) )
 		{
 			// bump down weapon
 			bumpdown = true;
@@ -589,7 +615,7 @@ Class Demolitionist : PlayerPawn
 				mystats.stompcount++;
 			}
 			if ( lastvelz < -10 ) A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
-			if ( (player == players[consoleplayer]) && (lastvelz < -gruntspeed) && (mute.GetInt() < 4) )
+			if ( (player == players[consoleplayer]) && (lastvelz < -gruntspeed) && (mute.GetInt() < 4) && (health > 0) )
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			if ( lastvelz < -1 )
 				A_Footstep(0,true,clamp(-lastvelz*0.05,0.0,1.0));
@@ -702,6 +728,7 @@ Class Demolitionist : PlayerPawn
 				if ( a.bACTLIKEBRIDGE && (diff.z <= -a.Height) ) continue;	// don't bump bridges if hit by above
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+				A_AlertMonsters(800);
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
@@ -776,11 +803,12 @@ Class Demolitionist : PlayerPawn
 				if ( dir dot ceilnorm < -.6 )
 				{
 					bool busted = false;
-					if ( raging )
+					if ( raging || swwm_omnibust )
 					{
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
-						int dmg = int(128+spd*20);
+						int dmg = int(15+spd*2.5);
+						if ( raging ) dmg *= 8;
 						bool buttslam = false;
 						// BUTTSLAM
 						if ( dir dot viewdir < -.3 )
@@ -794,13 +822,16 @@ Class Demolitionist : PlayerPawn
 						if ( BusterWall.Bust(tempme.Results,dmg,self,dir,pos.z+Height) )
 						{
 							// busted through
-							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
-							ps.damagetype = buttslam?'Buttslam':'Dash';
-							ps.target = self;
-							ps.special1 = int(15+spd*2.5);
+							if ( raging )
+							{
+								let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
+								ps.damagetype = buttslam?'Buttslam':'Dash';
+								ps.target = self;
+								ps.special1 = int(15+spd*2.5);
+								raging.DoHitFX();
+							}
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 							busted = true;
-							raging.DoHitFX();
 							if ( buttslam )
 							{
 								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
@@ -810,13 +841,14 @@ Class Demolitionist : PlayerPawn
 							}
 						}
 					}
-					if ( !busted )
+					if ( !busted || !raging )
 					{
 						// headbump
 						bumped = true;
 						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 						bumptic = gametic+int(20+spd/4.);
 						A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+						A_AlertMonsters(800);
 						vel *= .2;
 						vel -= dir*(10+(spd*30/mass));
 						vel.z += 5+(spd*(10/mass));
@@ -853,11 +885,12 @@ Class Demolitionist : PlayerPawn
 					// don't bump if we're only grazing it
 					if ( dir dot wallnorm > -.6 )
 						continue;
-					if ( raging )
+					if ( raging || swwm_omnibust )
 					{
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
-						int dmg = int(128+spd*20);
+						int dmg = int(15+spd*2.5);
+						if ( raging ) dmg *= 8;
 						bool buttslam = false;
 						// BUTTSLAM
 						if ( dir dot viewdir < -.3 )
@@ -881,12 +914,15 @@ Class Demolitionist : PlayerPawn
 						if ( BusterWall.Bust(tempme.Results,dmg,self,dir,pos.z+Height/2) )
 						{
 							// busted through
-							let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
-							ps.damagetype = buttslam?'Buttslam':'Dash';
-							ps.target = self;
-							ps.special1 = int(15+spd*2.5);
+							if ( raging )
+							{
+								let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
+								ps.damagetype = buttslam?'Buttslam':'Dash';
+								ps.target = self;
+								ps.special1 = int(15+spd*2.5);
+								raging.DoHitFX();
+							}
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
-							raging.DoHitFX();
 							if ( buttslam )
 							{
 								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
@@ -894,7 +930,7 @@ Class Demolitionist : PlayerPawn
 								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 								mystats.buttslams++;
 							}
-							continue;
+							if ( raging ) continue;	// don't stop
 						}
 					}
 					// wallbump
@@ -902,6 +938,7 @@ Class Demolitionist : PlayerPawn
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 					bumptic = gametic+int(20+spd/4.);
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
+					A_AlertMonsters(800);
 					vel *= .2;
 					vel -= dir*(10+(spd*30/mass));
 					vel += wallnorm*(10+(spd*50/mass));
@@ -940,6 +977,9 @@ Class Demolitionist : PlayerPawn
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
+		// completely nullify non-lethal fall damage
+		if ( (mod == 'Falling') && (damage < TELEFRAG_DAMAGE) )
+			damage = 0;
 		if ( damage <= 0 )
 		{
 			lastdamage = 0;
@@ -2105,22 +2145,21 @@ Class Demolitionist : PlayerPawn
 		Loop;
 	CrouchWave:
 		#### # 3;
-		XZWE Z 3;
-		XZWF ABCDEFGHIJKLMN 3;
+		XZWF ABCDEFGHIJKLMNO 3;
 		Goto Crouch+1;
 	CrouchApprove:
 		#### # 3;
-		XZWF OPQRSTUVWXYZ 3;
-		XZWG ABCDE 3;
+		XZWF PQRSTUVWXYZ 3;
+		XZWG ABCDEF 3;
 		Goto Crouch+1;
 	CrouchVictory:
 		#### # 3;
-		XZWG FGHIJKLMNOPQRSTUVWX 3;
+		XZWG GHIJKLMNOPQRSTUVWXY 3;
 		Goto Crouch+1;
 	CrouchBlowKiss:
 		#### # 3;
-		XZWG YZ 3;
-		XZWH ABCDEFGHIJKLMNOPQ 3;
+		XZWG Z 3;
+		XZWH ABCDEFGHIJKLMNOPQR 3;
 		Goto Crouch+1;
 	CrouchMissile:
 		XZW7 M 2;
@@ -2168,23 +2207,23 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	Float:
 		#### # 3;
-		XZWD WXYZ 3;
-		XZWE ABCDEFGH 3;
+		XZWD XYZ 3;
+		XZWE ABCDEFGHI 3;
 		Goto Float+1;
 	Swim:
 		#### # 2;
-		XZWE IJK 2;
+		XZWE JKL 2;
 		Goto SwimLoop;
 	SwimLoop:
-		XZWE LMN 2;
-		XZWE O 0 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
-		XZWE OPQRST 2;
-		XZWE U 0 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
-		XZWE UVW 2;
+		XZWE MNO 2;
+		XZWE P 0 A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZWE PQRSTU 2;
+		XZWE V 0 A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP,.2);
+		XZWE VWX 2;
 		Loop;
 	SwimEnd:
 		#### # 2;
-		XZWE LXY 2;
+		XZWE MYZ 2;
 		Goto Float+1;
 	VoodooSpawn:
 		XZWZ A -1;
@@ -2443,11 +2482,12 @@ Class DemolitionistShockwave : Actor
 			s.vel = pvel;
 		}
 		let raging = RagekitPower(target.FindInventory("RagekitPower"));
-		if ( raging )
+		if ( raging || swwm_omnibust )
 		{
 			// bust the floor if we can
 			let tempme = new("LineTracer"); // gross hack to pass needed data
-			int dmg = (40+min(special1,120))*8;
+			int dmg = 40+min(special1,120);
+			if ( raging ) dmg *= 8;
 			F3DFloor ff;
 			for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
 			{
@@ -2459,11 +2499,14 @@ Class DemolitionistShockwave : Actor
 			tempme.Results.HitSector = FloorSector;
 			tempme.Results.HitType = TRACE_HitFloor;
 			BusterWall.Bust(tempme.Results,dmg,target,(0,0,-1),pos.z);
-			let ps = Spawn("BigPunchSplash",pos);
-			ps.damagetype = 'GroundPound';
-			ps.target = target;
-			ps.special1 = dmg;
-			raging.DoHitFX();
+			if ( raging )
+			{
+				let ps = Spawn("BigPunchSplash",pos);
+				ps.damagetype = 'GroundPound';
+				ps.target = target;
+				ps.special1 = dmg;
+				raging.DoHitFX();
+			}
 		}
 	}
 	States
@@ -2656,6 +2699,24 @@ Class LoveHeartBurstLight : PaletteLight
 	}
 }
 
+Class LoveHeartLight : PointLightAttenuated
+{
+	Default
+	{
+		Args 255,176,208,80;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( target || target.InStateSequence(target.CurState,target.FindState("Death")) )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.pos,true);
+	}
+}
+
 Class LoveHeart : Actor
 {
 	Default
@@ -2679,6 +2740,17 @@ Class LoveHeart : Actor
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
 		let raging = RagekitPower(self.target.FindInventory("RagekitPower"));
+		if ( raging )
+		{
+			bEXTREMEDEATH = true;
+			bNOEXTREMEDEATH = false;
+		}
+		else
+		{
+			bEXTREMEDEATH = false;
+			bNOEXTREMEDEATH = true;
+		}
+		if ( target is 'WolfensteinSS' ) target.bFRIENDLY = false;
 		if ( target.IsFriend(self.target) || (target is 'MBFHelperDog') )
 		{
 			int healamt = clamp(special2,5,15);
@@ -2701,6 +2773,8 @@ Class LoveHeart : Actor
 			}
 			return 0;
 		}
+		Vector3 dirto = level.Vec3Diff(pos,target.Vec3Offset(0,0,target.Height/2)).unit();
+		SWWMUtility.DoKnockback(target,dirto,1500.*damage);
 		let bread = target.FindState("Pain");
 		if ( bread ) target.SetState(bread);
 		if ( raging )
@@ -2708,6 +2782,14 @@ Class LoveHeart : Actor
 			damage *= 8;
 			raging.DoHitFX();
 		}
+		if ( target is 'WolfensteinSS' )
+		{
+			damage = int.max;
+			bEXTREMEDEATH = true;
+			bNOEXTREMEDEATH = false;
+		}
+		else if ( target is 'SWWMHangingKeen' )
+			damage = max(target.Health,damage);
 		return damage;
 	}
 
@@ -2751,13 +2833,30 @@ Class LoveHeart : Actor
 	{
 		Super.PostBeginPlay();
 		A_StartSound("misc/heart",CHAN_WEAPON);
-		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
+		//A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
+		// can't use Attach/RemoveLight for now due to heavy performance issues
+		let l = Spawn("LoveHeartLight",pos);
+		l.target = self;
 		special2 = 25;
 	}
 	action void A_HeartBurst()
 	{
+		// use line
+		if ( BlockingLine )
+		{
+			int s = SWWMUtility.PointOnLineSide(pos.xy,BlockingLine);
+			BlockingLine.RemoteActivate(target,s,SPAC_Use,pos);
+		}
+		if ( swwm_omnibust )
+		{
+			int dmg = GetMissileDamage(0,0);
+			let raging = RagekitPower(self.target.FindInventory("RagekitPower"));
+			if ( raging ) dmg *= 8;
+			if ( BusterWall.ProjectileBust(self,dmg,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch))) )
+				raging.DoHitFX();
+		}
 		A_SetRenderStyle(1.,STYLE_Add);
-		A_RemoveLight('LOVELIGHT');
+		//A_RemoveLight('LOVELIGHT');
 		A_QuakeEx(2,2,2,8,0,300,"",QF_RELATIVE|QF_SCALEDOWN);
 		A_StartSound("bestsound",CHAN_VOICE);
 		Spawn("LoveHeartBurstLight",pos);
@@ -2810,8 +2909,8 @@ Class HHitList
 Class SWWMGesture : SWWMWeapon
 {
 	Weapon formerweapon;
-	int whichgesture;
-	bool deaded;
+	int whichgesture, nextgesture;
+	bool deaded, queued;
 	int gonect;
 
 	// these should prevent autoswitch when out of ammo
@@ -2826,7 +2925,20 @@ Class SWWMGesture : SWWMWeapon
 
 	static void SetGesture( PlayerPawn mo, int which = 0 )
 	{
-		if ( (mo.player.ReadyWeapon is 'SWWMGesture') || (mo.player.PendingWeapon is 'SWWMGesture') ) return;	// already gesturing
+		if ( mo.player.PendingWeapon is 'SWWMGesture' ) return;	// already initiating a gesture
+		if ( (mo.player.ReadyWeapon is 'SWWMGesture') )
+		{
+			// already gesturing
+			// just queue another one
+			// (ignore grenade, that one uses special refire handling)
+			if ( which != -1 )
+			{
+				let g = SWWMGesture(mo.player.ReadyWeapon);
+				g.nextgesture = which;
+				g.queued = true;
+			}
+			return;
+		}
 		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
 		if ( !w )
 		{
@@ -2850,6 +2962,13 @@ Class SWWMGesture : SWWMWeapon
 
 	action void A_FinishGesture()
 	{
+		if ( invoker.queued )
+		{
+			invoker.whichgesture = invoker.nextgesture;
+			invoker.queued = false;
+			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
+			return;
+		}
 		player.PendingWeapon = invoker.formerweapon;
 		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
 	}

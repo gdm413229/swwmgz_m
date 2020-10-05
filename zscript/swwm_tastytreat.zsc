@@ -453,8 +453,8 @@ Class CandyMagArmBig : CandyMagArm
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		reactiontime = Random[ExploS](10,16);
-		vel *= FRandom[ExploS](.8,1.5);
+		reactiontime = Random[ExploS](10,20);
+		vel *= FRandom[ExploS](.8,2.);
 	}
 	States
 	{
@@ -540,9 +540,9 @@ Class CandyGunProj : Actor
 		pitch = asin(-cvel.z);
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
-		Scale *= 6.+.2*special1;
+		Scale *= 7.+.2*special1;
 		A_AlertMonsters(40000);
-		SWWMUtility.DoExplosion(self,4000+900*special1,80000+15000*special1,300+30*special1,200,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,5000+900*special1,80000+15000*special1,500+30*special1,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
@@ -575,7 +575,7 @@ Class CandyGunProj : Actor
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
 		}
-		numpt = int(Random[ExploS](2,4)*(1.+.4*special1));
+		numpt = int(Random[ExploS](2,6)*(1.+.4*special1));
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("CandyMagArmBig",pos);
@@ -583,6 +583,7 @@ Class CandyGunProj : Actor
 		}
 		Spawn("CandyLight3",pos);
 		Spawn("CandyRing3",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,5000+900*special1,cvel);
 	}
 	States
 	{
@@ -603,7 +604,7 @@ Class CandyGunProj : Actor
 			{
 				double ang = FRandom[ExploS](0,360);
 				double pt = FRandom[ExploS](-90,90);
-				let s = Spawn((frame>10)?"CandyBeam":"TinyCandyBeam",pos);
+				let s = Spawn((frame<10)?"CandyBeam":"TinyCandyBeam",pos);
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
@@ -698,6 +699,7 @@ Class CandyMagProj : Actor
 		}
 		Spawn("CandyLight2",pos);
 		Spawn("CandyRing2",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,1000+900*special1,cvel);
 	}
 	States
 	{
@@ -1024,6 +1026,7 @@ Class CandyGun : SWWMWeapon
 			b.angle = atan2(hitnormal.y,hitnormal.x);
 			b.pitch = asin(-hitnormal.z);
 			b.target = self;
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,1700,self,d.HitDir,d.HitLocation.z);
 		}
 		for ( int i=0; i<6; i++ )
 		{

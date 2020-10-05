@@ -584,6 +584,81 @@ Class PurpleBloodReference : Actor
 	}
 }
 
+// bare actor used for extra gib deaths
+Class ExtraGibDeaths : Actor
+{
+	StateLabel gibstate;
+
+	static void GibThis( Actor a, Statelabel st )
+	{
+		if ( !a ) return;
+		let g = ExtraGibDeaths(Spawn("ExtraGibDeaths"));
+		g.master = a;
+		g.gibstate = st;
+	}
+
+	void A_DoGib()
+	{
+		if ( !master ) return;
+		master.SetState(FindState(gibstate));
+	}
+
+	States
+	{
+	Spawn:
+		TNT1 A 1 NoDelay;
+		TNT1 A 1 A_DoGib();
+		Stop;
+	DemonXDeath:
+		SARX A 5;
+		SARX B 5 A_XScream();
+		SARX C 5 A_NoBlocking();
+		SARX DEF 5;
+		SARX G -1;
+		Stop;
+	KnightXDeath:
+		BO2X A 5;
+		BO2X B 5 A_XScream();
+		BO2X C 5;
+		BO2X D 5 A_NoBlocking();
+		BO2X EFGH 5;
+		BO2X I -1;
+		Stop;
+	BaronXDeath:
+		BOSX A 5;
+		BOSX B 5 A_XScream();
+		BOSX C 5;
+		BOSX D 5 A_NoBlocking();
+		BOSX EFGH 5;
+		BOSX I -1 A_BossDeath();
+		Stop;
+	CacoXDeath:
+		CACX A 5;
+		CACX B 5 A_XScream();
+		CACX C 5 A_NoBlocking();
+		CACX D 4;
+		CACX E 3;
+		CACX F 4;
+		CACX G 5;
+		CACX H -1;
+		Stop;
+	BonerXDeath:
+		REVX A 3;
+		REVX B 4 A_XScream();
+		REVX C 5 A_NoBlocking();
+		REVX DE 5;
+		REVX F -1;
+		Stop;
+	VileXDeath:
+		VILX A 5;
+		VILX B 5 A_XScream();
+		VILX C 5 A_NoBlocking();
+		VILX DEF 5;
+		VILX G -1;
+		Stop;
+	}
+}
+
 // corpse thump handler
 Class CorpseFallTracker : Thinker
 {
@@ -749,6 +824,28 @@ Class SWWMGoreHandler : EventHandler
 			e.Thing.CopyBloodColor(pb);
 			pb.Destroy();
 		}
+		else if ( e.Thing.GetClass() == "LostSoul" )
+			e.Thing.bNOBLOOD = true;
+	}
+
+	override void WorldThingDied( WorldEvent e )
+	{
+		// force insert gib animations on some vanilla Doom monsters
+		int gibhealth = e.Thing.GetGibHealth();
+		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
+		if ( !gotgibbed ) return;
+		if ( (e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") )
+			ExtraGibDeaths.GibThis(e.Thing,"DemonXDeath");
+		else if ( e.Thing.GetClass() == "HellKnight" )
+			ExtraGibDeaths.GibThis(e.Thing,"KnightXDeath");
+		else if ( e.Thing.GetClass() == "BaronOfHell" )
+			ExtraGibDeaths.GibThis(e.Thing,"BaronXDeath");
+		else if ( e.Thing.GetClass() == "Cacodemon" )
+			ExtraGibDeaths.GibThis(e.Thing,"CacoXDeath");
+		else if ( e.Thing.GetClass() == "Revenant" )
+			ExtraGibDeaths.GibThis(e.Thing,"BonerXDeath");
+		else if ( e.Thing.GetClass() == "Archvile" )
+			ExtraGibDeaths.GibThis(e.Thing,"VileXDeath");
 	}
 
 	override void WorldThingDamaged( WorldEvent e )
@@ -756,6 +853,14 @@ Class SWWMGoreHandler : EventHandler
 		if ( e.Thing.Health > 0 ) return;
 		// no gib if it was erased
 		if ( e.DamageType == 'Ynykron' ) return;
+		int gibhealth = e.Thing.GetGibHealth();
+		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
+		bool forcegibbed = false;
+		// force gib availability for some vanilla Doom monsters
+		if ( gotgibbed && ((e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "Cacodemon") || (e.Thing.GetClass() == "Revenant") || (e.Thing.GetClass() == "Archvile")) )
+			forcegibbed = true;
+		if ( !e.Thing.FindState("XDeath",true) && !e.Thing.FindState("Death.Extreme",true) && !forcegibbed )
+			gotgibbed = false;
 		// only do special handling if they use our blood
 		if ( (e.Thing.GetBloodType(0) != "mkBlood") || e.Thing.bNOBLOOD )
 			return;
@@ -782,8 +887,7 @@ Class SWWMGoreHandler : EventHandler
 			return;
 		}
 		// override gibbing
-		int gibhealth = e.Thing.GetGibHealth();
-		if ( !e.Thing.bDONTGIB && (e.Thing.FindState("XDeath",true) || e.Thing.FindState("Death.Extreme",true)) && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH) )
+		if ( gotgibbed )
 		{
 			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
 			if ( !b ) return;

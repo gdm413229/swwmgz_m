@@ -184,6 +184,7 @@ Class ExplodiumMagProj : Actor
 			s.target = target;
 		}
 		Spawn("ExploLight2",pos);
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,20+15*special1,cvel);
 	}
 	States
 	{
@@ -414,6 +415,7 @@ Class ExplodiumGun : SWWMWeapon
 			b.angle = atan2(hitnormal.y,hitnormal.x);
 			b.pitch = asin(-hitnormal.z);
 			b.target = self;
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
 		for ( int i=0; i<6; i++ )
 		{
@@ -523,7 +525,6 @@ Class ExplodiumGun : SWWMWeapon
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
 		Weapon.SelectionOrder 1000;
-		Weapon.SlotPriority 1.;
 		Inventory.MaxAmount 2;
 		Weapon.SisterWeapon "DualExplodiumGun";
 		Stamina 8000;
@@ -805,6 +806,7 @@ Class DualExplodiumGun : SWWMWeapon
 			b.angle = atan2(hitnormal.y,hitnormal.x);
 			b.pitch = asin(-hitnormal.z);
 			b.target = self;
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
 		for ( int i=0; i<6; i++ )
 		{

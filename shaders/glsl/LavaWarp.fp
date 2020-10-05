@@ -18,9 +18,9 @@ void main()
 	float p = distance(uv,vec2(.5));
 	uv = (uv-.5)*(1.-dfact*.07)+.5;
 	vec4 res = texture(InputTexture,uv);
-	vec4 flood = texture(fluidtex,uv*sr+vec2(timer*.02,timer*.01));
-	res.rgb += flood.rgb*dfact*.4;
-	flood = texture(fluidtex,uv*sr*2.+vec2(-timer*.03,timer*.04));
-	res.rgb += flood.rgb*dfact*.6;
+	vec4 flood = texture(fluidtex,uv*sr+vec2(timer*.02,timer*.01))*.4
+		+texture(fluidtex,uv*sr*2.+vec2(-timer*.03,timer*.04))*.6;
+	flood.rgb *= lightcol;
+	res.rgb += flood.rgb*dfact;
 	FragColor = vec4(res.rgb,1.);
 }

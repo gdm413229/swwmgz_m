@@ -96,10 +96,6 @@ Other items that can be bought at any moment. **Omnisights** and **Embiggeners**
   Invinciball        | 640000
   Ragekit            | 500000
   Lämp               | 70000
-  T1 Fabricator      | 3000
-  T2 Fabricator      | 12000
-  T3 Fabricator      | 150000
-  T4 Fabricator      | 1920000
 
 ### Collectables
 

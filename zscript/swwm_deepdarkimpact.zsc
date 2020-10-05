@@ -31,7 +31,9 @@ Class AirBullet : FastProjectile
 			if ( target == lasthit ) return 0;
 			lasthit = target;
 		}
-		SWWMUtility.DoKnockback(target,vel.unit(),10000);
+		Vector3 dirto = level.Vec3Offset(pos,target.Vec3Offset(0,0,target.Height/2.));
+		dirto /= dirto.length();
+		SWWMUtility.DoKnockback(target,vel.unit()*.6+dirto*.4,60000);
 		return damage;
 	}
 	override void Effect()
@@ -54,7 +56,7 @@ Class AirBullet : FastProjectile
 			s.alpha *= .2;
 		}
 		bAMBUSH = true;
-		SWWMUtility.DoExplosion(self,GetMissileDamage(0,0),0,50,ignoreme:target);
+		SWWMUtility.DoExplosion(self,GetMissileDamage(0,0),0,60,ignoreme:target);
 		bAMBUSH = false;
 		tcnt++;
 		if ( tcnt < 2 ) return;
@@ -104,6 +106,7 @@ Class AirBullet : FastProjectile
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
 		}
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,100,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 	States
 	{
@@ -303,14 +306,14 @@ Class DeepImpact : SWWMWeapon
 		int wallhits = 0;
 		Vector3 hitnormal;
 		Vector3 wnorm = (0,0,0);
-		for ( double i=0; i<1.; i+=.05 )
+		for ( double i=0; i<.35; i+=.05 )
 		{
 			for ( int j=0; j<360; j+=(360/rings) )
 			{
 				dir = (x+y*cos(j)*i+z*sin(j)*i).unit();
 				t.hitlist.Clear();
 				t.hitdist.Clear();
-				t.Trace(origin,level.PointInSector(origin.xy),dir,150-i*50,0);
+				t.Trace(origin,level.PointInSector(origin.xy),dir,150-i*120,0);
 				for ( int i=0; i<t.hitlist.Size(); i++ )
 				{
 					int inl = -1;
@@ -352,6 +355,7 @@ Class DeepImpact : SWWMWeapon
 					else hitnormal = t.Results.HitSector.ceilingplane.Normal;
 					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
 				}
+				if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(5*(1.-clamp(t.Results.Distance/150.,0.,1.))),target,t.Results.HitVector,t.Results.HitPos.z);
 			}
 			rings += 5;
 		}
@@ -365,10 +369,10 @@ Class DeepImpact : SWWMWeapon
 		{
 			Vector3 avgdir = list[i].avgdir/list[i].nhits;
 			double avgdist = list[i].avgdist/list[i].nhits;
-			double dmg = 4000.*(1.-clamp(avgdist/300.,0.,1.));
+			double dmg = 5000.*(1.-clamp(avgdist/200.,0.,1.));
 			if ( !list[i].a.bDONTTHRUST && (list[i].a.mass < LARGE_MASS) )
-				list[i].a.vel += ((avgdir+(0,0,.35))*dmg/max(50,list[i].a.mass));
-			list[i].a.DamageMobj(self,self,int(dmg/500.),'Push',DMG_THRUSTLESS);
+				list[i].a.vel += ((avgdir+(0,0,.2))*dmg/max(50,list[i].a.mass));
+			list[i].a.DamageMobj(invoker,self,int(dmg/350.),'Push',DMG_THRUSTLESS);
 		}
 		let ti = ThinkerIterator.Create("Actor");
 		Actor m;
@@ -457,7 +461,6 @@ Class DeepImpact : SWWMWeapon
 		Inventory.Icon "graphics/HUD/Icons/W_DeepImpact.png";
 		Weapon.UpSound "deepimpact/select";
 		Weapon.SlotNumber 1;
-		Weapon.SlotPriority 1.;
 		Weapon.SelectionOrder 2000;
 		Stamina 6000;
 		DeepImpact.ClipCount 100;

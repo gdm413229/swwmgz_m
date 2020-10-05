@@ -493,7 +493,7 @@ Class SaltImpact : Actor
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( args[0] == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( args[0] >= 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	override void PostBeginPlay()
@@ -584,7 +584,7 @@ Class SaltBeam : Actor
 
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( args[1] == 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( args[1] >= 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	void SpreadOut()
@@ -618,7 +618,7 @@ Class SaltBeam : Actor
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
 		{
-			if ( args[1] ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x,t.Results.HitPos.z);
+			if ( (args[1] == 2) || swwm_omnibust ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x,t.Results.HitPos.z);
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
 				SWWMUtility.DoKnockback(t.Results.HitActor,x,25000);
@@ -1329,7 +1329,7 @@ Class TheBall : Actor
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( special1 == 1 ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
+		if ( special1 >= 1 ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
 		return Super.GetObituary(victim,inflictor,mod,playerattack);
 	}
 	override int SpecialMissileHit( Actor victim )
@@ -1451,7 +1451,6 @@ Class TheBall : Actor
 		lasthit = null;
 		Vector3 HitNormal = -vel.unit();
 		F3DFloor ff;
-		LineTracer faketracer = new("LineTracer");
 		if ( BlockingFloor )
 		{
 			// find closest 3d floor for its normal
@@ -1462,14 +1461,8 @@ Class TheBall : Actor
 				ff = BlockingFloor.Get3DFloor(i);
 				break;
 			}
-			if ( ff )
-			{
-				faketracer.Results.ffloor = ff;
-				HitNormal = -ff.top.Normal;
-			}
+			if ( ff ) HitNormal = -ff.top.Normal;
 			else HitNormal = BlockingFloor.floorplane.Normal;
-			faketracer.Results.HitType = TRACE_HitFloor;
-			faketracer.Results.HitSector = BlockingFloor;
 		}
 		else if ( BlockingCeiling )
 		{
@@ -1481,14 +1474,8 @@ Class TheBall : Actor
 				ff = BlockingCeiling.Get3DFloor(i);
 				break;
 			}
-			if ( ff )
-			{
-				faketracer.Results.ffloor = ff;
-				HitNormal = -ff.bottom.Normal;
-			}
+			if ( ff ) HitNormal = -ff.bottom.Normal;
 			else HitNormal = BlockingCeiling.ceilingplane.Normal;
-			faketracer.Results.HitType = TRACE_HitCeiling;
-			faketracer.Results.HitSector = BlockingCeiling;
 		}
 		else if ( BlockingLine )
 		{
@@ -1502,30 +1489,17 @@ Class TheBall : Actor
 				if ( (!locknum || (target && target.CheckKeys(locknum,false,true))) && !SWWMUtility.IsExitLine(BlockingLine) )
 					BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
 			}
-			faketracer.Results.HitType = TRACE_HitWall;
-			faketracer.Results.HitLine = BlockingLine;
-			faketracer.Results.Side = wside;
-			faketracer.Results.Tier = TIER_Middle;
-			// guess the tier hit
-			if ( BlockingLine.sidedef[1] )
-			{
-				double ceil = BlockingLine.sidedef[!wside].sector.ceilingplane.ZAtPoint(pos.xy);
-				double flor = BlockingLine.sidedef[!wside].sector.floorplane.ZAtPoint(pos.xy);
-				if ( pos.z >= ceil ) faketracer.Results.Tier = TIER_Upper;
-				else if ( (pos.z+Height) <= flor ) faketracer.Results.Tier = TIER_Lower;
-			}
 		}
 		else if ( BlockingMobj )
 		{
 			Vector3 diff = level.Vec3Diff(BlockingMobj.Vec3Offset(0,0,BlockingMobj.Height/2),pos);
 			HitNormal = diff.unit();
-			faketracer.Results.HitType = TRACE_HitActor;
 		}
 		// send the needed data for a bust
-		if ( special1 == 1 )
+		if ( (special1 == 2) || swwm_omnibust )
 		{
 			int dmg = int(oldvel.length()*4.2+heat*80);
-			BusterWall.Bust(faketracer.Results,dmg,target,oldvel.unit(),pos.z+Height/2.);
+			BusterWall.ProjectileBust(self,dmg,oldvel.unit());
 		}
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;
@@ -2100,6 +2074,13 @@ Class Spreadgun : SWWMWeapon
 
 	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false )
 	{
+		if ( swwm_omnibust )
+		{
+			// Wall busting
+			int bustdmg = dmg;
+			if ( t is 'SpreadSlugTracer' ) bustdmg = int(SpreadSlugTracer(t).penetration);
+			BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector,t.Results.HitPos.z);
+		}
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);

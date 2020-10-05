@@ -957,6 +957,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					{
 						if ( !invlist[i] ) continue;
 						str = invlist[i].GetTag();
+						if ( invlist[i] is 'SWWMCollectable' )
+							str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
 					}
@@ -1363,6 +1365,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					if ( !invlist[i] ) continue;
 					str = invlist[i].GetTag();
+					if ( invlist[i] is 'SWWMCollectable' )
+						str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
 				}
@@ -1528,6 +1532,142 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = -2;
 		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = -1;
 		else if ( b is 'PuzzleItem' ) tb = 1;
+		if ( ta == tb )
+		{
+			if ( a is 'Weapon' )
+			{
+				bool dummy;
+				int slota, slotb;
+				[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(Weapon(a).GetClass());
+				if ( slota == 0 ) slota = 10;
+				[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(Weapon(b).GetClass());
+				if ( slotb == 0 ) slotb = 10;
+				if ( slota == slotb )
+					return (Weapon(a).SlotPriority <= Weapon(b).SlotPriority);
+				return slota > slotb;
+			}
+			else if ( a is 'Ammo' )
+			{
+				Class<Weapon> usesa, usesb;
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let w = (Class<Weapon>)(AllActorClasses[i]);
+					if ( !w ) continue;
+					let def = GetDefaultByType(w);
+					if ( w is 'SWWMWeapon' )
+					{
+						if ( SWWMWeapon(def).UsesAmmo(Ammo(a).GetClass()) )
+							usesa = w;
+						if ( SWWMWeapon(def).UsesAmmo(Ammo(b).GetClass()) )
+							usesb = w;
+					}
+					else
+					{
+						if ( (def.AmmoType1 == Ammo(a).GetClass()) || (def.AmmoType2 == Ammo(a).GetClass()) )
+							usesa = w;
+						if ( (def.AmmoType1 == Ammo(b).GetClass()) || (def.AmmoType2 == Ammo(b).GetClass()) )
+							usesb = w;
+					}
+					if ( usesa && usesb )
+						break;
+				}
+				if ( usesa && usesb )
+				{
+					bool dummy;
+					int slota, slotb;
+					[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(usesa);
+					if ( slota == 0 ) slota = 10;
+					[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(usesb);
+					if ( slotb == 0 ) slotb = 10;
+					if ( slota == slotb )
+					{
+						// sort by unit value
+						// (special, those with zero value go last)
+						int vala = a.default.Stamina;
+						if ( vala == 0 ) vala = int.max;
+						int valb = b.default.Stamina;
+						if ( valb == 0 ) valb = int.max;
+						if ( vala == valb )
+						{
+							// sort alphabetically
+							return a.GetTag() > b.GetTag();
+						}
+						return vala > valb;
+					}
+					return slota > slotb;
+				}
+			}
+			else if ( a is 'MagAmmo' )
+			{
+				// oh boy this one gets complicated
+				Class<Ammo> pamoa, pamob;
+				pamoa = MagAmmo(a).ParentAmmo;
+				pamob = MagAmmo(b).ParentAmmo;
+				Class<Weapon> usesa, usesb;
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let w = (Class<Weapon>)(AllActorClasses[i]);
+					if ( !w ) continue;
+					let def = GetDefaultByType(w);
+					if ( w is 'SWWMWeapon' )
+					{
+						if ( SWWMWeapon(def).UsesAmmo(pamoa) )
+							usesa = w;
+						if ( SWWMWeapon(def).UsesAmmo(pamob) )
+							usesb = w;
+					}
+					else
+					{
+						if ( (def.AmmoType1 == pamoa) || (def.AmmoType2 == pamoa) )
+							usesa = w;
+						if ( (def.AmmoType1 == pamob) || (def.AmmoType2 == pamob) )
+							usesb = w;
+					}
+					if ( usesa && usesb )
+						break;
+				}
+				if ( usesa && usesb )
+				{
+					bool dummy;
+					int slota, slotb;
+					[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(usesa);
+					if ( slota == 0 ) slota = 10;
+					[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(usesb);
+					if ( slotb == 0 ) slotb = 10;
+					if ( slota == slotb )
+					{
+						// sort by unit value
+						// (special, those with zero value go last)
+						int vala = GetDefaultByType(pamoa).Stamina;
+						if ( vala == 0 ) vala = int.max;
+						int valb = GetDefaultByType(pamob).Stamina;
+						if ( valb == 0 ) valb = int.max;
+						if ( vala == valb )
+						{
+							// sort alphabetically
+							return a.GetTag() > b.GetTag();
+						}
+						return vala > valb;
+					}
+					return slota > slotb;
+				}
+			}
+			else
+			{
+				// sort by unit value
+				// (special, those with zero value go last)
+				int vala = a.default.Stamina;
+				if ( vala == 0 ) vala = int.max;
+				int valb = b.default.Stamina;
+				if ( valb == 0 ) valb = int.max;
+				if ( vala == valb )
+				{
+					// sort alphabetically
+					return a.GetTag() > b.GetTag();
+				}
+				return vala > valb;
+			}
+		}
 		return ta > tb;
 	}
 
@@ -1538,15 +1678,25 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		let db = GetDefaultByType(b);
 		if ( a is 'Weapon' ) ta = 2;
 		else if ( a is 'Ammo' ) ta = 1;
-		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || da.bBIGPOWERUP ) ta = 3;
+		else if ( (a is 'PowerupGiver') || da.bBIGPOWERUP ) ta = 3;
 		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = 5;
 		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = 4;
 		if ( b is 'Weapon' ) tb = 2;
 		else if ( b is 'Ammo' ) tb = 1;
-		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || db.bBIGPOWERUP ) tb = 3;
+		else if ( (b is 'PowerupGiver') || db.bBIGPOWERUP ) tb = 3;
 		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 5;
 		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 4;
-		return ta <= tb;
+		if ( ta == tb )
+		{
+			// sort by unit price
+			if ( da.Stamina == db.Stamina )
+			{
+				// sort alphabetically
+				return da.GetTag() > db.GetTag();
+			}
+			return da.Stamina > db.Stamina;
+		}
+		return ta < tb;
 	}
 
 	private int partition_inventory( Array<Inventory> a, int l, int h )
@@ -1609,13 +1759,37 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		qsort_store(a,b,p+1,h);
 	}
 
+	private bool CmpMonsterKill( MonsterKill a, MonsterKill b )
+	{
+		if ( a.kills == b.kills )
+		{
+			// sort by name instead
+			String taga, tagb;
+			taga = GetDefaultByType(a.m).GetTag();
+			tagb = GetDefaultByType(b.m).GetTag();
+			// beautify if there's no tag
+			if ( taga == FallbackTag )
+			{
+				taga = a.m.GetClassName();
+				SWWMUtility.BeautifyClassName(taga);
+			}
+			if ( tagb == FallbackTag )
+			{
+				tagb = a.m.GetClassName();
+				SWWMUtility.BeautifyClassName(tagb);
+			}
+			return taga > tagb;
+		}
+		return a.kills < b.kills;
+	}
+
 	private int partition_mstats( Array<MonsterKill> a, int l, int h )
 	{
 		MonsterKill pv = a[h];
 		int i = (l-1);
 		for ( int j=l; j<=(h-1); j++ )
 		{
-			if ( pv.kills < a[j].kills )
+			if ( CmpMonsterKill(pv,a[j]) )
 			{
 				i++;
 				MonsterKill tmp = a[j];
@@ -1663,6 +1837,44 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		qsort_lore(a,p+1,h);
 	}
 
+	private bool CmpCollectable( Inventory a, Inventory b )
+	{
+		if ( a.Stamina == b.Stamina )
+		{
+			// alphabetic
+			return a.GetTag() > b.GetTag();
+		}
+		// descending value
+		return a.default.Stamina < b.default.Stamina;
+	}
+
+	private int partition_collectable( Array<Inventory> a, int l, int h )
+	{
+		Inventory pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpCollectable(pv,a[j]) )
+			{
+				i++;
+				Inventory tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Inventory tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_collectable( Array<Inventory> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_collectable(a,l,h);
+		qsort_collectable(a,l,p-1);
+		qsort_collectable(a,p+1,h);
+	}
+
 	override void Ticker()
 	{
 		Super.Ticker();
@@ -1696,7 +1908,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') || (inv is 'SWWMCollectable') ) continue;
 				// no hidden weapons
 				if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
 				String tag = inv.GetTag();
@@ -1732,6 +1944,15 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
 				if ( k ) invlist.Push(k);
 			}
+			// collectables, sorted by name
+			Array<Inventory> cols;
+			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
+			{
+				if ( inv is 'SWWMCollectable' )
+					cols.Push(inv);
+			}
+			qsort_collectable(cols,0,cols.Size()-1);
+			invlist.Append(cols);
 			// crop selection
 			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
 		}
@@ -1746,8 +1967,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( !type ) continue;
 				// no collectables
 				if ( type is 'SWWMCollectable' ) continue;
-				// no fabricators before hexen
-				if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) && (type is 'AmmoFabricator') ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
@@ -1962,6 +2181,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( stats.favweapon == -1 ) str = str.."N/A";
 			else if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' ) str = str..StringTable.Localize("$SWWM_YOURSELF");
 			else if ( stats.wstats[stats.favweapon].w == 'SWWMGesture' ) str = str..StringTable.Localize("$SWWM_DOKIDOKI");
+			else if ( stats.wstats[stats.favweapon].w == 'Weapon' ) str = str..StringTable.Localize("$SWWM_GRAVKILL");
 			else
 			{
 				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
@@ -2362,19 +2582,19 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					int ox = ((cnt>22)?623:631);
 					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
 					str = String.Format("%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-					Screen.DrawText(fnt2,Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,(sec>=3600)?Font.CR_RED:(sec<=stats.lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[0],origin.y+yy,"T",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[0]+8;
 					str = String.Format("%d\cu/\c-%d",stats.lstats[i].scount,stats.lstats[i].stotal);
-					Screen.DrawText(fnt2,Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,(stats.lstats[i].scount>=stats.lstats[i].stotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[1],origin.y+yy,"S",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[1]+8;
 					str = String.Format("%d\cu/\c-%d",stats.lstats[i].icount,stats.lstats[i].itotal);
-					Screen.DrawText(fnt2,Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,(stats.lstats[i].icount>=stats.lstats[i].itotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[2],origin.y+yy,"I",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[2]+8;
 					str = String.Format("%d\cu/\c-%d",stats.lstats[i].kcount,stats.lstats[i].ktotal);
-					Screen.DrawText(fnt2,Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,(stats.lstats[i].kcount>=stats.lstats[i].ktotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[3],origin.y+yy,"K",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					yy += 14;
 				}
@@ -2472,6 +2692,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
+				if ( invlist[i] is 'SWWMCollectable' )
+					str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
 			}
@@ -2482,7 +2704,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
-				Screen.DrawText(fnt,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				if ( invlist[i] is 'SWWMCollectable' )
+					str.AppendFormat(" \cj(\cg¥\cf%d\cj)\c-",invlist[i].default.Stamina);
+				Screen.DrawText(fnt,(invlist[i] is 'SWWMCollectable')?Font.CR_PURPLE:Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -2615,7 +2839,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
 				else if ( storelist[i] is 'Ammo' ) clscol = Font.CR_BROWN;
-				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
+				else if ( (storelist[i] is 'PowerupGiver') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
 				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));

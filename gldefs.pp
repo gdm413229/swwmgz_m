@@ -6,6 +6,7 @@ HardwareShader PostProcess beforebloom
 	Texture fluidtex "textures/wetwarp.png"
 	Uniform float dfact
 	Uniform float timer
+	Uniform vec3 lightcol
 }
 HardwareShader PostProcess beforebloom
 {
@@ -15,6 +16,7 @@ HardwareShader PostProcess beforebloom
 	Texture fluidtex "textures/lavawarp.png"
 	Uniform float dfact
 	Uniform float timer
+	Uniform vec3 lightcol
 }
 HardwareShader PostProcess beforebloom
 {
@@ -24,6 +26,7 @@ HardwareShader PostProcess beforebloom
 	Texture fluidtex "textures/slimewarp.png"
 	Uniform float dfact
 	Uniform float timer
+	Uniform vec3 lightcol
 }
 HardwareShader PostProcess beforebloom
 {
@@ -82,4 +85,30 @@ HardwareShader PostProcess scene
 	Uniform float Timer
 	Uniform float ni
 	Texture NoiseTexture "textures/rgbnoise.png"
+}
+
+HardwareShader PostProcess screen
+{
+	Name "ObPass0"
+	Shader "shaders/glsl/ObeliskPass0.fp" 330
+	Uniform float Timer
+}
+HardwareShader PostProcess screen
+{
+	Name "ObPass1"
+	Shader "shaders/glsl/ObeliskPass1.fp" 330
+	Uniform float Timer
+	Texture NoiseTexture "textures/rgbnoise.png"
+}
+HardwareShader PostProcess screen
+{
+	Name "ObPass2"
+	Shader "shaders/glsl/ObeliskPass2.fp" 330
+	Uniform float Timer
+}
+HardwareShader PostProcess screen
+{
+	Name "ObPass3"
+	Shader "shaders/glsl/ObeliskPass3.fp" 330
+	Uniform float Timer
 }

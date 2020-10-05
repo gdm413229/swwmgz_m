@@ -18,6 +18,14 @@ Class GrilledCheeseSandwich : Inventory
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
 
+	// for falling off cliffs and others
+	// last 5 seconds of safe positions
+	bool lastsafevalid;
+	Vector3 lastsafepos[5];
+	double lastsafeangle[5];
+	int safetic;
+	int dteleport;
+
 	override Inventory CreateCopy( Actor other )
 	{
 		// additional lore
@@ -75,23 +83,80 @@ Class GrilledCheeseSandwich : Inventory
 			return; // don't trigger on endlevel damage
 		if ( damageType == 'Telefrag' )
 		{
+			// prevent overlap with voodoo doll
 			if ( source.player == Owner.player )
-				return;	// we can't avoid voodoo telefrag, it would break things
-			else
-				Owner.DamageMobj(Owner,Owner,damage,damageType,flags); // kill what attempted the telefrag
+				dteleport = 1;	// teleport has to be on next tic
+			else source.DamageMobj(Owner,Owner,damage,damageType,flags); // kill what attempted the telefrag
 		}
 		if ( (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
+			if ( (damageType == 'Falling') || (damageType == 'InstantDeath') )
+				SafeTeleport();	// get out of pits
 			newdamage = 0;
 			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			DoTheThing(true);
 			Amount--;
 		}
 	}
+	void SafeTeleport( bool tostart = false )
+	{
+		Spawn("SWWMItemFog",Owner.Vec3Offset(0,0,Owner.Height/2));
+		Vector3 safepos;
+		double safeangle;
+		if ( tostart || !lastsafevalid )
+		{
+			if ( deathmatch ) [safepos, safeangle] = level.PickDeathmatchStart();
+			else [safepos, safeangle] = level.PickPlayerStart(Owner.PlayerNumber());
+		}
+		else
+		{
+			safepos = lastsafepos[4];
+			safeangle = lastsafeangle[4];
+		}
+		Owner.Teleport(safepos,safeangle,TF_TELEFRAG|TF_FORCED|TF_USESPOTZ|TF_NOFOG);
+	}
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Amount <= 0 ) DepleteOrDestroy();
+		if ( dteleport > 0 )
+		{
+			dteleport--;
+			if ( dteleport <= 0 ) dteleport = -1;
+		}
+		else if ( dteleport == -1 )
+		{
+			dteleport = 0;
+			SafeTeleport();
+		}
+		// check safe spot
+		if ( Owner && !(Owner.CurSector.flags&Sector.SECF_ENDLEVEL) && (Owner.CurSector.DamageAmount <= 0) && (Owner.waterlevel < 2) && (Owner.GetFloorTerrain().DamageAmount <= 0) && (Owner.pos.z <= Owner.floorz) )
+		{
+			if ( safetic == 0 )
+			{
+				if ( lastsafevalid )
+				{
+					for ( int i=4; i>0; i-- )
+					{
+						lastsafepos[i] = lastsafepos[i-1];
+						lastsafeangle[i] = lastsafeangle[i-1];
+					}
+					lastsafepos[0] = Owner.pos;
+					lastsafeangle[0] = Owner.angle;
+				}
+				else
+				{
+					lastsafevalid = true;
+					for ( int i=0; i<5; i++ )
+					{
+						lastsafepos[i] = Owner.pos;
+						lastsafeangle[i] = Owner.angle;
+					}
+				}
+			}
+			safetic = (safetic+1)%35;
+		}
+		else safetic = 1;
+		if ( (Amount <= 0) && (dteleport == 0) ) DepleteOrDestroy();
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -190,6 +255,7 @@ Class GhostPower : PowerInvisibility
 		Powerup.Strength 100;
 		Powerup.Mode "Translucent";
 		Powerup.Color "F0E0FF", 0.1;
+		+INVENTORY.ADDITIVETIME;
 	}
 
 	override void InitEffect()
@@ -291,7 +357,7 @@ Class GhostArtifact : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
-		if ( g ) g.EffectTics = g.default.EffectTics;
+		if ( g ) g.EffectTics += g.default.EffectTics;
 		else Owner.GiveInventory("GhostPower",1);
 		return true;
 	}
@@ -362,6 +428,7 @@ Class GravityPower : Powerup
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Gravity.png";
 		Powerup.Duration -60;
+		+INVENTORY.ADDITIVETIME;
 	}
 
 	override void InitEffect()
@@ -417,7 +484,7 @@ Class GravitySuppressor : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GravityPower(Owner.FindInventory("GravityPower"));
-		if ( g ) g.EffectTics = g.default.EffectTics;
+		if ( g ) g.EffectTics += g.default.EffectTics;
 		else Owner.GiveInventory("GravityPower",1);
 		return true;
 	}
@@ -529,6 +596,7 @@ Class InvinciballPower : Powerup
 		Powerup.Duration -30;
 		Inventory.Icon "graphics/HUD/Icons/I_Invinciball.png";
 		Powerup.Color "FF3000", 0.1;
+		+INVENTORY.ADDITIVETIME;
 	}
 
 	override void InitEffect()
@@ -638,7 +706,7 @@ Class FuckingInvinciball : Inventory
 		let i = InvinciballPower(Owner.FindInventory("InvinciballPower"));
 		if ( i )
 		{
-			i.EffectTics = i.default.EffectTics;
+			i.EffectTics += i.default.EffectTics;
 			i.lastpulse = max(i.lastpulse,gametic+35);
 			SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
 		}
@@ -759,6 +827,7 @@ Class RagekitPower : Powerup
 		Powerup.Duration -30;
 		Inventory.Icon "graphics/HUD/Icons/I_Ragekit.png";
 		Powerup.Color "FF0000", 0.2;
+		+INVENTORY.ADDITIVETIME;
 	}
 
 	override void InitEffect()
@@ -793,6 +862,8 @@ Class RagekitPower : Powerup
 		if ( !(level.maptime%30) )
 		{
 			SWWMHandler.DoFlash(Owner,Color(16,255,0,0),5);
+			if ( Owner.GiveBody(1,100) )
+				SWWMScoreObj.Spawn(1,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 			Owner.A_AlertMonsters(2000);
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
@@ -845,6 +916,8 @@ Class RagekitPower : Powerup
 	void DoHitFX()
 	{
 		if ( level.maptime <= lasteffect+5 ) return;
+		if ( Owner.GiveBody(5,100) )
+			SWWMScoreObj.Spawn(5,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 		Owner.A_AlertMonsters(5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
@@ -883,11 +956,12 @@ Class Ragekit : Inventory
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
-		Owner.GiveBody(-100);	// full base health
+		if ( Owner.GiveBody(100,100) )
+			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
 		let r = RagekitPower(Owner.FindInventory("RagekitPower"));
 		if ( r )
 		{
-			r.EffectTics = r.default.EffectTics;
+			r.EffectTics += r.default.EffectTics;
 			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 			Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 			r.lastpulse = max(r.lastpulse,gametic+35);
@@ -1266,6 +1340,8 @@ Class LampMashiro : Actor abstract
 // ⡕⡕⠠⡅⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡝⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠐⣁⡴⡴⢣⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀⠀⢠⣾⠿⣫⠞⣱⣿⣿⣿⣿⣿⠟⡡
 // ⢅⢇⢘⢕⢍⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣎⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠿⠛⠛⠛⠉⠁⠀⢀⢜⢕⢅⠕⣡⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠐⡫⡠⠜⣡⣾⣿⣿⡿⠟⠫⠦⠪⠊
 // ⢕⢕⢸⣵⣷⣾⣿⣿⣿⣿⣟⢿⣿⣿⣿⣿⣿⣿⣿⣦⣤⡩⣉⣉⡩⣉⣉⠉⠉⠈⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⠀⣤⢔⢗⢕⠕⣰⣿⣿⣿⣿⣿⣿⣿⣿⡿⢋⢔⢕⠕⣓⠏⣊⠰⠻⠟⠛⣉⠅⢄⠂⡪⡪⡪⠨
+//
+// ~it actually won't be her, but one can dream~
 //
 }
 
@@ -1695,6 +1771,7 @@ Class BarrierPower : PowerIronFeet
 		Inventory.Icon "graphics/HUD/Icons/I_Barrier.png";
 		Powerup.Duration -60;
 		Powerup.Color "20FF00", 0.1;
+		+INVENTORY.ADDITIVETIME;
 	}
 
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage )
@@ -1741,7 +1818,7 @@ Class EBarrier : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let b = BarrierPower(Owner.FindInventory("BarrierPower"));
-		if ( b ) b.EffectTics = b.default.EffectTics;
+		if ( b ) b.EffectTics += b.default.EffectTics;
 		else Owner.GiveInventory("BarrierPower",1);
 		return true;
 	}

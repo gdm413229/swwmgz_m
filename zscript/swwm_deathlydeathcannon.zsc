@@ -645,6 +645,7 @@ Class YnykronBeam : Actor
 			b.pitch = asin(-norm.z);
 			b.A_SprayDecal("YnykronBlast",-172);
 			if ( YnykronShot(master) ) YnykronShot(master).blastcount++;
+			if ( swwm_omnibust ) BusterWall.Bust(t.Results,int.max,target,t.Results.HitVector,t.Results.HitPos.z);
 			// find exit point
 			int maxdist = (25600-special1);
 			int i;
@@ -893,6 +894,7 @@ Class DelayedWallBeam : Actor
 			}
 			else at.Results.HitLine.Activate(tracer,at.Results.Side,SPAC_Impact);
 		}
+		if ( swwm_omnibust ) BusterWall.Bust(at.Results,int.max,target,-at.Results.HitVector,at.Results.HitPos.z);
 		Destroy();
 	}
 }
@@ -1549,6 +1551,7 @@ Class YnykronLightningArc : Actor
 				s.target = target;
 				s.angle = atan2(normal.y,normal.x);
 				s.pitch = asin(-normal.z);
+				if ( swwm_omnibust ) BusterWall.Bust(t.Results,GetMissileDamage(0,0),target,t.Results.HitVector,t.Results.HitPos.z);
 			}
 			invoker.nextpos = t.Results.HitPos;
 			bAMBUSH = true;
@@ -2278,15 +2281,7 @@ Class YnykronSingularity : Actor
 				{
 					// force use the sandwich, warp to safe spot
 					let gc = GrilledCheeseSandwich(a.FindInventory("GrilledCheeseSandwich"));
-					Spawn("SWWMItemFog",a.Vec3Offset(0,0,a.Height/2));
-					Vector3 safepos;
-					int safeangle;
-					if ( deathmatch ) [safepos, safeangle] = level.PickDeathmatchStart();
-					else [safepos, safeangle] = level.PickPlayerStart(a.PlayerNumber());
-					a.vel *= 0.;
-					a.SetOrigin(safepos,false);
-					a.angle = safeangle;
-					a.pitch = 0;
+					gc.SafeTeleport(true);
 					a.A_StartSound(gc.UseSound,CHAN_ITEMEXTRA);
 					gc.DoTheThing(true);
 					gc.Amount--;

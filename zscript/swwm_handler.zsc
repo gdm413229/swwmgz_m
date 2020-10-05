@@ -862,6 +862,11 @@ Class SWWMHandler : EventHandler
 			let t = new("UglyBoyGetsFuckedUp");
 			t.ChangeStatNum(Thinker.STAT_USER);
 		}
+		if ( swwm_partytime )
+		{
+			let pt = Actor.Spawn("PartyTime",e.Thing.pos);
+			pt.target = e.Thing;
+		}
 	}
 
 	override void WorldThingDamaged( WorldEvent e )
@@ -935,6 +940,9 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
+		// romero hax
+		if ( (e.Thing is 'BossBrain') && (e.DamageType == 'Telefrag') )
+			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
 		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
 		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
 		{
@@ -942,7 +950,7 @@ Class SWWMHandler : EventHandler
 			if ( s )
 			{
 				s.kills++;
-				s.AddWeaponKill(e.Inflictor,e.Thing);
+				s.AddWeaponKill(e.Inflictor,e.Thing,e.DamageType);
 			}
 			if ( e.DamageSource == players[consoleplayer].mo )
 			{
@@ -1000,7 +1008,7 @@ Class SWWMHandler : EventHandler
 				{
 					scr.xscore[ofs] = 0;
 					scr.xtcolor[ofs] = Font.FindFontColor('BlushPink');
-					scr.xstr[ofs] = StringTable.Localize("$SWWM_LOVED");
+					scr.xstr[ofs] = StringTable.Localize((e.Thing is 'WolfensteinSS')?"$SWWM_LOVED_ALT":"$SWWM_LOVED");
 					scr.xcnt = ++ofs;
 				}
 			}
@@ -1125,12 +1133,12 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
-		else if ( e.Thing is 'BossBrain' )
+		else if ( e.Thing.GetClass() == 'BossBrain' )
 		{
 			e.Thing.SetTag("$FN_BOSSBRAIN");
-			e.Thing.A_SetSize(20,70);
+			e.Thing.A_SetSize(20,40);
+			e.Thing.bNOBLOOD = true;
 		}
-		else if ( e.Thing is 'CommanderKeen' ) e.Thing.SetTag("$FN_KEEN");
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
 	}
 
@@ -1238,6 +1246,8 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Replacement is 'DSparilHax' )
 			e.Replacee = 'Sorcerer2';
+		if ( e.Replacement is 'SWWMHangingKeen' )
+			e.Replacee = 'CommanderKeen';
 	}
 
 	override void CheckReplacement( ReplaceEvent e )
@@ -1253,6 +1263,17 @@ Class SWWMHandler : EventHandler
 		static const Class<Actor> blackpool[] = {"BlackShell","BlackShell2"};
 		if ( e.Replacee is 'ItemFog' ) e.Replacement = 'SWWMItemFog';
 		if ( e.Replacee is 'TeleportFog' ) e.Replacement = 'SWWMTeleportFog';
+		if ( (e.Replacee is 'CommanderKeen') && (!e.Replacement || (e.Replacement == 'CommanderKeen')) )
+		{
+			let def = GetDefaultByType(e.Replacee);
+			bool dehackery = false;
+			for ( State s=def.SpawnState; s; s=s.NextState )
+			{
+				if ( s.bDEHACKED ) dehackery = true;
+				if ( s.NextState == s ) break;
+			}
+			if ( !dehackery ) e.Replacement = 'SWWMHangingKeen';
+		}
 		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') ) e.Replacement = 'PusherWeapon';
 		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
 		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
@@ -1433,11 +1454,6 @@ Class SWWMHandler : EventHandler
 			else if ( !Random[Replacements](0,3) ) e.Replacement = 'CandyGunBullets';
 			else e.Replacement = Random[Replacements](0,2)?'SilverBullets':'SilverBullets2';
 		}
-		else if ( (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') )
-		{
-			if ( Random[Replacements](0,3) ) e.Replacement = 'SWWMNothing';
-			else e.Replacement = 'GoldShell';
-		}
 		else if ( (e.Replacee == 'CellPack') || (e.Replacee == 'SkullRodHefty') )
 		{
 			if ( !Random[Replacements](0,2) )
@@ -1452,7 +1468,7 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee == 'Mana2' ) e.Replacement = 'FabricatorTier2';
 		else if ( e.Replacee == 'Mana3' ) e.Replacement = 'FabricatorTier3';
 		else if ( e.Replacee == 'ArtiBoostMana' ) e.Replacement = 'FabricatorTier4';
-		else if ( (e.Replacee == 'Backpack') || (e.Replacee == 'BagOfHolding') || (e.Replacee == 'ArtiPork') || (e.Replacee == 'ArtiBoostArmor') ) e.Replacement = 'HammerspaceEmbiggener';
+		else if ( (e.Replacee == 'Backpack') || (e.Replacee == 'BagOfHolding') || (e.Replacee == 'ArtiBoostArmor') ) e.Replacement = 'HammerspaceEmbiggener';
 		else if ( (e.Replacee == 'FWeaponPiece1') || (e.Replacee == 'FWeaponPiece2')
 			|| (e.Replacee == 'CWeaponPiece1') || (e.Replacee == 'CWeaponPiece3')
 			|| (e.Replacee == 'MWeaponPiece2') || (e.Replacee == 'MWeaponPiece3') )
@@ -1481,11 +1497,12 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee == 'Radsuit' ) e.Replacement = 'EBarrier';
 		else if ( (e.Replacee == 'ArtiFly') ) e.Replacement = 'GravitySuppressor';
 		else if ( (e.Replacee == 'InvulnerabilitySphere') || (e.Replacee == 'ArtiInvulnerability') || (e.Replacee == 'ArtiInvulnerability2') ) e.Replacement = 'FuckingInvinciball';
-		else if ( (e.Replacee == 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'Ragekit';
+		else if ( (e.Replacee == 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'Ragekit';
 		else if ( (e.Replacee == 'AllMap') || (e.Replacee == 'SuperMap') ) e.Replacement = 'Omnisight';
 		else if ( (e.Replacee == 'Infrared') || (e.Replacee == 'ArtiTorch') ) e.Replacement = 'SWWMLamp';
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
+		else if ( (e.Replacee == 'ArtiPork') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'SWWMNothing'/*'Chancebox'*/;
 	}
 
 	override void NetworkProcess( ConsoleEvent e )
@@ -1785,6 +1802,8 @@ Class SWWMHandler : EventHandler
 				Shader.SetEnabled(p,"WaterWarp",true);
 				Shader.SetUniform1f(p,"WaterWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
 				Shader.SetUniform1f(p,"WaterWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"WaterWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
+
 			}
 			else Shader.SetEnabled(p,"WaterWarp",false);
 			if ( demo.lastunder == Demolitionist.UNDER_LAVA )
@@ -1792,6 +1811,7 @@ Class SWWMHandler : EventHandler
 				Shader.SetEnabled(p,"LavaWarp",true);
 				Shader.SetUniform1f(p,"LavaWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
 				Shader.SetUniform1f(p,"LavaWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"LavaWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
 			}
 			else Shader.SetEnabled(p,"LavaWarp",false);
 			if ( demo.lastunder == Demolitionist.UNDER_SLIME )
@@ -1799,6 +1819,7 @@ Class SWWMHandler : EventHandler
 				Shader.SetEnabled(p,"SlimeWarp",true);
 				Shader.SetUniform1f(p,"SlimeWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
 				Shader.SetUniform1f(p,"SlimeWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"SlimeWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
 			}
 			else Shader.SetEnabled(p,"SlimeWarp",false);
 			int lastdmg = (demo.Health>0)?demo.lastdamage:Random[Flicker](60,80);

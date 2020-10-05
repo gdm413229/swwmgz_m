@@ -18,9 +18,116 @@ enum ESWWMGZChannels
 // Future planning, will be filled out with AI stuff and whatnot someday
 Class SWWMMonster : Actor
 {
+	// integrated fun tags
 	virtual clearscope String GetFunTag( String defstr = "" )
 	{
 		return GetTag(defstr);
+	}
+
+	// the function that should be overriden in subclasses
+	virtual int HandleLocationalDamage( Actor inflictor, Actor source, int damage, Name mod, Vector3 HitLocation, int flags = 0, double angle = 0 )
+	{
+		return damage;
+	}
+
+	// locational damage support, akin to UE1, but hitlocation will be treated as a relative offset, to make things easier
+	// this one should be called directly by everything in this mod, when possible
+	int LocationalDamageMobj( Actor inflictor, Actor source, int damage, Name mod, Vector3 HitLocation, int flags = 0, double angle = 0 )
+	{
+		damage = HandleLocationalDamage(inflictor,source,damage,mod,HitLocation,flags,angle);
+		return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+	}
+
+	// "estimated" locational damage for the vanilla DamageMobj
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		Vector3 guesspos = (0,0,Height/2.);
+		// use inflictor if available, as it may be a projectile or hitscan puff
+		// if damage comes from an item, use owner
+		// all of this could be done better (or implemented as an engine feature), but whatever
+		Actor whomst = inflictor?inflictor:source;
+		if ( whomst is 'Inventory' ) whomst = Inventory(whomst).Owner;
+		if ( whomst )
+		{
+			if ( whomst.bMISSILE || (flags&DMG_INFLICTOR_IS_PUFF) )
+				guesspos = level.Vec3Diff(pos,whomst.pos);
+			else guesspos = level.Vec3Diff(pos,whomst.Vec3Offset(0,0,whomst.Height/2));
+			guesspos.x = clamp(guesspos.x,-radius,radius);
+			guesspos.y = clamp(guesspos.y,-radius,radius);
+			guesspos.z = clamp(guesspos.z,0,height);
+		}
+		return LocationalDamageMobj(inflictor,source,damage,mod,guesspos,flags,angle);
+	}
+}
+
+// Less mean-spirited Keen
+Class SWWMHangingKeen : Actor
+{
+	action void A_DropKeen()
+	{
+		Spawn("SWWMDroppedKeen",Vec3Offset(0,0,8));
+	}
+	Default
+	{
+		Tag "$FN_KEEN";
+		Health 100;
+		Radius 10;
+		Height 54;
+		Mass int.max;
+		PainChance 256;
+		+SOLID;
+		+SPAWNCEILING;
+		+NOGRAVITY;
+		+SHOOTABLE;
+		+NOICEDEATH;
+		+DONTFALL;
+		+NOBLOOD;
+		+DONTTHRUST;
+		PainSound "keen/pain";
+		DeathSound "keen/death";
+	}
+	States
+	{
+	Spawn:
+		KEE2 A -1;
+		Stop;
+	Death:
+		KEE2 A 6;
+		KEE2 B 6 A_DropKeen();
+		KEE2 C 6 A_Scream();
+		KEE2 DE 6;
+		KEE2 F 30;
+		KEE2 F -1 A_KeenDie();
+		Stop;
+	Pain:
+		KEE2 G 4;
+		KEE2 G 8 A_Pain();
+		Goto Spawn;
+	}
+}
+Class SWWMDroppedKeen : Actor
+{
+	Default
+	{
+		Radius 10;
+		Height 32;
+		Gravity .5;
+		+NOBLOCKMAP;
+	}
+	States
+	{
+	Spawn:
+		KEE3 A 1 A_JumpIf(pos.z<=floorz,1);
+		Wait;
+		KEE3 B 1 { vel.z = 4; }
+		KEE3 B 1 A_JumpIf(pos.z<=floorz,1);
+		Wait;
+		KEE3 B 1 { vel.z = 2; }
+		KEE3 B 1 A_JumpIf(pos.z<=floorz,1);
+		Wait;
+		KEE3 B 12;
+		TNT1 A 1 { Spawn("TeleportFog",pos,ALLOW_REPLACE); }
+		Stop;
 	}
 }
 

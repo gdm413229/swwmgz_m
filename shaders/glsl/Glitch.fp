@@ -1,3 +1,7 @@
+const float thr1 = 6.4;
+const float thr2 = 8.6;
+const float thr3 = 19.3;
+
 float rnd2( in vec2 sd )
 {
     return fract(cos(dot(sd*floor(Timer*15.0),vec2(145.34,142.55)))*2745.84);
@@ -13,7 +17,7 @@ void main()
 	vec2 uv_c[3] = vec2[3](coord,coord,coord);
 	vec2 blka = floor(coord*vec2(22.0,12.0));
 	vec2 blkb = floor(coord*vec2(6.0,9.0));
-	float noiz = pow(rnd2(blka),6.4)*pow(rnd2(blkb),8.6)-pow(rnd(4.53),19.3)*str2;
+	float noiz = pow(rnd2(blka),thr1)*pow(rnd2(blkb),thr2)-pow(rnd(4.53),thr3)*str2;
 	uv_c[0].x += str1*noiz*(rnd(3.35)-0.5);
 	uv_c[1].x += str1*noiz*(rnd(4.63)-0.5);
 	uv_c[2].x += str1*noiz*(rnd(5.62)-0.5);

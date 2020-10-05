@@ -39,7 +39,6 @@
  - Voice acting? Maybe not, I'd need people to re-voice all Strife NPCs.
  - Oh god I have to do dialogue sprites for all characters. Maybe I can get someone else for the job?
 
-
 **At this point I'm just making shit up:**
 
  - Official comic.

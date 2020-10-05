@@ -9,7 +9,7 @@ Class MsgLine
 Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex[3], InventoryTex, ChatTex[6],
-		HealthTex[5], FuelTex, DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
+		HealthTex[5], FuelTex[2], DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
 	// "Full History" contains all messages since session start, nothing is flushed
@@ -28,7 +28,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -598,7 +598,8 @@ Class SWWMStatusBar : BaseStatusBar
 		SetSize(0,640,360);
 		StatusTex = TexMan.CheckForTexture("graphics/HUD/StatusBox.png",TexMan.Type_Any);
 		DashTex = TexMan.CheckForTexture("graphics/HUD/DashBar.png",TexMan.Type_Any);
-		FuelTex = TexMan.CheckForTexture("graphics/HUD/FuelBar.png",TexMan.Type_Any);
+		FuelTex[0] = TexMan.CheckForTexture("graphics/HUD/FuelBar.png",TexMan.Type_Any);
+		FuelTex[1] = TexMan.CheckForTexture("graphics/HUD/FuelBarS.png",TexMan.Type_Any);
 		HealthTex[0] = TexMan.CheckForTexture("graphics/HUD/HealthBar0.png",TexMan.Type_Any);
 		HealthTex[1] = TexMan.CheckForTexture("graphics/HUD/HealthBar1.png",TexMan.Type_Any);
 		HealthTex[2] = TexMan.CheckForTexture("graphics/HUD/HealthBar2.png",TexMan.Type_Any);
@@ -864,40 +865,54 @@ Class SWWMStatusBar : BaseStatusBar
 		int yy = margin+19;
 		if ( automapactive )
 		{
+			if ( !showitems ) showitems = CVar.GetCVar('am_showitems',players[consoleplayer]);
+			if ( !showmaplabel ) showmaplabel = CVar.GetCVar('am_showmaplabel',players[consoleplayer]);
+			if ( !showmonsters ) showmonsters = CVar.GetCVar('am_showmonsters',players[consoleplayer]);
+			if ( !showsecrets ) showsecrets = CVar.GetCVar('am_showsecrets',players[consoleplayer]);
+			if ( !showtime ) showtime = CVar.GetCVar('am_showtime',players[consoleplayer]);
+			if ( !showtotaltime ) showtotaltime = CVar.GetCVar('am_showtotaltime',players[consoleplayer]);
 			int xx = int(ss.x-(margin+2));
 			String str;
-			if ( level.clusterflags&level.CLUSTER_HUB ) str = level.levelname;
+			int label = showmaplabel.GetInt();
+			if ( !label || ((level.clusterflags&level.CLUSTER_HUB) && (label == 2)) ) str = level.levelname;
 			else str = String.Format("%s - %s",level.mapname.MakeUpper(),level.levelname);
 			let fnt = LangFont(mTewiFont);
 			Screen.DrawText(fnt,Font.CR_FIRE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += fnt.GetHeight();
 			fnt = LangFont(mMiniwiFont);
-			if ( level.total_monsters > 0 )
+			if ( (level.total_monsters > 0) && showmonsters.GetBool() )
 			{
 				str = String.Format("\cxK \c-%d\cu/\c-%d",level.killed_monsters,level.total_monsters);
-				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,(level.killed_monsters>=level.total_monsters)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( level.total_items > 0 )
+			if ( (level.total_items > 0) && showitems.GetBool() )
 			{
 				str = String.Format("\cxI \c-%d\cu/\c-%d",level.found_items,level.total_items);
-				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,(level.found_items>=level.total_items)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( level.total_secrets > 0 )
+			if ( (level.total_secrets > 0) && showsecrets.GetBool() )
 			{
 				str = String.Format("\cxS \c-%d\cu/\c-%d",level.found_secrets,level.total_secrets);
+				Screen.DrawText(fnt,(level.found_secrets>=level.total_secrets)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
+			int sec;
+			if ( showtime.GetBool() )
+			{
+				sec = Thinker.Tics2Seconds(level.maptime);
+				str = String.Format("\cxT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
+				Screen.DrawText(fnt,(sec>3600)?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
+			if ( showtotaltime.GetBool() )
+			{
+				sec = Thinker.Tics2Seconds(level.totaltime);
+				str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
 				Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			int sec = Thinker.Tics2Seconds(level.maptime);
-			str = String.Format("\cxT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-			Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += fnt.GetHeight();
-			sec = Thinker.Tics2Seconds(level.totaltime);
-			str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-			Screen.DrawText(fnt,Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += fnt.GetHeight();
 			yy += 3;
 		}
 		// in doom/heretic (draw key icons)
@@ -1111,7 +1126,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !d || (d.dashfuel > 20) || ((gametic%10) < 5) ) alph = 1.;
 		Screen.DrawTexture(DashTex,false,margin+2,ss.y-(margin+20),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,dw,DTA_Alpha,alph);
 		double fw = FuelInter.GetValue()/2.;
-		Screen.DrawTexture(FuelTex,false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,fw);
+		Screen.DrawTexture(FuelTex[swwm_superfuel],false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,fw);
 		double ht = clamp(HealthInter.GetValue(),0,10000);
 		double hw = min(ht,100);
 		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )

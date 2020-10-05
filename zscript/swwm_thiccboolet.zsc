@@ -161,9 +161,11 @@ Class SilverImpact : Actor
 
 Class WallPenetrate
 {
-	Vector3 hitpos, hitdir, hitnormal;
+	Vector3 hitpos, hitdir, hitnormal, bustdir;
+	int hitside, hittier, hittype, penetration;
 	Line hitline;
-	int hitside;
+	Sector hitsector;
+	F3DFloor hitffloor;
 }
 
 Class AuxiliarySilverBulletTracer : LineTracer
@@ -237,25 +239,38 @@ Class SilverBulletTracer : SpreadSlugTracer
 					Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
 					if ( level.IsPointInLevel(ofs) )
 					{
-						penetration = max(0,penetration-i*4);
 						let wp = new("WallPenetrate");
+						wp.hittype = Results.HitType;
 						wp.hitline = Results.HitLine;
 						wp.hitside = Results.Side;
+						wp.hittier = Results.Tier;
+						wp.hitsector = Results.HitSector;
+						wp.hitffloor = Results.ffloor;
 						wp.hitpos = Results.HitPos;
 						wp.hitdir = Results.HitVector;
+						wp.bustdir = Results.HitVector;
+						wp.penetration = int(penetration);
 						wp.hitnormal = (-Results.HitLine.delta.y,Results.HitLine.delta.x,0).unit();
 						if ( !Results.Side ) wp.hitnormal *= -1;
 						WallPenetrateList.Push(wp);
+						penetration = max(0,penetration-i*4);
 						// trace backwards to find exit surface
 						let at = new("AuxiliarySilverBulletTracer");
 						at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_NoSky);
 						if ( at.Results.HitType != TRACE_HitNone )
 						{
 							let wp2 = new("WallPenetrate");
+							wp2.hittype = at.Results.HitType;
 							wp2.hitline = at.Results.HitLine;
+							wp2.hitside = at.Results.Side;
+							wp2.hittier = at.Results.Tier;
+							wp2.hitsector = at.Results.HitSector;
+							wp2.hitffloor = at.Results.ffloor;
 							wp2.hitside = at.Results.Side;
 							wp2.hitpos = at.Results.HitPos;
 							wp2.hitdir = at.Results.HitVector;
+							wp2.bustdir = -at.Results.HitVector;
+							wp2.penetration = int(penetration);
 							if ( at.Results.HitType == TRACE_HitWall )
 							{
 								wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
@@ -284,12 +299,17 @@ Class SilverBulletTracer : SpreadSlugTracer
 				Vector3 ofs = level.Vec3Offset(Results.HitPos,Results.HitVector*i);
 				if ( level.IsPointInLevel(ofs) )
 				{
-					penetration = max(0,penetration-i*4);
 					let wp = new("WallPenetrate");
+					wp.hittype = Results.HitType;
 					wp.hitline = Results.HitLine;
 					wp.hitside = Results.Side;
+					wp.hittier = Results.Tier;
+					wp.hitsector = Results.HitSector;
+					wp.hitffloor = Results.ffloor;
 					wp.hitpos = Results.HitPos;
 					wp.hitdir = Results.HitVector;
+					wp.bustdir = Results.HitVector;
+					wp.penetration = int(penetration);
 					if ( Results.HitType == TRACE_HitWall )
 					{
 						wp.hitnormal = (-Results.HitLine.delta.y,Results.HitLine.delta.x,0).unit();
@@ -301,16 +321,24 @@ Class SilverBulletTracer : SpreadSlugTracer
 					else if ( Results.HitType == TRACE_HitFloor )
 						wp.hitnormal = Results.HitSector.floorplane.Normal;
 					WallPenetrateList.Push(wp);
+					penetration = max(0,penetration-i*4);
 					// trace backwards to find exit surface
 					let at = new("AuxiliarySilverBulletTracer");
 					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_NoSky);
 					if ( at.Results.HitType != TRACE_HitNone )
 					{
 						let wp2 = new("WallPenetrate");
+						wp2.hittype = at.Results.HitType;
 						wp2.hitline = at.Results.HitLine;
+						wp2.hitside = at.Results.Side;
+						wp2.hittier = at.Results.Tier;
+						wp2.hitsector = at.Results.HitSector;
+						wp2.hitffloor = at.Results.ffloor;
 						wp2.hitside = at.Results.Side;
 						wp2.hitpos = at.Results.HitPos;
 						wp2.hitdir = at.Results.HitVector;
+						wp2.bustdir = -at.Results.HitVector;
+						wp2.penetration = int(penetration);
 						if ( at.Results.HitType == TRACE_HitWall )
 						{
 							wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
@@ -776,6 +804,7 @@ Class SilverBullet : SWWMWeapon
 				p.target = self;
 			}
 		}
+		LineTracer faketracer = new("LineTracer");
 		for ( int i=0; i<t.WallPenetrateList.Size(); i++ )
 		{
 			Vector3 hitpos = t.WallPenetrateList[i].hitpos;
@@ -784,8 +813,18 @@ Class SilverBullet : SWWMWeapon
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
 			p.target = self;
-			if ( t.WallPenetrateList[i].hitline )
+			if ( t.WallPenetrateList[i].hittype == TRACE_HitWall )
 				t.WallPenetrateList[i].hitline.Activate(self,t.WallPenetrateList[i].hitside,SPAC_Impact);
+			if ( swwm_omnibust )
+			{
+				faketracer.Results.HitType = t.WallPenetrateList[i].HitType;
+				faketracer.Results.HitSector = t.WallPenetrateList[i].HitSector;
+				faketracer.Results.HitLine = t.WallPenetrateList[i].HitLine;
+				faketracer.Results.ffloor = t.WallPenetrateList[i].HitFFloor;
+				faketracer.Results.Side = t.WallPenetrateList[i].HitSide;
+				faketracer.Results.Tier = t.WallPenetrateList[i].HitTier;
+				BusterWall.Bust(faketracer.Results,t.WallPenetrateList[i].penetration,self,t.WallPenetrateList[i].BustDir,t.WallPenetrateList[i].HitPos.z);
+			}
 		}
 		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
 		{
@@ -810,6 +849,7 @@ Class SilverBullet : SWWMWeapon
 			p.pitch = asin(-hitnormal.z);
 			p.target = self;
 			if ( t.Results.HitType == TRACE_HitWall ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(t.penetration),self,t.Results.HitVector,t.Results.HitPos.z);
 		}
 		for ( int i=0; i<t.Results.Distance; i+=16 )
 		{
@@ -872,16 +912,14 @@ Class SilverBullet : SWWMWeapon
 				}
 			}
 			else if ( t.Results.HitType == TRACE_HitWall )
-			{
 				t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
-				BusterWall.Bust(t.Results,invoker.proneme?2500:2000,self,t.Results.HitVector,t.Results.HitPos.z);
-			}
 			let p = Spawn("FatChodeImpact",t.Results.HitPos+hitnormal*4);
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
 			p.target = self;
 			FatChodeImpact(p).realangle = atan2(t.Results.HitVector.y,t.Results.HitVector.x);
 			FatChodeImpact(p).realpitch = asin(-t.Results.HitVector.z);
+			BusterWall.Bust(t.Results,invoker.proneme?2500:2000,self,t.Results.HitVector,t.Results.HitPos.z);
 		}
 		for ( int i=0; i<t.Results.Distance; i+=16 )
 		{

@@ -160,6 +160,11 @@ Mixin Class SWWMAmmo
 		}
 		return Super.HandlePickup(item);
 	}
+
+	default
+	{
+		+INVENTORY.IGNORESKILL;
+	}
 }
 
 // Common code for individual bullets
@@ -1248,7 +1253,7 @@ Class AmmoFabricator : Inventory abstract
 		int maxb = ib?ib.MaxAmount:GetDefaultByType(b).Amount;
 		double facta = cnta/double(maxa);
 		double factb = cntb/double(maxb);
-		return (facta > factb);
+		return (facta >= factb);
 	}
 
 	private int partition_fabammo( Array<Class<Ammo> > a, int l, int h )
@@ -1293,7 +1298,7 @@ Class AmmoFabricator : Inventory abstract
 			if ( !(def.Stamina) || (def.Stamina > maxunitprice) ) continue;
 			available.Push(a);
 		}
-		// sort by "need weight" (prioritize ammo that the player lacks over ammo that te player has plenty of
+		// sort by "need weight" (prioritize ammo that the player lacks over ammo that the player has plenty of
 		qsort_fabammo(available,0,available.Size()-1);
 		// loop through until we fill the inventory or run out of budget
 		bool given = false;
@@ -1381,7 +1386,6 @@ Class FabricatorTier1 : AmmoFabricator
 		AmmoFabricator.Budget 5000;
 		AmmoFabricator.PerType 2;
 		AmmoFabricator.MaxUnitPrice 2500;
-		Stamina 3000;
 	}
 }
 Class FabricatorTier2 : AmmoFabricator
@@ -1397,7 +1401,6 @@ Class FabricatorTier2 : AmmoFabricator
 		AmmoFabricator.Budget 15000;
 		AmmoFabricator.PerType 4;
 		AmmoFabricator.MaxUnitPrice 10000;
-		Stamina 12000;
 	}
 }
 Class FabricatorTier3 : AmmoFabricator
@@ -1413,7 +1416,6 @@ Class FabricatorTier3 : AmmoFabricator
 		AmmoFabricator.Budget 150000;
 		AmmoFabricator.PerType 8;
 		AmmoFabricator.MaxUnitPrice 80000;
-		Stamina 150000;
 	}
 }
 Class FabricatorTier4 : AmmoFabricator
@@ -1428,7 +1430,6 @@ Class FabricatorTier4 : AmmoFabricator
 		AmmoFabricator.PerType int.max;
 		AmmoFabricator.MaxUnitPrice int.max;
 		-INVENTORY.AUTOACTIVATE;
-		Stamina 1920000;
 	}
 }
 

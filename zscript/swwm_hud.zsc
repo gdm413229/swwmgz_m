@@ -595,7 +595,16 @@ Class SWWMStatusBar : BaseStatusBar
 	override void Init()
 	{
 		Super.Init();
-		SetSize(0,640,360);
+		// scaling is set to 640 pixels wide minimum
+		// and height set so it fits up to ultrawide (2.370:1 ~ 2.4:1)
+		// ultrawide is honestly an abomination,
+		// and these numbers should be proof enough of it
+		// none of the commercially available "21:9" screens even have
+		// that actual ratio in the first place, what the fuck man
+		// they dangle anywhere between 12:4, 43:18 and 64:27
+		// fuck ultrawide, seriously
+		// get a 16:10 screen instead, it's the best aspect ratio
+		SetSize(0,640,266);
 		StatusTex = TexMan.CheckForTexture("graphics/HUD/StatusBox.png",TexMan.Type_Any);
 		DashTex = TexMan.CheckForTexture("graphics/HUD/DashBar.png",TexMan.Type_Any);
 		FuelTex[0] = TexMan.CheckForTexture("graphics/HUD/FuelBar.png",TexMan.Type_Any);
@@ -1399,44 +1408,29 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			hs.x = hscale.GetInt();
 			if ( Screen.GetWidth()/hs.x < 640. ) hs.x = max(1,floor(Screen.GetWidth()/640.));
-			hs.y = hs.x;
 		}
+		hs.y = hs.x;
 		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		margin = clamp(safezone.GetInt(),0,(ss.x<640)?10:40);
 		if ( bscale.GetInt() <= 0 ) hsb = GetHUDScale();
-		else
-		{
-			hsb.x = bscale.GetInt();
-			hsb.y = hsb.x;
-		}
+		else hsb.x = bscale.GetInt();
+		hsb.y = hsb.x;
 		ssb = (Screen.GetWidth()/hsb.x,Screen.GetHeight()/hsb.y);
 		if ( nscale.GetInt() <= 0 ) hsn = GetHUDScale();
-		else
-		{
-			hsn.x = nscale.GetInt();
-			hsn.y = hsn.x;
-		}
+		else hsn.x = nscale.GetInt();
+		hsn.y = hsn.x;
 		ssn = (Screen.GetWidth()/hsn.x,Screen.GetHeight()/hsn.y);
 		if ( sscale.GetInt() <= 0 ) hss = GetHUDScale();
-		else
-		{
-			hss.x = sscale.GetInt();
-			hss.y = hss.x;
-		}
+		else hss.x = sscale.GetInt();
+		hss.y = hss.x;
 		sss = (Screen.GetWidth()/hss.x,Screen.GetHeight()/hss.y);
 		if ( iscale.GetInt() <= 0 ) hsi = GetHUDScale();
-		else
-		{
-			hsi.x = iscale.GetInt();
-			hsi.y = hsi.x;
-		}
+		else hsi.x = iscale.GetInt();
+		hsi.y = hsi.x;
 		ssi = (Screen.GetWidth()/hsi.x,Screen.GetHeight()/hsi.y);
 		if ( dscale.GetInt() <= 0 ) hsd = GetHUDScale();
-		else
-		{
-			hsd.x = dscale.GetInt();
-			hsd.y = hsd.x;
-		}
+		else hsd.x = dscale.GetInt();
+		hsd.y = hsd.x;
 		ssd = (Screen.GetWidth()/hsd.x,Screen.GetHeight()/hsd.y);
 		FracTic = TicFrac;
 		DrawTarget();

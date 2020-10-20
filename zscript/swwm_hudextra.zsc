@@ -32,6 +32,7 @@ Class PayRespects : HUDMessageBase
 	override void ScreenSizeChanged()
 	{
 		hs = StatusBar.GetHUDScale()*scale;
+		hs.y = hs.x;
 		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 	}
 
@@ -90,8 +91,8 @@ Class SWWMOneLiner : HUDMessageBase
 		{
 			hs.x = hscale.GetInt();
 			if ( Screen.GetWidth()/hs.x < 640. ) hs.x = max(1,floor(Screen.GetWidth()/640.));
-			hs.y = hs.x;
 		}
+		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String loc = StringTable.Localize(whichline);
 		if ( loc.Length() <= 0 ) return;	// don't draw empty strings

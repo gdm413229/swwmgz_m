@@ -117,8 +117,8 @@ Class ExplodiumMagProj : Actor
 	{
 		Obituary "$O_EXPLODIUM";
 		DamageType "Explodium";
-		Radius 6;
-		Height 6;
+		Radius 4;
+		Height 4;
 		Gravity 0.5;
 		Speed 30;
 		PROJECTILE;
@@ -148,7 +148,7 @@ Class ExplodiumMagProj : Actor
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
-		A_SprayDecal("BigScorch",172);
+		A_SprayDecal("BigRocketBlast",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -226,6 +226,8 @@ Class ExplodiumBulletImpact : Actor
 		Obituary "$O_EXPLODIUM";
 		DamageType "Explodium";
 		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
 		Scale 1.2;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
@@ -243,7 +245,7 @@ Class ExplodiumBulletImpact : Actor
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
 		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);
-		A_SprayDecal("Scorch",-172);
+		A_SprayDecal("RocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -310,6 +312,25 @@ Class ExplodiumGun : SWWMWeapon
 		Screen.DrawTexture(WeaponBox,false,bx-24,by-22,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-22,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-19,by-14,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override void HudTick()
+	{
+		[cpos, ccol] = TraceForCrosshair();
+		let sw = SWWMWeapon(SisterWeapon);
+		// avoid jumpy switching
+		if ( (Owner.player.PendingWeapon is 'SWWMWeapon') && (Owner.player.PendingWeapon != sw) )
+		{
+			SWWMWeapon(Owner.player.PendingWeapon).cpos = cpos;
+			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = lagvpos;
+		}
+		[sw.cpos, sw.ccol] = sw.TraceForCrosshair();
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		if ( Owner.player.ReadyWeapon == SisterWeapon ) return (10.,3.5,-2.);
+		return (10.,3.,-2.);
 	}
 
 	override bool HandlePickup( Inventory item )
@@ -530,6 +551,8 @@ Class ExplodiumGun : SWWMWeapon
 		Stamina 8000;
 		ExplodiumGun.ClipCount 7;
 		+WEAPON.EXPLOSIVE;
+		Radius 12;
+		Height 24;
 	}
 	States
 	{
@@ -703,6 +726,32 @@ Class DualExplodiumGun : SWWMWeapon
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-19,by-14,String.Format("%d",max(ExplodiumGun(SisterWeapon).clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-46,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-43,by-14,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override void RenderUnderlay( RenderEvent e )
+	{
+		Super.RenderUnderlay(e);
+		// draw both crosshairs
+		SWWMWeapon(SisterWeapon).RenderUnderlay(e);
+	}
+
+	override void HudTick()
+	{
+		[cpos, ccol] = TraceForCrosshair();
+		let sw = SWWMWeapon(SisterWeapon);
+		// avoid jumpy switching
+		if ( (Owner.player.PendingWeapon is 'SWWMWeapon') && (Owner.player.PendingWeapon != sw) )
+		{
+			SWWMWeapon(Owner.player.PendingWeapon).cpos = sw.cpos;
+			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = sw.lagvpos;
+		}
+		[sw.cpos, sw.ccol] = sw.TraceForCrosshair();
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		if ( Owner.player.ReadyWeapon == SisterWeapon ) return (10.,-3.,-2.);
+		return (10.,-3.5,-2.);
 	}
 
 	action void A_LeftFlash( StateLabel flashlabel = null )

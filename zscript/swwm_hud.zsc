@@ -874,8 +874,11 @@ Class SWWMStatusBar : BaseStatusBar
 			int xx = int(ss.x-(margin+2));
 			String str;
 			int label = showmaplabel.GetInt();
-			if ( !label || ((level.clusterflags&level.CLUSTER_HUB) && (label == 2)) ) str = level.levelname;
-			else str = String.Format("%s - %s",level.mapname.MakeUpper(),level.levelname);
+			String ln = level.levelname;
+			int iof = ln.IndexOf(" - by: ");
+			if ( iof != -1 ) ln.Truncate(iof);
+			if ( !label || ((level.clusterflags&level.CLUSTER_HUB) && (label == 2)) ) str = ln;
+			else str = String.Format("%s - %s",level.mapname.MakeUpper(),ln);
 			let fnt = LangFont(mTewiFont);
 			Screen.DrawText(fnt,Font.CR_FIRE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += fnt.GetHeight();

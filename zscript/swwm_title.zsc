@@ -5,6 +5,10 @@ Class SWWMTitleStuff : EventHandler
 	transient ui TextureID tex[3];
 	transient ui Font TewiFont, MPlusFont;
 	transient ui CVar lang, fuzz;
+	transient ui Array<String> scrolls;
+	transient ui int sline;
+	transient ui double sbase;
+	transient ui String lastlang;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	private ui Font LangFont( Font req )
@@ -63,5 +67,50 @@ Class SWWMTitleStuff : EventHandler
 		else vsize = tsize;
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-26,0.,2.)*.5;
 		Screen.DrawTexture(tex[1],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
+		if ( (level.maptime/Thinker.TICRATE) < 30 ) return;
+		// scrolls
+		if ( (scrolls.Size() <= 0 ) || (lastlang != lang.GetString()) )
+		{
+			scrolls.Clear();
+			String sstr = StringTable.Localize("$SWWM_TITLESCROLL");
+			sstr.Split(scrolls,"\n");
+			sbase = (level.maptime+e.FracTic)/Thinker.TICRATE;
+			if ( sline >= scrolls.Size() ) sline = 0;
+		}
+		lastlang = lang.GetString();
+		// estimate scrool length
+		double llen = fnt.StringWidth(scrolls[sline]);
+		double soffset = 40*((level.maptime+e.FracTic)/Thinker.TICRATE-sbase);
+		if ( soffset > llen+320 )
+		{
+			sline++;
+			if ( sline >= scrolls.Size() ) sline = 0;
+			sbase = (level.maptime+e.FracTic)/Thinker.TICRATE;
+			soffset = 0;
+		}
+		double xx = 320-soffset;
+		int tlen = scrolls[sline].CodePointCount();
+		for ( int i=0, pos=0; i<tlen; i++ )
+		{
+			int ch;
+			[ch, pos] = scrolls[sline].GetNextCodePoint(pos);
+			if ( (xx > -8) && (xx < 320) )
+			{
+				for ( double trl = .1; trl < 1.; trl += .04 )
+				{
+					double yy = 160+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl));
+					alf = max(0,1.-abs(160-xx)/160.)**.5;
+					alf *= .2*trl;
+					double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl))-16*(1.-trl);
+					Screen.DrawChar(fnt,Font.CR_BLUE,xx-xxofs,yy,ch,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf,DTA_LegacyRenderStyle,STYLE_Add);
+				}
+				double yy = 160+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE);
+				alf = max(0,1.-abs(160-xx)/160.)**.5;
+				double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE);
+				Color c = Color(int(127.5+127.5*sin(10*i+80*(level.maptime+e.FracTic)/Thinker.TICRATE)),0,0);
+				Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx-xxofs,yy,ch,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+			}
+			xx += fnt.GetCharWidth(ch);
+		}
 	}
 }

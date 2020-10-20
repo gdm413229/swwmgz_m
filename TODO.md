@@ -1,7 +1,6 @@
 **Finishing touches before release:**
 
- - Radio function
- - Collectables
+ - Collectibles
  - Achievements
  - Minigames
 
@@ -13,6 +12,7 @@
  - Extra localizations (including Japanese)
  - Mod trailer video (doubt I'd be able to, I might ask someone instead)
  - Rewrite the entire Demolitionist Menu code from the ground up to be more easily extensible and adapt to any window size
+ - Hexen key and puzzle item models?
 
 **Very extra things for the future:**
 

@@ -21,7 +21,7 @@ Class AirBullet : FastProjectile
 	}
 	override void PostBeginPlay()
 	{
-		A_StartSound("deepimpact/bullet",CHAN_BODY,CHANF_LOOPING,1.,1.5);
+		A_StartSound("deepimpact/bullet",CHAN_BODY,CHANF_LOOP,1.,1.5);
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
@@ -236,6 +236,7 @@ Class DeepImpact : SWWMWeapon
 
 	override void HudTick()
 	{
+		Super.HudTick();
 		if ( !ChargeInter ) ChargeInter = DynamicValueInterpolator.Create(clipcount,.5,1,25);
 		ChargeInter.Update(clipcount);
 	}
@@ -262,6 +263,11 @@ Class DeepImpact : SWWMWeapon
 			A_WeaponOffset(0,32);
 			player.SetPSprite(PSP_WEAPON,ResolveState("AltRelease"));
 		}
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,2.,-3.);
 	}
 
 	action void A_DryFire()

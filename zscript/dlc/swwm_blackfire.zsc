@@ -3,4 +3,32 @@
 
 Class BlackfireIgniter : SWWMWeapon
 {
+	int clipcount;
+	bool hasaux;
+	int auxclipcount;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		Tag "$T_BLACKFIRE";
+		Inventory.PickupMessage "$T_BLACKFIRE";
+		Obituary "$O_BLACKFIRE";
+		Inventory.Icon "graphics/HUD/Icons/W_Blackfire.png";
+		Weapon.SlotNumber 7;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 550;
+		Weapon.AmmoType1 "DarkCanister";
+		Weapon.AmmoGive1 1;
+		SWWMWeapon.DropAmmoType "DarkCanister";
+		BlackfireIgniter.ClipCount 100;
+		Stamina 220000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

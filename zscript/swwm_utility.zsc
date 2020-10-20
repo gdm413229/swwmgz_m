@@ -14,21 +14,59 @@ const FallbackTag = "AWESOME IT'S PENIS"; // used on tag processing, please don'
 
 Class SWWMUtility
 {
+	// thanks zscript
+	static clearscope double fract( double a )
+	{
+		return a-floor(a);
+	}
+
+	// this can probably be simplified, but I'm lazy
+	static clearscope Vector3 HSVtoRGB( Vector3 hsv )
+	{
+		Vector3 p;
+		p.x = abs(fract(hsv.x+1.)*6.-3.);
+		p.y = abs(fract(hsv.x+(2./3.))*6.-3.);
+		p.z = abs(fract(hsv.x+(1./3.))*6.-3.);
+		Vector3 p2;
+		p2.x = (1.-hsv.y)+clamp(p.x-1.,0.,1.)*hsv.y;
+		p2.y = (1.-hsv.y)+clamp(p.y-1.,0.,1.)*hsv.y;
+		p2.z = (1.-hsv.y)+clamp(p.z-1.,0.,1.)*hsv.y;
+		return p2*hsv.z;
+	}
+
 	static clearscope void StripColor( out String str )
 	{
 		int len = str.CodePointCount();
-		for ( int i=0; i<len; i++ )
+		int i = 0;
+		for ( int i=0, pos=0; i<len; i++ )
 		{
 			int remlen = 0;
-			if ( str.GetNextCodePoint(i) != 0x1C )
+			int cplen = 0;
+			int ch, nxt;
+			[ch, nxt] = str.GetNextCodePoint(pos);
+			if ( ch != 0x1C )
+			{
+				pos = nxt;
 				continue;
+			}
 			remlen++;
-			if ( str.GetNextCodePoint(i+remlen) == 0x5B )
-				while ( str.GetNextCodePoint(i+remlen) != 0x5D )
-					remlen++;
+			cplen++;
+			[ch, nxt] = str.GetNextCodePoint(pos+remlen);
+			if ( ch == 0x5B )
+			{
+				int ch2;
+				do
+				{
+					[ch2, nxt] = str.GetNextCodePoint(pos+remlen);
+					remlen += nxt-(pos+remlen);
+					cplen++;
+				}
+				while ( ch2 != 0x5D );
+			}
 			remlen++;
-			str.Remove(i,remlen);
-			len -= remlen;
+			str.Remove(pos,remlen);
+			len -= cplen;
+			i--;
 		}
 	}
 
@@ -52,13 +90,14 @@ Class SWWMUtility
 		str.Truncate(0);
 		workstr.Replace("_"," ");
 		int len = workstr.CodePointCount();
-		for ( int i=0; i<len; i++ )
+		for ( int i=0, pos=0; i<len; i++ )
 		{
-			int cp1 = workstr.GetNextCodePoint(i);
+			int cp1;
+			[cp1, pos] = workstr.GetNextCodePoint(pos);
 			str.AppendCharacter(cp1);
 			if ( i < len-1 )
 			{
-				int cp2 = workstr.GetNextCodePoint(i+1);
+				int cp2 = workstr.GetNextCodePoint(pos);
 				// this looks awkward, but I have to also account for non-letter characters
 				// uppercase after lowercase
 				if ( (String.CharUpper(cp1) != cp1) && (String.CharLower(cp2) != cp2) )
@@ -71,6 +110,17 @@ Class SWWMUtility
 					str.AppendCharacter(0x20);
 			}
 		}
+	}
+
+	static double PitchTo( Actor a, Actor b, double hfact = 1. )
+	{
+		if ( !a || !b ) return 0;
+		Vector3 thispos = a.player?a.Vec2OffsetZ(0,0,a.player.viewz):a.Vec3Offset(0,0,a.missileheight);
+		Vector3 otherpos = b.Vec3Offset(0,0,b.height*hfact);
+		Vector3 diff = level.Vec3Diff(thispos,otherpos);
+		double dist = diff.length();
+		if ( dist > 0 ) return -asin(diff.z/dist);
+		return 0;
 	}
 
 	static clearscope int GetLineLock( Line l )
@@ -111,6 +161,60 @@ Class SWWMUtility
 	{
 		if ( !l ) return 0;
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
+	}
+
+	// haha another one
+	// copied from BoxOnLineSide()
+	static clearscope int BoxOnLineSide( double top, double bottom, double left, double right, Line l )
+	{
+		if ( !l ) return 0;
+		int p1, p2;
+		if ( l.delta.x == 0 )
+		{
+			// ST_VERTICAL:
+			p1 = (right < l.v1.p.x);
+			p2 = (left < l.v1.p.x);
+			if ( l.delta.y < 0 )
+			{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( l.delta.y == 0 )
+		{
+			// ST_HORIZONTAL:
+			p1 = (top > l.v1.p.y);
+			p2 = (bottom > l.v1.p.y);
+			if ( l.delta.x < 0 )
+			{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( (l.delta.x*l.delta.y) >= 0 )
+		{
+			// ST_POSITIVE:
+			p1 = PointOnLineSide((left,top),l);
+			p2 = PointOnLineSide((right,bottom),l);
+		}
+		else
+		{
+			// ST_NEGATIVE:
+			p1 = PointOnLineSide((right,top),l);
+			p2 = PointOnLineSide((left,bottom),l);
+		}
+		return (p1==p2)?p1:-1;
+	}
+
+	// wrapper
+	static clearscope int ActorOnLineSide( Actor a, Line l )
+	{
+		double box[4];
+		box[0] = a.pos.y+a.radius;
+		box[1] = a.pos.y-a.radius;
+		box[2] = a.pos.x-a.radius;
+		box[3] = a.pos.x+a.radius;
+		return BoxOnLineSide(box[0],box[1],box[2],box[3],l);
 	}
 
 	// box intersection check, for collision detection
@@ -227,19 +331,35 @@ Class SWWMUtility
 	}
 
 	// Thanks to ZZYZX and Nash
-	static play void SetToSlope( Actor a, double dang )
+	static play void SetToSlope( Actor a, double dang, bool ceil = false )
 	{
-		vector3 fnormal = a.FloorSector.floorplane.Normal;
+		Sector sect;
+		Vector3 fnormal;
+		if ( ceil )
+		{
+			sect = a.CeilingSector;
+			fnormal = -sect.ceilingplane.Normal;
+		}
+		else
+		{
+			sect = a.FloorSector;
+			fnormal = sect.floorplane.Normal;
+		}
 		// find closest 3d floor for its normal
 		F3DFloor ff;
-		for ( int i=0; i<a.FloorSector.Get3DFloorCount(); i++ )
+		for ( int i=0; i<sect.Get3DFloorCount(); i++ )
 		{
-			if ( !(a.FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-			if ( !(a.FloorSector.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
-			ff = a.FloorSector.Get3DFloor(i);
+			if ( !(sect.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+			if ( !ceil && !(sect.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
+			else if ( ceil && !(sect.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.ceilingz) ) continue;
+			ff = sect.Get3DFloor(i);
 			break;
 		}
-		if ( ff ) fnormal = -ff.top.Normal;
+		if ( ff )
+		{
+			if ( ceil ) fnormal = ff.bottom.Normal;
+			else fnormal = -ff.top.Normal;
+		}
 		vector2 fnormalp1 = ((fnormal.x != 0) || (fnormal.y != 0))?(fnormal.x,fnormal.y).Unit():(0,0);
 		vector2 fnormalp2 = ((fnormal.x,fnormal.y).Length(),fnormal.z);
 		double fang = atan2(fnormalp1.y,fnormalp1.x); // floor angle (not pitch!)
@@ -676,7 +796,6 @@ Class SWWMUtility
 			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
 			if ( !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
 		}
-		// TODO destructible geometry support
 	}
 
 	static play bool InPlayerFOV( PlayerInfo p, Actor a, double maxdist = 0. )

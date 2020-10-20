@@ -223,13 +223,6 @@ Class WallbusterReloadMenu : GenericMenu
 		return Super.MenuEvent(mkey,fromcontroller);
 	}
 
-	override bool MouseEvent( int type, int mx, int my )
-	{
-		bool res = Super.MouseEvent(type,mx,my);
-		// TODO mouse input?
-		return res;
-	}
-
 	override bool OnUiEvent( UIEvent ev )
 	{
 		int y;
@@ -390,7 +383,7 @@ Class CBTHandler : StaticEventHandler
 			}
 			cbtvol = min(.6,cbtvol+.1);
 			if ( (cbtme.GetInt() >= 1) && !cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
-				cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOPING,cbtvol,0.);
+				cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOP,cbtvol,0.);
 			else if ( (cbtme.GetInt() < 1) && cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
 				cbt.A_StopSound(CHAN_AMBEXTRA+1);
 			if ( (cbtme.GetInt() >= 2) && !cbt.IsActorPlayingSound(CHAN_AMBEXTRA+2) )
@@ -399,7 +392,7 @@ Class CBTHandler : StaticEventHandler
 				if ( cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
 				{
 					cbt.A_StopSound(CHAN_AMBEXTRA+1);
-					cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOPING,cbtvol,0.);
+					cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOP,cbtvol,0.);
 				}
 				cbt.A_StartSound("wallbuster/cbt",CHAN_AMBEXTRA+2,CHANF_UI,cbtvol,0.);
 			}
@@ -633,7 +626,7 @@ Class BusterWall : Thinker
 
 	static bool Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
 	{
-		// we can't blow up 3D floors (yet)
+		// we can't blow up 3D floors
 		if ( d.ffloor ) return false;
 		Sector hs = d.HitSector;
 		int hp;
@@ -641,7 +634,7 @@ Class BusterWall : Thinker
 		{
 			// no busting the goat
 			if ( IsIOSWall(d.HitLine) ) return false;
-			// onesided wall? no bust (TODO: bust polyobjects)
+			// onesided wall? no bust
 			if ( !d.HitLine.sidedef[1] ) return false;
 			// sector is opposite of side hit
 			hs = d.HitLine.sidedef[!d.Side].sector;
@@ -1113,6 +1106,10 @@ Class Wallbuster : SWWMWeapon
 			p.special1 = max(0,(bc-5)/4);
 		}
 	}
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,3.5,-1.8);
+	}
 	action void A_FireShells( int num = 1 )
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
@@ -1214,7 +1211,7 @@ Class Wallbuster : SWWMWeapon
 			l.target = self;
 		}
 		// third pass, actually fire them
-		Vector3 base = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+8*y-10*z);
+		Vector3 base = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3.5*y-6*z);
 		SpreadgunTracer st;
 		SpreadSlugTracer sst;
 		for ( int i=0; i<num; i++ )
@@ -1239,10 +1236,10 @@ Class Wallbuster : SWWMWeapon
 				break;
 			}
 			invoker.fired[idx] = true;
-			double t1 = int(i%5)*72+90;
-			double t2 = int(i/5)*72+90;
-			Vector2 b = (cos(t1),sin(t1))*2;
-			b.y += 8;
+			double t1 = 90-int(i%5)*72;
+			double t2 = 360-int(i/5)*72;
+			Vector2 b = (cos(t1),sin(t1))*1.2;
+			b.y += 3.;
 			Vector2 n = (b.x*cos(t2)-b.y*sin(t2),b.x*sin(t2)+b.y*cos(t2));
 			origin = level.Vec3Offset(base,n.x*y+n.y*z);
 			invoker.curobt = types[which];
@@ -1575,6 +1572,8 @@ Class Wallbuster : SWWMWeapon
 		SWWMWeapon.DropAmmoType "Shell";
 		Stamina 35000;
 		+SWWMWEAPON.NOFIRSTGIVE;
+		Radius 30;
+		Height 36;
 	}
 	States
 	{

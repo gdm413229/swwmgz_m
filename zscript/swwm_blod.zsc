@@ -118,9 +118,10 @@ Class mkBloodSpray : Actor
 Class mkBloodDrop : Actor
 {
 	bool killme;
-	bool dead;
+	bool dead, onceiling;
 	mkBloodDrop prevblod, nextblod;
 	Sector tracksector;
+	F3DFloor trackffloor;
 	int trackplane;
 
 	Default
@@ -152,8 +153,16 @@ Class mkBloodDrop : Actor
 			if ( tracksector )
 			{
 				double trackz;
-				if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy);
-				else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
+				if ( trackffloor )
+				{
+					if ( trackplane ) trackz = trackffloor.bottom.ZAtPoint(pos.xy)-.1;
+					else trackz = trackffloor.top.ZAtPoint(pos.xy);
+				}
+				else
+				{
+					if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy)-.1;
+					else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
+				}
 				if ( trackz != pos.z )
 				{
 					SetZ(trackz);
@@ -164,6 +173,17 @@ Class mkBloodDrop : Actor
 			{
 				scale *= 1.005;
 				A_FadeOut(.01);
+			}
+			if ( onceiling && (special2 < 200) && (scale.x > .2) )
+			{
+				if ( special1-- ) return;
+				special2 += 10;
+				special1 = Random[Blood](20,30)+special2;
+				let d = Spawn("mkBloodDrop",Vec3Offset(0,0,-2));
+				d.master = self;
+				d.SetShade(fillcolor);
+				d.CopyBloodColor(self);
+				d.scale = Scale*FRandom[Blood](.4,.6);
 			}
 			return;	// we don't need to update states when we're dead
 		}
@@ -215,6 +235,16 @@ Class mkBloodDrop : Actor
 						SetZ(floorz);
 						HitFloor();
 						A_StartSound("misc/blooddrop",volume:.1);
+						if ( master )
+						{
+							// assume we dropped onto the previous spot
+							if ( master.tracer )
+							{
+								Destroy();
+								return;
+							}
+							master.tracer = self;
+						}
 						dead = true;
 						SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
 						tracksector = FloorSector;
@@ -227,25 +257,37 @@ Class mkBloodDrop : Actor
 							ff = FloorSector.Get3DFloor(i);
 							break;
 						}
-						if ( ff )
-						{
-							tracksector = ff.model;
-							trackplane = 1;
-						}
+						if ( ff ) trackffloor = ff;
 						frame = Random[Blood](5,8);
 						return;
 					}
 					if ( pos.z+height > ceilingz )
 					{
-						if ( ceilingpic == skyflatnum )
+						if ( (ceilingpic == skyflatnum) || master )
 						{
 							Destroy();
 							return;
 						}
 						// hit the ceiling
-						// TODO stick to it and drop more blood
+						SetZ(ceilingz-.1);
 						A_StartSound("misc/blooddrop",volume:.1);
-						Destroy();
+						dead = true;
+						onceiling = true;
+						SWWMUtility.SetToSlope(self,FRandom[Blood](0,360),true);
+						tracksector = CeilingSector;
+						trackplane = 1;
+						F3DFloor ff;
+						for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
+						{
+							if ( !(CeilingSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+							if ( !(CeilingSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+							ff = CeilingSector.Get3DFloor(i);
+							break;
+						}
+						if ( ff ) trackffloor = ff;
+						frame = Random[Blood](5,8);
+						special1 = Random[Blood](15,25);
+						special2 = 0;
 						return;
 					}
 					CheckPortalTransition();

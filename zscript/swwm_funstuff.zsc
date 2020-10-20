@@ -1,11 +1,14 @@
-// collectable items that may drop sometimes
+// collectible items that may drop sometimes
 
-Class SWWMCollectable : Inventory abstract
+Class SWWMCollectible : Inventory abstract
 {
-	int avail;
+	Mixin SWWMUseToPickup;
+
+	int avail, gesture;
 	bool propagated;
 
 	Property Availability : avail;
+	Property PickupGesture : gesture;
 
 	// minimum gametype requirements
 	enum EAvailability
@@ -21,12 +24,15 @@ Class SWWMCollectable : Inventory abstract
 		Inventory.PickupSound "menu/buyinv";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
-		SWWMCollectable.Availability AVAIL_All;
+		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMCollectible.Availability AVAIL_All;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNCLEARABLE;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 10;
+		Height 24;
 	}
 	override void PostBeginPlay()
 	{
@@ -64,11 +70,15 @@ Class SWWMCollectable : Inventory abstract
 		{
 			if ( !playeringame[i] || !players[i].mo || (i == other.PlayerNumber()) )
 				continue;
-			let c = SWWMCollectable(Spawn(GetClass(),pos));
+			let c = SWWMCollectible(Spawn(GetClass(),pos));
 			c.propagated = true;
 			if ( !c.CallTryPickup(players[i].mo) )
 				c.Destroy();
 		}
+		// pickup gesture (has to be -100 or under, which is the range reserved for these)
+		if ( !other.player || !CVar.GetCVar('swwm_collectanim',other.player).GetBool() || (gesture > -100) )
+			return;
+		SWWMGesture.SetGesture(PlayerPawn(other),gesture);
 	}
 	States
 	{
@@ -79,66 +89,96 @@ Class SWWMCollectable : Inventory abstract
 }
 
 // April Fools 2020
-Class FroggyChair : SWWMCollectable
+Class FroggyChair : Actor
 {
 	int cdown;
+	bool carried;
 
 	Default
 	{
 		Tag "$T_FROGGY";
-		Inventory.PickupMessage "$T_FROGGY";
-		Stamina 1440;
+		Radius 12;
+		Height 16;
+		+SOLID;
+		+SHOOTABLE;
+		+NODAMAGE;
+		+NOBLOOD;
+		+INTERPOLATEANGLES;
 	}
-	override void AttachToOwner( Actor other )
+	private void BeginCarry( Actor carrier )
 	{
-		Super.AttachToOwner(other);
-		if ( !propagated )
-			cdown = 150;
+		if ( !carrier ) return;
+		carrier.A_StartSound("demolitionist/handsup",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetRenderStyle(.5,STYLE_Translucent);
+		A_SetSize(32,32);	// easier to deselect
+		carried = true;
+		bSOLID = false;
+		bSHOOTABLE = false;
+		bNOGRAVITY = true;
+		vel *= 0;
+		master = carrier;
 	}
-	override void DoEffect()
+	private void EndCarry()
 	{
-		Super.DoEffect();
-		if ( cdown <= 0 ) return;
-		if ( Owner && Owner.CheckLocalView() )
+		if ( master ) master.A_StartSound("demolitionist/handsdown",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetRenderStyle(1.,STYLE_Normal);
+		A_SetSize(default.radius,default.height);
+		carried = false;
+		bSOLID = true;
+		bSHOOTABLE = true;
+		bNOGRAVITY = false;
+		master = null;
+	}
+	override void Tick()
+	{
+		if ( cdown < 80 )
 		{
-			if ( cdown == 140 )
+			cdown++;
+			if ( cdown == 10 )
 				Console.MidPrint(newsmallfont,"$D_FROGGY1");
-			else if ( cdown == 70 )
+			else if ( cdown == 80 )
 				Console.MidPrint(newsmallfont,"$D_FROGGY2");
 		}
-		cdown--;
+		if ( carried )
+		{
+			if ( !master || (master.Health <= 0) ) EndCarry();
+			else
+			{
+				Vector3 tomove = master.Vec2OffsetZ(cos(master.angle)*40.,sin(master.angle)*40.,master.player.viewz-32.);
+				Vector3 dirto = level.Vec3Diff(pos,tomove);
+				SetOrigin(level.Vec3Offset(pos,dirto*.3),true);
+				double magvel = dirto.length();
+				dirto /= magvel;
+				vel = dirto*min(20,magvel);
+				double angleto = deltaangle(angle,AngleTo(master));
+				A_SetAngle(angle+angleto*.3,SPF_INTERPOLATE);
+			}
+			return;
+		}
+		Super.Tick();
+		if ( pos.z <= floorz ) vel.xy *= .9;	// fast friction
+	}
+	override bool Used( Actor user )
+	{
+		if ( carried )
+		{
+			if ( user != master ) return false;
+			if ( TestMobjLocation() && level.IsPointInLevel(pos) )
+				EndCarry();
+		}
+		else BeginCarry(user);
+		return true;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
 	}
 }
 
-// The other collectables, which will be implemented eventually
-Class MMiaSRVol1 : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_SEXROBOT1";
-		Inventory.PickupMessage "$T_SEXROBOT1";
-		Stamina 2000;
-	}
-}
-Class MMiaSRVol2 : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_SEXROBOT2";
-		Inventory.PickupMessage "$T_SEXROBOT2";
-		Stamina 2000;
-	}
-}
-Class MMiaSRVol3 : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_SEXROBOT3";
-		Inventory.PickupMessage "$T_SEXROBOT3";
-		Stamina 2000;
-	}
-}
-Class MothPlushy : SWWMCollectable
+// The collectibles
+Class MothPlushy : SWWMCollectible
 {
 	int cdown;
 
@@ -168,16 +208,7 @@ Class MothPlushy : SWWMCollectable
 		cdown--;
 	}
 }
-Class BRCDebutLP : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_BLACKRATS";
-		Inventory.PickupMessage "$T_BLACKRATS";
-		Stamina 6000;
-	}
-}
-Class AkariProject : SWWMCollectable
+Class AkariProject : SWWMCollectible
 {
 	Default
 	{
@@ -186,16 +217,7 @@ Class AkariProject : SWWMCollectable
 		Stamina 3000;
 	}
 }
-Class CatCatcherPoster : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_CATCATCHER";
-		Inventory.PickupMessage "$T_CATCATCHER";
-		Stamina 1500;
-	}
-}
-Class LoveSignalsCD : SWWMCollectable
+Class LoveSignalsCD : SWWMCollectible
 {
 	Default
 	{
@@ -204,7 +226,7 @@ Class LoveSignalsCD : SWWMCollectable
 		Stamina 4000;
 	}
 }
-Class NutatcoBar : SWWMCollectable
+Class NutatcoBar : SWWMCollectible
 {
 	Default
 	{
@@ -213,16 +235,7 @@ Class NutatcoBar : SWWMCollectable
 		Stamina 200;
 	}
 }
-Class HegeCactus : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_HEGE";
-		Inventory.PickupMessage "$T_HEGE";
-		Stamina 8000;
-	}
-}
-Class FrispyCorn : SWWMCollectable
+Class FrispyCorn : SWWMCollectible
 {
 	Default
 	{
@@ -231,47 +244,38 @@ Class FrispyCorn : SWWMCollectable
 		Stamina 500;
 	}
 }
-Class LithiumVol1 : SWWMCollectable
-{
-	Default
-	{
-		Tag "$T_LITHIUM";
-		Inventory.PickupMessage "$T_LITHIUM";
-		Stamina 3500;
-	}
-}
 // Heretic
-Class DemoPlush : SWWMCollectable
+Class DemoPlush : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_DEMOPLUSH";
 		Inventory.PickupMessage "$T_DEMOPLUSH";
-		SWWMCollectable.Availability AVAIL_Heretic;
+		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 6400;
 	}
 }
-Class TomeOfPower : SWWMCollectable
+Class TomeOfPower : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_TOMEPOWER";
 		Inventory.PickupMessage "$T_TOMEPOWER";
-		SWWMCollectable.Availability AVAIL_Heretic;
+		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 16000;
 	}
 }
-Class QuartzFlask : SWWMCollectable
+Class QuartzFlask : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_YEFLASK";
 		Inventory.PickupMessage "$T_YEFLASK";
-		SWWMCollectable.Availability AVAIL_Heretic;
+		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 4000;
 	}
 }
-Class SayaBean : SWWMCollectable
+Class SayaBean : SWWMCollectible
 {
 	int cdown;
 
@@ -279,7 +283,7 @@ Class SayaBean : SWWMCollectable
 	{
 		Tag "$T_SAYABEAN";
 		Inventory.PickupMessage "$T_SAYABEAN";
-		SWWMCollectable.Availability AVAIL_Heretic;
+		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 12000;
 	}
 	override void AttachToOwner( Actor other )
@@ -301,150 +305,63 @@ Class SayaBean : SWWMCollectable
 	}
 }
 // Hexen
-Class KirinCummies : SWWMCollectable
+Class KirinCummies : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_PEACH";
 		Inventory.PickupMessage "$T_PEACH";
-		SWWMCollectable.Availability AVAIL_Hexen;
+		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 400;
 	}
 }
-Class MilkBreads : SWWMCollectable
+Class MilkBreads : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_MILKBREAD";
 		Inventory.PickupMessage "$T_MILKBREAD";
-		SWWMCollectable.Availability AVAIL_Hexen;
+		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 900;
 	}
 }
-Class EyeObelisk : SWWMCollectable
-{
-	int cdown;
-
-	Default
-	{
-		Tag "$T_OBELISK";
-		Inventory.PickupMessage "$T_OBELISK";
-		SWWMCollectable.Availability AVAIL_Hexen;
-		Stamina 24000;
-	}
-	override void PostBeginPlay()
-	{
-		if ( InStateSequence(CurState,FindState("Spawn")) )
-			A_StartSound("obelisk/idle",CHAN_BODY,CHANF_LOOPING);
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		if ( propagated ) return;
-		// nauseatingly fast trip through images of the future
-		if ( other.player != players[consoleplayer] ) return;
-		let hnd = EyeObeliskFlash(StaticEventHandler.Find("EyeObeliskFlash"));
-		if ( hnd ) hnd.doit = true;
-	}
-}
-Class KirinManga : SWWMCollectable
+Class KirinManga : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_KIRINMANGA";
 		Inventory.PickupMessage "$T_KIRINMANGA";
-		SWWMCollectable.Availability AVAIL_Hexen;
+		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 1600;
 	}
 }
-
-Class EyeObeliskFlash : StaticEventHandler
+Class KirinPlush : SWWMCollectible
 {
-	bool doit;
-	int cd;
-	ui bool doit_ui;
-	ui int timeme;
-	ui TextureID ftex[29];
+	int cdown;
 
-	override void UiTick()
+	Default
 	{
-		if ( !doit && !doit_ui )
-		{
-			timeme = 0;
-			return;
-		}
-		if ( timeme == 0 )
-		{
-			// do not trigger if the user doesn't want this
-			if ( CVar.GetCVar('swwm_noscare',players[consoleplayer]).GetBool() )
-				return;
-			doit_ui = true;
-			for ( int i=0; i<29; i++ )
-				ftex[i] = TexMan.CheckForTexture(String.Format("graphics/obelisk/O_SIGHT%d.png",i),TexMan.Type_Any);
-			S_StartSound("obelisk/sight",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE,1.,0.);
-		}
-		if ( timeme == 210 ) Console.MidPrint(newsmallfont,"$D_OBELISK");
-		if ( timeme == 240 ) doit_ui = false;
-		timeme++;
+		Tag "$T_KIRINPLUSH";
+		Inventory.PickupMessage "$T_KIRINPLUSH";
+		SWWMCollectible.Availability AVAIL_Hexen;
+		Stamina 20000;
 	}
-	override void WorldTick()
+	override void AttachToOwner( Actor other )
 	{
-		if ( !doit ) return;
-		cd++;
-		if ( cd < 1 ) return;
-		cd = 0;
-		doit = false;
+		Super.AttachToOwner(other);
+		if ( !propagated )
+			cdown = 70;
 	}
-	override void RenderOverlay( RenderEvent e )
+	override void DoEffect()
 	{
-		if ( !doit_ui ) return;
-		double secs = (timeme+e.FracTic)/Thinker.TICRATE;
-		PlayerInfo p = players[consoleplayer];
-		if ( secs < .25 ) Screen.Dim("White",(secs*4.)**2.,0,0,Screen.GetWidth(),Screen.GetHeight());
-		else if ( secs < 2.25 )
+		Super.DoEffect();
+		if ( cdown <= 0 ) return;
+		if ( Owner && Owner.CheckLocalView() )
 		{
-			Shader.SetEnabled(p,"ObPass0",true);
-			Shader.SetEnabled(p,"ObPass1",true);
-			Shader.SetEnabled(p,"ObPass2",true);
-			Shader.SetEnabled(p,"ObPass3",true);
-			Shader.SetUniform1f(p,"ObPass0","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
-			Shader.SetUniform1f(p,"ObPass1","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
-			Shader.SetUniform1f(p,"ObPass2","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
-			Shader.SetUniform1f(p,"ObPass3","Timer",(timeme+e.FracTic)/Thinker.TICRATE);
-			secs -= .25;
-			Screen.Dim("Black",1.,0,0,Screen.GetWidth(),Screen.GetHeight());
-			// flash images:
-			//  0. mirror man (thievery at the forsaken manor redux)
-			//  1. viridescent lord (hexmas)
-			//  2. nightmare lord (spooktober)
-			//  3. dreadful lady (strife 25th anniversary project)
-			//  4. shinnovre (unsx 6)
-			//  5. hiikya (the hiikyan war)
-			//  6. rebirth of azadeku (project abyss dlc1: forgotten times)
-			//  7. heart of assimilation (project abyss dlc2: the void lords)
-			//  8. sage of blue (project abyss dlc3: assault on blue tower)
-			//  9. ser (project convergence)
-			int whichimg = clamp(int((10.*secs)/2.),0,9);
-			if ( !ftex[whichimg] ) return;
-			double ar = Screen.GetAspectRatio();
-			Vector2 tsize = TexMan.GetScaledSize(ftex[whichimg]);
-			double sar = tsize.x/tsize.y;
-			Vector2 vsize;
-			if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
-			else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
-			else vsize = tsize;
-			vsize *= .75;
-			Screen.DrawTexture(ftex[whichimg],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+			if ( cdown == 35 )
+				A_StartSound("kirin/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
 		}
-		else if ( secs < 6.25 )
-		{
-			Shader.SetEnabled(p,"ObPass0",false);
-			Shader.SetEnabled(p,"ObPass1",false);
-			Shader.SetEnabled(p,"ObPass2",false);
-			Shader.SetEnabled(p,"ObPass3",false);
-			secs -= 2.25;
-			Screen.Dim("White",(1.-secs*.25)**1.5,0,0,Screen.GetWidth(),Screen.GetHeight());
-		}
+		cdown--;
 	}
 }
 
@@ -572,23 +489,14 @@ Class ChanceboxSpawner : Actor
 {
 	override void PostBeginPlay()
 	{
-		int numcol = 0;
-		for ( int i=0; i<AllActorClasses.Size(); i++ )
-		{
-			let c = (Class<SWWMCollectable>)(AllActorClasses[i]);
-			if ( !c || (c == 'SWWMCollectable') ) continue;
-			let def = GetDefaultByType(c);
-			// check that we can collect it in this IWAD
-			if ( !(gameinfo.gametype&def.avail) ) continue;
-			numcol++;
-		}
-		let ti = ThinkerIterator.Create("SWWMCollectable");
-		while ( ti.Next() ) numcol--;
+		int numbox = 0;
+		let ti = ThinkerIterator.Create("ChanceboxSpawner");
+		while ( ti.Next() ) numbox++;
 		ti = ThinkerIterator.Create("Chancebox");
-		while ( ti.Next() ) numcol--;
-		if ( numcol <= 0 )
+		while ( ti.Next() ) numbox++;
+		if ( numbox > 3 )
 		{
-			// can't spawn a box, everything's been collected
+			// there's three boxes in the map already (plus ourselves)
 			Destroy();
 			return;
 		}
@@ -606,49 +514,276 @@ Class ChanceboxSpawner : Actor
 		b.HandleSpawnFlags();
 		b.bCOUNTSECRET = spawnflags&MTF_SECRET;
 		b.ChangeTid(tid);
+		Destroy();
+	}
+
+	Default
+	{
+		Radius 12;
+		Height 20;
 	}
 }
 
-// Collectable box (recycling of discarded "chance box" item)
+Class BoxSpawnSpot
+{
+	Vector3 pos;
+	double angle;
+}
+
+Class CBoxLight : SpotLightAttenuated
+{
+	Default
+	{
+		Args 112,64,224,100;
+		DynamicLight.SpotInnerAngle 20;
+		DynamicLight.SpotOuterAngle 80;
+		+INTERPOLATEANGLES;
+	}
+
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target || target.InStateSequence(target.CurState,target.FindState("BlowUp")) )
+		{
+			Destroy();
+			return;
+		}
+		Vector2 ofs = ((special1<2)?8:-8,(special1%2)?12:-12);
+		double ang = (special1<2)?0:180;
+		angle = target.angle+ang;
+		SetOrigin(target.Vec3Offset(ofs.x*cos(target.angle)-ofs.y*sin(target.angle),ofs.y*cos(target.angle)+ofs.x*sin(target.angle),10),true);
+	}
+}
+
+// Collectible box (recycling of discarded "chance box" item)
 Class Chancebox : Actor
 {
+	bool dud;
+
 	static void SpawnChanceboxes()
 	{
-		// TODO the whole damn deal of finding secret sectors and whatnot
-		// this will be huge, and get called from the event handler on first level load
+		// find all secret sectors, find potential spawn spots within them
+		// after that, spawn up to 3 boxes total within them
+		int tboxes = 0;
+		for ( int i=0; i<level.Sectors.Size(); i++ )
+		{
+			if ( !(level.Sectors[i].flags&Sector.SECF_SECRET) ) continue;
+			Sector s = level.Sectors[i];
+			// find any spots in the sector that are within it and have no linedefs or blocking actors within a 32 unit box
+			// start from the center, expand in rings
+			Vector2 origin = s.centerspot;
+			double maxradius = 0;
+			for ( int j=0; j<s.lines.Size(); j++ )
+			{
+				Line l = s.lines[j];
+				double v1len = (l.v1.p-origin).length(),
+					v2len = (l.v2.p-origin).length();
+				if ( v1len > maxradius ) maxradius = v1len;
+				if ( v2len > maxradius ) maxradius = v2len;
+			}
+			int rings = 1;
+			bool spawned = false;
+			Array<BoxSpawnSpot> spots;
+			spots.Clear();
+			for ( double j=0.; j<maxradius; j+=16. )
+			{
+				for ( double k=0.; k<360.; k+=(360./rings) )
+				{
+					// check spot
+					Vector3 testpos = (origin.x+j*cos(k),origin.y+j*sin(k),0);
+					testpos.z = s.floorplane.ZAtPoint(testpos.xy);
+					if ( (level.PointInSector(testpos.xy) != s) || !level.IsPointInLevel(testpos) ) continue;
+					bool blocked = false;
+					BlockLinesIterator bl = BlockLinesIterator.CreateFromPos(testpos,32,32,s);
+					double tbox[4];
+					// top, bottom, left, right
+					tbox[0] = testpos.y+32;
+					tbox[1] = testpos.y-32;
+					tbox[2] = testpos.x-32;
+					tbox[3] = testpos.x+32;
+					while ( bl.Next() )
+					{
+						Line l =  bl.CurLine;
+						if ( !l ) continue;
+						if ( tbox[2] > l.bbox[3] ) continue;
+						if ( tbox[3] < l.bbox[2] ) continue;
+						if ( tbox[0] < l.bbox[1] ) continue;
+						if ( tbox[1] > l.bbox[0] ) continue;
+						if ( SWWMUtility.BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) != -1 ) continue;
+						blocked = true;
+						break;
+					}
+					if ( blocked ) continue;
+					BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,testpos.z,32,256,false);
+					while ( bt.Next() )
+					{
+						if ( !bt.Thing ) continue;
+						if ( abs(bt.Thing.pos.x-testpos.x) > 32+bt.Thing.Radius ) continue;
+						if ( abs(bt.Thing.pos.y-testpos.y) > 32+bt.Thing.Radius ) continue;
+						blocked = true;
+						break;
+					}
+					if ( blocked ) continue;
+					let sp = new("BoxSpawnSpot");
+					sp.pos = testpos;
+					sp.angle = k+180;
+					spots.Push(sp);
+				}
+				rings += 3;
+			}
+			if ( spots.Size() < 10 ) continue;
+			int ws = Random[Chancebox](0,spots.Size()-1);
+			let c = Spawn("ChanceboxSpawner",spots[ws].pos);
+			c.angle = spots[ws].angle;
+			tboxes++;
+			if ( tboxes >= 3 ) break;	// already spawned 3 boxes in one map (which is a lot)
+		}
 	}
 
 	action void A_DropSomething()
 	{
-		Array<Class <SWWMCollectable> > candidates;
+		Array<Class <SWWMCollectible> > candidates;
 		candidates.Clear();
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
-			let c = (Class<SWWMCollectable>)(AllActorClasses[i]);
-			if ( !c || (c == 'SWWMCollectable') ) continue;
+			let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectible') ) continue;
 			let def = GetDefaultByType(c);
 			// check that we can collect it in this IWAD
 			if ( !(gameinfo.gametype&def.avail) ) continue;
 			candidates.Push(c);
 		}
-		let ti = ThinkerIterator.Create("SWWMCollectable");
-		SWWMCollectable c;
-		while ( c = SWWMCollectable(ti.Next()) )
+		let ti = ThinkerIterator.Create("SWWMCollectible");
+		SWWMCollectible c;
+		while ( c = SWWMCollectible(ti.Next()) )
 		{
 			int f = candidates.Find(c.GetClass());
 			if ( f < candidates.Size() )
 				candidates.Delete(f);
 		}
-		if ( candidates.Size() <= 0 )
+		if ( (candidates.Size() <= 0) || invoker.dud )
 		{
 			// no candidates? just burst into treats
-			for ( int i=0; i<=30; i++ )
+			if ( Random[Chancebox](0,1) )
 			{
-				let a = Spawn((i==0)?"RefresherItem":(i%3)?"HealthNuggetItem":"ArmorNuggetItem",pos);
+				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":Random[Chancebox](0,2)?"GrilledCheeseSandwich":"YnykronAmmo",pos);
 				a.bDROPPED = true;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);
-				if ( i > 0 ) a.vel.xy = (cos(i*12),sin(i*12))*FRandom[Chancebox](4,12);
+			}
+			else if ( !Random[Chancebox](0,2) )
+			{
+				for ( int i=0; i<=12; i++ )
+				{
+					let a = Spawn((i==0)?"CandyGun":"CandyGunBullets",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					if ( i > 0 ) a.vel.xy = (cos(i*30),sin(i*30))*FRandom[Chancebox](1,2);
+				}
+			}
+			else if ( !Random[Chancebox](0,2) )
+			{
+				for ( int i=0; i<3; i++ )
+				{
+					let a = Spawn("SilverBullets2",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<6; i++ )
+				{
+					let a = Spawn("SilverBullets",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](3,4);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				let a = Spawn("HellblazerWarheads",pos);
+				a.bDROPPED = true;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+				for ( int i=0; i<3; i++ )
+				{
+					a = Spawn("HellblazerRavagers",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<5; i++ )
+				{
+					a = Spawn("HellblazerCrackshots",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
+				}
+				for ( int i=0; i<8; i++ )
+				{
+					a = Spawn("HellblazerMissiles",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*45),sin(i*45))*FRandom[Chancebox](5,6);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				let a = Spawn("BlackShell",pos);
+				a.bDROPPED = true;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+				for ( int i=0; i<3; i++ )
+				{
+					a = Spawn("BlueShell",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<8; i++ )
+				{
+					a = Spawn((i%2)?"WhiteShell":"PurpleShell",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
+				}
+				for ( int i=0; i<12; i++ )
+				{
+					a = Spawn((i%2)?"RedShell":"GreenShell",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*30),sin(i*30))*FRandom[Chancebox](5,6);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				for ( int i=0; i<100; i++ )
+				{
+					let a = Spawn("HealthNuggetItem",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,8);
+					a.vel.xy = (cos(i*3.6),sin(i*3.6))*FRandom[Chancebox](1,8);
+				}
+			}
+			else
+			{
+				for ( int i=0; i<=15; i++ )
+				{
+					let a = Spawn((i==0)?"RefresherItem":(i%3)?"HealthNuggetItem":"ArmorNuggetItem",pos);
+					a.bDROPPED = true;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					if ( i > 0 ) a.vel.xy = (cos(i*24),sin(i*24))*FRandom[Chancebox](1,2);
+				}
 			}
 		}
 		else
@@ -687,6 +822,34 @@ Class Chancebox : Actor
 	override bool Used( Actor user )
 	{
 		if ( CurState != FindState("Spawn") ) return false;
+		if ( !dud )
+		{
+			if ( Random[Chancebox](0,2) )
+			{
+				int nbox = 0, ndud = 0;
+				// this one's a dud (unless all the others are)
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				while ( c = Chancebox(ti.Next()) )
+				{
+					if ( c == self ) continue;
+					nbox++;
+					if ( c.dud ) ndud++;
+				}
+				if ( ndud < nbox ) dud = true;
+			}
+			else
+			{
+				// the others are duds
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				while ( c = Chancebox(ti.Next()) )
+				{
+					if ( c == self ) continue;
+					c.dud = true;	// we found one, the others just drop goodies
+				}
+			}
+		}
 		if ( bCountSecret )
 		{
 			user.GiveSecret();
@@ -702,10 +865,31 @@ Class Chancebox : Actor
 		SetStateLabel("PreActive");
 		return true;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		for ( int i=0; i<4; i++ )
+		{
+			let l = Spawn("CBoxLight",pos);
+			l.special1 = i;
+			l.target = self;
+		}
+		let ti = ThinkerIterator.Create("Chancebox");
+		Chancebox c;
+		while ( c = Chancebox(ti.Next()) )
+		{
+			if ( c.dud || (c.CurState == c.FindState("Spawn")) )
+				continue;
+			// automatically become a dud if collectible has been found
+			dud = true;
+			break;
+		}
+	}
 	Default
 	{
-		Radius 16;
-		Height 32;
+		Tag "$T_CHANCEBOX";
+		Radius 12;
+		Height 20;
 		+MOVEWITHSECTOR;
 		+ROLLSPRITE;
 		+SOLID;
@@ -747,16 +931,16 @@ Class Chancebox : Actor
 	BlowUp:
 		XZW2 A 1
 		{
-			A_SetSize(16,4);
+			A_SetSize(12,3);
 			A_QuakeEx(2,2,2,9,0,500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:.2);
 			A_StartSound("chancebox/explode",CHAN_VOICE);
 			angle = specialf1;
 			pitch = roll = 0;
-			let t = Spawn("ChanceboxTop",Vec3Offset(0,0,32));
+			let t = Spawn("ChanceboxTop",Vec3Offset(0,0,20));
 			t.angle = angle;
-			let s1 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((16,0),angle+90),0)));
+			let s1 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((12,0),angle+90),0)));
 			s1.angle = angle+90;
-			let s2 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((16,0),angle-90),0)));
+			let s2 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((12,0),angle-90),0)));
 			s2.angle = angle-90;
 			A_DropSomething();
 		}
@@ -771,8 +955,8 @@ Class ChanceboxTop : Actor
 {
 	Default
 	{
-		Radius 16;
-		Height 4;
+		Radius 12;
+		Height 3;
 		Species "Chancebox";
 		PROJECTILE;
 		+THRUSPECIES;
@@ -806,8 +990,8 @@ Class ChanceboxSide : Actor
 {
 	Default
 	{
-		Radius 16;
-		Height 32;
+		Radius 12;
+		Height 24;
 		Species "Chancebox";
 		PROJECTILE;
 		+THRUSPECIES;

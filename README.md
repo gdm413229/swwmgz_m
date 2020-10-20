@@ -30,13 +30,14 @@ Additional features:
  - **Targetting Array:** Tracks nearby foes and provides basic information on their health. Compatible with **Omnisight™** mapping modules for tracking key items and nearby exits. Can also highlight nearby pickups by holding a dedicated button.
  - **Akari Labs CuteEmotion™ Display:** Equipped onto your visor to show a wide range of predefined facial expressions in order to convey simple emotions to others.
  - **Akari Labs LoudBoi™ Voicebox:** Allows you to 🇪 🇲 🇮 🇹. Additional voice options will be available through add-ons. Note that the default voice is in Japanese, but subtitles will be provided when available.
+ - **On-demand Item Obtainers:** AKA "hands". You can pick up certain items from a distance by pressing Use (this is mainly a workaround for any quirks that might come from items in this mod having modified collision).
 
-**Note:** Since you're a robutt you pretty much can swim indefinitely and are also inmune to poison.
+**Note:** Since you're a robutt you pretty much can swim indefinitely and are also immune to poison.
 
 ## The Weapons
 ![](docimg/demolitionist_wallbuster.png)
 
-The arsenal this mod brings to the table is composed mainly of stupidly overpowered weapons, which has been my speciality for years.
+The arsenal this mod brings to the table is composed mainly of stupidly overpowered weapons, which has been my specialty for years.
 
 Some weapons may have extra functions attached to the **Reload** or **Zoom** buttons, so don't forget to bind those too.
 
@@ -102,7 +103,7 @@ The **Spreadgun** uses 10 gauge ammunition, apparently just for the sake of maki
 Available in the following types, with varying chances of appearing depending
 on replaced item, may also come in bundles:
 
- - **Standard shotshell (red):** Lots of tiny pellets ready to tear enemies to shreds. Most common.
+ - **Standard buckshot (red):** Lots of tiny pellets ready to tear enemies to shreds. Most common.
  - **Slug (green):** Concentrated damage in a single, large projectile. Common.
  - **Dragon's breath (white):** Fiery pain in one shot for everything in front of you. Not very effective underwater, but still deals some small heat damage. Somewhat rare.
  - **Kinylum saltshot (blue):** Highly volatile shards of **Kinylum** that leave behind a trail of burning plasma. Rare.
@@ -376,6 +377,65 @@ A floating lamp companion, may attract moths. The moths will disperse and attack
 
 Reveals the entire layout of the map and shows key locations in the HUD. Also allows you to highlight pickups through walls when holding the **Item Sense** button.
 
+## The Collectibles
+![](docimg/chancebox.png)
+
+Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. Each of them will provide you with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
+
+***(Do note that this feature is currently not fully implemented, there may be missing models)***
+
+### NUTATCO™ Chocolate Bar (¥200)
+
+A light snack, said to have a "savage taste".
+
+### Frispy™ Tasty Corn Snack (¥500)
+
+Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these that their tasty scent has stuck to her permanently.
+
+### The Akari Project (¥3000)
+
+Hard cover copy of Saya's famous sci-fi novel about interdimensional travel. Saya has frequently cited it to dab hard on the UAC and their failures.
+
+### Meidobot - Love Signals (¥4000)
+
+Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there.
+
+### Mashiro Plush (¥5000)
+
+A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Potentially cursed, be extra careful when you have a Lämp around.
+
+### Quartz Flask (¥4000) [Heretic]
+
+Ye flask. Contains healing potion, has a taste comparable to cough syrup. Seems to also be popular on Cronos, having been carried over by the Serpent Riders and their armies.
+
+### Demolitionist Plush (¥6400) [Heretic]
+
+A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth.
+
+### Haunted Saya Bean Plush (¥12000) [Heretic]
+
+Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
+
+### Tyketto's Tome of Power (¥16000) [Heretic]
+
+A book of magic weapon enchantments. Found quite often across the land of Parthoris.
+
+### Toot Froot™ Peach Juice (¥400) [Hexen]
+
+Saya began to stock up on these after her marriage with Kirin, for some unexplained reason. She says the taste reminds her of him.
+
+### Akkouxhei Milk Breads (¥900) [Hexen]
+
+A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet they may be even lethal if consumed in excess.
+
+### I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie!? (¥1600) [Hexen]
+
+A oneshot manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
+
+### Kirin Plush (¥20000) [Hexen]
+
+The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart.
+
 ## The HUD
 
 Pretty simplistic so it doesn't get in the way of the action. Some things may be configurable.
@@ -421,10 +481,10 @@ Current equipped weapon stats. Ammo(s) and such. Below it, the weapon slots.
 
 ### Targeter
 
-Because in the middle of the chaos that is this mod you might have a hard time trying to figure out where everything is in between explosions and massive smoke clouds, a targeter has been implemented, which will show the following:
+Because in the middle of the chaos that is this mod you might have a hard time trying to figure out where everything is in between explosions and massive smoke clouds, a targetter has been implemented, which will show the following:
 
-- **Players and monsters:** Draws an identification label and a health bar. The bar can display overhealing, and also indicate when someone is invulnerable. When they take damage or get healed, numbers (either red or green) will pop up around them. The targeter only picks up enemies in your direct line of sight, gradually fading once you lose sight of them, and can only display up to 40 individual bars (configurable), giving priority first to players, then the nearest enemies. The **Omnisight** increases the time out-of-sight targets remain marked.
-- **Keys and map exits:** If you've picked up an **Omnisight**, key items and any exit lines will be marked and labelled, along with a little distance indicator in map units. Note that this doesn't work for script-triggered exits.
+- **Players and monsters:** Draws an identification label and a health bar. The bar can display overhealing, and also indicate when someone is invulnerable. When they take damage or get healed, numbers (either red or green) will pop up around them. The targetter only picks up enemies in your direct line of sight, gradually fading once you lose sight of them, and can only display up to 40 individual bars (configurable), giving priority first to players, then the nearest enemies. The **Omnisight** increases the time out-of-sight targets remain marked.
+- **Keys and map exits:** If you've picked up an **Omnisight**, key items and any exit lines will be marked and labeled, along with a little distance indicator in map units. Note that this doesn't work for script-triggered exits.
 - **Highlighted items:** Holding the ***"Item Sense"*** button will mark and label nearby items, in case they're hard to see among countless piles of corpses or dim lighting. If you have an **Omnisight**, items that are out of view (e.g.: behind walls) will be marked too.
 
 These components are toggleable.

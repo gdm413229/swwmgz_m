@@ -408,7 +408,7 @@ Class EvisceratorProj : Actor
 	{
 		bForceXYBillboard = true;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("BigScorch",50);
+		A_SprayDecal("BigRocketBlast",50);
 		A_NoGravity();
 		A_SetScale(3.5);
 		SWWMUtility.DoExplosion(self,150,120000,200,80);
@@ -671,6 +671,11 @@ Class Eviscerator : SWWMWeapon
 		}
 	}
 
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,4.,-5.);
+	}
+
 	action void A_EvisceratorFire()
 	{
 		let weap = Weapon(invoker);
@@ -689,7 +694,7 @@ Class Eviscerator : SWWMWeapon
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		SWWMUtility.DoKnockback(self,-x,25000.);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
-		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-5*z);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
 		for ( int i=0; i<40; i++ )
 		{
 			a = FRandom[Eviscerator](0,360);
@@ -704,7 +709,7 @@ Class Eviscerator : SWWMWeapon
 		for ( int i=0; i<4; i++ )
 		{
 			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (10,3,-5);
+			SWWMViewSmoke(s).ofs = (10,4,-5);
 			s.target = self;
 			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
 			s.alpha *= .2;
@@ -818,6 +823,8 @@ Class Eviscerator : SWWMWeapon
 		Weapon.AmmoGive1 4;
 		SWWMWeapon.DropAmmoType "EvisceratorShell";
 		+WEAPON.EXPLOSIVE;
+		Radius 20;
+		Height 32;
 	}
 	States
 	{

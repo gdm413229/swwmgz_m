@@ -247,7 +247,7 @@ Class HellblazerMissile : Actor
 		Super.PostBeginPlay();
 		if ( bNOGRAVITY )
 		{
-			A_StartSound("hellblazer/fly",CHAN_BODY,CHANF_LOOPING,1.,2.);
+			A_StartSound("hellblazer/fly",CHAN_BODY,CHANF_LOOP,1.,2.);
 			let t = Spawn("HellblazerFlare",pos);
 			t.master = self;
 		}
@@ -294,7 +294,7 @@ Class HellblazerMissile : Actor
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("BigScorch",50);
+		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(4.5);
 		SWWMUtility.DoExplosion(self,350,320000,200,90);
 		A_NoGravity();
@@ -391,7 +391,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("BigScorch",50);
+		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(6.);
 		SWWMUtility.DoExplosion(self,300,320000,250,100);
 		A_NoGravity();
@@ -461,7 +461,7 @@ Class HellblazerRavager : HellblazerMissile
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("HugeScorch",50);
+		A_SprayDecal("HugeRocketBlast",50);
 		A_SetScale(8.);
 		SWWMUtility.DoExplosion(self,400,320000,300,120);
 		A_NoGravity();
@@ -540,7 +540,7 @@ Class HellblazerWarhead : HellblazerMissile
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("WumboScorch",150);
+		A_SprayDecal("WumboRocketBlast",150);
 		A_SetScale(7.);
 		SWWMUtility.DoExplosion(self,2000,600000,400,200);
 		A_NoGravity();
@@ -831,7 +831,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
-		A_SprayDecal("BigScorch",50);
+		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(2.5);
 		SWWMUtility.DoExplosion(self,80,200000,150,60);
 		A_NoGravity();
@@ -1311,6 +1311,11 @@ Class Hellblazer : SWWMWeapon
 		}
 	}
 
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,3.5,-5.);
+	}
+
 	action void A_HellblazerFire( int type = 0, bool bAlt = false )
 	{
 		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
@@ -1332,7 +1337,7 @@ Class Hellblazer : SWWMWeapon
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		SWWMUtility.DoKnockback(self,-x,bAlt?22000.:32000.);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
-		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-5*z);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3.5*y-5*z);
 		a = FRandom[Hellblazer](0,360);
 		s = FRandom[Hellblazer](0,bAlt?.02:.005);
 		dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -1553,6 +1558,8 @@ Class Hellblazer : SWWMWeapon
 		Hellblazer.ClipCount 6;
 		+SWWMWEAPON.NOFIRSTGIVE;
 		+WEAPON.EXPLOSIVE;
+		Radius 24;
+		Height 32;
 	}
 	States
 	{

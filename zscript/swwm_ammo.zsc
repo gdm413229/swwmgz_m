@@ -164,6 +164,7 @@ Mixin Class SWWMAmmo
 	default
 	{
 		+INVENTORY.IGNORESKILL;
+		Inventory.PickupFlash "SWWMPickupFlash";
 	}
 }
 
@@ -171,6 +172,7 @@ Mixin Class SWWMAmmo
 Class MagAmmo : Inventory abstract
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Class<Ammo> ParentAmmo;
 	Ammo pamo;
@@ -185,6 +187,7 @@ Class MagAmmo : Inventory abstract
 		+INVENTORY.KEEPDEPLETED;
 		Inventory.PickupSound "misc/bullet_pkup";
 		Inventory.Amount 1;
+		Inventory.PickupFlash "SWWMPickupFlash";
 	}
 
 	private Inventory DoDrop( Class<Inventory> type )
@@ -333,6 +336,7 @@ Class RedShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -345,6 +349,8 @@ Class RedShell : Ammo
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -358,6 +364,8 @@ Class RedShell2 : RedShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class RedShell4 : RedShell
@@ -365,6 +373,8 @@ Class RedShell4 : RedShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 Class RedShell8 : RedShell
@@ -372,6 +382,8 @@ Class RedShell8 : RedShell
 	Default
 	{
 		Inventory.Amount 8;
+		Radius 8;
+		Height 20;
 	}
 }
 Class RedShell12 : RedShell
@@ -379,6 +391,8 @@ Class RedShell12 : RedShell
 	Default
 	{
 		Inventory.Amount 12;
+		Radius 10;
+		Height 20;
 	}
 }
 Class RedShell16 : RedShell
@@ -386,6 +400,8 @@ Class RedShell16 : RedShell
 	Default
 	{
 		Inventory.Amount 16;
+		Radius 10;
+		Height 20;
 	}
 }
 
@@ -394,6 +410,7 @@ Class GreenShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -406,6 +423,8 @@ Class GreenShell : Ammo
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -419,6 +438,8 @@ Class GreenShell2 : GreenShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class GreenShell4 : GreenShell
@@ -426,6 +447,8 @@ Class GreenShell4 : GreenShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 Class GreenShell8 : GreenShell
@@ -433,6 +456,8 @@ Class GreenShell8 : GreenShell
 	Default
 	{
 		Inventory.Amount 8;
+		Radius 8;
+		Height 20;
 	}
 }
 Class GreenShell12 : GreenShell
@@ -440,6 +465,8 @@ Class GreenShell12 : GreenShell
 	Default
 	{
 		Inventory.Amount 12;
+		Radius 10;
+		Height 20;
 	}
 }
 
@@ -448,6 +475,7 @@ Class WhiteShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -460,6 +488,8 @@ Class WhiteShell : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -473,6 +503,8 @@ Class WhiteShell2 : WhiteShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class WhiteShell4 : WhiteShell
@@ -480,6 +512,8 @@ Class WhiteShell4 : WhiteShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 Class WhiteShell8 : WhiteShell
@@ -487,6 +521,8 @@ Class WhiteShell8 : WhiteShell
 	Default
 	{
 		Inventory.Amount 8;
+		Radius 8;
+		Height 20;
 	}
 }
 
@@ -495,6 +531,7 @@ Class BlueShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -507,6 +544,8 @@ Class BlueShell : Ammo
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -520,6 +559,8 @@ Class BlueShell2 : BlueShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class BlueShell4 : BlueShell
@@ -527,6 +568,8 @@ Class BlueShell4 : BlueShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 Class BlueShell8 : BlueShell
@@ -534,6 +577,8 @@ Class BlueShell8 : BlueShell
 	Default
 	{
 		Inventory.Amount 8;
+		Radius 8;
+		Height 20;
 	}
 }
 
@@ -542,6 +587,7 @@ Class BlackShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -554,6 +600,8 @@ Class BlackShell : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -567,6 +615,8 @@ Class BlackShell2 : BlackShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class BlackShell4 : BlackShell
@@ -574,6 +624,8 @@ Class BlackShell4 : BlackShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 
@@ -582,6 +634,7 @@ Class PurpleShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -594,6 +647,8 @@ Class PurpleShell : Ammo
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -607,6 +662,8 @@ Class PurpleShell2 : PurpleShell
 	Default
 	{
 		Inventory.Amount 2;
+		Radius 6;
+		Height 20;
 	}
 }
 Class PurpleShell4 : PurpleShell
@@ -614,6 +671,8 @@ Class PurpleShell4 : PurpleShell
 	Default
 	{
 		Inventory.Amount 4;
+		Radius 6;
+		Height 20;
 	}
 }
 
@@ -656,6 +715,7 @@ Class GoldShell : Ammo
 	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	action void A_GoldShellTrail()
 	{
@@ -673,7 +733,10 @@ Class GoldShell : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
+		+DONTGIB;	// don't crush these, they're valuable
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
 	}
 	States
 	{
@@ -691,6 +754,7 @@ Class EvisceratorShell : Ammo
 {
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -704,6 +768,8 @@ Class EvisceratorShell : Ammo
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 8;
+		Height 22;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -724,6 +790,8 @@ Class EvisceratorSixPack : EvisceratorShell
 	{
 		Inventory.PickupMessage "$I_EVISHELLPAK";
 		Inventory.Amount 6;
+		Radius 20;
+		Height 24;
 	}
 }
 
@@ -757,6 +825,7 @@ Class HellblazerMissiles : Ammo
 {
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -770,6 +839,8 @@ Class HellblazerMissiles : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -789,6 +860,8 @@ Class HellblazerMissileMag : HellblazerMissiles
 	{
 		Inventory.PickupMessage "$T_HELLMISSILEMAG";
 		Inventory.Amount 6;
+		Radius 12;
+		Height 26;
 	}
 }
 Class HellblazerMissileTrioSpawn : Actor
@@ -817,6 +890,7 @@ Class HellblazerCrackshots : Ammo
 {
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -830,6 +904,8 @@ Class HellblazerCrackshots : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -849,6 +925,8 @@ Class HellblazerCrackshotMag : HellblazerCrackshots
 	{
 		Inventory.PickupMessage "$T_HELLCLUSTERMAG";
 		Inventory.Amount 3;
+		Radius 12;
+		Height 26;
 	}
 }
 
@@ -856,6 +934,7 @@ Class HellblazerRavagers : Ammo
 {
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -869,6 +948,8 @@ Class HellblazerRavagers : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -888,6 +969,8 @@ Class HellblazerRavagerMag : HellblazerRavagers
 	{
 		Inventory.PickupMessage "$T_HELLBURNINATORMAG";
 		Inventory.Amount 3;
+		Radius 12;
+		Height 26;
 	}
 }
 
@@ -895,6 +978,7 @@ Class HellblazerWarheads : Ammo
 {
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -908,6 +992,8 @@ Class HellblazerWarheads : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -927,6 +1013,8 @@ Class HellblazerWarheadMag : HellblazerWarheads
 	{
 		Inventory.PickupMessage "$T_HELLNUKEMAG";
 		Inventory.Amount 2;
+		Radius 12;
+		Height 26;
 	}
 }
 
@@ -936,7 +1024,9 @@ Class HellblazerWarheadMag : HellblazerWarheads
 
 Class SparkUnit : Ammo
 {
+	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -950,6 +1040,8 @@ Class SparkUnit : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
 	}
 	States
 	{
@@ -965,7 +1057,9 @@ Class SparkUnit : Ammo
 
 Class SilverBulletAmmo : Ammo
 {
+	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -979,6 +1073,8 @@ Class SilverBulletAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 10;
+		Height 26;
 	}
 	States
 	{
@@ -990,7 +1086,9 @@ Class SilverBulletAmmo : Ammo
 
 Class SilverBulletAmmo2 : Ammo
 {
+	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -1004,6 +1102,8 @@ Class SilverBulletAmmo2 : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 10;
+		Height 26;
 	}
 	States
 	{
@@ -1015,8 +1115,6 @@ Class SilverBulletAmmo2 : Ammo
 
 Class SilverBullets : MagAmmo
 {
-	Mixin SWWMOverlapPickupSound;
-
 	Default
 	{
 		Tag "$T_XSBBULLET";
@@ -1028,6 +1126,8 @@ Class SilverBullets : MagAmmo
 		Inventory.InterHubAmount 15;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 22;
 	}
 	States
 	{
@@ -1038,8 +1138,6 @@ Class SilverBullets : MagAmmo
 }
 Class SilverBullets2 : MagAmmo
 {
-	Mixin SWWMOverlapPickupSound;
-
 	Default
 	{
 		Tag "$T_FCBBULLET";
@@ -1051,6 +1149,8 @@ Class SilverBullets2 : MagAmmo
 		Inventory.InterHubAmount 10;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 4;
+		Height 22;
 	}
 	States
 	{
@@ -1111,7 +1211,9 @@ Class SilverBullets2BundleSpawn : Actor
 
 Class CandyGunAmmo : Ammo
 {
+	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -1125,6 +1227,8 @@ Class CandyGunAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 24;
 	}
 	States
 	{
@@ -1136,8 +1240,6 @@ Class CandyGunAmmo : Ammo
 
 Class CandyGunBullets : MagAmmo
 {
-	Mixin SWWMOverlapPickupSound;
-
 	Default
 	{
 		Tag "$T_CANDYBULLET";
@@ -1149,6 +1251,8 @@ Class CandyGunBullets : MagAmmo
 		Inventory.InterHubAmount 27;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 2;
+		Height 20;
 	}
 	States
 	{
@@ -1199,7 +1303,9 @@ Class CandyGunSpares : Ammo
 
 Class YnykronAmmo : Ammo
 {
+	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -1213,6 +1319,8 @@ Class YnykronAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 8;
+		Height 24;
 	}
 	States
 	{
@@ -1229,6 +1337,7 @@ Class YnykronAmmo : Ammo
 Class AmmoFabricator : Inventory abstract
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	int budget, pertype, maxunitprice;
 
@@ -1363,7 +1472,10 @@ Class AmmoFabricator : Inventory abstract
 		Inventory.UseSound "fabricator/use";
 		Inventory.MaxAmount 32;
 		Inventory.InterHubAmount 32;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		FloatBobStrength 0.25;
+		Radius 10;
+		Height 24;
 	}
 	States
 	{
@@ -1440,6 +1552,8 @@ Class FabricatorTier4 : AmmoFabricator
 Class HammerspaceEmbiggener : Inventory
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
 	bool cheatedin;
 
 	override void SetGiveAmount( Actor receiver, int amount, bool givecheat )
@@ -1526,7 +1640,7 @@ Class HammerspaceEmbiggener : Inventory
 			for ( Inventory i=Owner.Inv; i; i=i.Inv )
 			{
 				if ( !(i is 'Ammo') ) continue;
-				i.MaxAmount = int(i.Default.MaxAmount*(1+self.Amount/2.));
+				i.MaxAmount = int(i.default.MaxAmount*(1+Amount/2.));
 				if ( Ammo(i).BackpackMaxAmount > 0 )
 					i.MaxAmount = min(i.MaxAmount,Ammo(i).BackpackMaxAmount);
 				int amount = Ammo(i).BackpackAmount;
@@ -1536,10 +1650,17 @@ Class HammerspaceEmbiggener : Inventory
 					i.Amount = i.MaxAmount;
 			}
 		}
+		// new ammo suddenly added? upgrade it (this shouldn't happen unless fucky scripting has been involved)
+		if ( (item is 'Ammo') && !Owner.FindInventory(Ammo(item).GetParentAmmo()) )
+		{
+			item.MaxAmount = int(item.default.MaxAmount*(1+Amount/2.));
+			if ( Ammo(item).BackpackMaxAmount > 0 )
+				item.MaxAmount = min(item.MaxAmount,Ammo(item).BackpackMaxAmount);
+		}
 		return res;
 	}
 
-	override void DetachFromOwner()
+	override void DepleteOrDestroy()
 	{
 		// reset upgrade
 		for ( Inventory i=Owner.Inv; i; i=i.Inv )
@@ -1549,6 +1670,7 @@ Class HammerspaceEmbiggener : Inventory
 			if ( i.Amount > i.MaxAmount )
 				i.Amount = i.MaxAmount;
 		}
+		Super.DepleteOrDestroy();
 	}
 
 	Default
@@ -1557,12 +1679,15 @@ Class HammerspaceEmbiggener : Inventory
 		Inventory.PickupMessage "$T_EMBIGGENER";
 		Inventory.MaxAmount 16;
 		Inventory.InterHubAmount 16;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.ALWAYSPICKUP;
 		+COUNTITEM;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 8;
+		Height 24;
 	}
 	States
 	{

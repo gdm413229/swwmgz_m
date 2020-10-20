@@ -51,30 +51,20 @@ These will be available long after the first release.
   -------------------- | -------
   Itamex Hammer        | 9000
   Puntzer Beta         | 10000
-  *SMW.05 Bullet*      | 400
-  Puntzer Gamma        | 50000
+  *SMW.05 Bullet*      | 300
+  Puntzer Gamma        | 30000
+  Sheen HMG            | 100000
+  *HMG Bullet*         | 400
   Quadravol            | 80000
   *Quadravol Ammo*     | 10000
-  Blackfire Igniter    | 120000
+  Blackfire Igniter    | 220000
   *Blackfire Canister* | 20000
-  Sparkster x3         | 250000
-  *Nokron Unit*        | 35000
-  *Kinylum Unit*       | 25000
-  EMP Carbine          | 300000
+  EMP Carbine          | 500000
   *EMP Core*           | 60000
-  PROWEL&TADEL         | 1600000
-  *Madness Core*       | 150000
+  Ray-Khom             | 1600000
+  *Ray Mag*            | 150000
+  *Ray Battery*        | 320000
 
-  Item           | Price
-  -------------- | -------
-  Sheen HMG      | 100000
-  *HMG Bullet*   | 250
-  Skull Launcher | 80000
-  *Skull*        | 4000
-  Cryolance      | 240000
-  *Cryo Mag*     | 60000
-  Ray-Khom       | 1600000
-  *Ray Bolt*     | 20000
 
 ### Other items
 
@@ -101,24 +91,14 @@ Other items that can be bought at any moment. **Omnisights** and **Embiggeners**
 
 Items that can sometimes be found in special boxes hidden in secret rooms. When collected they give credits according to their price.
 
-  Item            | Price
-  --------------- | -----
-  Nutatco Bar     | 200
-  Frispy Corn     | 500
-  Hoagie          | 800
-  PISS Whiskey    | 1200
-  Froggy Chair    | 1440
-  Cat C. Poster   | 1500
-  MMiaSR Vol.1    | 2000
-  MMiaSR Vol.2    | 2000
-  MMiaSR Vol.3    | 2000
-  Akari Project   | 3000
-  Lithium Vol.1   | 3500
-  Love Signals    | 4000
-  Mashiro Plush   | 5000
-  BRC Debut LP    | 6000
-  Hege Cactus     | 8000
-  Raidemin Figure | 9000
+  Item          | Price
+  ------------- | -----
+  Nutatco Bar   | 200
+  Frispy Corn   | 500
+  MMiaSR Vol.1  | 2000
+  Akari Project | 3000
+  Love Signals  | 4000
+  Mashiro Plush | 5000
 
 The following unlock when playing **Heretic** and up.
 
@@ -126,8 +106,6 @@ The following unlock when playing **Heretic** and up.
   --------------- | -----
   Quartz Flask    | 4000
   Demo Plush      | 6400
-  Doomguy Figure  | 9000
-  Firemace        | 10000
   Saya Bean Plush | 12000
   Tome of Power   | 16000
 
@@ -138,6 +116,4 @@ The following unlock when playing **Hexen** and up.
   Peach Juice | 400
   Milk Breads | 900
   Kirin Manga | 1600
-  Puzzle Book | 2500
-  Kirin Plush | 10000
-  Obelisk     | 24000
+  Kirin Plush | 20000

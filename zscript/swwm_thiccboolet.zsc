@@ -110,7 +110,7 @@ Class SilverImpact : Actor
 			return;
 		}
 		A_StartSound("silverbullet/hit",CHAN_VOICE,CHANF_DEFAULT,1.,.7);
-		A_SprayDecal("BigBulletChip",-64);
+		A_SprayDecal("BigPock",-64);
 		A_SprayDecal("HugeWallCrack",-64);
 		int numpt = Random[Silverbullet](15,25);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
@@ -437,9 +437,9 @@ Class FatChodeImpact : Actor
 		A_AlertMonsters(8000);
 		A_QuakeEx(7,7,7,50,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StartSound("silverbullet/chode",CHAN_VOICE,CHANF_DEFAULT,1.,.35);
-		A_SprayDecal("BigBulletChip",-64);
+		A_SprayDecal("BigPock",-64);
 		A_SprayDecal("HugeWallCrack",-64);
-		A_SprayDecal("WumboScorch",-64);
+		A_SprayDecal("WumboRocketBlast",-64);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -592,7 +592,7 @@ Class FatChodeExplosionArm : Actor
 			SWWMUtility.DoExplosion(self,20+reactiontime,8000+1500*reactiontime,80+5*reactiontime,50,DE_THRUWALLS);
 			if ( level.IsPointInLevel(pos) )
 			{
-				A_SprayDecal("HugeScorch",-32);
+				A_SprayDecal("HugeRocketBlast",-32);
 				Spawn("FatChodeExplosionTrail",pos);
 				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 				let s = Spawn("SWWMHalfSmoke",pos);
@@ -621,7 +621,6 @@ Class SilverBullet : SWWMWeapon
 	double zoomlevel;
 	ui TextureID reticle;
 	transient ui CVar useshaders;
-	bool initialized;
 	int rezoom;
 	bool proneme;
 
@@ -679,6 +678,7 @@ Class SilverBullet : SWWMWeapon
 	}
 	override void HudTick()
 	{
+		Super.HudTick();
 		if ( !ZoomInter ) ZoomInter = DynamicValueInterpolator.Create(int(zoomlevel*10),.5,1,20);
 		ZoomInter.Update(int(zoomlevel*10));
 	}
@@ -701,20 +701,6 @@ Class SilverBullet : SWWMWeapon
 		}
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
 	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		if ( !initialized )
-		{
-			initialized = true;
-			// first copy always has a XSB mag with a XSB bullet in the chamber
-			chambered = true;
-			fired = false;
-			fcbchambered = false;
-			fcbloaded = false;
-			fcbselected = false;
-		}
-	}
 	override void DetachFromOwner()
 	{
 		// force disable zoom
@@ -727,7 +713,6 @@ Class SilverBullet : SWWMWeapon
 	{
 		Super.DoEffect();
 		if ( zoomed ) crosshair = 99;
-		else crosshair = 0;
 		if ( !Owner || !Owner.player )
 		{
 			proneme = false;
@@ -755,8 +740,10 @@ Class SilverBullet : SWWMWeapon
 			Shader.SetEnabled(players[consoleplayer],"SilverScope",true);
 			if ( !reticle ) reticle = TexMan.CheckForTexture("graphics/SBReticle.png",TexMan.Type_Any);
 			Screen.DrawTexture(reticle,false,ss.x*.5,ss.y*.5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Stencil,DTA_FillColor,Color(0,0,0));
+			return;
 		}
 		else Shader.SetEnabled(players[consoleplayer],"SilverScope",false);
+		Super.RenderUnderlay(e);
 	}
 
 	action void ProcessTraceHit( SilverBulletTracer t, Vector3 origin, Vector3 dir )
@@ -929,6 +916,11 @@ Class SilverBullet : SWWMWeapon
 			s.target = self;
 		}
 	}
+	override Vector3 GetTraceOffset()
+	{
+		if ( zoomed ) return (0.,0.,0.);
+		return (10.,1,-1.);
+	}
 	action void A_SilverFire()
 	{
 		A_SWWMFlash();
@@ -943,7 +935,8 @@ Class SilverBullet : SWWMWeapon
 		SWWMHandler.DoFlash(self,Color(110,255,192,80),8);
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+1*y-1*z);
+		Vector3 origin = Vec2OffsetZ(0,0,player.viewz);
+		if ( !invoker.zoomed ) origin = level.Vec3Offset(origin,10*x+1*y-1*z);
 		Vector3 x2, y2, z2;
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		if ( invoker.fcbchambered )
@@ -1119,8 +1112,10 @@ Class SilverBullet : SWWMWeapon
 		SWWMWeapon.DropAmmoType "SilverBulletAmmo";
 		SilverBullet.ClipCount 5;
 		+SWWMWEAPON.NOFIRSTGIVE;
-		+WEAPON.NO_AUTO_SWITCH;
 		+WEAPON.ALT_AMMO_OPTIONAL;
+		+WEAPON.EXPLOSIVE;
+		Radius 36;
+		Height 36;
 	}
 	States
 	{

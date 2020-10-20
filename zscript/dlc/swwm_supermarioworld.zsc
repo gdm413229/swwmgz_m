@@ -3,4 +3,31 @@
 
 Class PuntzerGamma : SWWMWeapon
 {
+	int ClipCount;
+	bool chambered;
+
+	Property ClipCount : ClipCount;
+
+	Default
+	{
+		Tag "$T_PUNTZERGAMMA";
+		Inventory.PickupMessage "$I_PUNTZERGAMMA";
+		Obituary "$O_PUNTZERGAMMA";
+		Inventory.Icon "graphics/HUD/Icons/W_PuntzerGamma.png";
+		Weapon.SlotNumber 4;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 200;
+		PuntzerGamma.ClipCount 30;
+		Weapon.AmmoType1 "SMW05Ammo";
+		Weapon.AmmoGive1 30;
+		SWWMWeapon.DropAmmoType "SMW05Ammo";
+		Stamina 30000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

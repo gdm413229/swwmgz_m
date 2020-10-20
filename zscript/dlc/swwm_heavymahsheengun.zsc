@@ -3,4 +3,25 @@
 
 Class HeavyMahSheenGun : SWWMWeapon
 {
+	Default
+	{
+		Tag "$T_SHEENHMG";
+		Inventory.PickupMessage "$I_SHEENHMG";
+		Obituary "$O_SHEENHMG";
+		Inventory.Icon "graphics/HUD/Icons/W_SheenHMG.png";
+		Weapon.SlotNumber 5;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 100;
+		Weapon.AmmoType1 "SheenAmmo";
+		Weapon.AmmoGive1 200;
+		SWWMWeapon.DropAmmoType "SheenAmmo";
+		Stamina 100000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

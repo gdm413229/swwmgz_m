@@ -1,6 +1,15 @@
 // SHAMEFUL DISPLAY
 
-// >loading brutal doom with this
+// At this point there's no clearer way to tell people to stop combining
+// incompatible mods.
+// The BD crowd never listens, never learns, you can't just mix up gameplay
+// mods and expect everything to work.
+// You also can't expect modders to put in the effort needed to go and add
+// compatibility for a mod that wouldn't even make any sense to add
+// compatibility for because both replace the same things and are entirely
+// different beasts with different styles altogether.
+// Just stop. Put that gray matter to use. Do you really think it's worth it?
+// Don't do this shit.
 Class SWWMBrutalHandler : StaticEventHandler
 {
 	ui int timer;
@@ -17,8 +26,16 @@ Class SWWMBrutalHandler : StaticEventHandler
 			break;
 		}
 		SetRandomSeed[bdscreen](Random[bdscreen]()+consoleplayer+MSTime());
-		if ( detected )
-			Console.Printf("\cg========\n\cgIf you have BD on your autoload, you really shouldn't.\n\cgIf you manually loaded it with this mod, why would you?\n\cgThey're not compatible and never will be.\n\cg========");
+		if ( !detected ) return;
+		Console.Printf(
+			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
+			"\cx┃   \cfIf you have BD on your autoload you really shouldn't.   \cx┃\n"
+			"\cx┃  \cfIf you manually loaded it with this mod, why would you?  \cx┃\n"
+			"\cx┃         \cfThey're not compatible and never will be.         \cx┃\n"
+			"\cx┃    \cfThis mod will now shit the bed once you go in-game,    \cx┃\n"
+			"\cx┃            \cfand trust me, it's better this way.            \cx┃\n"
+			"\cx┃             \cf<See you again, have a nice day>              \cx┃\n"
+			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
 	}
 
 	override void UiTick()
@@ -31,7 +48,7 @@ Class SWWMBrutalHandler : StaticEventHandler
 				S_StartSound("brutal/ezmodo",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 				S_StartSound("brutal/ezmodo",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
-			else if ( timer == 350 ) ThrowAbortException(">Brutal Doom");
+			else if ( timer == 350 ) ThrowAbortException("This manual abort is for your own safety");
 			timer++;
 		}
 		else timer = 0;
@@ -64,6 +81,16 @@ Class SWWMBrutalHandler : StaticEventHandler
 }
 
 // HORNY
+// Surprisingly, I've put in actual effort into this compatibility thing (even
+// if it's just sort of partial).
+// Demo-chan has no pp in this body that they can stick into the girls, so all
+// they get is the headpats. There's some sort of crazy magic going on here,
+// that makes the demon gals fall to their knees instantly. Saya thinks it
+// might be a side effect of teaching them the "blow kiss" spell (which has the
+// same effect).
+// Obviously, all the standard weapons work, and these gals appear to be of the
+// masochistic kind. This is generally not very effective compared to the pats
+// and smooches, but it's there, if you're willing to hurt them (I wouldn't).
 Class SWWMHDoomHandler : StaticEventHandler
 {
 	ui int timer;
@@ -79,8 +106,105 @@ Class SWWMHDoomHandler : StaticEventHandler
 			break;
 		}
 		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
-		if ( detected )
-			Console.Printf("\cg========\n\cgHa ha very funny.\n\cgIf you want the Demolitionist to fuck some hot demon girls go commission a porn artist.\n\cg========");
+		if ( !detected ) return;
+		Console.Printf(
+			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
+			"\cx┃            \cfOh my, someone appears to be \cgH \ckO \cdR \cvN \chY \ct♥            \cx┃\n"
+			"\cx┃   \cfWell, all you'll be getting here is the power of headpats.   \cx┃\n"
+			"\cx┃  \cfIf you want Demo-chan to actually fuck some hot demon girls,  \cx┃\n"
+			"\cx┃      \cfjust go commission a porn artist or something, idk.       \cx┃\n"
+			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
+	}
+
+	static bool IsCuteGirl( Actor a )
+	{
+		Class p = a.GetClass();
+		while ( p.GetParentClass() && (p.GetParentClass() != 'Actor') )
+		{
+			p = p.GetParentClass();
+			if ( p.GetClassName() == 'HDoomMonster' )
+				return true;
+		}
+		return false;
+	}
+
+	static bool IsSexyTime( Actor a )
+	{
+		Class p = a.GetClass();
+		while ( p.GetParentClass() && (p.GetParentClass() != 'Actor') )
+		{
+			p = p.GetParentClass();
+			if ( p.GetClassName() == 'SexActor' )
+				return true;
+		}
+		return false;
+	}
+
+	static bool IsStaticSexyTime( Actor a )
+	{
+		Class p = a.GetClass();
+		while ( p.GetParentClass() && (p.GetParentClass() != 'Actor') )
+		{
+			p = p.GetParentClass();
+			if ( p.GetClassName() == 'StaticSexActor' )
+				return true;
+		}
+		return false;
+	}
+
+	override void WorldThingSpawned( WorldEvent e )
+	{
+		// demo can't sex the ladies (not with this body)
+		// spawn a headpat tracker, we can at least do this much for them
+		if ( IsSexyTime(e.Thing) )
+		{
+			e.Thing.bUSESPECIAL = false;
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+			// sweet dreams, demon
+			HeadpatTracker(hp).patstate = e.Thing.FindState("TooLate");
+			HeadpatTracker(hp).deathstate = e.Thing.FindState("Finish");
+			// height fixes
+			String cname = e.Thing.GetClassName();
+			if ( cname.Left(12) ~== "Cacodemoness" )
+				HeadpatTracker(hp).hdoomheightfix = .2;
+			else if ( cname.Left(12) ~== "ImpEncounter" )
+				HeadpatTracker(hp).hdoomheightfix = .35;
+			else if ( cname.Left(8) ~== "Mancubus" )
+				HeadpatTracker(hp).hdoomheightfix = .1;
+			else if ( cname.Left(9) ~== "HLostSoul" )
+				HeadpatTracker(hp).hdoomheightfix = .5;
+			else if ( cname.Left(10) ~== "ArchViless" )
+				HeadpatTracker(hp).hdoomheightfix = -.1;
+		}
+		else if ( IsStaticSexyTime(e.Thing) )
+		{
+			e.Thing.bUSESPECIAL = false;
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+			if ( e.Thing.GetClassName() == 'ImpInAChair' )
+			{
+				HeadpatTracker(hp).hdoomheightfix = .2;
+				HeadpatTracker(hp).hdoomangfix = 15;
+			}
+		}
+		else if ( IsCuteGirl(e.Thing) )
+		{
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+			// sweet dreams, demon
+			HeadpatTracker(hp).lethalpat = true;
+			String cname = e.Thing.GetClassName();
+			// height fixes
+			if ( cname.Left(12) ~== "ImpEncounter" )
+				HeadpatTracker(hp).hdoomheightfix = .1;
+			else if ( cname.Left(8) ~== "Mancubus" )
+				HeadpatTracker(hp).hdoomheightfix = -.1;
+			else if ( cname.Left(9) ~== "HLostSoul" )
+				HeadpatTracker(hp).hdoomheightfix = .5;
+			else if ( cname.Left(10) ~== "ArchViless" )
+				HeadpatTracker(hp).hdoomheightfix = -.3;
+		}
 	}
 
 	override void UiTick()
@@ -106,7 +230,7 @@ Class SWWMHDoomHandler : StaticEventHandler
 
 	override void RenderOverlay( RenderEvent e )
 	{
-		if ( !detected || (timer < 50) ) return;
+		if ( !detected || (timer < 50) || (timer > 150) ) return;
 		if ( !scr ) scr = TexMan.CheckForTexture("graphics/hdscreen.png",TexMan.Type_Any);
 		double ar = Screen.GetAspectRatio();
 		Vector2 tsize = TexMan.GetScaledSize(scr);
@@ -118,6 +242,7 @@ Class SWWMHDoomHandler : StaticEventHandler
 			else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
 			else vsize = tsize;
 		}
-		Screen.DrawTexture(scr,false,(vsize.x-tsize.x)/2.,(vsize.y-tsize.y)/2.,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		double alph = clamp(2.5-(timer+e.FracTic)/50.,0.,.25)*4.;
+		Screen.DrawTexture(scr,false,(vsize.x-tsize.x)/2.,(vsize.y-tsize.y)/2.,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 	}
 }

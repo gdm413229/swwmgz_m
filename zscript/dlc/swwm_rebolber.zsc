@@ -3,4 +3,29 @@
 
 Class PuntzerBeta : SWWMWeapon
 {
+	int bullets[6];
+	int rotation;
+	bool initialized;
+
+	Default
+	{
+		Tag "$T_PUNTZERBETA";
+		Inventory.PickupMessage "$I_PUNTZERBETA";
+		Obituary "$O_PUNTZERBETA";
+		Inventory.Icon "graphics/HUD/Icons/W_PuntzerBeta.png";
+		Weapon.SlotNumber 3;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 450;
+		Weapon.AmmoType1 "SMW05Ammo";
+		Weapon.AmmoGive1 6;
+		SWWMWeapon.DropAmmoType "SMW05Ammo";
+		Stamina 10000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

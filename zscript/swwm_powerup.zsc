@@ -17,6 +17,7 @@ Class GrilledCheeseSandwich : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	// for falling off cliffs and others
 	// last 5 seconds of safe positions
@@ -186,6 +187,7 @@ Class GrilledCheeseSandwich : Inventory
 		Inventory.PickupMessage "$T_SANDWICH";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -193,6 +195,8 @@ Class GrilledCheeseSandwich : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 12;
+		Height 24;
 	}
 
 	States
@@ -233,8 +237,8 @@ Class GhostSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/ghostact",CHAN_VOICE,CHANF_LOOPING,.1,1.5);
-		A_StartSound("powerup/ghostact",CHAN_7,CHANF_LOOPING,.4,ATTN_NONE);
+		A_StartSound("powerup/ghostact",CHAN_VOICE,CHANF_LOOP,.1,1.5);
+		A_StartSound("powerup/ghostact",CHAN_7,CHANF_LOOP,.4,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -332,6 +336,7 @@ Class GhostArtifact : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	Default
 	{
@@ -343,6 +348,7 @@ Class GhostArtifact : Inventory
 		Inventory.PickupMessage "$T_GHOSTARTI";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -350,6 +356,8 @@ Class GhostArtifact : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 12;
+		Height 24;
 	}
 
 	override bool Use( bool pickup )
@@ -409,8 +417,8 @@ Class GravSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/gravityact",CHAN_VOICE,CHANF_LOOPING,.2,1.5);
-		A_StartSound("powerup/gravityact",CHAN_7,CHANF_LOOPING,.7,ATTN_NONE);
+		A_StartSound("powerup/gravityact",CHAN_VOICE,CHANF_LOOP,.2,1.5);
+		A_StartSound("powerup/gravityact",CHAN_7,CHANF_LOOP,.7,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -478,6 +486,7 @@ Class GravitySuppressor : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	override bool Use( bool pickup )
 	{
@@ -507,6 +516,7 @@ Class GravitySuppressor : Inventory
 		Inventory.PickupMessage "$T_GRAVITYS";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -514,6 +524,8 @@ Class GravitySuppressor : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 12;
+		Height 28;
 	}
 	States
 	{
@@ -574,8 +586,8 @@ Class InvinciSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/invinciballact",CHAN_VOICE,CHANF_LOOPING,.4,1.5);
-		A_StartSound("powerup/invinciballact",CHAN_7,CHANF_LOOPING,.8,ATTN_NONE);
+		A_StartSound("powerup/invinciballact",CHAN_VOICE,CHANF_LOOP,.4,1.5);
+		A_StartSound("powerup/invinciballact",CHAN_7,CHANF_LOOP,.8,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -691,6 +703,7 @@ Class FuckingInvinciball : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -732,6 +745,7 @@ Class FuckingInvinciball : Inventory
 		Inventory.PickupMessage "$T_INVINCIBALL";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -739,6 +753,8 @@ Class FuckingInvinciball : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 10;
+		Height 28;
 	}
 	States
 	{
@@ -800,8 +816,8 @@ Class RageSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/ragekitact",CHAN_VOICE,CHANF_LOOPING,.4,1.5);
-		A_StartSound("powerup/ragekitact",CHAN_7,CHANF_LOOPING,.5,ATTN_NONE);
+		A_StartSound("powerup/ragekitact",CHAN_VOICE,CHANF_LOOP,.4,1.5);
+		A_StartSound("powerup/ragekitact",CHAN_7,CHANF_LOOP,.5,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -951,6 +967,7 @@ Class Ragekit : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	override bool Use( bool pickup )
 	{
@@ -958,6 +975,12 @@ Class Ragekit : Inventory
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		if ( Owner.GiveBody(100,100) )
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
+		if ( !(Owner is 'Demolitionist') )
+		{
+			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
+			Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
+			return true;
+		}
 		let r = RagekitPower(Owner.FindInventory("RagekitPower"));
 		if ( r )
 		{
@@ -988,6 +1011,7 @@ Class Ragekit : Inventory
 		Inventory.PickupMessage "$T_RAGEKIT";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -995,6 +1019,8 @@ Class Ragekit : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 12;
+		Height 24;
 	}
 	States
 	{
@@ -1007,6 +1033,7 @@ Class Ragekit : Inventory
 Class Omnisight : Inventory
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	override bool Use( bool pickup )
 	{
@@ -1026,6 +1053,7 @@ Class Omnisight : Inventory
 		Inventory.MaxAmount 1;
 		Inventory.InterHubAmount 0;
 		Inventory.RestrictedTo "Demolitionist";
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+COUNTITEM;
@@ -1034,6 +1062,8 @@ Class Omnisight : Inventory
 		+INVENTORY.UNTOSSABLE;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 24;
 	}
 	States
 	{
@@ -1082,7 +1112,7 @@ Class LampMoth : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOPING,.02,4.,FRandom[Moth](.8,1.2));
+		A_StartSound("moth/fly",CHAN_BODY,CHANF_LOOP,.02,4.,FRandom[Moth](.8,1.2));
 		if ( master && master.player ) SetFriendPlayer(master.player);
 		else bFRIENDLY = false;
 	}
@@ -1577,6 +1607,7 @@ Class CompanionLamp : Actor
 Class SWWMLamp : Inventory
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	bool bActive;
 	TextureID OnIcon;
@@ -1683,6 +1714,7 @@ Class SWWMLamp : Inventory
 		Inventory.Amount 1;
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -1692,6 +1724,8 @@ Class SWWMLamp : Inventory
 		FloatBobStrength 0.25;
 		SWWMLamp.Charge 100;
 		Stamina 70000;
+		Radius 8;
+		Height 28;
 	}
 	States
 	{
@@ -1751,8 +1785,8 @@ Class BarrierSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/barrieract",CHAN_VOICE,CHANF_LOOPING,.06,1.5);
-		A_StartSound("powerup/barrieract",CHAN_7,CHANF_LOOPING,.1,ATTN_NONE);
+		A_StartSound("powerup/barrieract",CHAN_VOICE,CHANF_LOOP,.06,1.5);
+		A_StartSound("powerup/barrieract",CHAN_7,CHANF_LOOP,.1,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -1812,6 +1846,7 @@ Class EBarrier : Inventory
 {
 	Mixin SWWMAutoUseFix;
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
 
 	override bool Use( bool pickup )
 	{
@@ -1841,6 +1876,7 @@ Class EBarrier : Inventory
 		Inventory.PickupMessage "$T_BARRIER";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
 		+INVENTORY.INVBAR;
@@ -1848,6 +1884,8 @@ Class EBarrier : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 6;
+		Height 28;
 	}
 	States
 	{

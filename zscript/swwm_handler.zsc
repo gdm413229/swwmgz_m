@@ -3,6 +3,9 @@
 // preload fonts and stuff
 Class SWWMPreloader : StaticEventHandler
 {
+	transient ui Font TewiFont, MPlusFont;
+	transient ui CVar lang;
+
 	override void OnRegister()
 	{
 		Font.GetFont('k6x8');
@@ -17,7 +20,18 @@ Class SWWMPreloader : StaticEventHandler
 		Font.GetFont('Tewi');
 		Font.GetFont('TewiShaded');
 		Font.GetFont('TewiShadedInverse');
+		Font.GetFont('SWWMBigFont');
 	}
+	// FIXME uncomment this once it's supported
+	/*override void UiTick()
+	{
+		// HACK! Graf, please let us change this in a cleaner way
+		if ( menuDelegate.GetClass() == 'DoomMenuDelegate' )
+		{
+			menuDelegate.Destroy();
+			menuDelegate = new("SWWMMenuDelegate");
+		}
+	}*/
 }
 
 // save version holder
@@ -545,6 +559,8 @@ Class SWWMHandler : EventHandler
 				lpos /= xcnt;
 				SWWMInterest.Spawn(lpos,theline:l);
 			}
+			// spawn loot
+			Chancebox.SpawnChanceboxes();
 		}
 		else if ( e.IsSaveGame || e.IsReopen )
 		{
@@ -656,7 +672,7 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		// reset score (optional) if inventory should be cleared
-		if ( level.removeitems && !e.IsReturn && swwm_resetscore )
+		if ( swwm_resetscore && level.removeitems && !e.IsReturn )
 			c.credits = c.hcredits = 0;
 	}
 
@@ -803,6 +819,8 @@ Class SWWMHandler : EventHandler
 			// ignore if not targetted or player can't see it
 			if ( (a.target != players[consoleplayer].mo)
 				|| !SWWMUtility.InPlayerFOV(players[consoleplayer],a) ) continue;
+			// [HDoom] ignore cute girls
+			if ( SWWMHDoomHandler.IsCuteGirl(a.target) ) continue;
 			// is it already in?
 			bool addme = true;
 			for ( int i=0; i<combatactors.Size(); i++ )
@@ -923,7 +941,8 @@ Class SWWMHandler : EventHandler
 				{
 					if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.DamageSource)) )
 						lastcombat = AddOneliner("friendhit",1,10);
-					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.bBOSSDEATH)?2:4) ) lastcombat = AddOneliner("gethit",1,15);
+					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.bBOSSDEATH)?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
+						lastcombat = AddOneliner("gethit",1,15);
 				}
 				highesttic = gametic;
 			}
@@ -959,7 +978,7 @@ Class SWWMHandler : EventHandler
 				{
 					if ( e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing) )
 						lastcombat = AddOneliner("friendkill",1,5);
-					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.bBOSSDEATH)?2:5) )
+					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.bBOSSDEATH)?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 						lastcombat = AddOneliner("scorekill",1,15);
 				}
 			}
@@ -1076,6 +1095,7 @@ Class SWWMHandler : EventHandler
 
 	private void DoKeyTagFix( Actor a )
 	{
+		if ( a is 'SWWMKey' ) return;	// mod's custom keys are fine
 		if ( a is 'RedCard' ) a.SetTag("$T_REDCARD");
 		else if ( a is 'BlueCard' ) a.SetTag("$T_BLUECARD");
 		else if ( a is 'YellowCard' ) a.SetTag("$T_YELLOWCARD");
@@ -1139,7 +1159,19 @@ Class SWWMHandler : EventHandler
 			e.Thing.A_SetSize(20,40);
 			e.Thing.bNOBLOOD = true;
 		}
+		else if ( (e.Thing is 'MBFHelperDog') || ((e.Thing is 'Cacodemon') && !(e.Thing is 'DeadCacodemon')) )
+		{
+			// you can pet the dog, and you can also pet the caco
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+		}
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
+		if ( swwm_shadows && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory')) )
+		{
+			// Uncomment once sprite shadows are added in-engine
+			//if ( ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1'))) )
+				SWWMShadow.Track(e.Thing);
+		}
 	}
 
 	override void PostUiTick()
@@ -1246,8 +1278,6 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Replacement is 'DSparilHax' )
 			e.Replacee = 'Sorcerer2';
-		if ( e.Replacement is 'SWWMHangingKeen' )
-			e.Replacee = 'CommanderKeen';
 	}
 
 	override void CheckReplacement( ReplaceEvent e )
@@ -1262,8 +1292,8 @@ Class SWWMHandler : EventHandler
 		static const Class<Actor> bluepool[] = {"BlueShell","BlueShell2","BlueShell4"};
 		static const Class<Actor> blackpool[] = {"BlackShell","BlackShell2"};
 		if ( e.Replacee is 'ItemFog' ) e.Replacement = 'SWWMItemFog';
-		if ( e.Replacee is 'TeleportFog' ) e.Replacement = 'SWWMTeleportFog';
-		if ( (e.Replacee is 'CommanderKeen') && (!e.Replacement || (e.Replacement == 'CommanderKeen')) )
+		else if ( e.Replacee is 'TeleportFog' ) e.Replacement = 'SWWMTeleportFog';
+		else if ( (e.Replacee is 'CommanderKeen') && (!e.Replacement || (e.Replacement == 'CommanderKeen')) )
 		{
 			let def = GetDefaultByType(e.Replacee);
 			bool dehackery = false;
@@ -1274,6 +1304,25 @@ Class SWWMHandler : EventHandler
 			}
 			if ( !dehackery ) e.Replacement = 'SWWMHangingKeen';
 		}
+		else if ( e.Replacee is 'RedCard' )
+		{
+			if ( level.GetChecksum() ~== "3805A661D5C4523AFF7BF86991071043" )
+				return;	// don't replace red key in Equinox MAP13
+			e.Replacement = 'SWWMRedCard';
+		}
+		else if ( e.Replacee is 'BlueCard' ) e.Replacement = 'SWWMBlueCard';
+		else if ( e.Replacee is 'YellowCard' ) e.Replacement = 'SWWMYellowCard';
+		else if ( e.Replacee.GetClassName() == 'KDiZDSilverKey' ) e.Replacement = 'SWWMSilverCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'KDiZDGreenKey' ) e.Replacement = 'SWWMGreenCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'KDiZDOrangeKey' ) e.Replacement = 'SWWMOrangeCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'GreenCard' ) e.Replacement = 'SWWMGreenCard';
+		else if ( e.Replacee is 'RedSkull' ) e.Replacement = 'SWWMRedSkull';
+		else if ( e.Replacee is 'BlueSkull' ) e.Replacement = 'SWWMBlueSkull';
+		else if ( e.Replacee is 'YellowSkull' ) e.Replacement = 'SWWMYellowSkull';
+		else if ( e.Replacee is 'KeyGreen' ) e.Replacement = 'SWWMKeyGreen';
+		else if ( e.Replacee is 'KeyBlue' ) e.Replacement = 'SWWMKeyBlue';
+		else if ( e.Replacee is 'KeyYellow' ) e.Replacement = 'SWWMKeyYellow';
+		else if ( e.Replacee.GetClassName() == 'KeyRed' ) e.Replacement = 'SWWMKeyRed';
 		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') ) e.Replacement = 'PusherWeapon';
 		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
 		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
@@ -1502,7 +1551,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'Infrared') || (e.Replacee == 'ArtiTorch') ) e.Replacement = 'SWWMLamp';
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
-		else if ( (e.Replacee == 'ArtiPork') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'SWWMNothing'/*'Chancebox'*/;
+		else if ( (e.Replacee == 'ArtiPork') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'ChanceboxSpawner';
 	}
 
 	override void NetworkProcess( ConsoleEvent e )
@@ -1512,7 +1561,7 @@ Class SWWMHandler : EventHandler
 		{
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
 			let mo = players[e.player].mo;
-			if ( (mo.Health <= 0) || !(mo is 'Demolitionist') ) return;
+			if ( e.Args[0] < 0 ) return;	// special gestures can't be manually started
 			SWWMGesture.SetGesture(mo,e.Args[0]);
 		}
 		if ( e.IsManual ) return;
@@ -1523,7 +1572,13 @@ Class SWWMHandler : EventHandler
 			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
 			{
 				players[e.Args[0]].mo.GiveInventory(item,e.Args[2],true);
-				if ( item is 'Weapon' ) players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
+				if ( item is 'Weapon' )
+				{
+					// special case, select dual guns if we bought a second one
+					if ( (item is 'ExplodiumGun') && (players[e.Args[0]].mo.CountInv("ExplodiumGun") > 1) )
+						players[e.Args[0]].mo.A_SelectWeapon("DualExplodiumGun");
+					else players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
+				}
 			}
 		}
 		else if ( e.Name.Left(10) ~== "swwmtrade." )

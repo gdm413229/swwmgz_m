@@ -85,6 +85,8 @@ Class SWWMStats : Thinker
 		let ls = new("LevelStat");
 		ls.hub = !!(level.clusterflags&level.CLUSTER_HUB);
 		ls.levelname = level.levelname;
+		int iof = ls.levelname.IndexOf(" - by: ");
+		if ( iof != -1 ) ls.levelname.Truncate(iof);
 		ls.mapname = level.mapname;
 		ls.kcount = level.killed_monsters;
 		ls.ktotal = level.total_monsters;
@@ -361,11 +363,11 @@ Class SWWMLoreLibrary : Thinker
 		if ( ref ~== "BlackfireIgniter" ) return true;
 		if ( ref ~== "EMPCarbine" ) return true;
 		if ( ref ~== "RayKhom" ) return true;
-		// check if entry is for a collectable
+		// check if entry is for a collectible
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
-			let c = (Class<SWWMCollectable>)(AllActorClasses[i]);
-			if ( !c || (c == 'SWWMCollectable') ) continue;
+			let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectible') ) continue;
 			let def = GetDefaultByType(c);
 			// skip if we match and it's not for this game
 			if ( (c.GetClassName() == ref) && !(gameinfo.gametype&def.avail) )
@@ -910,12 +912,14 @@ Class SWWMCombatTracker : Thinker
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
 			int mxdist = maxdist.GetInt();
-			// enemies within a set distance that have us as target
-			if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(mytarget.target).length() < mxdist)) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
 			// players (but not voodoo dolls), always visible in sp/coop
 			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
+			// friendlies within a set distance
+			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < mxdist)) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
+			// enemies within a set distance that have us as target
+			else if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(mytarget.target).length() < mxdist)) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
 			// any visible enemies within one quarter of the set distance
-			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+			else if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 		else if ( (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') )
 		{

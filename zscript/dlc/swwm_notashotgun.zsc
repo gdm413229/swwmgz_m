@@ -3,4 +3,32 @@
 
 Class Quadravol : SWWMWeapon
 {
+	int clipcount;
+	int extracharge;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		Tag "$T_QUADRAVOL";
+		Inventory.PickupMessage "$I_QUADRAVOL";
+		Obituary "$O_QUADRAVOL";
+		Inventory.Icon "graphics/HUD/Icons/W_Quadravol.png";
+		Weapon.SlotNumber 6;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 650;
+		Weapon.AmmoType1 "QuadAmmo";
+		Weapon.AmmoGive1 1;
+		SWWMWeapon.DropAmmoType "QuadAmmo";
+		Quadravol.ClipCount 10;
+		Stamina 80000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.EXPLOSIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

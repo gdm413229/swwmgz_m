@@ -3,4 +3,38 @@
 
 Class RayKhom : SWWMWeapon
 {
+	int clipcount, clipcount2;
+	bool chambered;
+
+	Property ClipCount : clipcount;
+	Property ClipCount2 : clipcount2;
+
+	Default
+	{
+		Tag "$T_RAYKHOM";
+		Inventory.PickupMessage "$T_RAYKHOM";
+		Obituary "$O_RAYKHOM";
+		Inventory.Icon "graphics/HUD/Icons/W_RayKhom.png";
+		Weapon.SlotNumber 9;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 750;
+		Weapon.AmmoType1 "RayAmmo";
+		Weapon.AmmoGive1 1;
+		Weapon.AmmoType2 "RayBattery";
+		Weapon.AmmoGive2 0;
+		SWWMWeapon.DropAmmoType "RayAmmo";
+		RayKhom.ClipCount 20;
+		RayKhom.ClipCount2 500;
+		Stamina 1600000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.PRIMARY_USES_BOTH;
+		+WEAPON.EXPLOSIVE;
+		+WEAPON.BFG;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

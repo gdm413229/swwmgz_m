@@ -13,6 +13,7 @@ Class MenuTransaction
 	bool result, usedup;
 }
 
+// FIXME this whole thing needs to be refactored eventually
 Class SWWMKnowledgeBaseMenu : GenericMenu
 {
 	enum EDemoTab
@@ -23,7 +24,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		TAB_KEYS,
 		TAB_LIBRARY,
 		TAB_STORE,
-		TAB_RADIO,
 		TAB_GAME,
 		TAB_TRADING,
 		TAB_CHAT,
@@ -83,6 +83,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int kcode;
 	// crimey clock stuff
 	int c_year, c_month, c_day, c_hour, c_minute;
+	String c_tz;
 	// mouse stuff
 	Vector2 curmouse;
 	bool isrclick;
@@ -146,41 +147,55 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( gameinfo.gametype&GAME_Heretic )
 		{
+			// March 10th 2171, 17:34 JST
+			// Epoch: 6351554040
 			c_year = 2171;
 			c_month = 3;
 			c_day = 9;
-			c_hour = 9;
-			c_minute = 41;
+			c_hour = 17;
+			c_minute = 34;
+			c_tz = "JST";
 		}
 		else if ( gameinfo.gametype&GAME_Hexen )
 		{
+			// May 25th 2171, 16:41 JST
+			// Epoch: 6355438860
 			c_year = 2171;
 			c_month = 4;
 			c_day = 24;
 			c_hour = 16;
 			c_minute = 41;
+			c_tz = "JST";
 		}
 		else if ( gameinfo.gametype&GAME_Strife )
 		{
+			// September 13th 2173, 11:26 JST
+			// Epoch: 6425490360
 			c_year = 2173;
 			c_month = 7;
 			c_day = 12;
 			c_hour = 11;
 			c_minute = 26;
+			c_tz = "JST";
 		}
 		else	// Doom
 		{
+			// June 6th 2148, 18:37 EDT
+			// (June 7th 2148, 07:37 JST)
+			// Epoch: 5630769420
 			c_year = 2148;
 			c_month = 5;
 			c_day = 5;
-			c_hour = 12;
-			c_minute = 27;
+			c_hour = 18;
+			c_minute = 37;
+			c_tz = "EDT";
 		}
 	}
 
 	// please don't look at this
 	private String CrimeTime()
 	{
+		// we have to do things this way because dates in this mod go beyond 32-bit unix time
 		static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 		bool leap_year;
 		int y = c_year, m = c_month, d = c_day, h = c_hour, mn = c_minute;
@@ -260,7 +275,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				addtime = 0;
 			}
 		}
-		return String.Format("%04d-%02d-%02d %02d:%02d",y,m+1,d+1,h,mn);
+		return String.Format("%04d-%02d-%02d %02d:%02d %s",y,m+1,d+1,h,mn,c_tz);
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
@@ -595,7 +610,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
 			{
 				// can't use this
-				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectable')
+				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectible')
 					 || (invlist[sel0] is 'HammerspaceEmbiggener') )
 					return true;
 				let t = new("MenuTransaction");
@@ -751,8 +766,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				static const string tabnames[] =
 				{
 					"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_RADIOTAB", "$SWWM_GAMETAB",
-					"$SWWM_TRADETAB", "$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_GAMETAB", "$SWWM_TRADETAB",
+					"$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 				};
 				xx = 0;
 				int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
@@ -957,7 +972,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					{
 						if ( !invlist[i] ) continue;
 						str = invlist[i].GetTag();
-						if ( invlist[i] is 'SWWMCollectable' )
+						if ( invlist[i] is 'SWWMCollectible' )
 							str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1365,7 +1380,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				{
 					if ( !invlist[i] ) continue;
 					str = invlist[i].GetTag();
-					if ( invlist[i] is 'SWWMCollectable' )
+					if ( invlist[i] is 'SWWMCollectible' )
 						str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
@@ -1837,7 +1852,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		qsort_lore(a,p+1,h);
 	}
 
-	private bool CmpCollectable( Inventory a, Inventory b )
+	private bool CmpCollectible( Inventory a, Inventory b )
 	{
 		if ( a.Stamina == b.Stamina )
 		{
@@ -1848,13 +1863,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		return a.default.Stamina < b.default.Stamina;
 	}
 
-	private int partition_collectable( Array<Inventory> a, int l, int h )
+	private int partition_collectible( Array<Inventory> a, int l, int h )
 	{
 		Inventory pv = a[h];
 		int i = (l-1);
 		for ( int j=l; j<=(h-1); j++ )
 		{
-			if ( CmpCollectable(pv,a[j]) )
+			if ( CmpCollectible(pv,a[j]) )
 			{
 				i++;
 				Inventory tmp = a[j];
@@ -1867,12 +1882,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		a[i+1] = tmp;
 		return i+1;
 	}
-	private void qsort_collectable( Array<Inventory> a, int l, int h )
+	private void qsort_collectible( Array<Inventory> a, int l, int h )
 	{
 		if ( l >= h ) return;
-		int p = partition_collectable(a,l,h);
-		qsort_collectable(a,l,p-1);
-		qsort_collectable(a,p+1,h);
+		int p = partition_collectible(a,l,h);
+		qsort_collectible(a,l,p-1);
+		qsort_collectible(a,p+1,h);
 	}
 
 	override void Ticker()
@@ -1908,7 +1923,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// alphabetically sorted inventory
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') || (inv is 'SWWMCollectable') ) continue;
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectible') && !(inv is 'MagAmmo') || (inv is 'SWWMCollectible') ) continue;
 				// no hidden weapons
 				if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
 				String tag = inv.GetTag();
@@ -1944,14 +1959,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
 				if ( k ) invlist.Push(k);
 			}
-			// collectables, sorted by name
+			// collectibles, sorted by name
 			Array<Inventory> cols;
 			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 			{
-				if ( inv is 'SWWMCollectable' )
+				if ( inv is 'SWWMCollectible' )
 					cols.Push(inv);
 			}
-			qsort_collectable(cols,0,cols.Size()-1);
+			qsort_collectible(cols,0,cols.Size()-1);
 			invlist.Append(cols);
 			// crop selection
 			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
@@ -1965,8 +1980,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				let type = (Class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				// no collectables
-				if ( type is 'SWWMCollectable' ) continue;
+				// no collectibles
+				if ( type is 'SWWMCollectible' ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
@@ -2091,7 +2106,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				// alphabetically sorted inventory
 				for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
 				{
-					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectable') && !(inv is 'MagAmmo') ) continue;
+					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectible') && !(inv is 'MagAmmo') ) continue;
 					// no hidden weapons
 					if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
 					String tag = inv.GetTag();
@@ -2212,9 +2227,19 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 							if ( w )
 							{
 								// play if actually switching
-								if ( hnd.checklist[j].result ) MenuSound(GetDefaultByType(w).UpSound);
+								if ( hnd.checklist[j].result )
+								{
+									// gz 4.5pre workaround (expects a Name now)
+									String snd = GetDefaultByType(w).UpSound;
+									MenuSound(snd);
+								}
 							}
-							else MenuSound(GetDefaultByType(hnd.checklist[j].used).UseSound);
+							else
+							{
+								// gz 4.5pre workaround (expects a Name now)
+								String snd = GetDefaultByType(hnd.checklist[j].used).UseSound;
+								MenuSound(snd);
+							}
 						}
 					}
 					else
@@ -2390,8 +2415,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		static const string tabnames[] =
 		{
 			"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
-			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_RADIOTAB", "$SWWM_GAMETAB",
-			"$SWWM_TRADETAB", "$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_GAMETAB", "$SWWM_TRADETAB",
+			"$SWWM_CHATTAB", "$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 		};
 		static const string ltabnames[] =
 		{
@@ -2403,7 +2428,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		};
 		int maxtab = multiplayer?TAB_CHAT:TAB_GAME;
 		int mx = maxtab;
-		if ( (curtab > TAB_CHAT) ) mx++;
+		if ( curtab > TAB_CHAT ) mx++;
 		for ( int i=0; i<=mx; i++ )
 		{
 			str = StringTable.Localize(tabnames[(i>maxtab)?curtab:i]);
@@ -2656,7 +2681,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
-				else if ( invlist[i] is 'SWWMCollectable' ) clscol = Font.CR_FIRE;
+				else if ( invlist[i] is 'SWWMCollectible' ) clscol = Font.CR_FIRE;
 				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
@@ -2692,7 +2717,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
-				if ( invlist[i] is 'SWWMCollectable' )
+				if ( invlist[i] is 'SWWMCollectible' )
 					str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -2704,9 +2729,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				if ( !invlist[i] ) continue;
 				str = invlist[i].GetTag();
-				if ( invlist[i] is 'SWWMCollectable' )
+				if ( invlist[i] is 'SWWMCollectible' )
 					str.AppendFormat(" \cj(\cg¥\cf%d\cj)\c-",invlist[i].default.Stamina);
-				Screen.DrawText(fnt,(invlist[i] is 'SWWMCollectable')?Font.CR_PURPLE:Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				Screen.DrawText(fnt,(invlist[i] is 'SWWMCollectible')?Font.CR_PURPLE:Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
 				{
@@ -2882,11 +2907,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
-		}
-		else if ( curtab == TAB_RADIO )
-		{
-			str = StringTable.Localize("$SWWM_COMINGSOON");
-			Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 		else if ( curtab == TAB_GAME )
 		{

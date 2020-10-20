@@ -1,4 +1,4 @@
-## List of achievements to be implemented in 0.9.13b
+## List of achievements to be implemented in 0.9.12b
 
 ### Base achievements:
 
@@ -37,9 +37,11 @@
 - **Premium Detective**: Obtain 100% secrets in 30 maps.
 - **Return to Sender**: Kill 50 enemies with parried projectiles.
 - **RIP Headphone Users**: Fire 25 Saltshot rounds simultaneously at close range.
+- **Robutts Die Twice**: Do exactly that.
 - **Salutations**: Greet another player.
 - **Sayonara, Scumbag**: Wave at a dying enemy 20 times.
 - **Shameful Display**: Load SWWM GZ and H-Doom together.
+- **Shaped Like A Friend**: Befriend 50 Cacodemons with headpats.
 - **Sharing Is Caring**: Share items in multiplayer 50 times.
 - **Shockmaster**: Perform 50 Biospark combos.
 - **Slam Your Balls**: Land 100 Lead Ball crits.
@@ -62,7 +64,7 @@
 ### DLC Weaponset achievements:
 
 - **HAHA DAB**: Gib 100 enemies with the Itamex Hammer.
-- **High Noon**: Kill 6 enemies in a single Puntzer Beta reload.
+- **High Noon**: Land 6 killing shots in a single Puntzer Beta reload.
 - **Dakka**: Fire the Sheen HMG for 1 minute straight.
 - **Gravely Roast**: Perform 30 bayonet combos with the Quadravol.
 - **And The Dragons Were No More**: Kill the Death Wyvern using the Rail Carbine.

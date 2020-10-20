@@ -3,4 +3,22 @@
 
 Class ItamexHammer : SWWMWeapon
 {
+	Default
+	{
+		Tag "$T_HAMMER";
+		Inventory.PickupMessage "$I_HAMMER";
+		Obituary "$O_HAMMER";
+		Inventory.Icon "graphics/HUD/Icons/W_ItamexHammer.png";
+		Weapon.SlotNumber 1;
+		Weapon.SlotPriority 3.;
+		Weapon.SelectionOrder 1200;
+		Stamina 9000;
+		+WEAPON.MELEEWEAPON;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

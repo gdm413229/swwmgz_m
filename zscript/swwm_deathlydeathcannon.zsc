@@ -367,7 +367,7 @@ Class YnykronImpact : Actor
 				{
 					// poof away manually
 					tracer.bINVISIBLE = true;
-					tracer.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+					tracer.A_ChangeLinkFlags(true);		// remove from blockmap, should guarantee archviles not raising this
 					IDontFeelSoGood.DeletThis(tracer);	// ensures corpse is deleted too
 				}
 			}
@@ -2050,7 +2050,7 @@ Class YnykronSingularityExplosion : Actor
 		if ( !Random[ExploS](0,5) )
 			A_StartSound("ynykron/impact",CHAN_VOICE);
 		SWWMUtility.DoExplosion(self,10000,5000,400,200);
-		A_SprayDecal("WumboScorch",-172);
+		A_SprayDecal("WumboRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -2735,6 +2735,7 @@ Class Ynykron : SWWMWeapon
 	}
 	override void HudTick()
 	{
+		Super.HudTick();
 		if ( !ChargeInter ) ChargeInter = DynamicValueInterpolator.Create(int(chargelevel*10),.5,1,400);
 		ChargeInter.Update(int(chargelevel*10));
 	}
@@ -2757,10 +2758,15 @@ Class Ynykron : SWWMWeapon
 		Super.Travelled();
 		if ( Owner.player && (Owner.player.Readyweapon == self) )
 		{
-			Owner.A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOPING,.3,4.);
+			Owner.A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
 			if ( chargestate > CS_IDLE )
-				Owner.A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOPING,(.025*chargelevel)**3.,2.);
+				Owner.A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,(.025*chargelevel)**3.,2.);
 		}
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (15.,4.,-1.);
 	}
 
 	action void A_YnykronFire()
@@ -2793,7 +2799,7 @@ Class Ynykron : SWWMWeapon
 		invoker.clipcount = 0;
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*15+y*4);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*15+y*4-z);
 		Actor s;
 		if ( invoker.inverted ) s = Spawn("YnykronAltShot",origin);
 		else s = Spawn("YnykronShot",origin);
@@ -2808,7 +2814,7 @@ Class Ynykron : SWWMWeapon
 	{
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*15+y*4);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*15+y*4-z);
 		int numpt = Random[Ynykron](10,20);
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -2876,6 +2882,8 @@ Class Ynykron : SWWMWeapon
 		Ynykron.ClipCount 1;
 		+WEAPON.BFG;
 		+WEAPON.EXPLOSIVE;
+		Radius 32;
+		Height 36;
 	}
 	States
 	{
@@ -2886,9 +2894,9 @@ Class Ynykron : SWWMWeapon
 		XZW2 L 2
 		{
 			invoker.ventcooldown = Random[Ynykron](6,15);
-			A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOPING,.3,4.);
+			A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
 			if ( invoker.chargelevel > 0. )
-				A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOPING,(.025*invoker.chargelevel)**3.,2.);
+				A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,(.025*invoker.chargelevel)**3.,2.);
 			A_FullRaise();
 		}
 		XZW2 MNOPQRSTUVWXYZ 2;
@@ -3066,7 +3074,7 @@ Class Ynykron : SWWMWeapon
 		XZWA T 2
 		{
 			invoker.ventfade = .3;
-			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOPING);
+			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOP);
 		}
 		XZWA UVWXY 2;
 		XZWA Z 2 A_JumpIf(invoker.chargestate==CS_IDLE,1);
@@ -3091,7 +3099,7 @@ Class Ynykron : SWWMWeapon
 		{
 			invoker.chargestate = CS_CHARGING;
 			invoker.ventcooldown = Random[Ynykron](6,15);
-			A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOPING,.01,2.);
+			A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,.01,2.);
 		}
 		Goto Ready;
 	Reload:

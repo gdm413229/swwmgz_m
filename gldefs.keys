@@ -1,0 +1,198 @@
+HardwareShader Texture "models/DoomRedKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/redmap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomYellowKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/goldmap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomBlueKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/blumap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomGreenKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/greenmap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomOrangeKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/goldmap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomBlackKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/leadmap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomWhiteKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/silvermap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+HardwareShader Texture "models/DoomSilverKey.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomKey_mask.png"
+	Texture "envtex" "models/silvermap.png"
+	Texture "brighttex" "models/DoomKey_bright.png"
+}
+Brightmap Texture "models/DoomKeyLight.png"
+{
+	Map "brightmaps/Fullbright.png"
+}
+
+HardwareShader Texture "models/DoomRedSkull.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomSkull_mask.png"
+	Texture "envtex" "models/redmap.png"
+	Texture "brighttex" "models/DoomSkull_bright.png"
+}
+HardwareShader Texture "models/DoomBlueSkull.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomSkull_mask.png"
+	Texture "envtex" "models/blumap.png"
+	Texture "brighttex" "models/DoomSkull_bright.png"
+}
+HardwareShader Texture "models/DoomYellowSkull.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/DoomSkull_mask.png"
+	Texture "envtex" "models/goldmap.png"
+	Texture "brighttex" "models/DoomSkull_bright.png"
+}
+
+pointlight SWWMREDKEY
+{
+	color 1.0 0.0 0.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMYELLOWKEY
+{
+	color 1.0 1.0 0.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMBLUEKEY
+{
+	color 0.0 0.0 1.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMGREENKEY
+{
+	color 0.0 1.0 0.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMSILVERKEY
+{
+	color 0.8 0.9 1.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMORANGEKEY
+{
+	color 1.0 0.6 0.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMCARDLITE
+{
+	color 0.5 0.5 0.0
+	size 20
+	attenuate 1
+	offset 0 16 0
+}
+
+object SWWMRedCard
+{
+    frame XZW1 { light SWWMREDKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMYellowCard
+{
+    frame XZW1 { light SWWMYELLOWKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMBlueCard
+{
+    frame XZW1 { light SWWMBLUEKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMGreenCard
+{
+    frame XZW1 { light SWWMGREENKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMSilverCardKDiZD
+{
+    frame XZW1 { light SWWMSILVERKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMGreenCardKDiZD
+{
+    frame XZW1 { light SWWMGREENKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+object SWWMOrangeCardKDiZD
+{
+    frame XZW1 { light SWWMORANGEKEY }
+    frame XZW1B { light SWWMCARDLITE }
+}
+
+object SWWMRedSkull
+{
+    frame XZW1 { light SWWMREDKEY }
+}
+object SWWMBlueSkull
+{
+    frame XZW1 { light SWWMREDKEY }
+}
+object SWWMYellowSkull
+{
+    frame XZW1 { light SWWMREDKEY }
+}
+
+object SWWMKeyGreen
+{
+    frame XZW1 { light SWWMGREENKEY }
+}
+object SWWMKeyBlue
+{
+    frame XZW1 { light SWWMBLUEKEY }
+}
+object SWWMKeyYellow
+{
+    frame XZW1 { light SWWMYELLOWKEY }
+}
+object SWWMKeyRed
+{
+    frame XZW1 { light SWWMREDKEY }
+}

@@ -546,7 +546,7 @@ Class CandyGunProj : Actor
 		A_QuakeEx(9,9,9,70,0,1500+100*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1200,rollintensity:2.);
 		A_StartSound("candygun/gunhit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/gunhit",CHAN_WEAPON,attenuation:.12);
-		A_SprayDecal("WumboScorch",172);
+		A_SprayDecal("WumboRocketBlast",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -662,7 +662,7 @@ Class CandyMagProj : Actor
 		A_QuakeEx(9,9,9,30,0,500+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:2.);
 		A_StartSound("candygun/maghit",CHAN_VOICE,attenuation:.24);
 		A_StartSound("candygun/maghit",CHAN_WEAPON,attenuation:.12);
-		A_SprayDecal("HugeScorch",172);
+		A_SprayDecal("HugeRocketBlast",172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -757,7 +757,7 @@ Class CandyBulletImpact : Actor
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);
-		A_SprayDecal("BigScorch",-172);
+		A_SprayDecal("BigRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -953,6 +953,11 @@ Class CandyGun : SWWMWeapon
 		}
 		else Screen.DrawText(TewiFont,Font.CR_FIRE,bx-cx,by-18,String.Format("%d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-37,by-40,String.Format("%d",Ammo2.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,3,-2.);
 	}
 
 	action void A_Schutt()
@@ -1160,6 +1165,8 @@ Class CandyGun : SWWMWeapon
 		+SWWMWEAPON.NOFIRSTGIVE;
 		+WEAPON.EXPLOSIVE;
 		+WEAPON.BFG;
+		Radius 12;
+		Height 24;
 	}
 	States
 	{

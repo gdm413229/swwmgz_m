@@ -89,7 +89,7 @@ decal SaltMark
 	animator GoAway2
 }
 
-decal ShockMarkSmall
+decal ShockMarkSmall1
 {
 	pic shockmrk
 	shade "00 00 00"
@@ -98,7 +98,52 @@ decal ShockMarkSmall
 	x-scale 0.3
 	y-scale 0.3
 }
-decal ShockMark
+decal ShockMarkSmall2
+{
+	pic shockmk2
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.3
+	y-scale 0.3
+}
+decal ShockMarkSmall3
+{
+	pic shockmk3
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.3
+	y-scale 0.3
+}
+decal ShockMarkSmall4
+{
+	pic shockmk4
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.3
+	y-scale 0.3
+}
+decal ShockMarkSmall5
+{
+	pic shockmk5
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.3
+	y-scale 0.3
+}
+decalgroup ShockMarkSmall
+{
+	ShockMarkSmall1	1
+	ShockMarkSmall2	1
+	ShockMarkSmall3	1
+	ShockMarkSmall4	1
+	ShockMarkSmall5	1
+}
+
+decal ShockMark1
 {
 	pic shockmrk
 	shade "00 00 00"
@@ -107,7 +152,52 @@ decal ShockMark
 	x-scale 0.6
 	y-scale 0.6
 }
-decal ShockMarkBig
+decal ShockMark2
+{
+	pic shockmk2
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.6
+	y-scale 0.6
+}
+decal ShockMark3
+{
+	pic shockmk3
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.6
+	y-scale 0.6
+}
+decal ShockMark4
+{
+	pic shockmk4
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.6
+	y-scale 0.6
+}
+decal ShockMark5
+{
+	pic shockmk5
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 0.6
+	y-scale 0.6
+}
+decalgroup ShockMark
+{
+	ShockMark1	1
+	ShockMark2	1
+	ShockMark3	1
+	ShockMark4	1
+	ShockMark5	1
+}
+
+decal ShockMarkBig1
 {
 	pic shockmrk
 	shade "00 00 00"
@@ -115,6 +205,50 @@ decal ShockMarkBig
 	randomflipy
 	x-scale 1.5
 	y-scale 1.5
+}
+decal ShockMarkBig2
+{
+	pic shockmk2
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 1.5
+	y-scale 1.5
+}
+decal ShockMarkBig3
+{
+	pic shockmk3
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 1.5
+	y-scale 1.5
+}
+decal ShockMarkBig4
+{
+	pic shockmk4
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 1.5
+	y-scale 1.5
+}
+decal ShockMarkBig5
+{
+	pic shockmk5
+	shade "00 00 00"
+	randomflipx
+	randomflipy
+	x-scale 1.5
+	y-scale 1.5
+}
+decalgroup ShockMarkBig
+{
+	ShockMarkBig1	1
+	ShockMarkBig2	1
+	ShockMarkBig3	1
+	ShockMarkBig4	1
+	ShockMarkBig5	1
 }
 
 decal BigBlast
@@ -147,7 +281,13 @@ decal RipBlast
 	y-scale 0.45
 }
 
-decal YnykronBlast
+fader SlowBurn
+{
+	DecayStart 0.5
+	DecayTime 5.0
+}
+
+decal YnykronBlast2
 {
 	pic mcblast
 	translucent 0.9
@@ -157,20 +297,49 @@ decal YnykronBlast
 	randomflipx
 	randomflipy
 }
-
-decal HugeScorch
+decal YnykronBlast
 {
-	pic SCORCH1
+	pic mcglow
+	add 0.8
+	x-scale 0.6
+	y-scale 0.6
+	randomflipx
+	randomflipy
+	fullbright
+	animator SlowBurn
+	lowerdecal YnykronBlast2
+}
+
+decal RocketBlast
+{
+	pic rktblast
+	shade "00 00 00"
+	x-scale 0.4
+	y-scale 0.4
+	randomflipx
+	randomflipy
+}
+decal BigRocketBlast
+{
+	pic rktblast
+	shade "00 00 00"
+	x-scale 0.8
+	y-scale 0.8
+	randomflipx
+	randomflipy
+}
+decal HugeRocketBlast
+{
+	pic rktblast
 	shade "00 00 00"
 	x-scale 1.25
 	y-scale 1.25
 	randomflipx
 	randomflipy
 }
-
-decal WumboScorch
+decal WumboRocketBlast
 {
-	pic SCORCH1
+	pic rktblast
 	shade "00 00 00"
 	x-scale 1.75
 	y-scale 1.75
@@ -178,130 +347,194 @@ decal WumboScorch
 	randomflipy
 }
 
-decal TinyBulletChip1
+decal Pock0
 {
-	pic CHIP1
+	pic pock0
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 0.22
-	y-scale 0.22
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
 }
-
-decal TinyBulletChip2
+decal Pock1
 {
-	pic CHIP2
+	pic pock1
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 0.22
-	y-scale 0.22
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
 }
-
-decal TinyBulletChip3
+decal Pock2
 {
-	pic CHIP3
+	pic pock2
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 0.22
-	y-scale 0.22
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
 }
-
-decal TinyBulletChip4
+decal Pock3
 {
-	pic CHIP4
+	pic pock3
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 0.22
-	y-scale 0.22
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
 }
-
-decal TinyBulletChip5
+decal Pock4
 {
-	pic CHIP5
+	pic pock4
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 0.22
-	y-scale 0.22
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
 }
-
-decalgroup TinyBulletChip
+decal Pock5
 {
-	TinyBulletChip1	1
-	TinyBulletChip2	1
-	TinyBulletChip3	1
-	TinyBulletChip4	1
-	TinyBulletChip5	1
-}
-
-decal BigBulletChip1
-{
-	pic CHIP1
+	pic pock5
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 1.0
-	y-scale 1.0
+	x-scale 0.12
+	y-scale 0.12
 	randomflipx
-	randomflipy
+}
+decalgroup Pock
+{
+	Pock0	1
+	Pock1	1
+	Pock2	1
+	Pock3	1
+	Pock4	1
+	Pock5	1
 }
 
-decal BigBulletChip2
+decal TinyPock0
 {
-	pic CHIP2
+	pic pock0
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 1.0
-	y-scale 1.0
+	x-scale 0.05
+	y-scale 0.05
 	randomflipx
-	randomflipy
 }
-
-decal BigBulletChip3
+decal TinyPock1
 {
-	pic CHIP3
+	pic pock1
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 1.0
-	y-scale 1.0
+	x-scale 0.05
+	y-scale 0.05
 	randomflipx
-	randomflipy
 }
-
-decal BigBulletChip4
+decal TinyPock2
 {
-	pic CHIP4
+	pic pock2
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 1.0
-	y-scale 1.0
+	x-scale 0.05
+	y-scale 0.05
 	randomflipx
-	randomflipy
 }
-
-decal BigBulletChip5
+decal TinyPock3
 {
-	pic CHIP5
+	pic pock3
 	translucent 0.85
 	shade "00 00 00"
-	x-scale 1.0
-	y-scale 1.0
+	x-scale 0.05
+	y-scale 0.05
 	randomflipx
-	randomflipy
+}
+decal TinyPock4
+{
+	pic pock4
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.05
+	y-scale 0.05
+	randomflipx
+}
+decal TinyPock5
+{
+	pic pock5
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.05
+	y-scale 0.05
+	randomflipx
+}
+decalgroup TinyPock
+{
+	TinyPock0	1
+	TinyPock1	1
+	TinyPock2	1
+	TinyPock3	1
+	TinyPock4	1
+	TinyPock5	1
 }
 
-decalgroup BigBulletChip
+decal BigPock0
 {
-	BigBulletChip1	1
-	BigBulletChip2	1
-	BigBulletChip3	1
-	BigBulletChip4	1
-	BigBulletChip5	1
+	pic pock0
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decal BigPock1
+{
+	pic pock1
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decal BigPock2
+{
+	pic pock2
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decal BigPock3
+{
+	pic pock3
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decal BigPock4
+{
+	pic pock4
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decal BigPock5
+{
+	pic pock5
+	translucent 0.85
+	shade "00 00 00"
+	x-scale 0.25
+	y-scale 0.25
+	randomflipx
+}
+decalgroup BigPock
+{
+	BigPock0	1
+	BigPock1	1
+	BigPock2	1
+	BigPock3	1
+	BigPock4	1
+	BigPock5	1
 }

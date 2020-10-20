@@ -86,29 +86,3 @@ HardwareShader PostProcess scene
 	Uniform float ni
 	Texture NoiseTexture "textures/rgbnoise.png"
 }
-
-HardwareShader PostProcess screen
-{
-	Name "ObPass0"
-	Shader "shaders/glsl/ObeliskPass0.fp" 330
-	Uniform float Timer
-}
-HardwareShader PostProcess screen
-{
-	Name "ObPass1"
-	Shader "shaders/glsl/ObeliskPass1.fp" 330
-	Uniform float Timer
-	Texture NoiseTexture "textures/rgbnoise.png"
-}
-HardwareShader PostProcess screen
-{
-	Name "ObPass2"
-	Shader "shaders/glsl/ObeliskPass2.fp" 330
-	Uniform float Timer
-}
-HardwareShader PostProcess screen
-{
-	Name "ObPass3"
-	Shader "shaders/glsl/ObeliskPass3.fp" 330
-	Uniform float Timer
-}

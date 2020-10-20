@@ -23,7 +23,7 @@ OptionMenu "SWWMOptionMenu"
 	Class "SWWMOptionMenu"
 	Title "$SWWM_MTITLE"
 
-	StaticText "$SWWM_PTITLE", "Gold"
+	StaticText "$SWWM_PTITLE", "Blue"
 	SWWMVoiceOption "$SWWM_VOICETYPE", "swwm_voicetype"
 	Option "$SWWM_MUTELEVEL", "swwm_mutevoice", "SWWMVoice"
 	Option "$SWWM_6DOF", "swwm_fly6dof", "YesNo"
@@ -31,7 +31,9 @@ OptionMenu "SWWMOptionMenu"
 	ScaleSlider "$SWWM_REVIVECOOLDOWN", "swwm_revivecooldown", 0, 300, 30, "$SWWM_UNLIMITED"
 	Option "$SWWM_MENUPAUSE", "swwm_menupause", "YesNo"
 	StaticText " "
-	StaticText "$SWWM_OTITLE", "Gold"
+	StaticText "$SWWM_OTITLE", "Blue"
+	Option "$SWWM_PHAIR", "swwm_phair", "YesNo"
+	Option "$SWWM_SHADOWS", "swwm_shadows", "YesNo"
 	Option "$SWWM_BLOOD", "swwm_blood", "YesNo"
 	ScaleSlider "$SWWM_MAXBLOOD", "swwm_maxblood", -1, 1000, 1, "$SWWM_NONE", "$SWWM_UNLIMITED"
 	ScaleSlider "$SWWM_MAXGIBS", "swwm_maxgibs", -1, 1000, 1, "$SWWM_NONE", "$SWWM_UNLIMITED"
@@ -69,13 +71,13 @@ OptionMenu "SWWMOptionMenu"
 	Option "$SWWM_INTERMUSIC", "swwm_intermusic", "YesNo"
 	Option "$SWWM_FUZZ", "swwm_fuzz", "YesNo"
 	StaticText " "
-	StaticText "$SWWM_FTITLE", "Gold"
+	StaticText "$SWWM_FTITLE", "Blue"
 	Option "$SWWM_FUNTAGS", "swwm_funtags", "YesNo"
 	Option "$SWWM_OMNIBUST", "swwm_omnibust", "YesNo"
 	Option "$SWWM_SUPERFUEL", "swwm_superfuel", "YesNo"
 	Option "$SWWM_PARTYTIME", "swwm_partytime", "YesNo"
 	StaticText " "
-	StaticText "$SWWM_BTITLE", "Gold"
+	StaticText "$SWWM_BTITLE", "Blue"
 	Option "$SWWM_ENEMYDROPS", "swwm_enemydrops", "SWWMEnemyDropType"
 	Option "$SWWM_RESETSCORE", "swwm_resetscore", "YesNo"
 	Option "$SWWM_EXTRAALERT", "swwm_extraalert", "YesNo"
@@ -89,15 +91,15 @@ OptionMenu "SWWMOptionMenu"
 	Option "$SWWM_SIMPLEFOG", "swwm_simplefog", "YesNo"
 	Option "$SWWM_SHOTGIB", "swwm_shotgib", "YesNo"
 	StaticText " "
-	StaticText "$SWWM_ITITLE", "Gold"
+	StaticText "$SWWM_ITITLE", "Blue"
 	Option "$SWWM_ARMORUSE", "swwm_autousearmor", "YesNo"
 	Option "$SWWM_HEALTHUSE", "swwm_autousehealth", "YesNo"
 	Option "$SWWM_AMMOUSE", "swwm_autouseammo", "YesNo"
 	Option "$SWWM_EARBUSTER", "swwm_earbuster", "YesNo"
 	Option "$SWWM_BUSTERPAUSE", "swwm_cbtpause", "YesNo"
-	Option "$SWWM_NOSCARE", "swwm_noscare", "YesNo"
+	Option "$SWWM_COLLECTANIM", "swwm_collectanim", "YesNo"
 	StaticText " "
-	StaticText "$SWWM_CTITLE", "Gold"
+	StaticText "$SWWM_CTITLE", "Blue"
 	Option "$SWWM_SKEYS", "swwm_sharekeys", "YesNo"
 	Option "$SWWM_SVARMORUSE", "swwm_enforceautousearmor", "SWWMEnforce"
 	Option "$SWWM_SVHEALTHUSE", "swwm_enforceautousehealth", "SWWMEnforce"
@@ -108,123 +110,122 @@ OptionMenu "SWWMCreditsMenu"
 {
 	Title "$SWWM_MCREDS"
 
-	StaticText "$SWWM_CLEAD", "Red"
+	StaticText "$SWWM_CLEAD", "Blue"
 	StaticText " "
-	StaticText "Marisa Kirisame", "Gold"
+	StaticText "Marisa Kirisame", "Sapphire"
 	StaticText " "
-	StaticText "$SWWM_CASSETS", "Red"
+	StaticText "$SWWM_CASSETS", "Blue"
 	StaticText " "
-	StaticText "Bethesda Game Studios", "Gold"
+	StaticText "Bethesda Game Studios", "Sapphire"
 	StaticText "Fallout: New Vegas", "White"
 	StaticText "Fallout 4", "White"
 	StaticText " "
-	StaticText "Epic Games", "Gold"
+	StaticText "Epic Games", "Sapphire"
 	StaticText "Unreal", "White"
 	StaticText "Unreal Tournament", "White"
 	StaticText "Unreal Tournament 2004", "White"
 	StaticText "Unreal Tournament 3", "White"
 	StaticText " "
-	StaticText "Ion Storm", "Gold"
+	StaticText "Ion Storm", "Sapphire"
 	StaticText "Deus Ex", "White"
 	StaticText " "
-	StaticText "Looking Glass Studios", "Gold"
+	StaticText "Looking Glass Studios", "Sapphire"
 	StaticText "Thief", "White"
 	StaticText "System Shock 2", "White"
 	StaticText " "
-	StaticText "People Can Fly", "Gold"
+	StaticText "People Can Fly", "Sapphire"
 	StaticText "Painkiller", "White"
 	StaticText " "
-	StaticText "Tripwire Interactive", "Gold"
+	StaticText "Tripwire Interactive", "Sapphire"
 	StaticText "Killing Floor", "White"
 	StaticText " "
-	StaticText "From Software", "Gold"
+	StaticText "From Software", "Sapphire"
 	StaticText "Dark Souls", "White"
 	StaticText "Dark Souls II", "White"
 	StaticText "Dark Souls III", "White"
 	StaticText " "
-	StaticText "Amuscaria", "Gold"
+	StaticText "Amuscaria", "Sapphire"
 	StaticText "$SWWM_ASSBARONS", "White"
 	StaticText " "
-	StaticText "Ryan Cordell", "Gold"
+	StaticText "Ryan Cordell", "Sapphire"
 	StaticText "$SWWM_ASSOTHERS", "White"
 	StaticText " "
-	StaticText "SiFi270", "Gold"
+	StaticText "SiFi270", "Sapphire"
 	StaticText "$SWWM_ASSKEEN", "White"
 	StaticText " "
-	StaticText "$SWWM_CMUSIC", "Red"
+	StaticText "$SWWM_CMUSIC", "Blue"
 	StaticText " "
-	StaticText "Teque", "Gold"
+	StaticText "Teque", "Sapphire"
 	StaticText "Traumatic State", "White"
 	StaticText "Dragony", "White"
 	StaticText "Hidden Tune #242", "White"
 	StaticText " "
-	StaticText "$SWWM_CFANART", "Red"
+	StaticText "$SWWM_CFANART", "Blue"
 	StaticText " "
-	StaticText "Substance20 (@S20TBL)", "Gold"
-	StaticText "Captain J (@Jho7835)", "Gold"
-	StaticText "Redead-ITA", "Gold"
-	StaticText "Sgt. Shivers (@Sgt_Shivers_)", "Gold"
-	StaticText "Moa Dixøn / Endie (@MoaDixon)", "Gold"
+	StaticText "Substance20 (@S20TBL)", "Sapphire"
+	StaticText "Captain J (@Jho7835)", "Sapphire"
+	StaticText "Redead-ITA", "Sapphire"
+	StaticText "Sgt. Shivers (@Sgt_Shivers_)", "Sapphire"
+	StaticText "Moa Dixøn / Endie (@MoaDixon)", "Sapphire"
 	StaticText " "
-	StaticText "$SWWM_CLOCAL", "Red"
+	StaticText "$SWWM_CLOCAL", "Blue"
 	StaticText " "
-	StaticText "$SWWM_LRUS", "Gold"
+	StaticText "$SWWM_LRUS", "Sapphire"
 	StaticText "Blueberry", "White"
 	StaticText " "
-	StaticText "$SWWM_CPATRON", "Red"
+	StaticText "$SWWM_CPATRON", "Blue"
 	StaticText " "
-	StaticText "Snacks", "Gold"
-	StaticText "john", "Gold"
-	StaticText "Alexa Jones-Gonzales", "Gold"
-	StaticText "Jonas Höglund", "Gold"
-	StaticText "Lilian Lamp", "Gold"
-	StaticText "Valerie Thiessen", "Gold"
-	StaticText "Corey Hectus", "Gold"
-	StaticText "Dac", "Gold"
-	StaticText "Pietro Gagliardi", "Gold"
-	StaticText "Xada Xephron", "Gold"
-	StaticText "Zard1084", "Gold"
-	StaticText "NekoMithos", "Gold"
-	StaticText "m8f", "Gold"
-	StaticText "3d0xp0xy", "Gold"
+	StaticText "Snacks", "Sapphire"
+	StaticText "john", "Sapphire"
+	StaticText "Alexa Jones-Gonzales", "Sapphire"
+	StaticText "Jonas Höglund", "Sapphire"
+	StaticText "Lilian Lamp", "Sapphire"
+	StaticText "Valerie Thiessen", "Sapphire"
+	StaticText "Corey Hectus", "Sapphire"
+	StaticText "Dac", "Sapphire"
+	StaticText "Pietro Gagliardi", "Sapphire"
+	StaticText "Xada Xephron", "Sapphire"
+	StaticText "Zard1084", "Sapphire"
+	StaticText "NekoMithos", "Sapphire"
+	StaticText "m8f", "Sapphire"
+	StaticText "3d0xp0xy", "Sapphire"
 	StaticText " "
-	StaticText "$SWWM_CTHANK", "Red"
+	StaticText "$SWWM_CTHANK", "Blue"
 	StaticText " "
 	StaticText "Marrub, Ribonucleic Asshat", "Heliotrope"
 	StaticText "(愛してる ♥)", "BlushPink"
 	StaticText " "
-	StaticText "KynikossDragonn", "Gold"
+	StaticText "KynikossDragonn", "Sapphire"
 	StaticText "$SWWM_CDRAGON2", "White"
 	StaticText " "
-	StaticText "Lucy", "Gold"
+	StaticText "Lucy", "Sapphire"
 	StaticText "$SWWM_CLUCY2", "White"
 	StaticText " "
-	StaticText "KeksDose", "Gold"
+	StaticText "KeksDose", "Sapphire"
 	StaticText "$SWWM_CKEKS2", "White"
 	StaticText " "
-	StaticText "ZZYZX, Nash", "Gold"
+	StaticText "ZZYZX, Nash", "Sapphire"
 	StaticText "$SWWM_CZN2", "White"
 	StaticText " "
-	StaticText "Valerie Lavender", "Gold"
+	StaticText "Valerie Lavender", "Sapphire"
 	StaticText "$SWWM_CVAL2", "White"
 	StaticText " "
-	StaticText "CptSledge", "Gold"
+	StaticText "CptSledge", "Sapphire"
 	StaticText "$SWWM_CSLEDGE2", "White"
 	StaticText "$SWWM_CSLEDGE3", "White"
 	StaticText " "
-	StaticText "a1337spy", "Gold"
+	StaticText "a1337spy", "Sapphire"
 	StaticText "$SWWM_CSPY2", "White"
 	StaticText " "
-	StaticText "$SWWM_CINSP1", "Gold"
+	StaticText "$SWWM_CINSP1", "Sapphire"
 	StaticText "$SWWM_CINSP2", "White"
 	StaticText " "
-	StaticText "$SWWM_CCOMMUNITY1", "Gold"
+	StaticText "$SWWM_CCOMMUNITY1", "Sapphire"
 	StaticText "$SWWM_CCOMMUNITY2", "White"
 	StaticText "$SWWM_CCOMMUNITY3", "White"
 	StaticText " "
-	StaticText "$SWWM_CDEVS1", "Gold"
+	StaticText "$SWWM_CDEVS1", "Sapphire"
 	StaticText "$SWWM_CDEVS2", "White"
-
 }
 AddOptionMenu "OptionsMenu"
 {
@@ -235,89 +236,28 @@ AddOptionMenu "OptionsMenu"
 ListMenu "MainMenu"
 {
 	Class "SWWMMainMenu"
-	IfGame(Doom, Chex)
-	{
-		LineSpacing 16
-		StaticPatch 94, 2, "M_DOOM"
-		Position 97, 72
-		IfOption(ReadThis)
-		{
-			Position 97, 64
-		}
-	}
-	IfGame(Strife)
-	{
-		StaticPatch 84, 2, "M_STRIFE"
-		Position 97, 45
-	}
-	IfGame(Heretic)
-	{
-		StaticPatch 88, 0, "M_HTIC"
-		StaticPatch 40, 10, "M_SKL01"
-		StaticPatch 232, 10, "M_SKL00"
-		Position 110, 56
-	}
-	IfGame(Hexen)
-	{
-		StaticPatch 88, 0, "M_HTIC"
-		StaticPatch 37, 80, "FBULB0"
-		StaticPatch 278, 80, "FBULA0"
-		Position 110, 56
-	}
-	IfGame(Doom, Strife, Chex)
-	{
-		PatchItem "M_NGAME", "n", "PlayerclassMenu"
-		ifOption(SwapMenu)
-		{
-			PatchItem "M_LOADG", "l", "LoadGameMenu", 0
-			PatchItem "M_SAVEG", "s", "SaveGameMenu",0
-			PatchItem "M_OPTION","o", "OptionsMenu", 0
-		}
-		else
-		{
-			PatchItem "M_OPTION","o", "OptionsMenu", 0
-			PatchItem "M_LOADG", "l", "LoadGameMenu", 0
-			PatchItem "M_SAVEG", "s", "SaveGameMenu", 0
-		}
-		ifOption(ReadThis)
-		{
-			PatchItem "M_RDTHIS","r", "ReadThisMenu", 0
-		}
-		PatchItem "M_QUITG", "q", "QuitMenu", 0
-	}
-	IfGame(Heretic, Hexen)
-	{
-		TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
-		TextItem "$MNU_OPTIONS", "o", "OptionsMenu"
-		TextItem "$MNU_GAMEFILES", "g", "GameFilesMenu"
-		TextItem "$MNU_INFO", "i", "ReadThisMenu"
-		TextItem "$MNU_QUITGAME", "q", "QuitMenu"
-	}
+	Font "SWWMBigFont", "Untranslated"
+	Selector "graphics/DemoIcon.png", -24, 10
+	LineSpacing 28
+	SWWMLogo "M_SWWM"
+	Position 0, 56
+	SWWMTextItemM "$MNU_NEWGAME", "n", "PlayerclassMenu"
+	SWWMTextItemM "$MNU_OPTIONS", "o", "OptionsMenu"
+	SWWMTextItemM "$MNU_LOADGAME", "l", "LoadGameMenu"
+	SWWMTextItemM "$MNU_SAVEGAME", "s", "SaveGameMenu"
+	SWWMTextItemM "$MNU_QUITGAME", "q", "QuitMenu"
 }
 ListMenu "MainMenuTextOnly"
 {
 	Class "SWWMMainMenu"
-	IfGame(Doom, Chex)
-	{
-		StaticPatch 94, 2, "M_DOOM"
-		Position 97, 72
-		IfOption(ReadThis)
-		{
-			Position 97, 64
-		}
-	}
-	IfGame(Strife)
-	{
-		StaticPatch 84, 2, "M_STRIFE"
-		Position 97, 45
-	}
+	Font "SWWMBigFont", "Untranslated"
+	Selector "graphics/DemoIcon.png", -24, 10
+	LineSpacing 28
+	SWWMLogo "M_SWWM"
+	Position 0, 56
 	TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
 	TextItem "$MNU_OPTIONS", "o", "OptionsMenu"
 	TextItem "$MNU_LOADGAME", "l", "LoadGameMenu"
 	TextItem "$MNU_SAVEGAME", "s", "SaveGameMenu"
-	IfOption(ReadThis)
-	{
-		TextItem "$MNU_INFO", "i", "ReadThisMenu"
-	}
 	TextItem "$MNU_QUITGAME", "q", "QuitMenu"
 }

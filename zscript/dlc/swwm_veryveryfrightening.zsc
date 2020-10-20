@@ -3,4 +3,34 @@
 
 Class EMPCarbine : SWWMWeapon
 {
+	int clipcount;
+	bool chambered;
+	bool initialized;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		Tag "$T_EMPCARBINE";
+		Inventory.PickupMessage "$I_EMPCARBINE";
+		Obituary "$O_EMPCARBINE";
+		Inventory.Icon "graphics/HUD/Icons/W_EMPCarbine.png";
+		Weapon.SlotNumber 8;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 850;
+		Weapon.AmmoType1 "EMPCore";
+		Weapon.AmmoGive1 1;
+		SWWMWeapon.DropAmmoType "EMPCore";
+		EMPCarbine.ClipCount 4;
+		Stamina 500000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.EXPLOSIVE;
+		+WEAPON.ALT_AMMO_OPTIONAL;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
 }

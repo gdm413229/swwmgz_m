@@ -158,7 +158,7 @@ Class SpreadImpact : Actor
 		Super.PostBeginPlay();
 		if ( swwm_extraalert ) A_AlertMonsters(200);
 		A_StartSound("spreadgun/pellet",CHAN_VOICE,CHANF_DEFAULT,.4,4.);
-		A_SprayDecal("TinyBulletChip",-20);
+		A_SprayDecal("TinyPock",-20);
 		int numpt = Random[Spreadgun](2,4)-special1;
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
@@ -205,7 +205,7 @@ Class SlugImpact : Actor
 		Super.PostBeginPlay();
 		if ( swwm_extraalert ) A_AlertMonsters(500);
 		A_StartSound("spreadgun/slug",CHAN_VOICE,CHANF_DEFAULT,1.,2.);
-		A_SprayDecal("BulletChip",-20);
+		A_SprayDecal("Pock",-20);
 		int numpt = Random[Spreadgun](5,10)-special1;
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
@@ -1413,7 +1413,7 @@ Class TheBall : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("pusher/fly",CHAN_WEAPON,CHANF_LOOPING,.6,3.,2.);
+		A_StartSound("pusher/fly",CHAN_WEAPON,CHANF_LOOP,.6,3.,2.);
 		heat = 1.;
 	}
 	override void Tick()
@@ -1594,7 +1594,7 @@ Class GoldenImpact : Actor
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
-		A_SprayDecal("WumboScorch",-172);
+		A_SprayDecal("WumboRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -1730,7 +1730,7 @@ Class GoldenSubImpact : Actor
 		Super.PostBeginPlay();
 		SWWMUtility.DoExplosion(self,777,30000,400,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
-		A_SprayDecal("BigScorch",-172);
+		A_SprayDecal("BigRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -1866,7 +1866,7 @@ Class GoldenSubSubImpact : Actor
 		Super.PostBeginPlay();
 		SWWMUtility.DoExplosion(self,77,20000,200,100,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
-		A_SprayDecal("Scorch",-172);
+		A_SprayDecal("RocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
@@ -2140,6 +2140,11 @@ Class Spreadgun : SWWMWeapon
 			p.pitch = asin(-hitnormal.z);
 			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
 		}
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,2.,-2.);
 	}
 
 	action void A_FireShell()
@@ -2573,6 +2578,8 @@ Class Spreadgun : SWWMWeapon
 		SWWMWeapon.DropAmmoType "Clip";
 		Stamina 15000;
 		+SWWMWEAPON.NOFIRSTGIVE;
+		Radius 10;
+		Height 24;
 	}
 
 	States

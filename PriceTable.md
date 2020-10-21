@@ -87,7 +87,7 @@ Other items that can be bought at any moment. **Omnisights** and **Embiggeners**
   Ragekit            | 500000
   Lämp               | 70000
 
-### Collectables
+### Collectibles
 
 Items that can sometimes be found in special boxes hidden in secret rooms. When collected they give credits according to their price.
 

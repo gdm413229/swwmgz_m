@@ -841,35 +841,20 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawScore()
 	{
-		if ( ScoreInter2.GetValue() > 0 )
+		String sstr;
+		if ( ScoreInter2.GetValue() > 0 ) sstr = String.Format("%d%09d",ScoreInter2.GetValue(),ScoreInter.GetValue());
+		else sstr = String.Format("%09d",ScoreInter.GetValue());
+		int digits = sstr.Length();
+		int xx = 19+6*digits;
+		Screen.DrawTexture(ScoreTex[0],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		xx -= 15;
+		for ( int i=0; i<digits; i++ )
 		{
-			int digits = 9;
-			digits += int(Log10(ScoreInter2.GetValue()))+1;
-			int xx = 19+6*digits;
-			Screen.DrawTexture(ScoreTex[0],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			xx -= 15;
-			for ( int i=0; i<digits; i++ )
-			{
-				Screen.DrawTexture(ScoreTex[1],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				xx -= 6;
-			}
-			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,String.Format("%d",clamp(ScoreInter2.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture(ScoreTex[1],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx -= 6;
 		}
-		else
-		{
-			int xx = 73;
-			Screen.DrawTexture(ScoreTex[0],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			xx -= 15;
-			for ( int i=0; i<9; i++ )
-			{
-				Screen.DrawTexture(ScoreTex[1],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-				xx -= 6;
-			}
-			Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+58),margin+1,String.Format("%09d",clamp(ScoreInter.GetValue(),0,999999999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		}
+		Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,sstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw stats and timer when automap is open
 		int yy = margin+19;
 		if ( automapactive )
@@ -1097,7 +1082,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( CPlayer.PendingWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.PendingWeapon);
 			else if ( CPlayer.ReadyWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.ReadyWeapon);
 			if ( !CPlayer.HasWeaponsInSlot(i%10) ) ncolor = Font.CR_DARKGRAY;
-			else if ( hasgesture && (hasgesture.formerweapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
+			else if ( hasgesture && hasgesture.formerweapon && (hasgesture.formerweapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( (!CPlayer.PendingWeapon || (CPlayer.PendingWeapon == WP_NOCHANGE)) && CPlayer.ReadyWeapon && (CPlayer.ReadyWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else

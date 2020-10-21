@@ -981,7 +981,7 @@ Class SWWMWeapon : Weapon abstract
 	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
 
 	transient CVar phair;		// use custom precise crosshair
-	transient ui CVar ch_img, ch_siz, ch_grow, ch_col, ch_hp, ch_on;
+	transient ui CVar ch_img, ch_siz, ch_grow, ch_col, ch_hp, ch_on, ch_force;
 	ui SWWMCrosshairTracer ctr;
 	ui Vector3 cpos;
 	ui Color ccol;
@@ -1094,6 +1094,8 @@ Class SWWMWeapon : Weapon abstract
 		if ( !phair || !phair.GetBool() ) return;
 		if ( !ch_on ) ch_on = CVar.GetCVar('crosshairon',players[consoleplayer]);
 		if ( !ch_on.GetBool() ) return;
+		if ( !ch_force ) ch_on = CVar.GetCVar('crosshairforce',players[consoleplayer]);
+		if ( ch_force.GetBool() ) return;
 		let sb = SWWMStatusBar(StatusBar);
 		if ( !sb ) return;
 		sb.viewport.FromHud();

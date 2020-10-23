@@ -121,7 +121,7 @@ Class mkBloodDrop : Actor
 	bool dead, onceiling;
 	mkBloodDrop prevblod, nextblod;
 	Sector tracksector;
-	F3DFloor trackffloor;
+	Sector trackffloor;	// can't use F3DFloor, blocks saving
 	int trackplane;
 
 	Default
@@ -155,8 +155,8 @@ Class mkBloodDrop : Actor
 				double trackz;
 				if ( trackffloor )
 				{
-					if ( trackplane ) trackz = trackffloor.bottom.ZAtPoint(pos.xy)-.1;
-					else trackz = trackffloor.top.ZAtPoint(pos.xy);
+					if ( trackplane ) trackz = trackffloor.floorplane.ZAtPoint(pos.xy)-.1;
+					else trackz = trackffloor.ceilingplane.ZAtPoint(pos.xy);
 				}
 				else
 				{
@@ -257,7 +257,7 @@ Class mkBloodDrop : Actor
 							ff = FloorSector.Get3DFloor(i);
 							break;
 						}
-						if ( ff ) trackffloor = ff;
+						if ( ff ) trackffloor = ff.model;
 						frame = Random[Blood](5,8);
 						return;
 					}
@@ -284,7 +284,7 @@ Class mkBloodDrop : Actor
 							ff = CeilingSector.Get3DFloor(i);
 							break;
 						}
-						if ( ff ) trackffloor = ff;
+						if ( ff ) trackffloor = ff.model;
 						frame = Random[Blood](5,8);
 						special1 = Random[Blood](15,25);
 						special2 = 0;

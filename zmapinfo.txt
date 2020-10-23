@@ -31,6 +31,7 @@ GameInfo
 	MessageBoxClass = "SWWMMessageBox"
 	BorderFlat = "graphics/bord_flat.png"
 	Border = 2, 0, "graphics/bord_tr.png", "graphics/bord_t.png", "graphics/bord_tl.png", "graphics/bord_r.png", "graphics/bord_l.png", "graphics/bord_br.png", "graphics/bord_b.png", "graphics/bord_bl.png"
+	ForceTextInMenus = true
 	// precaching of frame-heavy objects
 	PrecacheClasses = "Demolitionist",
 		"DeepImpact",
@@ -48,6 +49,49 @@ GameInfo
 	// precache very long stuff
 	PrecacheSounds = "wallbuster/olddays",
 		"wallbuster/cbt"
+}
+
+ClearSkills
+
+Skill chill
+{
+	AutoUseHealth
+	DamageFactor = 0.5
+	EasyBossBrain
+	SpawnFilter = baby
+	ACSReturn = 0
+	Name = "$SWWM_SKCHILL"
+}
+Skill easy
+{
+	SpawnFilter = easy
+	ACSReturn = 1
+	Name = "$SWWM_SKEASY"
+}
+Skill normal
+{
+	SpawnFilter = normal
+	ACSReturn = 2
+	Name = "$SWWM_SKNORMAL"
+	DefaultSkill
+}
+Skill hard
+{
+	SpawnFilter = hard
+	ACSReturn = 3
+	Name = "$SWWM_SKHARD"
+}
+Skill lunatic
+{
+	FastMonsters
+	DisableCheats
+	Aggressiveness = 1.0
+	MonsterHealth = 2.0
+	DamageFactor = 2.0
+	SpawnFilter = nightmare
+	ACSReturn = 4
+	Name = "$SWWM_SKLUNATIC"
+	MustConfirm = "$SWWM_SKLUNATICCONFIRM"
 }
 
 Map TITLEMAP "SWWM GZ - Title Map"

@@ -1247,13 +1247,6 @@ Class SWWMShadow : Actor
 	}
 	private void Update( bool nointerpolate = false )
 	{
-		double curz = target.CurSector.NextLowestFloorAt(target.pos.x,target.pos.y,target.pos.z);
-		SetOrigin((target.pos.x,target.pos.y,curz),true);
-		if ( nointerpolate )
-			prev = pos;
-		else if ( oldfloor != target.CurSector )
-			prev.z = pos.z;	// prevent interpolation of steep height changes
-		oldfloor = target.CurSector;
 		// update scale / alpha
 		if ( (target is 'Inventory') && (Inventory(target).Owner || !target.bSPECIAL) || target.bKILLED || target.bINVISIBLE || (target.sprite == target.GetSpriteIndex('TNT1')) )
 			alpha = 0.;
@@ -1264,8 +1257,18 @@ Class SWWMShadow : Actor
 			double bscale = (target.radius/16.)*(1.-min(1.,.003*abs(target.pos.z-pos.z)));
 			A_SetScale(bscale);
 		}
+		// update position
+		double curz = target.CurSector.NextLowestFloorAt(target.pos.x,target.pos.y,target.pos.z);
+		if ( (target.pos.xy == pos.xy) && (pos.z == curz) ) return;
+		SetOrigin((target.pos.x,target.pos.y,curz),true);
+		if ( nointerpolate )
+			prev = pos;
+		else if ( oldfloor != target.CurSector )
+			prev.z = pos.z;	// prevent interpolation of steep height changes
 		// update slope alignment
-		SWWMUtility.SetToSlope(self,0);
+		if ( !oldfloor || (oldfloor != target.CurSector) )
+			SWWMUtility.SetToSlope(self,0);
+		oldfloor = target.CurSector;
 	}
 	override void Tick()
 	{

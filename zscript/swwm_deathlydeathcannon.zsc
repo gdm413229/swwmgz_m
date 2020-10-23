@@ -255,7 +255,7 @@ Class YnykronDelayedImpact : Actor
 		special1++;
 		if ( special1 < 4 )
 		{
-			if ( tracer ) SetOrigin(level.Vec3Offset(tracer.pos,ofs),true);
+			if ( tracer ) SetOrigin(level.Vec3Offset(tracer.pos,ofs),false);
 			return;
 		}
 		let b = Spawn("YnykronImpact",pos);

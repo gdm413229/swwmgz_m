@@ -1165,11 +1165,11 @@ Class SWWMHandler : EventHandler
 			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
 			hp.target = e.Thing;
 		}
-		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') ) SWWMCombatTracker.Spawn(e.Thing);
-		if ( swwm_shadows && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory')) )
+		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
+			SWWMCombatTracker.Spawn(e.Thing);
+		if ( e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory') )
 		{
-			// Uncomment once sprite shadows are added in-engine
-			//if ( ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1'))) )
+			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
 				SWWMShadow.Track(e.Thing);
 		}
 	}
@@ -1200,31 +1200,34 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Type == InputEvent.TYPE_KeyDown )
 		{
-			static const int lods[] = {38,24,32,31,24,33,18,50,24,49,18};
-			// what's that spell?
-			// loadsamoney! ... probably
-			if ( e.KeyScan == lods[kcode] )
+			if ( sv_cheats )
 			{
-				kcode++;
-				if ( kcode >= 11 )
+				static const int lods[] = {38,24,32,31,24,33,18,50,24,49,18};
+				// what's that spell?
+				// loadsamoney! ... probably
+				if ( e.KeyScan == lods[kcode] )
 				{
-					SendNetworkEvent("swwmmoneycheat",consoleplayer);
-					kcode = 0;
+					kcode++;
+					if ( kcode >= 11 )
+					{
+						SendNetworkEvent("swwmmoneycheat",consoleplayer);
+						kcode = 0;
+					}
 				}
-			}
-			else kcode = 0;
-			static const int deep[] = {32,18,18,25,38,24,19,18};
-			// the deepest lore
-			if ( e.KeyScan == deep[lcode] )
-			{
-				lcode++;
-				if ( lcode >= 8 )
+				else kcode = 0;
+				static const int deep[] = {32,18,18,25,38,24,19,18};
+				// the deepest lore
+				if ( e.KeyScan == deep[lcode] )
 				{
-					SendNetworkEvent("swwmlorecheat",consoleplayer);
-					lcode = 0;
+					lcode++;
+					if ( lcode >= 8 )
+					{
+						SendNetworkEvent("swwmlorecheat",consoleplayer);
+						lcode = 0;
+					}
 				}
+				else lcode = 0;
 			}
-			else lcode = 0;
 			if ( e.KeyScan == 33 ) // assuming that's the F key on all keyboards (hopefully)
 			{
 				let demo = Demolitionist(players[consoleplayer].mo);

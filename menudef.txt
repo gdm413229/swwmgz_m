@@ -18,6 +18,12 @@ OptionValue "SWWMEnemyDropType"
 	0, "$SWWM_DROPS_AMMO"
 	1, "$SWWM_DROPS_WEAPONS"
 }
+OptionValue "SWWMShadows"
+{
+	0, "$SWWM_SHADOWS_OFF"
+	1, "$SWWM_SHADOWS_ON"
+	2, "$SWWM_SHADOWS_ALL"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -33,7 +39,7 @@ OptionMenu "SWWMOptionMenu"
 	StaticText " "
 	StaticText "$SWWM_OTITLE", "Blue"
 	Option "$SWWM_PRECISECROSSHAIR", "swwm_precisecrosshair", "YesNo"
-	Option "$SWWM_SHADOWS", "swwm_shadows", "YesNo"
+	Option "$SWWM_SHADOWS", "swwm_shadows", "SWWMShadows"
 	Option "$SWWM_BLOOD", "swwm_blood", "YesNo"
 	ScaleSlider "$SWWM_MAXBLOOD", "swwm_maxblood", -1, 1000, 1, "$SWWM_NONE", "$SWWM_UNLIMITED"
 	ScaleSlider "$SWWM_MAXGIBS", "swwm_maxgibs", -1, 1000, 1, "$SWWM_NONE", "$SWWM_UNLIMITED"

@@ -2598,6 +2598,9 @@ Class ReviveCooldown : Powerup
 // not an actual light, just handles the attach/detach
 Class DemolitionistSelfLight : Actor
 {
+	bool oldactive;
+	bool oldglow;
+
 	Default
 	{
 		+NOGRAVITY;
@@ -2623,14 +2626,16 @@ Class DemolitionistSelfLight : Actor
 			Destroy();
 			return;
 		}
-		if ( !activelight() )
-			target.A_RemoveLight('DemoSelfLight');
-		else if ( activelight() )
+		bool curactive = activelight();
+		if ( curactive && !oldactive )
 			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(12,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
-		if ( target.bINVISIBLE || (target.alpha <= double.epsilon) )
-			target.A_RemoveLight('DemoSelfLight2');
-		else
-			target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,Color(32,48,24),80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
+		else if ( !curactive && oldactive )
+			target.A_RemoveLight('DemoSelfLight');
+		oldactive = curactive;
+		bool curglow = !(target.bINVISIBLE||(target.alpha <= double.epsilon));
+		if ( curglow && !oldglow ) target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,Color(32,48,24),80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
+		else if ( !curglow && oldglow ) target.A_RemoveLight('DemoSelfLight2');
+		oldglow = curglow;
 	}
 }
 
@@ -3003,7 +3008,7 @@ Class HeadpatTracker : Actor
 			return;
 		}
 		A_SetSize(target.radius+8,target.height+8);
-		SetOrigin(target.pos,false);
+		if ( pos != target.pos ) SetOrigin(target.pos,false);
 	}
 	override bool Used( Actor user )
 	{

@@ -165,6 +165,9 @@ Class SWWMHandler : EventHandler
 	SWWMChip chips, chips_end;
 	int chips_cnt, oldmaxdebris;
 
+	// prevents revived monsters from spawning in more golden shells
+	Array<Actor> alreadygold;
+
 	static void QueueCasing( SWWMCasing c )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -852,12 +855,19 @@ Class SWWMHandler : EventHandler
 
 	override void WorldThingDied( WorldEvent e )
 	{
-		if ( ((e.Thing.default.bBOSS) || (e.Thing.default.Health >= 1000)) && !Random[GoldDrop](0,2) )
+		if ( ((e.Thing.default.bBOSS) || (e.Thing.default.Health >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
 		{
-			let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
-			double ang = FRandom[SpareShells](0,360);
-			g.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](.4,.8);
-			g.vel.z = FRandom[SpareShells](2.,4.);
+			// make sure we can't farm drops from revivable enemies
+			// (or cause some things to spam-spawn gold shells)
+			// (*cough* Touhou Doom *cough*)
+			alreadygold.Push(e.Thing);
+			if ( !Random[GoldDrop](0,2) )
+			{
+				let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+				double ang = FRandom[SpareShells](0,360);
+				g.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](.4,.8);
+				g.vel.z = FRandom[SpareShells](2.,4.);
+			}
 		}
 		// Korax instakill
 		if ( (e.Thing is 'Korax') && !e.Thing.special2 && HexenMap40() )

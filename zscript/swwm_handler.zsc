@@ -1227,20 +1227,20 @@ Class SWWMHandler : EventHandler
 
 	override bool InputProcess( InputEvent e )
 	{
-		if ( e.Type == InputEvent.TYPE_KeyDown )
+		if ( (e.Type == InputEvent.TYPE_KeyDown) && (e.KeyChar >= 0x61) && (e.KeyChar <= 0x7A) )
 		{
 			// cheat code handling
 			String cht[] =
 			{
-				"mklodsofemone", "mkdeeplore",
+				"swwmlodsofemone", "swwmdeeplore",
 				// SWWM Platinum cheats
-				"mkimstuck",            "mkarmojumbo",         "mkdangimhealthy",
-				"mkwarriorofzaemonath", "mkpowerparp",         "mkcannotseemyhands",
-				"mkreflectonme",        "mkgunzmeneeds",       "mkbloodrainsfromheaven",
-				"mknotwannaboom",       "mkverywrappyoatmeal", "mkflaggerybingo",
-				"mkheadsball",          "mksmarties",          "mknocilla",
-				"mkmarioisaweenie",     "mkpunish",            "mkboingball",
-				"mkgassy",              "mkiamsuperman",       "mktouchstone"
+				"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
+				"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
+				"swwmreflectonme",        "swwmgunzmeneeds",       "swwmbloodrainsfromheaven",
+				"swwmnotwannaboom",       "swwmverywrappyoatmeal", "swwmflaggerybingo",
+				"swwmheadsball",          "swwmsmarties",          "swwmnocilla",
+				"swwmmarioisaweenie",     "swwmpunish",            "swwmboingball",
+				"swwmgassy",              "swwmiamsuperman",       "swwmtouchstone"
 			};
 			String cmd[] =
 			{
@@ -1256,25 +1256,28 @@ Class SWWMHandler : EventHandler
 			};
 			bool matchany = false;
 			kstr.AppendCharacter(e.KeyChar);
-			for ( int i=0; i<cht.Size(); i++ )
+			if ( kstr.Length() > 0 )
 			{
-				if ( kstr != cht[i].Left(kstr.length()) ) continue;
-				matchany = true;
-				if ( kstr != cht[i] ) continue;
-				SendNetworkEvent(cmd[i],consoleplayer);
-				kcode = 0;
-				kstr = "";
-				return true;
-			}
-			if ( !matchany )
-			{
-				kcode = 0;
-				kstr = "";
-			}
-			else
-			{
-				kcode++;
-				if ( kcode > 2 ) return true; // eat keypresses from this point
+				for ( int i=0; i<cht.Size(); i++ )
+				{
+					if ( kstr != cht[i].Left(kstr.length()) ) continue;
+					matchany = true;
+					if ( kstr != cht[i] ) continue;
+					SendNetworkEvent(cmd[i],consoleplayer);
+					kcode = 0;
+					kstr = "";
+					return true;
+				}
+				if ( !matchany )
+				{
+					kcode = 0;
+					kstr = "";
+				}
+				else
+				{
+					kcode++;
+					if ( kcode > 4 ) return true; // eat keypresses from this point
+				}
 			}
 			// F
 			if ( e.KeyChar == 0x66 )

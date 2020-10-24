@@ -110,7 +110,7 @@ Class SWWMTitleStuff : EventHandler
 				Color c = Color(int(127.5+127.5*sin(10*i+80*(level.maptime+e.FracTic)/Thinker.TICRATE)),0,0);
 				Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx-xxofs,yy,ch,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
 			}
-			xx += fnt.GetCharWidth(ch);
+			xx += fnt.GetCharWidth(ch)-1;	// keming
 		}
 	}
 }

@@ -836,6 +836,20 @@ Class SWWMUtility
 		if ( (maxdist > 0.) && (sc.z < maxdist) ) return false;
 		return true;
 	}
+
+	static clearscope bool CheatsDisabled( int p = -1 )
+	{
+		if ( cl_blockcheats || ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && !sv_cheats) )
+		{
+			if ( (p != -1) && (p == consoleplayer) )
+			{
+				Console.Printf("\cfSORRY NOTHING\c-");
+				S_StartSound("misc/trombone",CHAN_VOICE,CHANF_UI);
+			}
+			return true;
+		}
+		return false;
+	}
 }
 
 Class RadiusDebugSphere : Actor

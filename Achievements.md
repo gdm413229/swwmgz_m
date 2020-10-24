@@ -22,6 +22,7 @@
 - **Hydrogenated**: Consume a total of 1000L of fuel.
 - **I Am Very Smart**: Load SWWM GZ and Brutal Doom together.
 - **Icarus Dimes**: Blow yourself up with your own explosives.
+- **It's Been Ten Years**: Use a cheat code from SWWM Platinum.
 - **Just A Replica**: Find something the Ynykron can't destroy.
 - **Knock Knock**: Kill 50 enemies through walls with the Silver Bullet.
 - **Layers Of White**: Summon the White Lady.

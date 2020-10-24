@@ -267,17 +267,7 @@ Class SWWMHandler : EventHandler
 		int countem;
 		if ( testme == locme ) countem = 0;
 		else countem = locme.ToInt();
-		if ( countem == 0 )
-		{
-			if ( voicetype ~== "default" ) return 0;
-			// retry with the default voicetype
-			voicetype = "default";
-			testme = String.Format("SWWM_SUBS_DEFAULT_N%s",type.MakeUpper());
-			locme = StringTable.Localize(testme,false);
-			if ( testme == locme ) countem = 0;
-			else countem = locme.ToInt();
-			if ( countem == 0 ) return 0;
-		}
+		if ( countem == 0 ) return 0;	// voicepack doesn't have this
 		// check last line so we don't repeat
 		int last = 0, ent;
 		for ( int i=0; i<hnd.lastlines.Size(); i++ )

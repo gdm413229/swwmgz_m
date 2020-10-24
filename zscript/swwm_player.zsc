@@ -892,19 +892,22 @@ Class Demolitionist : PlayerPawn
 					// don't bump if we're only grazing it
 					if ( dir dot wallnorm > -.6 )
 						continue;
+					bool buttslam = false;
+					// BUTTSLAM
+					if ( dir dot viewdir < -.3 )
+					{
+						buttslam = true;
+						// leave buttmark
+						A_SprayDecal("ButtMark",172,(cos(angle+90)*2,sin(angle+90)*2,Height*.54),dir);
+						A_SprayDecal("ButtMark",172,(cos(angle-90)*2,sin(angle-90)*2,Height*.54),dir);
+					}
 					if ( raging || swwm_omnibust )
 					{
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
 						int dmg = int(15+spd*2.5);
 						if ( raging ) dmg *= 8;
-						bool buttslam = false;
-						// BUTTSLAM
-						if ( dir dot viewdir < -.3 )
-						{
-							dmg *= 3;
-							buttslam = true;
-						}
+						if ( buttslam ) dmg *= 3;
 						tempme.Results.HitLine = BlockingLine;
 						tempme.Results.HitType = TRACE_HitWall;
 						tempme.Results.Side = lside;

@@ -243,9 +243,9 @@ ListMenu "MainMenu"
 {
 	Class "SWWMMainMenu"
 	Font "SWWMBigFont", "White", "Sapphire"
-	Selector "graphics/DemoIcon.png", -24, 10
+	Selector "graphics/DemoIcon.png", -24, 0
 	LineSpacing 28
-	SWWMLogo "M_SWWM"
+	SWWMLogo "graphics/M_SWWM.png"
 	Position 0, 56
 	SWWMTextItemM "$MNU_NEWGAME", "n", "PlayerclassMenu"
 	SWWMTextItemM "$MNU_OPTIONS", "o", "OptionsMenu"
@@ -257,9 +257,9 @@ ListMenu "MainMenuTextOnly"
 {
 	Class "SWWMMainMenu"
 	Font "SWWMBigFont", "White", "Sapphire"
-	Selector "graphics/DemoIcon.png", -24, 10
+	Selector "graphics/DemoIcon.png", -24, 0
 	LineSpacing 28
-	SWWMLogo "M_SWWM"
+	SWWMLogo "graphics/M_SWWM.png"
 	Position 0, 56
 	SWWMTextItemM "$MNU_NEWGAME", "n", "PlayerclassMenu"
 	SWWMTextItemM "$MNU_OPTIONS", "o", "OptionsMenu"
@@ -269,6 +269,7 @@ ListMenu "MainMenuTextOnly"
 }
 ListMenu "EpisodeMenu"
 {
+	Class "SWWMBigMenuHack"
 	IfGame(Doom, Heretic, Hexen, Strife)
 	{
 		NetgameMessage "$NEWGAME"
@@ -278,20 +279,18 @@ ListMenu "EpisodeMenu"
 		NetgameMessage "$CNEWGAME"
 	}
 	Font "SWWMBigFont", "White", "Sapphire"
-	Selector "graphics/DemoIcon.png", -32, 10
+	Selector "graphics/DemoIcon.png", -24, 0
 	LineSpacing 28
-	StaticText 56, 24, "$MNU_EPISODE"
-	Position 90, 64
+	SWWMStaticTextM 0, 0, "$MNU_EPISODE", "Blue"
+	Position 0, 48
 }
 
 ListMenu "SkillMenu"
 {
+	Class "SWWMBigMenuHack"
 	Font "SWWMBigFont", "White", "Sapphire"
-	Selector "graphics/DemoIcon.png", -32, 10
+	Selector "graphics/DemoIcon.png", -24, 0
 	LineSpacing 28
-	StaticText 24, 4, "$MNU_CHOOSESKILL"
-	Position 0, 40
-	CenterMenu
-	// the menu building code for this does not give a single goddamn fuck about positioning so it looks completely off-center
-	// thanks to whoever decided that, hope you step on a LEGO
+	SWWMStaticTextM 0, 0, "$MNU_CHOOSESKILL", "Blue"
+	Position 0, 48
 }

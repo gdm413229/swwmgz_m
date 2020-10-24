@@ -202,6 +202,92 @@ Class SWWMMainMenu : ListMenu
 	}
 }
 
+// skill/episode menu hack
+Class SWWMBigMenuHack : ListMenu
+{
+	override void Init( Menu parent, ListMenuDescriptor desc )
+	{
+		Super.Init(parent,desc);
+		// replace text/patch items with our own
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			let itm = mDesc.mItems[i];
+			if ( itm.GetClass() == 'ListMenuItemTextItem' )
+			{
+				let ti = ListMenuItemTextItem(itm);
+				let rep = new("ListMenuItemSWWMTextItemM");
+				Name c;
+				int p;
+				[c, p] = ti.GetAction();
+				rep.InitDirect(ti.GetX(),ti.GetY(),mDesc.mLinespacing,ti.mHotkey,ti.mText,ti.mFont,ti.mColor,ti.mColorSelected,c,p);
+				mDesc.mItems[i] = rep;
+				ti.Destroy();
+			}
+			else if ( itm.GetClass() == 'ListMenuItemPatchItem' )
+			{
+				let pi = ListMenuItemPatchItem(itm);
+				let rep = new("ListMenuItemSWWMPatchItemM");
+				Name c;
+				int p;
+				[c, p] = pi.GetAction();
+				rep.InitDirect(pi.GetX(),pi.GetY(),mDesc.mLinespacing,pi.mHotkey,pi.mTexture,c,p);
+				mDesc.mItems[i] = rep;
+				pi.Destroy();
+			}
+		}
+	}
+}
+
+Class ListMenuItemSWWMStaticTextM : ListMenuItem
+{
+	String mText;
+	Font mFont;
+	int mColor;
+
+	void Init( ListMenuDescriptor desc, double x, double y, String text, int color = -1 )
+	{
+		Super.Init(x,y);
+		mText = text;
+		mFont = desc.mFont;
+		mColor = (color>=0)?color:desc.mFontColor;
+	}
+
+	void InitDirect( double x, double y, String text, Font font, int color = Font.CR_UNTRANSLATED )
+	{
+		Super.Init(x,y);
+		mText = text;
+		mFont = font;
+		mColor = color;
+	}
+
+	override void Drawer( bool selected )
+	{
+		if ( mText.Length() == 0 ) return;
+		String text = Stringtable.Localize(mText);
+		double x = (320-mFont.StringWidth(text))/2;
+		Screen.DrawText(mFont,mColor,x,mYpos,text,DTA_Clean,true);
+	}
+
+	// FIXME The 4.5+ way - swap out for this once it's done
+	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	{
+		if ( mText.Length() == 0 ) return;
+		String text = Stringtable.Localize(mText);
+		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
+		int h = desc?desc.DisplayHeight():-1;
+		if ( w == ListMenuDescriptor.CleanScale )
+		{
+			double x = (320-mFont.StringWidth(text))/2;
+			Screen.DrawText(mFont,mColor,x,abs(mYpos),text,(mYpos<0)?DTA_CleanTop:DTA_Clean,true);
+		}
+		else
+		{
+			double x = (w-mFont.StringWidth(text))/2;
+			Screen.DrawText(mFont,mColor,x,abs(mYpos),text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+		}
+	}*/
+}
+
 // scaled SWWM GZ logo
 class ListMenuItemSWWMLogo : ListMenuItem
 {
@@ -323,13 +409,27 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 {
 	String mText;
 	Font mFont;
+	int mColor;
+	int mColorSelected;
 
 	void Init( ListMenuDescriptor desc, String text, String hotkey, Name child, int param = 0 )
 	{
 		Super.Init(desc.mXpos,desc.mYpos,desc.mLinespacing,child,param);
 		mText = text;
 		mFont = desc.mFont;
+		mColor = desc.mFontColor;
+		mColorSelected = desc.mFontcolor2;
 		mHotkey = hotkey.GetNextCodePoint(0);
+	}
+
+	void InitDirect( double x, double y, int height, int hotkey, String text, Font font, int color, int color2, Name child, int param = 0 )
+	{
+		Super.Init(x,y,height,child,param);
+		mText = text;
+		mFont = font;
+		mColor = color;
+		mColorSelected = color2;
+		mHotkey = hotkey;
 	}
 
 	override int GetWidth()
@@ -345,6 +445,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		double y = mYPos-12; // text needs to be offset up for some reason, otherwise doesn't match mouse selection bounds
 		if ( selected )
 		{
+			SWWMUtility.StripColor(text);
 			double xx = x;
 			int tlen = text.CodePointCount();
 			for ( int i=0, pos=0; i<tlen; i++ )
@@ -352,20 +453,21 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 				int ch;
 				[ch, pos] = text.GetNextCodePoint(pos);
 				double yy = y+4*sin(32*i+8*Menu.MenuTime());
-				Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_Clean,true);
+				Screen.DrawChar(mFont,mColorSelected,xx,yy,ch,DTA_Clean,true);
 				xx += mFont.GetCharWidth(ch)-2;	// account for menu font kerning
 			}
 		}
-		else Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_Clean,true);
+		else Screen.DrawText(mFont,mColor,x,y,text,DTA_Clean,true);
 	}
 
 	override void DrawSelector( double xofs, double yofs, TextureID tex )
 	{
 		if ( tex.isNull() ) return;
 		double x = (320-GetWidth())/2;
-		Screen.DrawTexture(tex,true,x+xofs,mYpos+yofs,DTA_Clean,true,DTA_CenterOffset,true);
+		double y = (mYpos+mFont.GetHeight()/2)-10;
+		Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
 		x = (320+GetWidth())/2;
-		Screen.DrawTexture(tex,true,x-xofs,mYpos+yofs,DTA_Clean,true,DTA_CenterOffset,true);
+		Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
 	}
 
 	// FIXME The 4.5+ way - swap out for this once it's done
@@ -420,22 +522,106 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		if ( tex.isNull() ) return;
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
+		double y = (mYpos+mFont.GetHeight()/2)-10;
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			double x = (320-GetWidth())/2;
-			Screen.DrawTexture(tex,true,x+xofs,mYpos+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
+			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
 			x = (320+GetWidth())/2;
-			Screen.DrawTexture(tex,true,x-xofs,mYpos+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
+			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
 		else
 		{
 			double x = (w-GetWidth())/2;
-			Screen.DrawTexture(tex,true,x+xofs,mYpos+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
+			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
 			x = (w+GetWidth())/2;
-			Screen.DrawTexture(tex,true,x-xofs,mYpos+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
+			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
 	}*/
 
+}
+
+// for compat with non-text episodes
+Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
+{
+	TextureID mTexture;
+
+	void Init( ListMenuDescriptor desc, TextureID patch, String hotkey, Name child, int param = 0 )
+	{
+		Super.Init(desc.mXpos,desc.mYpos,desc.mLinespacing,child,param);
+		mHotkey = hotkey.GetNextCodePoint(0);
+		mTexture = patch;
+	}
+
+	void InitDirect( double x, double y, int height, int hotkey, TextureID patch, Name child, int param = 0 )
+	{
+		Super.Init(x,y,height,child,param);
+		mHotkey = hotkey;
+		mTexture = patch;
+	}
+
+	override int GetWidth()
+	{
+		Vector2 vs = TexMan.GetScaledSize(mTexture);
+		return int(vs.x);
+	}
+
+	override void Drawer( bool selected )
+	{
+		double x = (320-GetWidth())/2;
+		Screen.DrawTexture(mTexture,true,x,mYpos,DTA_Clean,true);
+	}
+
+	override void DrawSelector( double xofs, double yofs, TextureID tex )
+	{
+		if ( tex.isNull() ) return;
+		Vector2 vs = TexMan.GetScaledSize(mTexture);
+		double x = (320-vs.x)/2;
+		double y = mYpos+(vs.y/2);
+		Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
+		x = (320+vs.x)/2;
+		Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
+	}
+
+	// FIXME The 4.5+ way - swap out for this once it's done
+	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	{
+		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
+		int h = desc?desc.DisplayHeight():-1;
+		if ( w == ListMenuDescriptor.CleanScale )
+		{
+			double x = (320-GetWidth())/2;
+			Screen.DrawTexture(mTexture,true,x,mYpos,DTA_Clean,true);
+		}
+		else
+		{
+			double x = (w-GetWidth())/2;
+			screen.DrawTexture(mTexture,true,x,mYpos,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+		}
+	}
+
+	override void DrawSelector( double xofs, double yofs, TextureID tex, ListMenuDescriptor desc )
+	{
+		if ( tex.isNull() ) return;
+		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
+		int h = desc?desc.DisplayHeight():-1;
+		Vector2 vs = TexMan.GetScaledSize(mTexture);
+		double y = mYpos+vs.y/2;
+		if ( w == ListMenuDescriptor.CleanScale )
+		{
+			double x = (320-vs.x)/2;
+			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
+			x = (320+vs.x)/2;
+			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
+		}
+		else
+		{
+			double x = (w-vs.x)/2;
+			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
+			x = (w+vs.x)/2;
+			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
+		}
+	}*/
 }
 
 // FIXME uncomment this once it's supported

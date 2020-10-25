@@ -593,6 +593,7 @@ Class Chancebox : Actor
 					Vector3 testpos = (origin.x+j*cos(k),origin.y+j*sin(k),0);
 					testpos.z = s.floorplane.ZAtPoint(testpos.xy);
 					if ( (level.PointInSector(testpos.xy) != s) || !level.IsPointInLevel(testpos) ) continue;
+					double ceil = s.ceilingplane.ZAtPoint(testpos.xy);
 					bool blocked = false;
 					BlockLinesIterator bl = BlockLinesIterator.CreateFromPos(testpos,32,32,s);
 					double tbox[4];
@@ -614,6 +615,44 @@ Class Chancebox : Actor
 						break;
 					}
 					if ( blocked ) continue;
+					// check for 3D floors first
+					int nffloor = s.Get3DFloorCount();
+					double bceil = ceil;
+					for ( int l=0; l<nffloor; l++ )
+					{
+						if ( !(s.Get3DFloor(l).flags&F3DFloor.FF_SOLID) ) continue;
+						double fz = s.Get3DFloor(l).top.ZAtPoint(testpos.xy);
+						if ( fz < testpos.z ) continue;
+						double cz = ceil;
+						for ( int l2=0; l2<nffloor; l2++ )
+						{
+							if ( !(s.Get3DFloor(l2).flags&F3DFloor.FF_SOLID) ) continue;
+							if ( (s.Get3DFloor(l2).top.ZAtPoint(testpos.xy) < fz) ) continue;
+							cz = s.Get3DFloor(l2).bottom.ZAtPoint(testpos.xy);
+							break;
+						}
+						if ( cz < bceil ) bceil = cz;
+						if ( cz-fz < 32 ) continue;	// too short
+						bool blockedff = false;
+						BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,fz,32,256,false);
+						while ( bt.Next() )
+						{
+							if ( !bt.Thing ) continue;
+							if ( abs(bt.Thing.pos.x-testpos.x) > 32+bt.Thing.Radius ) continue;
+							if ( abs(bt.Thing.pos.y-testpos.y) > 32+bt.Thing.Radius ) continue;
+							blockedff = true;
+							break;
+						}
+						if ( blockedff ) continue;
+						let sp = new("BoxSpawnSpot");
+						sp.pos = (testpos.x,testpos.y,fz);
+						sp.angle = k+180;
+						spots.Push(sp);
+					}
+					// spawn at the real floor
+					if ( bceil-testpos.z < 32 ) continue;	// too short
+					// don't spawn on sky or hurtfloors if there are 3D floors
+					if ( (nffloor > 0) && ((s.GetTexture(0) == skyflatnum) || (s.damageamount > 0)) ) continue;
 					BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,testpos.z,32,256,false);
 					while ( bt.Next() )
 					{
@@ -850,10 +889,16 @@ Class Chancebox : Actor
 				}
 			}
 		}
-		if ( bCountSecret )
+		if ( bCOUNTITEM )
+		{
+			user.player.itemcount++;
+			level.found_items++;
+			bCOUNTITEM = false;
+		}
+		if ( bCOUNTSECRET )
 		{
 			user.GiveSecret();
-			bCountSecret = false;
+			bCOUNTSECRET = false;
 		}
 		if ( special )
 		{
@@ -894,6 +939,7 @@ Class Chancebox : Actor
 		+ROLLSPRITE;
 		+SOLID;
 		+INTERPOLATEANGLES;
+		+COUNTITEM;
 		Species "Chancebox";
 	}
 	States

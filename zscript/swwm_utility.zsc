@@ -850,6 +850,23 @@ Class SWWMUtility
 		}
 		return false;
 	}
+
+	static clearscope bool IdentifyingDog( Actor a )
+	{
+		if ( a is 'MBFHelperDog' ) return true;
+		// more dogs will be added as found
+		// because all dogs must be pet
+		return false;
+	}
+
+	static clearscope bool IdentifyingCaco( Actor a )
+	{
+		if ( a is 'DeadCacodemon' ) return false;
+		if ( a is 'Cacodemon' ) return true;
+		if ( a.Species == 'RLCacodemon' ) return true; // DRLA
+		if ( a.Species == 'Caco' ) return true; // CH
+		return false;
+	}
 }
 
 Class RadiusDebugSphere : Actor

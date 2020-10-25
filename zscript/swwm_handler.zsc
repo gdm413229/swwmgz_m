@@ -1166,7 +1166,7 @@ Class SWWMHandler : EventHandler
 			e.Thing.A_SetSize(20,40);
 			e.Thing.bNOBLOOD = true;
 		}
-		else if ( (e.Thing is 'MBFHelperDog') || ((e.Thing is 'Cacodemon') && !(e.Thing is 'DeadCacodemon')) )
+		else if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing) )
 		{
 			// you can pet the dog, and you can also pet the caco
 			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);

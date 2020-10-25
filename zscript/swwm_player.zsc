@@ -1848,9 +1848,7 @@ Class Demolitionist : PlayerPawn
 	bool FastCheck( bool notfast = false )
 	{
 		if ( !player ) return false;
-		bool rslt = max(abs(player.cmd.forwardmove),abs(player.cmd.sidemove))>6400;
-		// FIXME easier method - uncomment on new GZDoom release
-		// bool rslt = player.cmd.buttons&BT_RUN;
+		bool rslt = player.cmd.buttons&BT_RUN;
 		if ( notfast ) rslt = !rslt;
 		return rslt;
 	}
@@ -1918,8 +1916,7 @@ Class Demolitionist : PlayerPawn
 		// we need the crouch button state to be preserved for other functions
 		if ( wascrouching ) player.cmd.buttons |= BT_CROUCH;
 	}
-	// FIXME requires PR #1169 - uncomment on next GZDoom release
-	/*override void Travelled()
+	override void Travelled()
 	{
 		// reinitialize
 		dashfuel = default.dashfuel;
@@ -1939,9 +1936,8 @@ Class Demolitionist : PlayerPawn
 			player.PendingWeapon = SWWMGesture(player.ReadyWeapon).formerweapon;
 			player.SetPSprite(PSP_WEAPON,player.ReadyWeapon.ResolveState("Deselect"));
 		}
-	}*/
-	// FIXME requires PR #1173 - uncomment on next GZDoom release
-	/*override bool PreTeleport( Vector3 destpos, double destangle, int flags )
+	}
+	override bool PreTeleport( Vector3 destpos, double destangle, int flags )
 	{
 		// store old pos
 		pretelepos = pos;
@@ -1971,7 +1967,7 @@ Class Demolitionist : PlayerPawn
 		let l = SWWMLamp(FindInventory("SWWMLamp"));
 		if ( l && l.thelamp )
 			CompanionLamp(l.thelamp).justteleport = true;
-	}*/
+	}
 	States
 	{
 	Spawn:

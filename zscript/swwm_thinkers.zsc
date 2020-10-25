@@ -972,56 +972,41 @@ Class UglyBoyGetsFuckedUp : Thinker
 	}
 }
 
-// Gotta force it someway
-Class ForcedFallerDamager : Thinker
+// Track last damage source to blame fall damage on
+Class SWWMWhoPushedMe : Thinker
 {
-	Actor mybody, instigator;
-	double lastvelz;
-	bool wasflying;
+	Actor tracked, instigator;
 
-	static void TrackBody( Actor b )
-	{
-		if ( !b ) return;
-		let ffd = new("ForcedFallerDamager");
-		ffd.ChangeStatNum(STAT_USER);
-		ffd.mybody = b;
-		ffd.lastvelz = b.vel.z;
-		ffd.wasflying = ((b.pos.z>b.floorz)&&b.TestMobjZ());
-	}
 	static void SetInstigator( Actor b, Actor whomst )
 	{
 		if ( !b || !whomst ) return;
-		let ti = ThinkerIterator.Create("ForcedFallerDamager",STAT_USER);
-		ForcedFallerDamager ffd;
-		while ( ffd = ForcedFallerDamager(ti.Next()) )
+		let ti = ThinkerIterator.Create("SWWMWhoPushedMe",STAT_INFO);
+		SWWMWhoPushedMe ffd;
+		while ( ffd = SWWMWhoPushedMe(ti.Next()) )
 		{
-			if ( ffd.mybody != b ) continue;
+			if ( ffd.tracked != b ) continue;
 			ffd.instigator = whomst;
-			break;
-		}
-	}
-	override void Tick()
-	{
-		if ( !swwm_doomfall || !mybody )
-		{
-			Destroy();
 			return;
 		}
-		bool isflying = ((mybody.pos.z>mybody.floorz)&&mybody.TestMobjZ())||mybody.bNOGRAVITY;
-		if ( wasflying && !isflying && (lastvelz < -23) && !level.monsterfallingdamage && !(mybody.floorsector.flags&Sector.SECF_NOFALLINGDAMAGE) )
+		ffd = new("SWWMWhoPushedMe");
+		ffd.ChangeStatNum(STAT_INFO);
+		ffd.tracked = b;
+		ffd.instigator = whomst;
+	}
+
+	static Actor RecallInstigator( Actor b )
+	{
+		if ( !b ) return null;
+		let ti = ThinkerIterator.Create("SWWMWhoPushedMe",STAT_INFO);
+		SWWMWhoPushedMe ffd;
+		while ( ffd = SWWMWhoPushedMe(ti.Next()) )
 		{
-			// big hurt
-			int dmg;
-			if ( lastvelz < -35 ) dmg = Actor.TELEFRAG_DAMAGE;
-			else dmg = int((-lastvelz-23)*6);
-			mybody.DamageMobj(instigator,instigator,dmg,'Falling');
+			if ( ffd.tracked != b ) continue;
+			Actor whomst = ffd.instigator;
+			ffd.Destroy();
+			return whomst;
 		}
-		if ( !isflying && wasflying ) instigator = null;
-		wasflying = isflying;
-		lastvelz = mybody.vel.z;
-		// wait until body is dead
-		if ( mybody.Health > 0 ) return;
-		Destroy();
+		return null;
 	}
 }
 

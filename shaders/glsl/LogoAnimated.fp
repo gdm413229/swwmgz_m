@@ -85,7 +85,7 @@ vec4 ProcessTexel()
 	// clamp borders
 	vec2 sz = textureSize(tex,0);
 	vec2 px = uv*sz;
-	if ( (px.x <= 1) || (px.x >= sz.x) || (px.y <= 1) || (px.y >= sz.y) )
+	if ( (px.x <= 1) || (px.x >= (sz.x-1)) || (px.y <= 1) || (px.y >= (sz.y-1)) )
 		tmp2 = vec4(0.);
 	// ding, logo's done
 	return tmp2;

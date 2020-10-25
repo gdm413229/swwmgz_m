@@ -260,16 +260,7 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 		mColor = color;
 	}
 
-	override void Drawer( bool selected )
-	{
-		if ( mText.Length() == 0 ) return;
-		String text = Stringtable.Localize(mText);
-		double x = (320-mFont.StringWidth(text))/2;
-		Screen.DrawText(mFont,mColor,x,mYpos,text,DTA_Clean,true);
-	}
-
-	// FIXME The 4.5+ way - swap out for this once it's done
-	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
 		if ( mText.Length() == 0 ) return;
 		String text = Stringtable.Localize(mText);
@@ -285,7 +276,7 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 			double x = (w-mFont.StringWidth(text))/2;
 			Screen.DrawText(mFont,mColor,x,abs(mYpos),text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
-	}*/
+	}
 }
 
 // scaled SWWM GZ logo
@@ -299,18 +290,7 @@ class ListMenuItemSWWMLogo : ListMenuItem
 		mTexture = patch;
 	}
 
-	// the old way
-	override void Drawer( bool selected )
-	{
-		if ( !mTexture.Exists() )
-			return;
-		Vector2 vs = TexMan.GetScaledSize(mTexture);
-		double x = (320-vs.x)/2;
-		Screen.DrawTexture(mTexture,false,x,-48,DTA_Clean,true);
-	}
-
-	// FIXME The 4.5+ way - swap out for this once it's done
-	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
 		if ( !mTexture.Exists() )
 			return;
@@ -328,48 +308,13 @@ class ListMenuItemSWWMLogo : ListMenuItem
 			x = (w-vs.x)/2;
 			Screen.DrawTexture(mTexture,false,x,-48,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
-	}*/
+	}
 }
 
 // message box that enforces newsmallfont and changes text color to match menus
 Class SWWMMessageBox : MessageBoxMenu
 {
 	override void Init( Menu parent, String message, int messagemode, bool playsound, Name cmd, voidptr native_handler )
-	{
-		Super.Init(parent,message,messagemode,playsound,cmd,native_handler);
-		textFont = arrowFont = newsmallfont;
-		destWidth = CleanWidth;
-		destHeight = CleanHeight;
-		selector = "▶";
-		int mr1 = 170+textFont.StringWidth(Stringtable.Localize("$TXT_YES"));
-		int mr2 = 170+textFont.StringWidth(Stringtable.Localize("$TXT_NO"));
-		mMouseRight = max(mr1,mr2);
-		mMessage = textFont.BreakLines(Stringtable.Localize(message),600);
-	}
-
-	override void Drawer()
-	{
-		int fontheight = textFont.GetHeight();
-		int y = 100;
-		int c = mMessage.Count();
-		y -= c*fontHeight/2;
-		for ( int i=0; i<c; i++ )
-		{
-			Screen.DrawText(textFont,OptionMenuSettings.mFontColorValue,160-mMessage.StringWidth(i)/2,y, mMessage.StringAt(i),DTA_Clean,true);
-			y += fontheight;
-		}
-		if ( mMessageMode != 0 ) return;
-		y += fontheight;
-		mMouseY = y;
-		Screen.DrawText(textFont,messageSelection==0?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,160,y,Stringtable.Localize("$TXT_YES"),DTA_Clean,true);
-		Screen.DrawText(textFont,messageSelection==1?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,160,y+fontheight+1,Stringtable.Localize("$TXT_NO"),DTA_Clean,true);
-		if ( messageSelection < 0 ) return;
-		if ( (MenuTime()%8) < 6 )
-			Screen.DrawText(arrowFont,OptionMenuSettings.mFontColorSelection,(150-160)*CleanXfac+Screen.GetWidth()/2,(y+(fontheight+1)*messageSelection-100+fontheight/2-5)*CleanYfac+Screen.GetHeight()/2,selector,DTA_CellX,8*CleanXfac,DTA_CellY,8*CleanYfac);
-	}
-
-	// FIXME the 4.5+ way - swap out for this once it's done
-	/*override void Init( Menu parent, String message, int messagemode, bool playsound, Name cmd, voidptr native_handler )
 	{
 		Super.Init(parent,message,messagemode,playsound,cmd,native_handler);
 		textFont = arrowFont = newsmallfont;
@@ -401,7 +346,7 @@ Class SWWMMessageBox : MessageBoxMenu
 		if ( messageSelection < 0 ) return;
 		if ( (MenuTime()%8) < 6 )
 			Screen.DrawText(arrowFont,OptionMenuSettings.mFontColorSelection,destWidth/2-11,y+fontheight*messageSelection,selector,DTA_VirtualWidth,destWidth, DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
-	}*/
+	}
 }
 
 // main menu item with wiggly text when selected and Demo face selectors on both sides
@@ -437,41 +382,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		return max(1,mFont.StringWidth(StringTable.Localize(mText)));
 	}
 
-	override void Drawer( bool selected )
-	{
-		String text = StringTable.Localize(mText);
-		// centered
-		double x = (320-mFont.StringWidth(text))/2;
-		double y = mYPos-12; // text needs to be offset up for some reason, otherwise doesn't match mouse selection bounds
-		if ( selected )
-		{
-			SWWMUtility.StripColor(text);
-			double xx = x;
-			int tlen = text.CodePointCount();
-			for ( int i=0, pos=0; i<tlen; i++ )
-			{
-				int ch;
-				[ch, pos] = text.GetNextCodePoint(pos);
-				double yy = y+4*sin(32*i+8*Menu.MenuTime());
-				Screen.DrawChar(mFont,mColorSelected,xx,yy,ch,DTA_Clean,true);
-				xx += mFont.GetCharWidth(ch)-2;	// account for menu font kerning
-			}
-		}
-		else Screen.DrawText(mFont,mColor,x,y,text,DTA_Clean,true);
-	}
-
-	override void DrawSelector( double xofs, double yofs, TextureID tex )
-	{
-		if ( tex.isNull() ) return;
-		double x = (320-GetWidth())/2;
-		double y = (mYpos+mFont.GetHeight()/2)-10;
-		Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
-		x = (320+GetWidth())/2;
-		Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
-	}
-
-	// FIXME The 4.5+ way - swap out for this once it's done
-	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
@@ -484,6 +395,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		if ( selected )
 		{
 			double xx = x;
+			SWWMUtility.StripColor(text);
 			int tlen = text.CodePointCount();
 			if ( w == ListMenuDescriptor.CleanScale )
 			{
@@ -537,7 +449,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			x = (w+GetWidth())/2;
 			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
-	}*/
+	}
 
 }
 
@@ -566,25 +478,7 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 		return int(vs.x);
 	}
 
-	override void Drawer( bool selected )
-	{
-		double x = (320-GetWidth())/2;
-		Screen.DrawTexture(mTexture,true,x,mYpos,DTA_Clean,true);
-	}
-
-	override void DrawSelector( double xofs, double yofs, TextureID tex )
-	{
-		if ( tex.isNull() ) return;
-		Vector2 vs = TexMan.GetScaledSize(mTexture);
-		double x = (320-vs.x)/2;
-		double y = mYpos+(vs.y/2);
-		Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
-		x = (320+vs.x)/2;
-		Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true);
-	}
-
-	// FIXME The 4.5+ way - swap out for this once it's done
-	/*override void Draw( bool selected, ListMenuDescriptor desc )
+	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
@@ -621,11 +515,10 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 			x = (w+vs.x)/2;
 			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
-	}*/
+	}
 }
 
-// FIXME uncomment this once it's supported
-/*Class SWWMMenuDelegate : DoomMenuDelegate
+Class SWWMMenuDelegate : DoomMenuDelegate
 {
 	transient CVar lang;
 	transient Font TewiFont, MPlusFont, SWWMBigFont;
@@ -655,4 +548,4 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 		if ( (fnt == BigFont) || (fnt == AlternativeBigFont) || (fnt == OriginalBigFont) || (fnt == IntermissionFont) ) return SWWMBigFont;
 		return fnt;
 	}
-}*/
+}

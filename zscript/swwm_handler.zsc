@@ -22,8 +22,8 @@ Class SWWMPreloader : StaticEventHandler
 		Font.GetFont('TewiShadedInverse');
 		Font.GetFont('SWWMBigFont');
 	}
-	// FIXME uncomment this once it's supported
-	/*override void UiTick()
+
+	override void UiTick()
 	{
 		// HACK! Graf, please let us change this in a cleaner way
 		if ( menuDelegate.GetClass() == 'DoomMenuDelegate' )
@@ -31,7 +31,7 @@ Class SWWMPreloader : StaticEventHandler
 			menuDelegate.Destroy();
 			menuDelegate = new("SWWMMenuDelegate");
 		}
-	}*/
+	}
 }
 
 // save version holder
@@ -672,27 +672,6 @@ Class SWWMHandler : EventHandler
 		// reset combat tracker
 		if ( !swwm_notrack )
 			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
-		if ( p.mo is 'Demolitionist' )
-		{
-			// reinitialize
-			Demolitionist(p.mo).dashfuel = Demolitionist(p.mo).default.dashfuel;
-			Demolitionist(p.mo).last_boost = 0;
-			Demolitionist(p.mo).last_kick = 0;
-			// cancel dash/boost
-			p.mo.A_StopSound(CHAN_JETPACK);
-			Demolitionist(p.mo).fuelcooldown = 0.;
-			Demolitionist(p.mo).dashcooldown = 0.;
-			Demolitionist(p.mo).dashboost = 0.;
-			Demolitionist(p.mo).dashsnd = false;
-			// prevent sudden stomping if we were previously falling
-			Demolitionist(p.mo).lastvelz = p.mo.vel.z;
-			// early cancel gestures
-			if ( p.ReadyWeapon is 'SWWMGesture' )
-			{
-				p.PendingWeapon = SWWMGesture(p.ReadyWeapon).formerweapon;
-				p.SetPSprite(PSP_WEAPON,p.ReadyWeapon.ResolveState("Deselect"));
-			}
-		}
 		// reset score (optional) if inventory should be cleared
 		if ( swwm_resetscore && level.removeitems && !e.IsReturn )
 			c.credits = c.hcredits = 0;
@@ -708,8 +687,6 @@ Class SWWMHandler : EventHandler
 		// reattach combat tracker
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
 			SWWMCombatTracker.Spawn(e.Thing);
-		if ( swwm_doomfall && e.Thing.bISMONSTER && !level.monsterfallingdamage )
-			ForcedFallerDamager.TrackBody(e.Thing);
 		if ( !(e.Thing is 'PlayerPawn') ) return;
 		// reset some vars
 		if ( e.Thing.playernumber() != -1 )
@@ -946,7 +923,7 @@ Class SWWMHandler : EventHandler
 				}
 			}
 			// fall dmg
-			ForcedFallerDamager.SetInstigator(e.Thing,e.DamageSource);
+			SWWMWhoPushedMe.SetInstigator(e.Thing,e.DamageSource);
 			// stats
 			if ( e.Thing.player )
 			{
@@ -992,29 +969,33 @@ Class SWWMHandler : EventHandler
 		if ( (e.Thing is 'BossBrain') && (e.DamageType == 'Telefrag') )
 			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
 		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
-		if ( (e.DamageSource && e.DamageSource.player && (e.DamageSource != e.Thing)) )
+		// fall damage tracking hack
+		let src = e.DamageSource;
+		if ( (e.DamageType == 'Falling') && !e.DamageSource )
+			src = SWWMWhoPushedMe.RecallInstigator(e.Thing);
+		if ( (src && src.player && (src != e.Thing)) )
 		{
-			let s = SWWMStats.Find(e.DamageSource.player);
+			let s = SWWMStats.Find(src.player);
 			if ( s )
 			{
 				s.kills++;
 				s.AddWeaponKill(e.Inflictor,e.Thing,e.DamageType);
 			}
-			if ( e.DamageSource == players[consoleplayer].mo )
+			if ( src == players[consoleplayer].mo )
 			{
 				highesttic = gametic;
 				if ( !lastcombat || (gametic > lastcombat+40) )
 				{
-					if ( e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing) )
+					if ( e.Thing.IsFriend(src) || SWWMUtility.IsCivilian(e.Thing) )
 						lastcombat = AddOneliner("friendkill",1,5);
 					else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.bBOSSDEATH)?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 						lastcombat = AddOneliner("scorekill",1,15);
 				}
 			}
 			// no credits unless it's a counted kill or marine (that isn't friendly)
-			if ( e.Thing.IsFriend(e.DamageSource) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
+			if ( e.Thing.IsFriend(src) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
 				return;
-			int pnum = e.DamageSource.PlayerNumber();
+			int pnum = src.PlayerNumber();
 			if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
 				multilevel[pnum]++;
 			else multilevel[pnum] = 0;
@@ -1024,7 +1005,7 @@ Class SWWMHandler : EventHandler
 			// scoring
 			int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.05)*10));
 			SWWMScoreObj scr = null;
-			if ( e.DamageSource.player == players[consoleplayer] )
+			if ( src.player == players[consoleplayer] )
 				scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 			int ofs = 0;
 			if ( e.DamageType == 'Push' )
@@ -1060,7 +1041,7 @@ Class SWWMHandler : EventHandler
 					scr.xcnt = ++ofs;
 				}
 			}
-			if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (e.DamageSource.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !e.DamageSource.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
+			if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (src.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !src.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
 			{
 				score *= 2;
 				if ( scr )
@@ -1107,14 +1088,14 @@ Class SWWMHandler : EventHandler
 					scr.xcnt = ++ofs;
 				}
 			}
-			SWWMCredits.Give(e.DamageSource.player,score);
+			SWWMCredits.Give(src.player,score);
 			if ( scr ) scr.score = score;	// update final score
 			if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
 			{
 				allkills = true;
-				SWWMCredits.Give(e.DamageSource.player,1000);
-				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),e.DamageSource.player.GetUserName(),1000);
-				SWWMScoreObj.Spawn(1000,e.DamageSource.Vec3Offset(0,0,e.DamageSource.Height/2));
+				SWWMCredits.Give(src.player,1000);
+				Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),src.player.GetUserName(),1000);
+				SWWMScoreObj.Spawn(1000,src.Vec3Offset(0,0,src.Height/2));
 			}
 			spreecount[pnum]++;
 			if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
@@ -1172,11 +1153,8 @@ Class SWWMHandler : EventHandler
 	{
 		if ( e.Thing is 'Inventory' )
 			CopyFloatBob(e.Thing);
-		if ( swwm_doomfall && e.Thing.bISMONSTER && !level.monsterfallingdamage )
-			ForcedFallerDamager.TrackBody(e.Thing);
-		// alternate form without extra thinker, just needs PR #1153
-		//if ( swwm_doomfall && e.Thing.bISMONSTER )
-		//	e.Thing.bFALLDAMAGE = true;
+		if ( swwm_doomfall && e.Thing.bISMONSTER )
+			e.Thing.bFALLDAMAGE = true;
 		if ( e.Thing is 'Key' )
 		{
 			DoKeyTagFix(e.Thing);

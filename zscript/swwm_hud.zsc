@@ -28,7 +28,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMVanillaBossHandler bosshnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -728,7 +728,8 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !proj.IsInFront() ) continue;
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			tag = targ.mytag;
-			if ( targ.legged )
+			if ( !legspoil ) legspoil = CVar.GetCVar('swwm_ldspoil',players[consoleplayer]);
+			if ( targ.legged && (targ.mutated || legspoil.GetBool()) )
 			{
 				if ( StringTable.Localize("$SWWM_LEGPREFIX") == "R" ) tag = tag..StringTable.Localize("$SWWM_LEG");
 				else tag = StringTable.Localize("$SWWM_LEG")..tag;

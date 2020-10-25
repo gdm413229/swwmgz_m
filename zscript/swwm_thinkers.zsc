@@ -780,7 +780,7 @@ Class SWWMCombatTracker : Thinker
 	Vector3 pos, prevpos, oldpos, oldprev;
 	PlayerInfo myplayer;
 	SWWMCombatTracker prev, next;
-	bool legged;
+	bool legged, mutated;
 	int tcnt;
 	double height;
 	transient CVar funtags, maxdist;
@@ -903,6 +903,16 @@ Class SWWMCombatTracker : Thinker
 				legged = true;
 				// adjust for health inflation
 				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
+			}
+		}
+		if ( legged && !mutated )
+		{
+			// check inventory regularly to mark as mutated
+			for ( Inventory i=mytarget.inv; i; i=i.inv )
+			{
+				if ( i.GetClassName() != "LDLegendaryMonsterTransformed" ) continue;
+				mutated = true;
+				Console.Printf(StringTable.Localize("$SWWM_LTFORM"),mytag);
 			}
 		}
 		lasthealth = mytarget.Health;

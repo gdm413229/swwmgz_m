@@ -753,7 +753,7 @@ Class SWWMUtility
 	static play void DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
 	{
 		// debug, display radius sphere
-		if ( swwm_explosiondebug )
+		if ( swwm_debugblast )
 		{
 			let s = Actor.Spawn("RadiusDebugSphere",Source.pos);
 			s.Scale *= ExplosionRadius;

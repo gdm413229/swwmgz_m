@@ -1049,7 +1049,6 @@ Class SWWMTeleportFog : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SetOrigin(Vec3Offset(0,0,28),false);
 		A_StartSound("misc/teleport",CHAN_VOICE);
 		Spawn("TeleLight",pos);
 		if ( swwm_simplefog ) SetStateLabel("Simple");
@@ -1163,7 +1162,7 @@ Class SmolInvisibleSplasher : InvisibleSplasher
 {
 	Default
 	{
-		Mass 10;
+		Mass 5;
 	}
 }
 
@@ -1241,6 +1240,8 @@ Class SWWMShadow : Actor
 
 	static void Track( Actor other )
 	{
+		// prevent infinite recursion
+		if ( other is 'SWWMShadow' ) return;
 		let s = SWWMShadow(Spawn("SWWMShadow",other.pos));
 		s.target = other;
 		s.Update(true);
@@ -1254,7 +1255,9 @@ Class SWWMShadow : Actor
 		{
 			alpha = 1.-min(1.,.006*abs(target.pos.z-pos.z));
 			alpha *= target.alpha;
-			double bscale = (target.radius/16.)*(1.-min(1.,.003*abs(target.pos.z-pos.z)));
+			double relz = target.pos.z-pos.z;
+			if ( target.bFLOATBOB ) relz += BobSin(target.FloatBobPhase)*target.FloatBobStrength;
+			double bscale = (target.radius/16.)*(1.-min(1.,.003*relz));
 			A_SetScale(bscale);
 		}
 		// update position

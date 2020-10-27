@@ -45,20 +45,31 @@ Class SMW05BigAmmo : SMW05Ammo
 
 Class SheenAmmo : Ammo
 {
-	Mixin SWWMShellAmmo;
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
 
+	override string PickupMessage()
+	{
+		String tagstr = "$T_SHEENBULLET";
+		tagstr.MakeUpper();
+		if ( Amount > 1 )
+		{
+			tagstr = tagstr.."S";
+			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
+		}
+		return StringTable.Localize(tagstr);
+	}
+
 	Default
 	{
-		Tag "$T_SHEENBULLET";
+		Tag "$T_SHEENBULLETS";
 		Stamina 400;
 		Inventory.Icon "graphics/HUD/Icons/A_SheenAmmo.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 600;
 		Ammo.BackpackAmount 50;
-		Ammo.DropAmount 100;
+		Ammo.DropAmount 50;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -70,7 +81,7 @@ Class SheenAmmo : Ammo
 	}
 }
 
-Class SheenSmallAmmo: SheenAmmo
+Class SheenSmallAmmo : SheenAmmo
 {
 	Default
 	{

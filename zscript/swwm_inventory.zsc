@@ -1208,7 +1208,11 @@ Class SWWMWeapon : Weapon abstract
 		}
 		if ( !player.ReadyWeapon ) return;
 		let psp = player.GetPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		ResetPSprite(psp);
 		psp.y = WEAPONTOP;
+		// do not jump to ready state here, the weapon should do that
+		// directly once it finishes playing its select animation
 	}
 	action void A_FullLower()
 	{
@@ -1219,7 +1223,9 @@ Class SWWMWeapon : Weapon abstract
 			return;
 		}
 		let psp = player.GetPSprite(PSP_WEAPON);
+		if ( !psp ) return;
 		psp.y = WEAPONBOTTOM;
+		ResetPSprite(psp);
 		if ( player.playerstate == PST_DEAD )
 		{
 			// Player is dead, so don't bring up a pending weapon

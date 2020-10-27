@@ -254,8 +254,8 @@ ListMenu "MainMenu"
 	Position 0, 56
 	SWWMTextItemM "$MNU_NEWGAME", "n", "PlayerclassMenu"
 	SWWMTextItemM "$MNU_OPTIONS", "o", "OptionsMenu"
-	SWWMTextItemM "$MNU_LOADGAME", "l", "LoadGameMenu"
-	SWWMTextItemM "$MNU_SAVEGAME", "s", "SaveGameMenu"
+	SWWMTextItemM "$MNU_GAMEFILES", "g", "GameFilesMenu"
+	SWWMTextItemM "$MNU_INFO", "i", "SWWMHelpMenu"
 	SWWMTextItemM "$MNU_QUITGAME", "q", "QuitMenu"
 }
 ListMenu "MainMenuTextOnly"
@@ -269,9 +269,20 @@ ListMenu "MainMenuTextOnly"
 	Position 0, 56
 	SWWMTextItemM "$MNU_NEWGAME", "n", "PlayerclassMenu"
 	SWWMTextItemM "$MNU_OPTIONS", "o", "OptionsMenu"
+	SWWMTextItemM "$MNU_GAMEFILES", "g", "GameFilesMenu"
+	SWWMTextItemM "$MNU_INFO", "i", "SWWMHelpMenu"
+	SWWMTextItemM "$MNU_QUITGAME", "q", "QuitMenu"
+}
+ListMenu "GameFilesMenu"
+{
+	Class "SWWMMainMenu"
+	Size Clean
+	Font "SWWMBigFont", "White", "Sapphire"
+	Selector "graphics/DemoIcon.png", -24, 0
+	LineSpacing 28
+	Position 0, 88
 	SWWMTextItemM "$MNU_LOADGAME", "l", "LoadGameMenu"
 	SWWMTextItemM "$MNU_SAVEGAME", "s", "SaveGameMenu"
-	SWWMTextItemM "$MNU_QUITGAME", "q", "QuitMenu"
 }
 ListMenu "EpisodeMenu"
 {

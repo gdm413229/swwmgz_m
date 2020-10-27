@@ -108,7 +108,8 @@ Class mkBloodSpray : Actor
 			d.scale *= str*.15*FRandom[Blood](.6,1.4);
 		}
 		bool flying = IsTargetFlying();
-		if ( !flying ) str *= 1.-(.3/sz);
+		if ( flying ) str *= 1.-(.1/sz);
+		else str *= 1.-(.3/sz);
 		if ( (str <= .05) || ((cnt-- <= 0) && !flying) ) Destroy();
 	}
 }

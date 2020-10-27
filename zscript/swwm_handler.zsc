@@ -155,6 +155,7 @@ Class SWWMHandler : EventHandler
 	transient String curlang;
 	transient CVar funtags;
 	transient bool curfuntags;
+	transient int slotstrictwarn;
 
 	// optimization
 	OnFire fires;
@@ -581,8 +582,37 @@ Class SWWMHandler : EventHandler
 
 	override void PlayerEntered( PlayerEvent e )
 	{
-		// create some static thinkers for this player if needed
 		PlayerInfo p = players[e.playernumber];
+		// override KEYCONF-forced player classes when run with other gameplay mods (wish this was easier)
+		if ( !(p.mo is 'Demolitionist') )
+		{
+			// make sure it's defined here, so special purpose classes (player chunks, scripted overrides) are respected
+			for ( int i=0; i<PlayerClasses.Size(); i++ )
+			{
+				if ( !(p.mo is PlayerClasses[i].Type) ) continue;
+				// perform a hotswap, code adapted from my .flow player morph in spooktober
+				let n = PlayerPawn(Actor.Spawn("Demolitionist",p.mo.pos));
+				n.player = p;
+				n.angle = p.mo.angle;
+				n.pitch = p.mo.pitch;
+				p.camera = n;
+				p.mo.Destroy();
+				p.mo = n;
+				n.GiveDefaultInventory();
+				let e = Weapon(n.FindInventory("ExplodiumGun"));
+				if ( e )
+				{
+					p.ReadyWeapon = null;
+					p.PendingWeapon = e;
+					n.BringUpWeapon();
+				}
+				// warn if strict KEYCONF is enabled
+				if ( setslotstrict && (p == players[consoleplayer]) )
+					slotstrictwarn = gametic+300;
+				break;
+			}
+		}
+		// create some static thinkers for this player if needed
 		SWWMTradeHistory th = SWWMTradeHistory.Find(p);
 		if ( !th )
 		{
@@ -1333,7 +1363,8 @@ Class SWWMHandler : EventHandler
 				if ( s.bDEHACKED ) dehackery = true;
 				if ( s.NextState == s ) break;
 			}
-			if ( !dehackery ) e.Replacement = 'SWWMHangingKeen';
+			if ( dehackery ) return;
+			e.Replacement = 'SWWMHangingKeen';
 		}
 		else if ( e.Replacee is 'RedCard' )
 		{
@@ -1583,6 +1614,10 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee == 'GreenArmor') || (e.Replacee == 'SilverShield') || (e.Replacee == 'MeshArmor') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee == 'BlueArmor') || (e.Replacee == 'FalconShield') || (e.Replacee == 'EnchantedShield') ) e.Replacement = 'WarArmorItem';
 		else if ( (e.Replacee == 'ArtiPork') || (e.Replacee == 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleport') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'ChanceboxSpawner';
+		else return;
+		// this last part is kind of ugly, but it works
+		// guarantees that OUR replacements are all final
+		e.IsFinal = true;
 	}
 
 	override void NetworkProcess( ConsoleEvent e )
@@ -2107,6 +2142,20 @@ Class SWWMHandler : EventHandler
 		if ( !statusbar || !(statusbar is 'SWWMStatusBar') ) return;
 		SWWMStatusBar(statusbar).viewpos = e.viewpos;
 		SWWMStatusBar(statusbar).viewrot = (e.viewangle,e.viewpitch,e.viewroll);
+		if ( slotstrictwarn && (gametic < slotstrictwarn) )
+		{
+			String str = StringTable.Localize("$SWWM_SETSLOTSTRICT");
+			double t = (slotstrictwarn-(gametic+e.FracTic))/20.;
+			double alph = clamp(t,0.,1.);
+			BrokenLines l = newsmallfont.BreakLines(str,300);
+			double yy = (200-l.Count()*newsmallfont.GetHeight())/2;
+			for ( int i=0; i<l.Count(); i++ )
+			{
+				double xx = (320-l.StringWidth(i))/2;
+				Screen.DrawText(newsmallfont,Font.CR_UNTRANSLATED,xx,yy,l.StringAt(i),DTA_Clean,true,DTA_Alpha,alph);
+				yy += newsmallfont.GetHeight();
+			}
+		}
 	}
 
 	// various shaders

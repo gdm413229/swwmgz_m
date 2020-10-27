@@ -31,6 +31,7 @@ Class SWWMHelpMenu : GenericMenu
 		PAGE_ARSENAL2,
 		PAGE_ARSENAL3,
 		PAGE_TECH,
+		PAGE_TIPS,
 		PAGE_KBASE,
 		NUM_HELP_PAGES
 	};
@@ -180,12 +181,16 @@ Class SWWMHelpMenu : GenericMenu
 			hdr = StringTable.Localize("$SWWM_HELP_TECH");
 			txt = StringTable.Localize("$SWWM_HELP_TECHTXT");
 			break;
+		case PAGE_TIPS:
+			hdr = StringTable.Localize("$SWWM_HELP_TIPS");
+			txt = StringTable.Localize("$SWWM_HELP_TIPSTXT");
+			break;
 		}
 		if ( txt && hdr )
 		{
 			l = fnt.BreakLines(txt,480);
 			lh = l.Count()*h;
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(hdr)/2,origin.y+200-(h*4+lh)/2,hdr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+320-fnt.StringWidth(hdr)/2,origin.y+133-(h*3+lh)/2,hdr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			for ( int i=0; i<l.Count(); i++ )
 			{
 				int len = l.StringWidth(i);
@@ -193,13 +198,13 @@ Class SWWMHelpMenu : GenericMenu
 			}
 			for ( int i=0; i<l.Count(); i++ )
 			{
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+200-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+133-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 				y += h;
 			}
 			return;
 		}
 		txt = String.Format("(Unknown help page #%d)",page);
-		Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(txt)/2,origin.y+200-h/2,txt,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+		Screen.DrawText(fnt,Font.CR_GOLD,origin.x+320-fnt.StringWidth(txt)/2,origin.y+133-h/2,txt,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 	}
 
 	override void Drawer()
@@ -216,10 +221,10 @@ Class SWWMHelpMenu : GenericMenu
 		}
 		else Screen.Dim("Black",.8,0,0,Screen.GetWidth(),Screen.GetHeight());
 		double hs;
-		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 400) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.)/2.;
-		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 266) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/133.)),1.)/2.;
+		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/266.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
-		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		Vector2 origin = (ss.x-640,ss.y-266)/2.;
 		double alph = clamp((gametic-fadetic)*(5./Thinker.TICRATE),0.,1.);
 		if ( (prevpage == -1) || (alph >= 1.) ) DrawPage(curpage,ss,origin);
 		else

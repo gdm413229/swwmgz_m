@@ -43,6 +43,8 @@ Class SWWMTitleStuff : EventHandler
 			Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/Thinker.TICRATE)*.05,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
 		}
 		else Screen.Dim("Black",1.,0,0,Screen.GetWidth(),Screen.GetHeight());
+		double hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		double ar = Screen.GetAspectRatio();
 		tsize = TexMan.GetScaledSize(tex[0]);
 		double sar = tsize.x/tsize.y;
@@ -55,11 +57,11 @@ Class SWWMTitleStuff : EventHandler
 		String str = StringTable.Localize("$SWWM_TITLEPRESENTS");
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-10,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-16,0.,1.);
-		Screen.DrawText(fnt,Font.CR_WHITE,(320-fnt.StringWidth(str))/2,(200-fnt.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+		Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-fnt.StringWidth(str))/2,(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 		str = StringTable.Localize("$SWWM_TITLEMODBY");
 		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-18,0.,1.);
 		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-24,0.,1.);
-		Screen.DrawText(fnt,Font.CR_WHITE,(320-fnt.StringWidth(str))/2,(200-fnt.GetHeight())/2,str,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+		Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-fnt.StringWidth(str))/2,(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 		tsize = TexMan.GetScaledSize(tex[1]);
 		sar = tsize.x/tsize.y;
 		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
@@ -81,34 +83,34 @@ Class SWWMTitleStuff : EventHandler
 		// estimate scrool length
 		double llen = fnt.StringWidth(scrolls[sline]);
 		double soffset = 40*((level.maptime+e.FracTic)/Thinker.TICRATE-sbase);
-		if ( soffset > llen+320 )
+		if ( soffset > llen+ss.x )
 		{
 			sline++;
 			if ( sline >= scrolls.Size() ) sline = 0;
 			sbase = (level.maptime+e.FracTic)/Thinker.TICRATE;
 			soffset = 0;
 		}
-		double xx = 320-soffset;
+		double xx = ss.x-soffset;
 		int tlen = scrolls[sline].CodePointCount();
 		for ( int i=0, pos=0; i<tlen; i++ )
 		{
 			int ch;
 			[ch, pos] = scrolls[sline].GetNextCodePoint(pos);
-			if ( (xx > -8) && (xx < 320) )
+			if ( (xx > -8) && (xx < ss.x) )
 			{
 				for ( double trl = .1; trl < 1.; trl += .04 )
 				{
-					double yy = 160+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl));
-					alf = max(0,1.-abs(160-xx)/160.)**.5;
+					double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl));
+					alf = max(0,1.-abs((ss.x/2)-xx)/(ss.x/2))**.5;
 					alf *= .2*trl;
 					double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl))-16*(1.-trl);
-					Screen.DrawChar(fnt,Font.CR_BLUE,xx-xxofs,yy,ch,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf,DTA_LegacyRenderStyle,STYLE_Add);
+					Screen.DrawChar(fnt,Font.CR_BLUE,xx-xxofs,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf,DTA_LegacyRenderStyle,STYLE_Add);
 				}
-				double yy = 160+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE);
-				alf = max(0,1.-abs(160-xx)/160.)**.5;
+				double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE);
+				alf = max(0,1.-abs((ss.x/2)-xx)/(ss.x/2))**.5;
 				double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE);
 				Color c = Color(int(127.5+127.5*sin(10*i+80*(level.maptime+e.FracTic)/Thinker.TICRATE)),0,0);
-				Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx-xxofs,yy,ch,DTA_VirtualWidth,320,DTA_VirtualHeight,200,DTA_KeepRatio,true,DTA_Alpha,alf);
+				Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx-xxofs,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 			}
 			xx += fnt.GetCharWidth(ch)-1;	// keming
 		}

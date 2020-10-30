@@ -115,7 +115,11 @@ Class SWWMStatScreen : StatusScreen abstract
 			Array<Int> ents;
 			ents.Clear();
 			for ( int i=1; i<=maxtip; i++ )
+			{
+				// skip DLC tips for now
+				if ( (i >= 61) && (i <= 68) ) continue;
 				ents.Push(i);
+			}
 			if ( pdata.lasttip.Size() >= maxtip )
 			{
 				// exclude last one, start over

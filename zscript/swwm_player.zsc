@@ -3149,7 +3149,7 @@ Class SWWMGesture : SWWMWeapon
 			}
 			if ( pt.target.GiveBody(healamt,pt.target.GetSpawnHealth()) )
 			{
-				SWWMScoreObj.Spawn(healamt,pt.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+target.Height/2),Font.CR_BLUE);
+				SWWMScoreObj.Spawn(healamt,pt.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+pt.target.Height/2),Font.CR_BLUE);
 				SWWMHandler.DoFlash(pt.target,Color(32,224,128,255),10);
 			}
 		}

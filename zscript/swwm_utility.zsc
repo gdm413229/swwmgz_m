@@ -750,7 +750,8 @@ Class SWWMUtility
 
 	// complete spherical and more accurate replacement of A_Explode
 	// 100% free of the buggery GZDoom's own splash damage has
-	static play void DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
+	// returns the number of shootables hit/killed
+	static play int, int DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
 	{
 		// debug, display radius sphere
 		if ( swwm_debugblast )
@@ -769,6 +770,7 @@ Class SWWMUtility
 		double brange = 1./(ExplosionRadius-FullDamageRadius);
 		Actor Instigator = (flags&DE_NOTMISSILE)?Source:Source.target;
 		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius*2);	// test with doubled radius, just to be sure
+		int nhit = 0, nkill = 0;
 		while ( bi.Next() )
 		{
 			Actor a = bi.Thing;
@@ -815,11 +817,14 @@ Class SWWMUtility
 				if ( (flags&DE_BLAST) && a.bCANBLAST && !a.bDONTBLAST ) a.bBLASTED = true;
 			}
 			// hit it
+			nhit++;
 			int dmg = int(Damage*damagescale);
 			if ( dmg <= 0 ) continue;	// no harm
 			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
-			if ( !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
+			if ( a && !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
+			if ( !a || (a.Health <= 0) ) nkill++;
 		}
+		return nhit, nkill;
 	}
 
 	static play bool InPlayerFOV( PlayerInfo p, Actor a, double maxdist = 0. )
@@ -843,7 +848,7 @@ Class SWWMUtility
 		{
 			if ( (p != -1) && (p == consoleplayer) )
 			{
-				Console.Printf("\cfSORRY NOTHING\c-");
+				Console.Printf("\cxSORRY NOTHING\c-");
 				S_StartSound("misc/trombone",CHAN_VOICE,CHANF_UI);
 			}
 			return true;

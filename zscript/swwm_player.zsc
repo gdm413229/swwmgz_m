@@ -80,6 +80,7 @@ Class Demolitionist : PlayerPawn
 		DamageFactor "Drowning", 0.;
 		DamageFactor "Poison", 0.;
 		DamageFactor "PoisonCloud", 0.;
+		DamageFactor "Falling", 0.;
 		Demolitionist.DashFuel 240.;
 		+NOBLOOD;
 		+DONTGIB;
@@ -541,6 +542,10 @@ Class Demolitionist : PlayerPawn
 	override void Tick()
 	{
 		Super.Tick();
+		// can't be poisoned
+		PoisonDurationReceived = 0;
+		PoisonPeriodReceived = 0;
+		PoisonDamageReceived = 0;
 		if ( !player ) return;
 		if ( !selflight )
 		{
@@ -990,9 +995,6 @@ Class Demolitionist : PlayerPawn
 		// no damage whatsoever
 		if ( scriptedinvul )
 			return 0;
-		// completely nullify non-lethal fall damage
-		if ( (mod == 'Falling') && (damage < TELEFRAG_DAMAGE) )
-			damage = 0;
 		if ( damage <= 0 )
 		{
 			lastdamage = 0;

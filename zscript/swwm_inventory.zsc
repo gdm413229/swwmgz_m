@@ -1144,7 +1144,7 @@ Class SWWMWeapon : Weapon abstract
 		if ( ch_hp.GetInt() >= 2 )
 		{
 			int hp = Clamp(Owner.Health,0,200);
-			double sat = (hp<150)?1.:(1.-(health-150)/100.);
+			double sat = (hp<150)?1.:(1.-(hp-150)/100.);
 			Vector3 rgb = SWWMUtility.HSVtoRGB((hp/300.,sat,1.));
 			col = Color(int(rgb.x*255),int(rgb.y*255),int(rgb.z*255));
 		}
@@ -1165,7 +1165,8 @@ Class SWWMWeapon : Weapon abstract
 			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
 			else col = Color(0,255,0);
 		}
-		return ctr.Results.HitPos, col;
+		if ( ctr.Results.HitType == TRACE_HitNone ) return level.Vec3Offset(origin,x*10000.), col;
+		else return ctr.Results.HitPos, col;
 	}
 	// where the trace is coming from relative to eyes
 	virtual clearscope Vector3 GetTraceOffset() const

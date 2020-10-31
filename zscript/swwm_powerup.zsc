@@ -91,7 +91,7 @@ Class GrilledCheeseSandwich : Inventory
 		}
 		if ( (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
-			if ( (damageType == 'Falling') || (damageType == 'InstantDeath') )
+			if ( damageType == 'InstantDeath' )
 				SafeTeleport();	// get out of pits
 			newdamage = 0;
 			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);

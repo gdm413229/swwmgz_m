@@ -131,7 +131,7 @@ A ludicrously overkill weapon, courtesy of the always-overkill **Blackmann Arms*
 
 People like to nickname it the ***"Ballbuster"***. You'll see why.
 
-### Eviscerator (slot 5) ~ Replaces Chaingun, Dragon Claw, Hammer of Retribution
+### Eviscerator (slot 5) ~ Replaces Chaingun, Dragon Claw, Quietus (hilt)
 ![](docimg/eviscerator.png)
 
 The pleasure of shrapnel spamming. Make hot steaming pain rain upon your enemies.
@@ -149,7 +149,7 @@ This weapon made the **Unreal Engine** cry, so **GZDoom** may suffer a lot too.
 
 Little bundles of fun (in hot lead form) found either as single units (sometimes bunched up) or six-packs. There is no explanation for why they have an **owo** face scribbled on.
 
-### Hellblazer (slot 6) ~ Replaces Rocket Launcher, Phoenix Rod, Firestorm
+### Hellblazer (slot 6) ~ Replaces Rocket Launcher, Phoenix Rod, Hammer of Retribution
 ![](docimg/hellblazer.png)
 
 Another signature weapon of the **SWWM** series. This time in its third and far more improved revision.
@@ -172,7 +172,7 @@ Ammo for the **Hellblazer**, found either as single units or packs. There are fo
  - ***"Ravager"* incendiary bombs:** Wide range, the flames will engulf pretty much everything around itself.
  - ***"Slayer"* warheads:** Frickin' nukes, you better keep your distance, because they are ***STRONG***.
 
-### Biospark Carbine (slot 7) ~ Replaces Plasma Rifle, Hellstaff, Arc of Death
+### Biospark Carbine (slot 7) ~ Replaces Plasma Rifle, Hellstaff, Firestorm
 ![](docimg/biospark.png)
 
 A relic from the olden days of **UnSX**. A potent energy weapon that uses what's best described as *"sentient lightning"*.
@@ -190,7 +190,7 @@ If the beam hits either of the other energy blobs, they will detonate with highl
 
 Ammunition for the Biospark Carbine. They contain a lot of energy, despite the small size.
 
-### Silver Bullet JET (slot 8) ~ Replaces Plasma Rifle, Hellstaff, Quietus (hilt)
+### Silver Bullet JET (slot 8) ~ Replaces Plasma Rifle, Hellstaff, Arc of Death
 ![](docimg/silverbullet.png)
 
 The definitive model of **Blackmann Arms**'s legendary **Silver Bullet** series. A lighter (43kg), lower caliber (1.150) variant of the former 1.350 **BEHEMOTH** model, discontinued due to being seen as too impractical.
@@ -365,7 +365,7 @@ Each of these you pick up increase ammo capacity by half of its base value, stac
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
 ![](docimg/fabricator.png)
 
-Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons.
+Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the Ynykron).
 
 ### Lamp ~ Replaces Lite-Amp, Torch
 ![](docimg/lamp.png)
@@ -380,7 +380,7 @@ Reveals the entire layout of the map and shows key locations in the HUD. Also al
 ## The Collectibles
 ![](docimg/chancebox.png)
 
-Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. Each of them will provide you with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
+Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. While some will drop very useful goodies, one among them will provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
 
 ***(Do note that this feature is currently not fully implemented, there may be missing models)***
 
@@ -430,11 +430,11 @@ A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet
 
 ### I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie!? (¥1600) [Hexen]
 
-A oneshot manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
+A short manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
 
 ### Kirin Plush (¥20000) [Hexen]
 
-The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart.
+The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart. Like the Saya plush, also emits a cute giggle when squeezed.
 
 ## The HUD
 

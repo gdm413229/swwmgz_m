@@ -43,6 +43,10 @@ Mixin Class SWWMUseToPickup
 	{
 		Vector3 itempos = Vec3Offset(0,0,Height/2),
 			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
 		Touch(user);
 		// we got picked up
 		if ( bDestroyed || Owner || !bSPECIAL )

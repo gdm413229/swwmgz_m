@@ -1370,7 +1370,7 @@ Class TheBall : Actor
 			crit = true;
 		}
 		SWWMUtility.DoKnockback(victim,vel.unit(),slamforce);
-		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && is_schutt);
+		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && !victim.bDORMANT && is_schutt);
 		int newdmg = victim.DamageMobj(self,target,dmg,'Concussion',crit?(DMG_THRUSTLESS|DMG_FOILINVUL):DMG_THRUSTLESS);	// crits ignore invulnerability
 		Vector3 dir = -vel.unit();
 		// slam jam
@@ -1508,7 +1508,7 @@ Class TheBall : Actor
 		if ( BlockingMobj )
 		{
 			bcefact *= .7;
-			if ( !BlockingMobj.bINVULNERABLE && !BlockingMobj.bNOBLOOD )
+			if ( !BlockingMobj.bINVULNERABLE && !BlockingMobj.bNOBLOOD && !BlockingMobj.bDORMANT )
 				bcefact *= .6;
 		}
 		vel = (vel dot HitNormal)*HitNormal*FRandom[Spreadgun](-1.8,-1.)+vel;
@@ -2103,7 +2103,7 @@ Class Spreadgun : SWWMWeapon
 			int realdmg = dmg?dmg:t.HitList[i].HitDamage;
 			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large&&!swwm_shotgib);
 			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),mm*FRandom[Spreadgun](0.4,1.2));
-			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE )
+			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bDORMANT || t.HitList[i].HitActor.bINVULNERABLE )
 			{
 				let p = Spawn(impact,t.HitList[i].HitLocation);
 				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;

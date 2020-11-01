@@ -1256,7 +1256,7 @@ Class LampMoth : Actor
 			Vector3 awaydir = level.Vec3Diff(target.Vec3Offset(0,0,target.height),pos).unit();
 			vel += awaydir*8.;
 			int dmg = target.DamageMobj(self,self,GetMissileDamage(0,0),'Melee',Random[Moth](0,8)?DMG_NO_PAIN:0);
-			if ( !target.bNOBLOOD )
+			if ( !target.bNOBLOOD && !target.bDORMANT && !target.bINVULNERABLE )
 			{
 				target.TraceBleed(dmg,self);
 				target.SpawnBlood(pos,atan2(awaydir.y,awaydir.x)+180,dmg);

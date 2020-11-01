@@ -376,8 +376,7 @@ Class DeepImpact : SWWMWeapon
 			Vector3 avgdir = list[i].avgdir/list[i].nhits;
 			double avgdist = list[i].avgdist/list[i].nhits;
 			double dmg = 5000.*(1.-clamp(avgdist/200.,0.,1.));
-			if ( !list[i].a.bDONTTHRUST && (list[i].a.mass < LARGE_MASS) )
-				list[i].a.vel += ((avgdir+(0,0,.2))*dmg/max(50,list[i].a.mass));
+			SWWMUtility.DoKnockback(list[i].a,avgdir,dmg);
 			list[i].a.DamageMobj(invoker,self,int(dmg/350.),'Push',DMG_THRUSTLESS);
 		}
 		let ti = ThinkerIterator.Create("Actor");

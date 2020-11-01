@@ -774,7 +774,7 @@ Class SilverBullet : SWWMWeapon
 			int realdmg = t.HitList[i].HitDamage;
 			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',false,DMG_FOILINVUL);
 			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),realdmg*20.*FRandom[SilverBullet](.8,1.2));
-			if ( t.HitList[i].HitActor && !t.HitList[i].HitActor.bNOBLOOD )
+			if ( t.HitList[i].HitActor && !t.HitList[i].HitActor.bNOBLOOD && !t.HitList[i].HitActor.bDORMANT )
 			{
 				t.HitList[i].HitActor.TraceBleed(realdmg,self);
 				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
@@ -891,7 +891,7 @@ Class SilverBullet : SWWMWeapon
 			{
 				int dmg = t.Results.HitActor.DamageMobj(invoker,self,invoker.proneme?1000:500,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
 				SWWMUtility.DoKnockback(t.Results.HitActor,t.Results.HitVector+(0,0,.025),dmg*20.*FRandom[SilverBullet](.8,1.2));
-				if ( t.Results.HitActor && !t.Results.HitActor.bNOBLOOD )
+				if ( t.Results.HitActor && !t.Results.HitActor.bNOBLOOD && !t.Results.HitActor.bDORMANT )
 				{
 					t.Results.HitActor.TraceBleed(dmg,self);
 					t.Results.HitActor.SpawnBlood(t.Results.HitPos,atan2(t.Results.HitVector.y,t.Results.HitVector.x)+180,dmg);

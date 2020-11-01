@@ -737,6 +737,8 @@ Class SWWMUtility
 	{
 		if ( !Victim )
 			return;
+		if ( Victim.bDORMANT )	// no dormant knockback
+			return;
 		if ( !Victim.bSHOOTABLE && !Victim.bVULNERABLE )
 			return;
 		if ( Victim.bDONTTHRUST || (Victim.Mass >= Actor.LARGE_MASS) )

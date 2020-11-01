@@ -397,7 +397,7 @@ Class ExplodiumGun : SWWMWeapon
 			int dmg = 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-			if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
+			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
 			{
 				let p = Spawn("SWWMBulletImpact",d.HitLocation);
 				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
@@ -816,7 +816,7 @@ Class DualExplodiumGun : SWWMWeapon
 			int dmg = 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-			if ( d.HitActor.bNOBLOOD || d.HitActor.bINVULNERABLE )
+			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
 			{
 				let p = Spawn("SWWMBulletImpact",d.HitLocation);
 				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;

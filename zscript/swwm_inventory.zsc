@@ -1283,7 +1283,7 @@ Class SWWMWeapon : Weapon abstract
 			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 			int quakin = raging?8:2;
 			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
-			if ( !d.HitActor.bNOBLOOD && (raging || !d.HitActor.bINVULNERABLE) )
+			if ( !d.HitActor.bNOBLOOD && !d.HitActor.bDORMANT && (raging || !d.HitActor.bINVULNERABLE) )
 			{
 				d.HitActor.TraceBleed(dmg,invoker);
 				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);

@@ -170,6 +170,9 @@ Class SWWMHandler : EventHandler
 	// prevents revived monsters from spawning in more golden shells
 	Array<Actor> alreadygold;
 
+	// attempt to optimize Ynykron singularity suction
+	Array<Actor> suckableactors;
+
 	static void QueueCasing( SWWMCasing c )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -1209,6 +1212,8 @@ Class SWWMHandler : EventHandler
 			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
 				SWWMShadow.Track(e.Thing);
 		}
+		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE )
+			SuckableActors.Push(e.Thing);
 	}
 
 	override void PostUiTick()

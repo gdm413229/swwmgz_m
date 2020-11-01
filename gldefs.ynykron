@@ -3,3 +3,15 @@ HardwareShader Texture "models/YnykronSmoke.png"
 	Shader "shaders/glsl/YnykronSmoke.fp"
 	Texture "smoketex" "models/YnykronSmokeNoise.png"
 }
+
+PointLight YNYKRONHALOLIGHT
+{
+	Color 0.875 0.125 1.0
+	Size 400
+	Attenuate 1
+}
+
+Object YnykronHalo
+{
+	Frame "MHAL" { light "YNYKRONHALOLIGHT" }
+}

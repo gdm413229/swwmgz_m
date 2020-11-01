@@ -989,7 +989,7 @@ Class CandyGun : SWWMWeapon
 			int dmg = 500;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,72000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS|DMG_FOILINVUL,atan2(d.HitDir.y,d.HitDir.x));
-			if ( d.HitActor.bNOBLOOD )
+			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT )
 			{
 				let p = Spawn("SWWMBulletImpact",d.HitLocation);
 				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;

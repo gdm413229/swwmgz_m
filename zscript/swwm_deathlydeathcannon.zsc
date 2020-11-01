@@ -1154,7 +1154,6 @@ Class YnykronHalo : Actor
 		}
 		SetOrigin(target.pos,true);
 		A_SetScale(1.5*target.scale.x);
-		A_AttachLight('YNYKRONHALOLIGHT',DynamicLight.PointLight,Color(224,32,255),int(900*scale.x),0,DYNAMICLIGHT.LF_ATTENUATE);
 		let h = Spawn("YnykronHaloTail",pos);
 		h.scale = scale;
 	}
@@ -1200,7 +1199,7 @@ Class GatherDust : Actor
 			if ( distto < (32.*target.scale.x) )
 			{
 				// sucked in
-				target.specialf2 += FRandom[ExploS](.2,2.);
+				target.specialf2 += FRandom[ExploS](.5,5.);
 				Destroy();
 				return;
 			}
@@ -1322,22 +1321,6 @@ Class YnykronVoidBeam : Actor
 				dp = deltaangle(pitch,basept+FRandom[Ynykron](-5,5));
 			angle += da*.2;
 			pitch += dp*.2;
-			// seek a target
-			double closest = double.infinity;
-			let bt = BlockThingsIterator.Create(self,8000);
-			Vector3 dir = swwm_CoordUtil.GetAxes(pitch,angle,0);
-			tracer = null;
-			while ( bt.Next() )
-			{
-				let a = bt.Thing;
-				double dist;
-				if ( !a || !a.bSHOOTABLE || (!a.bISMONSTER && !(a is 'BossBrain') && !a.player) || (a.Health <= 0) || ((dist=Distance3D(a)) > 8000) || !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
-				if ( dist > closest ) continue;
-				Vector3 dirto = level.Vec3Diff(pos,a.Vec3Offset(0,0,a.height/2));
-				if ( dir dot dirto < .2 ) continue;
-				closest = dist;
-				tracer = a;
-			}
 			if ( lifetimer == -1 )
 			{
 				A_FadeIn(FRandom[Ynykron](.003,.05));
@@ -1405,7 +1388,6 @@ Class YnykronVoidBeam : Actor
 			else nextbeam.SetOrigin(level.Vec3Offset(pos,x*16*scale.x),true);
 			nextbeam.target = target;
 			nextbeam.master = master;
-			nextbeam.tracer = tracer;
 			YnykronVoidBeam(nextbeam).basebeam = basebeam;
 			YnykronVoidBeam(nextbeam).prevbeam = self;
 			YnykronVoidBeam(nextbeam).maxlen = maxlen;
@@ -1415,12 +1397,6 @@ Class YnykronVoidBeam : Actor
 			nextbeam.frame = 1;
 			Vector3 newdir = t.Results.HitVector;
 			newdir = (newdir+.4*(FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1),FRandom[Ynykron](-1,1))).unit();
-			if ( tracer && (tracer.Health > 0) )
-			{
-				Vector3 dirto = level.Vec3Diff(nextbeam.pos,tracer.Vec3Offset(0,0,tracer.Height/2));
-				dirto /= dirto.length();
-				newdir = (newdir+dirto*FRandom[Ynykron](0.,.5)).unit();
-			}
 			double da = deltaangle(nextbeam.angle,atan2(newdir.y,newdir.x)),
 				dp = deltaangle(nextbeam.pitch,asin(-newdir.z));
 			nextbeam.angle += da*.2;
@@ -2104,8 +2080,8 @@ Class YnykronSingularityExplosion : Actor
 
 Class YnykronSingularity : Actor
 {
-	const MAXBEAMS = 20;
-	const MAXCLOUDS = 500;
+	const MAXBEAMS = 10;
+	const MAXCLOUDS = 300;
 
 	Actor beamers[MAXBEAMS];
 	Actor clouds[MAXCLOUDS];
@@ -2141,7 +2117,10 @@ Class YnykronSingularity : Actor
 		if ( isFrozen() ) return;
 		Vector3 newpos;
 		if ( !mt ) mt = new("SimpleMoveTracer");
-		mt.Trace(pos,CurSector,vel,1.,0);
+		Vector3 dir = vel;
+		double dist = vel.length();
+		dir /= dist;
+		mt.Trace(pos,CurSector,dir,dist,0);
 		if ( mt.Results.HitType == TRACE_HitNone ) newpos = level.Vec3Offset(pos,vel);
 		else newpos = level.Vec3Offset(mt.Results.HitPos,-mt.Results.HitVector);
 		if ( level.IsPointInLevel(newpos) )
@@ -2165,7 +2144,7 @@ Class YnykronSingularity : Actor
 	void A_SingularityTick()
 	{
 		// gather dust particles (minor "background" mass gain)
-		int numpt = int(max(4,32*scale.x));
+		int numpt = int(max(4,20*scale.x));
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
@@ -2254,71 +2233,91 @@ Class YnykronSingularity : Actor
 			beamers[i].master = self;
 		}
 		// suck in reachable targets
-		let bi = BlockThingsIterator.Create(self,12800*scale.x);
-		while ( bi.Next() )
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
 		{
-			let a = bi.Thing;
-			if ( !a || (a == self) || (!a.bSHOOTABLE && !(a is 'YnykronSingularity')) || !SWWMUtility.SphereIntersect(a,pos,20000.*scale.x) || !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
-				continue;
-			if ( a.player && (a.player.cheats&CF_NOCLIP2) )	// for safety
-				continue;
-			double capmass = a.mass;
-			// succ
-			if ( SWWMUtility.SphereIntersect(a,pos,32.*scale.x) )
+			for ( int i=0; i<hnd.SuckableActors.Size(); i++ )
 			{
-				// merge with other vortices
-				if ( a is 'YnykronSingularity' )
+				let a = hnd.SuckableActors[i];
+				if ( !a )
 				{
-					critmass += YnykronSingularity(a).critmass;
-					specialf2 += a.specialf2;
-					a.Destroy();
+					hnd.SuckableActors.Delete(i--);
 					continue;
 				}
-				// voodoo dolls just get erased (how convenient)
-				// otherwise instantly vaporize the fucker
-				if ( a.player && (a.player.mo != a) ) a.Destroy();
-				else if ( a.CountInv("GrilledCheeseSandwich") > 0 )
+				if ( a.bDORMANT || (a.Health <= 0) || (a == self) || !SWWMUtility.SphereIntersect(a,pos,20000.*scale.x) || !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+					continue;
+				if ( a.player && (a.player.cheats&CF_NOCLIP2) )	// for safety
+					continue;
+				double capmass = a.mass;
+				// succ
+				if ( SWWMUtility.SphereIntersect(a,pos,32.*scale.x) )
 				{
-					// force use the sandwich, warp to safe spot
-					let gc = GrilledCheeseSandwich(a.FindInventory("GrilledCheeseSandwich"));
-					gc.SafeTeleport(true);
-					a.A_StartSound(gc.UseSound,CHAN_ITEMEXTRA);
-					gc.DoTheThing(true);
-					gc.Amount--;
+					// merge with other vortices
+					if ( a is 'YnykronSingularity' )
+					{
+						critmass += YnykronSingularity(a).critmass;
+						specialf2 += a.specialf2;
+						a.Destroy();
+						continue;
+					}
+					// delet missile
+					if ( a.bMISSILE )
+					{
+						specialf2 += 10.;
+						a.Destroy();
+						continue;
+					}
+					// voodoo dolls just get erased (how convenient)
+					// otherwise instantly vaporize the fucker
+					if ( a.player && (a.player.mo != a) ) a.Destroy();
+					else if ( a.CountInv("GrilledCheeseSandwich") > 0 )
+					{
+						// force use the sandwich, warp to safe spot
+						let gc = GrilledCheeseSandwich(a.FindInventory("GrilledCheeseSandwich"));
+						gc.SafeTeleport(true);
+						a.A_StartSound(gc.UseSound,CHAN_ITEMEXTRA);
+						gc.DoTheThing(true);
+						gc.Amount--;
+					}
+					else if ( !a.FindInventory("GrilledCheeseSafeguard") ) a.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+					if ( a && (a.Health <= 0) )
+					{
+						if ( a.player ) PlayerGone.FeckOff(a);
+						// poof away, always
+						a.bINVISIBLE = true;
+						a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+						IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
+					}
+					if ( !a || (a.Health <= 0) )
+						specialf2 += min(100.,capmass*.6); // partial absorption
+					continue;
 				}
-				else if ( !a.FindInventory("GrilledCheeseSafeguard") ) a.DamageMobj(self,a,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-				if ( a && (a.Health <= 0) )
+				capmass = max(50.,a.mass);
+				Vector3 dirto = level.Vec3Diff(a.Vec3Offset(0,0,a.Height/2),pos);
+				double dist = dirto.length();
+				dirto /= dist;
+				// rip
+				if ( a && a.bSHOOTABLE && SWWMUtility.SphereIntersect(a,pos,200.*scale.x) )
+					a.DamageMobj(self,target,int(clamp(10.-dist*.05,0.,5.)),'YnykronAlt',DMG_FORCED|DMG_THRUSTLESS);
+				if ( !a ) continue;
+				// weak gravitational force as per v-field (approximate)
+				double grav = (3.*YNON_CONST*specialf2*capmass)/(dist**.5);
+				// strong gravitational force as per u-field (approximate)
+				grav += (4.*AXAN_CONST*specialf2*capmass)/(dist**2.);
+				// account for ground friction
+				if ( a.pos.z <= a.floorz )
 				{
-					if ( a.player ) PlayerGone.FeckOff(a);
-					// poof away, always
-					a.bINVISIBLE = true;
-					a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-					IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
+					double frict, movef;
+					[frict, movef] = a.GetFriction();
+					grav *= movef;
+					if ( !a.player ) dirto.z += .1;
 				}
-				if ( !a || (a.Health <= 0) )
-					specialf2 += capmass*.6;	// partial absorption
-				continue;
-			}
-			capmass = max(50.,a.mass);
-			Vector3 dirto = level.Vec3Diff(a.Vec3Offset(0,0,a.Height/2),pos);
-			double dist = dirto.length();
-			dirto /= dist;
-			// weak gravitational force as per v-field (approximate)
-			double grav = (3.*YNON_CONST*specialf2*capmass)/(dist**.5);
-			// strong gravitational force as per u-field (approximate)
-			grav += (4.*AXAN_CONST*specialf2*capmass)/(dist**2.);
-			// account for ground friction
-			if ( a.pos.z <= a.floorz )
-			{
-				double frict, movef;
-				[frict, movef] = a.GetFriction();
-				grav *= movef;
-			}
-			if ( a.mass < LARGE_MASS )
-			{
-				// v-force field compression (very rough approximation)
-				a.vel *= max(.0,1.-.03*(grav*grav)/(MION_CONST*MION_CONST));
-				a.vel += dirto*grav/(capmass*TICRATE);
+				if ( a.mass < LARGE_MASS )
+				{
+					// v-force field compression (very rough approximation)
+					a.vel *= max(.0,1.-.03*(grav*grav)/(MION_CONST*MION_CONST));
+					a.vel += dirto*grav/(capmass*TICRATE);
+				}
 			}
 		}
 		// push away from nearby geometry
@@ -2709,7 +2708,7 @@ Class Ynykron : SWWMWeapon
 
 	int chargestate;
 	double chargelevel;
-	bool inverted;
+	bool inverted, invertreload;
 
 	double ventalpha, ventfade;
 	int ventcooldown;
@@ -2910,7 +2909,7 @@ Class Ynykron : SWWMWeapon
 			int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true))) )
 				flg |= WRF_ALLOWRELOAD;
-			if ( (invoker.clipcount <= 0) || (invoker.chargestate > CS_IDLE) )
+			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && (invoker.Ammo1.Amount <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true)) )
 				flg |= WRF_NOSECONDARY;
 			if ( invoker.chargestate == CS_CHARGING )
 				flg |= WRF_NOPRIMARY;
@@ -2993,6 +2992,11 @@ Class Ynykron : SWWMWeapon
 	AltFire:
 		XZW2 A 2
 		{
+			if ( (invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+			{
+				invoker.invertreload = true;
+				return ResolveState("Reload");
+			}
 			A_StartSound("ynykron/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			return A_JumpIf(invoker.inverted,"TakeInverted");
 		}
@@ -3122,6 +3126,13 @@ Class Ynykron : SWWMWeapon
 			invoker.clipcount = 1;
 			invoker.inverted = false;
 			// no mag is dropped, depleted crystals are hazardous and should be disposed of properly
+			if ( invoker.invertreload )
+			{
+				invoker.invertreload = false;
+				invoker.inverted = true;
+				return ResolveState("PutInverted");
+			}
+			return ResolveState(null);
 		}
 		Goto PutNormal;
 	UnloadInverted:
@@ -3136,6 +3147,13 @@ Class Ynykron : SWWMWeapon
 			invoker.clipcount = 1;
 			invoker.inverted = false;
 			// no mag is dropped, depleted crystals are hazardous and should be disposed of properly
+			if ( invoker.invertreload )
+			{
+				invoker.invertreload = false;
+				invoker.inverted = true;
+				return ResolveState("PutInverted");
+			}
+			return ResolveState(null);
 		}
 		Goto PutNormal;
 	Zoom:

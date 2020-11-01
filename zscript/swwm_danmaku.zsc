@@ -262,7 +262,7 @@ Class EvisceratorChunk : Actor
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
 		if ( bAMBUSH || (vel.length() <= 5) ) return damage;
-		if ( !target.bNOBLOOD && !target.bINVULNERABLE )
+		if ( !target.bNOBLOOD && !target.bDORMANT && !target.bINVULNERABLE )
 		{
 			target.SpawnBlood(pos,AngleTo(target),damage);
 			A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.2);
@@ -297,7 +297,7 @@ Class EvisceratorChunk : Actor
 			// bleed if not gibbed (reduces effect spam)
 			if ( victim.health-amt > victim.GetGibHealth() )
 			{
-				if ( !victim.bNOBLOOD && !victim.bINVULNERABLE )
+				if ( !victim.bNOBLOOD && !victim.bDORMANT && !victim.bINVULNERABLE )
 				{
 					victim.SpawnBlood(pos,AngleTo(victim),damage);
 					A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.2);

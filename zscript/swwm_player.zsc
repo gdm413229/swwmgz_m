@@ -1071,6 +1071,14 @@ Class Demolitionist : PlayerPawn
 	}
 	override void MovePlayer()
 	{
+		if ( !player || (player.mo != self) || (player.cheats&(CF_FROZEN|CF_TOTALLYFROZEN)) )
+		{
+			dashboost = 0.;
+			if ( dashsnd ) A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
+			dashsnd = false;
+			Super.MovePlayer();
+			return;
+		}
 		bool isdashing = InStateSequence(CurState,FindState("Dash"));
 		if ( isdashing ) player.cmd.forwardmove = player.cmd.sidemove = 0;
 		if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) )

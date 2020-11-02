@@ -510,7 +510,7 @@ Class Demolitionist : PlayerPawn
 		}
 		// don't do inertial sway when in 6dof mode, causes issues
 		if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',players[consoleplayer]);
-		if ( !fly6dof.GetBool() || !((waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2)) )
+		if ( !fly6dof.GetBool() || !((waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2)) )
 		{
 			cur.x += diffang;
 			cur.y -= diffpitch;
@@ -690,7 +690,7 @@ Class Demolitionist : PlayerPawn
 		prevvelz = vel.z;
 		bool isdashing = InStateSequence(CurState,FindState("Dash"));
 		bool isboosting = InStateSequence(CurState,FindState("Jump"));
-		bNOFRICTION = (((waterlevel<2)&&(bFly||bFlyCheat&&!(player.cheats&CF_NOCLIP2)))||isdashing);
+		bNOFRICTION = (((waterlevel<2)&&(bFly&&!bFlyCheat&&!(player.cheats&CF_NOCLIP2)))||isdashing);
 		fuelcooldown = max(0,fuelcooldown-1);
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
@@ -1037,7 +1037,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override void CheckPitch()
 	{
-		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
+		if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) )
 			return;	// handled in moveplayer
 		Super.CheckPitch();
 	}
@@ -1045,7 +1045,7 @@ Class Demolitionist : PlayerPawn
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) )
 			player.cmd.upmove = 0;
-		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
+		if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) )
 		{
 			double fs = TweakSpeeds(1.,0.);
 			Vector3 x, y, z;
@@ -1073,7 +1073,7 @@ Class Demolitionist : PlayerPawn
 	{
 		bool isdashing = InStateSequence(CurState,FindState("Dash"));
 		if ( isdashing ) player.cmd.forwardmove = player.cmd.sidemove = 0;
-		if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) )
+		if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) )
 		{
 			player.onground = false;
 			if ( player.turnticks )
@@ -1271,7 +1271,7 @@ Class Demolitionist : PlayerPawn
 			}
 			if ( player.crouchoffset ) player.crouching = 1;
 			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
-			else if ( (waterlevel < 2) && (bFly || bFlyCheat) && !(player.cheats&CF_NOCLIP2) ) return;
+			else if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) ) return;
 			else if ( bNoGravity ) vel.z = 3;
 			else if ( level.IsJumpingAllowed()
 				&& ((player.onground && (player.jumptics == 0))
@@ -1632,6 +1632,26 @@ Class Demolitionist : PlayerPawn
 					SetStateLabel("StartCrouch");
 				else if ( InStateSequence(CurState,FindState("Crouch")) )
 					SetStateLabel("CrouchMove");
+			}
+			else if ( bFlyCheat || (player.cheats&CF_NOCLIP2) )
+			{
+				// Special case, fly cheats don't play a swim animation, only float
+				// (this fixes Demo "swimming" on the library ladder in Spooktober, for example)
+				if ( InStateSequence(CurState,FindState("Spawn"))
+						|| InStateSequence(CurState,FindState("Turn"))
+						|| InStateSequence(CurState,FindState("See"))
+						|| InStateSequence(CurState,FindState("SeeFast"))
+						|| InStateSequence(CurState,FindState("SeeFastLoop"))
+						|| InStateSequence(CurState,FindState("SeeFastEnd"))
+						|| InStateSequence(CurState,FindState("Jump"))
+						|| InStateSequence(CurState,FindState("Fall"))
+						|| InStateSequence(CurState,FindState("FallLoop"))
+						|| InStateSequence(CurState,FindState("Swim"))
+						|| InStateSequence(CurState,FindState("SwimLoop")) )
+					SetStateLabel("Float");
+				else if ( InStateSequence(CurState,FindState("Crouch"))
+					|| InStateSequence(CurState,FindState("CrouchMove")) )
+					SetStateLabel("EndCrouch");
 			}
 			else
 			{

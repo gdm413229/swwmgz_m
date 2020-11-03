@@ -239,7 +239,11 @@ OptionMenu "SWWMCreditsMenu"
 }
 AddOptionMenu "OptionsMenu"
 {
-	StaticText " "
+	Submenu "$SWWM_MTITLE", "SWWMOptionMenu"
+	Submenu "$SWWM_MCREDS", "SWWMCreditsMenu"
+}
+AddOptionMenu "OptionsMenuSimple"
+{
 	Submenu "$SWWM_MTITLE", "SWWMOptionMenu"
 	Submenu "$SWWM_MCREDS", "SWWMCreditsMenu"
 }

@@ -280,12 +280,12 @@ All of these can be carried in your inventory indefinitely before use, except in
 
 +10 health boost, up to a cap of 100 points.
 
-### Health Cube ~ Replaces Medkit, Mystic Urn (Hexen), Quartz Flask (Heretic)
+### Health Cube ~ Replaces Medkit, Quartz Flask
 ![](docimg/cubehealth.png)
 
 +20 health boost, up to a cap of 100 points.
 
-### Refresher ~ Replaces Soulsphere, Mystic Urn (Heretic), Mystic Ambit Incant
+### Refresher ~ Replaces Soulsphere, Mystic Urn
 ![](docimg/refresher.png)
 
 This artifact provides a +100 health boost plus a regeneration effect that heals +10 every 5 seconds, for up to 50 seconds, thus it doubles as a powerup. Its overhealing effects cap at 500 points (including the regen). Once its effects wear out, however, your excess health will gradually settle towards the typical 200 point cap. Unlike other health items, the **Refresher** auto-activates only if you're about to die. This usually prevents such a grim outcome... unless the damage is too high to counter.
@@ -365,7 +365,7 @@ Each of these you pick up increase ammo capacity by half of its base value, stac
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
 ![](docimg/fabricator.png)
 
-Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the Ynykron).
+Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the **Ynykron Artifact**).
 
 ### Lamp ~ Replaces Lite-Amp, Torch
 ![](docimg/lamp.png)
@@ -469,15 +469,15 @@ When the **Automap** is open, the map name and stats will also be shown here.
 
 ### Bottom left corner
 
-Your health, armor and fuel, along with an inventory box, and all active armors and powerups (with their respective durability/duration).
+Your health and fuel, along with an inventory box, and all active armors and powerups (with their respective durability/duration).
 
 ### Bottom border
 
-Pickup messages. Repeated pickups will have a multiplier suffix added. Total messages shown are also configurable.
+Voice acting subtitles and pickup messages. Repeated pickups will have a multiplier suffix added. Total messages shown are also configurable.
 
 ### Bottom right corner
 
-Current equipped weapon stats. Ammo(s) and such. Below it, the weapon slots.
+The weapon slots. Above them, the currently equipped weapon's stats (i.e.: ammo(s) and such).
 
 ### Targeter
 

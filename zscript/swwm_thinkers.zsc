@@ -348,6 +348,7 @@ Class SWWMLoreLibrary : Thinker
 			if ( ref ~== "Cronos" ) return true;
 			if ( ref ~== "Kirin" ) return true;	// not met
 			if ( ref ~== "Fabricator" ) return true;	// not yet introduced
+			if ( ref ~== "Administrators" ) return true;	// not met
 		}
 		if ( !(gameinfo.gametype&GAME_Strife) )
 		{
@@ -433,6 +434,8 @@ Class SWWMLoreLibrary : Thinker
 				text = "SWWM_LORETXT_BIGSHOT2";	// predictions about crimes_m
 			else if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
 				text = "SWWM_LORETXT_AKARIPROJECT2";	// fiction becomes reality
+			else if ( text ~== "SWWM_LORETXT_GODS" )
+				text = "SWWM_LORETXT_GODS2";	// beyond gods
 		}
 		// check that it's valid
 		if ( StringTable.Localize(tag,false) == tag ) return false;

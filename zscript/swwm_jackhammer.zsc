@@ -320,7 +320,7 @@ Class PusherProjectile : Actor
 		}
 		else toucher.A_StartSound("misc/w_pkup",CHAN_ITEM,CHANF_MAYBE_LOCAL);
 		toucher.A_SelectWeapon("PusherWeapon");
-		Spawn("SWWMPickupFlash",pos);
+		Spawn("SWWMRedPickupFlash",pos);
 		Destroy();
 	}
 	override bool Used( Actor user )

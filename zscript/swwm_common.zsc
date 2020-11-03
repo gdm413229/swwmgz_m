@@ -67,6 +67,19 @@ Class SWWMHangingKeen : Actor
 	{
 		Spawn("SWWMDroppedKeen",Vec3Offset(0,0,8));
 	}
+	override bool Used( Actor user )
+	{
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
+		if ( Health > 0 )
+		{
+			DamageMobj(user,user,Health,'Untie',DMG_FORCED|DMG_THRUSTLESS);
+			return true;
+		}
+		return false;
+	}
 	Default
 	{
 		Tag "$FN_KEEN";
@@ -1098,6 +1111,7 @@ Class SWWMPickupFlash : Actor
 	Default
 	{
 		RenderStyle "Add";
+		Args 0,3,2,1;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -1106,10 +1120,15 @@ Class SWWMPickupFlash : Actor
 		+NOINTERACTION;
 		+FORCEXYBILLBOARD;
 	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		frame = Args[0];
+	}
 	States
 	{
 	Spawn:
-		BLPF A 1 Bright NoDelay
+		BLPF # 1 Bright NoDelay
 		{
 			// offset up
 			SetOrigin(Vec3Offset(0,0,16),false);
@@ -1123,14 +1142,63 @@ Class SWWMPickupFlash : Actor
 				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
 				let s = Spawn("SWWMSmallSmoke",pos);
 				s.vel = pvel;
-				s.SetShade(Color(3,2,1)*Random[ExploS](64,85));
+				s.SetShade(Color(Args[1],Args[2],Args[3])*Random[ExploS](64,85));
 				s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
 				s.scale *= 3.;
 				s.alpha *= .5;
 			}
 		}
-		BLPF A 1 Bright A_FadeOut(.2);
+		BLPF # 1 Bright A_FadeOut(.2);
 		Wait;
+	}
+}
+Class SWWMPinkPickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 1,3,1,2;
+	}
+}
+Class SWWMCyanPickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 2,1,2,3;
+	}
+}
+Class SWWMGreenPickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 3,1,3,1;
+	}
+}
+Class SWWMBluePickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 4,1,1,3;
+	}
+}
+Class SWWMPurplePickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 5,2,1,3;
+	}
+}
+Class SWWMRedPickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 6,3,1,1;
+	}
+}
+Class SWWMWhitePickupFlash : SWWMPickupFlash
+{
+	Default
+	{
+		Args 7,3,3,3;
 	}
 }
 

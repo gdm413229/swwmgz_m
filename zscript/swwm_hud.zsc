@@ -1390,14 +1390,10 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !dscale ) dscale = CVar.GetCVar('swwm_detscale',players[consoleplayer]);
 		BeginHUD();
 		if ( hscale.GetInt() <= 0 ) hs = GetHUDScale();
-		else
-		{
-			hs.x = hscale.GetInt();
-			if ( Screen.GetWidth()/hs.x < 640. ) hs.x = max(1,floor(Screen.GetWidth()/640.));
-		}
+		else hs.x = hscale.GetInt();
 		hs.y = hs.x;
 		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		margin = clamp(safezone.GetInt(),0,(ss.x<640)?10:40);
+		margin = clamp(safezone.GetInt(),0,40);
 		if ( bscale.GetInt() <= 0 ) hsb = GetHUDScale();
 		else hsb.x = bscale.GetInt();
 		hsb.y = hsb.x;

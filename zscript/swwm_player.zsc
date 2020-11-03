@@ -1607,6 +1607,7 @@ Class Demolitionist : PlayerPawn
 					|| InStateSequence(CurState,FindState("See"))) )
 					SetStateLabel("SeeFast");
 				else if ( InStateSequence(CurState,FindState("Spawn"))
+					|| InStateSequence(CurState,FindState("Float"))
 					|| InStateSequence(CurState,FindState("Turn")) )
 				{
 					SetStateLabel("See");

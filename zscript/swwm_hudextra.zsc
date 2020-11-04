@@ -87,11 +87,7 @@ Class SWWMOneLiner : HUDMessageBase
 		int margin = safezone.GetInt();
 		Vector2 hs;
 		if ( hscale.GetInt() <= 0 ) hs = StatusBar.GetHUDScale();
-		else
-		{
-			hs.x = hscale.GetInt();
-			if ( Screen.GetWidth()/hs.x < 640. ) hs.x = max(1,floor(Screen.GetWidth()/640.));
-		}
+		else hs.x = hscale.GetInt();
 		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String loc = StringTable.Localize(whichline);

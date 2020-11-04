@@ -3047,8 +3047,8 @@ Class HeadpatTracker : Actor
 		if ( user.player.crouchdir == -1 ) return false;	// need to be standing up
 		if ( !user.player.onground ) return false;	// need to be on solid ground
 		// check use range
-		Vector3 diff = level.Vec3Diff(user.pos,target.pos);
-		if ( (diff.z < -target.height*.5) || (diff.z > user.height*.5) ) return false;
+		Vector3 diff = level.Vec3Diff(user.Vec2Offset(0,0,user.player.viewz),Vec3Offset(0,0,target.Height));
+		if ( abs(diff.z) > PlayerPawn(user.player.mo).UseRange ) return false;
 		if ( user is 'Demolitionist' )
 		{
 			patter = user;

@@ -313,14 +313,14 @@ Class mkBloodDrop : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMGoreHandler.QueueBlod(self);
+		SWWMHandler.QueueBlod(self);
 		int jumps = Random[Blood](0,3);
 		state dest = ResolveState("Spawn");
 		SetState(dest+jumps);
 	}
 	override void OnDestroy()
 	{
-		SWWMGoreHandler.DeQueueBlod(self);
+		SWWMHandler.DeQueueBlod(self);
 		Super.OnDestroy();
 	}
 	States
@@ -413,12 +413,12 @@ Class mkFlyingGib : Actor
 		else shadecol = Color(80,0,0);
 		bleeding = true;
 		if ( Random[Blood](0,1) ) bXFlip = true;
-		SWWMGoreHandler.QueueMeat(self);
+		SWWMHandler.QueueMeat(self);
 	}
 
 	override void OnDestroy()
 	{
-		SWWMGoreHandler.DeQueueMeat(self);
+		SWWMHandler.DeQueueMeat(self);
 		Super.OnDestroy();
 	}
 
@@ -735,207 +735,5 @@ Class CorpseFallTracker : Thinker
 		if ( (mybody.Health > 0) || isflying || (mybody.tics != -1) || (mybody.vel.length() > 0) )
 			return;
 		Destroy();
-	}
-}
-
-Class SWWMGoreHandler : EventHandler
-{
-	mkBloodDrop blods, blods_end;
-	int blods_cnt, oldmaxblood;
-	mkFlyingGib meats, meats_end;
-	int meats_cnt, oldmaxgibs;
-
-	override void WorldLoaded( WorldEvent e )
-	{
-		// recheck queues in case limits changed
-		while ( blods && (blods_cnt > swwm_maxblood) )
-			DeQueueBlod(blods);
-		while ( meats && (meats_cnt > swwm_maxgibs) )
-			DeQueueMeat(meats);
-	}
-
-	static void QueueBlod( mkBloodDrop b )
-	{
-		let hnd = SWWMGoreHandler(EventHandler.Find("SWWMGoreHandler"));
-		if ( !hnd ) return;
-		hnd.blods_cnt++;
-		if ( !hnd.blods )
-		{
-			// this is the initial one
-			hnd.blods = b;
-			hnd.blods_end = b;
-		}
-		else
-		{
-			hnd.blods_end.nextblod = b;
-			b.prevblod = hnd.blods_end;
-			hnd.blods_end = b;
-		}
-		while ( hnd.blods && (swwm_maxblood >= 0) && (hnd.blods_cnt > swwm_maxblood) )
-			DeQueueBlod(hnd.blods);
-	}
-	static void DeQueueBlod( mkBloodDrop b )
-	{
-		let hnd = SWWMGoreHandler(EventHandler.Find("SWWMGoreHandler"));
-		if ( !hnd || !hnd.blods ) return;
-		if ( (hnd.blods != b) && !b.prevblod && !b.nextblod ) return;
-		hnd.blods_cnt--;
-		if ( !b.prevblod ) hnd.blods = b.nextblod;
-		else b.prevblod.nextblod = b.nextblod;
-		if ( b == hnd.blods_end ) hnd.blods_end = b.prevblod;
-		if ( b.nextblod ) b.nextblod.prevblod = b.prevblod;
-		b.killme = true;
-		b.prevblod = null;
-		b.nextblod = null;
-	}
-	static void QueueMeat( mkFlyingGib m )
-	{
-		let hnd = SWWMGoreHandler(EventHandler.Find("SWWMGoreHandler"));
-		if ( !hnd ) return;
-		hnd.meats_cnt++;
-		if ( !hnd.meats )
-		{
-			// this is the initial one
-			hnd.meats = m;
-			hnd.meats_end = m;
-		}
-		else
-		{
-			hnd.meats_end.nextmeat = m;
-			m.prevmeat = hnd.meats_end;
-			hnd.meats_end = m;
-		}
-		while ( hnd.meats && (swwm_maxgibs >= 0) && (hnd.meats_cnt > swwm_maxgibs) )
-			DeQueueMeat(hnd.meats);
-	}
-	static void DeQueueMeat( mkFlyingGib m )
-	{
-		let hnd = SWWMGoreHandler(EventHandler.Find("SWWMGoreHandler"));
-		if ( !hnd || !hnd.meats ) return;
-		if ( (hnd.meats != m) && !m.prevmeat && !m.nextmeat ) return;
-		hnd.meats_cnt--;
-		if ( !m.prevmeat ) hnd.meats = m.nextmeat;
-		else m.prevmeat.nextmeat = m.nextmeat;
-		if ( m == hnd.meats_end ) hnd.meats_end = m.prevmeat;
-		if ( m.nextmeat ) m.nextmeat.prevmeat = m.prevmeat;
-		m.killme = true;
-		m.prevmeat = null;
-		m.nextmeat = null;
-	}
-
-	override void WorldTick()
-	{
-		if ( swwm_maxblood != oldmaxblood )
-		{
-			while ( blods && (swwm_maxblood >= 0) && (blods_cnt > swwm_maxblood) )
-				DeQueueBlod(blods);
-		}
-		if ( swwm_maxgibs != oldmaxgibs )
-		{
-			while ( meats && (swwm_maxgibs >= 0) && (meats_cnt > swwm_maxgibs) )
-				DeQueueMeat(meats);
-		}
-		oldmaxblood = swwm_maxblood;
-		oldmaxgibs = swwm_maxgibs;
-	}
-
-	override void CheckReplacement( ReplaceEvent e )
-	{
-		// only replace vanilla blood if no other gore mod is doing it
-		if ( (e.Replacee == "Blood") && (!e.Replacement || e.Replacement == "Blood") && swwm_blood )
-			e.Replacement = "mkBlood";
-	}
-
-	override void WorldThingSpawned( WorldEvent e )
-	{
-		// vanilla blood color changes
-		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )
-		{
-			let gb = Actor.Spawn("GreenBloodReference");
-			e.Thing.CopyBloodColor(gb);
-			gb.Destroy();
-		}
-		else if ( e.Thing.GetClass() == "Cacodemon" )
-		{
-			let bb = Actor.Spawn("BlueBloodReference");
-			e.Thing.CopyBloodColor(bb);
-			bb.Destroy();
-		}
-		else if ( (e.Thing.GetClass() == "Wizard") || (e.Thing.GetClass() == "Heresiarch") || (e.Thing.GetClass() == "Sorcerer2") )
-		{
-			let pb = Actor.Spawn("PurpleBloodReference");
-			e.Thing.CopyBloodColor(pb);
-			pb.Destroy();
-		}
-		else if ( e.Thing.GetClass() == "LostSoul" )
-			e.Thing.bNOBLOOD = true;
-	}
-
-	override void WorldThingDied( WorldEvent e )
-	{
-		// force insert gib animations on some vanilla Doom monsters
-		int gibhealth = e.Thing.GetGibHealth();
-		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
-		if ( !gotgibbed ) return;
-		if ( (e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") )
-			ExtraGibDeaths.GibThis(e.Thing,"DemonXDeath");
-		else if ( e.Thing.GetClass() == "HellKnight" )
-			ExtraGibDeaths.GibThis(e.Thing,"KnightXDeath");
-		else if ( e.Thing.GetClass() == "BaronOfHell" )
-			ExtraGibDeaths.GibThis(e.Thing,"BaronXDeath");
-		else if ( e.Thing.GetClass() == "Cacodemon" )
-			ExtraGibDeaths.GibThis(e.Thing,"CacoXDeath");
-		else if ( e.Thing.GetClass() == "Revenant" )
-			ExtraGibDeaths.GibThis(e.Thing,"BonerXDeath");
-		else if ( e.Thing.GetClass() == "Archvile" )
-			ExtraGibDeaths.GibThis(e.Thing,"VileXDeath");
-	}
-
-	override void WorldThingDamaged( WorldEvent e )
-	{
-		if ( e.Thing.Health > 0 ) return;
-		// no gib if it was erased
-		if ( e.DamageType == 'Ynykron' ) return;
-		int gibhealth = e.Thing.GetGibHealth();
-		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
-		bool forcegibbed = false;
-		// force gib availability for some vanilla Doom monsters
-		if ( gotgibbed && ((e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "Cacodemon") || (e.Thing.GetClass() == "Revenant") || (e.Thing.GetClass() == "Archvile")) )
-			forcegibbed = true;
-		if ( !e.Thing.FindState("XDeath",true) && !e.Thing.FindState("Death.Extreme",true) && !forcegibbed )
-			gotgibbed = false;
-		// only do special handling if they use our blood
-		if ( (e.Thing.GetBloodType(0) != "mkBlood") || e.Thing.bNOBLOOD )
-			return;
-		CorpseFallTracker.TrackBody(e.Thing);
-		bool b;
-		Actor a;
-		// special handling of some monsters
-		if ( e.Thing.GetClass() == "Cyberdemon" )
-		{
-			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
-			if ( !b ) return;
-			mkGibber(a).gibbed = e.Thing;
-			mkGibber(a).delay = 40;
-			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
-			return;
-		}
-		else if ( e.Thing.GetClass() == "SpiderMastermind" )
-		{
-			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
-			if ( !b ) return;
-			mkGibber(a).gibbed = e.Thing;
-			mkGibber(a).delay = 60;
-			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
-			return;
-		}
-		// override gibbing
-		if ( gotgibbed )
-		{
-			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
-			if ( !b ) return;
-			mkGibber(a).gibbed = e.Thing;
-			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
-		}
 	}
 }

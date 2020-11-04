@@ -362,49 +362,6 @@ Class WallbusterReloadMenu : GenericMenu
 	}
 }
 
-Class CBTHandler : StaticEventHandler
-{
-	bool initme;
-	double cbtvol;
-	transient CVar cbtme;
-
-	override void WorldTick()
-	{
-		if ( !cbtme ) cbtme = CVar.GetCVar('swwm_cbtmeme',players[consoleplayer]);
-		if ( !players[consoleplayer].mo ) return;
-		let cbt = players[consoleplayer].mo.FindInventory("Wallbuster");
-		if ( !cbt ) return;
-		if ( cbt == players[consoleplayer].ReadyWeapon )
-		{
-			if ( !initme && (cbtme.GetInt() > 0) )
-			{
-				initme = true;
-				cbtvol = .6;
-			}
-			cbtvol = min(.6,cbtvol+.1);
-			if ( (cbtme.GetInt() >= 1) && !cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
-				cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOP,cbtvol,0.);
-			else if ( (cbtme.GetInt() < 1) && cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
-				cbt.A_StopSound(CHAN_AMBEXTRA+1);
-			if ( (cbtme.GetInt() >= 2) && !cbt.IsActorPlayingSound(CHAN_AMBEXTRA+2) )
-			{
-				// restart the music
-				if ( cbt.IsActorPlayingSound(CHAN_AMBEXTRA+1) )
-				{
-					cbt.A_StopSound(CHAN_AMBEXTRA+1);
-					cbt.A_StartSound("wallbuster/olddays",CHAN_AMBEXTRA+1,CHANF_UI|CHANF_LOOP,cbtvol,0.);
-				}
-				cbt.A_StartSound("wallbuster/cbt",CHAN_AMBEXTRA+2,CHANF_UI,cbtvol,0.);
-			}
-			else if ( (cbtme.GetInt() < 2) && cbt.IsActorPlayingSound(CHAN_AMBEXTRA+2) )
-				cbt.A_StopSound(CHAN_AMBEXTRA+2);
-		}
-		else cbtvol = max(0.,cbtvol-.1);
-		cbt.A_SoundVolume(CHAN_AMBEXTRA+1,cbtvol*((cbtme.GetInt()>=2)?.8:1.));
-		cbt.A_SoundVolume(CHAN_AMBEXTRA+2,cbtvol);
-	}
-}
-
 Class BustedQuake : Actor
 {
 	Default

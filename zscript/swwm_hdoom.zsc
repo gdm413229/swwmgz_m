@@ -24,8 +24,13 @@ Class SWWMHDoomHandler : StaticEventHandler
 			detected = true;
 			break;
 		}
+		if ( !detected )
+		{
+			// get rid of ourselves
+			Destroy();
+			return;
+		}
 		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
-		if ( !detected ) return;
 		Console.Printf(
 			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
 			"\cx┃            \cfOh my, someone appears to be \cgH \ckO \cdR \cvN \chY \ct♥            \cx┃\n"

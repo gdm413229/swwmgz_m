@@ -27,8 +27,13 @@ Class SWWMBrutalHandler : StaticEventHandler
 			detected = true;
 			break;
 		}
+		if ( !detected )
+		{
+			// get rid of ourselves
+			Destroy();
+			return;
+		}
 		SetRandomSeed[bdscreen](Random[bdscreen]()+consoleplayer+MSTime());
-		if ( !detected ) return;
 		Console.Printf(
 			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
 			"\cx┃   \cfIf you have BD on your autoload you really shouldn't.   \cx┃\n"

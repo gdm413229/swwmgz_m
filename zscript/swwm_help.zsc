@@ -1,17 +1,4 @@
-// Hey Graf how about you let us replace the class used for the "Read This!"
-// menu in mapinfo/gameinfo or something so I don't have to do this hack here?
-Class SWWMReadThisHijacker : StaticEventHandler
-{
-	override void UiTick()
-	{
-		Menu cur = Menu.GetCurrentMenu();
-		if ( cur is 'ReadThisMenu' )
-		{
-			cur.Close();
-			Menu.SetMenu('SWWMHelpMenu');
-		}
-	}
-}
+// alternate "Read This!" menu
 
 Class SWWMHelpMenu : GenericMenu
 {

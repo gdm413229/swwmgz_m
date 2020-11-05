@@ -384,55 +384,47 @@ Every now and then you will find these strange ***"Lucky Chance Boxes"*** in sec
 
 ***(Do note that this feature is currently not fully implemented, there may be missing models)***
 
-### NUTATCO™ Chocolate Bar (¥200)
+### NUTATCO™ Chocolate Bar
 
 A light snack, said to have a "savage taste".
 
-### Frispy™ Tasty Corn Snack (¥500)
+### Frispy™ Tasty Corn Snack
 
 Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these that their tasty scent has stuck to her permanently.
 
-### The Akari Project (¥3000)
+### The Akari Project
 
 Hard cover copy of Saya's famous sci-fi novel about interdimensional travel. Saya has frequently cited it to dab hard on the UAC and their failures.
 
-### Meidobot - Love Signals (¥4000)
+### Meidobot - Love Signals
 
 Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there.
 
-### Mashiro Plush (¥5000)
+### Mashiro Plush
 
 A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Potentially cursed, be extra careful when you have a Lämp around.
 
-### Quartz Flask (¥4000) [Heretic]
-
-Ye flask. Contains healing potion, has a taste comparable to cough syrup. Seems to also be popular on Cronos, having been carried over by the Serpent Riders and their armies.
-
-### Demolitionist Plush (¥6400) [Heretic]
-
-A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth.
-
-### Haunted Saya Bean Plush (¥12000) [Heretic]
+### Haunted Saya Bean Plush (Heretic)
 
 Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
 
-### Tyketto's Tome of Power (¥16000) [Heretic]
+### Demolitionist Plush (Heretic)
 
-A book of magic weapon enchantments. Found quite often across the land of Parthoris.
+A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth.
 
-### Toot Froot™ Peach Juice (¥400) [Hexen]
+### Toot Froot™ Peach Juice (Hexen)
 
 Saya began to stock up on these after her marriage with Kirin, for some unexplained reason. She says the taste reminds her of him.
 
-### Akkouxhei Milk Breads (¥900) [Hexen]
+### Akkouxhei Milk Breads (Hexen)
 
 A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet they may be even lethal if consumed in excess.
 
-### I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie!? (¥1600) [Hexen]
+### I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie!? (Hexen)
 
 A short manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
 
-### Kirin Plush (¥20000) [Hexen]
+### Kirin Plush (Hexen)
 
 The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart. Like the Saya plush, also emits a cute giggle when squeezed.
 

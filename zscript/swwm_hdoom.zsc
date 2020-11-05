@@ -25,11 +25,7 @@ Class SWWMHDoomHandler : StaticEventHandler
 			break;
 		}
 		if ( !detected )
-		{
-			// get rid of ourselves
-			Destroy();
 			return;
-		}
 		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
 		Console.Printf(
 			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
@@ -38,6 +34,13 @@ Class SWWMHDoomHandler : StaticEventHandler
 			"\cx┃  \cfIf you want Demo-chan to actually fuck some hot demon girls,  \cx┃\n"
 			"\cx┃      \cfjust go commission a porn artist or something, idk.       \cx┃\n"
 			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
+	}
+
+	override void WorldLoaded( WorldEvent e )
+	{
+		// get rid of ourselves if not needed
+		if ( !detected && !bDestroyed )
+			Destroy();
 	}
 
 	static bool IsCuteGirl( Actor a )

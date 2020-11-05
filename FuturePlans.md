@@ -17,9 +17,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Hoagie *(Can't eat it, but looks delicious)*
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - PISS Whiskey *("Is it actually piss or is that just the brand name? Either way, I don't want to know what's inside")*
-  - **[Heretic]** Firemace *("What kind of ridiculous weapon is this?")*
   - **[Heretic]** Doomguy Action Figure *("Oh, he gets one too?")*
-  - **[Hexen]** Lord Vilkreath - Fundamentals of Puzzle Design *("The hell is this crap?")*
   - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Mothgirl summon for Lämp easter egg**

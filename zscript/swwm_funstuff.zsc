@@ -186,7 +186,7 @@ Class MothPlushy : SWWMCollectible
 	{
 		Tag "$T_MOTHPLUSH";
 		Inventory.PickupMessage "$T_MOTHPLUSH";
-		Stamina 5000;
+		Stamina 4000;
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -214,7 +214,7 @@ Class AkariProject : SWWMCollectible
 	{
 		Tag "$T_AKARIPROJECT";
 		Inventory.PickupMessage "$T_AKARIPROJECT";
-		Stamina 3000;
+		Stamina 2000;
 	}
 }
 Class LoveSignalsCD : SWWMCollectible
@@ -223,7 +223,7 @@ Class LoveSignalsCD : SWWMCollectible
 	{
 		Tag "$T_LOVESIGNALS";
 		Inventory.PickupMessage "$T_LOVESIGNALS";
-		Stamina 4000;
+		Stamina 3000;
 	}
 }
 Class NutatcoBar : SWWMCollectible
@@ -233,6 +233,7 @@ Class NutatcoBar : SWWMCollectible
 		Tag "$T_NUTATCO";
 		Inventory.PickupMessage "$T_NUTATCO";
 		Stamina 200;
+		Radius 4;
 	}
 }
 Class FrispyCorn : SWWMCollectible
@@ -241,7 +242,8 @@ Class FrispyCorn : SWWMCollectible
 	{
 		Tag "$T_FRISPYCORN";
 		Inventory.PickupMessage "$T_FRISPYCORN";
-		Stamina 500;
+		Stamina 400;
+		Radius 8;
 	}
 }
 // Heretic
@@ -252,27 +254,7 @@ Class DemoPlush : SWWMCollectible
 		Tag "$T_DEMOPLUSH";
 		Inventory.PickupMessage "$T_DEMOPLUSH";
 		SWWMCollectible.Availability AVAIL_Heretic;
-		Stamina 6400;
-	}
-}
-Class TomeOfPower : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_TOMEPOWER";
-		Inventory.PickupMessage "$T_TOMEPOWER";
-		SWWMCollectible.Availability AVAIL_Heretic;
-		Stamina 16000;
-	}
-}
-Class QuartzFlask : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_YEFLASK";
-		Inventory.PickupMessage "$T_YEFLASK";
-		SWWMCollectible.Availability AVAIL_Heretic;
-		Stamina 4000;
+		Stamina 6000;
 	}
 }
 Class SayaBean : SWWMCollectible
@@ -284,7 +266,7 @@ Class SayaBean : SWWMCollectible
 		Tag "$T_SAYABEAN";
 		Inventory.PickupMessage "$T_SAYABEAN";
 		SWWMCollectible.Availability AVAIL_Heretic;
-		Stamina 12000;
+		Stamina 5000;
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -312,7 +294,7 @@ Class KirinCummies : SWWMCollectible
 		Tag "$T_PEACH";
 		Inventory.PickupMessage "$T_PEACH";
 		SWWMCollectible.Availability AVAIL_Hexen;
-		Stamina 400;
+		Stamina 300;
 	}
 }
 Class MilkBreads : SWWMCollectible
@@ -344,7 +326,7 @@ Class KirinPlush : SWWMCollectible
 		Tag "$T_KIRINPLUSH";
 		Inventory.PickupMessage "$T_KIRINPLUSH";
 		SWWMCollectible.Availability AVAIL_Hexen;
-		Stamina 20000;
+		Stamina 8000;
 	}
 	override void AttachToOwner( Actor other )
 	{
@@ -863,7 +845,15 @@ Class Chancebox : Actor
 		if ( CurState != FindState("Spawn") ) return false;
 		if ( !dud )
 		{
-			if ( Random[Chancebox](0,2) )
+			if ( !Random[Chancebox](0,2) )
+			{
+				// all boxes are duds
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				while ( c = Chancebox(ti.Next()) )
+					c.dud = true;
+			}
+			else if ( Random[Chancebox](0,2) )
 			{
 				int nbox = 0, ndud = 0;
 				// this one's a dud (unless all the others are)

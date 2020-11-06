@@ -2,7 +2,6 @@
 
  - Collectibles
  - Achievements
- - Minigames
 
 **Extra things after release:**
 
@@ -13,6 +12,7 @@
  - Mod trailer video (doubt I'd be able to, I might ask someone instead)
  - Rewrite the entire Demolitionist Menu code from the ground up to be more easily extensible and adapt to any window size
  - Hexen key and puzzle item models?
+ - Minigames?
 
 **Very extra things for the future:**
 

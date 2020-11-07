@@ -1584,6 +1584,15 @@ Class SWWMHandler : EventHandler
 	private bool ShouldSpawnDualExpl()
 	{
 		int np = 0, ng = 0;
+		// check travelling items, in case this was called mid-transition
+		let ti = ThinkerIterator.Create("ExplodiumGun",Thinker.STAT_TRAVELLING);
+		ExplodiumGun g;
+		while ( g = ExplodiumGun(ti.Next()) )
+		{
+			np++;
+			if ( g.Amount > 1 ) ng++;
+		}
+		if ( np > 0 ) return (ng < np);
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] || !players[i].mo ) continue;

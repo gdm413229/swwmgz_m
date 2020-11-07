@@ -20,7 +20,14 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - **[Heretic]** Doomguy Action Figure *("Oh, he gets one too?")*
   - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
-* ***(Maybe)* Minigames for the Demolitionist Menu (pong, tetris, some sort of basic platformer or shmup)**
+* **DLC Gameset:**
+  - Tetris
+  - Pong
+  - Snake
+  - ... maybe other small games
+  - **[Doom]** Demo Land Adventure (platformer with shooty gameplay)
+  - **[Heretic]** Interstellar Demolitionist (a somewhat simple SHMUP, kinda Touhou styled)
+  - **[Hexen]** Demolition Quest (a JRPG, kinda like early FF / BoF)
 * **Mothgirl summon for Lämp easter egg**
 * **Ibuki companion add-on *(w/ optional "stream friendly" clothing)***
 * **Saya model, for scenes or something idk *(maybe a companion add-on too)***

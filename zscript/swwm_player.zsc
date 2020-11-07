@@ -3213,6 +3213,14 @@ Class SWWMGesture : SWWMWeapon
 					t.bCOUNTKILL = false;
 					level.total_monsters--;
 				}
+				if ( t.special && !(t.ActivationType&THINGSPEC_NoDeathSpecial) )
+				{
+					Actor whomst = level.actownspecial?t:self;
+					if ( t.ActivationType&THINGSPEC_ThingActs ) whomst = t;
+					else if ( t.ActivationType&THINGSPEC_TriggerActs ) whomst = self;
+					level.ExecuteSpecial(t.special,whomst,null,false,t.args[0],t.args[1],t.args[2],t.args[3],t.args[4]);
+					t.special = 0;
+				}
 				t.bFRIENDLY = true;
 				if ( deathmatch )
 					t.SetFriendPlayer(player);

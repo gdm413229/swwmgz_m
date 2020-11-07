@@ -874,6 +874,19 @@ Class SWWMUtility
 		if ( a.Species == 'Caco' ) return true; // CH
 		return false;
 	}
+
+	// Друг
+	static clearscope bool IdentifyingDrug( Actor a )
+	{
+		if ( a is 'Beast' ) return true;
+		return false;
+	}
+
+	static clearscope bool IdentifyingDoubleBoi( Actor a )
+	{
+		if ( a is 'Ettin' ) return true;
+		return false;
+	}
 }
 
 Class RadiusDebugSphere : Actor

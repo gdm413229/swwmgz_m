@@ -789,6 +789,7 @@ Class SWWMCombatTracker : Thinker
 	int tcnt;
 	double height;
 	transient CVar funtags, maxdist;
+	bool bBOSS, bFRIENDLY;
 
 	void UpdateTag()
 	{
@@ -827,7 +828,7 @@ Class SWWMCombatTracker : Thinker
 		}
 		else t.lasthealth = t.maxhealth = target.health;
 		t.updated = int.min;
-		t.height = t.mytarget.height;
+		t.height = target.height;
 		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
 		t.prevpos = level.Vec3Offset(target.prev,(0,0,t.height));
 		t.oldpos = target.pos;
@@ -835,6 +836,8 @@ Class SWWMCombatTracker : Thinker
 		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
 		t.myplayer = target.player;
 		t.next = hnd.trackers;
+		t.bBOSS = target.bBOSS;
+		t.bFRIENDLY = target.bFRIENDLY;
 		if ( hnd.trackers ) hnd.trackers.prev = t;
 		hnd.trackers = t;
 		hnd.trackers_cnt++;
@@ -920,6 +923,8 @@ Class SWWMCombatTracker : Thinker
 				Console.Printf(StringTable.Localize("$SWWM_LTFORM"),mytag);
 			}
 		}
+		bBOSS = mytarget.bBOSS|(maxhealth>1000);
+		bFRIENDLY = mytarget.bFRIENDLY;
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
 		if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);

@@ -43,10 +43,10 @@
 - **Pest Control**: Obtain 100% kills in 30 maps.
 - **Premium Detective**: Obtain 100% secrets in 30 maps.
 - **Return to Sender**: Kill 50 enemies with parried projectiles.
-- **Robutts Die Twice**: Reenact your favorite Souls-like.
+- **Robutts Die Twice**: Die and reboot two times in the same map.
 - **Salutations**: Greet another player.
 - **Sayonara, Scumbag**: Wave at a dying enemy 20 times.
-- **Shaped Like A Friend**: Befriend 50 Cacodemons with headpats.
+- **Shaped Like A Friend**: Befriend 50 Cacodemons, Weredragons or Ettins with headpats.
 - **Sharing Is Caring**: Share items in multiplayer 50 times.
 - **Shockmaster**: Perform 50 Biospark combos.
 - **Slam Your Balls**: Land 100 Lead Ball crits.
@@ -73,3 +73,12 @@
 - **High Noon**: Land 6 killing shots in a single Puntzer Beta reload.
 - **The Most Silent Takedown**: Kill 50 enemies with the Ray-Khom primary without alerting anyone else.
 - **You Gained Brouzouf**: Unload an entire mag in fuller auto with the Puntzer Gamma without missing a single shot.
+
+### DLC Gameset achievements:
+
+- **Tetromination**: Complete a full game of Tetris.
+- **Danny Won, Yeah**: Complete a full game of Pong.
+- **Tsuchinoko Real**: Complete a full game of Snake.
+- **Master of Platformers**: Complete a full game of Demo Land Adventure.
+- **Master of SHMUPs**: Complete a full game of Interstellar Demolitionist.
+- **Master of RPGs**: Complete a full game of Demolition Quest.

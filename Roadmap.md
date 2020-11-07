@@ -10,17 +10,17 @@
  - See if I can add those damn swimming anims.
  - Beg more artists for intermission fanart.
  - Stuff to maybe add during this stage: Explodium Guns akimbo, Quick grenade.
- - Collectables. Froggy Chair was only the beginning.
+ - Collectibles. Froggy Chair was only the beginning.
 
 **Cutie Robutt Adventures:**
 
  - Going Gold™.
  - Think about the future. There are lots of things I could do now *(see FuturePlans.md)*.
- - Maybe try to do the fancy titlemap now, mod trailer, etc.
 
 **Extra Funtimes:**
 
  - DLC weapons.
+ - DLC minigames.
 
 **LODS OF LORE:**
 
@@ -29,7 +29,7 @@
 
 **Funny Fellas:**
 
- - Monster/decoration replacement packs. All of it modelled and tweaked to fit the style and theme of the mod. Expect enhanced enemy behaviour, not gonna keep it "vanilla".
+ - Monster/decoration replacement packs. All of it modeled and tweaked to fit the style and theme of the mod. Expect enhanced enemy behavior, not gonna keep it "vanilla".
  - Porting weapons to Hideous Destructor as a meme.
 
 **Fight for the Front and freedom. Move out!:**

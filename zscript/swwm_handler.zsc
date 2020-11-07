@@ -1182,7 +1182,7 @@ Class SWWMHandler : EventHandler
 			{
 				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.DamageSource)) )
 					lastcombat = AddOneliner("friendhit",1,10);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.bBOSSDEATH)?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.DamageSource.bBOSS?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("gethit",1,15);
 			}
 			highesttic = gametic;
@@ -1221,7 +1221,7 @@ Class SWWMHandler : EventHandler
 			{
 				if ( e.Thing.IsFriend(src) || SWWMUtility.IsCivilian(e.Thing) )
 					lastcombat = AddOneliner("friendkill",1,5);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.bBOSSDEATH)?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.Thing.bBOSS?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("scorekill",1,15);
 			}
 		}
@@ -1411,9 +1411,10 @@ Class SWWMHandler : EventHandler
 			e.Thing.A_SetSize(20,40);
 			e.Thing.bNOBLOOD = true;
 		}
-		else if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing) )
+		else if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
+			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
 		{
-			// you can pet the dog, and you can also pet the caco
+			// you can pet the dog, and you can also pet the caco (and friends)
 			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
 			hp.target = e.Thing;
 		}

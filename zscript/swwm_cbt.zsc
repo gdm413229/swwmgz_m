@@ -821,6 +821,10 @@ Class Wallbuster : SWWMWeapon
 	transient ui Font TewiFont;
 	Class<Ammo> curobt;
 
+	ui Vector3 cpos25[25];
+	ui Color ccol25[25];
+	ui Vector2 lagvpos25[25];
+
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
 		if ( curobt is 'RedShell' ) return StringTable.Localize("$O_WALLBUSTER_RED");
@@ -923,6 +927,118 @@ Class Wallbuster : SWWMWeapon
 			}
 			Screen.DrawTexture(fired[i]?UsedIcon[which]:LoadIcon[which],false,bx-barrelposx[idx],by-barrelposy[idx],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
+	}
+
+	override void HudTick()
+	{
+		Super.HudTick();
+		// 25-trace
+		for ( int i=0; i<25; i++ )
+			[cpos25[i], ccol25[i]] = TraceForCrosshair25(i);
+	}
+
+	override void RenderUnderlay( RenderEvent e )
+	{
+		// draw custom crosshair
+		if ( automapactive ) return;
+		if ( !phair || !phair.GetBool() ) return;
+		if ( !ch_on ) ch_on = CVar.GetCVar('crosshairon',players[consoleplayer]);
+		if ( !ch_on.GetBool() ) return;
+		if ( !ch_force ) ch_force = CVar.GetCVar('crosshairforce',players[consoleplayer]);
+		if ( ch_force.GetBool() ) return;
+		let sb = SWWMStatusBar(StatusBar);
+		if ( !sb ) return;
+		sb.viewport.FromHud();
+		sb.proj.CacheResolution();
+		sb.proj.CacheFov(players[consoleplayer].fov);
+		sb.proj.OrientForRenderUnderlay(e);
+		sb.proj.BeginProjection();
+		if ( !ch_img ) ch_img = CVar.GetCVar('crosshair',players[consoleplayer]);
+		int cnum = abs(ch_img.GetInt());
+		if ( !cnum ) return;
+		String tn = String.Format("XHAIR%s%d",(Screen.GetWidth()<640)?"S":"B",cnum);
+		TextureID ctex = TexMan.CheckForTexture(tn,TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture(String.Format("XHAIR%s1",(Screen.GetWidth()<640)?"S":"B"),TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture("XHAIRS1",TexMan.Type_MiscPatch);
+		Vector2 ts = TexMan.GetScaledSize(ctex);
+		if ( !ch_siz ) ch_siz = CVar.GetCVar('crosshairscale',players[consoleplayer]);
+		double cs = ch_siz.GetFloat();
+		double sz = 1.;
+		if ( cs > 0. ) sz = Screen.GetHeight()*cs/200.;
+		if ( !ch_grow ) ch_grow = CVar.GetCVar('crosshairgrow',players[consoleplayer]);
+		if ( ch_grow.GetBool() ) sz *= sb.CrosshairSize;
+		Vector3 tdir = level.Vec3Diff(e.ViewPos,cpos);
+		// project
+		sb.proj.ProjectWorldPos(e.ViewPos+tdir);
+		Vector2 vpos;
+		if ( !sb.proj.IsInFront() ) return;
+		Vector2 npos = sb.proj.ProjectToNormal();
+		vpos = sb.viewport.SceneToWindow(npos);
+		if ( lagvpos == (0,0) ) lagvpos = vpos;
+		else lagvpos = lagvpos*.7+vpos*.3;	// this will be fucky depending on the FPS, but oh well
+		for ( int i=0; i<25; i++ )
+		{
+			tdir = level.Vec3Diff(e.ViewPos,cpos25[i]);
+			// project
+			sb.proj.ProjectWorldPos(e.ViewPos+tdir);
+			if ( !sb.proj.IsInFront() ) return;
+			npos = sb.proj.ProjectToNormal();
+			vpos = sb.viewport.SceneToWindow(npos);
+			if ( lagvpos25[i] == (0,0) ) lagvpos25[i] = vpos;
+			else lagvpos25[i] = lagvpos25[i]*.7+vpos*.3;	// this will be fucky depending on the FPS, but oh well
+			Screen.DrawTexture(ctex,false,int(lagvpos25[i].x),int(lagvpos25[i].y),DTA_DestWidthF,ts.x*sz,DTA_DestHeightF,ts.y*sz,DTA_AlphaChannel,true,DTA_FillColor,ccol25[i]);
+		}
+	}
+
+	ui Vector3, Color TraceForCrosshair25( int i )
+	{
+		if ( !ctr ) ctr = new("SWWMCrosshairTracer");
+		ctr.ignoreme = Owner;
+		Vector3 x, y, z, ofs;
+		double s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(Owner.pitch,Owner.angle,Owner.roll);
+		ofs = GetTraceOffset25(i);
+		Vector3 origin = level.Vec3Offset(Owner.Vec2OffsetZ(0,0,Owner.player.viewz),ofs.x*x+ofs.y*y+ofs.z*z);
+		ctr.Trace(origin,level.PointInSector(origin.xy),x,10000.,0);
+		if ( !ch_col ) ch_col = CVar.GetCVar('crosshaircolor',players[consoleplayer]);
+		Color col = ch_col.GetInt();
+		if ( !ch_hp ) ch_hp = CVar.GetCVar('crosshairhealth',players[consoleplayer]);
+		if ( ch_hp.GetInt() >= 2 )
+		{
+			int hp = Clamp(Owner.Health,0,200);
+			double sat = (hp<150)?1.:(1.-(hp-150)/100.);
+			Vector3 rgb = SWWMUtility.HSVtoRGB((hp/300.,sat,1.));
+			col = Color(int(rgb.x*255),int(rgb.y*255),int(rgb.z*255));
+		}
+		else if ( ch_hp.GetInt() == 1 )
+		{
+			double hp = Clamp(Owner.Health,0,100)/100.;
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		else if ( (ctr.Results.HitType == TRACE_HitActor) && ctr.Results.HitActor.bSHOOTABLE )
+		{
+			// show target health, rather than our own
+			double hp = ctr.Results.HitActor.Health/double(ctr.Results.HitActor.GetSpawnHealth());
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		if ( ctr.Results.HitType == TRACE_HitNone ) return level.Vec3Offset(origin,x*10000.), col;
+		else return ctr.Results.HitPos, col;
+	}
+
+	clearscope Vector3 GetTraceOffset25( int i ) const
+	{
+		double t1 = 90-int(i%5)*72;
+		double t2 = 360-int(i/5)*72;
+		Vector2 b = (cos(t1),sin(t1))*1.2;
+		b.y += 3.;
+		Vector2 n = (b.x*cos(t2)-b.y*sin(t2),b.x*sin(t2)+b.y*cos(t2));
+		return (10.,3.5+n.x,-6.+n.y);
 	}
 
 	override bool UsesAmmo( Class<Ammo> kind )
@@ -1065,7 +1181,7 @@ Class Wallbuster : SWWMWeapon
 	}
 	override Vector3 GetTraceOffset()
 	{
-		return (10.,3.5,-1.8);
+		return (10.,3.5,-6.);
 	}
 	action void A_FireShells( int num = 1 )
 	{

@@ -619,7 +619,7 @@ Class SilverBullet : SWWMWeapon
 
 	bool zoomed;
 	double zoomlevel;
-	ui TextureID reticle;
+	ui TextureID reticle, scope;
 	transient ui CVar useshaders;
 	int rezoom;
 	bool proneme;
@@ -733,11 +733,17 @@ Class SilverBullet : SWWMWeapon
 	override void RenderUnderlay( RenderEvent e )
 	{
 		if ( !useshaders ) useshaders = CVar.GetCVar('swwm_shaders',players[consoleplayer]);
-		if ( zoomed && (Owner.player == players[consoleplayer]) && useshaders.GetBool() )
+		if ( zoomed && (Owner.player == players[consoleplayer]) )
 		{
 			Vector2 ss = (Screen.GetWidth(),Screen.GetHeight());
 			ss *= (512./ss.y);
-			Shader.SetEnabled(players[consoleplayer],"SilverScope",true);
+			if ( useshaders.GetBool() ) Shader.SetEnabled(players[consoleplayer],"SilverScope",true);
+			else
+			{
+				Shader.SetEnabled(players[consoleplayer],"SilverScope",false);
+				if ( !scope ) scope = TexMan.CheckForTexture("graphics/SBScope.png",TexMan.Type_Any);
+				Screen.DrawTexture(scope,false,ss.x*.5,ss.y*.5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Multiply);
+			}
 			if ( !reticle ) reticle = TexMan.CheckForTexture("graphics/SBReticle.png",TexMan.Type_Any);
 			Screen.DrawTexture(reticle,false,ss.x*.5,ss.y*.5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Stencil,DTA_FillColor,Color(0,0,0));
 			return;

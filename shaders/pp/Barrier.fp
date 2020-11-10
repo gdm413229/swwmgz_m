@@ -10,7 +10,7 @@ void main()
 	vec3 col = texture(InputTexture,uv).rgb*3.;
 	for ( int i=0; i<3; i++ )
 	{
-		uv = (uv*.98)+.01;
+		uv = (uv*.985)+.005;
 		uv += (flood-.5)*.005;
 		col += texture(InputTexture,uv).rgb;
 	}

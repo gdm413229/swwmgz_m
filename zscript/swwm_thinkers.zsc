@@ -934,20 +934,20 @@ Class SWWMCombatTracker : Thinker
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
 			int mxdist = maxdist.GetInt();
-			// players (but not voodoo dolls), always visible in sp/coop
-			if ( !deathmatch && mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
+			// players (but not voodoo dolls), always visible in sp/coop/teamplay
+			if ( mytarget.player && (mytarget.player.mo == mytarget) && (!deathmatch || (teamplay && (mytarget.player.GetTeam() == players[consoleplayer].GetTeam()))) ) updated = level.maptime+35;
 			// friendlies within a set distance
-			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < mxdist)) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
+			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
 			// enemies within a set distance that have us as target
-			else if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(mytarget.target).length() < mxdist)) && mytarget.CheckSight(mytarget.target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
+			else if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
 			// any visible enemies within one quarter of the set distance
-			else if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+			else if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < (mxdist/4))) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 		else if ( (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') )
 		{
 			int mxdist = maxdist.GetInt();
 			// special stuff, only if visible
-			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].mo).length() < (mxdist/4))) && players[consoleplayer].mo.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < (mxdist/4))) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}
 	}
 }

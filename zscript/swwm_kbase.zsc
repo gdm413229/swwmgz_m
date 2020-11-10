@@ -2504,7 +2504,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( cnt <= 0 )
 				{
 					str = StringTable.Localize("$SWWM_NOSTAT");
-					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					return;
 				}
 				int ofs = clamp(sel0,0,max(0,cnt-22));
@@ -2533,7 +2533,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( cnt <= 0 )
 				{
 					str = StringTable.Localize("$SWWM_NOSTAT");
-					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					return;
 				}
 				int ofs = clamp(sel0,0,max(0,cnt-22));
@@ -2571,7 +2571,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( cnt <= 0 )
 				{
 					str = StringTable.Localize("$SWWM_NOSTAT");
-					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					return;
 				}
 				int ofs = clamp(sel0,0,max(0,cnt-22));
@@ -2637,7 +2637,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				xx += 9;
 				yy = 23;
 				str = StringTable.Localize("$SWWM_COMINGSOON");
-				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((631-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((631-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
 		else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
@@ -2645,7 +2645,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( invlist.Size() <= 0 )
 			{
 				str = StringTable.Localize("$SWWM_NOINV");
-				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			xx = 9;
@@ -2705,7 +2705,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( invlist.Size() <= 0 )
 			{
 				str = StringTable.Localize("$SWWM_NOKEYS");
-				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			xx = 9;
@@ -2804,7 +2804,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( !sub )
 			{
 				str = StringTable.Localize("$SWWM_LOREUNSEL");
-				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+((634-xx)-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			str = StringTable.Localize(lorelist[sel0].text);
@@ -2833,7 +2833,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( storelist.Size() <= 0 )
 			{
 				str = StringTable.Localize("$SWWM_NOSTORE");
-				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			// draw all the stuff in the store
@@ -2914,7 +2914,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( playerlist.Size() <= 0 )
 				{
 					str = StringTable.Localize("$SWWM_NOTRADE");
-					Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					return;
 				}
 				xx = 9;
@@ -2954,7 +2954,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( tradelib.ent.Size() <= 0 )
 					{
 						str = StringTable.Localize("$SWWM_NOTRADEHIST");
-						Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 						return;
 					}
 					xx = 6;
@@ -2990,7 +2990,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( !bar || (bar.FullHistory.Size() <= 0) )
 			{
 				str = StringTable.Localize("$SWWM_NOCHAT");
-				Screen.DrawText(fnt,Font.CR_FIRE,(ss.x-fnt.StringWidth(str))/2.,(ss.y-fnt.GetHeight())/2.,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			int margin = TewiFont.StringWidth("[00:00:00] ");
@@ -3026,7 +3026,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			Screen.DrawTexture(EasterEgg,false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			str = StringTable.Localize("$SWWM_TODEMO");
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2.,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 		else if ( curtab == TAB_HELP )
 		{

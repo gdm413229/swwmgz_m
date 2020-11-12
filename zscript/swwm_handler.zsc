@@ -1126,7 +1126,7 @@ Class SWWMHandler : EventHandler
 
 	override void WorldThingDied( WorldEvent e )
 	{
-		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.default.Health >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
+		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
 		{
 			// make sure we can't farm drops from revivable enemies
 			// (or cause some things to spam-spawn gold shells)
@@ -1339,7 +1339,7 @@ Class SWWMHandler : EventHandler
 			s.mkill = multilevel[pnum]+1;
 		lastkill[pnum] = level.maptime;
 		// scoring
-		int score = min(1000,int(ceil(e.Thing.SpawnHealth()*.05)*10));
+		int score = min(1000,int(ceil(e.Thing.GetSpawnHealth()*.05)*10));
 		SWWMScoreObj scr = null;
 		if ( src.player == players[consoleplayer] )
 			scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
@@ -1560,7 +1560,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'BaronOfHell' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
 			}
 			bosstag = "$BT_BRUISERS";
 		}
@@ -1569,7 +1569,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Cyberdemon' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 5;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
 			}
 			bosstag = "$BT_CYBIE";
 		}
@@ -1578,7 +1578,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Spidermastermind' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 6;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 6;
 			}
 			bosstag = "$BT_SPIDER";
 		}
@@ -1587,7 +1587,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Spidermastermind' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 4;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 			}
 			bosstag = "$BT_SPIDER2";
 		}
@@ -1597,7 +1597,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe )
-					e.Thing.Health *= 2;
+					e.Thing.StartHealth = e.Thing.Health *= 2;
 			}
 			bosstag = "$BT_DIMPLE";
 		}
@@ -1607,7 +1607,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossbrainactor = e.Thing;
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 40;	// goodbye, instakills
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 40;	// goodbye, instakills
 			}
 			if ( e.Thing is 'BossEye' )
 				bossviewactor = e.Thing;
@@ -1618,7 +1618,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'IronLich' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 4;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 			}
 			bosstag = "$BT_LICHES";
 		}
@@ -1627,7 +1627,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Minotaur' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 3;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
 			}
 			bosstag = "$BT_MINOTAUR";
 		}
@@ -1636,7 +1636,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Sorcerer1' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				bosstag = "$BT_DSPARIL";
 			}
 			else if ( e.Thing is 'Sorcerer2' )
@@ -1645,7 +1645,7 @@ Class SWWMHandler : EventHandler
 				bossactors.Clear();
 				initialized = false;
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 8;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
 				bosstag = "$BT_DSPARIL2";
 			}
 		}
@@ -1654,7 +1654,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'ClericBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				bosstag = "$BT_CLERIC";
 			}
 		}
@@ -1663,7 +1663,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'FighterBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				bosstag = "$BT_FIGHTER";
 			}
 		}
@@ -1672,7 +1672,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'MageBoss' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				bosstag = "$BT_MAGE";
 			}
 		}
@@ -1681,7 +1681,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Dragon' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 4;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 				bosstag = "$BT_DRAGON";
 			}
 		}
@@ -1690,7 +1690,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Heresiarch' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 8;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
 				bosstag = "$BT_HERESIARCH";
 			}
 		}
@@ -1699,7 +1699,7 @@ Class SWWMHandler : EventHandler
 			if ( e.Thing is 'Korax' )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe ) e.Thing.Health *= 10;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
 				bosstag = "$BT_KORAX";
 			}
 		}

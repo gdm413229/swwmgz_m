@@ -857,7 +857,7 @@ Class SWWMHandler : EventHandler
 			l.ChangeStatNum(Thinker.STAT_STATIC);
 			l.myplayer = p;
 		}
-		// horrendous piece of shit bandaid fix because gzdoom gets on my fucking nerves with its inconsistency bullshit when traveling between levels
+		// horrendous piece of shit bandaid fix because gzdoom gets on my fucking nerves with its inconsistency bullshit
 		let ti = ThinkerIterator.Create("SWWMLoreLibrary",Thinker.STAT_STATIC);
 		SWWMLoreLibrary l2;
 		bool bmesg = false;
@@ -866,7 +866,7 @@ Class SWWMHandler : EventHandler
 			if ( (l2 == l) || (l2.myplayer != p) ) continue;
 			if ( !bmesg )
 			{
-				Console.Printf("If this message appears, something broke the mod really badly and should be reported.");
+				Console.Printf("If these messages appear, something broke and should be reported.");
 				bmesg = true;
 			}
 			// merge excess libraries (if it ever happens)

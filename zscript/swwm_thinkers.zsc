@@ -334,7 +334,7 @@ Class SWWMLoreLibrary : Thinker
 	Array<SWWMLore> ent;
 	int lastaddtic;
 
-	bool DirectAdd( String ref )
+	static bool PreVerify( String ref )
 	{
 		// restrictions
 		if ( !(gameinfo.gametype&(GAME_Raven|GAME_Strife)) )
@@ -376,6 +376,33 @@ Class SWWMLoreLibrary : Thinker
 			if ( (c.GetClassName() == ref) && !(gameinfo.gametype&def.avail) )
 				return true;
 		}
+		ref = ref.MakeUpper();
+		String tag = String.Format("SWWM_LORETAG_%s",ref);
+		String tab = String.Format("SWWM_LORETAB_%s",ref);
+		String text = String.Format("SWWM_LORETXT_%s",ref);
+		// check that it's valid
+		if ( StringTable.Localize(tag,false) == tag ) return true;
+		if ( StringTable.Localize(tab,false) == tab )
+		{
+			Console.Printf("Entry \"%s\" defines no tab.",ref);
+			return true;
+		}
+		if ( StringTable.Localize(text,false) == text )
+		{
+			Console.Printf("Entry \"%s\" defines no text.",ref);
+			return true;
+		}
+		return false;
+	}
+
+	bool DirectAdd( String ref )
+	{
+		if ( PreVerify(ref) ) return true;
+		return InternalAdd(ref);
+	}
+
+	private bool InternalAdd( String ref )
+	{
 		ref = ref.MakeUpper();
 		String tag = String.Format("SWWM_LORETAG_%s",ref);
 		String tab = String.Format("SWWM_LORETAB_%s",ref);
@@ -437,18 +464,6 @@ Class SWWMLoreLibrary : Thinker
 			else if ( text ~== "SWWM_LORETXT_GODS" )
 				text = "SWWM_LORETXT_GODS2";	// beyond gods
 		}
-		// check that it's valid
-		if ( StringTable.Localize(tag,false) == tag ) return false;
-		if ( StringTable.Localize(tab,false) == tab )
-		{
-			Console.Printf("Entry \"%s\" defines no tab.",ref);
-			return false;
-		}
-		if ( StringTable.Localize(text,false) == text )
-		{
-			Console.Printf("Entry \"%s\" defines no text.",ref);
-			return false;
-		}
 		// check if existing
 		for ( int i=0; i<ent.Size(); i++ )
 		{
@@ -489,6 +504,7 @@ Class SWWMLoreLibrary : Thinker
 
 	static void Add( PlayerInfo p, String ref )
 	{
+		if ( PreVerify(ref) ) return;
 		SWWMLoreLibrary ll = Find(p);
 		if ( !ll )
 		{
@@ -496,7 +512,7 @@ Class SWWMLoreLibrary : Thinker
 			ll.ChangeStatNum(STAT_STATIC);
 			ll.myplayer = p;
 		}
-		ll.DirectAdd(ref);
+		ll.InternalAdd(ref);
 	}
 
 	void MarkRead( int idx )

@@ -134,6 +134,12 @@ Class SWWMHDoomHandler : StaticEventHandler
 		}
 	}
 
+	override void WorldThingRevived( WorldEvent e )
+	{
+		// reattach pats
+		WorldThingSpawned(e);
+	}
+
 	override void UiTick()
 	{
 		if ( !detected ) return;

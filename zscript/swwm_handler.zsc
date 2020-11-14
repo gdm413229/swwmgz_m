@@ -940,6 +940,14 @@ Class SWWMHandler : EventHandler
 		// reattach combat tracker
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
 			SWWMCombatTracker.Spawn(e.Thing);
+		// reattach headpats
+		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
+			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
+		{
+			// you can pet the dog, and you can also pet the caco (and friends)
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+		}
 		if ( !(e.Thing is 'PlayerPawn') ) return;
 		// reset some vars
 		if ( e.Thing.playernumber() != -1 )
@@ -948,13 +956,6 @@ Class SWWMHandler : EventHandler
 			spreecount[e.Thing.playernumber()] = 0;
 			tookdamage[e.Thing.playernumber()] = false;
 			lastkill[e.Thing.playernumber()] = int.min;
-			// initialize some player vars
-			if ( e.Thing is 'Demolitionist' )
-			{
-				Demolitionist(e.Thing).dashfuel = 240.;
-				Demolitionist(e.Thing).last_boost = 0;
-				Demolitionist(e.Thing).last_kick = 0;
-			}
 		}
 		// reset uptime since player had just died
 		SWWMStats s = SWWMStats.Find(e.Thing.player);

@@ -384,7 +384,7 @@ Class DragonBreathArm : Actor
 				l.target = p;
 			}
 			if ( !(ReactionTime%2) )
-				SWWMUtility.DoExplosion(self,1+(reactiontime*1.5),1000+200*reactiontime,150-6*reactiontime,ignoreme:bHITOWNER?null:target);
+				SWWMUtility.DoExplosion(self,1+(reactiontime*1.5),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -623,6 +623,8 @@ Class SaltBeam : Actor
 			{
 				SWWMUtility.DoKnockback(t.Results.HitActor,x,25000);
 				t.Results.HitActor.DamageMobj(self,target,60+Accuracy*5,'Salt',DMG_THRUSTLESS);
+				if ( t.Results.HitActor && t.Results.HitActor.bIsMonster && !Random[Spreadgun](0,3) )
+					t.Results.HitActor.Howl();
 			}
 			Vector3 norm = -x;
 			if ( t.Results.HitType == TRACE_HitWall )
@@ -691,7 +693,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,ignoreme:target);
+			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
 		if ( ((special2%5) || args[2]) && !special1 ) SpreadOut();
 		args[2]++;
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -876,6 +878,8 @@ Class OnFire : Actor
 				int flg = DMG_THRUSTLESS;
 				if ( victim is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're on fire, that shield is worthless
 				victim.DamageMobj(self,instigator,clamp(int(amount*.1),1,30),'Fire',flg);	// need to use this actor as inflictor to have a proper obituary
+				if ( victim.bISMONSTER && !Random[FlameT](0,3) )
+					victim.Howl();
 			}
 			if ( !victim )
 			{

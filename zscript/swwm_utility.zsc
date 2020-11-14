@@ -8,6 +8,7 @@ enum EDoExplosionFlags
 	DE_THRUWALLS = 8,	// damages through geometry (no sight check)
 	DE_NOTMISSILE = 16,	// instigator is the source itself (normally it'd be its target pointer)
 	DE_EXTRAZTHRUST = 32,	// applies a higher Z thrust to enemies on ground
+	DE_HOWL = 64,		// 25% chance for hit enemies to howl
 };
 
 const FallbackTag = "AWESOME IT'S PENIS"; // used on tag processing, please don't mind the actual string used)
@@ -824,6 +825,7 @@ Class SWWMUtility
 			if ( dmg <= 0 ) continue;	// no harm
 			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
 			if ( a && !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
+			if ( (flags&DE_HOWL) && a && a.bISMONSTER && !Random[DoBlast](0,3) ) a.Howl();
 			if ( !a || (a.Health <= 0) ) nkill++;
 		}
 		return nhit, nkill;

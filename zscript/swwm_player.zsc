@@ -1862,7 +1862,7 @@ Class Demolitionist : PlayerPawn
 		else
 		{
 			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.5);
-			let b = Spawn("SmolInvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
+			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
 		}
 	}

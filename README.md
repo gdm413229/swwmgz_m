@@ -109,7 +109,7 @@ on replaced item, may also come in bundles:
  - **Kinylum saltshot (blue):** Highly volatile shards of **Kinylum** that leave behind a trail of burning plasma. Rare.
  - ***"Fuck your shit"* round (black):** A special home-made incendiary ammo type that only an absolute madman would have come up with. Sets everything on fire (potentially including yourself). Very rare.
  - ***"The ball"* (purple):** A big lead ball, 'nuff said. Somewhat rare.
- - **Golden shell (self-explanatory color):** An extremely rare, but very valuable type. Fires a sabot packed with a very dense, high-grade **Explodium** charge, the shell also contains some gold glitter, but it's just for show. Clearly designed by someone completely insane, and definitely guaranteed to not fail catastrophically and blow up your gun, your hands, your arms, and the rest of your upper body. Unlike the others, this one is only available as a rare drop from boss monsters, and as a rare spawn for chaos/banishment devices in **Heretic** and **Hexen**.
+ - **Golden shell (self-explanatory color):** An extremely rare, but very valuable type. Fires a sabot packed with a very dense, high-grade **Explodium** charge, the shell also contains some gold glitter, but it's just for show. Clearly designed by someone completely insane, and definitely guaranteed to not fail catastrophically and blow up your gun, your hands, your arms, and the rest of your upper body. Unlike the others, this one is only available as a rare drop from powerful monsters (over 1000HP) and bosses. They may also appear in **Chanceboxes**.
 
 ### Wallbuster (slot 4) ~ Replaces SSG, Ethereal Crossbow, Frost Shards
 ![](docimg/wallbuster.png)
@@ -259,7 +259,7 @@ Unlike its previous incarnation in **SWWM Platinum**, this one doesn't have such
 ### Crystal Box
 ![](docimg/ynykronammo.png)
 
-Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn, so you'll have to get more ammo by finding additional weapon pickups or managing to afford one in the store.
+Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn in the world, so you'll have to get more ammo by finding additional weapon pickups or managing to afford one in the store, or trying your luck with a **Chancebox**.
 
 ## The Pickups
 ![](docimg/demolitionist_items.png)
@@ -385,10 +385,12 @@ Every now and then you will find these strange ***"Lucky Chance Boxes"*** in sec
 ***(Do note that this feature is currently not fully implemented, there may be missing models)***
 
 ### NUTATCO™ Chocolate Bar
+![](docimg/nutatcobar.png)
 
 A light snack, said to have a "savage taste".
 
 ### Frispy™ Tasty Corn Snack
+![](docimg/frispycorn.png)
 
 Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these that their tasty scent has stuck to her permanently.
 
@@ -425,6 +427,7 @@ A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet
 A short manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
 
 ### Kirin Plush (Hexen)
+![](docimg/kirinplush.png)
 
 The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart. Like the Saya plush, also emits a cute giggle when squeezed.
 

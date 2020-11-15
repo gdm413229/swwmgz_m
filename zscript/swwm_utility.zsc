@@ -863,6 +863,9 @@ Class SWWMUtility
 	static clearscope bool IdentifyingDog( Actor a )
 	{
 		if ( a is 'MBFHelperDog' ) return true;
+		// reminder that mark is a terrible person
+		if ( a.GetClassName() == 'GermanDog' ) return true;
+		if ( a.GetClassName() == '64HellHound' ) return true;
 		// more dogs will be added as found
 		// because all dogs must be pet
 		return false;

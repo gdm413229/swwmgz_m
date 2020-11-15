@@ -1,0 +1,28 @@
+#library "SWWMCOMP"
+#include "zcommon.acs"
+
+// these scripts are redirected to by the compatibility postprocessor
+
+SCRIPT "ZPACK_E1M2_SCRIPT6" ( void )
+{
+       TagWait(22);
+       Door_Open(22,16);
+       Floor_LowerByValue(22,2,8);
+       Delay(245);
+       Door_Close(22,16);
+       Floor_RaiseByValue(22,2,8);
+       Delay(24);
+}
+
+SCRIPT "ZPACK_E3M2_SCRIPT9" ( void )
+{
+	ACS_Execute(4,0,7);
+	ClearLineSpecial();
+}
+
+SCRIPT "ZPACK_E3M8_SCRIPT15" ( void )
+{
+	Floor_LowerByValue(49,10,64);
+	TagWait(49);
+	Floor_LowerByValue(37,10,120);
+}

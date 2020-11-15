@@ -1,0 +1,32 @@
+// level compatibility scripts
+// sometimes shit breaks because of old and wrong scripting
+// usually stuff that uses CheckInventory to look for keys, instead of, y'know,
+// using ACS_LockedExecute
+
+Class SWWMLevelCompatibility : LevelPostProcessor
+{
+	protected void Apply( Name checksum, String mapname )
+	{
+		switch ( checksum )
+		{
+		case 'none':
+			return;
+		// ZPack E1M2
+		case 'BA13454A41D931685B6A4B28E6946B6B':
+			// script uses checkinventory for red key
+			SetLineSpecial(225,ACS_LockedExecuteDoor,-Int('ZPACK_E1M2_SCRIPT6'),0,0,0,1);
+			SetLineSpecial(228,ACS_LockedExecuteDoor,-Int('ZPACK_E1M2_SCRIPT6'),0,0,0,1);
+			break;
+		// ZPack E3M2
+		case '17BD38E0B2FB8E760885FE46325DFF3A':
+			// script uses checkinventory for red skull
+			SetLineSpecial(5913,ACS_LockedExecute,-Int('ZPACK_E3M2_SCRIPT9'),0,0,0,4);
+			break;
+		// ZPack E3M8
+		case '13C5952A04014122271F50134DB4521F':
+			// script uses checkinventory for yellow skull
+			SetLineSpecial(22610,ACS_LockedExecute,-Int('ZPACK_E3M8_SCRIPT15'),0,0,0,6);
+			break;
+		}
+	}
+}

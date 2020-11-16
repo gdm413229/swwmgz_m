@@ -1138,7 +1138,8 @@ Class SWWMHandler : EventHandler
 			int dropweight = 0;
 			let ti = ThinkerIterator.Create(e.Thing.GetClass());
 			while ( ti.Next() ) dropweight++;
-			dropweight = max(2,dropweight/4);
+			int minchance = max(1,6-(e.Thing.GetSpawnHealth()/1000));
+			dropweight = max(minchance,dropweight/4);
 			if ( !Random[GoldDrop](0,dropweight) )
 			{
 				let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));

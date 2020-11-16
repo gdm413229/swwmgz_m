@@ -720,6 +720,7 @@ Class GoldShell : Ammo
 	action void A_GoldShellTrail()
 	{
 		if ( Random[Goldy](0,2) ) return;
+		if ( !players[consoleplayer].Camera.CheckSight(self,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return;
 		Spawn("GoldShellSparkle",Vec3Offset(FRandom[Goldy](-2,2),FRandom[Goldy](-2,2),FRandom[Goldy](10,18)));
 	}
 

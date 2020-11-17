@@ -119,6 +119,20 @@ Class SWWMOptionMenu : OptionMenu
 	transient CVar lang;
 	transient Font TewiFont, MPlusFont;
 
+	override void Init( Menu parent, OptionMenuDescriptor desc )
+	{
+		Super.Init(parent,desc);
+		// remove voicepack selector if there's only one voice
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			if ( !(mDesc.mItems[i] is 'OptionMenuItemSWWMVoiceOption')
+				|| (OptionMenuItemSWWMVoiceOption(mDesc.mItems[i]).types.Size() > 1) ) continue;
+			mDesc.mItems[i].Destroy();
+			mDesc.mItems.Delete(i);
+			if ( mDesc.mSelectedItem > i ) mDesc.mSelectedItem--;
+			i--;
+		}
+	}
 	override void Ticker()
 	{
 		Super.Ticker();

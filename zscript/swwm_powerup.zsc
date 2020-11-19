@@ -858,7 +858,7 @@ Class RagekitPower : Powerup
 		}
 		if ( Owner.player == players[consoleplayer] )
 			lastrage = SWWMHandler.AddOneliner("ragekit",2,20)+40;
-		Owner.A_AlertMonsters(5000);
+		Owner.A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
@@ -880,7 +880,7 @@ Class RagekitPower : Powerup
 			SWWMHandler.DoFlash(Owner,Color(16,255,0,0),5);
 			if ( Owner.GiveBody(1,100) )
 				SWWMScoreObj.Spawn(1,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
-			Owner.A_AlertMonsters(2000);
+			Owner.A_AlertMonsters(swwm_uncapalert?0:2000);
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
@@ -934,7 +934,7 @@ Class RagekitPower : Powerup
 		if ( level.maptime <= lasteffect+5 ) return;
 		if ( Owner.GiveBody(5,100) )
 			SWWMScoreObj.Spawn(5,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
-		Owner.A_AlertMonsters(5000);
+		Owner.A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )

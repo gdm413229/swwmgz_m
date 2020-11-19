@@ -277,7 +277,7 @@ Class BigBiospark : Actor
 	void A_BigSparkExplode()
 	{
 		A_StopSound(CHAN_VOICE);
-		A_AlertMonsters(15000);
+		A_AlertMonsters(swwm_uncapalert?0:15000);
 		SWWMUtility.DoExplosion(self,350,90000,250,100,flags:DE_HOWL);
 		A_QuakeEx(9,9,9,30,0,1400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
@@ -537,7 +537,7 @@ Class BiosparkBall : Actor
 	void A_SparkExplode()
 	{
 		A_StopSound(CHAN_VOICE);
-		A_AlertMonsters(5000);
+		A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMUtility.DoExplosion(self,50,20000,150,80,flags:DE_HOWL);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		A_StartSound("biospark/hit",CHAN_ITEM,attenuation:.8);
@@ -701,7 +701,7 @@ Class BiosparkBeamImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters(2000);
+		A_AlertMonsters(swwm_uncapalert?0:2000);
 		SWWMUtility.DoExplosion(self,40,20000,100,40,flags:DE_HOWL);
 		A_QuakeEx(3,3,3,12,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.4);
 		A_StartSound("biospark/beamhit",CHAN_ITEM,attenuation:1.1);
@@ -903,7 +903,7 @@ Class BiosparkComboImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_AlertMonsters(6000);
+		A_AlertMonsters(swwm_uncapalert?0:6000);
 		SWWMUtility.DoExplosion(self,bAMBUSH?(200+Args[0]*25):150,bAMBUSH?120000:60000,bAMBUSH?500:300,bAMBUSH?350:150,DE_HOWL);
 		A_QuakeEx(9,9,9,25,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:600,rollIntensity:1.5);
 		A_StartSound("biospark/bighit",CHAN_ITEM,attenuation:.4);
@@ -1793,7 +1793,7 @@ Class BiosparkCore : Actor
 	}
 	void A_Deploy()
 	{
-		A_AlertMonsters(700);
+		A_AlertMonsters(swwm_uncapalert?0:700);
 		A_QuakeEx(7,7,7,8,0,1400,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		A_StartSound("biospark/deploy",CHAN_ITEM,attenuation:.7);
 		A_StartSound("biospark/deploy",CHAN_WEAPON,attenuation:.5);
@@ -1808,7 +1808,7 @@ Class BiosparkCore : Actor
 	{
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
-		A_AlertMonsters(5000);
+		A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMUtility.DoExplosion(self,50,120000,150,60);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -2036,7 +2036,7 @@ Class Sparkster : SWWMWeapon
 			A_ZoomFactor(1.);
 			A_SWWMFlash();
 			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
-			A_AlertMonsters(5000);
+			A_AlertMonsters(swwm_uncapalert?0:5000);
 			A_PlayerFire();
 			a = FRandom[Spread](0,360);
 			s = FRandom[Spread](0,.007);
@@ -2056,7 +2056,7 @@ Class Sparkster : SWWMWeapon
 			A_ZoomFactor(1.);
 			A_SWWMFlash();
 			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
-			A_AlertMonsters(4000);
+			A_AlertMonsters(swwm_uncapalert?0:4000);
 			A_PlayerFire();
 			a = FRandom[Spread](0,360);
 			s = FRandom[Spread](0,.003);
@@ -2074,7 +2074,7 @@ Class Sparkster : SWWMWeapon
 			A_QuakeEx(5,5,5,10,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.6);
 			A_ZoomFactor(.94,ZOOM_INSTANT);
 			A_ZoomFactor(1.);
-			A_AlertMonsters(1200);
+			A_AlertMonsters(swwm_uncapalert?0:1200);
 			A_PlayerFire();
 			SWWMUtility.DoKnockback(self,-x,2500.);
 			a = FRandom[Spread](0,360);

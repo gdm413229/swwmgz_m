@@ -102,7 +102,7 @@ Class SilverImpact : Actor
 	{
 		Super.PostBeginPlay();
 		SWWMUtility.DoExplosion(self,100,8000,100,20);
-		A_AlertMonsters(2500);
+		A_AlertMonsters(swwm_uncapalert?0:2500);
 		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )
 		{
@@ -434,7 +434,7 @@ Class FatChodeImpact : Actor
 	{
 		Super.PostBeginPlay();
 		SWWMUtility.DoExplosion(self,1500,40000,250,120,DE_THRUWALLS|DE_EXTRAZTHRUST);
-		A_AlertMonsters(8000);
+		A_AlertMonsters(swwm_uncapalert?0:8000);
 		A_QuakeEx(7,7,7,50,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StartSound("silverbullet/chode",CHAN_VOICE,CHANF_DEFAULT,1.,.35);
 		A_SprayDecal("BigPock",-64);
@@ -931,7 +931,7 @@ Class SilverBullet : SWWMWeapon
 	{
 		A_SWWMFlash();
 		A_StartSound(invoker.fcbchambered?"silverbullet/altfire":"silverbullet/fire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.3);
-		A_AlertMonsters(16000);
+		A_AlertMonsters(swwm_uncapalert?0:16000);
 		int str = invoker.fcbchambered?7:8;
 		A_QuakeEx(str,str,str,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:str/4.);
 		double basezoom = invoker.zoomed?clamp(invoker.zoomlevel,1.,16.):1.;

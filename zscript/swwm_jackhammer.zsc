@@ -242,7 +242,7 @@ Class PusherProjectile : Actor
 		// re-do the bounce with our formula
 		vel = .8*((vel dot HitNormal)*HitNormal*(-1.8+FRandom[Pusher](.0,.8))+vel);
 		A_StartSound("pusher/bounce",volume:.3);
-		A_AlertMonsters(300);
+		A_AlertMonsters(swwm_uncapalert?0:300);
 		if ( vel.length() < 5 )
 		{
 			special1 = 0;
@@ -400,7 +400,7 @@ Class PusherWeapon : SWWMWeapon
 		if ( d.HitType != TRACE_HitNone )
 		{
 			A_QuakeEx(2,2,2,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
-			A_AlertMonsters(1200);
+			A_AlertMonsters(swwm_uncapalert?0:1200);
 			int dmg = int(5+invoker.chargelevel*3);
 			if ( d.HitType == TRACE_HitActor )
 			{
@@ -460,7 +460,7 @@ Class PusherWeapon : SWWMWeapon
 			s.scale *= 1.4;
 			s.alpha *= .03;
 		}
-		if ( swwm_extraalert || !(invoker.hitcnt%20) ) A_AlertMonsters(500);
+		if ( swwm_extraalert || !(invoker.hitcnt%20) ) A_AlertMonsters(swwm_uncapalert?0:500);
 		invoker.hitcnt++;
 	}
 
@@ -487,7 +487,7 @@ Class PusherWeapon : SWWMWeapon
 		if ( d.HitType != TRACE_HitNone )
 		{
 			A_QuakeEx(8,8,8,12,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
-			A_AlertMonsters(1600);
+			A_AlertMonsters(swwm_uncapalert?0:1600);
 			int dmg = int(300*invoker.chargelevel);
 			if ( d.HitType == TRACE_HitActor )
 			{
@@ -560,7 +560,7 @@ Class PusherWeapon : SWWMWeapon
 				s.alpha *= .1;
 			}
 		}
-		A_AlertMonsters(1200);
+		A_AlertMonsters(swwm_uncapalert?0:1200);
 		invoker.chargelevel = 0.;
 	}
 

@@ -348,7 +348,7 @@ Class Demolitionist : PlayerPawn
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
-			if ( swwm_extraalert ) A_AlertMonsters(800);
+			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:800);
 			dashboost *= (player.cmd.buttons&BT_USER2)?.9:.1;
 		}
 		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
@@ -365,7 +365,7 @@ Class Demolitionist : PlayerPawn
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
-			if ( swwm_extraalert ) A_AlertMonsters(800);
+			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:800);
 			dashboost *= (player.cmd.buttons&BT_JUMP)?.95:.4;
 			last_boost = level.maptime+1;
 		}
@@ -617,7 +617,7 @@ Class Demolitionist : PlayerPawn
 				s.special1 = int(-lastvelz);
 				ReactionTime = 17;
 				A_Stop();
-				A_AlertMonsters(2500);
+				A_AlertMonsters(swwm_uncapalert?0:2500);
 				if ( player == players[consoleplayer] )
 				{
 					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -740,7 +740,7 @@ Class Demolitionist : PlayerPawn
 				if ( a.bACTLIKEBRIDGE && (diff.z <= -a.Height) ) continue;	// don't bump bridges if hit by above
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-				A_AlertMonsters(800);
+				A_AlertMonsters(swwm_uncapalert?0:800);
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
@@ -860,7 +860,7 @@ Class Demolitionist : PlayerPawn
 						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 						bumptic = gametic+int(20+spd/4.);
 						A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-						A_AlertMonsters(800);
+						A_AlertMonsters(swwm_uncapalert?0:800);
 						vel *= .2;
 						vel -= dir*(10+(spd*30/mass));
 						vel.z += 5+(spd*(10/mass));
@@ -953,7 +953,7 @@ Class Demolitionist : PlayerPawn
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 					bumptic = gametic+int(20+spd/4.);
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
-					A_AlertMonsters(800);
+					A_AlertMonsters(swwm_uncapalert?0:800);
 					vel *= .2;
 					vel -= dir*(10+(spd*30/mass));
 					vel += wallnorm*(10+(spd*50/mass));
@@ -1414,7 +1414,7 @@ Class Demolitionist : PlayerPawn
 					s.special1 = 30;
 					ReactionTime = 17;
 					A_Stop();
-					A_AlertMonsters(2500);
+					A_AlertMonsters(swwm_uncapalert?0:2500);
 					if ( player == players[consoleplayer] )
 					{
 						A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);

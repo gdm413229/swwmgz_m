@@ -302,7 +302,7 @@ Class HellblazerMissile : Actor
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitm",CHAN_WEAPON,attenuation:.8);
 		A_StartSound("hellblazer/hitm",CHAN_VOICE,attenuation:.5);
-		A_AlertMonsters(2500);
+		A_AlertMonsters(swwm_uncapalert?0:2500);
 		Spawn("HellblazerExplLight",pos);
 		int numpt = Random[Hellblazer](12,24);
 		for ( int i=0; i<numpt; i++ )
@@ -399,7 +399,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitc",CHAN_WEAPON,attenuation:.7);
 		A_StartSound("hellblazer/hitc",CHAN_VOICE,attenuation:.4);
-		A_AlertMonsters(3000);
+		A_AlertMonsters(swwm_uncapalert?0:3000);
 		Spawn("HellblazerExplLight",pos);
 		int numpt = Random[Hellblazer](12,24);
 		for ( int i=0; i<numpt; i++ )
@@ -469,7 +469,7 @@ Class HellblazerRavager : HellblazerMissile
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitr",CHAN_WEAPON,attenuation:.6);
 		A_StartSound("hellblazer/hitr",CHAN_VOICE,attenuation:.3);
-		A_AlertMonsters(4500);
+		A_AlertMonsters(swwm_uncapalert?0:4500);
 		Spawn("HellblazerExplLight",pos);
 		int numpt = Random[Hellblazer](16,28);
 		for ( int i=0; i<numpt; i++ )
@@ -548,7 +548,7 @@ Class HellblazerWarhead : HellblazerMissile
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitw",CHAN_WEAPON,attenuation:.4);
 		A_StartSound("hellblazer/hitw",CHAN_VOICE,attenuation:.1);
-		A_AlertMonsters(40000);
+		A_AlertMonsters(swwm_uncapalert?0:40000);
 		Spawn("HellblazerExplLight3",pos);
 		int numpt = Random[Hellblazer](20,30);
 		for ( int i=0; i<numpt; i++ )
@@ -752,7 +752,7 @@ Mixin Class HellblazerGrenade
 			ExplodeMissile();
 			return;
 		}
-		if ( swwm_extraalert ) A_AlertMonsters(300);
+		if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:300);
 		A_StartSound("hellblazer/bounce",CHAN_ITEM);
 		rollvel = FRandom[Hellblazer](-16,16);
 		anglevel = FRandom[Hellblazer](-16,16);
@@ -839,7 +839,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitcs",CHAN_WEAPON,attenuation:.9);
 		A_StartSound("hellblazer/hitcs",CHAN_VOICE,attenuation:.5);
-		A_AlertMonsters(2000);
+		A_AlertMonsters(swwm_uncapalert?0:2000);
 		Spawn("HellblazerExplLight2",pos);
 		int numpt = Random[Hellblazer](4,8);
 		for ( int i=0; i<numpt; i++ )
@@ -1323,7 +1323,7 @@ Class Hellblazer : SWWMWeapon
 							"HellblazerMissile2","HellblazerCrackshot2","HellblazerRavager2","HellblazerWarhead2"};
 		static const Color cols[] = {Color(4,3,2),Color(2,4,2),Color(4,2,2),Color(3,2,4)};
 		A_StartSound(bAlt?"hellblazer/altfire":"hellblazer/fire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:(bAlt?1.7:.8));
-		A_AlertMonsters(bAlt?400:1200);
+		A_AlertMonsters(swwm_uncapalert?0:bAlt?400:1200);
 		int qstr = bAlt?4:5;
 		A_QuakeEx(qstr,qstr,qstr,bAlt?4:12,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.12*qstr);
 		A_ZoomFactor(bAlt?.96:.93,ZOOM_INSTANT);

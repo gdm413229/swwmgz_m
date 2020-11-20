@@ -387,44 +387,48 @@ Every now and then you will find these strange ***"Lucky Chance Boxes"*** in sec
 ### NUTATCO™ Chocolate Bar
 ![](docimg/nutatcobar.png)
 
-A light snack, said to have a "savage taste".
+A light snack, said to have a "savage taste". The branding was entirely Saya's doing thanks to her position as #1 sponsor of Vestal Foods.
 
 ### Frispy™ Tasty Corn Snack
 ![](docimg/frispycorn.png)
 
-Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these that their tasty scent has stuck to her permanently.
+Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these that their tasty scent has stuck to her permanently, becoming a walking advertisement for them. Kirin likes it, at least.
 
 ### The Akari Project
+![](docimg/akariproject.png)
 
-Hard cover copy of Saya's famous sci-fi novel about interdimensional travel. Saya has frequently cited it to dab hard on the UAC and their failures.
+A copy of Saya's famous sci-fi novel about interdimensional travel. Saya has frequently cited it to dab hard on the UAC and their failures. The interportal system devised by Saya in 2171 was named after this.
 
 ### Meidobot - Love Signals
 
-Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there.
+Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there. The album is considered a declaration of love to Saya, although it should be noted that this predates Maidbot gaining sentience (not that it makes much of a difference, as her feelings for Saya turned out to be very real).
 
 ### Mashiro Plush
 
-A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Potentially cursed, be extra careful when you have a Lämp around.
+A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Appears to be cursed, potentially putting you in the sights of a very real moth girl.
 
 ### Haunted Saya Bean Plush (Heretic)
 
 Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
 
 ### Demolitionist Plush (Heretic)
+![](docimg/demoplush.png)
 
-A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth.
+A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth. Fully articulated, face and tags glow in the dark.
 
 ### Toot Froot™ Peach Juice (Hexen)
+![](docimg/tootfroot.png)
 
-Saya began to stock up on these after her marriage with Kirin, for some unexplained reason. She says the taste reminds her of him.
+Saya began to stock up on these after her marriage with Kirin, for some unexplained reason. She says the taste reminds her of him. Kirin also seems to enjoy drinking them, perhaps a bit too much, in fact.
 
 ### Akkouxhei Milk Breads (Hexen)
 
-A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet they may be even lethal if consumed in excess.
+A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet they may be even lethal if consumed in excess. Saya gave herself a heart attack once after stuffing her face full of them.
 
 ### I Married A Cherry Boy Emperor But It Turns Out He's Really Cute In Lingerie!? (Hexen)
+![](docimg/kirinmanga.png)
 
-A short manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
+A single-volume manga by Saya Miyamoto "based on true events" about a young girl who marries a seemingly pure and innocent emperor with a secret crossdressing hobby.
 
 ### Kirin Plush (Hexen)
 ![](docimg/kirinplush.png)

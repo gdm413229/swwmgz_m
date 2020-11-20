@@ -1409,7 +1409,7 @@ Class Hellblazer : SWWMWeapon
 		if ( !player.FindPSprite(PSP_WEAPON+1) )
 		{
 			A_Overlay(PSP_WEAPON+1,g);
-			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE,true);
+			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
 			A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
 		}
 		else player.SetPSprite(PSP_WEAPON+1,invoker.FindState(g));

@@ -1204,15 +1204,15 @@ Class SWWMStatusBar : BaseStatusBar
 			for ( int j=l.Count()-1; j>=0; j-- )
 			{
 				int len = fnt.StringWidth(l.StringAt(j));
-				xx = (ss.x-len)/2.;
-				Screen.DrawText(fnt,pickcol.GetInt(),int(xx),yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				xx = int((ss.x-len)/2.);
+				Screen.DrawText(fnt,pickcol.GetInt(),xx,yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy -= h;
 			}
 			yy -= 6;
 		}
 	}
 
-	private void DrawMessages()
+	private void DrawMessages( double boxalph = 1. )
 	{
 		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
 		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
@@ -1236,14 +1236,14 @@ Class SWWMStatusBar : BaseStatusBar
 			int h = fnt.GetHeight();
 			int maxlen = 0;
 			for ( int i=0; i<l.Count(); i++ ) maxlen = max(maxlen,fnt.StringWidth(l.StringAt(i)));
-			xx = (ss.x*ssp-maxlen)/2.;
+			xx = int((ss.x*ssp-maxlen)/2.);
 			yy = ss.y*ssp*.375;
-			yy -= (h*l.Count()+4)/2.;	// center
+			yy -= (h*l.Count()+4)/2;	// center
 			Screen.Dim("Black",.8*alph,int((xx-6)*hs.x*hsp),int(yy*hs.y*hsp),int((maxlen+12)*hs.x*hsp),int((h*l.Count()+4)*hs.y*hsp));
 			for ( int i=0; i<l.Count(); i++ )
 			{
 				int len = fnt.StringWidth(l.StringAt(i));
-				xx = (ss.x*ssp-len)/2.;
+				xx = int((ss.x*ssp-len)/2.);
 				Screen.DrawText(fnt,col,int(xx),yy+2,l.StringAt(i),DTA_VirtualWidthF,ss.x*ssp,DTA_VirtualHeightF,ss.y*ssp,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy += h;
 			}
@@ -1253,7 +1253,7 @@ Class SWWMStatusBar : BaseStatusBar
 		xx = margin;
 		yy = margin;
 		bool smol = (ss.x<640);
-		if ( !camhidden ) Screen.DrawTexture(ChatTex[smol?3:0],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(ChatTex[smol?3:0],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,boxalph);
 		yy++;
 		for ( int i=mstart; i<MainQueue.Size(); i++ )
 		{
@@ -1270,12 +1270,12 @@ Class SWWMStatusBar : BaseStatusBar
 			BrokenLines l = fnt.BreakLines(cstr,smol?211:361);
 			for ( int j=0; j<l.Count(); j++ )
 			{
-				if ( !camhidden ) Screen.DrawTexture(ChatTex[smol?4:1],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(ChatTex[smol?4:1],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,boxalph);
 				Screen.DrawText(fnt,col,xx+4,yy,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy += 13;
 			}
 		}
-		if ( !camhidden ) Screen.DrawTexture(ChatTex[smol?5:2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(ChatTex[smol?5:2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,boxalph);
 	}
 
 	override bool DrawChat( String txt )
@@ -1311,12 +1311,12 @@ Class SWWMStatusBar : BaseStatusBar
 		// don't do anything
 	}
 
-	private void DrawDeath()
+	private double DrawDeath()
 	{
 		// death prompt
 		let demo = Demolitionist(CPlayer.mo);
 		let goner = PlayerGone(CPlayer.mo);
-		if ( (!demo && !goner) || (CPlayer.Health > 0) || (CPlayer != players[consoleplayer]) ) return;
+		if ( (!demo && !goner) || (CPlayer.Health > 0) || (CPlayer != players[consoleplayer]) ) return 1.;
 		String str;
 		double alph;
 		int len;
@@ -1325,14 +1325,15 @@ Class SWWMStatusBar : BaseStatusBar
 		int deadtimer = goner?goner.deadtimer:demo.deadtimer;
 		if ( goner || (demo.player.viewheight <= 6) )
 		{
-			Screen.Dim("Black",goner?1.:min(deadtimer/80.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+			double dimalph = goner?1.:min(deadtimer/80.,1.);
+			Screen.Dim("Black",dimalph,0,0,Screen.GetWidth(),Screen.GetHeight());
 			if ( demo && (demo.revivefail > level.maptime) )
 			{
 				Screen.Dim("Red",clamp((demo.revivefail-level.maptime)/60.,0.,.2),0,0,Screen.GetWidth(),Screen.GetHeight());
 				str = StringTable.Localize("$SWWM_REFAIL");
 				fnt = LangFont(mTewiFont);
 				len = fnt.StringWidth(str);
-				xx = (ss.x-len)/2.;
+				xx = int((ss.x-len)/2.);
 				yy = ss.y-48;
 				if ( ((demo.revivefail-level.maptime)%16) < 8 )
 					Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -1341,38 +1342,40 @@ Class SWWMStatusBar : BaseStatusBar
 			str = String.Format(StringTable.Localize("$SWWM_URDED"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
-			xx = (ss.x-len)/2.;
+			xx = int((ss.x-len)/2.);
 			yy = (ss.y-fnt.GetHeight()*4)/2.;
 			Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
 			{
-				if ( sv_norespawn ) return;
+				if ( sv_norespawn ) return (1.-dimalph);
 				alph = clamp((deadtimer-90)/60.,0.,1.);
 				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"),CPlayer.GetUserName());
 				fnt = LangFont(mTewiFont);
 				len = fnt.StringWidth(str);
-				xx = (ss.x-len)/2.;
+				xx = int((ss.x-len)/2.);
 				yy = ss.y/2.;
 				Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-				return;
+				return (1.-dimalph);
 			}
 			alph = clamp((deadtimer-140)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
-			xx = (ss.x-len)/2.;
+			xx = int((ss.x-len)/2.);
 			yy = ss.y/2.;
 			Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			if ( goner || !swwm_revive )
-				return;
+				return (1.-dimalph);
 			alph = clamp((deadtimer-160)/60.,0.,1.);
 			str = String.Format(StringTable.Localize("$SWWM_URDED3"),CPlayer.GetUserName());
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
-			xx = (ss.x-len)/2.;
+			xx = int((ss.x-len)/2.);
 			yy = (ss.y+fnt.GetHeight()*2)/2.;
 			Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			return (1.-dimalph);
 		}
+		return 1.;
 	}
 
 	override void Draw( int state, double TicFrac )
@@ -1426,7 +1429,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( hnd ) hnd.DrawBossBar(self);
 			DrawPickups();
 			DrawDeath();
-			DrawMessages();
+			DrawMessages(0.);
 		}
 		else
 		{
@@ -1437,8 +1440,8 @@ Class SWWMStatusBar : BaseStatusBar
 			DrawWeapon();
 			if ( hnd ) hnd.DrawBossBar(self);
 			DrawPickups();
-			DrawDeath();
-			DrawMessages();
+			double malph = DrawDeath();
+			DrawMessages(malph);
 		}
 	}
 }

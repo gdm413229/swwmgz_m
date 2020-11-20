@@ -846,6 +846,10 @@ Class Chancebox : Actor
 	}
 	override bool Used( Actor user )
 	{
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
 		if ( CurState != FindState("Spawn") ) return false;
 		if ( !dud )
 		{

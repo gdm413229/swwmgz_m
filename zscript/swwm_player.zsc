@@ -401,7 +401,7 @@ Class Demolitionist : PlayerPawn
 		Sector headregion = null;
 		if ( CurSector.moreflags&Sector.SECMF_UNDERWATER ) // check underwater sector
 			headregion = CurSector;
-		else if ( CurSector.heightsec ) // check height transfer
+		else if ( CurSector.heightsec && (Cursector.heightsec.moreflags&Sector.SECMF_UNDERWATER) ) // check height transfer
 		{
 			let hsec = CurSector.heightsec;
 			double fh = hsec.floorplane.ZAtPoint(pos.xy);
@@ -423,9 +423,7 @@ Class Demolitionist : PlayerPawn
 				double ff_top = ff.top.ZAtPoint(pos.xy);
 				if ( (ff_top <= pos.z) || (ff_bottom > centerpos.z) ) continue;
 				if ( headpos.z <= ff_top )
-				{
 					headregion = ff.model;
-				}
 				break;
 			}
 		}

@@ -1,14 +1,14 @@
 This is just a bit of *"future planning"* for stuff that I ***might*** add after the first release.
 
 * **DLC Weaponset:**
-  1. Itamex Reinforced Hammer *(UnSX 5)*
-  3. Puntzer Beta *(SWWM Iridium)*
-  4. Puntzer Gamma *(Ultra Suite 2)*
-  5. Sheen HMG *(SWWM Platinum Ep2)*
-  6. Quadravol *(UnSX)*
-  7. Blackfire Igniter *(UnSX 5, Ultra Suite 3)*
-  8. Rail Carbine *("Tesla Beamer" in Ultra Suite 2 & 3)*
-  9. Ray-Khom *(UnSX)*
+  - [1] Itamex Reinforced Hammer *(UnSX 5)*
+  - [3] Puntzer Beta *(SWWM Iridium)*
+  - [4] Puntzer Gamma *(Ultra Suite 2)*
+  - [5] Sheen HMG *(SWWM Platinum Ep2)*
+  - [6] Quadravol *(UnSX)*
+  - [7] Blackfire Igniter *(UnSX 5, Ultra Suite 3)*
+  - [8] Rail Carbine *("Tesla Beamer" in Ultra Suite 2 & 3)*
+  - [9] Ray-Khom *(UnSX)*
 * ***(Maybe)* Add the collectibles that were removed due to time constraints:**
   - The Black Rat's Coven - Walpurgisnacht *(Debut album)*
   - Cat Catcher *(Promo poster)*

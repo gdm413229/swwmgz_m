@@ -120,6 +120,8 @@ Class SWWMStatScreen : StatusScreen abstract
 				if ( (i >= 61) && (i <= 68) ) continue;
 				ents.Push(i);
 			}
+			// account for skipped dlc tips (important, will crash otherwise)
+			maxtip -= 8;
 			if ( pdata.lasttip.Size() >= maxtip )
 			{
 				// exclude last one, start over
@@ -268,10 +270,27 @@ Class SWWMStatScreen : StatusScreen abstract
 			if ( !playeringame[i] ) continue;
 			{
 				PlayerInfo p = players[i];
-				if ( (p.cmd.buttons^p.oldbuttons) && ((p.cmd.buttons&p.oldbuttons) == p.oldbuttons) && !p.Bot && (p.cmd.buttons&(BT_ATTACK|BT_USE)) )
+				if ( (p.cmd.buttons^p.oldbuttons) && ((p.cmd.buttons&p.oldbuttons) == p.oldbuttons) && !p.Bot )
 				{
-					acceleratestage = 1;
-					playerready[i] = true;
+					if ( p.cmd.buttons&(BT_ATTACK|BT_USE) )
+					{
+						acceleratestage = 1;
+						playerready[i] = true;
+					}
+					if ( i == consoleplayer )
+					{
+						if ( p.cmd.buttons&BT_RELOAD )
+						{
+							PlaySound("menu/demoscroll");
+							whichtip = 0;
+						}
+						if ( p.cmd.buttons&BT_ZOOM )
+						{
+							PlaySound("menu/demoscroll");
+							whichart = 0;
+							arttex.SetNull();
+						}
+					}
 				}
 				p.oldbuttons = p.buttons;
 			}

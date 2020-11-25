@@ -24,6 +24,12 @@ OptionValue "SWWMShadows"
 	1, "$SWWM_SHADOWS_ON"
 	2, "$SWWM_SHADOWS_ALL"
 }
+OptionValue "SWWMDamageTarget"
+{
+	0, "$SWWM_TARGET_ALWAYS"
+	1, "$SWWM_TARGET_FIRSTHIT"
+	2, "$SWWM_TARGET_DAMAGED"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -52,6 +58,7 @@ OptionMenu "SWWMOptionMenu"
 	Slider "$SWWM_PICKLEN", "swwm_pickduration", 1, 30, 1, 0
 	Option "$SWWM_TARGET", "swwm_targeter", "YesNo"
 	Option "$SWWM_TARGETTAG", "swwm_targettags", "YesNo"
+	Option "$SWWM_DAMAGETARGET", "swwm_damagetarget", "SWWMDamageTarget"
 	Option "$SWWM_BIGTAGS", "swwm_bigtags", "YesNo"
 	Option "$SWWM_BOSSBAR", "swwm_bosshealthbars", "YesNo"
 	Option "$SWWM_DAMNUMS", "swwm_healthnums", "YesNo"

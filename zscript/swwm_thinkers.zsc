@@ -804,8 +804,9 @@ Class SWWMCombatTracker : Thinker
 	bool legged, mutated;
 	int tcnt;
 	double height;
-	transient CVar funtags, maxdist;
+	transient CVar funtags, maxdist, damagebars;
 	bool bBOSS, bFRIENDLY;
+	bool firsthit;
 
 	void UpdateTag()
 	{
@@ -941,8 +942,19 @@ Class SWWMCombatTracker : Thinker
 		}
 		bBOSS = mytarget.bBOSS|(maxhealth>1000);
 		bFRIENDLY = mytarget.bFRIENDLY;
+		if ( mytarget.Health < lasthealth ) firsthit = true;
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
+		// special update conditions
+		if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
+		int dbar = damagebars.GetInt();
+		if ( dbar )
+		{
+			if ( (dbar == 2) && (lasthealth >= maxhealth) )
+				return;
+			else if ( (dbar == 1) && !firsthit )
+				return;
+		}
 		if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE && !mytarget.bCORPSE )
 		{

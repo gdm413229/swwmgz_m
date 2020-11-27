@@ -2098,8 +2098,8 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'Cell') || (e.Replacee == 'SkullRodAmmo') )
 		{
-			if ( Random[Replacements](0,2) ) e.Replacement = Random[Replacements](0,2)?'HellblazerRavagers':'HellblazerWarheads';
-			else if ( Random[Replacements](0,3) ) e.Replacement = 'SparkUnit';
+			if ( !Random[Replacements](0,2) ) e.Replacement = Random[Replacements](0,2)?'HellblazerRavagers':'HellblazerWarheads';
+			else if ( Random[Replacements](0,2) ) e.Replacement = 'SparkUnit';
 			else if ( !Random[Replacements](0,3) ) e.Replacement = 'CandyGunBullets';
 			else e.Replacement = Random[Replacements](0,2)?'SilverBullets':'SilverBullets2';
 		}

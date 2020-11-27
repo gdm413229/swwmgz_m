@@ -1902,6 +1902,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		if ( !pauseme ) pauseme = CVar.GetCVar('swwm_menupause',players[consoleplayer]);
 		if ( pauseme.GetBool() ) menuactive = Menu.On;
 		else menuactive = Menu.OnNoPause;
+		// forcibly tick hud (mainly so interpolators can still update in the background)
+		if ( !multiplayer && (menuactive == Menu.On) )
+			StatusBar.Tick();
 		if ( !multiplayer && ((curtab == TAB_TRADING) || (curtab == TAB_CHAT)) )
 		{
 			MenuSound("menu/demotab");

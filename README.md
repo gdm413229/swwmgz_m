@@ -197,7 +197,7 @@ The definitive model of **Blackmann Arms**'s legendary **Silver Bullet** series.
 
 **Primary fire:** Shoot the bullet. A second press chambers another round.
 
-**Secondary fire:** Picks the ammo for the next reload.
+**Secondary fire:** On tap, picks the ammo for the next reload. On hold, also tap primary to manually cock (in case you want to eject unfired rounds).
 
 **Reload:** Reload (what else is new) or switch ammo types.
 

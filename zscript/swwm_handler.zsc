@@ -2167,7 +2167,16 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
 			{
-				players[e.Args[0]].mo.GiveInventory(item,e.Args[2],true);
+				if ( (item is 'ArmorNuggetItem') || (item is 'HealthNuggetItem') )
+				{
+					// these have to be given in a loop because fun reasons
+					for ( int i=0; i<e.Args[2]; i++ )
+						players[e.Args[0]].mo.GiveInventory(item,1,true);
+				}
+				else players[e.Args[0]].mo.GiveInventory(item,e.Args[2],true);
+				// fucky workaround
+				let inv = players[e.Args[0]].mo.FindInventory(item);
+				if ( inv && (inv.Amount <= 0) && !inv.bKEEPDEPLETED ) inv.Destroy();
 				if ( item is 'Weapon' )
 				{
 					// special case, select dual guns if we bought a second one

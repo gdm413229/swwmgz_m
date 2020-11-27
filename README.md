@@ -293,7 +293,7 @@ This artifact provides a +100 health boost plus a regeneration effect that heals
 ### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette
 ![](docimg/nuggetarmor.png)
 
-Cumulative armor items that can increase resistance to all damage by as much as you can find. Each nugget adds 5% to the total. Above 100%, damage gets turned into additional health (up to the standard 100% cap). The upper cap for these is 200%.
+Cumulative armor items that can increase resistance to all damage by as much as you can find. Each nugget adds 1% to the total. Above 100%, damage gets turned into additional health (up to the standard 100% cap). The upper cap for these is 200%.
 
 ### Blast Suit ~ Replaces Green Armor, Silver Shield, Mesh Armor
 ![](docimg/blastsuit.png)

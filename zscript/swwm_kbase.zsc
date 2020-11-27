@@ -2028,10 +2028,40 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( !type2 || (type2.GetParentClass() != type) ) continue;
 						let inv2 = GetDefaultByType(type2);
 						int cprice = int(inv.Stamina*(1.+.75*(inv2.Amount-1)));
-						if ( (inv2.Amount > amt) && (inv2.Amount <= maxneed) && (cprice <= SWWMCredits.Get(players[consoleplayer])) )
+						if ( (inv2.Amount > amt) && (inv2.Amount <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
 						{
 							price = cprice;
 							amt = inv2.Amount;
+						}
+					}
+				}
+				// nuggets can be bought in bulk
+				else if ( type is 'HealthNuggetItem' )
+				{
+					let inv2 = GetDefaultByType(SWWMHealth(inv).giveme);
+					int maxneed = (inv2.MaxAmount-players[consoleplayer].Health);
+					for ( int j=5; j<=20; j+=5 )
+					{
+						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
+						if ( (j <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
+						{
+							price = cprice;
+							amt = j;
+						}
+					}
+				}
+				else if ( type is 'ArmorNuggetItem' )
+				{
+					let inv2 = GetDefaultByType(SWWMSpareArmor(inv).giveme);
+					let cur2 = players[consoleplayer].mo.FindInventory(SWWMSpareArmor(inv).giveme);
+					int maxneed = cur2?(cur2.MaxAmount-cur2.Amount):inv2.MaxAmount;
+					for ( int j=5; j<=20; j+=5 )
+					{
+						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
+						if ( (j <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
+						{
+							price = cprice;
+							amt = j;
 						}
 					}
 				}

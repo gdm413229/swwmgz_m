@@ -1183,13 +1183,16 @@ Class LampMoth : Actor
 		}
 		Vector3 dest = target.Vec3Offset(0,0,target.height*.75);
 		Vector3 dir = level.Vec3Diff(pos,dest);
-		Vector3 dirunit = dir.unit();
-		FLineTraceData d;
-		LineTrace(atan2(dirunit.y,dirunit.x),dir.length(),asin(-dirunit.z),data:d);
-		if ( (d.HitType != TRACE_HitActor) && (d.HitActor != target) )
+		if ( dir.length() > 0 )
 		{
-			A_Chase();
-			return;
+			Vector3 dirunit = dir.unit();
+			FLineTraceData d;
+			LineTrace(atan2(dirunit.y,dirunit.x),dir.length(),asin(-dirunit.z),data:d);
+			if ( (d.HitType != TRACE_HitActor) && (d.HitActor != target) )
+			{
+				A_Chase();
+				return;
+			}
 		}
 		if ( vel.length() > 0 )
 		{
@@ -1327,7 +1330,7 @@ Class LampMoth2 : LampMoth
 	}
 }
 
-Class LampMashiro : Actor abstract
+Class LampMashiro : SWWMMonster abstract
 {
 //
 // ~nothing here yet, but she will make an appearance someday~
@@ -1414,7 +1417,9 @@ Class CompanionLamp : Actor
 		Vector3 ofs = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*dist;
 		Vector3 spawnpos = level.Vec3Offset(Vec3Offset(0,0,height/2),ofs);
 		if ( !level.IsPointInLevel(spawnpos) ) return;
-		let m = LampMoth(Spawn(Random[Moth](0,9)?"LampMoth":"LampMoth2",spawnpos));
+		// higher chance of white moths if carrying the Mashiro plush
+		int mchance = parent.FindInventory("MothPlushy")?3:9;
+		let m = LampMoth(Spawn(Random[Moth](0,mchance)?"LampMoth":"LampMoth2",spawnpos));
 		if ( !m.TestMobjLocation() )
 		{
 			m.Destroy();
@@ -1438,16 +1443,7 @@ Class CompanionLamp : Actor
 		Spawn("SWWMItemFog",pos);
 		Trail = pos;
 	}
-	// the stupidest thing ever, it's called BlockingLine but it's not always blocking us
-	private bool BlockingLineIsBlocking()
-	{
-		if ( !BlockingLine ) return false;
-		// one-sided
-		if ( !BlockingLine.sidedef[1] ) return true;
-		// blocks us
-		if ( BlockingLine.flags&(Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING) ) return true;
-		return false;
-	}
+
 	override void Tick()
 	{
 		Super.Tick();
@@ -1472,7 +1468,7 @@ Class CompanionLamp : Actor
 				Line oldblockingline = blockingline;
 				Sector oldblockingfloor = blockingfloor, oldblockingceiling = blockingceiling;
 				SetOrigin(testpos,false);
-				if ( !TestMobjLocation() || BlockingLineIsBlocking() || BlockingFloor || BlockingCeiling )
+				if ( !TestMobjLocation() || SWWMUtility.BlockingLineIsBlocking(self,Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING) || BlockingFloor || BlockingCeiling )
 				{
 					SetOrigin(oldpos,false);
 					prev = oldprev;
@@ -1523,7 +1519,7 @@ Class CompanionLamp : Actor
 		angle += Clamp(deltaangle(angle,AngleTo(parent)),-5.,5.);
 		vel *= .8;
 		bool blocked = false;
-		if ( BlockingLine && BlockingLineIsBlocking() )
+		if ( SWWMUtility.BlockingLineIsBlocking(self,Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING) )
 		{
 			// push away from wall
 			Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();

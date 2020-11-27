@@ -122,7 +122,6 @@ Class mkBloodDrop : Actor
 	bool dead, onceiling;
 	mkBloodDrop prevblod, nextblod;
 	Sector tracksector;
-	Sector trackffloor;	// can't use F3DFloor, blocks saving
 	int trackplane;
 
 	Default
@@ -154,16 +153,8 @@ Class mkBloodDrop : Actor
 			if ( tracksector )
 			{
 				double trackz;
-				if ( trackffloor )
-				{
-					if ( trackplane ) trackz = trackffloor.floorplane.ZAtPoint(pos.xy)-.1;
-					else trackz = trackffloor.ceilingplane.ZAtPoint(pos.xy);
-				}
-				else
-				{
-					if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy)-.1;
-					else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
-				}
+				if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy)-.1;
+				else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
 				if ( trackz != pos.z )
 				{
 					SetZ(trackz);
@@ -190,110 +181,96 @@ Class mkBloodDrop : Actor
 		}
 		else
 		{
-			FCheckPosition tm;
 			// gravitational pull
-			vel.z -= GetGravity();
-			// movement subdivision (these damn things are tiny)
-			int steps = 8;
-			while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
-				steps++;
-			bool domove = (vel!=(0,0,0))||((pos.z!=floorz)&&(pos.z!=ceilingz-height));
-			if ( domove )
+			if ( waterlevel <= 0 ) vel.z -= GetGravity();
+			// linetrace-based movement (hopefully more reliable than traditional methods)
+			Vector3 dir = vel;
+			double spd = vel.length();
+			dir /= spd;
+			FLineTraceData d;
+			double ang = atan2(dir.y,dir.x);
+			double pt = asin(-dir.z);
+			LineTrace(ang,spd,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d);
+			if ( d.HitType == TRACE_HitFloor )
 			{
-				Vector3 steppy = vel/steps;
-				int changexy = steppy.X||steppy.Y;
-				for ( int i=0; i<steps; i++ )
+				if ( d.HitTexture == skyflatnum )
 				{
-					if ( changexy && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) )
+					Destroy();
+					return;
+				}
+				// landed on floor
+				SetOrigin(d.HitLocation,true);
+				HitFloor();
+				A_StartSound("misc/blooddrop",volume:.1);
+				if ( master )
+				{
+					// assume we dropped onto the previous spot
+					if ( master.tracer )
 					{
-						let l = tm.CeilingLine;
-						if ( l && l.backsector && l.backsector.GetTexture(1) == skyflatnum )
-						{
-							let posr = PosRelative(l.backsector);
-							if ( pos.z >= l.backsector.ceilingplane.ZAtPoint(posr.xy) )
-							{
-								Destroy();
-								return;
-							}
-						}
-						// hit wall
-						Vector3 dir = vel.unit();
-						TraceBleedAngle(20,atan2(dir.y,dir.x),asin(-dir.z));
-						A_StartSound("misc/blooddrop",volume:.1);
 						Destroy();
 						return;
 					}
-					AddZ(steppy.z);
-					UpdateWaterLevel();
-					if ( pos.z <= floorz )
-					{
-						if ( floorpic == skyflatnum )
-						{
-							Destroy();
-							return;
-						}
-						// landed on floor
-						SetZ(floorz);
-						HitFloor();
-						A_StartSound("misc/blooddrop",volume:.1);
-						if ( master )
-						{
-							// assume we dropped onto the previous spot
-							if ( master.tracer )
-							{
-								Destroy();
-								return;
-							}
-							master.tracer = self;
-						}
-						dead = true;
-						SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
-						tracksector = FloorSector;
-						trackplane = 0;
-						F3DFloor ff;
-						for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-							if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-							ff = FloorSector.Get3DFloor(i);
-							break;
-						}
-						if ( ff ) trackffloor = ff.model;
-						frame = Random[Blood](5,8);
-						return;
-					}
-					if ( pos.z+height > ceilingz )
-					{
-						if ( (ceilingpic == skyflatnum) || master )
-						{
-							Destroy();
-							return;
-						}
-						// hit the ceiling
-						SetZ(ceilingz-.1);
-						A_StartSound("misc/blooddrop",volume:.1);
-						dead = true;
-						onceiling = true;
-						SWWMUtility.SetToSlope(self,FRandom[Blood](0,360),true);
-						tracksector = CeilingSector;
-						trackplane = 1;
-						F3DFloor ff;
-						for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(CeilingSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-							if ( !(CeilingSector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-							ff = CeilingSector.Get3DFloor(i);
-							break;
-						}
-						if ( ff ) trackffloor = ff.model;
-						frame = Random[Blood](5,8);
-						special1 = Random[Blood](15,25);
-						special2 = 0;
-						return;
-					}
-					CheckPortalTransition();
+					master.tracer = self;
 				}
+				dead = true;
+				if ( d.Hit3DFloor )
+				{
+					tracksector = d.Hit3DFloor.model;
+					trackplane = 1;
+				}
+				else
+				{
+					tracksector = d.HitSector;
+					trackplane = 0;
+				}
+				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
+				frame = Random[Blood](5,8);
+				return;
 			}
+			if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( (d.HitTexture == skyflatnum) || master )
+				{
+					Destroy();
+					return;
+				}
+				// hit the ceiling
+				SetOrigin(d.HitLocation-(0,0,1),true);
+				A_StartSound("misc/blooddrop",volume:.1);
+				dead = true;
+				onceiling = true;
+				if ( d.Hit3DFloor )
+				{
+					tracksector = d.Hit3DFloor.model;
+					trackplane = 0;
+				}
+				else
+				{
+					tracksector = d.HitSector;
+					trackplane = 1;
+				}
+				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360),true);
+				frame = Random[Blood](5,8);
+				return;
+			}
+			if ( d.HitType == TRACE_HitWall )
+			{
+				if ( d.HitLine.backsector && (d.HitLine.backsector.GetTexture(1) == skyflatnum) && (d.HitLocation.z >= d.HitLine.backsector.ceilingplane.ZAtPoint(d.HitLocation.xy)) )
+				{
+					Destroy();
+					return;
+				}
+				// hit wall
+				Vector2 walldir = (-d.HitLine.delta.y,d.HitLine.delta.x).unit();
+				if ( d.LineSide ) walldir *= -1;
+				SetOrigin(d.HitLocation-walldir*8,true);
+				TraceBleedAngle(20,atan2(walldir.y,walldir.x),0);
+				A_StartSound("misc/blooddrop",volume:.1);
+				Destroy();
+				return;
+			}
+			SetOrigin(level.Vec3Offset(pos,vel),true);
+			UpdateWaterLevel();
 			if ( waterlevel > 0 ) A_FadeOut();
 			scale *= .99;
 			if ( scale.x <= 0. )

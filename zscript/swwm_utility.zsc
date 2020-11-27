@@ -12,6 +12,7 @@ enum EDoExplosionFlags
 };
 
 const FallbackTag = "AWESOME IT'S PENIS"; // used on tag processing, please don't mind the actual string used)
+const MaxBouncePerTic = 40;	// maximum simultaneous bounces in one tic for a lightweight actor before we consider it's stuck
 
 Class SWWMUtility
 {
@@ -890,6 +891,26 @@ Class SWWMUtility
 	static clearscope bool IdentifyingDoubleBoi( Actor a )
 	{
 		if ( a is 'Ettin' ) return true;
+		return false;
+	}
+
+	// the stupidest thing ever, it's called BlockingLine but it's not always blocking us
+	static bool BlockingLineIsBlocking( Actor a, int blockflags = Line.ML_BLOCKEVERYTHING )
+	{
+		Line l = a.BlockingLine;
+		// not blocked
+		if ( !l ) return false;
+		// one-sided always blocking
+		if ( !l.sidedef[1] ) return true;
+		// same for block everything lines
+		if ( l.flags&blockflags ) return true;
+		// lower and upper bounds hit?
+		double afloor = l.frontsector.floorplane.ZAtPoint(a.pos.xy),
+			bfloor = l.backsector.floorplane.ZAtPoint(a.pos.xy),
+			aceil = l.frontsector.ceilingplane.ZAtPoint(a.pos.xy),
+			bceil = l.backsector.ceilingplane.ZAtPoint(a.pos.xy);
+		if ( (a.pos.z >= min(aceil,bceil)) || (a.pos.z <= max(afloor,bfloor)) )
+			return true;
 		return false;
 	}
 }

@@ -16,7 +16,7 @@ enum ESWWMGZChannels
 };
 
 // Future planning, will be filled out with AI stuff and whatnot someday
-Class SWWMMonster : Actor
+Class SWWMMonster : Actor abstract
 {
 	// integrated fun tags
 	virtual clearscope String GetFunTag( String defstr = "" )
@@ -239,73 +239,54 @@ Class SWWMSmoke : Actor
 		if ( isFrozen() ) return;
 		vel *= .96;
 		vel.z += .01;
-		FCheckPosition tm;
-		// movement subdivision (these damn things are tiny)
-		int steps = 8;
-		while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
-			steps++;
-		bool domove = (vel!=(0,0,0));
-		if ( domove )
+		// linetrace-based movement (hopefully more reliable than traditional methods)
+		Vector3 dir = vel;
+		double spd = vel.length();
+		dir /= spd;
+		double dist = spd;
+		FLineTraceData d;
+		Vector3 newpos = pos;
+		int nstep = 0;
+		while ( dist > 0 )
 		{
-			Vector3 steppy = vel/steps;
-			int changexy = steppy.X||steppy.Y;
-			bool readjust = false;
-			for ( int i=0; i<steps; i++ )
+			// safeguard, too many bounces
+			if ( nstep > MAXBOUNCEPERTIC )
 			{
-				if ( changexy && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) )
-				{
-					// hit wall, slide along it
-					if ( BlockingLine )
-					{
-						Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
-						if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
-							normal *= -1;
-						vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					}
-					readjust = true;
-				}
-				AddZ(steppy.z);
-				UpdateWaterLevel();
-				if ( pos.z <= floorz )
-				{
-					// landed on floor, slide along it
-					SetZ(floorz);
-					F3DFloor ff;
-					for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
-					{
-						if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-						if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-						ff = FloorSector.Get3DFloor(i);
-						break;
-					}
-					Vector3 normal;
-					if ( ff ) normal = -ff.model.ceilingplane.Normal;
-					else normal = FloorSector.floorplane.Normal;
-					vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					readjust = true;
-				}
-				if ( pos.z+height > ceilingz )
-				{
-					// hit the ceiling, slide along it
-					SetZ(ceilingz-height);
-					F3DFloor ff;
-					for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
-					{
-						if ( !(CeilingSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-						if ( !(CeilingSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-						ff = CeilingSector.Get3DFloor(i);
-						break;
-					}
-					Vector3 normal;
-					if ( ff ) normal = -ff.model.floorplane.Normal;
-					else normal = CeilingSector.ceilingplane.Normal;
-					vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					readjust = true;
-				}
-				CheckPortalTransition();
-				if ( readjust ) break;	// movement changed, can't keep stepping
+				Destroy();
+				return;
 			}
+			double ang = atan2(dir.y,dir.x);
+			double pt = asin(-dir.z);
+			LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			dist -= d.Distance;
+			if ( d.HitType != TRACE_HitNone )
+			{
+				// should only happen if we bounced
+				dir = d.HitDir-(FRandom[Puff](1.,1.2)*hitnormal*(d.HitDir dot hitnormal));
+				vel = dir*spd;
+				newpos = d.HitLocation+hitnormal;
+			}
+			else newpos = level.Vec3Offset(newpos,dir*spd);
+			nstep++;
 		}
+		SetOrigin(newpos,true);
+		UpdateWaterLevel();
 		if ( (waterlevel > 0) && !bAMBUSH )
 		{
 			let b = Spawn("SWWMBubble",pos);
@@ -490,73 +471,53 @@ Class SWWMBubble : Actor
 		if ( isFrozen() ) return;
 		vel *= 0.96;
 		vel.z += 0.05;
-		FCheckPosition tm;
-		// movement subdivision (these damn things are tiny)
-		int steps = 8;
-		while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
-			steps++;
-		bool domove = (vel!=(0,0,0));
-		if ( domove )
+		// linetrace-based movement (hopefully more reliable than traditional methods)
+		Vector3 dir = vel;
+		double spd = vel.length();
+		dir /= spd;
+		double dist = spd;
+		FLineTraceData d;
+		Vector3 newpos = pos;
+		int nstep = 0;
+		while ( dist > 0 )
 		{
-			Vector3 steppy = vel/steps;
-			int changexy = steppy.X||steppy.Y;
-			bool readjust = false;
-			for ( int i=0; i<steps; i++ )
+			// safeguard, too many bounces
+			if ( nstep > MAXBOUNCEPERTIC )
 			{
-				if ( changexy && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) )
-				{
-					// hit wall, slide along it
-					if ( BlockingLine )
-					{
-						Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();;
-						if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
-							normal *= -1;
-						vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					}
-					readjust = true;
-				}
-				AddZ(steppy.z);
-				UpdateWaterLevel();
-				if ( pos.z <= floorz )
-				{
-					// landed on floor, slide along it
-					SetZ(floorz);
-					F3DFloor ff;
-					for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
-					{
-						if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-						if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-						ff = FloorSector.Get3DFloor(i);
-						break;
-					}
-					Vector3 normal;
-					if ( ff ) normal = -ff.model.ceilingplane.Normal;
-					else normal = FloorSector.floorplane.Normal;
-					vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					readjust = true;
-				}
-				if ( pos.z+height > ceilingz )
-				{
-					// hit the ceiling, slide along it
-					SetZ(ceilingz-height);
-					F3DFloor ff;
-					for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
-					{
-						if ( !(CeilingSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-						if ( !(CeilingSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-						ff = CeilingSector.Get3DFloor(i);
-						break;
-					}
-					Vector3 normal;
-					if ( ff ) normal = -ff.model.floorplane.Normal;
-					else normal = CeilingSector.ceilingplane.Normal;
-					vel = vel-FRandom[Puff](1.,1.2)*normal*(vel dot normal);
-					readjust = true;
-				}
-				CheckPortalTransition();
-				if ( readjust ) break;	// movement changed, can't keep stepping
+				Destroy();
+				return;
 			}
+			double ang = atan2(dir.y,dir.x);
+			double pt = asin(-dir.z);
+			LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			dist -= d.Distance;
+			if ( d.HitType != TRACE_HitNone )
+			{
+				// should only happen if we bounced
+				dir = d.HitDir-(FRandom[Puff](1.,1.2)*hitnormal*(d.HitDir dot hitnormal));
+				vel = dir*spd;
+				newpos = d.HitLocation+hitnormal;
+			}
+			else newpos = level.Vec3Offset(newpos,dir*spd);
+			nstep++;
 		}
+		SetOrigin(newpos,true);
 		UpdateWaterLevel();
 		if ( (waterlevel <= 0) || !Random[Puff](0,100) ) Destroy();
 		if ( tics > 0 ) tics--;
@@ -606,109 +567,83 @@ Class SWWMSpark : Actor
 				double trackz;
 				if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy);
 				else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
-				if ( trackz != pos.z )
-				{
-					SetZ(trackz);
-					UpdateWaterLevel(false);
-				}
+				if ( trackz != pos.z ) SetZ(trackz);
 			}
 		}
 		else
 		{
 			vel.z -= GetGravity();
-			FCheckPosition tm;
-			// movement subdivision (these damn things are tiny)
-			int steps = 8;
-			while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
-				steps++;
-			bool domove = (vel!=(0,0,0));
-			if ( domove )
+			// linetrace-based movement (hopefully more reliable than traditional methods)
+			Vector3 dir = vel;
+			double spd = vel.length();
+			dir /= spd;
+			double dist = spd;
+			FLineTraceData d;
+			Vector3 newpos = pos;
+			int nstep = 0;
+			while ( dist > 0 )
 			{
-				Vector3 steppy = vel/steps;
-				int changexy = steppy.X||steppy.Y;
-				bool readjust = false;
-				for ( int i=0; i<steps; i++ )
+				// safeguard, too many bounces
+				if ( nstep > MAXBOUNCEPERTIC )
 				{
-					if ( changexy && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) )
-					{
-						// hit wall, bounce on it
-						if ( BlockingLine )
-						{
-							Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();;
-							if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
-								normal *= -1;
-							vel = .4*(vel-2.*normal*(vel dot normal));
-						}
-						readjust = true;
-					}
-					AddZ(steppy.z);
-					UpdateWaterLevel();
-					if ( pos.z <= floorz )
-					{
-						// landed on floor, bounce on it
-						SetZ(floorz);
-						F3DFloor ff;
-						for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-							if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-							ff = FloorSector.Get3DFloor(i);
-							break;
-						}
-						Vector3 normal;
-						if ( ff ) normal = -ff.model.ceilingplane.Normal;
-						else normal = FloorSector.floorplane.Normal;
-						vel = .4*(vel-2.*normal*(vel dot normal));
-						readjust = true;
-					}
-					if ( pos.z+height > ceilingz )
-					{
-						// hit the ceiling, bounce on it
-						SetZ(ceilingz-height);
-						F3DFloor ff;
-						for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(CeilingSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-							if ( !(CeilingSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-							ff = CeilingSector.Get3DFloor(i);
-							break;
-						}
-						Vector3 normal;
-						if ( ff ) normal = -ff.model.floorplane.Normal;
-						else normal = CeilingSector.ceilingplane.Normal;
-						vel = .4*(vel-2.*normal*(vel dot normal));
-						readjust = true;
-					}
-					CheckPortalTransition();
-					if ( readjust ) break;	// movement changed, can't keep stepping
+					Destroy();
+					return;
 				}
-			}
-			if ( (max(abs(vel.x),max(abs(vel.y),abs(vel.z))) < 1.) && (pos.z <= floorz) )
-			{
-				SetZ(floorz);
-				F3DFloor ff;
-				for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
+				double ang = atan2(dir.y,dir.x);
+				double pt = asin(-dir.z);
+				LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+				Vector3 hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
 				{
-					if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-					if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-					ff = FloorSector.Get3DFloor(i);
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				dist -= d.Distance;
+				if ( d.HitType != TRACE_HitNone )
+				{
+					// should only happen if we bounced
+					dir = d.HitDir-(2*hitnormal*(d.HitDir dot hitnormal));
+					spd *= .4;
+					dist *= .4;
+					vel = dir*spd;
+					newpos = d.HitLocation+hitnormal;
+				}
+				else newpos = level.Vec3Offset(newpos,dir*spd);
+				if ( (spd < 1.) && (d.HitType == TRACE_HitFloor) )
+				{
+					// lose speed and die
+					if ( d.Hit3DFloor )
+					{
+						newpos.z = d.Hit3DFloor.top.ZAtPoint(newpos.xy);
+						tracksector = d.Hit3DFloor.model;
+						trackplane = 1;
+					}
+					else
+					{
+						newpos.z = d.HitSector.floorplane.ZAtPoint(newpos.xy);
+						tracksector = d.HitSector;
+						trackplane = 0;
+					}
+					vel = (0,0,0);
+					pitch = 0;
+					roll = 0;
+					dead = true;
+					SetStateLabel("Death");
 					break;
 				}
-				if ( ff )
-				{
-					tracksector = ff.model;
-					trackplane = 1;
-				}
-				else
-				{
-					tracksector = FloorSector;
-					trackplane = 0;
-				}
-				vel = (0,0,0);
-				dead = true;
-				SetStateLabel("Death");
-				return;
+				nstep++;
 			}
+			SetOrigin(newpos,true);
 		}
 		UpdateWaterLevel();
 		if ( waterlevel > 0 )
@@ -797,109 +732,86 @@ Class SWWMChip : Actor
 		}
 		else
 		{
-			vel.z -= GetGravity();
-			FCheckPosition tm;
-			// movement subdivision (these damn things are tiny)
-			int steps = 8;
-			while ( (abs(vel.x) >= radius*steps) || (abs(vel.y) >= radius*steps) || (abs(vel.z) >= height*steps) )
-				steps++;
-			bool domove = (vel!=(0,0,0));
-			if ( domove )
+			if ( waterlevel <= 0 ) vel.z -= GetGravity();
+			// linetrace-based movement (hopefully more reliable than traditional methods)
+			Vector3 dir = vel;
+			double spd = vel.length();
+			dir /= spd;
+			double dist = spd;
+			FLineTraceData d;
+			Vector3 newpos = pos;
+			int nstep = 0;
+			while ( dist > 0 )
 			{
-				Vector3 steppy = vel/steps;
-				int changexy = steppy.X||steppy.Y;
-				bool readjust = false;
-				for ( int i=0; i<steps; i++ )
+				// safeguard, too many bounces
+				if ( nstep > MAXBOUNCEPERTIC )
 				{
-					if ( changexy && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) )
-					{
-						// hit wall, bounce on it
-						if ( BlockingLine )
-						{
-							Vector3 normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();;
-							if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
-								normal *= -1;
-							vel = .3*(vel-2.*normal*(vel dot normal));
-						}
-						readjust = true;
-					}
-					AddZ(steppy.z);
-					UpdateWaterLevel();
-					if ( pos.z <= floorz )
-					{
-						// landed on floor, bounce on it
-						SetZ(floorz);
-						F3DFloor ff;
-						for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-							ff = FloorSector.Get3DFloor(i);
-							break;
-						}
-						Vector3 normal;
-						if ( ff ) normal = -ff.model.ceilingplane.Normal;
-						else normal = FloorSector.floorplane.Normal;
-						vel = .3*(vel-2.*normal*(vel dot normal));
-						readjust = true;
-					}
-					if ( pos.z+height > ceilingz )
-					{
-						// hit the ceiling, bounce on it
-						SetZ(ceilingz-height);
-						F3DFloor ff;
-						for ( int i=0; i<CeilingSector.Get3DFloorCount(); i++ )
-						{
-							if ( !(CeilingSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
-							ff = CeilingSector.Get3DFloor(i);
-							break;
-						}
-						Vector3 normal;
-						if ( ff ) normal = -ff.model.floorplane.Normal;
-						else normal = CeilingSector.ceilingplane.Normal;
-						vel = .3*(vel-2.*normal*(vel dot normal));
-						readjust = true;
-					}
-					CheckPortalTransition();
-					if ( readjust )
-					{
-						SetStateLabel("Bounce");
-						break;	// movement changed, can't keep stepping
-					}
+					Destroy();
+					return;
 				}
-			}
-			if ( (max(abs(vel.x),max(abs(vel.y),abs(vel.z))) < 1.) && (pos.z <= floorz) )
-			{
-				SetZ(floorz);
-				F3DFloor ff;
-				for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
+				double ang = atan2(dir.y,dir.x);
+				double pt = asin(-dir.z);
+				LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+				Vector3 hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
 				{
-					if ( !(FloorSector.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
-					if ( !(FloorSector.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
-					ff = FloorSector.Get3DFloor(i);
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				dist -= d.Distance;
+				if ( d.HitType != TRACE_HitNone )
+				{
+					// should only happen if we bounced
+					dir = d.HitDir-(2*hitnormal*(d.HitDir dot hitnormal));
+					spd *= .3;
+					dist *= .3;
+					vel = dir*spd;
+					newpos = d.HitLocation+hitnormal;
+				}
+				else newpos = level.Vec3Offset(newpos,dir*spd);
+				if ( (spd < 1.) && (d.HitType == TRACE_HitFloor) )
+				{
+					// lose speed and die
+					if ( d.Hit3DFloor )
+					{
+						newpos.z = d.Hit3DFloor.top.ZAtPoint(newpos.xy);
+						tracksector = d.Hit3DFloor.model;
+						trackplane = 1;
+					}
+					else
+					{
+						newpos.z = d.HitSector.floorplane.ZAtPoint(newpos.xy);
+						tracksector = d.HitSector;
+						trackplane = 0;
+					}
+					vel = (0,0,0);
+					pitch = 0;
+					roll = 0;
+					dead = true;
+					SetStateLabel("Death");
 					break;
 				}
-				if ( ff )
-				{
-					tracksector = ff.model;
-					trackplane = 1;
-				}
-				else
-				{
-					tracksector = FloorSector;
-					trackplane = 0;
-				}
-				vel = (0,0,0);
-				pitch = 0;
-				roll = 0;
-				dead = true;
-				SetStateLabel("Death");
-				return;
+				nstep++;
 			}
+			SetOrigin(newpos,true);
+			UpdateWaterLevel();
 		}
 		if ( killme ) A_FadeOut(.01);
 		if ( waterlevel > 0 )
 		{
 			vel *= .98;
+			anglevel *= .98;
+			pitchvel *= .98;
 			rollvel *= .98;
 		}
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -1326,6 +1238,8 @@ Class SWWMShadow : Actor
 			double relz = target.pos.z-pos.z;
 			if ( target.bFLOATBOB ) relz += BobSin(target.FloatBobPhase)*target.FloatBobStrength;
 			double bscale = (target.radius/16.)*(1.-min(1.,.003*relz));
+			// hax
+			if ( target is 'CompanionLamp' ) bscale *= 2.;
 			A_SetScale(bscale);
 		}
 		// update position

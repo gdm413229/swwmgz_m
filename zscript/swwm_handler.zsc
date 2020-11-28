@@ -259,6 +259,7 @@ Class SWWMHandler : EventHandler
 		MAP_HMAP37,
 		MAP_HMAP38,
 		MAP_HMAP40,
+		MAP_EVMAP30	// eviternity
 	};
 
 	private int WhichVanillaBossMap()
@@ -313,6 +314,8 @@ Class SWWMHandler : EventHandler
 			|| (mapsum ~== "1C5DE5A921DEE405E98E7E09D9829387")
 			|| (mapsum ~== "2A6C4235B942467D25FD50D5B313E67A") )
 			return MAP_HMAP40;
+		if ( mapsum ~== "5C5E5C08AF3572F31CF27318679F2B4E" )
+			return MAP_EVMAP30;
 		return MAP_NONE;
 	}
 
@@ -1455,6 +1458,9 @@ Class SWWMHandler : EventHandler
 		// romero hax
 		if ( (e.Thing is 'BossBrain') && (e.DamageType == 'Telefrag') )
 			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
+		// voodoo doll telefragging barrel hax (eviternity death exits)
+		if ( (e.Thing is 'ExplosiveBarrel') && (e.DamageType == 'Telefrag') && e.DamageSource.player && (e.DamageSource.player.mo != e.DamageSource) )
+			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
 		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
 		DoKillScoring(e);
 	}
@@ -1516,11 +1522,30 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
-		else if ( e.Thing.GetClass() == 'BossBrain' )
+		else if ( e.Thing.GetClass() == 'Pig' )
+			e.Thing.SetTag("$FN_PIG");	// missing in gzdoom
+		// eviternity stuff
+		else if ( (e.Thing.GetClassName() == "Archangelus")
+			|| (e.Thing.GetClassName() == "ArchangelusA")
+			|| (e.Thing.GetClassName() == "ArchangelusB") )
+			e.Thing.SetTag("$FN_ANGEL");
+		else if ( e.Thing.GetClassName() == "AstralCaco" )
+			e.Thing.SetTag("$FN_ASTRAL");
+		else if ( e.Thing.GetClassName() == "Annihilator" )
 		{
-			e.Thing.SetTag("$FN_BOSSBRAIN");
-			e.Thing.A_SetSize(20,40);
-			e.Thing.bNOBLOOD = true;
+			e.Thing.SetTag("$FN_ANNIHIL");
+			// OH BOY, THESE AREN'T CHANGEABLE
+			//e.Thing.Obituary = "$OB_ANNIHIL";
+		}
+		else if ( e.Thing.GetClassName() == "FormerCaptain" )
+		{
+			e.Thing.SetTag("$FN_FCAPTAIN");
+			//e.Thing.Obituary = "$OB_FCAPTAIN";
+		}
+		else if ( e.Thing.GetClassName() == "NightmareDemon" )
+		{
+			e.Thing.SetTag("$FN_NDEMON");
+			//e.Thing.Obituary = "$OB_NDEMON";
 		}
 		else if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
 			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
@@ -1529,8 +1554,9 @@ Class SWWMHandler : EventHandler
 			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
 			hp.target = e.Thing;
 		}
+		SWWMCombatTracker trk;
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
-			SWWMCombatTracker.Spawn(e.Thing);
+			trk = SWWMCombatTracker.Spawn(e.Thing);
 		if ( !(e.Thing is 'LampMoth') && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory') || (e.Thing is 'CompanionLamp')) )
 		{
 			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
@@ -1569,6 +1595,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_BRUISERS";
 		}
@@ -1578,6 +1605,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_CYBIE";
 		}
@@ -1587,6 +1615,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 6;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_SPIDER";
 		}
@@ -1596,6 +1625,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_SPIDER2";
 		}
@@ -1604,8 +1634,8 @@ Class SWWMHandler : EventHandler
 			if ( (e.Thing is 'Fatso') || (e.Thing is 'Arachnotron') )
 			{
 				bossactors.Push(e.Thing);
-				if ( upgrademe )
-					e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_DIMPLE";
 		}
@@ -1616,6 +1646,7 @@ Class SWWMHandler : EventHandler
 				bossbrainactor = e.Thing;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 40;	// goodbye, instakills
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			if ( e.Thing is 'BossEye' )
 				bossviewactor = e.Thing;
@@ -1627,6 +1658,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_LICHES";
 		}
@@ -1636,6 +1668,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			}
 			bosstag = "$BT_MINOTAUR";
 		}
@@ -1645,6 +1678,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_DSPARIL";
 			}
 			else if ( e.Thing is 'Sorcerer2' )
@@ -1654,6 +1688,7 @@ Class SWWMHandler : EventHandler
 				initialized = false;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_DSPARIL2";
 			}
 		}
@@ -1663,6 +1698,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_CLERIC";
 			}
 		}
@@ -1672,6 +1708,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_FIGHTER";
 			}
 		}
@@ -1681,6 +1718,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_MAGE";
 			}
 		}
@@ -1690,6 +1728,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_DRAGON";
 			}
 		}
@@ -1699,6 +1738,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_HERESIARCH";
 			}
 		}
@@ -1708,7 +1748,28 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
 				bosstag = "$BT_KORAX";
+			}
+		}
+		else if ( bossmap == MAP_EVMAP30 )
+		{
+			if ( e.Thing.GetClassName() == "ArchangelusA" )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
+				bosstag = "$BT_ARCHANGELUS";
+			}
+			else if ( e.Thing.GetClassName() == "ArchangelusB" )
+			{
+				// second phase
+				bossactors.Clear();
+				initialized = false;
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.maxhealth = trk.lasthealth = e.Thing.Health;
+				bosstag = "$BT_ARCHANGELUS";
 			}
 		}
 	}
@@ -1935,6 +1996,18 @@ Class SWWMHandler : EventHandler
 			}
 			if ( dehackery ) return;
 			e.Replacement = 'SWWMHangingKeen';
+		}
+		else if ( (e.Replacee is 'BossBrain') && (!e.Replacement || (e.Replacement == 'BossBrain')) )
+		{
+			let def = GetDefaultByType(e.Replacee);
+			bool dehackery = false;
+			for ( State s=def.SpawnState; s; s=s.NextState )
+			{
+				if ( s.bDEHACKED ) dehackery = true;
+				if ( s.NextState == s ) break;
+			}
+			if ( dehackery ) return;
+			e.Replacement = 'SWWMBossBrain';
 		}
 		else if ( e.Replacee is 'RedCard' )
 		{

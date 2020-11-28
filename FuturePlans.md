@@ -20,6 +20,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - **[Heretic]** Doomguy Action Figure *("Oh, he gets one too?")*
   - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
+* **Visible legs in first person**
 * **DLC Gameset:**
   - Tetris
   - Pong

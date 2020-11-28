@@ -613,13 +613,12 @@ Class SWWMUtility
 		case 'Cyberdemon':
 			basetag = "CYBER";
 			break;
-		case 'BossBrain':
+		case 'SWWMBossBrain':
 			basetag = "BOSSBRAIN";
 			break;
 		case 'WolfensteinSS':
 			basetag = "WOLFSS";
 			break;
-		case 'CommanderKeen':
 		case 'SWWMHangingKeen':
 			basetag = "KEEN";
 			break;
@@ -721,6 +720,26 @@ Class SWWMUtility
 			break;
 		case 'Heresiarch':
 			basetag = "HERESIARCH";
+			break;
+		case 'Pig':
+			basetag = "PIG";
+			break;
+		// eviternity
+		case 'ArchangelusA':
+		case 'ArchangelusB':
+			basetag = "ANGEL";
+			break;
+		case 'AstralCaco':
+			basetag = "ASTRAL";
+			break;
+		case 'Annihilator':
+			basetag = "ANNIHIL";
+			break;
+		case 'FormerCaptain':
+			basetag = "FCAPTAIN";
+			break;
+		case 'NightmareDemon':
+			basetag = "NDEMON";
 			break;
 		}
 		if ( basetag == "" ) return a.GetTag(defstr);
@@ -878,6 +897,7 @@ Class SWWMUtility
 		if ( a is 'Cacodemon' ) return true;
 		if ( a.Species == 'RLCacodemon' ) return true; // DRLA
 		if ( a.Species == 'Caco' ) return true; // CH
+		if ( a.GetClassName() == 'AstralCaco' ) return true; // Eviternity
 		return false;
 	}
 
@@ -911,6 +931,18 @@ Class SWWMUtility
 			bceil = l.backsector.ceilingplane.ZAtPoint(a.pos.xy);
 		if ( (a.pos.z >= min(aceil,bceil)) || (a.pos.z <= max(afloor,bfloor)) )
 			return true;
+		return false;
+	}
+
+	// detect eviternity (naive method)
+	static bool IsEviternity()
+	{
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			if ( AllActorClasses[i].GetClassName() != "Archangelus" )
+				continue;
+			return true;
+		}
 		return false;
 	}
 }

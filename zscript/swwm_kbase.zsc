@@ -48,6 +48,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int sel0, sel1, sel2;
 	int ofs0, ofs1, ofs2;	// usually equal to above, except when using mouse input
 	int drag;	// when dragging with the mouse, which scroller to affect (1 = ofs0 and so on)
+	// mission
+	String missionstr;
 	// stats
 	SWWMStats stats;
 	Array<String> statlist;
@@ -144,6 +146,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		tmsgtic = gametic+70;
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		// mission text
+		// TODO per-cluster messages
+		if ( gameinfo.gametype&GAME_Doom )
+		{
+			if ( SWWMUtility.IsEviternity() ) missionstr = "$SWWM_MISSION_EVITERNITY";
+			else missionstr = "$SWWM_MISSION_DOOM";
+		}
+		else if ( gameinfo.gametype&GAME_Heretic ) missionstr = "$SWWM_MISSION_HERETIC";
+		else if ( gameinfo.gametype&GAME_Hexen ) missionstr = "$SWWM_MISSION_HEXEN";
+		else if ( gameinfo.gametype&GAME_Strife ) missionstr = players[consoleplayer].logtext;	// just show the quest log
+		else missionstr = "$SWWM_MISSION_NONE";
 		if ( gameinfo.gametype&GAME_Heretic )
 		{
 			// March 10th 2171, 17:34 JST
@@ -366,11 +379,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			else if ( curtab == TAB_MISSION )
 			{
-				String str = StringTable.Localize("$SWWM_MISSION_NONE");
-				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
-				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
-				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
-				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
+				String str = StringTable.Localize(missionstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -796,11 +805,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
-				String str = StringTable.Localize("$SWWM_MISSION_NONE");
-				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
-				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
-				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
-				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
+				String str = StringTable.Localize(missionstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -1330,11 +1335,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			if ( curtab == TAB_MISSION )
 			{
-				String str = StringTable.Localize("$SWWM_MISSION_NONE");
-				if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
-				else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
-				else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
-				else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
+				String str = StringTable.Localize(missionstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -2488,11 +2489,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		// draw contents
 		if ( curtab == TAB_MISSION )
 		{
-			if ( gameinfo.gametype&GAME_Doom ) str = StringTable.Localize("$SWWM_MISSION_DOOM");
-			else if ( gameinfo.gametype&GAME_Heretic ) str = StringTable.Localize("$SWWM_MISSION_HERETIC");
-			else if ( gameinfo.gametype&GAME_Hexen ) str = StringTable.Localize("$SWWM_MISSION_HEXEN");
-			else if ( gameinfo.gametype&GAME_Strife ) str = StringTable.Localize(players[consoleplayer].logtext);
-			else str = StringTable.Localize("$SWWM_MISSION_NONE");
+			String str = StringTable.Localize(missionstr);
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;

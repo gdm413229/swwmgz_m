@@ -142,6 +142,7 @@ Class SWWMHelpMenu : GenericMenu
 			if ( gameinfo.gametype&GAME_Heretic ) txt = StringTable.Localize("$SWWM_HELP_STORYHERETIC");
 			else if ( gameinfo.gametype&GAME_Hexen ) txt = StringTable.Localize("$SWWM_HELP_STORYHEXEN");
 			else if ( gameinfo.gametype&GAME_Strife ) txt = StringTable.Localize("$SWWM_HELP_STORYSTRIFE");
+			else if ( SWWMUtility.IsEviternity() ) txt = StringTable.Localize("$SWWM_HELP_STORYEVITERNITY");
 			else txt = StringTable.Localize("$SWWM_HELP_STORYDOOM");
 			break;
 		case PAGE_DEMO:

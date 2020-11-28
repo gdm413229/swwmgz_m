@@ -917,7 +917,11 @@ Class SWWMCombatTracker : Thinker
 		if ( (tcnt == 1) && !mytarget.player )
 		{
 			// post-spawn health inflation check
-			if ( lasthealth > maxhealth ) maxhealth = lasthealth;
+			if ( lasthealth > maxhealth )
+			{
+				maxhealth = lasthealth;
+				intp.Reset(lasthealth);
+			}
 		}
 		if ( (tcnt == 6) && !mytarget.player )
 		{
@@ -927,7 +931,11 @@ Class SWWMCombatTracker : Thinker
 				if ( i.GetClassName() != "LDLegendaryMonsterToken" ) continue;
 				legged = true;
 				// adjust for health inflation
-				if ( lasthealth > maxhealth ) maxhealth = lasthealth;
+				if ( lasthealth > maxhealth )
+				{
+					maxhealth = lasthealth;
+					intp.Reset(lasthealth);
+				}
 			}
 		}
 		if ( legged && !mutated )

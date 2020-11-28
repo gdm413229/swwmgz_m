@@ -1595,6 +1595,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_BRUISERS";
 		}
@@ -1604,6 +1605,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_CYBIE";
 		}
@@ -1613,6 +1615,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 6;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_SPIDER";
 		}
@@ -1622,6 +1625,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_SPIDER2";
 		}
@@ -1631,6 +1635,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_DIMPLE";
 		}
@@ -1641,6 +1646,7 @@ Class SWWMHandler : EventHandler
 				bossbrainactor = e.Thing;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 40;	// goodbye, instakills
+				if ( trk ) trk.bBOSS = true;
 			}
 			if ( e.Thing is 'BossEye' )
 				bossviewactor = e.Thing;
@@ -1652,6 +1658,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_LICHES";
 		}
@@ -1661,6 +1668,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.bBOSS = true;
 			}
 			bosstag = "$BT_MINOTAUR";
 		}
@@ -1670,6 +1678,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DSPARIL";
 			}
 			else if ( e.Thing is 'Sorcerer2' )
@@ -1679,6 +1688,7 @@ Class SWWMHandler : EventHandler
 				initialized = false;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DSPARIL2";
 			}
 		}
@@ -1688,6 +1698,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_CLERIC";
 			}
 		}
@@ -1697,6 +1708,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_FIGHTER";
 			}
 		}
@@ -1706,6 +1718,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_MAGE";
 			}
 		}
@@ -1715,6 +1728,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DRAGON";
 			}
 		}
@@ -1724,6 +1738,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_HERESIARCH";
 			}
 		}
@@ -1733,6 +1748,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_KORAX";
 			}
 		}
@@ -1742,6 +1758,7 @@ Class SWWMHandler : EventHandler
 			{
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_ARCHANGELUS";
 			}
 			else if ( e.Thing.GetClassName() == "ArchangelusB" )
@@ -1751,6 +1768,7 @@ Class SWWMHandler : EventHandler
 				initialized = false;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_ARCHANGELUS";
 			}
 		}

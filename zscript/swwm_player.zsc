@@ -990,6 +990,11 @@ Class Demolitionist : PlayerPawn
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
+		if ( (swwm_strictuntouchable >= 2) && (damage > 0) && player )
+		{
+			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+			if ( hnd ) hnd.tookdamage[PlayerNumber()] = true;
+		}
 		// no damage whatsoever
 		if ( scriptedinvul )
 			return 0;

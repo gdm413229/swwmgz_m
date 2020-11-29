@@ -30,6 +30,12 @@ OptionValue "SWWMDamageTarget"
 	1, "$SWWM_TARGET_FIRSTHIT"
 	2, "$SWWM_TARGET_DAMAGED"
 }
+OptionValue "SWWMUntouchableStrictness"
+{
+	0, "$SWWM_UNTOUCHABLE_HEALTH"
+	1, "$SWWM_UNTOUCHABLE_ARMOR"
+	2, "$SWWM_UNTOUCHABLE_ANYHIT"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -108,6 +114,7 @@ OptionMenu "SWWMOptionMenu"
 	Option "$SWWM_YNYKRONALERT", "swwm_ynykronalert", "YesNo"
 	Option "$SWWM_SIMPLEFOG", "swwm_simplefog", "YesNo"
 	Option "$SWWM_SHOTGIB", "swwm_shotgib", "YesNo"
+	Option "$SWWM_STRICTUNTOUCHABLE", "swwm_strictuntouchable", "SWWMUntouchableStrictness"
 	StaticText " "
 	StaticText "$SWWM_ITITLE", "Blue"
 	Option "$SWWM_ARMORUSE", "swwm_autousearmor", "YesNo"

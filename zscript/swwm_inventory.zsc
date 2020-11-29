@@ -170,6 +170,11 @@ Class SWWMArmor : Armor abstract
 			if ( amount <= saved ) saved = amount;
 			newdamage -= saved;
 			if ( healed > 0 ) Owner.GiveBody(healed);
+			if ( (swwm_strictuntouchable == 1) && (saved > 0) && Owner.player )
+			{
+				let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+				if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
+			}
 			amount -= saved;
 			damage = newdamage;
 			bool shouldautouse = false;
@@ -364,6 +369,11 @@ Class SWWMHealth : Inventory abstract
 				return;
 			else if ( bBIGPOWERUP && (Owner.Health-damage > 0) )
 				return;
+			if ( (swwm_strictuntouchable == 1) && Owner.player )
+			{
+				let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+				if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
+			}
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			int tgive = 0;
 			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();

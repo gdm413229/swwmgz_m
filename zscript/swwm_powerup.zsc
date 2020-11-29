@@ -82,7 +82,7 @@ Class GrilledCheeseSandwich : Inventory
 			return;	// this damage type is ignored by the player, so it does not affect us
 		if ( damageType == 'EndLevel' )
 			return; // don't trigger on endlevel damage
-		if ( damageType == 'Telefrag' )
+		if ( (damageType == 'Telefrag') && source )
 		{
 			// prevent overlap with voodoo doll
 			if ( source.player == Owner.player )
@@ -91,6 +91,11 @@ Class GrilledCheeseSandwich : Inventory
 		}
 		if ( (Owner.Health-damage <= 0) && (Amount > 0) )
 		{
+			if ( (swwm_strictuntouchable == 1) && Owner.player )
+			{
+				let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+				if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
+			}
 			if ( damageType == 'InstantDeath' )
 				SafeTeleport();	// get out of pits
 			newdamage = 0;

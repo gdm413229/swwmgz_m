@@ -1410,15 +1410,18 @@ Class SWWMHandler : EventHandler
 				scr.xcnt = ++ofs;
 			}
 		}
+		spreecount[pnum]++;
+		if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
+			s.skill = spreecount[pnum];
 		if ( !tookdamage[pnum] )
 		{
-			int spreebonus = 10*spreecount[pnum];
+			int spreebonus = 10*(spreecount[pnum]);
 			// taper off after 10x (some people go really far with these, holy fuck)
 			if ( spreecount[pnum] > 10 ) spreebonus = int(spreebonus*((spreecount[pnum]/10.)**.25));
 			score += 100+spreebonus;
 			if ( (spreecount[pnum] > 0) && scr )
 			{
-				scr.xscore[ofs] = spreecount[pnum]+1;
+				scr.xscore[ofs] = spreecount[pnum];
 				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_SPREEKILL");
 				scr.xcnt = ++ofs;
@@ -1444,9 +1447,6 @@ Class SWWMHandler : EventHandler
 			Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),src.player.GetUserName(),1000);
 			SWWMScoreObj.Spawn(1000,src.Vec3Offset(0,0,src.Height/2));
 		}
-		spreecount[pnum]++;
-		if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
-			s.skill = spreecount[pnum];
 	}
 
 	override void WorldThingDamaged( WorldEvent e )

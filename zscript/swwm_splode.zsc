@@ -1124,7 +1124,11 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
 		Goto LeftReady;
 	Zoom:
-		XZW2 A 1 A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1
+		{
+			A_PlayerCheckGun();
+			A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		XZW9 ABCDEFG 1;
 		XZW9 H 1 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftZoom")); }
 		XZW9 IJKLMNOPQRSTUVW 1;

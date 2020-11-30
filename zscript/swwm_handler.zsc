@@ -15,10 +15,13 @@ Class SWWMStaticHandler : StaticEventHandler
 	// versioning
 	bool tainted;
 	String taintver;
+	bool mptaint[MAXPLAYERS];
+	String mpver[MAXPLAYERS];
 	// CBT easter egg
 	bool initme;
 	double cbtvol;
 	transient CVar cbtme;
+	int checktic;
 
 	override void NewGame()
 	{
@@ -32,13 +35,13 @@ Class SWWMStaticHandler : StaticEventHandler
 	{
 		// save version checker
 		if ( !e.IsSaveGame ) return;
+		checktic = gametic+5;
 		let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
 		let svd = SWWMSaveVerData(ti.Next());
 		if ( !svd )
 		{
 			tainted = true;
 			taintver = "\cg(no version information)\c-";
-			Console.Printf("\cgWARNING: \cjLoaded save contains no version data. Issues may happen.");
 			return;
 		}
 		String cver = StringTable.Localize("$SWWM_MODVER");
@@ -46,10 +49,13 @@ Class SWWMStaticHandler : StaticEventHandler
 		{
 			tainted = true;
 			taintver = svd.ver;
-			Console.Printf("\cgWARNING: \cjThis savegame is from a different version of SWWM GZ. Issues may happen.");
-			Console.Printf("\cgSaved:   \cj"..svd.ver);
-			Console.Printf("\cgCurrent: \cj"..cver);
 		}
+	}
+
+	override void PlayerEntered( PlayerEvent e )
+	{
+		if ( multiplayer && (e.playernumber == consoleplayer) )
+			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_MODVER"));
 	}
 
 	override void OnRegister()
@@ -68,6 +74,53 @@ Class SWWMStaticHandler : StaticEventHandler
 		Font.GetFont('TewiShaded');
 		Font.GetFont('TewiShadedInverse');
 		Font.GetFont('SWWMBigFont');
+	}
+
+	override void NetworkProcess( ConsoleEvent e )
+	{
+		if ( e.IsManual ) return;
+		if ( e.Name.Left(12) ~== "swwmversion." )
+		{
+			String verstr = e.Name.Mid(12);
+			if ( verstr != StringTable.Localize("$SWWM_MODVER") )
+			{
+				mptaint[e.Player] = true;
+				mpver[e.Player] = verstr;
+			}
+		}
+	}
+
+	override void PostUiTick()
+	{
+		if ( gametic != checktic ) return;
+		String cver = StringTable.Localize("$SWWM_MODVER");
+		if ( tainted )
+		{
+			let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+			let svd = SWWMSaveVerData(ti.Next());
+			if ( !svd ) Console.Printf("\cgWARNING: \cjLoaded save contains no version data. Issues may happen.");
+			else
+			{
+				Console.Printf("\cgWARNING: \cjThis savegame is from a different version of SWWM GZ. Issues may happen.");
+				Console.Printf("\cgSaved:   \cj"..svd.ver);
+				Console.Printf("\cgCurrent: \cj"..cver);
+			}
+		}
+		if ( multiplayer )
+		{
+			bool found = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !mptaint[i] ) continue;
+				if ( !found )
+				{
+					Console.Printf("\cfWARNING: \cjSome players have different versions of SWWM GZ loaded. Desyncs will happen.\c-");
+					Console.Printf("\cgYou: \cj"..cver);
+				}
+				found = true;
+				Console.Printf("\cgPlayer %d (\c-%s\cg): \cj%s",i+1,players[i].GetUserName(),mpver[i]);
+			}
+		}
 	}
 
 	override void UiTick()
@@ -2054,17 +2107,17 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
 		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') )
 		{
-			switch( Random[Replacement](0,14) )
+			switch( Random[Replacements](0,14) )
 			{
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacement](0,1)];
+				e.Replacement = redpool[Random[Replacements](0,1)];
 				break;
 			case 4:
 			case 5:
 			case 6:
-				e.Replacement = greenpool[Random[Replacement](0,1)];
+				e.Replacement = greenpool[Random[Replacements](0,1)];
 				break;
 			case 7:
 			case 8:
@@ -2077,17 +2130,17 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
-			switch( Random[Replacement](0,13) )
+			switch( Random[Replacements](0,13) )
 			{
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacement](0,2)];
+				e.Replacement = redpool[Random[Replacements](0,2)];
 				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacement](0,2)];
+				e.Replacement = greenpool[Random[Replacements](0,2)];
 				break;
 			case 6:
 			case 7:
@@ -2096,11 +2149,11 @@ Class SWWMHandler : EventHandler
 			case 8:
 			case 9:
 			case 10:
-				e.Replacement = purplepool[Random[Replacement](0,1)];
+				e.Replacement = purplepool[Random[Replacements](0,1)];
 				break;
 			case 11:
 			case 12:
-				e.Replacement = bluepool[Random[Replacement](0,1)];
+				e.Replacement = bluepool[Random[Replacements](0,1)];
 				break;
 			case 13:
 				e.Replacement = blackpool[0];
@@ -2109,34 +2162,34 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
 		{
-			switch( Random[Replacement](0,14) )
+			switch( Random[Replacements](0,14) )
 			{
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacement](1,3)];
+				e.Replacement = redpool[Random[Replacements](1,3)];
 				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacement](1,2)];
+				e.Replacement = greenpool[Random[Replacements](1,2)];
 				break;
 			case 6:
 			case 7:
 			case 8:
-				e.Replacement = whitepool[Random[Replacement](0,1)];
+				e.Replacement = whitepool[Random[Replacements](0,1)];
 				break;
 			case 9:
 			case 10:
 			case 11:
-				e.Replacement = purplepool[Random[Replacement](0,2)];
+				e.Replacement = purplepool[Random[Replacements](0,2)];
 				break;
 			case 12:
 			case 13:
-				e.Replacement = bluepool[Random[Replacement](0,2)];
+				e.Replacement = bluepool[Random[Replacements](0,2)];
 				break;
 			case 14:
-				e.Replacement = blackpool[Random[Replacement](0,1)];
+				e.Replacement = blackpool[Random[Replacements](0,1)];
 				break;
 			}
 		}
@@ -2238,6 +2291,57 @@ Class SWWMHandler : EventHandler
 			let mo = players[e.player].mo;
 			if ( e.Args[0] < 0 ) return;	// special gestures can't be manually started
 			SWWMGesture.SetGesture(mo,e.Args[0]);
+		}
+		else if ( e.Name ~== "swwmdebugdumprng" )
+		{
+			// dump the values of all mod RNGs (might help someday to track down what desyncs)
+			Console.Printf("\cxSWWM GZ RNG dump for player %d (\c-%s\cx):\c-",consoleplayer,players[consoleplayer].GetUserName());
+			Console.Printf("bdscreen: %d",Random2[bdscreen]());
+			Console.Printf("Blood: %d",Random2[Blood]());
+			Console.Printf("Boolet: %d",Random2[Boolet]());
+			Console.Printf("BrainExplode: %d",Random2[BrainExplode]());
+			Console.Printf("Bundle: %d",Random2[Bundle]());
+			Console.Printf("Candy: %d",Random2[Candy]());
+			Console.Printf("Chancebox: %d",Random2[Chancebox]());
+			Console.Printf("DemoLines: %d",Random2[DemoLines]());
+			Console.Printf("DoBlast: %d",Random2[DoBlast]());
+			Console.Printf("Eviscerator: %d",Random2[Eviscerator]());
+			Console.Printf("Explos: %d",Random2[Explos]());
+			Console.Printf("FInTheChat: %d",Random2[FInTheChat]());
+			Console.Printf("FlameT: %d",Random2[FlameT]());
+			Console.Printf("Flicker: %d",Random2[Flicker]());
+			Console.Printf("FunTags: %d",Random2[FunTags]());
+			Console.Printf("Gibs: %d",Random2[Gibs]());
+			Console.Printf("GoldDrop: %d",Random2[GoldDrop]());
+			Console.Printf("Goldy: %d",Random2[Goldy]());
+			Console.Printf("GunFlash: %d",Random2[GunFlash]());
+			Console.Printf("hdscreen: %d",Random2[hdscreen]());
+			Console.Printf("Hellblazer: %d",Random2[Hellblazer]());
+			Console.Printf("HudStuff: %d",Random2[HudStuff]());
+			Console.Printf("Impact: %d",Random2[Impact]());
+			Console.Printf("InterArt: %d",Random2[InterArt]());
+			Console.Printf("Invinciball: %d",Random2[Invinciball]());
+			Console.Printf("Junk: %d",Random2[Junk]());
+			Console.Printf("Moth: %d",Random2[Moth]());
+			Console.Printf("Nugget: %d",Random2[Nugget]());
+			Console.Printf("Parry: %d",Random2[Parry]());
+			Console.Printf("Ponch: %d",Random2[Ponch]());
+			Console.Printf("Puff: %d",Random2[Puff]());
+			Console.Printf("Pusher: %d",Random2[Pusher]());
+			Console.Printf("Rage: %d",Random2[Rage]());
+			Console.Printf("Replacements: %d",Random2[Replacements]());
+			Console.Printf("ScoreBits: %d",Random2[ScoreBits]());
+			Console.Printf("ShellDrop: %d",Random2[ShellDrop]());
+			Console.Printf("Shivers: %d",Random2[Shivers]());
+			Console.Printf("Silverbullet: %d",Random2[Silverbullet]());
+			Console.Printf("SpareShells: %d",Random2[SpareShells]());
+			Console.Printf("Sparkster: %d",Random2[Sparkster]());
+			Console.Printf("Spread: %d",Random2[Spread]());
+			Console.Printf("Spreadgun: %d",Random2[Spreadgun]());
+			Console.Printf("TUID: %d",Random2[TUID]());
+			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
+			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
+			Console.Printf("Ynykron: %d",Random2[Ynykron]());
 		}
 		if ( e.IsManual ) return;
 		if ( e.Name.Left(14) ~== "swwmstoregive." )

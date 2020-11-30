@@ -507,7 +507,7 @@ Class Demolitionist : PlayerPawn
 			diffy = abs(diffy)**.5*sgn;
 		}
 		// don't do inertial sway when in 6dof mode, causes issues
-		if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',players[consoleplayer]);
+		if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',player);
 		if ( !fly6dof.GetBool() || !((waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2)) )
 		{
 			cur.x += diffang;

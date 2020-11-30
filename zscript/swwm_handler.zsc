@@ -82,11 +82,9 @@ Class SWWMStaticHandler : StaticEventHandler
 		if ( e.Name.Left(12) ~== "swwmversion." )
 		{
 			String verstr = e.Name.Mid(12);
+			mpver[e.Player] = verstr;
 			if ( verstr != StringTable.Localize("$SWWM_MODVER") )
-			{
 				mptaint[e.Player] = true;
-				mpver[e.Player] = verstr;
-			}
 		}
 	}
 
@@ -111,14 +109,14 @@ Class SWWMStaticHandler : StaticEventHandler
 			bool found = false;
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
-				if ( !playeringame[i] || !mptaint[i] ) continue;
+				if ( !playeringame[i] || (i == consoleplayer) || (!mptaint[i] && (mpver[i] != "")) ) continue;
 				if ( !found )
 				{
 					Console.Printf("\cfWARNING: \cjSome players have different versions of SWWM GZ loaded. Desyncs will happen.\c-");
 					Console.Printf("\cgYou: \cj"..cver);
 				}
 				found = true;
-				Console.Printf("\cgPlayer %d (\c-%s\cg): \cj%s",i+1,players[i].GetUserName(),mpver[i]);
+				Console.Printf("\cgPlayer %d (\c-%s\cg): \cj%s",i+1,players[i].GetUserName(),(mpver[i]=="")?"\cg(no version information)\c-":mpver[i]);
 			}
 		}
 	}

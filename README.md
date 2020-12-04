@@ -360,7 +360,7 @@ You're fucking invincible for a total of 20 seconds.
 ### Hammerspace Embiggener ~ Replaces Backpack, Bag of Holding, Dragonskin Bracers
 ![](docimg/embiggener.png)
 
-Each of these you pick up increase ammo capacity by half of its base value, stacking up to 16 times for a maximum of 900% capacity. They also give you some extra ammo, like a vanilla backpack would (though not for all weapons).
+Each of these you pick up increases your ammo capacity (not necessarily doubling it), stacking up to 8 times. They also give you some extra ammo, like a vanilla backpack would (though not for all weapons).
 
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
 ![](docimg/fabricator.png)

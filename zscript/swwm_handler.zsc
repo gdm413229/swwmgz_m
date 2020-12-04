@@ -1179,6 +1179,28 @@ Class SWWMHandler : EventHandler
 		return false;
 	}
 
+	private static bool ShouldSpawnGold()
+	{
+		int totalneeded = 0;
+		// check "free space" in player inventories
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo ) continue;
+			let cg = players[i].mo.FindInventory("GoldShell");
+			if ( cg ) totalneeded += cg.MaxAmount-cg.Amount;
+			else totalneeded = GetDefaultByType("GoldShell").MaxAmount;
+		}
+		// subtract any shells already in the world
+		let ti = ThinkerIterator.Create("GoldShell");
+		GoldShell g;
+		while ( g = GoldShell(ti.Next()) )
+		{
+			if ( g.Owner ) continue;
+			totalneeded -= g.Amount;
+		}
+		return (totalneeded > 0);
+	}
+
 	override void WorldThingDied( WorldEvent e )
 	{
 		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
@@ -1194,7 +1216,8 @@ Class SWWMHandler : EventHandler
 			while ( ti.Next() ) dropweight++;
 			int minchance = max(1,6-(e.Thing.GetSpawnHealth()/1000));
 			dropweight = max(minchance,dropweight/4);
-			if ( !Random[GoldDrop](0,dropweight) )
+			// make sure the gold shell is "worth spawning", too
+			if ( !Random[GoldDrop](0,dropweight) && ShouldSpawnGold() )
 			{
 				let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
 				double ang = FRandom[SpareShells](0,360);

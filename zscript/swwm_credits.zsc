@@ -105,7 +105,7 @@ Class SWWMCreditsMenu : GenericMenu
 {
 	TextureID bgtex;
 	TextureID logo;
-	String stitle;
+	String stitle, stitle2;
 	String sdev, sassets, smusic, sfanart, slocal, spatrons, sthanks;
 	Array<SWWMCreditsEntry> cdev, cassets, cmusic, cfanart, clocal, cpatrons, cthanks;
 	transient CVar fuzz, lang;
@@ -149,6 +149,7 @@ Class SWWMCreditsMenu : GenericMenu
 		logo = TexMan.CheckForTexture("graphics/M_SWWM.png",TexMan.Type_Any);
 		[logow, logoh] = TexMan.GetSize(logo);
 		stitle = StringTable.Localize("$SWWM_CSTITLE");
+		stitle2 = StringTable.Localize("$SWWM_CSTITLE2");
 		sdev = StringTable.Localize("$SWWM_CLEAD");
 		sassets = StringTable.Localize("$SWWM_CASSETS");
 		smusic = StringTable.Localize("$SWWM_CMUSIC");
@@ -176,7 +177,6 @@ Class SWWMCreditsMenu : GenericMenu
 		clocal.Push(new("SWWMCreditsEntry").Init(sfnt,"Marisa Kirisame","$SWWM_LOCES"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Snacks"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"john"));
-		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Alexa Jones-Gonzales"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Jonas Höglund"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Lilian Lamp"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Valerie Thiessen"));
@@ -184,6 +184,7 @@ Class SWWMCreditsMenu : GenericMenu
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Dac"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Pietro Gagliardi"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Xada Xephron"));
+		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Alexa Jones-Gonzales"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"NekoMithos"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"Ashley Lambert"));
 		cpatrons.Push(new("SWWMCreditsEntry").Init(sfnt,"LordMisfit"));
@@ -202,7 +203,7 @@ Class SWWMCreditsMenu : GenericMenu
 		cthanks.Push(new("SWWMCreditsEntry").Init(sfnt,"$SWWM_CDEVS1","$SWWM_CDEVS2"));
 		cthanks.Push(new("SWWMCreditsEntry").Init(sfnt,"$SWWM_CYOU1","$SWWM_CYOU2"));
 		speed = 16.;
-		spos = (ss.y-logoh)/2;
+		spos = ss.y-logoh;
 		// calc total height
 		theight = logoh;
 		theight += 7*(SECTION_PAD+bfnt.GetHeight());
@@ -252,7 +253,14 @@ Class SWWMCreditsMenu : GenericMenu
 		// don't draw if we're offscreen, saves time
 		if ( (y+logoh < 0) || (y > ss.y) ) return logoh;
 		Screen.DrawTexture(logo,true,x-logow/2,y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawText(sfnt,Font.CR_SAPPHIRE,x-sfnt.StringWidth(stitle)/2,y+(logoh-24),stitle,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(sfnt,Font.CR_SAPPHIRE,x-sfnt.StringWidth(stitle)/2,y+(logoh-28),stitle,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// underline
+		int w = max(sfnt.StringWidth(stitle),sfnt.StringWidth(stitle2));
+		int cw = int(ceil((w+8)/6.))*6;
+		double xx = x-cw/2;
+		for ( int i=0; i<cw; i+=6 )
+			Screen.DrawChar(sfnt,Font.CR_SAPPHIRE,xx+i,y+(logoh-22),0x5F,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(sfnt,Font.CR_WHITE,x-sfnt.StringWidth(stitle2)/2,y+(logoh-9),stitle2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		return logoh;
 	}
 	double DrawSection( double x, double y, String txt )

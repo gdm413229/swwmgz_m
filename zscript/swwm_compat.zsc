@@ -27,6 +27,18 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			// script uses checkinventory for yellow skull
 			SetLineSpecial(22610,ACS_LockedExecute,-Int('ZPACK_E3M8_SCRIPT15'),0,0,0,6);
 			break;
+		// okuplok
+		case 'F7F353146676920238935A8D0D1B6E8E':
+			// add 7 more backpacks on top of existing one, for a full embiggening
+			// (players will need it)
+			for ( int i=0; i<7; i++ ) AddThing(8,(11808,-2016,384));
+			break;
+		// holy hell revealed
+		case '83569A062B5261C6BB4A034BA8245D24':
+			// remove boss brain and re-spawn it when end is reached, prevents cheesing the map with the ynykron
+			SetThingEdNum(50183,9001);
+			SetThingID(50183,666);
+			SetLineSpecial(21964,ACS_Execute,-Int('HHR_BRAINWALL'));
 		}
 	}
 }

@@ -753,7 +753,11 @@ Class SWWMHandler : EventHandler
 
 	override void WorldLoaded( WorldEvent e )
 	{
-		if ( level.levelname ~== "Modder Test Map" ) level.ReplaceTextures("-noflat-","kinstile",0);
+		if ( level.levelname ~== "Modder Test Map" )
+		{
+			level.ReplaceTextures("-noflat-","kinstile",0);
+			S_ChangeMusic("music/CARDISH1.XM");
+		}
 		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
 			AddOneliner("mapstart",3);
@@ -1169,6 +1173,8 @@ Class SWWMHandler : EventHandler
 		mapclear = true;
 		Console.Printf(StringTable.Localize("$SWWM_ALLCLEAR"),5000);
 		S_StartSound("misc/wow",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+		if ( swwm_silencemap == 1 ) S_ChangeMusic("",force:true);
+		else if ( swwm_silencemap > 1 ) S_ChangeMusic("music/olg.ogg",force:true);
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] || !players[i].mo ) continue;

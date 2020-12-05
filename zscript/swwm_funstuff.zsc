@@ -422,6 +422,79 @@ Class FancyConfetti : Actor
 		Stop;
 	}
 }
+Class SuperFancySparkle : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale .2;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[ExploS](.75,1.5);
+		specialf1 = FRandom[ExploS](.95,.98);
+		specialf2 = FRandom[ExploS](.005,.015);
+		double ang = FRandom[ExploS](0,360);
+		double pt = FRandom[ExploS](-90,30);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](4,20);
+		frame = Random[ExploS](0,7);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*specialf1);
+		A_FadeOut(specialf2);
+		Vector3 dir = vel;
+		double magvel = dir.length();
+		magvel *= .99;
+		if ( magvel > 0. )
+		{
+			dir /= magvel;
+			dir += .2*(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1));
+			vel = dir.unit()*magvel;
+		}
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+	}
+	States
+	{
+	Spawn:
+		BLPF # -1 Bright;
+		Stop;
+	}
+}
+Class SuperPartyLight : PaletteLight
+{
+	Default
+	{
+		Tag "SpRainbow";
+		Args 0,0,0,100;
+		ReactionTime 40;
+	}
+	override void PostBeginPlay()
+	{
+		SetTag(String.Format("SpRainbow,%d",Random[ExploS](0,7)));
+		ReactionTime = Random[ExploS](30,50);
+		double ang = FRandom[ExploS](0,360);
+		double pt = FRandom[ExploS](-90,30);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](2,10);
+		Super.PostBeginPlay();
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+	}
+}
 Class PartyTime : Actor
 {
 	bool ignite;
@@ -460,16 +533,25 @@ Class PartyTime : Actor
 	}
 	action void A_Confetti()
 	{
-		A_StartSound("misc/tada",CHAN_ITEM);
+		if ( !bAMBUSH ) A_StartSound("misc/tada",CHAN_ITEM);
 		double ang, pt;
 		int numpt = Random[ExploS](100,120);
+		if ( bAMBUSH ) numpt *= 2;
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,30);
 			let c = Spawn("FancyConfetti",Vec3Offset(0,0,specialf1));
 			c.vel = (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[ExploS](2,8);
+			if ( bAMBUSH ) c.vel *= 2;
 		}
+		if ( !bAMBUSH ) return;
+		numpt = Random[ExploS](60,80);
+		for ( int i=0; i<numpt; i++ )
+			Spawn("SuperFancySparkle",Vec3Offset(0,0,specialf1));
+		numpt = Random[ExploS](6,9);
+		for ( int i=0; i<numpt; i++ )
+			Spawn("SuperPartyLight",Vec3Offset(0,0,specialf1));
 	}
 }
 

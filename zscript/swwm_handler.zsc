@@ -235,6 +235,7 @@ Class SWWMHandler : EventHandler
 	int multilevel[MAXPLAYERS];
 	int lastitemcount[MAXPLAYERS];
 	bool allkills, allitems, allsecrets;
+	bool mapclear;
 	// for custom cheats
 	transient ui int kcode;
 	transient ui String kstr;
@@ -1016,7 +1017,7 @@ Class SWWMHandler : EventHandler
 		if ( s ) s.lastspawn = level.totaltime;
 	}
 
-	override void WorldTick()
+	private void LangRefresh()
 	{
 		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
@@ -1039,6 +1040,10 @@ Class SWWMHandler : EventHandler
 		}
 		curlang = lang.GetString();
 		curfuntags = funtags.GetBool();
+	}
+
+	private void QueueMaintenance()
+	{
 		if ( swwm_maxcasings != oldmaxcasings )
 		{
 			while ( casings && (swwm_maxcasings >= 0) && (casings_cnt > swwm_maxcasings) )
@@ -1063,25 +1068,11 @@ Class SWWMHandler : EventHandler
 		oldmaxdebris = swwm_maxdebris;
 		oldmaxblood = swwm_maxblood;
 		oldmaxgibs = swwm_maxgibs;
-		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
-		if ( onelinertic && (onelinertic < gametic) )
-		{
-			if ( players[consoleplayer].health > 0 )
-			{
-				if ( onelinerlevel > mutevoice.GetInt() )
-					players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
-				SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
-			}
-			onelinertic = 0;
-			onelinerspan = 0;
-		}
-		for ( int i=0; i<flashes.size(); i++ )
-		{
-			if ( flashes[i].tic >= gametic ) continue;
-			flashes.Delete(i);
-			i--;
-		}
-		// countable item scoring
+	}
+
+	// countable item scoring
+	private void ItemCountTrack()
+	{
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] ) continue;
@@ -1101,7 +1092,11 @@ Class SWWMHandler : EventHandler
 				s.items++;
 			}
 		}
-		// combat tracking
+	}
+
+	// combat tracking
+	private void CombatTrack()
+	{
 		// prune old entries
 		for ( int i=0; i<combatactors.Size(); i++ )
 		{
@@ -1159,6 +1154,56 @@ Class SWWMHandler : EventHandler
 		}
 		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) )
 			lastcombat = AddOneliner("fightstart",1,10);
+	}
+
+	private void OneHundredPercentCheck()
+	{
+		// ignore levels that have NOTHING
+		if ( (level.total_secrets <= 0)
+			&& (level.total_items <= 0)
+			&& (level.total_monsters <= 0) ) return;
+		if ( mapclear ) return;
+		if ( (level.found_secrets < level.total_secrets)
+			|| (level.found_items < level.total_items)
+			|| (level.killed_monsters < level.total_monsters) ) return;
+		mapclear = true;
+		Console.Printf(StringTable.Localize("$SWWM_ALLCLEAR"),5000);
+		S_StartSound("misc/wow",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo ) continue;
+			let f = Actor.Spawn("PartyTime",players[i].mo.pos);
+			f.bAMBUSH = true;
+			SWWMCredits.Give(players[i],5000);
+			SWWMScoreObj.Spawn(5000,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
+		}
+	}
+
+	override void WorldTick()
+	{
+		LangRefresh();
+		QueueMaintenance();
+		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
+		if ( onelinertic && (onelinertic < gametic) )
+		{
+			if ( players[consoleplayer].health > 0 )
+			{
+				if ( onelinerlevel > mutevoice.GetInt() )
+					players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
+				SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
+			}
+			onelinertic = 0;
+			onelinerspan = 0;
+		}
+		for ( int i=0; i<flashes.size(); i++ )
+		{
+			if ( flashes[i].tic >= gametic ) continue;
+			flashes.Delete(i);
+			i--;
+		}
+		ItemCountTrack();
+		CombatTrack();
+		OneHundredPercentCheck();
 		if ( initialized ) return;
 		// wait until bosses are active
 		for ( int i=0; i<bossactors.Size(); i++ )

@@ -458,7 +458,7 @@ The scoring system is pretty straightforward. Each enemy you kill will give you 
  * +2000 if the enemy killed is a boss.
  * +1000 if you've killed the last enemy in the map.
 
-You are also given +100 points for each secret found, +1000 if it's the final secret. Countable items give +10 points each or +500 if it's the final item.
+You are also given +100 points for each secret found, +1000 if it's the final secret. Countable items give +10 points each or +500 if it's the final item. In addition, +5000 will be given to all players if the level is fully cleared (100% kills/items/secrets).
 
 Score can be used to buy items on the in-game store, and it is preserved between hubs.
 

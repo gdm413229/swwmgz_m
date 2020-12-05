@@ -340,6 +340,7 @@ Class PaletteLight : PointLight
 {
 	Color pal[256];
 	bool IsLooping;
+	int InitialReactionTime;
 
 	Default
 	{
@@ -349,7 +350,7 @@ Class PaletteLight : PointLight
 	}
 	private void UpdateLight()
 	{
-		int index = clamp(255-((255*ReactionTime)/abs(default.ReactionTime)),0,255);
+		int index = clamp(255-((255*ReactionTime)/abs(InitialReactionTime)),0,255);
 		args[LIGHT_RED] = pal[index].r;
 		args[LIGHT_GREEN] = pal[index].g;
 		args[LIGHT_BLUE] = pal[index].b;
@@ -357,13 +358,23 @@ Class PaletteLight : PointLight
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		int lump = Wads.CheckNumForFullname(String.Format("palettes/%s.pal",GetTag()));
+		InitialReactionTime = ReactionTime;
+		String palname = GetTag();
+		int sep = palname.IndexOf(",");
+		int palnum = 0;
+		if ( sep != -1 )
+		{
+			String palnumstr = palname.Mid(sep+1);
+			palnum = palnumstr.ToInt()*768;
+			palname.Truncate(sep);
+		}
+		int lump = Wads.CheckNumForFullname(String.Format("palettes/%s.pal",palname));
 		String paldat = Wads.ReadLump(lump);
 		for ( int i=0; i<256; i++ )
 		{
-			pal[i].r = paldat.ByteAt(i*3);
-			pal[i].g = paldat.ByteAt(i*3+1);
-			pal[i].b = paldat.ByteAt(i*3+2);
+			pal[i].r = paldat.ByteAt(palnum++);
+			pal[i].g = paldat.ByteAt(palnum++);
+			pal[i].b = paldat.ByteAt(palnum++);
 		}
 		if ( ReactionTime < 0 )
 		{
@@ -384,7 +395,7 @@ Class PaletteLight : PointLight
 				Destroy();
 				return;
 			}
-			else ReactionTime = abs(default.ReactionTime);
+			else ReactionTime = abs(InitialReactionTime);
 		}
 		if ( target ) SetOrigin(target.pos,true);
 		UpdateLight();

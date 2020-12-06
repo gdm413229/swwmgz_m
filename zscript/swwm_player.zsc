@@ -729,7 +729,7 @@ Class Demolitionist : PlayerPawn
 			while ( (spd > 0) && bi.Next() )
 			{
 				a = bi.Thing;
-				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS ) continue;
+				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS || a.bCORPSE ) continue;
 				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*spd,8,16) ) continue;
 				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
@@ -883,7 +883,7 @@ Class Demolitionist : PlayerPawn
 			bTHRUACTORS = true;
 			for ( int i=1; i<=8; i++ )
 			{
-				if ( (spd > 0) && !bumped && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) && BlockingLine )
+				if ( (spd > 0) && !bumped && !TryMove(Vec2Offset(steppy.x,steppy.y),1,false,tm) && SWWMUtility.BlockingLineIsBlocking(self,Line.ML_BLOCKEVERYTHING|Line.ML_BLOCKING|Line.ML_BLOCK_PLAYERS) )
 				{
 					Vector3 wallnorm = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
 					int lside = 1;
@@ -2336,6 +2336,7 @@ Class DashTrail : Actor
 		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		FloatBobPhase 0;
 	}
 	override void PostBeginPlay()
 	{
@@ -2383,6 +2384,7 @@ Class DashTrail2 : Actor
 		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		FloatBobPhase 0;
 	}
 	override void PostBeginPlay()
 	{
@@ -2640,6 +2642,7 @@ Class DemolitionistSelfLight : Actor
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+NOINTERACTION;
+		FloatBobPhase 0;
 	}
 	bool activelight()
 	{

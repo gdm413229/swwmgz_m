@@ -13,6 +13,22 @@ Hope you have fun exploding demon knees.
 
  — *Marisa*
 
+## Disclaimers
+
+This mod features loud sounds and flashing lights, which may be harmful to certain people. There are options to dampen some of these effects, but it may still be unsafe nonetheless.
+
+The UI design and color schemes of the mod may be problematic to people with color blindness. Certain elements such as healthbars and various numbers could potentially become hard to see under some conditions. GZDoom has sliders for controlling not just brightness, contrast and gamma, but also color saturation, which may be of some help.
+
+The characters and stories featured in this mod are part of my own personal lore. Any similarities to real world individuals or events are entirely coincidental or, in some cases, loosely referential.
+
+The mod's overarching story and themes often tackle topics of world politics, economy, human rights and others. No work of fiction is free of politics, especially those that reflect the author's own beliefs. If you feel discomfort from political views opposite to your own, this may not be for you (especially if you're right-leaning/conservative).
+
+The mod contains certain sexual undertones (or overtones in the story itself). Some parts could be considered explicit in nature, so please take this with a grain of salt. You've been warned: The mod *IS* horny (and so am I, as its author).
+
+This mod is not compatible with **Brutal Doom** for obvious reasons. If you want to combine both, use the "Monsters Only" version of it, but do note that some glitches may still happen.
+
+This mod is, funny enough, readily compatible with **H-Doom**. You will not be able to engage in erotic acts with the demon girls, however, but they will be very vulnerable to kisses and headpats.
+
 ## The Player
 ![](docimg/demolitionist_actionshot.png)
 

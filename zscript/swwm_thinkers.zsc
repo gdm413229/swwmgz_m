@@ -36,6 +36,12 @@ Class SWWMStats : Thinker
 	Array<LevelStat> lstats;
 	Array<Class<Weapon> > alreadygot;
 	int favweapon;
+	// these two are used for mission updates
+	Array<int> clustervisit;
+	Array<bool> secretdone;
+	// [Strife] preserve previous mission logs
+	String oldlogtext;
+	Array<String> questbacklog;
 
 	bool GotWeapon( Class<Weapon> which )
 	{

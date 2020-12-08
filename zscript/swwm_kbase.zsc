@@ -50,6 +50,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 	int drag;	// when dragging with the mouse, which scroller to affect (1 = ofs0 and so on)
 	// mission
 	String missionstr;
+	Array<String> missionbacklog;
 	// stats
 	SWWMStats stats;
 	Array<String> statlist;
@@ -147,15 +148,94 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		// mission text
-		// TODO per-cluster messages
 		if ( gameinfo.gametype&GAME_Doom )
 		{
-			if ( SWWMUtility.IsEviternity() ) missionstr = "$SWWM_MISSION_EVITERNITY";
-			else missionstr = "$SWWM_MISSION_DOOM";
+			int clus = level.cluster;
+			bool eviternity = SWWMUtility.IsEviternity();
+			if ( eviternity )
+			{
+				// we have to do some heavy lifting here because episodes don't match clusters
+				if ( level.levelnum <= 5 ) clus = 1;
+				else if ( level.levelnum <= 10 ) clus = 2;
+				else if ( level.levelnum <= 15 ) clus = 3;
+				else if ( level.levelnum <= 20 ) clus = 4;
+				else if ( level.levelnum <= 25 ) clus = 5;
+				else if ( level.levelnum <= 30 ) clus = 6;
+				else if ( level.levelnum <= 31 ) clus = 7;
+				else if ( level.levelnum <= 32 ) clus = 8;
+				missionstr = String.Format("$SWWM_MISSION_EVITERNITY%d",clus);
+			}
+			else missionstr = String.Format("$SWWM_MISSION_DOOM%d",clus);
+			int csiz = stats.clustervisit.Size();
+			if ( (csiz > 0) && stats.secretdone[csiz-1] )
+			{
+				String tmpstr = missionstr.."_SECRET";
+				if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+					missionstr = tmpstr;
+			}
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == clus) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format(eviternity?"$SWWM_MISSION_EVITERNITY%d":"$SWWM_MISSION_DOOM%d",stats.clustervisit[i]);
+				if ( stats.secretdone[i] )
+				{
+					String tmpstr = xstr.."_SECRET";
+					if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+						xstr = tmpstr;
+				}
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
 		}
-		else if ( gameinfo.gametype&GAME_Heretic ) missionstr = "$SWWM_MISSION_HERETIC";
-		else if ( gameinfo.gametype&GAME_Hexen ) missionstr = "$SWWM_MISSION_HEXEN";
-		else if ( gameinfo.gametype&GAME_Strife ) missionstr = players[consoleplayer].logtext;	// just show the quest log
+		else if ( gameinfo.gametype&GAME_Heretic )
+		{
+			missionstr = String.Format("$SWWM_MISSION_HERETIC%d",level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_HERETIC%d",stats.clustervisit[i]);
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
+		}
+		else if ( gameinfo.gametype&GAME_Hexen )
+		{
+			missionstr = String.Format("$SWWM_MISSION_HEXEN%d",level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_HEXEN%d",stats.clustervisit[i]);
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
+		}
+		else if ( gameinfo.gametype&GAME_Strife )
+		{
+			missionstr = players[consoleplayer].logtext;	// just show the quest log
+			int csiz = stats.questbacklog.Size();
+			for ( int i=csiz-1; i>=0; i-- )
+				missionbacklog.Push(stats.questbacklog[i]);
+		}
 		else missionstr = "$SWWM_MISSION_NONE";
 		if ( gameinfo.gametype&GAME_Heretic )
 		{
@@ -189,6 +269,18 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			c_hour = 11;
 			c_minute = 26;
 			c_tz = "JST";
+		}
+		else if ( SWWMUtility.IsEviternity() )
+		{
+			// June 10th 2148, 20:09 +09
+			// (June 10th 2148, 20:09 JST)
+			// Epoch: 5631073740
+			c_year = 2148;
+			c_month = 5;
+			c_day = 9;
+			c_hour = 20;
+			c_minute = 9;
+			c_tz = "+09";
 		}
 		else	// Doom
 		{
@@ -379,7 +471,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			else if ( curtab == TAB_MISSION )
 			{
-				String str = StringTable.Localize(missionstr);
+				String str;
+				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+				else str = StringTable.Localize(missionbacklog[sel1-1]);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -541,7 +635,16 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_RIGHT:
-			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
+			if ( (curtab == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			{
+				if ( sel1 < missionbacklog.Size() )
+				{
+					sel0 = 0;
+					sel1++;
+					MenuSound("menu/demoscroll");
+				}
+			}
+			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
 			{
 				int oldsel = sel0;
 				ofs0 = sel0 += 22;
@@ -581,7 +684,16 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_LEFT:
-			if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
+			if ( (curtab == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			{
+				if ( sel1 > 0 )
+				{
+					sel0 = 0;
+					sel1--;
+					MenuSound("menu/demoscroll");
+				}
+			}
+			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 -= 22;
@@ -801,20 +913,42 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					xx += len;
 				}
 			}
-			else if ( (curtab == TAB_MISSION) && !isrclick )
+			else if ( curtab == TAB_MISSION )
 			{
 				// are we clicking where the scrollbar should be?
-				if ( mpos.x < 632 ) return res;
-				String str = StringTable.Localize(missionstr);
-				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
-				else return res;	// no scrollbar
-				// calculate offset
-				int szr = l.Count()-28;
-				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
-				if ( step != sel0 ) MenuSound("menu/demoscroll");
-				ofs0 = sel0 = step;
-				drag = 1;
+				if ( mpos.x < 632 )
+				{
+					int csiz = missionbacklog.Size();
+					if ( csiz <= 0 ) return res;
+					if ( isrclick && (sel1 < csiz) )
+					{
+						sel0 = 0;
+						sel1++;
+						MenuSound("menu/demoscroll");
+					}
+					else if ( !isrclick && (sel1 > 0) )
+					{
+						sel0 = 0;
+						sel1--;
+						MenuSound("menu/demoscroll");
+					}
+					return res;
+				}
+				if ( !isrclick )
+				{
+					String str;
+					if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+					else str = StringTable.Localize(missionbacklog[sel1-1]);
+					BrokenLines l = fnt.BreakLines(str,629);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+					drag = 1;
+				}
 			}
 			else if ( curtab == TAB_INVENTORY )
 			{
@@ -1335,7 +1469,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			if ( curtab == TAB_MISSION )
 			{
-				String str = StringTable.Localize(missionstr);
+				String str;
+				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+				else str = StringTable.Localize(missionbacklog[sel1-1]);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -2489,7 +2625,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		// draw contents
 		if ( curtab == TAB_MISSION )
 		{
-			String str = StringTable.Localize(missionstr);
+			String str;
+			if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+			else str = StringTable.Localize(missionbacklog[sel1-1]);
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;
@@ -2498,9 +2636,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			for ( int i=ofs; i<l.Count(); i++ )
 			{
 				if ( yy >= 370 ) break;
-				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,sel1?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 13;
 			}
+			int csiz = missionbacklog.Size();
 			// scrollbar
 			if ( l.Count() > 28 )
 			{
@@ -2509,6 +2648,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				int szr = l.Count()-28;
 				yy = floor(ofs*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				// page count
+				if ( csiz > 0 )
+				{
+					str = String.Format("%d \cf/\c- %d",sel1+1,csiz+1);
+					Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+629)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( csiz > 0 )
+			{
+				str = String.Format("%d \cf/\c- %d",sel1+1,csiz+1);
+				Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+637)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
 		else if ( curtab == TAB_STATS )

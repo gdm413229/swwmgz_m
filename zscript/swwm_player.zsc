@@ -552,6 +552,14 @@ Class Demolitionist : PlayerPawn
 			selflight.Tick();
 		}
 		if ( player.mo != self ) return;	// no voodoo dolls past this point
+		// strife thing
+		if ( mystats.oldlogtext == "" )
+			mystats.oldlogtext = player.logtext;
+		else if ( player.logtext != mystats.oldlogtext )
+		{
+			mystats.questbacklog.Push(mystats.oldlogtext);
+			mystats.oldlogtext = player.logtext;
+		}
 		// overheal fading
 		if ( (health <= 200) || (health > oldhealth) )
 		{

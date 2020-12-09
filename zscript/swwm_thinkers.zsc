@@ -894,10 +894,7 @@ Class SWWMCombatTracker : Thinker
 			Destroy();
 			return;
 		}
-		// don't update
-		if ( mytarget && mytarget.bDORMANT )
-			return;
-		// update
+		// is target gone or dead?
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
 			// we're done
@@ -908,11 +905,21 @@ Class SWWMCombatTracker : Thinker
 			if ( level.maptime > updated+35 ) Destroy();
 			return;
 		}
+		// don't update dormant targets
+		if ( mytarget.bDORMANT )
+			return;
+		// in deathmatch, don't update for hostile players
+		if ( deathmatch && mytarget.player && (mytarget.player.mo == mytarget) )
+		{
+			if ( teamplay && (mytarget.player.GetTeam() != players[consoleplayer].GetTeam()) )
+				return;
+			else if ( !teamplay ) return;
+		}
 		// only update height/position while alive
 		bool heightchanged = false;
 		if ( height != mytarget.height ) heightchanged = true;
 		height = mytarget.height;
-		if ( mytarget && (heightchanged || (mytarget.pos != oldpos) || (mytarget.prev != oldprev)) )
+		if ( heightchanged || (mytarget.pos != oldpos) || (mytarget.prev != oldprev) )
 		{
 			oldpos = mytarget.pos;
 			oldprev = mytarget.prev;
@@ -975,8 +982,8 @@ Class SWWMCombatTracker : Thinker
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
 			int mxdist = maxdist.GetInt();
-			// players (but not voodoo dolls), always visible in sp/coop/teamplay
-			if ( mytarget.player && (mytarget.player.mo == mytarget) && (!deathmatch || (teamplay && (mytarget.player.GetTeam() == players[consoleplayer].GetTeam()))) ) updated = level.maptime+35;
+			// players (but not voodoo dolls), always visible
+			if ( mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// friendlies within a set distance
 			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
 			// enemies within a set distance that have us as target

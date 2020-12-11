@@ -1010,7 +1010,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 					xx = 9;
 					yy = 23;
@@ -1055,7 +1055,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					if ( maxcol >= totalcol ) return res;	// no scrollbar
 					// calculate offset
 					int szr = totalcol-maxcol;
@@ -1084,7 +1084,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					int ofs = int(max(0,(ofs1/22)-(maxcol-1))*22);
 					xx = 9;
 					yy = 23;
@@ -1129,7 +1129,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					if ( maxcol >= totalcol ) return res;	// no scrollbar
 					// calculate offset
 					int szr = totalcol-maxcol;
@@ -1158,7 +1158,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 					xx = 9;
 					yy = 23;
@@ -1200,7 +1200,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					if ( maxcol >= totalcol ) return res;	// no scrollbar
 					// calculate offset
 					int szr = totalcol-maxcol;
@@ -1231,7 +1231,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+96);
-					totalcol = (storelist.Size()/22)+1;
+					totalcol = int(ceil(storelist.Size()/22.));
 					// gotta check both the tag and the price for clicking
 					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 					int cols = 1;
@@ -1275,7 +1275,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+96);
-					totalcol = (storelist.Size()/22)+1;
+					totalcol = int(ceil(storelist.Size()/22.));
 					if ( maxcol >= totalcol ) return res;	// no scrollbar
 					// calculate offset
 					int szr = totalcol-maxcol;
@@ -1372,7 +1372,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 							if ( len > longest ) longest = len;
 						}
 						maxcol = 622/(longest+24);
-						totalcol = (playerlist.Size()/22)+1;
+						totalcol = int(ceil(playerlist.Size()/22.));
 						int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 						xx = 9;
 						yy = 23;
@@ -1412,7 +1412,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 							if ( len > longest ) longest = len;
 						}
 						maxcol = 622/(longest+24);
-						totalcol = (playerlist.Size()/22)+1;
+						totalcol = int(ceil(playerlist.Size()/22.));
 						if ( maxcol >= totalcol ) return res;	// no scrollbar
 						// calculate offset
 						int szr = totalcol-maxcol;
@@ -1540,7 +1540,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( len > longest ) longest = len;
 				}
 				maxcol = 622/(longest+24);
-				totalcol = (invlist.Size()/22)+1;
+				totalcol = int(ceil(invlist.Size()/22.));
 				if ( maxcol >= totalcol ) return res;	// no scrollbar
 				// calculate offset
 				int szr = totalcol-maxcol;
@@ -1565,7 +1565,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( len > longest ) longest = len;
 				}
 				maxcol = 622/(longest+24);
-				totalcol = (invlist.Size()/22)+1;
+				totalcol = int(ceil(invlist.Size()/22.));
 				if ( maxcol >= totalcol ) return res;	// no scrollbar
 				// calculate offset
 				int szr = totalcol-maxcol;
@@ -1592,7 +1592,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					if ( len > longest ) longest = len;
 				}
 				maxcol = 622/(longest+96);
-				totalcol = (storelist.Size()/22)+1;
+				totalcol = int(ceil(storelist.Size()/22.));
 				if ( maxcol >= totalcol ) return res;	// no scrollbar
 				// calculate offset
 				int szr = totalcol-maxcol;
@@ -1645,7 +1645,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 						if ( len > longest ) longest = len;
 					}
 					maxcol = 622/(longest+24);
-					totalcol = (invlist.Size()/22)+1;
+					totalcol = int(ceil(invlist.Size()/22.));
 					if ( maxcol >= totalcol ) return res;	// no scrollbar
 					// calculate offset
 					int szr = totalcol-maxcol;
@@ -2879,7 +2879,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( len > longest ) longest = len;
 			}
 			maxcol = 622/(longest+24);
-			totalcol = (invlist.Size()/22)+1;
+			totalcol = int(ceil(invlist.Size()/22.));
 			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 			for ( int i=ofs; i<invlist.Size(); i++ )
 			{
@@ -2938,7 +2938,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( len > longest ) longest = len;
 			}
 			maxcol = 622/(longest+24);
-			totalcol = (invlist.Size()/22)+1;
+			totalcol = int(ceil(invlist.Size()/22.));
 			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 			for ( int i=0; i<invlist.Size(); i++ )
 			{
@@ -3067,7 +3067,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( len > longest ) longest = len;
 			}
 			maxcol = 622/(longest+96);
-			totalcol = (storelist.Size()/22)+1;
+			totalcol = int(ceil(storelist.Size()/22.));
 			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
 			int cols = 1;
 			for ( int i=ofs; i<storelist.Size(); i++ )

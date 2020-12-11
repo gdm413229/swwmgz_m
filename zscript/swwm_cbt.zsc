@@ -812,9 +812,8 @@ Class Wallbuster : SWWMWeapon
 	Array<Class<Ammo> > reloadqueue;
 	transient bool waitreload;
 	int whichspin;
-	transient CVar cbtmuffler, timeme;
-	bool timing;
-	int reloadtime[2], rnum;
+	transient CVar cbtmuffler;
+	int rnum;
 	transient bool cancelreload;
 
 	transient ui TextureID WeaponBox, AmmoIcon[4], LoadIcon[4], UsedIcon[4], EmptyIcon;
@@ -1617,19 +1616,6 @@ Class Wallbuster : SWWMWeapon
 			invoker.rotation[invoker.rotation[5]]--;
 		A_StartSound("wallbuster/load",CHAN_WEAPON,CHANF_OVERLAP);
 	}
-	action void A_StartReloadTiming()
-	{
-		invoker.timing = true;
-		invoker.reloadtime[0] = level.time;
-	}
-	action void A_StopReloadTiming()
-	{
-		invoker.timing = false;
-		invoker.reloadtime[1] = level.time;
-		if ( !invoker.timeme ) invoker.timeme = CVar.GetCVar('swwm_cbttime',players[consoleplayer]);
-		if ( (player == players[consoleplayer]) && invoker.timeme.GetBool() )
-			Console.Printf("Reloaded %d barrels in %gs",invoker.rnum,(invoker.reloadtime[1]-invoker.reloadtime[0])/35.);
-	}
 
 	Default
 	{
@@ -1731,11 +1717,7 @@ Class Wallbuster : SWWMWeapon
 		XZW2 A 0;
 		Goto Ready;
 	Reload:
-		XZW2 A 2
-		{
-			A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
-			A_StartReloadTiming();
-		}
+		XZW2 A 2 A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 DEFG 2;
 		XZW4 HIJK 1;
 		XZW4 L 1 A_StartSound("wallbuster/unlock",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1920,7 +1902,6 @@ Class Wallbuster : SWWMWeapon
 		XZW8 Z 1 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW9 ABC 1;
 		XZW9 DEF 2;
-		XZW2 A 0 A_StopReloadTiming();
 		Goto Ready;
 	User1:
 		XZW2 A 2

@@ -42,6 +42,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
 	transient CVar lang, fuzz, pauseme;
 	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	Array<int> tabs;
 	int curtab, oldtab;
 	// for scrolling
 	bool sub;
@@ -128,11 +129,6 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		EasterEgg = TexMan.CheckForTexture("graphics/KBase/Drawing.png",TexMan.Type_MiscPatch);
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
 		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
-		curtab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
-		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
-		if ( (curtab < TAB_MISSION) || (curtab > maxtab) ) curtab = TAB_MISSION;
-		if ( curtab == TAB_LIBRARY ) sel1 = CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).GetInt();
-		else if ( curtab == TAB_STATS ) sel1 = CVar.GetCVar('swwm_laststattab',players[consoleplayer]).GetInt();
 		MenuSound("menu/demoopen");
 		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
@@ -148,7 +144,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		// mission text
-		if ( gameinfo.gametype&GAME_Doom )
+		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
 		{
 			int clus = level.cluster;
 			bool eviternity = SWWMUtility.IsEviternity();
@@ -193,7 +189,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				missionbacklog.Push(xstr);
 			}
 		}
-		else if ( gameinfo.gametype&GAME_Heretic )
+		else if ( (gameinfo.gametype&GAME_Heretic) && SWWMUtility.IsKnownMap() )
 		{
 			missionstr = String.Format("$SWWM_MISSION_HERETIC%d",level.cluster);
 			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
@@ -211,7 +207,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				missionbacklog.Push(xstr);
 			}
 		}
-		else if ( gameinfo.gametype&GAME_Hexen )
+		else if ( (gameinfo.gametype&GAME_Hexen) && SWWMUtility.IsKnownMap() )
 		{
 			missionstr = String.Format("$SWWM_MISSION_HEXEN%d",level.cluster);
 			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
@@ -294,6 +290,32 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			c_minute = 37;
 			c_tz = "EDT";
 		}
+		if ( (missionstr != "$SWWM_MISSION_NONE") || (missionbacklog.Size() > 0) )
+			tabs.Push(TAB_MISSION);
+		tabs.Push(TAB_STATS);
+		tabs.Push(TAB_INVENTORY);
+		tabs.Push(TAB_KEYS);
+		tabs.Push(TAB_LIBRARY);
+		tabs.Push(TAB_STORE);
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || (i == consoleplayer) ) continue;
+			if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+			tabs.Push(TAB_TRADING);
+			break;
+		}
+		let bar = SWWMStatusBar(StatusBar);
+		if ( bar && (bar.FullHistory.Size() > 0) )
+			tabs.Push(TAB_CHAT);
+		int lasttab = CVar.GetCVar('swwm_lasttab',players[consoleplayer]).GetInt();
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			if ( tabs[i] != lasttab ) continue;
+			curtab = i;
+			break;
+		}
+		if ( tabs[curtab] == TAB_LIBRARY ) sel1 = CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).GetInt();
+		else if ( tabs[curtab] == TAB_STATS ) sel1 = CVar.GetCVar('swwm_laststattab',players[consoleplayer]).GetInt();
 	}
 
 	// please don't look at this
@@ -411,7 +433,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			if ( mkey == MKEY_ENTER )
 			{
 				MenuSound("misc/secret");
-				curtab = TAB_SECRET;
+				if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);
+				tabs.Push(TAB_SECRET);
+				curtab = tabs.Size()-1;
 				sel0 = sel1 = sel2 = 0;
 				ofs0 = ofs1 = ofs2 = 0;
 				sub = false;
@@ -430,9 +454,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEUP:
 			MenuSound("menu/demotab");
-			if ( (curtab <= TAB_MISSION) || (curtab > maxtab) ) curtab = maxtab;
+			if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);	// hide this tab
+			if ( curtab <= 0 ) curtab = (tabs.Size()-1);
 			else curtab--;
-			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
+			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(tabs[curtab]);
 			sel0 = sel1 = sel2 = 0;
 			ofs0 = ofs1 = ofs2 = 0;
 			sub = false;
@@ -444,9 +469,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return true;
 		case MKEY_PAGEDOWN:
 			MenuSound("menu/demotab");
-			if ( curtab < maxtab ) curtab++;
-			else curtab = TAB_MISSION;
-			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
+			if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);	// hide this tab
+			if ( curtab < (tabs.Size()-1) ) curtab++;
+			else curtab = 0;
+			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(tabs[curtab]);
 			sel0 = sel1 = sel2 = 0;
 			ofs0 = ofs1 = ofs2 = 0;
 			sub = false;
@@ -457,7 +483,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			playerlist.Clear();
 			return true;
 		case MKEY_DOWN:
-			if ( curtab == TAB_HELP )
+			if ( tabs[curtab] == TAB_HELP )
 			{
 				String str = StringTable.Localize("$SWWM_HELPTXT");
 				if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
@@ -469,7 +495,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					sel0++;
 				}
 			}
-			else if ( curtab == TAB_MISSION )
+			else if ( tabs[curtab] == TAB_MISSION )
 			{
 				String str;
 				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
@@ -482,12 +508,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs0 = ++sel0;
 				}
 			}
-			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
+			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 			}
-			else if ( (curtab == TAB_LIBRARY) && (lorelist.Size() > 1) )
+			else if ( (tabs[curtab] == TAB_LIBRARY) && (lorelist.Size() > 1) )
 			{
 				if ( sub )
 				{
@@ -516,19 +542,19 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					}
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
 				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = 0;
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
 				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = 0;
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
 				if ( !sub && (playerlist.Size() > 1) )
 				{
@@ -544,7 +570,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs1 = ++sel1;
 				}
 			}
-			else if ( curtab == TAB_STATS )
+			else if ( tabs[curtab] == TAB_STATS )
 			{
 				int cnt = 0;
 				if ( sel1 == STAT_MAIN )
@@ -561,22 +587,22 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_UP:
-			if ( (curtab == TAB_HELP) && (sel0 > 0) )
+			if ( (tabs[curtab] == TAB_HELP) && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 			}
-			else if ( (curtab == TAB_MISSION) && (sel0 > 0) )
+			else if ( (tabs[curtab] == TAB_MISSION) && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 			}
-			else if ( (curtab == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
+			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
 			}
-			else if ( (curtab == TAB_LIBRARY) && (lorelist.Size() > 1) )
+			else if ( (tabs[curtab] == TAB_LIBRARY) && (lorelist.Size() > 1) )
 			{
 				if ( sub )
 				{
@@ -600,19 +626,19 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					}
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 				if ( sel0 < 0 ) ofs0 = sel0 = invlist.Size()-1;
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 1) )
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 				if ( sel0 < 0 ) ofs0 = sel0 = storelist.Size()-1;
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
 				if ( !sub && (playerlist.Size() > 1) )
 				{
@@ -628,14 +654,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs1 = --sel1;
 				}
 			}
-			else if ( (curtab == TAB_STATS) && (sel0 > 0) )
+			else if ( (tabs[curtab] == TAB_STATS) && (sel0 > 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 			}
 			return true;
 		case MKEY_RIGHT:
-			if ( (curtab == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			if ( (tabs[curtab] == TAB_MISSION) && (missionbacklog.Size() > 0) )
 			{
 				if ( sel1 < missionbacklog.Size() )
 				{
@@ -644,21 +670,21 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					MenuSound("menu/demoscroll");
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) )
 			{
 				int oldsel = sel0;
 				ofs0 = sel0 += 22;
 				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = invlist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) )
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 21) )
 			{
 				int oldsel = sel0;
 				ofs0 = sel0 += 22;
 				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = storelist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
-			else if ( curtab == TAB_LIBRARY )
+			else if ( tabs[curtab] == TAB_LIBRARY )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
@@ -667,14 +693,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel1 > LORE_LORE ) ofs1 = sel1 = LORE_ITEM;
 				CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).SetInt(sel1);
 			}
-			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
+			else if ( (tabs[curtab] == TAB_TRADING) && !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
 			{
 				int oldsel = sel0;
 				ofs0 = sel0 += 22;
 				if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
 				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
 			}
-			else if ( curtab == TAB_STATS )
+			else if ( tabs[curtab] == TAB_STATS )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
@@ -684,7 +710,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_LEFT:
-			if ( (curtab == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			if ( (tabs[curtab] == TAB_MISSION) && (missionbacklog.Size() > 0) )
 			{
 				if ( sel1 > 0 )
 				{
@@ -693,17 +719,17 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					MenuSound("menu/demoscroll");
 				}
 			}
-			else if ( ((curtab == TAB_INVENTORY) || (curtab == TAB_KEYS) || ((curtab == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1))) && (invlist.Size() > 21) && (sel0-22 >= 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 -= 22;
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 21) && (sel0-22 >= 0) )
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 21) && (sel0-22 >= 0) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 -= 22;
 			}
-			else if ( curtab == TAB_LIBRARY )
+			else if ( tabs[curtab] == TAB_LIBRARY )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
@@ -712,12 +738,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel1 < LORE_ITEM ) ofs1 = sel1 = LORE_LORE;
 				CVar.GetCVar('swwm_lastloretab',players[consoleplayer]).SetInt(sel1);
 			}
-			else if ( (curtab == TAB_TRADING) && !sub && (playerlist.Size() > 21) && (sel0-22 >= 0) ) // lol is this ever going to happen
+			else if ( (tabs[curtab] == TAB_TRADING) && !sub && (playerlist.Size() > 21) && (sel0-22 >= 0) ) // lol is this ever going to happen
 			{
 				ofs0 = sel0 -= 22;
 				MenuSound("menu/demoscroll");
 			}
-			else if ( curtab == TAB_STATS )
+			else if ( tabs[curtab] == TAB_STATS )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = sel0 = 0;
@@ -727,7 +753,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_ENTER:
-			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
+			if ( (tabs[curtab] == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
 			{
 				// can't use this
 				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectible')
@@ -742,7 +768,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				checklist.Push(t);
 				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
 			}
-			else if ( (curtab == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
 			{
 				let itm = GetDefaultByType(storelist[sel0]);
 				let amt = storeunits[sel0];
@@ -777,7 +803,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( (camt+amt) >= max ) ofs1 = sel0 = max(0,sel0-1);
 				MenuSound("menu/buyinv");
 			}
-			else if ( curtab == TAB_LIBRARY )
+			else if ( tabs[curtab] == TAB_LIBRARY )
 			{
 				if ( sub )
 				{
@@ -794,7 +820,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs2 = sel2 = 0;
 				}
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
 				if ( !sub && (playerlist.Size() > 0) )
 				{
@@ -824,7 +850,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			return true;
 		case MKEY_CLEAR:
-			if ( (curtab == TAB_INVENTORY) && (invlist.Size() > 0) )
+			if ( (tabs[curtab] == TAB_INVENTORY) && (invlist.Size() > 0) )
 			{
 				let t = new("MenuTransaction");
 				t.uid = GenTUID();
@@ -833,12 +859,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				checklist.Push(t);
 				EventHandler.SendNetworkEvent(String.Format("swwmdropitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
 			}
-			else if ( (curtab == TAB_LIBRARY) && sub )
+			else if ( (tabs[curtab] == TAB_LIBRARY) && sub )
 			{
 				MenuSound("menu/democlose");
 				sub = false;
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
 				if ( !sub )
 				{
@@ -890,16 +916,20 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
 				};
 				xx = 0;
-				int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
-				for ( int i=TAB_MISSION; i<=maxtab; i++ )
+				for ( int i=0; i<tabs.Size(); i++ )
 				{
-					len = fnt.StringWidth(tabnames[i])+6;
+					len = fnt.StringWidth(tabnames[tabs[i]])+6;
 					if ( (mpos.x >= xx) && (mpos.x < xx+len) )
 					{
 						if ( curtab == i ) break;
 						MenuSound("menu/demotab");
+						if ( tabs[curtab] >= TAB_SECRET )
+						{
+							tabs.Delete(curtab);
+							if ( curtab < i ) i--;	// account for shortening
+						}
 						curtab = i;
-						CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
+						CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(tabs[curtab]);
 						sel0 = sel1 = sel2 = 0;
 						ofs0 = ofs1 = ofs2 = 0;
 						sub = false;
@@ -913,7 +943,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					xx += len;
 				}
 			}
-			else if ( curtab == TAB_MISSION )
+			else if ( tabs[curtab] == TAB_MISSION )
 			{
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 )
@@ -950,7 +980,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( curtab == TAB_INVENTORY )
+			else if ( tabs[curtab] == TAB_INVENTORY )
 			{
 				// check what item we clicked
 				if ( mpos.y < 377 )
@@ -983,7 +1013,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 							sel0 = i;
 							ofs0 = (sel0/22)*22;
 							// drop on right click in inventory tab
-							if ( (curtab == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
+							if ( (tabs[curtab] == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
 							else if ( !isrclick ) MenuEvent(MKEY_ENTER,false);
 							return res;
 						}
@@ -1024,7 +1054,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( (curtab == TAB_TRADING) && sub && (sel0 != -1) )
+			else if ( (tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1) )
 			{
 				// check what item we clicked
 				if ( mpos.y < 377 )
@@ -1057,7 +1087,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 							sel1 = i;
 							ofs1 = (sel1/22)*22;
 							// drop on right click in inventory tab
-							if ( (curtab == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
+							if ( (tabs[curtab] == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
 							else if ( !isrclick ) MenuEvent(MKEY_ENTER,false);
 							return res;
 						}
@@ -1098,7 +1128,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( (curtab == TAB_KEYS) && !isrclick )
+			else if ( (tabs[curtab] == TAB_KEYS) && !isrclick )
 			{
 				// check what item we clicked
 				if ( mpos.y < 377 )
@@ -1168,7 +1198,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( (curtab == TAB_STORE) && !isrclick )
+			else if ( (tabs[curtab] == TAB_STORE) && !isrclick )
 			{
 				// check what item we clicked
 				if ( mpos.y < 377 )
@@ -1243,7 +1273,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( (curtab == TAB_LIBRARY) && !isrclick )
+			else if ( (tabs[curtab] == TAB_LIBRARY) && !isrclick )
 			{
 				double midp = (lang.GetString()~=="jp")?206:126;
 				if ( mpos.x < midp )
@@ -1308,11 +1338,11 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 3;
 				}
 			}
-			else if ( (curtab == TAB_TRADING) && isrclick )
+			else if ( (tabs[curtab] == TAB_TRADING) && isrclick )
 			{
 				MenuEvent(MKEY_CLEAR,false);
 			}
-			else if ( (curtab == TAB_TRADING) && !isrclick )
+			else if ( (tabs[curtab] == TAB_TRADING) && !isrclick )
 			{
 				if ( !sub )
 				{
@@ -1393,7 +1423,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					drag = 1;
 				}
 			}
-			else if ( (curtab == TAB_CHAT) && !isrclick )
+			else if ( (tabs[curtab] == TAB_CHAT) && !isrclick )
 			{
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
@@ -1406,7 +1436,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				ofs0 = sel0 = step;
 				drag = 1;
 			}
-			else if ( (curtab == TAB_HELP) && !isrclick )
+			else if ( (tabs[curtab] == TAB_HELP) && !isrclick )
 			{
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
@@ -1424,7 +1454,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				ofs0 = sel0 = step;
 				drag = 1;
 			}
-			else if ( (curtab == TAB_STATS) && !isrclick )
+			else if ( (tabs[curtab] == TAB_STATS) && !isrclick )
 			{
 				double midp = (lang.GetString()~=="jp")?206:126;
 				if ( mpos.x < midp )
@@ -1467,7 +1497,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		}
 		else if ( (type == MOUSE_Move) && drag )	// scroll dragging
 		{
-			if ( curtab == TAB_MISSION )
+			if ( tabs[curtab] == TAB_MISSION )
 			{
 				String str;
 				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
@@ -1481,7 +1511,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
 			}
-			else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
+			else if ( (tabs[curtab] == TAB_INVENTORY) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) )
 			{
 				// check that scrollbar is present
 				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
@@ -1506,7 +1536,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
 				ofs0 = step*22;
 			}
-			else if ( curtab == TAB_KEYS )
+			else if ( tabs[curtab] == TAB_KEYS )
 			{
 				// check that scrollbar is present
 				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
@@ -1531,7 +1561,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
 				ofs0 = step*22;
 			}
-			else if ( curtab == TAB_STORE )
+			else if ( tabs[curtab] == TAB_STORE )
 			{
 				// check that scrollbar is present
 				if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
@@ -1558,7 +1588,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
 				ofs0 = step*22;
 			}
-			else if ( curtab == TAB_LIBRARY )
+			else if ( tabs[curtab] == TAB_LIBRARY )
 			{
 				if ( drag == 1 )
 				{
@@ -1587,7 +1617,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs2 = sel2 = step;
 				}
 			}
-			else if ( curtab == TAB_TRADING )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
 				if ( !sub )
 				{
@@ -1621,7 +1651,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 					ofs0 = sel0 = step;
 				}
 			}
-			else if ( curtab == TAB_CHAT )
+			else if ( tabs[curtab] == TAB_CHAT )
 			{
 				let bar = SWWMStatusBar(StatusBar);
 				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
@@ -1631,7 +1661,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
 			}
-			else if ( curtab == TAB_HELP )
+			else if ( tabs[curtab] == TAB_HELP )
 			{
 				int k1, k2;
 				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
@@ -1646,7 +1676,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
 			}
-			else if ( curtab == TAB_STATS )
+			else if ( tabs[curtab] == TAB_STATS )
 			{
 				int cnt = 0;
 				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
@@ -2042,21 +2072,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		// forcibly tick hud (mainly so interpolators can still update in the background)
 		if ( !multiplayer && (menuactive == Menu.On) )
 			StatusBar.Tick();
-		if ( !multiplayer && ((curtab == TAB_TRADING) || (curtab == TAB_CHAT)) )
-		{
-			MenuSound("menu/demotab");
-			curtab = TAB_MISSION;
-			CVar.GetCVar('swwm_lasttab',players[consoleplayer]).SetInt(curtab);
-			sel0 = sel1 = sel2 = 0;
-			ofs0 = ofs1 = ofs2 = 0;
-			sub = false;
-			invlist.Clear();
-			lorelist.Clear();
-			storelist.Clear();
-			storeunits.Clear();
-			playerlist.Clear();
-		}
-		if ( curtab == TAB_INVENTORY )
+		if ( tabs[curtab] == TAB_INVENTORY )
 		{
 			invlist.Clear();
 			// alphabetically sorted inventory
@@ -2083,12 +2099,12 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// crop selection
 			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
 		}
-		else if ( (curtab == TAB_STATS) && (sel1 == STAT_KILLS) )
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_KILLS) )
 		{
 			sorted_mstats.Copy(stats.mstats);
 			qsort_mstats(sorted_mstats,0,sorted_mstats.Size()-1);
 		}
-		else if ( curtab == TAB_KEYS )
+		else if ( tabs[curtab] == TAB_KEYS )
 		{
 			invlist.Clear();
 			// keys sorted by their index
@@ -2110,7 +2126,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// crop selection
 			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
 		}
-		else if ( curtab == TAB_STORE )
+		else if ( tabs[curtab] == TAB_STORE )
 		{
 			storelist.Clear();
 			storeunits.Clear();
@@ -2225,7 +2241,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			// crop selection
 			if ( sel0 >= storelist.Size() ) sel0 = max(0,storelist.Size()-1);
 		}
-		else if ( curtab == TAB_LIBRARY )
+		else if ( tabs[curtab] == TAB_LIBRARY )
 		{
 			// remember last position/size
 			SWWMLore oldone = null;
@@ -2259,13 +2275,14 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			oldloresiz = lorelib.ent.Size();
 		}
-		else if ( curtab == TAB_TRADING )
+		else if ( tabs[curtab] == TAB_TRADING )
 		{
 			// build player list
 			playerlist.Clear();
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
-				if ( !playeringame[i] || (i==consoleplayer) ) continue;
+				if ( !playeringame[i] || (i == consoleplayer) ) continue;
+				if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
 				playerlist.Push(i);
 			}
 			// build inventory list if open
@@ -2297,7 +2314,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( sel1 >= invlist.Size() ) sel1 = max(0,invlist.Size()-1);
 			}
 		}
-		else if ( (curtab == TAB_STATS) && (sel1 == STAT_MAIN) )
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_MAIN) )
 		{
 			statlist.Clear();
 			// wish I could use macros for this
@@ -2456,12 +2473,21 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		case UIEvent.Type_KeyDown:
 			if ( ev.keychar == UiEvent.Key_F1 )
 			{
-				if ( curtab == TAB_HELP )
+				if ( tabs[curtab] == TAB_HELP )
+				{
+					tabs.Delete(curtab);
 					curtab = oldtab;
+				}
 				else
 				{
+					if ( tabs[curtab] >= TAB_SECRET )
+					{
+						tabs.Delete(curtab);
+						curtab--;
+					}
 					oldtab = curtab;
-					curtab = TAB_HELP;
+					tabs.Push(TAB_HELP);
+					curtab = tabs.Size()-1;
 				}
 				sel0 = sel1 = sel2 = 0;
 				ofs0 = ofs1 = ofs2 = 0;
@@ -2497,7 +2523,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			}
 			break;
 		case UIEvent.Type_WheelDown:
-			if ( (curtab == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			if ( (tabs[curtab] == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
 			{
 				// special handling, need to check which side is being scrolled
 				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
@@ -2514,7 +2540,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			return MenuEvent(MKEY_DOWN,false);
 			break;
 		case UIEvent.Type_WheelUp:
-			if ( (curtab == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			if ( (tabs[curtab] == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
 			{
 				// special handling, need to check which side is being scrolled
 				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
@@ -2595,13 +2621,10 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		{
 			"$SWWM_STATTAB0", "$SWWM_STATTAB1", "$SWWM_STATTAB2", "$SWWM_STATTAB3"
 		};
-		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
-		int mx = maxtab;
-		if ( curtab > TAB_CHAT ) mx++;
-		for ( int i=0; i<=mx; i++ )
+		for ( int i=0; i<tabs.Size(); i++ )
 		{
-			str = StringTable.Localize(tabnames[(i>maxtab)?curtab:i]);
-			Screen.DrawText(fnt,((i>maxtab)||(curtab==i))?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			str = StringTable.Localize(tabnames[tabs[i]]);
+			Screen.DrawText(fnt,(curtab==i)?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += fnt.StringWidth(str)+2;
 			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += 4;
@@ -2623,7 +2646,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		xx = 637-fnt.StringWidth(str);
 		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw contents
-		if ( curtab == TAB_MISSION )
+		if ( tabs[curtab] == TAB_MISSION )
 		{
 			String str;
 			if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
@@ -2661,7 +2684,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+637)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_STATS )
+		else if ( tabs[curtab] == TAB_STATS )
 		{
 			// categories
 			xx = 9;
@@ -2820,7 +2843,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((631-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( (curtab == TAB_INVENTORY) || ((curtab == TAB_TRADING) && sub && (sel0 != -1)) )
+		else if ( (tabs[curtab] == TAB_INVENTORY) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) )
 		{
 			if ( invlist.Size() <= 0 )
 			{
@@ -2880,7 +2903,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_KEYS )
+		else if ( tabs[curtab] == TAB_KEYS )
 		{
 			if ( invlist.Size() <= 0 )
 			{
@@ -2929,7 +2952,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_LIBRARY )
+		else if ( tabs[curtab] == TAB_LIBRARY )
 		{
 			xx = 3;
 			yy = 14;
@@ -3008,7 +3031,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_STORE )
+		else if ( tabs[curtab] == TAB_STORE )
 		{
 			if ( storelist.Size() <= 0 )
 			{
@@ -3087,7 +3110,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_TRADING )
+		else if ( tabs[curtab] == TAB_TRADING )
 		{
 			if ( !sub )
 			{
@@ -3164,7 +3187,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				}
 			}
 		}
-		else if ( curtab == TAB_CHAT )
+		else if ( tabs[curtab] == TAB_CHAT )
 		{
 			let bar = SWWMStatusBar(StatusBar);
 			if ( !bar || (bar.FullHistory.Size() <= 0) )
@@ -3202,13 +3225,13 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 		}
-		else if ( curtab == TAB_SECRET )
+		else if ( tabs[curtab] == TAB_SECRET )
 		{
 			Screen.DrawTexture(EasterEgg,false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			str = StringTable.Localize("$SWWM_TODEMO");
 			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
-		else if ( curtab == TAB_HELP )
+		else if ( tabs[curtab] == TAB_HELP )
 		{
 			// help tab
 			int k1, k2;

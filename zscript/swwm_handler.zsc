@@ -1243,6 +1243,7 @@ Class SWWMHandler : EventHandler
 			SWWMStats s;
 			while ( s = SWWMStats(ti.Next()) )
 			{
+				if ( !SWWMUtility.IsKnownMap() ) break;
 				if ( s.myplayer != players[consoleplayer] ) continue;
 				int clust = level.cluster;
 				if ( SWWMUtility.IsEviternity() )

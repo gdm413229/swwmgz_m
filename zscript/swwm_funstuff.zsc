@@ -4,11 +4,10 @@ Class SWWMCollectible : Inventory abstract
 {
 	Mixin SWWMUseToPickup;
 
-	int avail, gesture;
+	int avail;
 	bool propagated;
 
 	Property Availability : avail;
-	Property PickupGesture : gesture;
 
 	// minimum gametype requirements
 	enum EAvailability
@@ -29,9 +28,10 @@ Class SWWMCollectible : Inventory abstract
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.AUTOACTIVATE;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-		Radius 10;
+		Radius 8;
 		Height 24;
 	}
 	override void PostBeginPlay()
@@ -53,6 +53,20 @@ Class SWWMCollectible : Inventory abstract
 			return StringTable.Localize(PickupMsg)..String.Format(" \cj(\cg¥\cf%d\cj)\c-",Stamina);
 		return Super.PickupMessage();
 	}
+	override bool Use( bool pickup )
+	{
+		if ( Owner.player && !propagated )
+		{
+			if ( pickup && CVar.GetCVar('swwm_collectanim',Owner.player) )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,self,true);
+			else if ( !pickup )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,self);
+		}
+		// clean up the flag
+		propagated = false;
+		return false;
+	}
+
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
@@ -75,16 +89,51 @@ Class SWWMCollectible : Inventory abstract
 			if ( !c.CallTryPickup(players[i].mo) )
 				c.Destroy();
 		}
-		// pickup gesture (has to be -100 or under, which is the range reserved for these)
-		if ( !other.player || !CVar.GetCVar('swwm_collectanim',other.player).GetBool() || (gesture > -100) )
-			return;
-		SWWMGesture.SetGesture(PlayerPawn(other),gesture);
 	}
+
 	States
 	{
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	}
+
+	// helper
+	action void A_FinishGesture()
+	{
+		let gest = SWWMGesture(FindInventory("SWWMGesture"));
+		if ( !gest )
+		{
+			ThrowAbortException("Call to A_FinishGesture() without owned SWWMGesture");
+			return;
+		}
+		if ( gest.sstate.Size() > 0 )
+		{
+			gest.whichgesture = GS_Null;
+			gest.whichstate = gest.sstate[0];
+			gest.whichcaller = gest.scaller[0];
+			// push back
+			gest.sstate.Delete(0);
+			gest.scaller.Delete(0);
+			let psp = player.FindPSprite(PSP_WEAPON);
+			psp.caller = gest;
+			psp.SetState(gest.ResolveState("Ready"));
+			return;
+		}
+		if ( gest.queued )
+		{
+			gest.whichstate = null;
+			gest.whichgesture = gest.nextgesture;
+			gest.queued = false;
+			let psp = player.FindPSprite(PSP_WEAPON);
+			psp.caller = gest;
+			psp.SetState(gest.ResolveState("Ready"));
+			return;
+		}
+		player.PendingWeapon = gest.formerweapon;
+		let psp = player.FindPSprite(PSP_WEAPON);
+		psp.caller = gest;
+		psp.SetState(gest.ResolveState("Deselect"));
 	}
 }
 
@@ -180,32 +229,33 @@ Class FroggyChair : Actor
 // The collectibles
 Class MothPlushy : SWWMCollectible
 {
+	// TODO post-release :: 1/64 chance after 5th use, set countdown to 175 to activate contract
+	int usetimes;
 	int cdown;
+	bool mashiro; // contract with white lady is active
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( cdown > 0 )
+		{
+			if ( Owner && Owner.CheckLocalView() )
+			{
+				if ( cdown == 105 )
+					A_StartSound("mashiro/appear",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
+				else if ( cdown == 35 )
+					Console.MidPrint(newsmallfont,"$D_MASHIRO");
+			}
+			cdown--;
+			if ( cdown <= 0 ) mashiro = true;
+		}
+	}
 
 	Default
 	{
 		Tag "$T_MOTHPLUSH";
 		Inventory.PickupMessage "$T_MOTHPLUSH";
 		Stamina 4000;
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		if ( !propagated )
-			cdown = 175;
-	}
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( cdown <= 0 ) return;
-		if ( Owner && Owner.CheckLocalView() )
-		{
-			if ( cdown == 105 )
-				A_StartSound("mashiro/appear",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
-			if ( cdown == 35 )
-				Console.MidPrint(newsmallfont,"$D_MASHIRO");
-		}
-		cdown--;
 	}
 }
 Class AkariProject : SWWMCollectible
@@ -215,7 +265,8 @@ Class AkariProject : SWWMCollectible
 		Tag "$T_AKARIPROJECT";
 		Inventory.PickupMessage "$T_AKARIPROJECT";
 		Stamina 2000;
-		Radius 6;
+		Radius 4;
+		Height 22;
 	}
 }
 Class LoveSignalsCD : SWWMCollectible
@@ -234,7 +285,8 @@ Class NutatcoBar : SWWMCollectible
 		Tag "$T_NUTATCO";
 		Inventory.PickupMessage "$T_NUTATCO";
 		Stamina 200;
-		Radius 4;
+		Radius 3;
+		Height 22;
 	}
 }
 Class FrispyCorn : SWWMCollectible
@@ -244,7 +296,8 @@ Class FrispyCorn : SWWMCollectible
 		Tag "$T_FRISPYCORN";
 		Inventory.PickupMessage "$T_FRISPYCORN";
 		Stamina 400;
-		Radius 8;
+		Radius 5;
+		Height 23;
 	}
 }
 // Heretic
@@ -256,36 +309,18 @@ Class DemoPlush : SWWMCollectible
 		Inventory.PickupMessage "$T_DEMOPLUSH";
 		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 6000;
-		Radius 10;
+		Radius 12;
+		Height 36;
 	}
 }
 Class SayaBean : SWWMCollectible
 {
-	int cdown;
-
 	Default
 	{
 		Tag "$T_SAYABEAN";
 		Inventory.PickupMessage "$T_SAYABEAN";
 		SWWMCollectible.Availability AVAIL_Heretic;
 		Stamina 5000;
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		if ( !propagated )
-			cdown = 70;
-	}
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( cdown <= 0 ) return;
-		if ( Owner && Owner.CheckLocalView() )
-		{
-			if ( cdown == 35 )
-				A_StartSound("saya/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
-		}
-		cdown--;
 	}
 }
 // Hexen
@@ -297,7 +332,8 @@ Class KirinCummies : SWWMCollectible
 		Inventory.PickupMessage "$T_PEACH";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 300;
-		Radius 4;
+		Radius 3;
+		Height 21;
 	}
 }
 Class MilkBreads : SWWMCollectible
@@ -308,7 +344,8 @@ Class MilkBreads : SWWMCollectible
 		Inventory.PickupMessage "$T_MILKBREAD";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 900;
-		Radius 6;
+		Radius 4;
+		Height 21;
 	}
 }
 Class KirinManga : SWWMCollectible
@@ -320,36 +357,19 @@ Class KirinManga : SWWMCollectible
 		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 1600;
 		Radius 4;
+		Height 22;
 	}
 }
 Class KirinPlush : SWWMCollectible
 {
-	int cdown;
-
 	Default
 	{
 		Tag "$T_KIRINPLUSH";
 		Inventory.PickupMessage "$T_KIRINPLUSH";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		Stamina 8000;
-		Radius 12;
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		if ( !propagated )
-			cdown = 70;
-	}
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( cdown <= 0 ) return;
-		if ( Owner && Owner.CheckLocalView() )
-		{
-			if ( cdown == 35 )
-				A_StartSound("kirin/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
-		}
-		cdown--;
+		Radius 14;
+		Height 37;
 	}
 }
 
@@ -704,9 +724,9 @@ Class Chancebox : Actor
 							break;
 						}
 						if ( cz < bceil ) bceil = cz;
-						if ( cz-fz < 32 ) continue;	// too short
+						if ( cz-fz < 56 ) continue;	// too short
 						bool blockedff = false;
-						BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,fz,32,256,false);
+						BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,fz,56,256,false);
 						while ( bt.Next() )
 						{
 							if ( !bt.Thing ) continue;
@@ -722,10 +742,10 @@ Class Chancebox : Actor
 						spots.Push(sp);
 					}
 					// spawn at the real floor
-					if ( bceil-testpos.z < 32 ) continue;	// too short
+					if ( bceil-testpos.z < 56 ) continue;	// too short
 					// don't spawn on sky or hurtfloors if there are 3D floors
 					if ( (nffloor > 0) && ((s.GetTexture(0) == skyflatnum) || (s.damageamount > 0)) ) continue;
-					BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,testpos.z,32,256,false);
+					BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,testpos.z,56,256,false);
 					while ( bt.Next() )
 					{
 						if ( !bt.Thing ) continue;

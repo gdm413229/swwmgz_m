@@ -2435,8 +2435,21 @@ Class SWWMHandler : EventHandler
 		{
 			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
 			let mo = players[e.player].mo;
-			if ( e.Args[0] < 0 ) return;	// special gestures can't be manually started
-			SWWMGesture.SetGesture(mo,e.Args[0]);
+			switch( e.Args[0] )
+			{
+			case 0:
+				SWWMGesture.SetGesture(mo,GS_Wave);
+				break;
+			case 1:
+				SWWMGesture.SetGesture(mo,GS_ThumbsUp);
+				break;
+			case 2:
+				SWWMGesture.SetGesture(mo,GS_Victory);
+				break;
+			case 3:
+				SWWMGesture.SetGesture(mo,GS_BlowKiss);
+				break;
+			}
 		}
 		else if ( e.Name ~== "swwmdebugdumprng" )
 		{

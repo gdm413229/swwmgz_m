@@ -66,7 +66,7 @@ Class Demolitionist : PlayerPawn
 	Default
 	{
 		Speed 1;
-		Radius 16;
+		Radius 12;	// should be 9 in theory, but it'd be too thin
 		Height 56;
 		Mass 500;
 		PainChance 255;
@@ -212,6 +212,7 @@ Class Demolitionist : PlayerPawn
 				{
 					let item = Inventory(Spawn(AllActorClasses[i]));
 					SWWMHandler.KeyTagFix(item);
+					if ( item is 'SWWMKey' ) SWWMKey(item).propagated = true;	// no anim
 					if ( !item.CallTryPickup(self) ) item.Destroy();
 				}
 			}
@@ -286,6 +287,7 @@ Class Demolitionist : PlayerPawn
 				// check that we can collect it in this IWAD
 				if ( !(gameinfo.gametype&def.avail) ) continue;
 				let item = Inventory(Spawn(AllActorClasses[i]));
+				SWWMCollectible(item).propagated = true;	// no score or anims
 				if ( !item.CallTryPickup(self) ) item.Destroy();
 			}
 		}
@@ -552,7 +554,6 @@ Class Demolitionist : PlayerPawn
 			selflight.target = self;
 			selflight.Tick();
 		}
-		if ( player.mo != self ) return;	// no voodoo dolls past this point
 		// strife thing
 		if ( mystats.oldlogtext == "" )
 			mystats.oldlogtext = player.logtext;
@@ -1836,7 +1837,10 @@ Class Demolitionist : PlayerPawn
 				if ( !playeringame[i] || !players[i].mo || (i == PlayerNumber()) )
 					continue;
 				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = true;
-				players[i].mo.GiveInventory(item.GetClass(),1);
+				let tkey = Inventory(Spawn(item.GetClass()));
+				SWWMHandler.KeyTagFix(tkey);
+				if ( tkey is 'SWWMKey' ) SWWMKey(tkey).propagated = true;	// no anim
+				if ( !tkey.CallTryPickup(self) ) tkey.Destroy();
 				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = false;
 			}
 		}
@@ -2673,7 +2677,7 @@ Class DemolitionistSelfLight : Actor
 		}
 		bool curactive = activelight();
 		if ( curactive && !oldactive )
-			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(12,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
 		else if ( !curactive && oldactive )
 			target.A_RemoveLight('DemoSelfLight');
 		oldactive = curactive;
@@ -3090,63 +3094,13 @@ Class HHitList
 
 enum EGestureSlot
 {
-	// keys
-	GS_RedKeycard = -250,
-	GS_BlueKeycard,
-	GS_YellowKeycard,
-	GS_RedSkull,
-	GS_BlueSkull,
-	GS_YellowSkull,
-	GS_GreenKeycard,
-	GS_SilverKeycard,
-	GS_OrangeKeycard,
-	GS_YellowKey,
-	GS_GreenKey,
-	GS_BlueKey,
-	GS_RedKey,
-	// key re-use
-	GS_RedKeycard2 = -200,
-	GS_BlueKeycard2,
-	GS_YellowKeycard2,
-	GS_RedSkull2,
-	GS_BlueSkull2,
-	GS_YellowSkull2,
-	GS_GreenKeycard2,
-	GS_SilverKeycard2,
-	GS_OrangeKeycard2,
-	GS_YellowKey2,
-	GS_GreenKey2,
-	GS_BlueKey2,
-	GS_RedKey2,
-	// collectibles
-	GS_MashiroPlush = -150,
-	GS_AkariProject,
-	GS_LoveSignals,
-	GS_NutatcoBar,
-	GS_FrispyCorn,
-	GS_DemoPlush,
-	GS_SayaBean,
-	GS_KirinCummies,
-	GS_MilkBreads,
-	GS_KirinManga,
-	GS_KirinPlush,
-	// collectible re-use
-	GS_MashiroPlush2 = -100,
-	GS_AkariProject2,
-	GS_LoveSignals2,
-	GS_NutatcoBar2,
-	GS_FrispyCorn2,
-	GS_DemoPlush2,
-	GS_SayaBean2,
-	GS_KirinCummies2,
-	GS_MilkBreads2,
-	GS_KirinManga2,
-	GS_KirinPlush2,
 	// special use
 	GS_Headpat = -50,
 	GS_Grenade,
+	// no gesture
+	GS_Null = 0,
 	// general gestures
-	GS_Wave = 0,
+	GS_Wave = 1,
 	GS_ThumbsUp,
 	GS_Victory,
 	GS_BlowKiss
@@ -3158,7 +3112,10 @@ Class SWWMGesture : SWWMWeapon
 	Weapon formerweapon;
 	int whichgesture, nextgesture;
 	bool deaded, queued;
-	Array<int> squeue;
+	State whichstate;
+	Actor whichcaller;
+	Array<State> sstate;
+	Array<Actor> scaller;
 	int gonect;
 	HeadpatTracker pats;	// for headpat gesture, our current tracker
 
@@ -3174,35 +3131,32 @@ Class SWWMGesture : SWWMWeapon
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner && Owner.player && (Owner.player.ReadyWeapon == self) && (Owner.Health <= 0) )
-		{
-			let psp = Owner.player.FindPSprite(PSP_WEAPON);
-			if ( psp && (psp.CurState != ResolveState("Deselect")) )
-				Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
-		}
+		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) )
+			return;
+		let psp = Owner.player.FindPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		if ( (Owner.Health <= 0) && (psp.CurState != ResolveState("Deselect")) )
+			Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
 	}
 
-	static SWWMGesture SetGesture( PlayerPawn mo, int which = 0 )
+	static SWWMGesture SetGesture( PlayerPawn mo, int which )
 	{
 		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
 		if ( mo.Health <= 0 ) return null;	// dead
 		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
-		if ( mo.player.PendingWeapon is 'SWWMGesture' ) return null;	// already initiating a gesture
-		if ( mo.player.ReadyWeapon is 'SWWMGesture' )
+		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
+		if ( (mo.player.PendingWeapon == w) || (mo.player.ReadyWeapon == w) )
 		{
 			// already gesturing
 			// just queue another one
-			let g = SWWMGesture(mo.player.ReadyWeapon);
-			if ( which < -50 ) g.squeue.Push(which); // collectable gestures have a dedicated array
-			if ( which < 0 ) return null; // special gestures can't be queued
+			if ( which <= 0 ) return null; // these gestures can't be queued
 			else
 			{
-				g.nextgesture = which;
-				g.queued = true;
+				w.nextgesture = which;
+				w.queued = true;
 			}
 			return null;
 		}
-		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
 		if ( !w )
 		{
 			w = SWWMGesture(Spawn("SWWMGesture"));
@@ -3210,7 +3164,44 @@ Class SWWMGesture : SWWMWeapon
 		}
 		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
 		else w.formerweapon = mo.player.ReadyWeapon;
+		w.whichstate = null;
 		w.whichgesture = which;
+		mo.player.PendingWeapon = w;
+		return w;
+	}
+
+	// "special" gestures go to a specified state, which may be external
+	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Actor a, bool pickup = false )
+	{
+		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
+		if ( mo.Health <= 0 ) return null;	// dead
+		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
+		State which = null;
+		if ( pickup ) which = a.FindState("PickupGesture");
+		else which = a.FindState("UseGesture");
+		if ( !which ) return null;	// state not found
+		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
+		if ( (mo.player.PendingWeapon == w) || (mo.player.ReadyWeapon == w) )
+		{
+			// already gesturing
+			// queue if unique
+			if ( w.sstate.Find(which) != w.sstate.Size() )
+			{
+				w.sstate.Push(which);
+				w.scaller.Push(a);
+			}
+			return null;
+		}
+		if ( !w )
+		{
+			w = SWWMGesture(Spawn("SWWMGesture"));
+			mo.AddInventory(w);
+		}
+		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
+		else w.formerweapon = mo.player.ReadyWeapon;
+		w.whichgesture = GS_Null;
+		w.whichstate = which;
+		w.whichcaller = a;
 		mo.player.PendingWeapon = w;
 		return w;
 	}
@@ -3226,15 +3217,20 @@ Class SWWMGesture : SWWMWeapon
 
 	action void A_FinishGesture()
 	{
-		if ( invoker.squeue.Size() > 0 )
+		if ( invoker.sstate.Size() > 0 )
 		{
-			invoker.whichgesture = invoker.squeue[0];
-			invoker.squeue.Delete(0); // push back
+			invoker.whichgesture = GS_Null;
+			invoker.whichstate = invoker.sstate[0];
+			invoker.whichcaller = invoker.scaller[0];
+			// push back
+			invoker.sstate.Delete(0);
+			invoker.scaller.Delete(0);
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
 			return;
 		}
 		if ( invoker.queued )
 		{
+			invoker.whichstate = null;
 			invoker.whichgesture = invoker.nextgesture;
 			invoker.queued = false;
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
@@ -3422,6 +3418,13 @@ Class SWWMGesture : SWWMWeapon
 	Ready:
 		XZW1 A 1
 		{
+			if ( invoker.whichstate )
+			{
+				// set caller (gross hack)
+				let psp = player.FindPSPrite(PSP_WEAPON);
+				psp.caller = invoker.whichcaller;
+				return invoker.whichstate;
+			}
 			switch ( invoker.whichgesture )
 			{
 			case GS_Headpat:
@@ -3560,8 +3563,8 @@ Class SWWMGesture : SWWMWeapon
 		XZW1 A -1 A_FinishGesture();
 		Stop;
 	NoGesture:
-		XZW1 A 1 A_FinishGesture();
-		Goto Deselect;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
 	Deselect:
 		XZW1 A -1 A_FullLower();
 		Stop;

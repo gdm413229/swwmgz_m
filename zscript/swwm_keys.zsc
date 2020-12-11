@@ -5,6 +5,8 @@ Class SWWMKey : Key abstract
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
 
+	bool propagated;
+
 	override void DoEffect()
 	{
 		Super.DoEffect();
@@ -18,11 +20,64 @@ Class SWWMKey : Key abstract
 		}
 	}
 
+	override bool Use( bool pickup )
+	{
+		if ( Owner.player && !propagated )
+		{
+			if ( pickup && CVar.GetCVar('swwm_collectanimkey',Owner.player) )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,self,true);
+			else if ( !pickup )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,self);
+		}
+		// clean up the flag
+		propagated = false;
+		return false;
+	}
+
 	Default
 	{
 		+NOTDMATCH;
 		+FLOATBOB;
+		+INVENTORY.AUTOACTIVATE;
 		FloatBobStrength 0.25;
+	}
+
+	// helper
+	action void A_FinishGesture()
+	{
+		let gest = SWWMGesture(FindInventory("SWWMGesture"));
+		if ( !gest )
+		{
+			ThrowAbortException("Call to A_FinishGesture() without owned SWWMGesture");
+			return;
+		}
+		if ( gest.sstate.Size() > 0 )
+		{
+			gest.whichgesture = GS_Null;
+			gest.whichstate = gest.sstate[0];
+			gest.whichcaller = gest.scaller[0];
+			// push back
+			gest.sstate.Delete(0);
+			gest.scaller.Delete(0);
+			let psp = player.FindPSprite(PSP_WEAPON);
+			psp.caller = gest;
+			psp.SetState(gest.ResolveState("Ready"));
+			return;
+		}
+		if ( gest.queued )
+		{
+			gest.whichstate = null;
+			gest.whichgesture = gest.nextgesture;
+			gest.queued = false;
+			let psp = player.FindPSprite(PSP_WEAPON);
+			psp.caller = gest;
+			psp.SetState(gest.ResolveState("Ready"));
+			return;
+		}
+		player.PendingWeapon = gest.formerweapon;
+		let psp = player.FindPSprite(PSP_WEAPON);
+		psp.caller = gest;
+		psp.SetState(gest.ResolveState("Deselect"));
 	}
 }
 

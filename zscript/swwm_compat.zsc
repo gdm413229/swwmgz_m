@@ -7,6 +7,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 {
 	protected void Apply( Name checksum, String mapname )
 	{
+		int numcol = 5;
 		switch ( checksum )
 		{
 		case 'none':
@@ -39,6 +40,18 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			SetThingEdNum(50183,9001);
 			SetThingID(50183,666);
 			SetLineSpecial(21964,ACS_Execute,-Int('HHR_BRAINWALL'));
+			break;
+		// Kinsie's Test Map (HERETIC)
+		case '0EADB2F82732A968B8513E4DC6138439':
+			numcol = 7;
+		// Kinsie's Test Map (HEXEN)
+		case 'D70250F93C6B6072DA39D9672B37F236':
+			numcol = 11;
+		// Kinsie's Test Map (DOOM)
+		case '959A613006CC3AA912C4A22908B7566A':
+			for ( int i=0; i<numcol; i++ )
+				AddThing(4206900+i,(1472+64*i,640,0));
+			break;
 		}
 	}
 }

@@ -1092,6 +1092,7 @@ Class SWWMWeapon : Weapon abstract
 	// HUD-side ticking
 	virtual ui void HudTick()
 	{
+		if ( !Owner ) return;
 		[cpos, ccol] = TraceForCrosshair();
 		// avoid jumpy switching
 		if ( Owner.player.PendingWeapon is 'SWWMWeapon' )

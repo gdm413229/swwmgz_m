@@ -931,6 +931,7 @@ Class Wallbuster : SWWMWeapon
 	override void HudTick()
 	{
 		Super.HudTick();
+		if ( !Owner ) return;
 		// 25-trace
 		for ( int i=0; i<25; i++ )
 			[cpos25[i], ccol25[i]] = TraceForCrosshair25(i);

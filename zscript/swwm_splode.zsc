@@ -316,6 +316,7 @@ Class ExplodiumGun : SWWMWeapon
 
 	override void HudTick()
 	{
+		if ( !Owner ) return;
 		[cpos, ccol] = TraceForCrosshair();
 		let sw = SWWMWeapon(SisterWeapon);
 		// avoid jumpy switching
@@ -740,6 +741,7 @@ Class DualExplodiumGun : SWWMWeapon
 
 	override void HudTick()
 	{
+		if ( !Owner ) return;
 		[cpos, ccol] = TraceForCrosshair();
 		let sw = SWWMWeapon(SisterWeapon);
 		// avoid jumpy switching

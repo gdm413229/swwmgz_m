@@ -779,7 +779,7 @@ Class SWWMSpark : Actor
 		}
 		else
 		{
-			vel.z -= GetGravity();
+			if ( pos.z > floorz ) vel.z -= GetGravity();
 			// linetrace-based movement (hopefully more reliable than traditional methods)
 			Vector3 dir = vel;
 			double spd = vel.length();
@@ -826,7 +826,7 @@ Class SWWMSpark : Actor
 					newpos = d.HitLocation+hitnormal;
 				}
 				else newpos = level.Vec3Offset(newpos,dir*spd);
-				if ( (spd < 1.) && (d.HitType == TRACE_HitFloor) )
+				if ( (spd < 1.) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
 				{
 					// lose speed and die
 					if ( d.Hit3DFloor )
@@ -837,6 +837,8 @@ Class SWWMSpark : Actor
 					}
 					else
 					{
+						// hacky workaround
+						if ( !d.HitSector ) d.HitSector = floorsector;
 						newpos.z = d.HitSector.floorplane.ZAtPoint(newpos.xy);
 						tracksector = d.HitSector;
 						trackplane = 0;
@@ -940,7 +942,7 @@ Class SWWMChip : Actor
 		}
 		else
 		{
-			if ( waterlevel <= 0 ) vel.z -= GetGravity();
+			if ( (waterlevel <= 0) && (pos.z > floorz) ) vel.z -= GetGravity();
 			// linetrace-based movement (hopefully more reliable than traditional methods)
 			Vector3 dir = vel;
 			double spd = vel.length();
@@ -985,9 +987,10 @@ Class SWWMChip : Actor
 					dist *= .3;
 					vel = dir*spd;
 					newpos = d.HitLocation+hitnormal;
+					SetStateLabel("Bounce");
 				}
 				else newpos = level.Vec3Offset(newpos,dir*spd);
-				if ( (spd < 1.) && (d.HitType == TRACE_HitFloor) )
+				if ( (spd < 1.) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
 				{
 					// lose speed and die
 					if ( d.Hit3DFloor )
@@ -998,6 +1001,8 @@ Class SWWMChip : Actor
 					}
 					else
 					{
+						// hacky workaround
+						if ( !d.HitSector ) d.HitSector = floorsector;
 						newpos.z = d.HitSector.floorplane.ZAtPoint(newpos.xy);
 						tracksector = d.HitSector;
 						trackplane = 0;

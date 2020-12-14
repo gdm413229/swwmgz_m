@@ -377,6 +377,18 @@ Class GhostArtifact : Inventory
 		return true;
 	}
 
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("GhostArtifactX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
+	}
+
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
@@ -503,6 +515,17 @@ Class GravitySuppressor : Inventory
 		if ( g ) g.EffectTics += g.default.EffectTics;
 		else Owner.GiveInventory("GravityPower",1);
 		return true;
+	}
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("GravityX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
 	}
 	override void PostBeginPlay()
 	{
@@ -732,6 +755,17 @@ Class FuckingInvinciball : Inventory
 		}
 		else Owner.GiveInventory("InvinciballPower",1);
 		return true;
+	}
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("InvinciballX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
 	}
 	override void PostBeginPlay()
 	{
@@ -998,6 +1032,17 @@ Class Ragekit : Inventory
 		}
 		else Owner.GiveInventory("RagekitPower",1);
 		return true;
+	}
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("RagekitX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
 	}
 	override void PostBeginPlay()
 	{
@@ -1859,6 +1904,17 @@ Class EBarrier : Inventory
 		if ( b ) b.EffectTics += b.default.EffectTics;
 		else Owner.GiveInventory("BarrierPower",1);
 		return true;
+	}
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("EBarrierX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
 	}
 	override void PostBeginPlay()
 	{

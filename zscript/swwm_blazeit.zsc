@@ -1220,7 +1220,15 @@ Class HellblazerWarheadArm : Actor
 	}
 }
 
-Class HellblazerX : GhostArtifactX {}
+Class HellblazerX : GhostArtifactX
+{
+	States
+	{
+	Spawn:
+		XZW1 A -1;	// not fullbright
+		Stop;
+	}
+}
 
 Class HellblazerXSub : GhostArtifactX
 {
@@ -1640,6 +1648,17 @@ Class Hellblazer : SWWMWeapon
 		SetState(SpawnState+curtype+1);
 	}
 
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("HellblazerX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
+	}
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();

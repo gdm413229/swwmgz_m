@@ -2336,7 +2336,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
 			String str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
 			statlist.Push(str);
-			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_METER"));
+			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
 			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
 			statlist.Push(str);
 			if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));

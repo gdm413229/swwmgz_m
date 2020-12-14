@@ -1430,11 +1430,14 @@ Class SWWMBulletTrail : LineTracer
 Class SWWMShadow : Actor
 {
 	Sector oldfloor;
+	transient CVar sdist;
 
 	static void Track( Actor other )
 	{
 		// prevent infinite recursion
 		if ( other is 'SWWMShadow' ) return;
+		// no shadows for overlay actors
+		if ( other is 'GhostArtifactX' ) return;
 		let s = SWWMShadow(Spawn("SWWMShadow",other.pos));
 		s.target = other;
 		s.Update(true);
@@ -1448,6 +1451,10 @@ Class SWWMShadow : Actor
 		{
 			alpha = 1.-min(1.,.006*abs(target.pos.z-pos.z));
 			alpha *= target.alpha;
+			if ( !sdist ) sdist = CVar.GetCVar('swwm_shadowdist',players[consoleplayer]);
+			int sd = sdist.GetInt();
+			// breaks with chasecam, but it's fine
+			if ( sd > 0 ) alpha *= clamp(4.*((sd-Distance3D(players[consoleplayer].Camera))/sd),0.,1.);
 			double relz = target.pos.z-pos.z;
 			if ( target.bFLOATBOB ) relz += BobSin(target.FloatBobPhase)*target.FloatBobStrength;
 			double bscale = (target.radius/16.)*(1.-min(1.,.003*relz));
@@ -1481,6 +1488,7 @@ Class SWWMShadow : Actor
 	{
 		RenderStyle "Shaded";
 		StencilColor "000000";
+		DistanceCheck 'swwm_shadowdist';
 		Radius .1;
 		Height 0.;
 		+NOBLOCKMAP;

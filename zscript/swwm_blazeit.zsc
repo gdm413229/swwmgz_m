@@ -1220,6 +1220,77 @@ Class HellblazerWarheadArm : Actor
 	}
 }
 
+Class HellblazerX : GhostArtifactX {}
+
+Class HellblazerXSub : GhostArtifactX
+{
+	Hellblazer weap;
+	int ridx;
+
+	Default
+	{
+		RenderStyle "Normal";
+	}
+	void UpdateMe()
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		int curtype = 0;
+		for ( int i=0; i<4; i++ )
+		{
+			if ( weap.loadammo != types[i] ) continue;
+			curtype = i;
+			break;
+		}
+		static const int sofs[] = {1,7,10,13};	// offsets from SpawnState for each ammo type state label
+		int idx;
+		switch ( curtype )
+		{
+		case 0:
+			idx = ridx-weap.magpos;
+			if ( idx > 5 ) idx -= 6;
+			else if ( idx < 0 ) idx += 6;
+			if ( weap.magstate[ridx] ) SetState(SpawnState);
+			else SetState(SpawnState+sofs[0]+idx);
+			break;
+		case 1:
+			idx = ridx-weap.magpos;
+			if ( idx > 2 ) idx -= 3;
+			else if ( idx < 0 ) idx += 3;
+			if ( (ridx > 2) || weap.magstate[ridx] ) SetState(SpawnState);
+			else SetState(SpawnState+sofs[1]+idx);
+			break;
+		case 2:
+			idx = ridx-weap.magpos;
+			if ( idx > 2 ) idx -= 3;
+			else if ( idx < 0 ) idx += 3;
+			if ( (ridx > 2) || weap.magstate[ridx] ) SetState(SpawnState);
+			else SetState(SpawnState+sofs[2]+idx);
+			break;
+		case 3:
+			idx = ridx-weap.magpos;
+			if ( idx > 1 ) idx -= 2;
+			else if ( idx < 0 ) idx += 2;
+			if ( (ridx > 1) || weap.magstate[ridx] ) SetState(SpawnState);
+			else SetState(SpawnState+sofs[3]+idx);
+			break;
+		}
+	}
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+	Missiles:
+		XZW1 ABCDEF -1;
+	Crackshots:
+		XZW2 ABC -1;
+	Ravagers:
+		XZW3 ABC -1;
+	Nukes:
+		XZW4 AB -1;
+		Stop;
+	}
+}
+
 Class Hellblazer : SWWMWeapon
 {
 	int clipcount;
@@ -1227,6 +1298,7 @@ Class Hellblazer : SWWMWeapon
 	int magpos;	// current rotation
 	Class<Ammo> loadammo, nextammo;
 	int spinskipped;
+	HellblazerXSub pickuprockets[6];
 
 	Property ClipCount : clipcount;
 
@@ -1542,6 +1614,41 @@ Class Hellblazer : SWWMWeapon
 		}
 	}
 
+	action void A_UpdatePickup()
+	{
+		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
+		for ( int i=0; i<6; i++ )
+		{
+			if ( !invoker.pickuprockets[i] )
+			{
+				invoker.pickuprockets[i] = HellblazerXSub(Spawn("HellblazerXSub",pos));
+				invoker.pickuprockets[i].angle = angle;
+				invoker.pickuprockets[i].target = invoker;
+				invoker.pickuprockets[i].weap = invoker;
+				invoker.pickuprockets[i].FloatBobPhase = FloatBobPhase;
+				invoker.pickuprockets[i].ridx = i;
+			}
+			invoker.pickuprockets[i].UpdateMe();
+		}
+		int curtype = 0;
+		for ( int i=0; i<4; i++ )
+		{
+			if ( invoker.loadammo != types[i] ) continue;
+			curtype = i;
+			break;
+		}
+		SetState(SpawnState+curtype+1);
+	}
+
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		tracer = Spawn("HellblazerX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
+	}
+
 	Default
 	{
 		Tag "$T_HELLBLAZER";
@@ -1564,7 +1671,8 @@ Class Hellblazer : SWWMWeapon
 	States
 	{
 	Spawn:
-		XZW1 A -1;
+		XZW1 A -1 NoDelay A_UpdatePickup();
+		XZW1 ABCD -1;
 		Stop;
 	Select:
 		XZW2 I 0

@@ -416,6 +416,7 @@ Saya's favorite barbecue-flavored corn nuts. She snacks on so many bags of these
 A copy of Saya's famous sci-fi novel about interdimensional travel. Saya has frequently cited it to dab hard on the UAC and their failures. The interportal system devised by Saya in 2171 was named after this.
 
 ### Meidobot - Love Signals
+![](docimg/lovesignals.png)
 
 Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there. The album is considered a declaration of love to Saya, although it should be noted that this predates Maidbot gaining sentience (not that it makes much of a difference, as her feelings for Saya turned out to be very real).
 
@@ -438,6 +439,7 @@ A soft and squishy plush doll of you! This became very popular after the events 
 Saya began to stock up on these after her marriage with Kirin, for some unexplained reason. She says the taste reminds her of him. Kirin also seems to enjoy drinking them, perhaps a bit too much, in fact.
 
 ### Akkouxhei Milk Breads (Hexen)
+![](docimg/milkbreads.png)
 
 A tasty treat from Kirin's homeland. These soft and fluffy pastries are so sweet they may be even lethal if consumed in excess. Saya gave herself a heart attack once after stuffing her face full of them.
 

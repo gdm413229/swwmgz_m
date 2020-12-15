@@ -981,15 +981,17 @@ Class SWWMCrosshairTracer : LineTracer
 Class SWWMWeapon : Weapon abstract
 {
 	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
 
+	bool wasused;
 	private int SWeaponFlags;
 	Actor pfield;	// instance of parry field for current melee attack
 	bool wallponch;	// is punching a wall (for activation checks)
 
 	Class<Ammo> dropammotype;
+	Class<Weapon> SwapWeapon;	// player can only own either this weapon or the SwapWeapon, if defined
 
 	Property DropAmmoType : dropammotype;
+	Property SwapWeapon : SwapWeapon;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
@@ -1001,6 +1003,66 @@ Class SWWMWeapon : Weapon abstract
 	ui Color ccol;
 	ui Vector2 lagvpos;
 
+	override void Touch( Actor toucher )
+	{
+		// cannot pick up swapweapon unless explicitly pressing use
+		if ( swwm_swapweapons && SwapWeapon && toucher.FindInventory(SwapWeapon) )
+		{
+			if ( toucher.CheckLocalView() )
+			{
+				String t2 = GetDefaultByType(SwapWeapon).GetTag();
+				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),t2,GetTag()));
+			}
+			return;
+		}
+		Super.Touch(toucher);
+	}
+	// allow pickup by use + swap weapon support
+	override bool Used( Actor user )
+	{
+		Vector3 itempos = Vec3Offset(0,0,Height/2),
+			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
+		// if the toucher owns our SwapWeapon, drop it before picking us up
+		bool swapto = false;
+		if ( swwm_swapweapons && SwapWeapon )
+		{
+			let sw = user.FindInventory(SwapWeapon);
+			if ( sw )
+			{
+				if ( Weapon(sw) == user.player.ReadyWeapon )
+					swapto = true;
+				user.DropInventory(sw);
+				// don't autoswitch just yet (hacky)
+				if ( swapto )
+				{
+					user.player.ReadyWeapon = null;
+					user.player.PendingWeapon = WP_NOCHANGE;
+				}
+			}
+		}
+		Touch(user);
+		// we got picked up
+		if ( bDestroyed || Owner || !bSPECIAL )
+		{
+			// autoswitch to us if we got swapped
+			if ( swapto ) user.A_SelectWeapon(GetClass());
+			Vector3 tracedir = level.Vec3Diff(userpos,itempos);
+			double dist = tracedir.length();
+			tracedir /= dist;
+			let cf = new("CrossLineFinder");
+			cf.Trace(userpos,level.PointInSector(userpos.xy),tracedir,dist,0);
+			// trigger all player cross lines found between user and item
+			for ( int i=0; i<cf.clines.Size(); i++ )
+				cf.clines[i].Activate(user,cf.csides[i],SPAC_Cross);
+			return true;
+		}
+		return false;
+	}
+
 	override void DoEffect()
 	{
 		Super.DoEffect();
@@ -1011,6 +1073,9 @@ Class SWWMWeapon : Weapon abstract
 	}
 	override bool HandlePickup( Inventory item )
 	{
+		// can't hold both weapons at once
+		if ( swwm_swapweapons && SwapWeapon && (item.GetClass() == SwapWeapon) )
+			return true;
 		if ( (GetClass() == item.GetClass()) && !item.ShouldStay() )
 		{
 			int oldammo1 = Ammo1?Ammo1.Amount:0;

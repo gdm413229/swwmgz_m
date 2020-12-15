@@ -2468,6 +2468,25 @@ Class SWWMHandler : EventHandler
 			if ( !item ) return;
 			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
 			{
+				// drop the swapweapon if we own it first
+				let def = GetDefaultByType(item);
+				if ( swwm_swapweapons && (item is 'SWWMWeapon') && SWWMWeapon(def).SwapWeapon )
+				{
+					let sw = Weapon(players[e.Args[0]].mo.FindInventory(SWWMWeapon(def).SwapWeapon));
+					if ( sw )
+					{
+						bool swapto = (sw == players[e.Args[0]].ReadyWeapon);
+						let drop = players[e.Args[0]].mo.DropInventory(sw);
+						// add some random velocity so multiple drops don't get bunched together
+						if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
+						// don't autoswitch just yet (hacky)
+						if ( swapto )
+						{
+							players[e.Args[0]].ReadyWeapon = null;
+							players[e.Args[0]].PendingWeapon = WP_NOCHANGE;
+						}
+					}
+				}
 				if ( (item is 'ArmorNuggetItem') || (item is 'HealthNuggetItem') )
 				{
 					// these have to be given in a loop because fun reasons

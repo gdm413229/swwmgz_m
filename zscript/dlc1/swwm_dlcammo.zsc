@@ -308,3 +308,53 @@ Class RayBattery : Ammo
 		Stop;
 	}
 }
+
+Class GrandSpear : MagAmmo
+{
+	Default
+	{
+		Tag "$T_GRANDSPEAR";
+		Inventory.PickupMessage "$T_GRANDSPEAR";
+		Inventory.Icon "graphics/HUD/Icons/A_GrandSpear.png";
+		MagAmmo.ParentAmmo "GrandAmmo";
+		MagAmmo.ClipSize 5;
+		Inventory.MaxAmount 10;
+		Inventory.InterHubAmount 10;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class GrandAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_GRANDAMMO";
+		Inventory.PickupMessage "$T_GRANDAMMO";
+		Stamina 1200000;
+		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 6;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

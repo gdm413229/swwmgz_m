@@ -304,6 +304,17 @@ Class PusherProjectile : Actor
 	}
 	override void Touch( Actor toucher )
 	{
+		// cannot pick up swapweapon unless explicitly pressing use
+		let swc = GetDefaultByType("PusherWeapon").SwapWeapon;
+		if ( swwm_swapweapons && swc && toucher.FindInventory(swc) )
+		{
+			if ( toucher.CheckLocalView() )
+			{
+				String t2 = GetDefaultByType(swc).GetTag();
+				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),t2,StringTable.Localize("$T_PUSHER")));
+			}
+			return;
+		}
 		let w = toucher.FindInventory("PusherWeapon");
 		if ( toucher.player && w )
 		{
@@ -329,6 +340,24 @@ Class PusherProjectile : Actor
 		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
 		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
 		if ( abs(diff.z) > rang ) return false;
+		// if the toucher owns our SwapWeapon, drop it before picking us up
+		let swc = GetDefaultByType("PusherWeapon").SwapWeapon;
+		if ( swwm_swapweapons && swc )
+		{
+			let sw = user.FindInventory(swc);
+			bool swapto = false;
+			if ( sw )
+			{
+				if ( sw == user.player.ReadyWeapon ) swapto = true;
+				user.DropInventory(sw);
+				// don't autoswitch just yet (hacky)
+				if ( swapto )
+				{
+					user.player.ReadyWeapon = null;
+					user.player.PendingWeapon = WP_NOCHANGE;
+				}
+			}
+		}
 		Touch(user);
 		return bDestroyed;
 	}
@@ -569,6 +598,7 @@ Class PusherWeapon : SWWMWeapon
 		Weapon.SlotPriority 2.;
 		Weapon.SelectionOrder 1500;
 		Stamina 10000;
+		//SWWMWeapon.SwapWeapon "ItamexHammer";
 		+WEAPON.MELEEWEAPON;
 		Radius 20;
 		Height 32;

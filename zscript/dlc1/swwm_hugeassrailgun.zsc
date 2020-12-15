@@ -1,0 +1,41 @@
+// Kmonn Shuna Grand Lance (planned for unreleased SWWM Iridium)
+// Slot 0, spawns shared with Ynykron Artifact
+
+Class GrandLance : SWWMWeapon
+{
+	int clipcount, clipcount2;
+	bool chambered;
+
+	Property ClipCount : clipcount;
+	Property ClipCount2 : clipcount2;
+
+	Default
+	{
+		Tag "$T_GRANDLANCE";
+		Inventory.PickupMessage "$T_GRANDLANCE";
+		Obituary "$O_GRANDLANCE";
+		Inventory.Icon "graphics/HUD/Icons/W_GrandLance.png";
+		Weapon.SlotNumber 0;
+		Weapon.SlotPriority 2.;
+		Weapon.SelectionOrder 8000;
+		Weapon.AmmoType1 "GrandAmmo";
+		Weapon.AmmoGive1 1;
+		Weapon.AmmoType2 "RayBattery";
+		Weapon.AmmoGive2 0;
+		SWWMWeapon.SwapWeapon "Ynykron";
+		SWWMWeapon.DropAmmoType "GrandAmmo";
+		GrandLance.ClipCount 5;
+		GrandLance.ClipCount2 500;
+		Stamina 4200000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.PRIMARY_USES_BOTH;
+		+WEAPON.EXPLOSIVE;
+		+WEAPON.BFG;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

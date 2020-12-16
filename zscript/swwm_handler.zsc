@@ -993,6 +993,15 @@ Class SWWMHandler : EventHandler
 		// reset score (optional) if inventory should be cleared
 		if ( swwm_resetscore && level.removeitems && !e.IsReturn )
 			c.credits = c.hcredits = 0;
+		// re-add any missing collectibles after a death exit (yes, this happens)
+		for ( int i=0; i<s.ownedcollectibles.Size(); i++ )
+		{
+			if ( p.mo.FindInventory(s.ownedcollectibles[i]) ) continue;
+			let c = SWWMCollectible(Actor.Spawn(s.ownedcollectibles[i],p.mo.pos));
+			c.propagated = true;
+			if ( !c.CallTryPickup(p.mo) )
+				c.Destroy();
+		}
 	}
 
 	override void PlayerRespawned( PlayerEvent e )

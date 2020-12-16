@@ -42,6 +42,8 @@ Class SWWMStats : Thinker
 	// [Strife] preserve previous mission logs
 	String oldlogtext;
 	Array<String> questbacklog;
+	// hackaround for stuff getting lost
+	Array<Class<SWWMCollectible> > ownedcollectibles;
 
 	bool GotWeapon( Class<Weapon> which )
 	{

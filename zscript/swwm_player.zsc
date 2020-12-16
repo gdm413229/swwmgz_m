@@ -1844,6 +1844,13 @@ Class Demolitionist : PlayerPawn
 				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = false;
 			}
 		}
+		// add collectible to stats
+		if ( (item is 'SWWMCollectible') && mystats )
+		{
+			let cls = item.GetClass();
+			if ( (mystats.ownedcollectibles.Size() > 0) && (mystats.ownedcollectibles.Find(cls) < mystats.ownedcollectibles.Size()) ) return;
+			mystats.ownedcollectibles.Push(cls);
+		}
 	}
 	override bool UseInventory( Inventory item )
 	{

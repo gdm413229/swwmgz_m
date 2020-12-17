@@ -118,7 +118,7 @@ Class YnykronImpactLight : PaletteLight
 	{
 		Tag "WhiteExpl,1";
 		ReactionTime 60;
-		Args 0,0,0,400;
+		Args 0,0,0,300;
 	}
 }
 
@@ -128,7 +128,7 @@ Class YnykronSubImpactLight : PaletteLight
 	{
 		Tag "WhiteExpl,1";
 		ReactionTime 20;
-		Args 0,0,0,200;
+		Args 0,0,0,120;
 	}
 }
 
@@ -138,7 +138,7 @@ Class YnykronShotLight : PaletteLight
 	{
 		Tag "WhiteExpl";
 		ReactionTime 100;
-		Args 0,0,0,1200;
+		Args 0,0,0,800;
 	}
 }
 
@@ -148,7 +148,7 @@ Class YnykronBeamLight : PaletteLight
 	{
 		Tag "WhiteExpl,1";
 		ReactionTime 50;
-		Args 0,0,0,600;
+		Args 0,0,0,250;
 	}
 }
 
@@ -395,8 +395,8 @@ Class YnykronImpact : Actor
 			s.scale *= 3.;
 			s.alpha *= .4;
 		}
-		if ( special2 ) Spawn("YnykronSubImpactLight",pos);
-		else Spawn("YnykronImpactLight",pos);
+		if ( special2 && !Random[ExploS](0,4) ) Spawn("YnykronSubImpactLight",pos);
+		else if ( !special2 ) Spawn("YnykronImpactLight",pos);
 		let r = Spawn("YnykronImpactRing",pos);
 		r.special2 = special2;
 		r.scale *= abs(scale.x)/5.;
@@ -712,7 +712,7 @@ Class YnykronBeam : Actor
 			nospread = true;
 			return;
 		}
-		if ( ((special1%256) < 128) && !Random[Ynykron](0,10) )
+		if ( ((special1%256) < 128) && !Random[Ynykron](0,20) )
 			Spawn("YnykronBeamLight",level.Vec3Offset(pos,x*64));
 		if ( special1 >= 25600 )
 		{
@@ -1796,7 +1796,7 @@ Class YnykronLightningLight : PaletteLight
 	{
 		Tag "WhiteExpl";
 		ReactionTime 12;
-		Args 0,0,0,900;
+		Args 0,0,0,500;
 	}
 }
 Class YnykronLightningLight2 : PaletteLight
@@ -1805,7 +1805,7 @@ Class YnykronLightningLight2 : PaletteLight
 	{
 		Tag "WhiteExpl";
 		ReactionTime 10;
-		Args 0,0,0,500;
+		Args 0,0,0,300;
 	}
 }
 
@@ -2283,10 +2283,15 @@ Class YnykronSingularity : Actor
 					if ( a && (a.Health <= 0) )
 					{
 						if ( a.player ) PlayerGone.FeckOff(a);
-						// poof away, always
-						a.bINVISIBLE = true;
-						a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
-						IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
+						if ( tracer.FindState("YnykronAltDeath",true) )
+							tracer.SetStateLabel("YnykronAltDeath");	// dedicated state
+						else
+						{
+							// poof away manually
+							a.bINVISIBLE = true;
+							a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
+							IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
+						}
 					}
 					if ( !a || (a.Health <= 0) )
 						specialf2 += min(100.,capmass*.6); // partial absorption
@@ -2703,7 +2708,8 @@ Class Ynykron : SWWMWeapon
 		CS_IDLE,
 		CS_CHARGING,
 		CS_READY,
-		CS_DISCHARGING
+		CS_DISCHARGING,
+		CS_POSTFIRE
 	};
 
 	int chargestate;
@@ -2794,7 +2800,7 @@ Class Ynykron : SWWMWeapon
 		A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCESTYLE|PSPF_FORCEALPHA,true);
 		A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
 		A_OverlayAlpha(PSP_WEAPON+1,0.);
-		invoker.chargestate = CS_IDLE;
+		invoker.chargestate = CS_POSTFIRE;
 		invoker.clipcount = 0;
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -2855,9 +2861,10 @@ Class Ynykron : SWWMWeapon
 		if ( !psp ) return;
 		ventalpha = clamp(ventalpha+ventfade,0.,1.);
 		psp.alpha = ventalpha;
-		if ( chargestate == CS_DISCHARGING )
+		if ( chargestate >= CS_DISCHARGING )
 		{
-			chargelevel = max(chargelevel*1.005-.24,0.);
+			if ( chargestate == CS_POSTFIRE ) chargelevel = max(chargelevel*1.024-1.,0.);
+			else chargelevel = max(chargelevel*1.005-.24,0.);
 			if ( chargelevel <= 0. ) chargestate = CS_IDLE;
 			if ( Owner.player.ReadyWeapon == self )
 				Owner.A_SoundVolume(CHAN_WEAPONEXTRA2,(.025*chargelevel)**3.);
@@ -2970,10 +2977,8 @@ Class Ynykron : SWWMWeapon
 			return ResolveState(null);
 		}
 		XZW3 JK 2;
-		XZW3 LMNOP 3;
-		XZW3 Q 3 A_StartSound("ynykron/ventclose",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW3 R 3;
-		Goto Ready;
+		XZW3 LMNOPQR 3;
+		Goto Discharging;
 	FireBlast:
 		TNT1 AAAAA 1 A_Backblast();
 		Stop;
@@ -2981,15 +2986,11 @@ Class Ynykron : SWWMWeapon
 		XZWA J 1
 		{
 			invoker.ventfade = .3;
-			A_StartSound("ynykron/puff",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOP);
 		}
-		XZWA KLMNO 2;
-		XZWA P 3
-		{
-			invoker.ventfade = -.1;
-		}
-		XZWA QRS 3;
-		Stop;
+		XZWA KL 2;
+		XZWA MNOPQRS 3;
+		Goto DischargingSmoke;
 	AltFire:
 		XZW2 A 2
 		{
@@ -3061,6 +3062,7 @@ Class Ynykron : SWWMWeapon
 			A_StartSound("ynykron/ventopen",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZW7 RSTUV 2 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+	Discharging:
 		XZW7 W 2
 		{
 			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
@@ -3082,6 +3084,7 @@ Class Ynykron : SWWMWeapon
 			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOP);
 		}
 		XZWA UVWXY 2;
+	DischargingSmoke:
 		XZWA Z 2 A_JumpIf(invoker.chargestate==CS_IDLE,1);
 		Wait;
 		XZWA Z 3

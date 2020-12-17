@@ -301,7 +301,12 @@ Class DragonBreathArm : Actor
 	{
 		Super.PostBeginPlay();
 		reactiontime = Random[ExploS](18,24);
-		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](16.,24.);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](16.,32.);
+		let l = Spawn("PaletteLight",pos);
+		l.Args[3] = int(60+60*(ReactionTime/20.));
+		l.ReactionTime = ReactionTime+2;
+		l.target = self;
+
 	}
 	override void Tick()
 	{
@@ -363,7 +368,7 @@ Class DragonBreathArm : Actor
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;
 		// re-do the bounce with our formula
-		vel = .8*((vel dot HitNormal)*HitNormal*(-1.8+FRandom[Spreadgun](.0,.8))+vel);
+		vel = .8*((vel dot HitNormal)*HitNormal*(-1.8+FRandom[Spreadgun](.0,.6))+vel);
 		bHITOWNER = true;
 	}
 	States
@@ -376,15 +381,8 @@ Class DragonBreathArm : Actor
 			let p = Spawn("DragonBreathPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
 			p.scale *= 3.5-2.5*(ReactionTime/20.);
-			if ( !(ReactionTime%5) )
-			{
-				let l = Spawn("PaletteLight",pos);
-				l.Args[3] = int(90+50*(ReactionTime/20.));
-				l.ReactionTime = int(2+8*(ReactionTime/20.));
-				l.target = p;
-			}
 			if ( !(ReactionTime%2) )
-				SWWMUtility.DoExplosion(self,1+(reactiontime*1.5),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
+				SWWMUtility.DoExplosion(self,1+(reactiontime*2),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -667,7 +665,7 @@ Class SaltBeam : Actor
 			return;
 		}
 		// next beam
-		if ( !(special2%4) && !Random[Spreadgun](0,Stamina/2) )
+		if ( !(special2%4) && !Random[Spreadgun](0,Stamina) )
 			Spawn("SaltLight",level.Vec3Offset(pos,x*16));
 		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*32));
 		double a = FRandom[Spreadgun](0,360), s = FRandom[Spreadgun](0,.06);
@@ -694,7 +692,7 @@ Class SaltBeam : Actor
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
 			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
-		if ( ((special2%5) || args[2]) && !special1 ) SpreadOut();
+		if ( ((special2%4) || args[2]) && !special1 ) SpreadOut();
 		args[2]++;
 		if ( !CheckNoDelay() || (tics == -1) ) return;
 		if ( tics > 0 ) tics--;
@@ -2219,17 +2217,17 @@ Class Spreadgun : SWWMWeapon
 				SWWMUtility.DoKnockback(self,-x,25000.);
 				break;
 			case 2:
-				for ( int j=0; j<5; j++ )
+				for ( int j=0; j<3; j++ )
 				{
 					a = FRandom[Spreadgun](0,360);
-					s = FRandom[Spreadgun](0,.2);
+					s = FRandom[Spreadgun](0,.24);
 					dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
 					let p = Spawn("DragonBreathArm",origin);
 					p.target = self;
 					p.angle = atan2(dir.y,dir.x);
 					p.pitch = asin(-dir.z);
 				}
-				for ( int i=0; i<7; i++ )
+				for ( int i=0; i<5; i++ )
 				{
 					let s = Spawn("SWWMViewSmoke",origin);
 					SWWMViewSmoke(s).ofs = (15,3,-3);
@@ -2237,7 +2235,7 @@ Class Spreadgun : SWWMWeapon
 					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
 					s.alpha *= .2;
 				}
-				for ( int i=0; i<20; i++ )
+				for ( int i=0; i<15; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
 					s.special1 = 1;
@@ -2246,7 +2244,7 @@ Class Spreadgun : SWWMWeapon
 					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
 					s.vel += vel*.5+x*FRandom[Spreadgun](3.,5.)+y*FRandom[Spreadgun](-1,1)+z*FRandom[Spreadgun](-1,1);
 				}
-				for ( int i=0; i<15; i++ )
+				for ( int i=0; i<12; i++ )
 				{
 					let s = Spawn("SWWMSpark",origin);
 					s.scale *= .3;

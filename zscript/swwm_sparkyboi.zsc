@@ -23,6 +23,7 @@ Class SparkArcLight : PaletteLight
 	Default
 	{
 		Tag "SparkExpl,2";
+		Args 0,0,0,60;
 		ReactionTime 20;
 	}
 }
@@ -31,6 +32,7 @@ Class SparkArcLightSmall : PaletteLight
 	Default
 	{
 		Tag "SparkExpl,2";
+		Args 0,0,0,30;
 		ReactionTime 10;
 	}
 }
@@ -39,6 +41,7 @@ Class SparkArcLightBig : PaletteLight
 	Default
 	{
 		Tag "SparkExpl,2";
+		Args 0,0,0,90;
 		ReactionTime 40;
 	}
 }
@@ -47,9 +50,9 @@ Class SparkBeamLight : PaletteLight
 {
 	Default
 	{
-		Tag "SparkExpl,1";
+		Tag "SparkExpl";
 		ReactionTime 20;
-		Args 0,0,0,300;
+		Args 0,0,0,250;
 	}
 }
 
@@ -1196,14 +1199,11 @@ Class BiosparkBeam : Actor
 
 	action void A_Spread()
 	{
-		for ( int i=0; i<2; i++ )
-		{
-			let c = Spawn("BiosparkChildBeam",pos);
-			c.angle = angle;
-			c.pitch = pitch;
-			if ( frame ) c.SetStateLabel("TrailSpawn");
-			c.roll = i*120;
-		}
+		let c = Spawn("BiosparkChildBeam",pos);
+		c.angle = angle;
+		c.pitch = pitch;
+		if ( frame ) c.SetStateLabel("TrailSpawn");
+		c.roll = Random[Sparkster](0,7)*45;
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
 		int numpt = Random[Sparkster](-1,6);
 		for ( int i=0; i<numpt; i++ )
@@ -1212,9 +1212,9 @@ Class BiosparkBeam : Actor
 			a.angle = angle;
 			a.pitch = pitch;
 			a.target = target;
-			a.ReactionTime += Random[Sparkster](-2,4);
+			a.ReactionTime += Random[Sparkster](-4,4);
 		}
-		numpt = Random[Sparkster](2,5);
+		numpt = Random[Sparkster](1,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			let a = Spawn("BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster](frame?0:.3,1)));
@@ -1222,9 +1222,9 @@ Class BiosparkBeam : Actor
 			a.pitch = pitch;
 			a.target = target;
 			a.master = self;
-			a.ReactionTime += Random[Sparkster](-1,3);
+			a.ReactionTime += Random[Sparkster](-2,2);
 		}
-		numpt = Random[Sparkster](25,50);
+		numpt = Random[Sparkster](20,30);
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
@@ -1237,8 +1237,11 @@ Class BiosparkBeam : Actor
 			s.specialf2 = FRandom[ExploS](.02,.04);
 			s.roll = FRandom[ExploS](0,360);
 		}
-		A_StartSound("biospark/zap",CHAN_WEAPON,0,.5,.7);
-		let p = Spawn("SparkBeamLight",level.Vec3Offset(pos,tdir/2));
+		if ( (special1%2) || bAMBUSH )
+		{
+			A_StartSound("biospark/zap",CHAN_WEAPON,0,.5,.6);
+			Spawn("SparkBeamLight",level.Vec3Offset(pos,tdir/2));
+		}
 		if ( bAMBUSH ) return;
 		let b = Spawn(GetClass(),invoker.nextpos);
 		b.frame = 1;
@@ -1566,7 +1569,7 @@ Class BiosparkArc : Actor
 		b.special1 = special1+1;
 		b.special2 = special2;
 		if ( (arcsnd != "") && !((special1+special2)%3) && !Random[Sparkster](0,3-extra) ) A_StartSound(arcsnd,CHAN_WEAPON,attenuation:attn);
-		if ( !((special1+special2)%8) && !Random[Sparkster](0,5-extra) )
+		if ( !((special1+special2)%8) && !Random[Sparkster](0,5) )
 		{
 			let p = Spawn((extra>1)?"SparkArcLightBig":(extra>0)?"SparkArcLight":"SparkArcLightSmall",level.Vec3Offset(pos,tdir/2));
 			p.args[3] = int(speed*8);

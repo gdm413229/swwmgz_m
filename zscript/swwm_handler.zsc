@@ -750,6 +750,13 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		ClearAllShaders(players[consoleplayer]);
+		// reset score on dead players (death exit™)
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || (players[i].Health > 0) ) continue;
+			let c = SWWMCredits.Find(players[i]);
+			if ( c ) c.credits = c.hcredits = 0;
+		}
 	}
 
 	override void WorldLoaded( WorldEvent e )

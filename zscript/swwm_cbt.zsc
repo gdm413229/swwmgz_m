@@ -738,6 +738,8 @@ Class BusterWall : Thinker
 			se.Destroy();
 		}
 		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
+		// stop all sound sequences
+		for ( int i=1; i<=4; i++ ) hs.StopSoundSequence(i);
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);

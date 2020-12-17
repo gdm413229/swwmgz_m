@@ -402,8 +402,7 @@ Class SWWMUtility
 		return int(ceil(x/100.)*100.);
 	}
 
-	// can't make clearscope because of SectorEffect.GetSector(), isn't that amazing?
-	static play bool IsDoorSector( Sector s, int part )
+	static clearscope bool IsDoorSector( Sector s, int part )
 	{
 		// super-easy mode: check for boss special sectors
 		if ( (level.mapname ~== "E1M8") || (level.mapname ~== "E2M8") || (level.mapname ~== "E3M8")
@@ -422,23 +421,6 @@ Class SWWMUtility
 					if ( level.Sectors[idx] == s )
 						return true;
 			}
-		}
-		// easy mode: check if it's already moving
-		if ( part )
-		{
-			let ti = ThinkerIterator.Create("MovingCeiling",Thinker.STAT_SECTOREFFECT);
-			MovingCeiling mc;
-			while ( mc = MovingCeiling(ti.Next()) )
-				if ( mc.GetSector() == s )
-					return true;
-		}
-		else
-		{
-			let ti = ThinkerIterator.Create("MovingFloor",Thinker.STAT_SECTOREFFECT);
-			MovingFloor mf;
-			while ( mf = MovingFloor(ti.Next()) )
-				if ( mf.GetSector() == s )
-					return true;
 		}
 		// hard mode: look for all lines/actors with movement specials referencing us
 		for ( int i=0; i<level.Lines.Size(); i++ )

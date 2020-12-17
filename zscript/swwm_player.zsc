@@ -1812,6 +1812,8 @@ Class Demolitionist : PlayerPawn
 		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);
 		SWWMCredits.Give(player,score);
 		SWWMScoreObj.Spawn(score,Vec3Offset(0,0,Height/2));
+		// somehow ongivesecret can be called BEFORE PostBeginPlay (what the fuck)
+		if ( !mystats ) mystats = SWWMStats.Find(player);
 		mystats.secrets++;
 		return true;
 	}

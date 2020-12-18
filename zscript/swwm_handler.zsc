@@ -1696,7 +1696,7 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
-		else if ( e.Thing.GetClass() == 'Pig' )
+		if ( e.Thing.GetClass() == 'Pig' )
 			e.Thing.SetTag("$FN_PIG");	// missing in gzdoom
 		// eviternity stuff
 		else if ( (e.Thing.GetClassName() == "Archangelus")
@@ -1721,7 +1721,7 @@ Class SWWMHandler : EventHandler
 			e.Thing.SetTag("$FN_NDEMON");
 			//e.Thing.Obituary = "$OB_NDEMON";
 		}
-		else if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
+		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
 			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
 		{
 			// you can pet the dog, and you can also pet the caco (and friends)

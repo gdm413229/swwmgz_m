@@ -225,6 +225,8 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Weapon>)(AllActorClasses[i]);
 				if ( !type || (type == "Weapon") ) continue;
+				// no Ynykron in Strife
+				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') ) continue;
 				// Don't give already owned weapons
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;

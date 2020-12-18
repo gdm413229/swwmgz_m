@@ -2150,6 +2150,8 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 				if ( !type ) continue;
 				// no collectibles
 				if ( type is 'SWWMCollectible' ) continue;
+				// no Ynykron in strife
+				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') ) continue;
 				// skip maxed items
 				let cur = players[consoleplayer].mo.FindInventory(type);
 				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;

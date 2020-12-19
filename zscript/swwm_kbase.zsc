@@ -14,7 +14,7 @@ Class MenuTransaction
 }
 
 // FIXME this whole thing needs to be refactored eventually
-Class SWWMKnowledgeBaseMenu : GenericMenu
+Class DemolitionistMenu : GenericMenu
 {
 	enum EDemoTab
 	{
@@ -130,7 +130,7 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
 		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
 		MenuSound("menu/demoopen");
-		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
+		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("event swwmdemomenu");
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
 		mkey[1] = Bindings.NameKeys(ikey[1],0);
 		ccol = CVar.GetCVar("msg3color",players[consoleplayer]);
@@ -1453,9 +1453,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 			{
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
-				int k1, k2;
-				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
-				String kstr = bindings.NameKeys(k1,k2);
+				String kstr;
+				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
+				else kstr = mkey[0];
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
@@ -3249,9 +3249,9 @@ Class SWWMKnowledgeBaseMenu : GenericMenu
 		else if ( tabs[curtab] == TAB_HELP )
 		{
 			// help tab
-			int k1, k2;
-			[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
-			String kstr = bindings.NameKeys(k1,k2);
+			String kstr;
+			if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
+			else kstr = mkey[0];
 			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 			if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
 			BrokenLines l = fnt.BreakLines(str,629);

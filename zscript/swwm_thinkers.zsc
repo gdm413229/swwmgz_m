@@ -814,15 +814,23 @@ Class SWWMCombatTracker : Thinker
 	int tcnt;
 	double height;
 	transient CVar funtags, maxdist, damagebars;
+	bool funtag;
+	int mxdist, dbar;
 	bool bBOSS, bFRIENDLY;
 	bool firsthit;
 
 	void UpdateTag()
 	{
-		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
+		// only the first tracker accesses the CVar, saves on perf
+		if ( !prev )
+		{
+			if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
+			funtag = funtags.GetBool();
+		}
+		if ( next ) next.funtag = funtag;
 		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen')) )
 		{
-			String realtag = funtags.GetBool()?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
+			String realtag = funtag?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
 			if ( realtag == FallbackTag )
 			{
 				realtag = mytarget.GetClassName();
@@ -892,11 +900,6 @@ Class SWWMCombatTracker : Thinker
 
 	override void Tick()
 	{
-		if ( swwm_notrack )
-		{
-			Destroy();
-			return;
-		}
 		// is target gone or dead?
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
@@ -969,8 +972,19 @@ Class SWWMCombatTracker : Thinker
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
 		// special update conditions
-		if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
-		int dbar = damagebars.GetInt();
+		// only the first tracker accesses the CVars, saves on perf
+		if ( !prev )
+		{
+			if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
+			if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
+			dbar = damagebars.GetInt();
+			mxdist = maxdist.GetInt();
+		}
+		if ( next )
+		{
+			next.dbar = dbar;
+			next.mxdist = mxdist;
+		}
 		if ( dbar )
 		{
 			if ( (dbar == 2) && (lasthealth >= maxhealth) )
@@ -978,13 +992,11 @@ Class SWWMCombatTracker : Thinker
 			else if ( (dbar == 1) && !firsthit )
 				return;
 		}
-		if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE && !mytarget.bCORPSE )
 		{
 			bool straifu = false;
 			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
 				straifu = true;
-			int mxdist = maxdist.GetInt();
 			// players (but not voodoo dolls), always visible
 			if ( mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
 			// friendlies within a set distance
@@ -996,7 +1008,6 @@ Class SWWMCombatTracker : Thinker
 		}
 		else if ( (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') )
 		{
-			int mxdist = maxdist.GetInt();
 			// special stuff, only if visible
 			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < (mxdist/4))) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
 		}

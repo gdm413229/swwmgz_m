@@ -19,9 +19,15 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - PISS Whiskey *("Is it actually piss or is that just the brand name? Either way, I don't want to know what's inside")*
   - **[Heretic]** Doomguy Action Figure *("Oh, he gets one too?")*
+  - **[Hexen]** Lord Vilkreath - Fundaments of Puzzle Design *("What the hell is this crap?")*
   - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
+* **Even more collectibles:**
+  - Dr. Locke's Super Happy Fun Ball *("I'd suggest not to drop it")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Visible legs in first person**
+* **Leaning**
+* **Crouch sliding**
+* **"Advanced" Item Sense *(detect activatable walls)***
 * **DLC Gameset:**
   - Tetris
   - Pong

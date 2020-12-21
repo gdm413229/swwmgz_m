@@ -3081,7 +3081,8 @@ Class HeadpatTracker : Actor
 			else patter.A_SetPitch(patter.pitch+.3*delta,SPF_INTERPOLATE);
 			return;
 		}
-		A_SetSize(target.radius+8,target.height+8);
+		if ( (radius != target.radius+8) || (height != target.height+8) )
+			A_SetSize(target.radius+8,target.height+8);
 		if ( pos != target.pos ) SetOrigin(target.pos,false);
 	}
 	override bool Used( Actor user )

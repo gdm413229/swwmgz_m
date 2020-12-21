@@ -1994,6 +1994,9 @@ Class Demolitionist : PlayerPawn
 			player.PendingWeapon = SWWMGesture(player.ReadyWeapon).formerweapon;
 			player.SetPSprite(PSP_WEAPON,player.ReadyWeapon.ResolveState("Deselect"));
 		}
+		// re-add ourselves to the "suckable list" (otherwise the Ynykron Singularity won't hurt us)
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd ) hnd.SuckableActors.Push(self);
 		// re-attach shadow
 		if ( swwm_shadows <= 0 ) return;
 		let ti = ThinkerIterator.Create("SWWMShadow");

@@ -505,7 +505,7 @@ Class HellblazerRavager : HellblazerMissile
 	{
 		special2++;
 		if ( (special2 > 10) || (special2%3) ) return;
-		int numpt = 6-special2/2;
+		int numpt = 11-special2;
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[Hellblazer](0,360);
@@ -1029,8 +1029,8 @@ Class HellblazerRavagerArm : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		reactiontime = Random[ExploS](18,24);
-		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](10.,30.);
+		reactiontime = Random[ExploS](15,25);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](10.,15.);
 	}
 	override void Tick()
 	{
@@ -1092,7 +1092,7 @@ Class HellblazerRavagerArm : Actor
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;
 		// re-do the bounce with our formula
-		vel = .8*((vel dot HitNormal)*HitNormal*FRandom[Hellblazer](-1.5,-1.)+vel);
+		vel = (vel dot HitNormal)*HitNormal*FRandom[Hellblazer](-1.5,-1.)+vel;
 	}
 	States
 	{
@@ -1102,7 +1102,7 @@ Class HellblazerRavagerArm : Actor
 			if ( waterlevel > 0 ) ReactionTime -= 2;
 			let p = Spawn("RavagerPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
-			p.scale *= 3.5-2.5*(ReactionTime/20.);
+			p.scale *= 2.5-1.5*(ReactionTime/20.);
 			if ( !(ReactionTime%3) )
 			{
 				let l = Spawn("RavagerLight",pos);
@@ -1110,19 +1110,18 @@ Class HellblazerRavagerArm : Actor
 				l.ReactionTime = int(2+8*(ReactionTime/20.));
 				l.target = p;
 			}
-			if ( !(ReactionTime%1) )
-				SWWMUtility.DoExplosion(self,1+reactiontime/2,1000+200*reactiontime,250-6*reactiontime);
-			double spd = vel.length();
-			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
+			SWWMUtility.DoExplosion(self,1+reactiontime,1000+200*reactiontime,250-6*reactiontime);
+			double spd = min(vel.length()*1.1,50);
+			vel = (vel*.1+(FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = pvel+vel*.2;
+			s.SetShade(Color(4,2,1)*Random[ExploS](48,63));
+			s.special1 = Random[ExploS](4,8);
+			s.scale *= 4.;
+			s.alpha *= .2+.3*(ReactionTime/20.);
 			if ( !(ReactionTime%2) )
 			{
-				let s = Spawn("SWWMHalfSmoke",pos);
-				s.vel = pvel+vel*.2;
-				s.SetShade(Color(4,2,1)*Random[ExploS](48,63));
-				s.special1 = Random[ExploS](2,4);
-				s.scale *= 3.2;
-				s.alpha *= .1+.2*(ReactionTime/20.);
 				int numpt = Random[Hellblazer](-2,4);
 				for ( int i=0; i<numpt; i++ )
 				{

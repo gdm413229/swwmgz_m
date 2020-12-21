@@ -332,7 +332,7 @@ Can eat up a total of 250 damage points before breaking.
 ### Grilled Cheese Sandwich ~ Replaces Megasphere, Morph Ovum, Platinum Helm
 ![](docimg/sandwich.png)
 
-The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**). Keep in mind that this overhealing above 500 points fades away much quicker than the **Refresher**'s.
+The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**). Keep in mind that this overhealing above 500 points fades away much quicker than the **Refresher**'s, and you can't use another sandwich again until the overheal fades.
 
 ### Ghost Artifact ~ Replaces Blur Sphere, Shadowsphere, Amulet of Warding
 ![](docimg/ghost.png)

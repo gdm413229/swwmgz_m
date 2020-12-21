@@ -9,7 +9,6 @@ Class PusherImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -54,7 +53,6 @@ Class BigPusherImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -104,7 +102,7 @@ Class PusherProjectile : Actor
 		Speed 50;
 		Radius 10;
 		Height 10;
-		DamageFunction int(6*vel.length());
+		DamageFunction clamp(int(3*vel.length()),0,150);
 		DamageType 'Tenderize';
 		BounceType "Hexen";
 		BounceFactor 1.0;
@@ -415,7 +413,7 @@ Class PusherWeapon : SWWMWeapon
 
 	action void A_PusherDrill()
 	{
-		invoker.chargelevel = clamp(invoker.chargelevel+FRandom[Pusher](-.1,.2),.3,1.);
+		invoker.chargelevel = clamp(invoker.chargelevel+FRandom[Pusher](-.04,.08),.3,1.);
 		A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 		A_WeaponOffset(FRandom[Pusher](-1,1)*2,32+FRandom[Pusher](-1,1)*2);
 		A_ZoomFactor(1.01,ZOOM_INSTANT);
@@ -430,7 +428,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(2,2,2,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(swwm_uncapalert?0:1200);
-			int dmg = int(5+invoker.chargelevel*3);
+			int dmg = int(3+invoker.chargelevel*3);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
@@ -476,9 +474,12 @@ Class PusherWeapon : SWWMWeapon
 				let p = Spawn("PusherImpact",d.HitLocation+HitNormal*4);
 				p.angle = atan2(HitNormal.y,HitNormal.x);
 				p.pitch = asin(-HitNormal.z);
+				if ( d.HitType == TRACE_HitFloor ) p.CheckSplash(40);
+				if ( waterlevel > 2 ) SWWMUtility.DoKnockback(self,-x,30000);
 			}
 			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,dmg,self,d.HitDir,d.HitLocation.z);
 		}
+		else if ( waterlevel > 2 ) SWWMUtility.DoKnockback(self,-x,18000);
 		if ( swwm_extraalert || !(invoker.hitcnt%20) ) A_AlertMonsters(swwm_uncapalert?0:500);
 		invoker.hitcnt++;
 	}
@@ -507,7 +508,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(8,8,8,12,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(swwm_uncapalert?0:1600);
-			int dmg = int(300*invoker.chargelevel);
+			int dmg = int(150*invoker.chargelevel);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
@@ -550,6 +551,7 @@ Class PusherWeapon : SWWMWeapon
 				let p = Spawn("BigPusherImpact",d.HitLocation+HitNormal*4);
 				p.angle = atan2(HitNormal.y,HitNormal.x);
 				p.pitch = asin(-HitNormal.z);
+				if ( d.HitType == TRACE_HitFloor ) p.CheckSplash(40);
 			}
 			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,dmg,self,d.HitDir,d.HitLocation.z);
 		}
@@ -580,7 +582,7 @@ Class PusherWeapon : SWWMWeapon
 
 	action void A_ChargeUp()
 	{
-		invoker.chargelevel = min(1.,invoker.chargelevel+.035);
+		invoker.chargelevel = min(1.,invoker.chargelevel+.025);
 		if ( invoker.chargelevel >= .5 ) invoker.vibe = min(1.,invoker.vibe+.02);
 		A_WeaponOffset(FRandom[Pusher](-1,1)*(invoker.chargelevel-invoker.vibe),32+FRandom[Pusher](-1,1)*(invoker.chargelevel-invoker.vibe));
 		if ( !(player.cmd.buttons&BT_ALTATTACK) && (invoker.chargelevel > .3) )

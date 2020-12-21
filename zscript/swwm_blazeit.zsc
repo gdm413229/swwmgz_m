@@ -296,7 +296,7 @@ Class HellblazerMissile : Actor
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(4.5);
-		SWWMUtility.DoExplosion(self,350,320000,200,90);
+		SWWMUtility.DoExplosion(self,200,320000,200,90);
 		A_NoGravity();
 		A_QuakeEx(5,5,5,15,0,1500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:.8);
 		A_StopSound(CHAN_BODY);
@@ -310,7 +310,7 @@ Class HellblazerMissile : Actor
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](2,8);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
-			s.SetShade(Color(4,3,2)*Random[Hellblazer](48,63));
+			s.SetShade(Color(4,2,1)*Random[Hellblazer](48,63));
 			s.special1 = Random[Hellblazer](1,4);
 			s.scale *= 2.8;
 			s.alpha *= .4;
@@ -393,7 +393,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(6.);
-		SWWMUtility.DoExplosion(self,300,320000,250,100);
+		SWWMUtility.DoExplosion(self,150,320000,250,100);
 		A_NoGravity();
 		A_QuakeEx(6,6,6,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StopSound(CHAN_BODY);
@@ -407,7 +407,7 @@ Class HellblazerCrackshot : HellblazerMissile
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](2,8);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
-			s.SetShade(Color(2,4,2)*Random[Hellblazer](48,63));
+			s.SetShade(Color(4,2,1)*Random[Hellblazer](48,63));
 			s.special1 = Random[Hellblazer](1,4);
 			s.scale *= 2.8;
 			s.alpha *= .4;
@@ -463,7 +463,7 @@ Class HellblazerRavager : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("HugeRocketBlast",50);
 		A_SetScale(8.);
-		SWWMUtility.DoExplosion(self,400,320000,300,120);
+		SWWMUtility.DoExplosion(self,250,320000,300,120);
 		A_NoGravity();
 		A_QuakeEx(6,6,6,30,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StopSound(CHAN_BODY);
@@ -477,7 +477,7 @@ Class HellblazerRavager : HellblazerMissile
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](4,12);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
-			s.SetShade(Color(4,2,2)*Random[Hellblazer](48,63));
+			s.SetShade(Color(4,2,1)*Random[Hellblazer](48,63));
 			s.special1 = Random[Hellblazer](2,5);
 			s.scale *= 3.2;
 			s.alpha *= .3;
@@ -542,7 +542,7 @@ Class HellblazerWarhead : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("WumboRocketBlast",150);
 		A_SetScale(7.);
-		SWWMUtility.DoExplosion(self,2000,600000,400,200);
+		SWWMUtility.DoExplosion(self,1500,600000,400,200);
 		A_NoGravity();
 		A_QuakeEx(9,9,9,150,0,12000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:4000,rollIntensity:2.);
 		A_StopSound(CHAN_BODY);
@@ -556,7 +556,7 @@ Class HellblazerWarhead : HellblazerMissile
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](4,20);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
-			s.SetShade(Color(3,2,4)*Random[Hellblazer](48,63));
+			s.SetShade(Color(4,2,1)*Random[Hellblazer](48,63));
 			s.special1 = Random[Hellblazer](3,8);
 			s.scale *= 4.;
 			s.alpha *= .4;
@@ -621,9 +621,9 @@ Class HellblazerWarhead : HellblazerMissile
 			}
 		}
 		special2++;
-		if ( (special2 <= 9) && !(special2%3) )
+		if ( (special2 <= 15) && !(special2%3) )
 		{
-			int numpt = 5-special2/2;
+			int numpt = 5-special2/5;
 			for ( int i=0; i<numpt; i++ )
 			{
 				double ang = FRandom[Hellblazer](0,360);
@@ -833,7 +833,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(2.5);
-		SWWMUtility.DoExplosion(self,80,200000,150,60);
+		SWWMUtility.DoExplosion(self,50,200000,150,60);
 		A_NoGravity();
 		A_QuakeEx(4,4,4,12,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:400,rollIntensity:.6);
 		A_StopSound(CHAN_BODY);
@@ -847,7 +847,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 			Vector3 pvel = (FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1),FRandom[Hellblazer](-1,1)).unit()*FRandom[Hellblazer](1,5);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
-			s.SetShade(Color(2,4,2)*Random[Hellblazer](48,63));
+			s.SetShade(Color(4,2,1)*Random[Hellblazer](48,63));
 			s.special1 = Random[Hellblazer](1,3);
 			s.scale *= 1.5;
 			s.alpha *= .4;
@@ -953,7 +953,7 @@ Class RavagerLight : PaletteLight
 	Default
 	{
 		Tag "DRed";
-		Args 0,0,0,400;
+		Args 0,0,0,250;
 	}
 }
 
@@ -965,7 +965,7 @@ Class RavagerPuff : Actor
 	{
 		RenderStyle "Add";
 		Scale .8;
-		Alpha .3;
+		Alpha .7;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -1100,7 +1100,6 @@ Class HellblazerRavagerArm : Actor
 		TNT1 A 1
 		{
 			if ( waterlevel > 0 ) ReactionTime -= 2;
-			A_CountDown();
 			let p = Spawn("RavagerPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
 			p.scale *= 3.5-2.5*(ReactionTime/20.);
@@ -1112,7 +1111,7 @@ Class HellblazerRavagerArm : Actor
 				l.target = p;
 			}
 			if ( !(ReactionTime%1) )
-				SWWMUtility.DoExplosion(self,4+reactiontime*2,1000+200*reactiontime,250-6*reactiontime);
+				SWWMUtility.DoExplosion(self,1+reactiontime/2,1000+200*reactiontime,250-6*reactiontime);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -1120,7 +1119,7 @@ Class HellblazerRavagerArm : Actor
 			{
 				let s = Spawn("SWWMHalfSmoke",pos);
 				s.vel = pvel+vel*.2;
-				s.SetShade(Color(4,2,2)*Random[ExploS](48,63));
+				s.SetShade(Color(4,2,1)*Random[ExploS](48,63));
 				s.special1 = Random[ExploS](2,4);
 				s.scale *= 3.2;
 				s.alpha *= .1+.2*(ReactionTime/20.);
@@ -1133,6 +1132,7 @@ Class HellblazerRavagerArm : Actor
 					s2.vel = pvel;
 				}
 			}
+			A_CountDown();
 		}
 		Wait;
 	Bounce:
@@ -1186,7 +1186,7 @@ Class HellblazerWarheadArm : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		-NOGRAVITY;
-		Gravity 0.25;
+		Gravity 0.35;
 		BounceFactor 1.0;
 		Radius 4;
 		Height 4;
@@ -1205,16 +1205,16 @@ Class HellblazerWarheadArm : Actor
 	Spawn:
 		TNT1 A 1
 		{
-			A_CountDown();
 			Spawn("HellblazerWarheadTrail",pos);
-			SWWMUtility.DoExplosion(self,30+reactiontime*5,3000+500*reactiontime,120+3*reactiontime);
+			SWWMUtility.DoExplosion(self,20+reactiontime*4,3000+500*reactiontime,120+3*reactiontime);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
-			s.SetShade(Color(4,3,2)*Random[ExploS](48,63));
+			s.SetShade(Color(4,2,1)*Random[ExploS](48,63));
 			s.special1 = Random[ExploS](1,3);
 			s.scale *= 6.;
 			s.alpha *= 0.1+.4*(ReactionTime/15.);
+			A_CountDown();
 		}
 		Wait;
 	}
@@ -1242,7 +1242,7 @@ Class HellblazerXSub : GhostArtifactX
 	void UpdateMe()
 	{
 		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
-		int curtype = 0;
+		int curtype = -1;
 		for ( int i=0; i<4; i++ )
 		{
 			if ( weap.loadammo != types[i] ) continue;
@@ -1280,6 +1280,12 @@ Class HellblazerXSub : GhostArtifactX
 			else if ( idx < 0 ) idx += 2;
 			if ( (ridx > 1) || weap.magstate[ridx] ) SetState(SpawnState);
 			else SetState(SpawnState+sofs[3]+idx);
+			break;
+		default:
+			// uninitialized pickup (3 blazers)
+			idx = ridx;
+			if ( idx > 2 ) SetState(SpawnState);
+			else SetState(SpawnState+sofs[0]+idx);
 			break;
 		}
 	}
@@ -1509,7 +1515,15 @@ Class Hellblazer : SWWMWeapon
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		if ( !loadammo ) loadammo = "HellblazerMissiles";
+		if ( !loadammo )
+		{
+			// 3 hellblazer missiles loaded
+			loadammo = "HellblazerMissiles";
+			clipcount = 3;
+			magpos = 0;
+			for ( int i=0; i<6; i++ )
+				magstate[i] = (i>2);
+		}
 		nextammo = loadammo;
 	}
 
@@ -1679,7 +1693,7 @@ Class Hellblazer : SWWMWeapon
 		Weapon.UpSound "hellblazer/select";
 		Stamina 90000;
 		Weapon.AmmoType1 "HellblazerMissiles";
-		Weapon.AmmoGive1 6;
+		Weapon.AmmoGive1 3;
 		//SWWMWeapon.SwapWeapon "Quadravol";
 		SWWMWeapon.DropAmmoType "RocketAmmo";
 		Hellblazer.ClipCount 6;

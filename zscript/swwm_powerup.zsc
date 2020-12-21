@@ -69,7 +69,7 @@ Class GrilledCheeseSandwich : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( Owner.Health >= 1000 ) return false;
+		if ( Owner.Health > 500 ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		DoTheThing();
 		return true;

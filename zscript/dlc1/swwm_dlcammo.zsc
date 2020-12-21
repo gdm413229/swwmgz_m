@@ -13,10 +13,10 @@ Class SMW05Ammo : Ammo
 		Stamina 300;
 		Inventory.Icon "graphics/HUD/Icons/A_SMW05Ammo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 90;
-		Ammo.BackpackAmount 6;
-		Ammo.BackpackMaxAmount 250;
-		Ammo.DropAmount 6;
+		Inventory.MaxAmount 60;
+		Ammo.BackpackAmount 3;
+		Ammo.BackpackMaxAmount 150;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -70,8 +70,8 @@ Class SheenAmmo : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 300;
 		Ammo.BackpackAmount 50;
-		Ammo.BackpackMaxAmount 1500;
-		Ammo.DropAmount 50;
+		Ammo.BackpackMaxAmount 1200;
+		Ammo.DropAmount 20;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -80,6 +80,14 @@ Class SheenAmmo : Ammo
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	}
+}
+
+Class SheenTinyAmmo : SheenAmmo
+{
+	Default
+	{
+		Inventory.Amount 10;
 	}
 }
 
@@ -112,9 +120,9 @@ Class QuadravolAmmo : Ammo
 		Stamina 10000;
 		Inventory.Icon "graphics/HUD/Icons/A_QuadAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
+		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 24;
+		Ammo.BackpackMaxAmount 16;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -133,7 +141,7 @@ Class QuadravolAmmoBundleSpawn : Actor
 	{
 		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<3; i++ )
+		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("QuadravolAmmo",Vec3Angle(6,i*(360/bnd)));
 			a.special = special;
@@ -163,9 +171,9 @@ Class DarkCanister : Ammo
 		Stamina 20000;
 		Inventory.Icon "graphics/HUD/Icons/A_DarkAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 5;
+		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 13;
+		Ammo.BackpackMaxAmount 9;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -191,9 +199,9 @@ Class EMPCore : Ammo
 		Stamina 60000;
 		Inventory.Icon "graphics/HUD/Icons/A_EMPCore.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 6;
+		Inventory.MaxAmount 5;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 14;
+		Ammo.BackpackMaxAmount 12;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -264,9 +272,9 @@ Class RayAmmo : Ammo
 		Stamina 150000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 4;
+		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 8;
+		Ammo.BackpackMaxAmount 6;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -344,9 +352,9 @@ Class GrandAmmo : Ammo
 		Stamina 1200000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 2;
+		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 6;
+		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;

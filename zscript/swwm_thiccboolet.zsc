@@ -433,7 +433,7 @@ Class FatChodeImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,1500,40000,250,120,DE_THRUWALLS|DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,600,40000,250,120,DE_THRUWALLS|DE_EXTRAZTHRUST);
 		A_AlertMonsters(swwm_uncapalert?0:8000);
 		A_QuakeEx(7,7,7,50,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StartSound("silverbullet/chode",CHAN_VOICE,CHANF_DEFAULT,1.,.35);
@@ -588,8 +588,8 @@ Class FatChodeExplosionArm : Actor
 	Spawn:
 		TNT1 A 1
 		{
-			A_CountDown();
-			SWWMUtility.DoExplosion(self,20+reactiontime,8000+1500*reactiontime,80+5*reactiontime,50,DE_THRUWALLS);
+			if ( !(ReactionTime%2) )
+				SWWMUtility.DoExplosion(self,10+reactiontime,8000+1500*reactiontime,80+5*reactiontime,50,DE_THRUWALLS);
 			if ( level.IsPointInLevel(pos) )
 			{
 				A_SprayDecal("HugeRocketBlast",-32);
@@ -602,6 +602,7 @@ Class FatChodeExplosionArm : Actor
 				s.scale *= 2.4;
 				s.alpha *= .1+.4*(ReactionTime/15.);
 			}
+			A_CountDown();
 		}
 		Wait;
 	}
@@ -895,7 +896,10 @@ Class SilverBullet : SWWMWeapon
 			}
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
-				int dmg = t.Results.HitActor.DamageMobj(invoker,self,invoker.proneme?1000:500,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
+				int dmg = invoker.proneme?800:600;
+				// might as well apply explosion on top
+				if ( dmg >= t.Results.HitActor.Health ) dmg += 600;
+				dmg = t.Results.HitActor.DamageMobj(invoker,self,dmg,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
 				SWWMUtility.DoKnockback(t.Results.HitActor,t.Results.HitVector+(0,0,.025),dmg*20.*FRandom[SilverBullet](.8,1.2));
 				if ( t.Results.HitActor && !t.Results.HitActor.bNOBLOOD && !t.Results.HitActor.bDORMANT )
 				{
@@ -912,7 +916,7 @@ Class SilverBullet : SWWMWeapon
 			p.target = self;
 			FatChodeImpact(p).realangle = atan2(t.Results.HitVector.y,t.Results.HitVector.x);
 			FatChodeImpact(p).realpitch = asin(-t.Results.HitVector.z);
-			BusterWall.Bust(t.Results,invoker.proneme?2500:2000,self,t.Results.HitVector,t.Results.HitPos.z);
+			BusterWall.Bust(t.Results,invoker.proneme?1400:1200,self,t.Results.HitVector,t.Results.HitPos.z);
 		}
 		for ( int i=0; i<t.Results.Distance; i+=16 )
 		{
@@ -958,7 +962,7 @@ Class SilverBullet : SWWMWeapon
 		{
 			SilverBulletTracer sst = new("SilverBulletTracer");
 			sst.ignoreme = self;
-			sst.penetration = invoker.proneme?2500.:1500.;
+			sst.penetration = invoker.proneme?1200.:1000.;
 			sst.hitlist.Clear();
 			sst.shootthroughlist.Clear();
 			sst.waterhitlist.Clear();

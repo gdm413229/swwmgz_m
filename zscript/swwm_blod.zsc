@@ -191,7 +191,7 @@ Class mkBloodDrop : Actor
 			double ang = atan2(dir.y,dir.x);
 			double pt = asin(-dir.z);
 			LineTrace(ang,spd,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d);
-			if ( d.HitType == TRACE_HitFloor )
+			if ( (d.HitType == TRACE_HitFloor) || (pos.z <= floorz) )
 			{
 				if ( d.HitTexture == skyflatnum )
 				{
@@ -220,6 +220,8 @@ Class mkBloodDrop : Actor
 				}
 				else
 				{
+					// hacky workaround
+					if ( !d.HitSector ) d.HitSector = floorsector;
 					tracksector = d.HitSector;
 					trackplane = 0;
 				}

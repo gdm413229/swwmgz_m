@@ -1179,6 +1179,7 @@ Class Wallbuster : SWWMWeapon
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
 			p.special1 = max(0,(bc-5)/4);
+			if ( t.Results.HitType == TRACE_HitFloor ) p.CheckSplash(40);
 		}
 	}
 	override Vector3 GetTraceOffset()
@@ -1251,7 +1252,7 @@ Class Wallbuster : SWWMWeapon
 				break;
 			}
 			double rfact = invoker.cbtmuffler.GetBool()?.85:.6;
-			A_StartSound(sounds[which],CHAN_WEAPON,CHANF_OVERLAP,1./(howmany**rfact),.6-howmany*.004,1.-howmany*.012);
+			A_StartSound(sounds[which],CHAN_WEAPON,CHANF_OVERLAP,1./(howmany**rfact),.6-howmany*.004,1.-howmany*.015);
 			if ( which == 0 ) redflashstr = max(120,redflashstr+10);
 			else if ( which == 1 ) redflashstr = max(90,redflashstr+8);
 			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
@@ -1324,7 +1325,7 @@ Class Wallbuster : SWWMWeapon
 				// slug
 				if ( !sst ) sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 275.;
+				sst.penetration = 150.;
 				a = FRandom[Wallbuster](0,360);
 				s = FRandom[Wallbuster](0,.002);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -1438,9 +1439,9 @@ Class Wallbuster : SWWMWeapon
 				// buckshot
 				if ( !st ) st = new("SpreadgunTracer");
 				st.ignoreme = self;
-				// attempt to uniformize expected damage
-				int expecteddmg = 200;
-				int numshot = 31-howmany;
+				// attempt to uniformize expected damage while reducing traces (mainly for performance)
+				int expecteddmg = 120;
+				int numshot = max(21-howmany,5);
 				int individualdmg = int(ceil(expecteddmg/double(numshot)));
 				for ( int j=0; j<numshot; j++ )
 				{

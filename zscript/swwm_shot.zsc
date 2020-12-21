@@ -149,7 +149,6 @@ Class SpreadImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -196,7 +195,6 @@ Class SlugImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -377,12 +375,11 @@ Class DragonBreathArm : Actor
 		TNT1 A 1
 		{
 			if ( waterlevel > 0 ) ReactionTime -= 2;
-			A_CountDown();
 			let p = Spawn("DragonBreathPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
 			p.scale *= 3.5-2.5*(ReactionTime/20.);
 			if ( !(ReactionTime%2) )
-				SWWMUtility.DoExplosion(self,1+(reactiontime*2),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
+				SWWMUtility.DoExplosion(self,1+(reactiontime/2),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -403,6 +400,7 @@ Class DragonBreathArm : Actor
 					s2.vel = pvel;
 				}
 			}
+			A_CountDown();
 		}
 		Wait;
 	Bounce:
@@ -498,7 +496,7 @@ Class SaltImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,25+special2*5,15000,100,40);
+		SWWMUtility.DoExplosion(self,12+special2*4,15000,100,40);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
 		A_SprayDecal("ShockMarkSmall",-172);
@@ -620,7 +618,7 @@ Class SaltBeam : Actor
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
 				SWWMUtility.DoKnockback(t.Results.HitActor,x,25000);
-				t.Results.HitActor.DamageMobj(self,target,60+Accuracy*5,'Salt',DMG_THRUSTLESS);
+				t.Results.HitActor.DamageMobj(self,target,20+Accuracy*4,'Salt',DMG_THRUSTLESS);
 				if ( t.Results.HitActor && t.Results.HitActor.bIsMonster && !Random[Spreadgun](0,3) )
 					t.Results.HitActor.Howl();
 			}
@@ -691,7 +689,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
+			SWWMUtility.DoExplosion(self,4+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
 		if ( ((special2%4) || args[2]) && !special1 ) SpreadOut();
 		args[2]++;
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -875,7 +873,7 @@ Class OnFire : Actor
 			{
 				int flg = DMG_THRUSTLESS;
 				if ( victim is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're on fire, that shield is worthless
-				victim.DamageMobj(self,instigator,clamp(int(amount*.1),1,30),'Fire',flg);	// need to use this actor as inflictor to have a proper obituary
+				victim.DamageMobj(self,instigator,clamp(int(amount*.06),1,20),'Fire',flg);	// need to use this actor as inflictor to have a proper obituary
 				if ( victim.bISMONSTER && !Random[FlameT](0,3) )
 					victim.Howl();
 			}
@@ -1343,7 +1341,7 @@ Class TheBall : Actor
 		double girth = (victim.radius+victim.height)/2.*max(50,victim.mass)*(victim.health/double(victim.GetSpawnHealth()));
 		// how hard this damn thing is going to slam
 		double slamforce = vel.length()*350.+heat*120;
-		int dmg = int(vel.length()*4.2+heat*80);
+		int dmg = int(vel.length()*4.+heat*40);
 		bool is_schutt = victim.bSHOOTABLE;
 		// critical hit!
 		bool crit = false;
@@ -1592,7 +1590,7 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:40000);
-		SWWMUtility.DoExplosion(self,7777,40000,600,500,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,777,40000,600,500,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1730,7 +1728,7 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,777,30000,400,300,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,77,30000,400,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -1866,7 +1864,7 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,77,20000,200,100,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,7,20000,200,100,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("RocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
@@ -2140,6 +2138,7 @@ Class Spreadgun : SWWMWeapon
 			let p = Spawn(impact,t.Results.HitPos+hitnormal*4);
 			p.angle = atan2(hitnormal.y,hitnormal.x);
 			p.pitch = asin(-hitnormal.z);
+			if ( t.Results.HitType == TRACE_HitFloor ) p.CheckSplash(40);
 			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
 		}
 	}
@@ -2182,7 +2181,7 @@ Class Spreadgun : SWWMWeapon
 			case 1:
 				sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 250.;
+				sst.penetration = 120.;
 				a = FRandom[Spreadgun](0,360);
 				s = FRandom[Spreadgun](0,.01);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -2429,7 +2428,7 @@ Class Spreadgun : SWWMWeapon
 			default:
 				st = new("SpreadgunTracer");
 				st.ignoreme = self;
-				for ( int j=0; j<30; j++ )
+				for ( int j=0; j<20; j++ )
 				{
 					a = FRandom[Spreadgun](0,360);
 					s = FRandom[Spreadgun](0,.22);
@@ -2438,7 +2437,7 @@ Class Spreadgun : SWWMWeapon
 					st.shootthroughlist.Clear();
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-					ProcessTraceHit(st,origin,dir,6,7000,bc:5);
+					ProcessTraceHit(st,origin,dir,5,7000,bc:5);
 				}
 				for ( int i=0; i<9; i++ )
 				{

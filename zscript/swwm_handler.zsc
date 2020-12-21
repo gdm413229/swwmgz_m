@@ -2228,7 +2228,7 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
 		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') )
 		{
-			switch( Random[Replacements](0,14) )
+			switch( Random[Replacements](0,12) )
 			{
 			case 0:
 			case 1:
@@ -2239,10 +2239,6 @@ Class SWWMHandler : EventHandler
 			case 5:
 			case 6:
 				e.Replacement = greenpool[Random[Replacements](0,1)];
-				break;
-			case 7:
-			case 8:
-				e.Replacement = purplepool[0];
 				break;
 			default:
 				e.Replacement = 'SWWMNothing';
@@ -2288,7 +2284,7 @@ Class SWWMHandler : EventHandler
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacements](1,3)];
+				e.Replacement = redpool[Random[Replacements](1,2)];
 				break;
 			case 3:
 			case 4:
@@ -2314,9 +2310,9 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
-		else if ( e.Replacee == 'ClipBox' ) e.Replacement = Random[Replacements](0,3)?'EvisceratorShell':Random[Replacements](0,4)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+		else if ( e.Replacee == 'ClipBox' ) e.Replacement = Random[Replacements](0,4)?'EvisceratorShell':Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
 		else if ( e.Replacee == 'BlasterAmmo' ) e.Replacement = 'EvisceratorShell';
-		else if ( e.Replacee == 'BlasterHefty' ) e.Replacement = Random[Replacements](0,4)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+		else if ( e.Replacee == 'BlasterHefty' ) e.Replacement = Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
 		else if ( (e.Replacee == 'RocketAmmo') || (e.Replacee == 'PhoenixRodAmmo') || (e.Replacee == 'MaceAmmo') ) e.Replacement = Random[Replacements](0,2)?'HellblazerMissiles':'HellblazerCrackshots';
 		else if ( (e.Replacee == 'RocketBox') || (e.Replacee == 'PhoenixRodHefty') || (e.Replacee == 'MaceHefty') )
 		{
@@ -2327,15 +2323,15 @@ Class SWWMHandler : EventHandler
 			case 2:
 			case 3:
 			case 4:
-				if ( Random[Replacements](0,3) ) e.Replacement = 'HellblazerMissiles';
-				else if ( Random[Replacements](0,2) ) e.Replacement = 'HellblazerMissileTrioSpawn';
+				if ( Random[Replacements](0,5) ) e.Replacement = 'HellblazerMissiles';
+				else if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerMissileTrioSpawn';
 				else e.Replacement = 'HellblazerMissileMag';
 				break;
 			case 5:
 			case 6:
 			case 7:
 			case 8:
-				if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerCrackshots';
+				if ( Random[Replacements](0,6) ) e.Replacement = 'HellblazerCrackshots';
 				else e.Replacement = 'HellblazerCrackshotMag';
 				break;
 			case 9:

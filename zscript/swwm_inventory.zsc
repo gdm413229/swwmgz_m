@@ -332,11 +332,11 @@ Class SWWMHealth : Inventory abstract
 		SWWMHandler.HealthFlash(Owner.PlayerNumber());
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
-		AutoUseExtra();
+		AutoUseExtra(false);
 		return true;
 	}
 
-	virtual void AutoUseExtra()
+	virtual void AutoUseExtra( bool recursive )
 	{
 	}
 
@@ -374,6 +374,7 @@ Class SWWMHealth : Inventory abstract
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			int tgive = 0;
 			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();
+			bool morethanonce = false;
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
 				if ( acc ) tgive += GetDefaultByType(giveme).Amount;
@@ -381,7 +382,8 @@ Class SWWMHealth : Inventory abstract
 				newdamage = newdamage-GetDefaultByType(giveme).Amount;
 				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
 				newdamage = max(0,newdamage);
-				AutoUseExtra();
+				AutoUseExtra(morethanonce);
+				morethanonce = true;
 				Amount--;
 			}
 			if ( acc ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_BLUE);
@@ -585,7 +587,6 @@ Class PunchImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -656,7 +657,6 @@ Class BigPunchImpact : Actor
 		Height 0;
 		+NOGRAVITY;
 		+NOCLIP;
-		+DONTSPLASH;
 		+NOTELEPORT;
 		+NOINTERACTION;
 	}
@@ -1450,6 +1450,7 @@ Class SWWMWeapon : Weapon abstract
 		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
 		p.angle = atan2(HitNormal.y,HitNormal.x);
 		p.pitch = asin(-HitNormal.z);
+		if ( d.HitType == TRACE_HitFloor ) p.CheckSplash(40);
 		if ( raging )
 		{
 			let ps = Spawn("BigPunchSplash",d.HitLocation+HitNormal*4);

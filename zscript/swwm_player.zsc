@@ -2990,6 +2990,7 @@ Class LoveHeart : Actor
 		}
 		A_SetRenderStyle(1.,STYLE_Add);
 		//A_RemoveLight('LOVELIGHT');
+		CheckSplash(40);
 		A_QuakeEx(2,2,2,8,0,300,"",QF_RELATIVE|QF_SCALEDOWN);
 		A_StartSound("bestsound",CHAN_VOICE);
 		Spawn("LoveHeartBurstLight",pos);

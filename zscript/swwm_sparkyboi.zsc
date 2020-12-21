@@ -1205,7 +1205,7 @@ Class BiosparkBeam : Actor
 		if ( frame ) c.SetStateLabel("TrailSpawn");
 		c.roll = Random[Sparkster](0,7)*45;
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
-		int numpt = Random[Sparkster](-1,6);
+		int numpt = Random[Sparkster](-1,4);
 		for ( int i=0; i<numpt; i++ )
 		{
 			let a = Spawn("BiosparkArc",level.Vec3Offset(pos,tdir*FRandom[Sparkster](frame?0:.3,1)));
@@ -1297,7 +1297,7 @@ Class BiosparkBeam : Actor
 	{
 		Obituary "$O_SPARKSTER";
 		RenderStyle "Add";
-		DamageFunction 15;
+		DamageFunction 10;
 		Speed 256;
 		Radius .1;
 		Height 0;

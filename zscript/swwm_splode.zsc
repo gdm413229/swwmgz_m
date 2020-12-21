@@ -62,9 +62,9 @@ Class ExplodiumMagArm : Actor
 	Spawn:
 		TNT1 A 1
 		{
-			A_CountDown();
 			Spawn("ExplodiumMagTrail",pos);
-			SWWMUtility.DoExplosion(self,2+reactiontime/3,3000+500*reactiontime,40+3*reactiontime,20);
+			if ( !(ReactionTime%2) )
+				SWWMUtility.DoExplosion(self,1+reactiontime/4,3000+500*reactiontime,40+3*reactiontime,20);
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
@@ -72,6 +72,7 @@ Class ExplodiumMagArm : Actor
 			s.special1 = Random[ExploS](1,3);
 			s.scale *= 2.4;
 			s.alpha *= 0.1+.4*(ReactionTime/15.);
+			A_CountDown();
 		}
 		Wait;
 	}
@@ -144,7 +145,7 @@ Class ExplodiumMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,20+15*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,30+10*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -395,7 +396,9 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 25;
+			int dmg = 10;
+			// might as well apply explosion on top
+			if ( dmg >= d.HitActor.Health ) dmg += 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
@@ -815,7 +818,9 @@ Class DualExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 25;
+			int dmg = 10;
+			// might as well apply explosion on top
+			if ( dmg >= d.HitActor.Health ) dmg += 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )

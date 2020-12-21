@@ -161,6 +161,17 @@ Mixin Class SWWMAmmo
 		return Super.HandlePickup(item);
 	}
 
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		// drop excess ammo
+		if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo') )
+		{
+			int excess = Amount-MaxAmount;
+			if ( excess > 0 ) CreateTossable(excess);
+		}
+	}
+
 	default
 	{
 		+INVENTORY.IGNORESKILL;
@@ -225,6 +236,12 @@ Class MagAmmo : Inventory abstract
 	override void DoEffect()
 	{
 		Super.DoEffect();
+		// drop excess ammo
+		if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo') )
+		{
+			int excess = Amount-MaxAmount;
+			if ( excess > 0 ) CreateTossable(excess);
+		}
 		if ( !pamo )
 		{
 			pamo = Ammo(Owner.FindInventory(ParentAmmo));
@@ -344,10 +361,10 @@ Class RedShell : Ammo
 		Stamina 500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsNormal.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 40;
-		Ammo.BackpackAmount 3;
-		Ammo.BackpackMaxAmount 200;
-		Ammo.DropAmount 3;
+		Inventory.MaxAmount 30;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 100;
+		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -419,9 +436,9 @@ Class GreenShell : Ammo
 		Stamina 800;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsSlug.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 30;
+		Inventory.MaxAmount 25;
 		Ammo.BackpackAmount 2;
-		Ammo.BackpackMaxAmount 150;
+		Ammo.BackpackMaxAmount 80;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -485,9 +502,9 @@ Class WhiteShell : Ammo
 		Stamina 1000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsDragon.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 24;
+		Inventory.MaxAmount 10;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 80;
+		Ammo.BackpackMaxAmount 30;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -542,9 +559,9 @@ Class BlueShell : Ammo
 		Stamina 2500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 28;
-		Ammo.BackpackAmount 2;
-		Ammo.BackpackMaxAmount 100;
+		Inventory.MaxAmount 15;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 40;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -599,9 +616,9 @@ Class BlackShell : Ammo
 		Stamina 4000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsFuck.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
+		Inventory.MaxAmount 10;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 32;
+		Ammo.BackpackMaxAmount 20;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -647,10 +664,10 @@ Class PurpleShell : Ammo
 		Stamina 1500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 32;
-		Ammo.BackpackAmount 2;
-		Ammo.BackpackMaxAmount 120;
-		Ammo.DropAmount 2;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 60;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -736,7 +753,7 @@ Class GoldShell : Ammo
 		Stamina 0;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsGold.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 3;
+		Inventory.MaxAmount 7;
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 7;
 		Ammo.DropAmount 1;
@@ -771,10 +788,10 @@ Class EvisceratorShell : Ammo
 		Stamina 3000;
 		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 36;
+		Inventory.MaxAmount 20;
 		Ammo.BackpackAmount 2;
-		Ammo.BackpackMaxAmount 148;
-		Ammo.DropAmount 2;
+		Ammo.BackpackMaxAmount 90;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 8;
@@ -843,9 +860,9 @@ Class HellblazerMissiles : Ammo
 		Stamina 8000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 30;
-		Ammo.BackpackAmount 2;
-		Ammo.BackpackMaxAmount 94;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 60;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -911,7 +928,7 @@ Class HellblazerCrackshots : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 15;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 71;
+		Ammo.BackpackMaxAmount 36;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -954,9 +971,9 @@ Class HellblazerRavagers : Ammo
 		Stamina 25000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 12;
+		Inventory.MaxAmount 9;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 60;
+		Ammo.BackpackMaxAmount 24;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1001,7 +1018,7 @@ Class HellblazerWarheads : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 12;
+		Ammo.BackpackMaxAmount 10;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1048,9 +1065,9 @@ Class SparkUnit : Ammo
 		Stamina 50000;
 		Inventory.Icon "graphics/HUD/Icons/A_Sparkster.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 6;
+		Inventory.MaxAmount 5;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 30;
+		Ammo.BackpackMaxAmount 15;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1084,7 +1101,7 @@ Class SilverBulletAmmo : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 11;
+		Ammo.BackpackMaxAmount 8;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1114,7 +1131,7 @@ Class SilverBulletAmmo2 : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 2;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 10;
+		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1182,7 +1199,7 @@ Class SilverBulletsBundleSpawn : Actor
 	{
 		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<3; i++ )
+		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("SilverBullets",Vec3Angle(6,i*(360/bnd)));
 			a.special = special;
@@ -1238,9 +1255,9 @@ Class CandyGunAmmo : Ammo
 		Stamina 100000;
 		Inventory.Icon "graphics/HUD/Icons/A_CandyGun.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 3;
+		Inventory.MaxAmount 2;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 7;
+		Ammo.BackpackMaxAmount 6;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1334,7 +1351,7 @@ Class YnykronAmmo : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 5;
+		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1489,8 +1506,6 @@ Class AmmoFabricator : Inventory abstract
 		+INVENTORY.AUTOACTIVATE;
 		+FLOATBOB;
 		Inventory.UseSound "fabricator/use";
-		Inventory.MaxAmount 32;
-		Inventory.InterHubAmount 32;
 		Inventory.PickupFlash "SWWMPickupFlash";
 		FloatBobStrength 0.25;
 		Radius 10;
@@ -1514,6 +1529,7 @@ Class FabricatorTier1 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
 		Inventory.MaxAmount 20;
+		Inventory.InterHubAmount 20;
 		AmmoFabricator.Budget 3000;
 		AmmoFabricator.PerType 1;
 		AmmoFabricator.MaxUnitPrice 2500;
@@ -1529,6 +1545,7 @@ Class FabricatorTier2 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
 		Inventory.MaxAmount 15;
+		Inventory.InterHubAmount 15;
 		AmmoFabricator.Budget 15000;
 		AmmoFabricator.PerType 2;
 		AmmoFabricator.MaxUnitPrice 12000;
@@ -1544,6 +1561,7 @@ Class FabricatorTier3 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
+		Inventory.InterHubAmount 10;
 		AmmoFabricator.Budget 80000;
 		AmmoFabricator.PerType 4;
 		AmmoFabricator.MaxUnitPrice 80000;
@@ -1557,6 +1575,7 @@ Class FabricatorTier4 : AmmoFabricator
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator4.png";
 		Inventory.PickupMessage "$T_FABRICATOR4";
 		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
 		AmmoFabricator.Budget int.max;
 		AmmoFabricator.PerType int.max;
 		AmmoFabricator.MaxUnitPrice 1000000;

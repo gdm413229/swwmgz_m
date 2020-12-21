@@ -119,7 +119,7 @@ Class EvisceratorChunk : Actor
 		Radius 2;
 		Height 2;
 		Speed 50;
-		DamageFunction int(clamp((vel.length()-6)*.15+max(0,1.-lifetime)*3.,0,10));
+		DamageFunction int(clamp((vel.length()-5)*.12+max(0,1.-lifetime)*2.,0,8));
 		DamageType 'shot';
 		BounceFactor 1.0;
 		WallBounceFactor 1.0;
@@ -411,7 +411,7 @@ Class EvisceratorProj : Actor
 		A_SprayDecal("BigRocketBlast",50);
 		A_NoGravity();
 		A_SetScale(3.5);
-		SWWMUtility.DoExplosion(self,150,120000,200,80);
+		SWWMUtility.DoExplosion(self,80,120000,200,80);
 		A_QuakeEx(6,6,6,20,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.7);
 		A_StartSound("eviscerator/shell",CHAN_WEAPON,attenuation:.5);
 		A_StartSound("eviscerator/shell",CHAN_VOICE,attenuation:.3);
@@ -432,7 +432,7 @@ Class EvisceratorProj : Actor
 			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
 				spawnofs *= -1;
 		}
-		for ( int i=0; i<40; i++ )
+		for ( int i=0; i<30; i++ )
 		{
 			p = Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs));
 			p.bHITOWNER = true;
@@ -441,7 +441,7 @@ Class EvisceratorProj : Actor
 			Vector3 dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = -asin(dir.z);
-			p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*(p.speed+FRandom[Eviscerator](-5,15));
+			p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*(p.speed+FRandom[Eviscerator](-5,20));
 			p.target = target;
 		}
 		int numpt = Random[Eviscerator](8,12);
@@ -659,16 +659,18 @@ Class Eviscerator : SWWMWeapon
 			return;
 		}
 		loadtics++;
-		if ( (loadtics == 9) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
-		{
+		if ( (loadtics == 15) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
 			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
-		}
-		if ( loadtics > 20 )
-		{
+		if ( (loadtics == 25) && !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
+			Ammo1.Amount = max(0,Ammo1.Amount-1);
+		if ( loadtics == 30 )
 			pendingload = false;
-			if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
-				Ammo1.Amount = max(0,Ammo1.Amount-1);
-		}
+	}
+
+	action void A_StartLoad( int delay = 0 )
+	{
+		invoker.pendingload = true;
+		invoker.loadtics = -delay;
 	}
 
 	override Vector3 GetTraceOffset()
@@ -695,7 +697,7 @@ Class Eviscerator : SWWMWeapon
 		SWWMUtility.DoKnockback(self,-x,25000.);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
-		for ( int i=0; i<40; i++ )
+		for ( int i=0; i<30; i++ )
 		{
 			a = FRandom[Eviscerator](0,360);
 			s = FRandom[Eviscerator](0,invoker.extended?.06:.3);
@@ -705,6 +707,7 @@ Class Eviscerator : SWWMWeapon
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = asin(-dir.z);
 			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
+			if ( invoker.extended ) p.vel *= 1.25;
 		}
 		for ( int i=0; i<4; i++ )
 		{
@@ -902,7 +905,7 @@ Class Eviscerator : SWWMWeapon
 		XZW4 C 1
 		{
 			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
-			invoker.pendingload = true;
+			A_StartLoad();
 		}
 		XZW4 DEF 1;
 		XZW4 GHI 2;
@@ -917,7 +920,7 @@ Class Eviscerator : SWWMWeapon
 		XZW7 B 1
 		{
 			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
-			invoker.pendingload = true;
+			A_StartLoad();
 		}
 		XZW7 CDE 1;
 		XZW7 FGH 2;
@@ -942,7 +945,7 @@ Class Eviscerator : SWWMWeapon
 		XZW2 STUVW 1;
 		XZW2 XYZ 2;
 		XZW3 ABCD 2;
-		XZW2 A 1 { invoker.pendingload = true; }
+		XZW2 A 1 A_StartLoad(5);
 		Goto Ready;
 	AltFireExt:
 		XZW4 Z 2;
@@ -950,7 +953,7 @@ Class Eviscerator : SWWMWeapon
 		XZW5 WXY 2;
 		XZW5 Z 2;
 		XZW6 ABC 2;
-		XZW4 Z 1 { invoker.pendingload = true; }
+		XZW4 Z 1 A_StartLoad(5);
 		Goto ReadyExt;
 	Zoom:
 		XZW2 A 2

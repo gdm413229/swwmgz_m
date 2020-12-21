@@ -145,7 +145,7 @@ Class ExplodiumMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,30+10*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,25+20*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -396,7 +396,7 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 10;
+			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
@@ -818,7 +818,7 @@ Class DualExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 10;
+			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 25;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);

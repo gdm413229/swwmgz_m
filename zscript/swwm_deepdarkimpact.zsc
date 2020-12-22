@@ -320,6 +320,7 @@ Class DeepImpact : SWWMWeapon
 				t.hitlist.Clear();
 				t.hitdist.Clear();
 				t.Trace(origin,level.PointInSector(origin.xy),dir,150-i*120,0);
+				SWWMBulletTrail.DoTrail(self,origin,dir,150-i*120,0);
 				for ( int i=0; i<t.hitlist.Size(); i++ )
 				{
 					int inl = -1;
@@ -353,6 +354,7 @@ Class DeepImpact : SWWMWeapon
 					if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.top.Normal;
 					else hitnormal = t.Results.HitSector.floorplane.Normal;
 					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
+					Spawn("InvisibleSplasher",t.Results.HitPos);
 				}
 				else if ( t.Results.HitType == TRACE_HitCeiling )
 				{

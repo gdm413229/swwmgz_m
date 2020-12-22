@@ -424,6 +424,7 @@ Class PusherWeapon : SWWMWeapon
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3.5*z);
 		FLineTraceData d;
 		LineTrace(angle,60,pitch,TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+		SWWMBulletTrail.DoTrail(self,origin,x,60,0);
 		if ( d.HitType != TRACE_HitNone )
 		{
 			A_QuakeEx(2,2,2,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
@@ -503,6 +504,7 @@ Class PusherWeapon : SWWMWeapon
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+2*y-3.5*z);
 		FLineTraceData d;
 		LineTrace(angle,80,pitch,TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+		SWWMBulletTrail.DoTrail(self,origin,x,80,0);
 		bool gone = false;
 		if ( d.HitType != TRACE_HitNone )
 		{

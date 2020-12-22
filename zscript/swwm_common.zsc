@@ -1370,7 +1370,7 @@ Class SWWMBulletTrail : LineTracer
 	Array<Line> ShootThroughList;
 	Actor ignoreme;
 
-	static play void DoTrail( Actor target, Vector3 pos, Vector3 dir, int dist, int bubblechance, bool smoky = false )
+	static play void DoTrail( Actor target, Vector3 pos, Vector3 dir, double dist, int bubblechance, bool smoky = false )
 	{
 		let t = new("SWWMBulletTrail");
 		t.ignoreme = target;
@@ -1379,9 +1379,9 @@ Class SWWMBulletTrail : LineTracer
 		t.Trace(pos,level.PointInSector(pos.xy),dir,dist,0);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
+			// have to do both because WOW, HOW THE FUCK IS THIS INTENTIONAL???
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{

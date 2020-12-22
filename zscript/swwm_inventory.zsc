@@ -878,7 +878,6 @@ Class UseList
 Class UseLineTracer : LineTracer
 {
 	Array<UseList> uses;
-	Array<Line> glass;
 
 	static play bool TangibleLine( UseList u )
 	{
@@ -946,8 +945,6 @@ Class UseLineTracer : LineTracer
 			{
 				if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything|Line.ML_BlockUse)) )
 					return TRACE_Stop;
-				if ( Results.HitLine.special == GlassBreak )	// fuck glass
-					glass.Push(Results.HitLine);
 				return TRACE_Skip;
 			}
 		}
@@ -1390,11 +1387,12 @@ Class SWWMWeapon : Weapon abstract
 	}
 	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1. )
 	{
+		Vector3 origin = Vec3Offset(0,0,player.viewheight);
+		Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
 		// check for usables
 		let ut = new("UseLineTracer");
 		ut.uses.Clear();
-		ut.glass.Clear();
-		ut.Trace(Vec3Offset(0,0,player.viewheight),CurSector,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)),DEFMELEERANGE*rangemul,0);
+		ut.Trace(origin,CurSector,dir,DEFMELEERANGE*rangemul,0);
 		invoker.wallponch = true;
 		for ( int i=0; i<ut.uses.Size(); i++ )
 		{
@@ -1414,9 +1412,8 @@ Class SWWMWeapon : Weapon abstract
 			}
 		}
 		invoker.wallponch = false;
-		// fuck glass
-		for ( int i=0; i<ut.glass.Size(); i++ )
-			ut.glass[i].Activate(self,0,SPAC_Impact);
+		// check for shootables
+		SWWMBulletTrail.DoTrail(self,origin,dir,DEFMELEERANGE*rangemul,0);
 		let raging = RagekitPower(FindInventory("RagekitPower"));
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )

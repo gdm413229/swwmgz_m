@@ -425,6 +425,7 @@ Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, a
 A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Appears to be cursed, potentially putting you in the sights of a very real moth girl.
 
 ### Haunted Saya Bean Plush (Heretic)
+![](docimg/sayabean.png)
 
 Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
 

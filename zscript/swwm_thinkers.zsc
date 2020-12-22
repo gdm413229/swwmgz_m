@@ -900,6 +900,19 @@ Class SWWMCombatTracker : Thinker
 
 	override void Tick()
 	{
+		// only the first tracker accesses the CVars, saves on perf
+		if ( !prev )
+		{
+			if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
+			if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
+			dbar = damagebars.GetInt();
+			mxdist = maxdist.GetInt();
+		}
+		if ( next )
+		{
+			next.dbar = dbar;
+			next.mxdist = mxdist;
+		}
 		// is target gone or dead?
 		if ( !mytarget || (mytarget.Health <= 0) )
 		{
@@ -972,19 +985,6 @@ Class SWWMCombatTracker : Thinker
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
 		// special update conditions
-		// only the first tracker accesses the CVars, saves on perf
-		if ( !prev )
-		{
-			if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
-			if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
-			dbar = damagebars.GetInt();
-			mxdist = maxdist.GetInt();
-		}
-		if ( next )
-		{
-			next.dbar = dbar;
-			next.mxdist = mxdist;
-		}
 		if ( dbar )
 		{
 			if ( (dbar == 2) && (lasthealth >= maxhealth) )

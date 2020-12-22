@@ -42,6 +42,12 @@ OptionValue "SWWMSilenceMap"
 	1, "$SWWM_SILENCE_SILENT"
 	2, "$SWWM_SILENCE_CALM"
 }
+OptionValue "SWWMForceStats"
+{
+	0, "$SWWM_STATS_DISABLED"
+	1, "$SWWM_STATS_ALWAYS"
+	2, "$SWWM_STATS_MAPNAME"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -61,6 +67,7 @@ OptionMenu "SWWMOptionMenu"
 	Option "$SWWM_RAGESHADER", "swwm_rageshader", "YesNo"
 	Slider "$SWWM_FLASH", "swwm_flashstrength", 0.0, 1.0, 0.1, 1
 	Option "$SWWM_CAMHUD", "swwm_camhud", "YesNo"
+	Option "$SWWM_FORCESTATS", "swwm_forcestats", "SWWMForceStats"
 	Slider "$SWWM_HUDMARGIN", "swwm_hudmargin", 0, 40, 1, 0
 	Slider "$SWWM_MAXMSG", "swwm_maxshown", 1, 10, 1, 0
 	Slider "$SWWM_MAXMSGBIG", "swwm_maxshownbig", 1, 20, 1, 0

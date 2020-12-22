@@ -26,7 +26,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMHandler hnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil, camhud;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil, camhud, forcestats;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -858,8 +858,10 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,sstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw stats and timer when automap is open
+		if ( !forcestats ) forcestats = CVar.GetCVar('swwm_forcestats',players[consoleplayer]);
+		int fstats = forcestats.GetInt();
 		int yy = margin+19;
-		if ( automapactive )
+		if ( automapactive || (fstats > 0) )
 		{
 			if ( !showitems ) showitems = CVar.GetCVar('am_showitems',players[consoleplayer]);
 			if ( !showmaplabel ) showmaplabel = CVar.GetCVar('am_showmaplabel',players[consoleplayer]);
@@ -869,15 +871,19 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !showtotaltime ) showtotaltime = CVar.GetCVar('am_showtotaltime',players[consoleplayer]);
 			int xx = int(ss.x-(margin+2));
 			String str;
-			int label = showmaplabel.GetInt();
-			String ln = level.levelname;
-			int iof = ln.IndexOf(" - by: ");
-			if ( iof != -1 ) ln.Truncate(iof);
-			if ( !label || ((level.clusterflags&level.CLUSTER_HUB) && (label == 2)) ) str = ln;
-			else str = String.Format("%s - %s",level.mapname.MakeUpper(),ln);
-			let fnt = LangFont(mTewiFont);
-			Screen.DrawText(fnt,Font.CR_FIRE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			yy += fnt.GetHeight();
+			Font fnt;
+			if ( automapactive || (fstats > 1) )
+			{
+				int label = showmaplabel.GetInt();
+				String ln = level.levelname;
+				int iof = ln.IndexOf(" - by: ");
+				if ( iof != -1 ) ln.Truncate(iof);
+				if ( !label || ((level.clusterflags&level.CLUSTER_HUB) && (label == 2)) ) str = ln;
+				else str = String.Format("%s - %s",level.mapname.MakeUpper(),ln);
+				fnt = LangFont(mTewiFont);
+				Screen.DrawText(fnt,Font.CR_FIRE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += fnt.GetHeight();
+			}
 			fnt = LangFont(mMiniwiFont);
 			if ( (level.total_monsters > 0) && showmonsters.GetBool() )
 			{

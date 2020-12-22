@@ -2283,8 +2283,8 @@ Class YnykronSingularity : Actor
 					if ( a && (a.Health <= 0) )
 					{
 						if ( a.player ) PlayerGone.FeckOff(a);
-						if ( tracer.FindState("YnykronAltDeath",true) )
-							tracer.SetStateLabel("YnykronAltDeath");	// dedicated state
+						if ( a.FindState("YnykronAltDeath",true) )
+							a.SetStateLabel("YnykronAltDeath");	// dedicated state
 						else
 						{
 							// poof away manually

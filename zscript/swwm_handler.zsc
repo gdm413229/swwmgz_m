@@ -2226,25 +2226,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') ) e.Replacement = Random[Replacements](0,2)?'CandyGun':'Ynykron';
 		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
-		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') )
-		{
-			switch( Random[Replacements](0,12) )
-			{
-			case 0:
-			case 1:
-			case 2:
-				e.Replacement = redpool[Random[Replacements](0,1)];
-				break;
-			case 4:
-			case 5:
-			case 6:
-				e.Replacement = greenpool[Random[Replacements](0,1)];
-				break;
-			default:
-				e.Replacement = 'SWWMNothing';
-				break;
-			}
-		}
+		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') ) e.Replacement = 'SWWMNothing';
 		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
 			switch( Random[Replacements](0,13) )

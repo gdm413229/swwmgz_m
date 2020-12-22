@@ -302,6 +302,19 @@ Class FrispyCorn : SWWMCollectible
 		Height 23;
 	}
 }
+Class SayaBean : SWWMCollectible
+{
+	bool callout;	// already called the player a perv for loading h-doom
+
+	Default
+	{
+		Tag "$T_SAYABEAN";
+		Inventory.PickupMessage "$T_SAYABEAN";
+		Stamina 5000;
+		Radius 6;
+		Height 23;
+	}
+}
 // Heretic
 Class DemoPlush : SWWMCollectible
 {
@@ -313,20 +326,6 @@ Class DemoPlush : SWWMCollectible
 		Stamina 6000;
 		Radius 12;
 		Height 36;
-	}
-}
-Class SayaBean : SWWMCollectible
-{
-	bool callout;	// already called the player a perv for loading h-doom
-
-	Default
-	{
-		Tag "$T_SAYABEAN";
-		Inventory.PickupMessage "$T_SAYABEAN";
-		SWWMCollectible.Availability AVAIL_Heretic;
-		Stamina 5000;
-		Radius 3;
-		Height 20;
 	}
 }
 // Hexen

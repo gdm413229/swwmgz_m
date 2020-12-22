@@ -22,7 +22,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - **[Hexen]** Lord Vilkreath - Fundaments of Puzzle Design *("What the hell is this crap?")*
   - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
 * **Even more collectibles:**
-  - Dr. Locke's Super Happy Fun Ball *("I'd suggest not to drop it")*
+  - AA-12 *("Ibuki's favorite shotgun. It's just a collectible model, so it doesn't actually shoot")*
+  - Cube *("It's a cube")*
+  - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
+  - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Visible legs in first person**
 * **Leaning**

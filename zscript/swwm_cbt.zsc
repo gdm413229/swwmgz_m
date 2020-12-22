@@ -942,7 +942,7 @@ Class Wallbuster : SWWMWeapon
 	override void RenderUnderlay( RenderEvent e )
 	{
 		// draw custom crosshair
-		if ( automapactive || (players[consoleplayer].Camera is 'SecurityCamera') ) return;
+		if ( automapactive || !(players[consoleplayer].Camera is 'PlayerPawn') ) return;
 		if ( !phair || !phair.GetBool() ) return;
 		if ( !ch_on ) ch_on = CVar.GetCVar('crosshairon',players[consoleplayer]);
 		if ( !ch_on.GetBool() ) return;

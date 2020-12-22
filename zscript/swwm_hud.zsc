@@ -1400,7 +1400,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( !iscale ) iscale = CVar.GetCVar('swwm_poiscale',players[consoleplayer]);
 		if ( !dscale ) dscale = CVar.GetCVar('swwm_detscale',players[consoleplayer]);
 		if ( !camhud ) camhud = CVar.GetCVar('swwm_camhud',players[consoleplayer]);
-		if ( !camhud.GetBool() && (players[consoleplayer].Camera is 'SecurityCamera') )
+		if ( !camhud.GetBool() && !(players[consoleplayer].Camera is 'PlayerPawn') )
 			camhidden = true;
 		else camhidden = false;
 		BeginHUD();

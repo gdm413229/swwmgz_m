@@ -27,8 +27,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
-* **Visible legs in first person**
-* **Leaning**
+* **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding**
 * **"Advanced" Item Sense *(detect activatable walls)***
 * **DLC Gameset:**

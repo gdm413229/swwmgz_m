@@ -575,7 +575,7 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon != lastwep) )
 		{
-			if ( (ntags.GetInt()&2) && (CPlayer == players[consoleplayer]) && !(CPlayer.PendingWeapon is 'SWWMGesture') )
+			if ( (ntags.GetInt()&2) && (CPlayer == players[consoleplayer]) && !(CPlayer.PendingWeapon is 'SWWMGesture') && !(CPlayer.PendingWeapon is 'SWWMItemGesture') )
 			{
 				ntagstr = CPlayer.PendingWeapon.GetTag();
 				ntagtic = level.totaltime;
@@ -1087,10 +1087,14 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			int ncolor = Font.CR_WHITE;
 			SWWMGesture hasgesture = null;
+			SWWMItemGesture hasitemgesture = null;
 			if ( CPlayer.PendingWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.PendingWeapon);
 			else if ( CPlayer.ReadyWeapon is 'SWWMGesture' ) hasgesture = SWWMGesture(CPlayer.ReadyWeapon);
+			if ( CPlayer.PendingWeapon is 'SWWMItemGesture' ) hasitemgesture = SWWMItemGesture(CPlayer.PendingWeapon);
+			else if ( CPlayer.ReadyWeapon is 'SWWMItemGesture' ) hasitemgesture = SWWMItemGesture(CPlayer.ReadyWeapon);
 			if ( !CPlayer.HasWeaponsInSlot(i%10) ) ncolor = Font.CR_DARKGRAY;
 			else if ( hasgesture && hasgesture.formerweapon && (hasgesture.formerweapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
+			else if ( hasitemgesture && hasitemgesture.gest.formerweapon && (hasitemgesture.gest.formerweapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else if ( (!CPlayer.PendingWeapon || (CPlayer.PendingWeapon == WP_NOCHANGE)) && CPlayer.ReadyWeapon && (CPlayer.ReadyWeapon.SlotNumber == (i%10)) ) ncolor = Font.CR_FIRE;
 			else

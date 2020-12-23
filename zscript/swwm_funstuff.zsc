@@ -6,8 +6,10 @@ Class SWWMCollectible : Inventory abstract
 
 	int avail;
 	bool propagated;
+	Class<SWWMItemGesture> gesture;
 
 	Property Availability : avail;
+	Property GestureWeapon : gesture;
 
 	// minimum gametype requirements
 	enum EAvailability
@@ -58,9 +60,9 @@ Class SWWMCollectible : Inventory abstract
 		if ( Owner.player && !propagated )
 		{
 			if ( pickup && CVar.GetCVar('swwm_collectanim',Owner.player) )
-				SWWMGesture.SetSpecialGesture(Owner.player.mo,self,true);
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture);
 			else if ( !pickup )
-				SWWMGesture.SetSpecialGesture(Owner.player.mo,self);
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture,true);
 		}
 		// clean up the flag
 		propagated = false;
@@ -97,43 +99,104 @@ Class SWWMCollectible : Inventory abstract
 		XZW1 A -1;
 		Stop;
 	}
+}
 
-	// helper
+Class SWWMItemGesture : SWWMWeapon abstract
+{
+	SWWMGesture gest;	// the base gesture weapon that we got picked from
+
+	// these should prevent autoswitch when out of ammo
+	override bool ReportHUDAmmo()
+	{
+		return false;
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		return false;
+	}
+	override bool Use( bool pickup )
+	{
+		return false;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) )
+			return;
+		let psp = Owner.player.FindPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		if ( (Owner.Health <= 0) && (psp.CurState != ResolveState("Deselect")) )
+			Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
 	action void A_FinishGesture()
 	{
-		let gest = SWWMGesture(FindInventory("SWWMGesture"));
+		let gest = invoker.gest;
 		if ( !gest )
 		{
 			ThrowAbortException("Call to A_FinishGesture() without owned SWWMGesture");
 			return;
 		}
-		if ( gest.sstate.Size() > 0 )
+		if ( gest.sweapon.Size() > 0 )
 		{
 			gest.whichgesture = GS_Null;
-			gest.whichstate = gest.sstate[0];
-			gest.whichcaller = gest.scaller[0];
+			gest.whichweapon = gest.sweapon[0];
+			gest.whichuse = gest.suse[0];
 			// push back
-			gest.sstate.Delete(0);
-			gest.scaller.Delete(0);
-			let psp = player.FindPSprite(PSP_WEAPON);
-			psp.caller = gest;
-			psp.SetState(gest.ResolveState("Ready"));
+			gest.sweapon.Delete(0);
+			gest.suse.Delete(0);
+			// go back to the main gesture and clear ourselves
+			player.ReadyWeapon = gest;
+			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.Destroy();
 			return;
 		}
 		if ( gest.queued )
 		{
-			gest.whichstate = null;
+			gest.whichweapon = null;
 			gest.whichgesture = gest.nextgesture;
 			gest.queued = false;
-			let psp = player.FindPSprite(PSP_WEAPON);
-			psp.caller = gest;
-			psp.SetState(gest.ResolveState("Ready"));
+			// go back to the main gesture and clear ourselves
+			player.ReadyWeapon = gest;
+			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.Destroy();
 			return;
 		}
+		// switch to old weapon and clear ourselves
+		player.ReadyWeapon = gest;
 		player.PendingWeapon = gest.formerweapon;
-		let psp = player.FindPSprite(PSP_WEAPON);
-		psp.caller = gest;
-		psp.SetState(gest.ResolveState("Deselect"));
+		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Deselect"));
+		invoker.Destroy();
+	}
+
+	Default
+	{
+		+WEAPON.CHEATNOTWEAPON;
+		+WEAPON.NO_AUTO_SWITCH;
+		+WEAPON.WIMPY_WEAPON;
+		+SWWMWEAPON.HIDEINMENU;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		Weapon.SelectionOrder int.max;
+	}
+	States
+	{
+	Select:
+		XZW1 A 1 A_FullRaise();
+		Goto Ready;
+	Ready:
+	Fire:
+		XZW1 A 1 A_Print("Pickup gesture");
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	AltFire:
+		XZW1 A 1 A_Print("Use gesture");
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Deselect:
+		XZW1 A -1 A_FullLower();
+		Stop;
 	}
 }
 

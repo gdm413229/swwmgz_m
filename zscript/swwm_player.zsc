@@ -1825,7 +1825,7 @@ Class Demolitionist : PlayerPawn
 		if ( !player ) return;
 		// add lore if any
 		SWWMLoreLibrary.Add(player,item.GetClassName());
-		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
+		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 			SWWMHandler.AddOneliner("getweapon",2);
 		if ( (item is 'Key') && !key_reentrant && !deathmatch )
 		{
@@ -1989,10 +1989,15 @@ Class Demolitionist : PlayerPawn
 		// prevent sudden stomping if we were previously falling
 		lastvelz = vel.z;
 		// early cancel gestures
-		if ( player && (player.ReadyWeapon is 'SWWMGesture') )
+		if ( player )
 		{
-			player.PendingWeapon = SWWMGesture(player.ReadyWeapon).formerweapon;
-			player.SetPSprite(PSP_WEAPON,player.ReadyWeapon.ResolveState("Deselect"));
+			if ( player.ReadyWeapon is 'SWWMItemGesture' )
+				player.ReadyWeapon = SWWMItemGesture(player.ReadyWeapon).gest;
+			if ( player.ReadyWeapon is 'SWWMGesture' )
+			{
+				player.PendingWeapon = SWWMGesture(player.ReadyWeapon).formerweapon;
+				player.SetPSprite(PSP_WEAPON,player.ReadyWeapon.ResolveState("Deselect"));
+			}
 		}
 		// re-add ourselves to the "suckable list" (otherwise the Ynykron Singularity won't hurt us)
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -3138,10 +3143,10 @@ Class SWWMGesture : SWWMWeapon
 	Weapon formerweapon;
 	int whichgesture, nextgesture;
 	bool deaded, queued;
-	State whichstate;
-	Actor whichcaller;
-	Array<State> sstate;
-	Array<Actor> scaller;
+	bool whichuse;
+	Class<SWWMItemGesture> whichweapon;
+	Array<bool> suse;
+	Array<Class<SWWMItemGesture> > sweapon;
 	int gonect;
 	HeadpatTracker pats;	// for headpat gesture, our current tracker
 
@@ -3151,6 +3156,10 @@ Class SWWMGesture : SWWMWeapon
 		return false;
 	}
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		return false;
+	}
+	override bool Use( bool pickup )
 	{
 		return false;
 	}
@@ -3171,7 +3180,8 @@ Class SWWMGesture : SWWMWeapon
 		if ( mo.Health <= 0 ) return null;	// dead
 		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
 		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
-		if ( (mo.player.PendingWeapon == w) || (mo.player.ReadyWeapon == w) )
+		if ( w && ((mo.player.PendingWeapon is 'SWWMGesture') || (mo.player.ReadyWeapon is 'SWWMGesture')
+			|| (mo.player.PendingWeapon is 'SWWMItemGesture') || (mo.player.ReadyWeapon is 'SWWMItemGesture')) )
 		{
 			// already gesturing
 			// just queue another one
@@ -3190,31 +3200,29 @@ Class SWWMGesture : SWWMWeapon
 		}
 		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
 		else w.formerweapon = mo.player.ReadyWeapon;
-		w.whichstate = null;
+		w.whichweapon = null;
 		w.whichgesture = which;
 		mo.player.PendingWeapon = w;
 		return w;
 	}
 
-	// "special" gestures go to a specified state, which may be external
-	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Actor a, bool pickup = false )
+	// "special" gestures are run by switching to another "weapon"
+	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Class<SWWMItemGesture> a, bool used = false )
 	{
 		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
 		if ( mo.Health <= 0 ) return null;	// dead
 		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
-		State which = null;
-		if ( pickup ) which = a.FindState("PickupGesture");
-		else which = a.FindState("UseGesture");
-		if ( !which ) return null;	// state not found
+		if ( !a ) return null;
 		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
-		if ( (mo.player.PendingWeapon == w) || (mo.player.ReadyWeapon == w) )
+		if ( w && ((mo.player.PendingWeapon is 'SWWMGesture') || (mo.player.ReadyWeapon is 'SWWMGesture')
+			|| (mo.player.PendingWeapon is 'SWWMItemGesture') || (mo.player.ReadyWeapon is 'SWWMItemGesture')) )
 		{
 			// already gesturing
 			// queue if unique
-			if ( w.sstate.Find(which) != w.sstate.Size() )
+			if ( (w.sweapon.Size() <= 0) || (w.sweapon.Find(a) != w.sweapon.Size()) )
 			{
-				w.sstate.Push(which);
-				w.scaller.Push(a);
+				w.sweapon.Push(a);
+				w.suse.Push(used);
 			}
 			return null;
 		}
@@ -3226,8 +3234,8 @@ Class SWWMGesture : SWWMWeapon
 		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
 		else w.formerweapon = mo.player.ReadyWeapon;
 		w.whichgesture = GS_Null;
-		w.whichstate = which;
-		w.whichcaller = a;
+		w.whichweapon = a;
+		w.whichuse = used;
 		mo.player.PendingWeapon = w;
 		return w;
 	}
@@ -3243,20 +3251,20 @@ Class SWWMGesture : SWWMWeapon
 
 	action void A_FinishGesture()
 	{
-		if ( invoker.sstate.Size() > 0 )
+		if ( invoker.sweapon.Size() > 0 )
 		{
 			invoker.whichgesture = GS_Null;
-			invoker.whichstate = invoker.sstate[0];
-			invoker.whichcaller = invoker.scaller[0];
+			invoker.whichweapon = invoker.sweapon[0];
+			invoker.whichuse = invoker.suse[0];
 			// push back
-			invoker.sstate.Delete(0);
-			invoker.scaller.Delete(0);
+			invoker.sweapon.Delete(0);
+			invoker.suse.Delete(0);
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
 			return;
 		}
 		if ( invoker.queued )
 		{
-			invoker.whichstate = null;
+			invoker.whichweapon = null;
 			invoker.whichgesture = invoker.nextgesture;
 			invoker.queued = false;
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
@@ -3444,12 +3452,19 @@ Class SWWMGesture : SWWMWeapon
 	Ready:
 		XZW1 A 1
 		{
-			if ( invoker.whichstate )
+			if ( invoker.whichweapon )
 			{
-				// set caller (gross hack)
-				let psp = player.FindPSPrite(PSP_WEAPON);
-				psp.caller = invoker.whichcaller;
-				return invoker.whichstate;
+				SWWMItemGesture g = SWWMItemGesture(FindInventory(invoker.whichweapon));
+				if ( !g )
+				{
+					g = SWWMItemGesture(Spawn(invoker.whichweapon));
+					AddInventory(g);
+				}
+				g.gest = invoker;
+				player.ReadyWeapon = g;
+				if ( invoker.whichuse ) player.SetPSPrite(PSP_WEAPON,g.FindState("AltFire"));
+				else player.SetPSPrite(PSP_WEAPON,g.FindState("Fire"));
+				return ResolveState(null);
 			}
 			switch ( invoker.whichgesture )
 			{

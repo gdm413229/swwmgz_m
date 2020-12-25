@@ -2217,9 +2217,9 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = 'ExplodiumGun';
 		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') ) e.Replacement = 'Spreadgun';
 		else if ( (e.Replacee is 'SuperShotgun') || (e.Replacee is 'MWeapFrost') ) e.Replacement = 'Wallbuster';
-		else if ( e.Replacee is 'Crossbow' ) e.Replacement = Random[Replacements](0,2)?'Spreadgun':'Wallbuster';
-		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeaponPiece3') ) e.Replacement = 'Eviscerator';
-		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'FWeapHammer') ) e.Replacement = 'Hellblazer';
+		else if ( (e.Replacee is 'Crossbow') || (e.Replacee.GetClassName() == 'TangoScrapGun') ) e.Replacement = Random[Replacements](0,2)?'Spreadgun':'Wallbuster';
+		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeaponPiece3') || (e.Replacee.GetClassName() == 'TangoAssaultRifle') || (e.Replacee.GetClassName() == 'TangoChaingun') ) e.Replacement = 'Eviscerator';
+		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'FWeapHammer') || (e.Replacee.GetClassName() == 'TangoStomper') ) e.Replacement = 'Hellblazer';
 		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') ) e.Replacement = Random[Replacements](0,2)?'Sparkster':'SilverBullet';
 		else if ( e.Replacee is 'CWeapFlame' ) e.Replacement = 'Sparkster';
 		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = 'SilverBullet';
@@ -2227,7 +2227,7 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
 		else if ( (e.Replacee == 'Clip') || (e.Replacee == 'GoldWandAmmo') || (e.Replacee == 'GoldWandHefty') ) e.Replacement = 'SWWMNothing';
-		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') )
+		else if ( (e.Replacee == 'Shell') || (e.Replacee is 'CrossbowAmmo') || (e.Replacee.GetClassName() == 'TangoScrapDrum') )
 		{
 			switch( Random[Replacements](0,13) )
 			{
@@ -2259,7 +2259,7 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
-		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
+		else if ( (e.Replacee == 'ShellBox') || (e.Replacee is 'CrossbowHefty') || (e.Replacee.GetClassName() == 'TangoScrapDrumPack') )
 		{
 			switch( Random[Replacements](0,14) )
 			{
@@ -2293,10 +2293,10 @@ Class SWWMHandler : EventHandler
 			}
 		}
 		else if ( e.Replacee == 'ClipBox' ) e.Replacement = Random[Replacements](0,4)?'EvisceratorShell':Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
-		else if ( e.Replacee == 'BlasterAmmo' ) e.Replacement = 'EvisceratorShell';
+		else if ( (e.Replacee == 'BlasterAmmo') || (e.Replacee.GetClassName() == 'TangoBulletClipHalf') ) e.Replacement = 'EvisceratorShell';
 		else if ( e.Replacee == 'BlasterHefty' ) e.Replacement = Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
-		else if ( (e.Replacee == 'RocketAmmo') || (e.Replacee == 'PhoenixRodAmmo') || (e.Replacee == 'MaceAmmo') ) e.Replacement = Random[Replacements](0,2)?'HellblazerMissiles':'HellblazerCrackshots';
-		else if ( (e.Replacee == 'RocketBox') || (e.Replacee == 'PhoenixRodHefty') || (e.Replacee == 'MaceHefty') )
+		else if ( (e.Replacee == 'RocketAmmo') || (e.Replacee == 'PhoenixRodAmmo') || (e.Replacee == 'MaceAmmo') || (e.Replacee.GetClassName() == 'TangoStomperAmmo') ) e.Replacement = Random[Replacements](0,2)?'HellblazerMissiles':'HellblazerCrackshots';
+		else if ( (e.Replacee == 'RocketBox') || (e.Replacee == 'PhoenixRodHefty') || (e.Replacee == 'MaceHefty')|| (e.Replacee.GetClassName() == 'TangoStomperBox') )
 		{
 			switch ( Random[Replacements](0,11) )
 			{

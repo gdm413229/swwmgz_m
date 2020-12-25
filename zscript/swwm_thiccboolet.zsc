@@ -710,6 +710,11 @@ Class SilverBullet : SWWMWeapon
 			Shader.SetEnabled(players[consoleplayer],"SilverScope",false);
 		Super.DetachFromOwner();
 	}
+	override double GetSpeedFactor()
+	{
+		if ( proneme ) return 0.;
+		return 1.;
+	}
 	override void DoEffect()
 	{
 		Super.DoEffect();
@@ -720,16 +725,22 @@ Class SilverBullet : SWWMWeapon
 			lookscale = 1.;
 			return;
 		}
-		if ( (Owner.player.ReadyWeapon == self) && Owner.player.mo.CanCrouch() && (Owner.player.crouchfactor <= .5) )
+		if ( (Owner.player.ReadyWeapon == self) && Owner.player.onground )
 		{
-			if ( !proneme ) Owner.A_StartSound("silverbullet/crouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
-			proneme = true;
-			lookscale = .4;
-			return;
+			if ( (!level.IsCrouchingAllowed() && (Owner.player.cmd.buttons&BT_CROUCH))
+				|| (level.IsCrouchingAllowed() && Owner.player.mo.CanCrouch() && (Owner.player.crouchfactor <= .5)) )
+			{
+				if ( !proneme ) Owner.A_StartSound("silverbullet/crouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
+				proneme = true;
+			}
+			else
+			{
+				if ( proneme ) Owner.A_StartSound("silverbullet/uncrouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
+				proneme = false;
+			}
 		}
-		if ( proneme ) Owner.A_StartSound("silverbullet/uncrouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
-		proneme = false;
-		lookscale = 1.;
+		else proneme = false;
+		lookscale = proneme?.4:1.;
 	}
 	override void RenderUnderlay( RenderEvent e )
 	{

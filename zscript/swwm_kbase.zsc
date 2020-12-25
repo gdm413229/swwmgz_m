@@ -2824,7 +2824,7 @@ Class DemolitionistMenu : GenericMenu
 					int ox = ((cnt>22)?623:631);
 					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
 					str = String.Format("%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-					Screen.DrawText(fnt2,(sec>=3600)?Font.CR_RED:(sec<=stats.lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,((stats.lstats[i].suck>0)&&(sec>=(stats.lstats[i].suck*60)))?Font.CR_RED:(sec<=stats.lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[0],origin.y+yy,"T",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[0]+8;
 					str = String.Format("%d\cu/\c-%d",stats.lstats[i].scount,stats.lstats[i].stotal);

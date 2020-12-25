@@ -20,7 +20,7 @@ Class LevelStat
 	int kcount, ktotal;
 	int icount, itotal;
 	int scount, stotal;
-	int time, par;
+	int time, par, suck;
 }
 
 Class SWWMStats : Thinker
@@ -104,6 +104,7 @@ Class SWWMStats : Thinker
 		ls.stotal = level.total_secrets;
 		ls.time = level.maptime;
 		ls.par = level.partime;
+		ls.suck = level.sucktime;
 		lstats.Push(ls);
 	}
 

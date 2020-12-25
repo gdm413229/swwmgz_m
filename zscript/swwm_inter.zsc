@@ -175,7 +175,7 @@ Class SWWMStatScreen : StatusScreen abstract
 			Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-len[1])/2.,oy,authortexts[0],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			foy += (fnt.GetHeight()+2)*(hs/hs2);
 		}
-		foy += 8.;
+		foy += 4.;
 		String str = StringTable.Localize("$WI_FINISHED");
 		len[0] = fnt.StringWidth(str);
 		Screen.Dim("Black",.8,int((ss2.x-len[0]-8)/2*hs2),int(foy*hs2),int((len[0]+8)*hs2),int((fnt.GetHeight()+4)*hs2));
@@ -193,7 +193,7 @@ Class SWWMStatScreen : StatusScreen abstract
 		len[0] = fnt.StringWidth(str);
 		Screen.Dim("Black",.8,int((ss2.x-len[0]-8)/2*hs2),int(4*hs2),int((len[0]+8)*hs2),int((fnt.GetHeight()+4)*hs2));
 		Screen.DrawText(fnt,Font.CR_FIRE,(ss2.x-len[0])/2.,6,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
-		double foy = fnt.GetHeight()+16;
+		double foy = fnt.GetHeight()+12;
 		len[0] = fnt.StringWidth(lnametexts[1]);
 		len[1] = fnt.StringWidth(authortexts[1]);
 		int dimlen = max(int((len[0]+8)*hs2),int((len[1]+8)*hs));
@@ -606,7 +606,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		{
 			str = TimeStr(cnt_time);
 			len = fnt.StringWidth(str);
-			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/Thinker.TICRATE)))?Font.CR_GOLD:(cnt_time>3600)?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/Thinker.TICRATE)))?Font.CR_GOLD:((wbs.sucktime>0)&&(cnt_time>(wbs.sucktime*60)))?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		}
 		yy += step;
 		if ( wi_showtotaltime )

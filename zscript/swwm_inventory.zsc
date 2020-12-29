@@ -13,7 +13,7 @@ Mixin Class SWWMAutoUseFix
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
-					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 			}
 		}
 		return Super.HandlePickup(item);
@@ -1100,7 +1100,7 @@ Class SWWMWeapon : Weapon abstract
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
-					Console.Printf(StringTable.Localize("$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 				item.bPickupGood = true;
 			}
 			return true;

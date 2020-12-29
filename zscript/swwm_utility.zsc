@@ -1247,6 +1247,30 @@ Class SWWMUtility
 		// no deathkings
 		return false;
 	}
+
+	// gendered languages are a fuck
+	static clearscope bool SellFemaleItem( Inventory i )
+	{
+		// no gendered string alt
+		if ( StringTable.Localize("$SWWM_SELLEXTRA_FEM") == "SWWM_SELLEXTRA_FEM" )
+			return false;
+		if ( i is 'DeepImpact' ) return true;
+		if ( i is 'ExplodiumGun' ) return true;
+		if ( i is 'Wallbuster' ) return true;
+		//if ( i is 'HeavyMahSheenGun' ) return true;
+		//if ( i is 'Quadravol' ) return true;
+		if ( i is 'Sparkster' ) return true;
+		//if ( i is 'EMPCarbine' ) return true;
+		if ( i is 'CandyGun' ) return true;
+		//if ( i is 'RayKhom' ) return true;
+		//if ( i is 'GrandLance' ) return true;
+		if ( i is 'HealthNuggetItem' ) return true;
+		if ( i is 'ArmorNuggetItem' ) return true;
+		if ( i is 'WarArmor' ) return true;
+		if ( i is 'FuckingInvinciball' ) return true;
+		if ( i is 'SWWMLamp' ) return true;
+		return false;
+	}
 }
 
 Class RadiusDebugSphere : Actor

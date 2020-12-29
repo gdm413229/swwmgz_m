@@ -1737,7 +1737,7 @@ Class SWWMHandler : EventHandler
 				SWWMShadow.Track(e.Thing);
 		}
 		// Ynykron vortex optimization
-		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE )
+		if ( e.Thing.bSHOOTABLE || (e.Thing.bMISSILE && !e.Thing.IsZeroDamage()) )
 			SuckableActors.Push(e.Thing);
 		// vanilla blood color changes
 		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )

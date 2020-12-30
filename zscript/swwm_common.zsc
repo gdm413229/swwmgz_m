@@ -450,6 +450,7 @@ Class SWWMSmoke : Actor
 		double dist = spd;
 		FLineTraceData d;
 		Vector3 newpos = pos;
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		int nstep = 0;
 		while ( dist > 0 )
 		{
@@ -478,17 +479,22 @@ Class SWWMSmoke : Actor
 				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 				if ( !d.LineSide ) hitnormal *= -1;
 			}
-			dist -= d.Distance;
 			if ( d.HitType != TRACE_HitNone )
 			{
+				dist -= d.Distance;
 				// should only happen if we bounced
 				dir = d.HitDir-(FRandom[Puff](1.,1.2)*hitnormal*(d.HitDir dot hitnormal));
 				vel = dir*spd;
-				newpos = d.HitLocation+hitnormal;
+				newpos = d.HitLocation+dir;
 			}
-			else newpos = level.Vec3Offset(newpos,dir*spd);
+			else
+			{
+				dist = 0.;
+				newpos = level.Vec3Offset(newpos,dir*spd);
+			}
 			nstep++;
 		}
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		SetOrigin(newpos,true);
 		UpdateWaterLevel();
 		if ( (waterlevel > 0) && !bAMBUSH )
@@ -684,6 +690,7 @@ Class SWWMBubble : Actor
 		double dist = spd;
 		FLineTraceData d;
 		Vector3 newpos = pos;
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		int nstep = 0;
 		while ( dist > 0 )
 		{
@@ -712,17 +719,22 @@ Class SWWMBubble : Actor
 				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 				if ( !d.LineSide ) hitnormal *= -1;
 			}
-			dist -= d.Distance;
 			if ( d.HitType != TRACE_HitNone )
 			{
+				dist -= d.Distance;
 				// should only happen if we bounced
 				dir = d.HitDir-(FRandom[Puff](1.,1.2)*hitnormal*(d.HitDir dot hitnormal));
 				vel = dir*spd;
-				newpos = d.HitLocation+hitnormal;
+				newpos = d.HitLocation+dir;
 			}
-			else newpos = level.Vec3Offset(newpos,dir*spd);
+			else
+			{
+				dist = 0.;
+				newpos = level.Vec3Offset(newpos,dir*spd);
+			}
 			nstep++;
 		}
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		SetOrigin(newpos,true);
 		UpdateWaterLevel();
 		if ( (waterlevel <= 0) || !Random[Puff](0,100) ) Destroy();
@@ -779,7 +791,7 @@ Class SWWMSpark : Actor
 		}
 		else
 		{
-			if ( pos.z > floorz ) vel.z -= GetGravity();
+			vel.z -= GetGravity();
 			// linetrace-based movement (hopefully more reliable than traditional methods)
 			Vector3 dir = vel;
 			double spd = vel.length();
@@ -787,6 +799,7 @@ Class SWWMSpark : Actor
 			double dist = spd;
 			FLineTraceData d;
 			Vector3 newpos = pos;
+			newpos.z = clamp(newpos.z,floorz,ceilingz);
 			int nstep = 0;
 			while ( dist > 0 )
 			{
@@ -815,18 +828,22 @@ Class SWWMSpark : Actor
 					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 					if ( !d.LineSide ) hitnormal *= -1;
 				}
-				dist -= d.Distance;
 				if ( d.HitType != TRACE_HitNone )
 				{
+					dist -= d.Distance;
 					// should only happen if we bounced
 					dir = d.HitDir-(2*hitnormal*(d.HitDir dot hitnormal));
 					spd *= .4;
 					dist *= .4;
 					vel = dir*spd;
-					newpos = d.HitLocation+hitnormal;
+					newpos = d.HitLocation+dir;
 				}
-				else newpos = level.Vec3Offset(newpos,dir*spd);
-				if ( (spd < 1.) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
+				else
+				{
+					dist = 0.;
+					newpos = level.Vec3Offset(newpos,dir*spd);
+				}
+				if ( ((spd < 1.) || (dir.z <= 0.)) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
 				{
 					// lose speed and die
 					if ( d.Hit3DFloor )
@@ -852,6 +869,7 @@ Class SWWMSpark : Actor
 				}
 				nstep++;
 			}
+			newpos.z = clamp(newpos.z,floorz,ceilingz);
 			SetOrigin(newpos,true);
 		}
 		UpdateWaterLevel();
@@ -892,8 +910,8 @@ Class SWWMChip : Actor
 
 	Default
 	{
-		Radius 2;
-		Height 2;
+		Radius 1;
+		Height 1;
 		+NOBLOCKMAP;
 		+THRUACTORS;
 		+NOTELEPORT;
@@ -942,7 +960,7 @@ Class SWWMChip : Actor
 		}
 		else
 		{
-			if ( (waterlevel <= 0) && (pos.z > floorz) ) vel.z -= GetGravity();
+			if ( waterlevel <= 0 ) vel.z -= GetGravity();
 			// linetrace-based movement (hopefully more reliable than traditional methods)
 			Vector3 dir = vel;
 			double spd = vel.length();
@@ -950,6 +968,7 @@ Class SWWMChip : Actor
 			double dist = spd;
 			FLineTraceData d;
 			Vector3 newpos = pos;
+			newpos.z = clamp(newpos.z,floorz,ceilingz);
 			int nstep = 0;
 			while ( dist > 0 )
 			{
@@ -978,19 +997,24 @@ Class SWWMChip : Actor
 					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 					if ( !d.LineSide ) hitnormal *= -1;
 				}
-				dist -= d.Distance;
 				if ( d.HitType != TRACE_HitNone )
 				{
+					dist -= d.Distance;
 					// should only happen if we bounced
 					dir = d.HitDir-(2*hitnormal*(d.HitDir dot hitnormal));
 					spd *= .3;
 					dist *= .3;
 					vel = dir*spd;
-					newpos = d.HitLocation+hitnormal;
+					newpos = d.HitLocation+dir;
 					SetStateLabel("Bounce");
 				}
-				else newpos = level.Vec3Offset(newpos,dir*spd);
-				if ( (spd < 1.) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
+				else
+				{
+					dist = 0.;
+					newpos = level.Vec3Offset(newpos,dir*spd);
+				}
+				newpos.z = clamp(newpos.z,floorz,ceilingz);
+				if ( ((spd < 1.) || (dir.z <= 0.)) && ((d.HitType == TRACE_HitFloor) || (newpos.z <= floorz)) )
 				{
 					// lose speed and die
 					if ( d.Hit3DFloor )

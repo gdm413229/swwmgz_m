@@ -188,11 +188,42 @@ Class mkBloodDrop : Actor
 			double spd = vel.length();
 			dir /= spd;
 			FLineTraceData d;
+			Vector3 newpos = pos;
+			newpos.z = clamp(newpos.z,floorz,ceilingz);
 			double ang = atan2(dir.y,dir.x);
 			double pt = asin(-dir.z);
-			LineTrace(ang,spd,pt,TRF_THRUACTORS|TRF_THRUHITSCAN,data:d);
+			LineTrace(ang,spd,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+			if ( d.HitType != TRACE_HitNone )
+			{
+				Vector3 hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				newpos = d.HitLocation+hitnormal;
+			}
+			else newpos = level.Vec3Offset(newpos,vel);
+			newpos.z = clamp(newpos.z,floorz,ceilingz);
+			SetOrigin(newpos,true);
 			if ( (d.HitType == TRACE_HitFloor) || (pos.z <= floorz) )
 			{
+				// hacky workaround
+				if ( !d.HitSector )
+				{
+					d.HitSector = floorsector;
+					d.HitTexture = floorpic;
+				}
 				if ( d.HitTexture == skyflatnum )
 				{
 					Destroy();
@@ -220,8 +251,6 @@ Class mkBloodDrop : Actor
 				}
 				else
 				{
-					// hacky workaround
-					if ( !d.HitSector ) d.HitSector = floorsector;
 					tracksector = d.HitSector;
 					trackplane = 0;
 				}
@@ -229,8 +258,14 @@ Class mkBloodDrop : Actor
 				frame = Random[Blood](5,8);
 				return;
 			}
-			if ( d.HitType == TRACE_HitCeiling )
+			if ( (d.HitType == TRACE_HitCeiling) || (pos.z >= ceilingz) )
 			{
+				// hacky workaround
+				if ( !d.HitSector )
+				{
+					d.HitSector = ceilingsector;
+					d.HitTexture = ceilingpic;
+				}
 				if ( (d.HitTexture == skyflatnum) || master )
 				{
 					Destroy();
@@ -271,7 +306,6 @@ Class mkBloodDrop : Actor
 				Destroy();
 				return;
 			}
-			SetOrigin(level.Vec3Offset(pos,vel),true);
 			UpdateWaterLevel();
 			if ( waterlevel > 0 ) A_FadeOut();
 			scale *= .99;

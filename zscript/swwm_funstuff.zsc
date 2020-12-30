@@ -497,7 +497,7 @@ Class FancyConfetti : Actor
 			if ( deadtimer > 300 ) A_FadeOut(0.05);
 			return;
 		}
-		if ( pos.z > floorz ) vel.z -= GetGravity();
+		vel.z -= GetGravity();
 		vel.xy *= .98;
 		if ( vel.z > 0 ) vel.z *= .98;
 		// linetrace-based movement (hopefully more reliable than traditional methods)
@@ -507,6 +507,7 @@ Class FancyConfetti : Actor
 		double dist = spd;
 		FLineTraceData d;
 		Vector3 newpos = pos;
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		int nstep = 0;
 		while ( dist > 0 )
 		{
@@ -535,15 +536,19 @@ Class FancyConfetti : Actor
 				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
 				if ( !d.LineSide ) hitnormal *= -1;
 			}
-			dist -= d.Distance;
 			if ( (d.HitType != TRACE_HitNone) && (d.HitType != TRACE_HitFloor) )
 			{
+				dist -= d.Distance;
 				// should only happen if we bounced
 				dir = d.HitDir-(1.2*hitnormal*(d.HitDir dot hitnormal));
 				vel = dir*spd;
-				newpos = d.HitLocation+hitnormal;
+				newpos = d.HitLocation+dir;
 			}
-			else newpos = level.Vec3Offset(newpos,dir*spd);
+			else
+			{
+				dist = 0.;
+				newpos = level.Vec3Offset(newpos,dir*spd);
+			}
 			if ( (d.HitType == TRACE_HitFloor) || (newpos.z <= floorz) )
 			{
 				// lose speed and die
@@ -570,6 +575,7 @@ Class FancyConfetti : Actor
 			}
 			nstep++;
 		}
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
 		SetOrigin(newpos,true);
 		UpdateWaterLevel();
 		if ( waterlevel > 0 )

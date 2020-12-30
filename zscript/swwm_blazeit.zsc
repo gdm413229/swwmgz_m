@@ -1021,7 +1021,7 @@ Class HellblazerRavagerArm : Actor
 		+NODAMAGETHRUST;
 		+FORCERADIUSDMG;
 		-NOGRAVITY;
-		Gravity 0.15;
+		Gravity 0.35;
 		BounceFactor 1.0;
 		Radius 2;
 		Height 2;
@@ -1110,7 +1110,7 @@ Class HellblazerRavagerArm : Actor
 				l.ReactionTime = int(2+8*(ReactionTime/20.));
 				l.target = p;
 			}
-			SWWMUtility.DoExplosion(self,1+reactiontime,1000+200*reactiontime,250-6*reactiontime);
+			SWWMUtility.DoExplosion(self,15+reactiontime/2,2000+400*reactiontime,300-4*reactiontime,100);
 			double spd = min(vel.length()*1.1,50);
 			vel = (vel*.1+(FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);

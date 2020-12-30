@@ -321,6 +321,58 @@ Class SWWMKeyRed : SWWMKey
 // (yeah, I'm lazy, and there's a lot of keys)
 Class SWWMKeyGesture : SWWMItemGesture abstract
 {
+	// due to specifics™ we have to handle the punching here
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner || !Owner.player || (Owner.player.Health <= 0) || (Owner.player.ReadyWeapon != self) )
+			return;
+		PSprite psp = Owner.player.FindPSPrite(PSP_WEAPON+1);
+		if ( !(Owner.player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1)) && !psp )
+		{
+			// not punching, move weapon back
+			psp = Owner.player.FindPSPrite(PSP_WEAPON);
+			if ( psp )
+			{
+				psp.oldx = psp.x;
+				psp.x = max(0,psp.x-8);
+				psp.oldy = psp.y;
+				psp.y = min(32,psp.y+4);
+			}
+			return;
+		}
+		if ( psp )
+		{
+			// already punching, let's shift the weapon away
+			psp = Owner.player.FindPSPrite(PSP_WEAPON);
+			if ( psp )
+			{
+				// shift away from center to center
+				psp.oldx = psp.x;
+				psp.x = min(70,psp.x+8);
+				psp.oldy = psp.y;
+				psp.y = max(16,psp.y-4);
+			}
+			return;
+		}
+		// start punch
+		if ( Owner.player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
+		{
+			psp = Owner.player.FindPSPrite(PSP_WEAPON);
+			if ( psp && (psp.CurState == FindState("WaitingForEnd")) )
+				return;
+			Owner.player.SetPSprite(PSP_WEAPON+1,FindState("Punch"));
+			psp = Owner.player.FindPSPrite(PSP_WEAPON+1);
+			if ( psp )
+			{
+				psp.bAddWeapon = false;
+				psp.bAddBob = false;
+				psp.x = -50;
+				psp.y = 32;
+			}
+		}
+	}
+
 	States
 	{
 	Fire:
@@ -330,8 +382,7 @@ Class SWWMKeyGesture : SWWMItemGesture abstract
 		XZW1 GHIJKLMNO 4;
 		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW1 QRST 3;
-		XZW1 A -1 A_FinishGesture();
-		Stop;
+		Goto WaitingForEnd;
 	AltFire:
 		XZW1 A 3 A_Jump(128,"Fire","AltFire2");
 		XZW1 U 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
@@ -343,8 +394,7 @@ Class SWWMKeyGesture : SWWMItemGesture abstract
 		XZW2 KL 3;
 		XZW2 M 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW2 NOPQR 3;
-		XZW1 A -1 A_FinishGesture();
-		Stop;
+		Goto WaitingForEnd;
 	AltFire2:
 		XZW1 A 3;
 		XZW2 S 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
@@ -361,7 +411,35 @@ Class SWWMKeyGesture : SWWMItemGesture abstract
 		XZW3 T 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 UV 4;
 		XZW3 WXY 3;
+		Goto WaitingForEnd;
+	WaitingForEnd:
+		XZW1 A 1 A_JumpIf(!player.FindPSprite(PSP_WEAPON+1),1);
+		Wait;
 		XZW1 A -1 A_FinishGesture();
+		Stop;
+	// overlay for melee
+	Punch:
+		XZW0 ABC 1;
+	PunchHold:
+		XZW0 D 1
+		{
+			A_PlayerMelee(true);
+			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_Parry(9);
+		}
+		XZW0 EF 1;
+		XZW0 G 1 A_Melee();
+		XZW0 HIJKLMN 2;
+		XZW0 A 0
+		{
+			if ( player.cmd.buttons&&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
+			{
+				let psp = player.FindPSprite(PSP_WEAPON);
+				if ( psp && (psp.CurState != ResolveState("WaitingForEnd")) )
+					return ResolveState("PunchHold");
+			}
+			return ResolveState(null);
+		}
 		Stop;
 	}
 }

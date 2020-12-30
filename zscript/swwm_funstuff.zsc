@@ -131,6 +131,7 @@ Class SWWMItemGesture : SWWMWeapon abstract
 
 	action void A_FinishGesture()
 	{
+		A_WeaponOffset(0,32);	// fix key punch offset
 		let gest = invoker.gest;
 		if ( !gest )
 		{

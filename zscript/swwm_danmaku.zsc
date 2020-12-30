@@ -615,6 +615,8 @@ Class Eviscerator : SWWMWeapon
 	bool extended;
 	// pending shell load
 	bool pendingload;
+	// has shell chambered
+	bool chambered;
 	// countdown to loading new shell
 	int loadtics;
 
@@ -629,14 +631,13 @@ Class Eviscerator : SWWMWeapon
 		Screen.DrawTexture(WeaponBox,false,bx-46,by-16,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		String astr = String.Format("%d",Ammo1.Amount);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-14-(TewiFont.StringWidth(astr)+1),by-15,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		bool noshell = pendingload||(isfiring&&!pendingload);
-		Screen.DrawTexture(AmmoIcon,false,bx-14,by-14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,noshell?Color(128,0,0,0):Color(0,0,0,0));
+		Screen.DrawTexture(AmmoIcon,false,bx-14,by-14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,chambered?Color(0,0,0,0):Color(128,0,0,0));
 		Screen.DrawText(TewiFont,Font.CR_WHITE,bx-44,by-15,extended?"►":"",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	override bool ReportHUDAmmo()
 	{
-		if ( (Ammo1.Amount > 0) || !pendingload ) return true;
+		if ( (Ammo1.Amount > 0) || chambered ) return true;
 		return false;
 	}
 
@@ -644,7 +645,7 @@ Class Eviscerator : SWWMWeapon
 	{
 		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
 		{
-			if ( (Ammo1.Amount > 0) || !pendingload ) return true;
+			if ( (Ammo1.Amount > 0) || chambered ) return true;
 			return false;
 		}
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
@@ -653,7 +654,7 @@ Class Eviscerator : SWWMWeapon
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( !pendingload || (Ammo1.Amount <= 0) )
+		if ( chambered || !pendingload || ((loadtics < 25) && (Ammo1.Amount <= 0)) )
 		{
 			loadtics = 0;
 			return;
@@ -664,7 +665,10 @@ Class Eviscerator : SWWMWeapon
 		if ( (loadtics == 25) && !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
 			Ammo1.Amount = max(0,Ammo1.Amount-1);
 		if ( loadtics == 30 )
+		{
 			pendingload = false;
+			chambered = true;
+		}
 	}
 
 	action void A_StartLoad( int delay = 0 )
@@ -739,6 +743,7 @@ Class Eviscerator : SWWMWeapon
 	{
 		let weap = Weapon(invoker);
 		if ( !weap ) return;
+		invoker.chambered = false;
 		invoker.isfiring = true;
 		A_StartSound("eviscerator/altfire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
@@ -799,6 +804,7 @@ Class Eviscerator : SWWMWeapon
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)-y*FRandom[Junk](3,6)-(0,0,FRandom[Junk](4,6));
 		c.vel += vel*.5;
+		invoker.chambered = false;
 	}
 
 	action void A_EvisceratorCasingSmoke( Vector3 ofs )
@@ -866,7 +872,7 @@ Class Eviscerator : SWWMWeapon
 		{
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			if ( !invoker.chambered ) flg |= WRF_NOFIRE;
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
 				invoker.CheckAmmo(EitherFire,true);
@@ -877,7 +883,7 @@ Class Eviscerator : SWWMWeapon
 		{
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( invoker.pendingload ) flg |= WRF_NOFIRE;
+			if ( !invoker.chambered ) flg |= WRF_NOFIRE;
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
 				invoker.CheckAmmo(EitherFire,true);

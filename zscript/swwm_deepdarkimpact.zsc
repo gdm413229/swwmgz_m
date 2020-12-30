@@ -363,7 +363,7 @@ Class DeepImpact : SWWMWeapon
 					else hitnormal = t.Results.HitSector.ceilingplane.Normal;
 					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
 				}
-				if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(5*(1.-clamp(t.Results.Distance/150.,0.,1.))),target,t.Results.HitVector,t.Results.HitPos.z);
+				if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(5*(1.-clamp(t.Results.Distance/150.,0.,1.))),self,t.Results.HitVector,t.Results.HitPos.z);
 			}
 			rings += 5;
 		}

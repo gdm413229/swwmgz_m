@@ -689,7 +689,7 @@ Class BusterWall : Thinker
 		// not strong enough to bust
 		if ( bust.accdamage < girthitude/300. ) return false;
 		// report bust
-		if ( Instigator.player )
+		if ( Instigator && Instigator.player )
 		{
 			let s = SWWMStats.Find(Instigator.player);
 			if ( s ) s.busts++;

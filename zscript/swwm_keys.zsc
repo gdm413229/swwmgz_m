@@ -432,7 +432,7 @@ Class SWWMKeyGesture : SWWMItemGesture abstract
 		XZW0 HIJKLMN 2;
 		XZW0 A 0
 		{
-			if ( player.cmd.buttons&&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
 			{
 				let psp = player.FindPSprite(PSP_WEAPON);
 				if ( psp && (psp.CurState != ResolveState("WaitingForEnd")) )

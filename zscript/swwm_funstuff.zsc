@@ -145,10 +145,9 @@ Class SWWMItemGesture : SWWMWeapon abstract
 			// push back
 			gest.sweapon.Delete(0);
 			gest.suse.Delete(0);
-			// go back to the main gesture and clear ourselves
+			// go back to the main gesture
 			player.ReadyWeapon = gest;
 			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
-			invoker.Destroy();
 			return;
 		}
 		if ( gest.queued )
@@ -156,17 +155,15 @@ Class SWWMItemGesture : SWWMWeapon abstract
 			gest.whichweapon = null;
 			gest.whichgesture = gest.nextgesture;
 			gest.queued = false;
-			// go back to the main gesture and clear ourselves
+			// go back to the main gesture
 			player.ReadyWeapon = gest;
 			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
-			invoker.Destroy();
 			return;
 		}
-		// switch to old weapon and clear ourselves
+		// switch to old weapon
 		player.ReadyWeapon = gest;
 		player.PendingWeapon = gest.formerweapon;
 		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Deselect"));
-		invoker.Destroy();
 	}
 
 	Default

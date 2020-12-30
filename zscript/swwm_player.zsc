@@ -3219,11 +3219,13 @@ Class SWWMGesture : SWWMWeapon
 		{
 			// already gesturing
 			// queue if unique
-			if ( (w.sweapon.Size() <= 0) || (w.sweapon.Find(a) != w.sweapon.Size()) )
+			for ( int i=0; i<w.sweapon.Size(); i++ )
 			{
-				w.sweapon.Push(a);
-				w.suse.Push(used);
+				if ( (w.sweapon[i] != a) || (w.suse[i] != used) ) continue;
+				return null;
 			}
+			w.sweapon.Push(a);
+			w.suse.Push(used);
 			return null;
 		}
 		if ( !w )

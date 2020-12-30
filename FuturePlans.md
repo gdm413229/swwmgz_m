@@ -10,20 +10,12 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [8] Rail Carbine *("Tesla Beamer" in Ultra Suite 2 & 3)*
   - [9] Ray-Khom *(UnSX)*
   - [0] Grand Lance *(SWWM Iridium)*
-* ***(Maybe)* Add the collectibles that were removed due to time constraints:**
-  - The Black Rat's Coven - Walpurgisnacht *(Debut album)*
-  - Cat Catcher *(Promo poster)*
-  - Hege Cactus *(Appears to absorb all water, causing intense thirst)*
-  - Raidemin Action Figure *(A popular Nukuri superhero, "looks a lot like you")*
-  - Hoagie *(Can't eat it, but looks delicious)*
-  - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
-  - PISS Whiskey *("Is it actually piss or is that just the brand name? Either way, I don't want to know what's inside")*
-  - **[Heretic]** Doomguy Action Figure *("Oh, he gets one too?")*
-  - **[Hexen]** Lord Vilkreath - Fundaments of Puzzle Design *("What the hell is this crap?")*
-  - **[Hexen]** Obelisk of the Golden Vale *("I puked out my guts when I touched that fucking thing")*
-* **Even more collectibles:**
+* **More collectibles (some of which were initially planned but didn't make it in time):**
   - AA-12 *("Ibuki's favorite shotgun. It's just a collectible model, so it doesn't actually shoot")*
   - Cube *("It's a cube")*
+  - Hege Cactus *(Appears to absorb all water, causing intense thirst)*
+  - Hoagie *(Can't eat it, but looks delicious)*
+  - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**

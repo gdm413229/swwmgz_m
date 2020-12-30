@@ -2424,20 +2424,21 @@ Class DemolitionistMenu : GenericMenu
 						if ( !multiplayer && (menuactive == Menu.On) )
 						{
 							// if it's a weapon, play the select sound
+							// if it's a collectible or key, play the "hands up" sound
 							let w = (Class<Weapon>)(hnd.checklist[j].used);
 							if ( w )
 							{
 								// play if actually switching
 								if ( hnd.checklist[j].result )
 								{
-									// gz 4.5pre workaround (expects a Name now)
 									String snd = GetDefaultByType(w).UpSound;
 									MenuSound(snd);
 								}
 							}
+							else if ( (hnd.checklist[j].used is 'SWWMCollectible') || (hnd.checklist[j].used is 'SWWMKey') )
+								MenuSound("demolitionist/handsup");
 							else
 							{
-								// gz 4.5pre workaround (expects a Name now)
 								String snd = GetDefaultByType(hnd.checklist[j].used).UseSound;
 								MenuSound(snd);
 							}

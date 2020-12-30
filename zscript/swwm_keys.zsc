@@ -54,6 +54,7 @@ Class SWWMRedCard : SWWMKey
 		Species "RedCard";
 		Inventory.PickupMessage "$T_REDCARD";
 		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -72,6 +73,7 @@ Class SWWMYellowCard : SWWMKey
 		Species "YellowCard";
 		Inventory.PickupMessage "$T_YELLOWCARD";
 		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -90,6 +92,7 @@ Class SWWMBlueCard : SWWMKey
 		Species "BlueCard";
 		Inventory.PickupMessage "$T_BLUECARD";
 		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -108,6 +111,7 @@ Class SWWMSilverCardKDiZD : SWWMKey
 		Species "BlueSkull";
 		Inventory.PickupMessage "$T_SILVERCARD";
 		Inventory.PickupFlash "SWWMWhitePickupFlash";
+		SWWMKey.GestureWeapon "SWWMSilverCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -126,6 +130,7 @@ Class SWWMGreenCardKDiZD : SWWMKey
 		Species "YellowSkull";
 		Inventory.PickupMessage "$T_GREENCARD";
 		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -144,6 +149,7 @@ Class SWWMOrangeCardKDiZD : SWWMKey
 		Species "RedSkull";
 		Inventory.PickupMessage "$T_ORANGECARD";
 		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMOrangeCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -162,6 +168,7 @@ Class SWWMGreenCard : SWWMKey
 		Species "GreenCard";
 		Inventory.PickupMessage "$T_GREENCARD";
 		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenCardGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -182,6 +189,7 @@ Class SWWMRedSkull : SWWMKey
 		Species "RedSkull";
 		Inventory.PickupMessage "$T_REDSKULL";
 		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedSkullGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -200,6 +208,7 @@ Class SWWMBlueSkull : SWWMKey
 		Species "BlueSkull";
 		Inventory.PickupMessage "$T_BLUESKULL";
 		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueSkullGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -218,6 +227,7 @@ Class SWWMYellowSkull : SWWMKey
 		Species "YellowSkull";
 		Inventory.PickupMessage "$T_YELLOWSKULL";
 		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowSkullGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -237,6 +247,7 @@ Class SWWMKeyGreen : SWWMKey
 		Species "KeyGreen";
 		Inventory.PickupMessage "$T_KEYGREEN";
 		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenKeyGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -255,6 +266,7 @@ Class SWWMKeyBlue : SWWMKey
 		Species "KeyBlue";
 		Inventory.PickupMessage "$T_KEYBLUE";
 		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueKeyGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -273,6 +285,7 @@ Class SWWMKeyYellow : SWWMKey
 		Species "KeyYellow";
 		Inventory.PickupMessage "$T_KEYYELLOW";
 		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowKeyGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -291,6 +304,7 @@ Class SWWMKeyRed : SWWMKey
 		Species "KeyRed";
 		Inventory.PickupMessage "$T_KEYRED";
 		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedKeyGesture";
 		Radius 10;
 		Height 25;
 	}
@@ -301,3 +315,66 @@ Class SWWMKeyRed : SWWMKey
 		Stop;
 	}
 }
+
+// Key gestures
+// (they all use the same exact animations, just with the object changed)
+// (yeah, I'm lazy, and there's a lot of keys)
+Class SWWMKeyGesture : SWWMItemGesture abstract
+{
+	States
+	{
+	Fire:
+		XZW1 A 3 A_Jump(128,"AltFire","AltFire2");
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEF 3;
+		XZW1 GHIJKLMNO 4;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	AltFire:
+		XZW1 A 3 A_Jump(128,"Fire","AltFire2");
+		XZW1 U 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 VWX 3;
+		XZW1 YZ 4;
+		XZW2 ABC 4;
+		XZW2 D 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP,pitch:.7);
+		XZW2 EFGHIJ 4;
+		XZW2 KL 3;
+		XZW2 M 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 NOPQR 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	AltFire2:
+		XZW1 A 3;
+		XZW2 S 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 TUVWX 3;
+		XZW2 YZ 4;
+		XZW3 ABCDE 4;
+		XZW3 F 2 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 GHI 2;
+		XZW3 JKL 3;
+		XZW3 MN 2;
+		XZW3 O 2 A_StartSound("demolitionist/petting",CHAN_WEAPON,CHANF_OVERLAP,.4);
+		XZW3 PQ 2;
+		XZW3 RS 4;
+		XZW3 T 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 UV 4;
+		XZW3 WXY 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class SWWMRedCardGesture : SWWMKeyGesture {}
+Class SWWMYellowCardGesture : SWWMKeyGesture {}
+Class SWWMBlueCardGesture : SWWMKeyGesture {}
+Class SWWMSilverCardGesture : SWWMKeyGesture {}
+Class SWWMGreenCardGesture : SWWMKeyGesture {}
+Class SWWMOrangeCardGesture : SWWMKeyGesture {}
+Class SWWMRedSkullGesture : SWWMKeyGesture {}
+Class SWWMYellowSkullGesture : SWWMKeyGesture {}
+Class SWWMBlueSkullGesture : SWWMKeyGesture {}
+Class SWWMGreenKeyGesture : SWWMKeyGesture {}
+Class SWWMBlueKeyGesture : SWWMKeyGesture {}
+Class SWWMYellowKeyGesture : SWWMKeyGesture {}
+Class SWWMRedKeyGesture : SWWMKeyGesture {}

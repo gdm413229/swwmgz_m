@@ -378,7 +378,7 @@ Class DragonBreathArm : Actor
 			let p = Spawn("DragonBreathPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
 			p.scale *= 3.5-2.5*(ReactionTime/20.);
-			SWWMUtility.DoExplosion(self,1+(reactiontime/2),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
+			SWWMUtility.DoExplosion(self,2+(reactiontime/2),1000+200*reactiontime,150-6*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
@@ -495,7 +495,7 @@ Class SaltImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,12+special2*4,15000,100,40);
+		SWWMUtility.DoExplosion(self,25+special2*4,15000,100,40);
 		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
 		A_SprayDecal("ShockMarkSmall",-172);
@@ -593,8 +593,7 @@ Class SaltBeam : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -613,11 +612,11 @@ Class SaltBeam : Actor
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
 		{
-			if ( (args[1] == 2) || swwm_omnibust ) BusterWall.Bust(t.Results,85+Accuracy*10,target,x,t.Results.HitPos.z);
+			if ( (args[1] == 2) || swwm_omnibust ) BusterWall.Bust(t.Results,60+Accuracy*10,target,x,t.Results.HitPos.z);
 			if ( t.Results.HitType == TRACE_HitActor )
 			{
 				SWWMUtility.DoKnockback(t.Results.HitActor,x,25000);
-				t.Results.HitActor.DamageMobj(self,target,20+Accuracy*4,'Salt',DMG_THRUSTLESS);
+				t.Results.HitActor.DamageMobj(self,target,35+Accuracy*5,'Salt',DMG_THRUSTLESS);
 				if ( t.Results.HitActor && t.Results.HitActor.bIsMonster && !Random[Spreadgun](0,3) )
 					t.Results.HitActor.Howl();
 			}
@@ -688,7 +687,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-			SWWMUtility.DoExplosion(self,4+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
+			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
 		if ( ((special2%4) || args[2]) && !special1 ) SpreadOut();
 		args[2]++;
 		if ( !CheckNoDelay() || (tics == -1) ) return;
@@ -2083,8 +2082,7 @@ Class Spreadgun : SWWMWeapon
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(self,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -2180,7 +2178,7 @@ Class Spreadgun : SWWMWeapon
 			case 1:
 				sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 120.;
+				sst.penetration = 150.;
 				a = FRandom[Spreadgun](0,360);
 				s = FRandom[Spreadgun](0,.01);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -2436,7 +2434,7 @@ Class Spreadgun : SWWMWeapon
 					st.shootthroughlist.Clear();
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-					ProcessTraceHit(st,origin,dir,5,7000,bc:5);
+					ProcessTraceHit(st,origin,dir,6,7000,bc:5);
 				}
 				for ( int i=0; i<9; i++ )
 				{
@@ -2575,8 +2573,7 @@ Class Spreadgun : SWWMWeapon
 		Weapon.SelectionOrder 500;
 		Weapon.AmmoType1 "RedShell";
 		Weapon.AmmoGive1 1;
-		//SWWMWeapon.SwapWeapon "PuntzerBeta";
-		SWWMWeapon.DropAmmoType "Clip";
+		SWWMWeapon.DropAmmoType "Shell";
 		Stamina 15000;
 		+SWWMWEAPON.NOFIRSTGIVE;
 		Radius 10;

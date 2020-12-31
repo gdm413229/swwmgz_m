@@ -1107,8 +1107,7 @@ Class BiosparkBeam : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
@@ -1459,8 +1458,7 @@ Class BiosparkArc : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
@@ -2132,7 +2130,6 @@ Class Sparkster : SWWMWeapon
 		Stamina 200000;
 		Weapon.AmmoType1 "SparkUnit";
 		Weapon.AmmoGive1 1;
-		//SWWMWeapon.SwapWeapon "BlackfireIgniter";
 		SWWMWeapon.DropAmmoType "SparkUnit";
 		Sparkster.ClipCount 8;
 		+SWWMWEAPON.NOFIRSTGIVE;

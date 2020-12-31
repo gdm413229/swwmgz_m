@@ -577,8 +577,7 @@ Class YnykronBeam : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -889,8 +888,7 @@ Class DelayedWallBeam : Actor
 			if ( at.Results.HitLine.sidedef[1] )
 			{
 				at.Results.HitLine.Activate(target,0,SPAC_PCross);
-				if ( at.Results.HitLine.special == GlassBreak )	// fuck glass
-					at.Results.HitLine.Activate(target,0,SPAC_Impact);
+				at.Results.HitLine.Activate(target,0,SPAC_Impact);
 			}
 			else at.Results.HitLine.Activate(tracer,at.Results.Side,SPAC_Impact);
 		}
@@ -1355,8 +1353,7 @@ Class YnykronVoidBeam : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.HitList.Size(); i++ )
 		{
@@ -1494,8 +1491,7 @@ Class YnykronLightningArc : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
@@ -2498,8 +2494,7 @@ Class YnykronAltBeam : Actor
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -2883,7 +2878,6 @@ Class Ynykron : SWWMWeapon
 		Stamina 5000000;
 		Weapon.AmmoType1 "YnykronAmmo";
 		Weapon.AmmoGive1 1;
-		//SWWMWeapon.SwapWeapon "GrandLance";
 		SWWMWeapon.DropAmmoType "YnykronAmmo";
 		+SWWMWEAPON.NOFIRSTGIVE;
 		Ynykron.ClipCount 1;

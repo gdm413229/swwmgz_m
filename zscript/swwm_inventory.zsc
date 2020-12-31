@@ -985,13 +985,12 @@ Class SWWMWeapon : Weapon abstract
 	bool wallponch;	// is punching a wall (for activation checks)
 
 	Class<Ammo> dropammotype;
-	Class<Weapon> SwapWeapon;	// player can only own either this weapon or the SwapWeapon, if defined
 
 	Property DropAmmoType : dropammotype;
-	Property SwapWeapon : SwapWeapon;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
 	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
+	FlagDef NoSwapWeapon : SWeaponFlags, 2;	// weapon is not affected by slot swapping
 
 	transient CVar phair;		// use custom precise crosshair
 	transient ui CVar ch_img, ch_siz, ch_grow, ch_col, ch_hp, ch_on, ch_force;
@@ -1000,16 +999,34 @@ Class SWWMWeapon : Weapon abstract
 	ui Color ccol;
 	ui Vector2 lagvpos;
 
+	bool IsSwapWeapon( Inventory i ) const
+	{
+		if ( bNoSwapWeapon || (i.GetClass() == GetClass()) ) return false;
+		let w = SWWMWeapon(i);
+		if ( w && !w.bNoSwapWeapon && (SlotNumber != -1) && (w.SlotNumber == SlotNumber) )
+			return true;
+		return false;
+	}
+
+	SWWMWeapon HasSwapWeapon( Actor other ) const
+	{
+		if ( bNoSwapWeapon ) return null;
+		for ( Inventory i=other.inv; i; i=i.inv )
+		{
+			if ( IsSwapWeapon(i) )
+				return SWWMWeapon(i);
+		}
+		return null;
+	}
+
 	override void Touch( Actor toucher )
 	{
 		// cannot pick up swapweapon unless explicitly pressing use
-		if ( swwm_swapweapons && SwapWeapon && toucher.FindInventory(SwapWeapon) )
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
 		{
 			if ( toucher.CheckLocalView() )
-			{
-				String t2 = GetDefaultByType(SwapWeapon).GetTag();
-				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),t2,GetTag()));
-			}
+				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.GetTag(),GetTag()));
 			return;
 		}
 		Super.Touch(toucher);
@@ -1025,20 +1042,16 @@ Class SWWMWeapon : Weapon abstract
 		if ( abs(diff.z) > rang ) return false;
 		// if the toucher owns our SwapWeapon, drop it before picking us up
 		bool swapto = false;
-		if ( swwm_swapweapons && SwapWeapon )
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = HasSwapWeapon(user)) )
 		{
-			let sw = user.FindInventory(SwapWeapon);
-			if ( sw )
+			if ( sw == user.player.ReadyWeapon ) swapto = true;
+			user.DropInventory(sw);
+			// don't autoswitch just yet (hacky)
+			if ( swapto )
 			{
-				if ( Weapon(sw) == user.player.ReadyWeapon )
-					swapto = true;
-				user.DropInventory(sw);
-				// don't autoswitch just yet (hacky)
-				if ( swapto )
-				{
-					user.player.ReadyWeapon = null;
-					user.player.PendingWeapon = WP_NOCHANGE;
-				}
+				user.player.ReadyWeapon = null;
+				user.player.PendingWeapon = WP_NOCHANGE;
 			}
 		}
 		Touch(user);
@@ -1071,7 +1084,7 @@ Class SWWMWeapon : Weapon abstract
 	override bool HandlePickup( Inventory item )
 	{
 		// can't hold both weapons at once
-		if ( swwm_swapweapons && SwapWeapon && (item.GetClass() == SwapWeapon) )
+		if ( swwm_swapweapons && IsSwapWeapon(item) )
 			return true;
 		if ( (GetClass() == item.GetClass()) && !item.ShouldStay() )
 		{

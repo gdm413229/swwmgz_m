@@ -763,9 +763,8 @@ Class SWWMItemSense : Thinker
 		if ( (item is 'RedShell') || (item is 'GreenShell')
 			|| (item is 'WhiteShell') || (item is 'BlueShell')
 			|| (item is 'BlackShell') || (item is 'PurpleShell')
-			|| (item is 'GoldShell') || (item is 'EvisceratorShell')
-			|| (item is 'HellblazerMissiles')|| (item is 'HellblazerCrackshots')
-			|| (item is 'HellblazerRavagers')|| (item is 'HellblazerWarheads') )
+			|| (item is 'GoldShell')/* || (item is 'SMW05Ammo')
+			|| (item is 'SheenAmmo')*/ )
 			tag = item.PickupMessage();
 		else tag = item.GetTag();
 	}
@@ -873,7 +872,13 @@ Class SWWMCombatTracker : Thinker
 		t.next = hnd.trackers;
 		t.bBOSS = target.bBOSS;
 		t.bFRIENDLY = target.bFRIENDLY;
-		if ( hnd.trackers ) hnd.trackers.prev = t;
+		if ( hnd.trackers )
+		{
+			hnd.trackers.prev = t;
+			// propagate cvar values
+			t.mxdist = hnd.trackers.mxdist;
+			t.dbar = hnd.trackers.dbar;
+		}
 		hnd.trackers = t;
 		hnd.trackers_cnt++;
 		return t;

@@ -303,14 +303,12 @@ Class PusherProjectile : Actor
 	override void Touch( Actor toucher )
 	{
 		// cannot pick up swapweapon unless explicitly pressing use
-		let swc = GetDefaultByType("PusherWeapon").SwapWeapon;
-		if ( swwm_swapweapons && swc && toucher.FindInventory(swc) )
+		let pw = GetDefaultByType("PusherWeapon");
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = pw.HasSwapWeapon(toucher)) )
 		{
 			if ( toucher.CheckLocalView() )
-			{
-				String t2 = GetDefaultByType(swc).GetTag();
-				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),t2,StringTable.Localize("$T_PUSHER")));
-			}
+				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.GetTag(),StringTable.Localize("$T_PUSHER")));
 			return;
 		}
 		let w = toucher.FindInventory("PusherWeapon");
@@ -339,21 +337,18 @@ Class PusherProjectile : Actor
 		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
 		if ( abs(diff.z) > rang ) return false;
 		// if the toucher owns our SwapWeapon, drop it before picking us up
-		let swc = GetDefaultByType("PusherWeapon").SwapWeapon;
-		if ( swwm_swapweapons && swc )
+		let pw = GetDefaultByType("PusherWeapon");
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = pw.HasSwapWeapon(user)) )
 		{
-			let sw = user.FindInventory(swc);
 			bool swapto = false;
-			if ( sw )
+			if ( sw == user.player.ReadyWeapon ) swapto = true;
+			user.DropInventory(sw);
+			// don't autoswitch just yet (hacky)
+			if ( swapto )
 			{
-				if ( sw == user.player.ReadyWeapon ) swapto = true;
-				user.DropInventory(sw);
-				// don't autoswitch just yet (hacky)
-				if ( swapto )
-				{
-					user.player.ReadyWeapon = null;
-					user.player.PendingWeapon = WP_NOCHANGE;
-				}
+				user.player.ReadyWeapon = null;
+				user.player.PendingWeapon = WP_NOCHANGE;
 			}
 		}
 		Touch(user);
@@ -429,7 +424,8 @@ Class PusherWeapon : SWWMWeapon
 		{
 			A_QuakeEx(2,2,2,7,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.8);
 			A_AlertMonsters(swwm_uncapalert?0:1200);
-			int dmg = int(3+invoker.chargelevel*3);
+			int dmg = int(3+invoker.chargelevel*7);
+			if ( invoker.chargelevel > .4 ) invoker.chargelevel -= FRandom[Pusher](.01,.04);
 			if ( d.HitType == TRACE_HitActor )
 			{
 				double diff = deltaangle(self.angle,AngleTo(d.HitActor));
@@ -602,7 +598,6 @@ Class PusherWeapon : SWWMWeapon
 		Weapon.SlotPriority 2.;
 		Weapon.SelectionOrder 1500;
 		Stamina 10000;
-		//SWWMWeapon.SwapWeapon "ItamexHammer";
 		+WEAPON.MELEEWEAPON;
 		Radius 20;
 		Height 32;

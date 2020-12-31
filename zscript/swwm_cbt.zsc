@@ -1122,8 +1122,7 @@ Class Wallbuster : SWWMWeapon
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(self,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -1325,7 +1324,7 @@ Class Wallbuster : SWWMWeapon
 				// slug
 				if ( !sst ) sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 150.;
+				sst.penetration = 200.;
 				a = FRandom[Wallbuster](0,360);
 				s = FRandom[Wallbuster](0,.002);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -1440,7 +1439,7 @@ Class Wallbuster : SWWMWeapon
 				if ( !st ) st = new("SpreadgunTracer");
 				st.ignoreme = self;
 				// attempt to uniformize expected damage while reducing traces (mainly for performance)
-				int expecteddmg = 120;
+				int expecteddmg = 150;
 				int numshot = max(21-howmany,5);
 				int individualdmg = int(ceil(expecteddmg/double(numshot)));
 				for ( int j=0; j<numshot; j++ )
@@ -1632,7 +1631,6 @@ Class Wallbuster : SWWMWeapon
 		Weapon.UpSound "wallbuster/select";
 		Weapon.AmmoType1 "RedShell";
 		Weapon.AmmoGive1 5;
-		//SWWMWeapon.SwapWeapon "PuntzerGamma";
 		SWWMWeapon.DropAmmoType "Shell";
 		Stamina 35000;
 		+SWWMWEAPON.NOFIRSTGIVE;

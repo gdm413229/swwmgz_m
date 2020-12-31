@@ -119,7 +119,7 @@ Class EvisceratorChunk : Actor
 		Radius 2;
 		Height 2;
 		Speed 50;
-		DamageFunction int(clamp((vel.length()-5)*.12+max(0,1.-lifetime)*2.,0,8));
+		DamageFunction int(clamp((vel.length()-5)*.12+max(0,1.-lifetime)*2.,0,10));
 		DamageType 'shot';
 		BounceFactor 1.0;
 		WallBounceFactor 1.0;
@@ -711,7 +711,7 @@ Class Eviscerator : SWWMWeapon
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = asin(-dir.z);
 			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
-			if ( invoker.extended ) p.vel *= 1.25;
+			if ( invoker.extended ) p.vel *= 1.4;
 		}
 		for ( int i=0; i<4; i++ )
 		{
@@ -830,7 +830,6 @@ Class Eviscerator : SWWMWeapon
 		Stamina 50000;
 		Weapon.AmmoType1 "EvisceratorShell";
 		Weapon.AmmoGive1 4;
-		//SWWMWeapon.SwapWeapon "HeavyMahSheenGun";
 		SWWMWeapon.DropAmmoType "EvisceratorShell";
 		+WEAPON.EXPLOSIVE;
 		Radius 20;

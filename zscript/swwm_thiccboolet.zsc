@@ -768,9 +768,8 @@ Class SilverBullet : SWWMWeapon
 	{
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
+			t.ShootThroughList[i].Activate(self,0,SPAC_Impact);
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -869,8 +868,7 @@ Class SilverBullet : SWWMWeapon
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
-			if ( t.ShootThroughList[i].special == GlassBreak )	// fuck glass
-				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			t.ShootThroughList[i].Activate(self,0,SPAC_Impact);
 		}
 		for ( int i=0; i<t.WaterHitList.Size(); i++ )
 		{
@@ -1162,7 +1160,6 @@ Class SilverBullet : SWWMWeapon
 		Weapon.AmmoGive1 1;
 		Weapon.AmmoType2 "SilverBulletAmmo2";
 		Weapon.AmmoGive2 0;
-		//SWWMWeapon.SwapWeapon "EMPCarbine";
 		SWWMWeapon.DropAmmoType "SilverBulletAmmo";
 		SilverBullet.ClipCount 5;
 		+SWWMWEAPON.NOFIRSTGIVE;

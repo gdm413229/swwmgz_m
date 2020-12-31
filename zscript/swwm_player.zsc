@@ -65,14 +65,17 @@ Class Demolitionist : PlayerPawn
 
 	Default
 	{
+		Tag "$T_DEMOLITIONIST";
 		Speed 1;
 		Radius 16;	// should be 9 in theory, but it'd be too thin
 		Height 56;
 		Mass 500;
 		PainChance 255;
-		Player.DisplayName "Demolitionist";
+		Player.DisplayName "$T_DEMOLITIONIST";
 		Player.StartItem "ExplodiumGun";
 		Player.StartItem "DeepImpact";
+		Player.StartItem "AlmasteelPlating";
+		Player.StartItem "SayaCollar";
 		Player.ViewHeight 52;
 		Player.AirCapacity 0;
 		Player.GruntSpeed 20;
@@ -1014,15 +1017,6 @@ Class Demolitionist : PlayerPawn
 		{
 			lastdamage = 0;
 			return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
-		}
-		// lucky collar
-		if ( (source == self) ) damage = max(1,damage/2);
-		if ( (Health-damage < 25) )
-		{
-			int splitdmg[2];
-			splitdmg[0] = max(0,Health-25);	// non-reduced part (>=25% health)
-			splitdmg[1] = max(1,(damage-splitdmg[0])/4);	// reduced part (<25% health)
-			damage = splitdmg[0]+splitdmg[1];
 		}
 		if ( !inflictor && !source && (FloorSector.flags&Sector.SECF_ENDLEVEL) )
 		{
@@ -2362,6 +2356,53 @@ Class Demolitionist : PlayerPawn
 		XZWZ PQR 2;
 		XZWZ S -1;
 		Stop;
+	}
+}
+
+// lucky collar
+// made by Ashley Knox, given to you and Ibuki by Saya
+Class SayaCollar : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+	}
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
+	{
+		if ( (damage <= 0) || (flags&(DMG_FORCED|DMG_NO_ARMOR)) ) return;
+		newdamage = damage;
+		// oopsies are halved
+		if ( source == Owner ) newdamage = max(1,newdamage/2);
+		// in danger? reduce to a quarter
+		if ( (Owner.Health-newdamage < 25) )
+		{
+			int splitdmg[2];
+			splitdmg[0] = max(0,Owner.Health-25);	// non-reduced part (>=25% health)
+			splitdmg[1] = max(1,(newdamage-splitdmg[0])/4);	// reduced part (<25% health)
+			newdamage = splitdmg[0]+splitdmg[1];
+		}
+	}
+}
+
+// high-resonant almasteel plating
+// EXTRA THICC as Saya requested
+Class AlmasteelPlating : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		Inventory.RestrictedTo "Demolitionist";
+	}
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
+	{
+		if ( (damage <= 0) || (flags&(DMG_FORCED|DMG_NO_ARMOR)) ) return;
+		// 50% reduction for normal damage, 80% reduction for explosions
+		if ( flags&DMG_EXPLOSION ) newdamage = max(1,damage/5);
+		else newdamage = max(1,damage/2);
 	}
 }
 

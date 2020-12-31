@@ -728,13 +728,16 @@ Class SWWMStatusBar : BaseStatusBar
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			tag = targ.mytag;
 			if ( !legspoil ) legspoil = CVar.GetCVar('swwm_ldspoil',players[consoleplayer]);
-			if ( targ.legged && (targ.mutated || legspoil.GetBool()) )
+			if ( tag != "" )
 			{
-				if ( StringTable.Localize("$SWWM_LEGPREFIX") == "R" ) tag = tag..StringTable.Localize("$SWWM_LEG");
-				else tag = StringTable.Localize("$SWWM_LEG")..tag;
+				if ( targ.legged && (targ.mutated || legspoil.GetBool()) )
+				{
+					if ( StringTable.Localize("$SWWM_LEGPREFIX") == "R" ) tag = tag..StringTable.Localize("$SWWM_LEG");
+					else tag = StringTable.Localize("$SWWM_LEG")..tag;
+				}
+				if ( targ.bBOSS ) tag = "\cx★\c- "..tag.." \cx★\c-";
+				if ( targ.bFRIENDLY ) tag = "\cg♥\c- "..tag.." \cg♥\c-";
 			}
-			if ( targ.bBOSS ) tag = "\cx★\c- "..tag.." \cx★\c-";
-			if ( targ.bFRIENDLY ) tag = "\cg♥\c- "..tag.." \cg♥\c-";
 			int mtime = 35;
 			if ( thesight && (targ.lasthealth > 0) ) mtime += 105;
 			double alph = clamp(((targ.updated+mtime)-level.maptime)/35.,0.,1.);

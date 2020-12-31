@@ -828,7 +828,7 @@ Class SWWMCombatTracker : Thinker
 			funtag = funtags.GetBool();
 		}
 		if ( next ) next.funtag = funtag;
-		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen')) )
+		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') || (mytarget is 'Demolitionist')) )
 		{
 			String realtag = funtag?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
 			if ( realtag == FallbackTag )

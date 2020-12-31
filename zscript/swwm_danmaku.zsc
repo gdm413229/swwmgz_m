@@ -872,7 +872,13 @@ Class Eviscerator : SWWMWeapon
 		{
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( !invoker.chambered ) flg |= WRF_NOFIRE;
+			if ( !invoker.chambered )
+			{
+				flg |= WRF_NOFIRE;
+				// autoloader
+				if ( !invoker.pendingload )
+					invoker.pendingload = true;
+			}
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
 				invoker.CheckAmmo(EitherFire,true);
@@ -883,7 +889,13 @@ Class Eviscerator : SWWMWeapon
 		{
 			invoker.isfiring = false;
 			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( !invoker.chambered ) flg |= WRF_NOFIRE;
+			if ( !invoker.chambered )
+			{
+				flg |= WRF_NOFIRE;
+				// autoloader
+				if ( !invoker.pendingload )
+					invoker.pendingload = true;
+			}
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
 				invoker.CheckAmmo(EitherFire,true);

@@ -1445,6 +1445,30 @@ Class AmmoFabricator : Inventory abstract
 			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
 			let def = GetDefaultByType(a);
 			if ( !(def.Stamina) || (def.Stamina > maxunitprice) ) continue;
+			// only ammo for weapons that are valid (can be used)
+			bool isvalid = false;
+			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			{
+				let type = (class<Weapon>)(AllActorClasses[j]);
+				if ( !type ) continue;
+				let rep = GetReplacement(type);
+				if ( (rep != type) && !(rep is "DehackedPickup") ) continue;
+				readonly<Weapon> weap = GetDefaultByType(type);
+				if ( !Owner.player || !Owner.player.weapons.LocateWeapon(type) || weap.bCheatNotWeapon ) continue;
+				let ready = weap.FindState("Ready");
+				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				if ( (type is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(a) )
+				{
+					isvalid = true;
+					break;
+				}
+				if ( (weap.AmmoType1 == a) || (weap.AmmoType2 == a) )
+				{
+					isvalid = true;
+					break;
+				}
+			}
+			if ( !isvalid ) continue;
 			available.Push(a);
 		}
 		// sort by "need weight" (prioritize ammo that the player lacks over ammo that the player has plenty of
@@ -1625,6 +1649,8 @@ Class HammerspaceEmbiggener : Inventory
 				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 				readonly<Weapon> weap = GetDefaultByType(type2);
 				if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+				let ready = weap.FindState("Ready");
+				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 				if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
 				{
 					isvalid = true;

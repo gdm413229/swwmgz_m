@@ -364,18 +364,6 @@ Class SWWMLoreLibrary : Thinker
 			if ( ref ~== "TheOrder" ) return true;
 			if ( ref ~== "TheFront" ) return true;
 		}
-		// restrict dlc weaponset until that's done
-		if ( ref ~== "ItamexHammer" ) return true;
-		if ( ref ~== "PuntzerBeta" ) return true;
-		if ( ref ~== "PuntzerGamma" ) return true;
-		if ( ref ~== "HeavyMahSheenGun" ) return true;
-		if ( ref ~== "Quadravol" ) return true;
-		if ( ref ~== "BlackfireIgniter" ) return true;
-		if ( ref ~== "EMPCarbine" ) return true;
-		if ( ref ~== "RayKhom" ) return true;
-		if ( ref ~== "GrandLance" ) return true;
-		// same for white lady
-		if ( ref ~== "WhiteLady" ) return true;
 		// check if entry is for a collectible
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
@@ -421,6 +409,10 @@ Class SWWMLoreLibrary : Thinker
 		// redirects
 		if ( gameinfo.gametype&GAME_Strife )
 		{
+			if ( text ~== "SWWM_LORETXT_KIRIN" )
+				text = "SWWM_LORETXT_KIRIN2";	// married alakir
+			else if ( text ~== "SWWM_LORETXT_SERPENTRIDERS" )
+				text = "SWWM_LORETXT_SERPENTRIDERS3";	// all riders gone
 		}
 		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
 		{
@@ -763,8 +755,8 @@ Class SWWMItemSense : Thinker
 		if ( (item is 'RedShell') || (item is 'GreenShell')
 			|| (item is 'WhiteShell') || (item is 'BlueShell')
 			|| (item is 'BlackShell') || (item is 'PurpleShell')
-			|| (item is 'GoldShell')/* || (item is 'SMW05Ammo')
-			|| (item is 'SheenAmmo')*/ )
+			|| (item is 'GoldShell') || (item is 'SMW05Ammo')
+			|| (item is 'SheenAmmo') )
 			tag = item.PickupMessage();
 		else tag = item.GetTag();
 	}

@@ -134,6 +134,8 @@ Class Demolitionist : PlayerPawn
 					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 					readonly<Weapon> weap = GetDefaultByType(type2);
 					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
+					let ready = weap.FindState("Ready");
+					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
 					{
 						isvalid = true;
@@ -145,7 +147,7 @@ Class Demolitionist : PlayerPawn
 						break;
 					}
 				}
-				if ( !isvalid ) continue;
+				if ( !isvalid && (giveall != ALL_YESYES) ) continue;
 				let ammoitem = FindInventory(type);
 				if ( !ammoitem )
 				{
@@ -155,6 +157,47 @@ Class Demolitionist : PlayerPawn
 				}
 				else if ( ammoitem.Amount < ammoitem.MaxAmount )
 					ammoitem.Amount = ammoitem.MaxAmount;
+			}
+			// also give mag ammo
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (class<MagAmmo>)(AllActorClasses[i]);
+				if ( !type || (type.GetParentClass() != "MagAmmo") )
+					continue;
+				let pamo = GetDefaultByType(type).ParentAmmo;
+				// Only give if it's for a valid weapon, unless using "give everything"
+				bool isvalid = false;
+				for ( int j=0; j<AllActorClasses.Size(); j++ )
+				{
+					let type2 = (class<Weapon>)(AllActorClasses[j]);
+					if ( !type2 ) continue;
+					let rep = GetReplacement(type2);
+					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+					readonly<Weapon> weap = GetDefaultByType(type2);
+					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
+					let ready = weap.FindState("Ready");
+					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(pamo) )
+					{
+						isvalid = true;
+						break;
+					}
+					if ( (weap.AmmoType1 == pamo) || (weap.AmmoType2 == pamo) )
+					{
+						isvalid = true;
+						break;
+					}
+				}
+				if ( !isvalid && (giveall != ALL_YESYES) ) continue;
+				let magitem = FindInventory(type);
+				if ( !magitem )
+				{
+					magitem = Inventory(Spawn(type));
+					magitem.AttachToOwner(self);
+					magitem.Amount = magitem.MaxAmount;
+				}
+				else if ( magitem.Amount < magitem.MaxAmount )
+					magitem.Amount = magitem.MaxAmount;
 			}
 			if ( !giveall ) return;
 		}
@@ -210,7 +253,8 @@ Class Demolitionist : PlayerPawn
 				else if ( (gameinfo.gametype&GAME_Chex) && !(AllActorClasses[i] is 'ChexRedCard') && !(AllActorClasses[i] is 'ChexBlueCard') && !(AllActorClasses[i] is 'ChexYellowCard') ) continue;
 				// don't give heretic keys in doom
 				if ( (gameinfo.gametype&GAME_DoomChex) && ((AllActorClasses[i] is 'KeyYellow') || (AllActorClasses[i] is 'KeyGreen') || (AllActorClasses[i] is 'KeyBlue')) ) continue;
-				let keyitem = GetDefaultByType(AllActorClasses[i]);
+				let rep = GetReplacement(AllActorClasses[i]);	// handle replacements, just in case
+				let keyitem = GetDefaultByType(rep);
 				if ( keyitem.special1 )
 				{
 					let item = Inventory(Spawn(AllActorClasses[i]));
@@ -258,8 +302,7 @@ Class Demolitionist : PlayerPawn
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
 				let def = GetDefaultByType (type);
-				if ( def.Icon.isValid() &&
-					!(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") &&	!(type is "Armor") && !(type is "Key") )
+				if ( def.Icon.isValid() && !(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") && !(type is "MagAmmo") && !(type is "Armor") && !(type is "Key") )
 				{
 					// Do not give replaced items unless using "give everything"
 					if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )

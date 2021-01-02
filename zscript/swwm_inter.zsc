@@ -606,7 +606,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		{
 			str = TimeStr(cnt_time);
 			len = fnt.StringWidth(str);
-			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/Thinker.TICRATE)))?Font.CR_GOLD:((wbs.sucktime>0)&&(cnt_time>(wbs.sucktime*60)))?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/Thinker.TICRATE)))?Font.CR_GOLD:((wbs.sucktime>0)&&(cnt_time>(wbs.sucktime*3600)))?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		}
 		yy += step;
 		if ( wi_showtotaltime )

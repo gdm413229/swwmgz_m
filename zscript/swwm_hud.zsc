@@ -911,7 +911,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				sec = Thinker.Tics2Seconds(level.maptime);
 				str = String.Format("\cxT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-				Screen.DrawText(fnt,((level.sucktime>0)&&(sec>=(level.sucktime*60)))?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,((level.sucktime>0)&&(sec>=(level.sucktime*3600)))?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
 			if ( showtotaltime.GetBool() )

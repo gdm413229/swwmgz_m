@@ -1456,6 +1456,8 @@ Class SilverBullet : SWWMWeapon
 	Reload:
 		XZW2 A 0
 		{
+			// autoswitch if needed
+			A_SwitchAmmoType(true);
 			if ( ((invoker.clipcount >= invoker.default.clipcount) && (invoker.fcbselected == invoker.fcbloaded)) || (!sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) && (invoker.Ammo1.Amount <= 0) && (invoker.Ammo2.Amount <= 0) && (CountInv("SilverBullets") <= 0) && (CountInv("SilverBullets2") <= 0)) )
 				return ResolveState("Idle");
 			if ( invoker.zoomed )

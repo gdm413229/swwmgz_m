@@ -938,34 +938,6 @@ Class SWWMHandler : EventHandler
 			l.ChangeStatNum(Thinker.STAT_STATIC);
 			l.myplayer = p;
 		}
-		// horrendous piece of shit bandaid fix because gzdoom gets on my fucking nerves with its inconsistency bullshit
-		let ti = ThinkerIterator.Create("SWWMLoreLibrary",Thinker.STAT_STATIC);
-		SWWMLoreLibrary l2;
-		bool bmesg = false;
-		while ( l2 = SWWMLoreLibrary(ti.Next()) )
-		{
-			if ( (l2 == l) || (l2.myplayer != p) ) continue;
-			if ( !bmesg )
-			{
-				Console.Printf("If these messages appear, something broke and should be reported.");
-				bmesg = true;
-			}
-			// merge excess libraries (if it ever happens)
-			Console.Printf("Merging existing lore library with %d entries.",l2.ent.Size());
-			for ( int i=0; i<l2.ent.Size(); i++ )
-			{
-				bool dontadd = false;
-				for ( int j=0; j<l.ent.Size(); j++ )
-				{
-					if ( l.ent[j].tag != l2.ent[i].tag ) continue;
-					l.ent[j].read |= l2.ent[i].read;
-					dontadd = true;
-				}
-				if ( dontadd ) continue;
-				l.ent.Push(l2.ent[i]);
-			}
-			l2.Destroy();
-		}
 		// pre-add some entries to start with
 		l.DirectAdd("Demolitionist");
 		l.DirectAdd("KnowledgeBase");
@@ -989,6 +961,11 @@ Class SWWMHandler : EventHandler
 			l.DirectAdd("TheOrder");
 			l.DirectAdd("TheFront");
 		}
+		// starting weapons (if owned)
+		if ( p.mo.FindInventory('DeepImpact') )
+			l.DirectAdd("DeepImpact");
+		if ( p.mo.FindInventory('ExplodiumGun') )
+			l.DirectAdd("ExplodiumGun");
 		SWWMStats s = SWWMStats.Find(p);
 		if ( !s )
 		{
@@ -1027,7 +1004,14 @@ Class SWWMHandler : EventHandler
 
 	override void PlayerRespawned( PlayerEvent e )
 	{
-		PlayerEntered(e);
+		// reset some vars
+		multilevel[e.playernumber] = 0;
+		spreecount[e.playernumber] = 0;
+		tookdamage[e.playernumber] = false;
+		lastkill[e.playernumber] = int.min;
+		// reset combat tracker
+		if ( !swwm_notrack )
+			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
 	}
 
 	override void WorldThingRevived( WorldEvent e )

@@ -8,6 +8,7 @@ Class Demolitionist : PlayerPawn
 	bool dashsnd;
 	bool sendtoground;
 	bool key_reentrant;
+	bool bLoreGrossHackFuckThisEngine;
 
 	int lastdamage;
 	transient int lastdamagetic;
@@ -358,7 +359,9 @@ Class Demolitionist : PlayerPawn
 	}
 	override void GiveDefaultInventory()
 	{
+		bLoreGrossHackFuckThisEngine = true;	// prevent default inventory from adding lore entries (fixes lore library disappearing when loading saves WHILE DEAD)
 		Super.GiveDefaultInventory();
+		bLoreGrossHackFuckThisEngine = false;
 		// preloaded gun
 		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
 		if ( !eg ) return;
@@ -1861,7 +1864,8 @@ Class Demolitionist : PlayerPawn
 		Super.AddInventory(item);
 		if ( !player ) return;
 		// add lore if any
-		SWWMLoreLibrary.Add(player,item.GetClassName());
+		if ( !bLoreGrossHackFuckThisEngine )
+			SWWMLoreLibrary.Add(player,item.GetClassName());
 		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 			SWWMHandler.AddOneliner("getweapon",2);
 		if ( (item is 'Key') && !key_reentrant && !deathmatch )

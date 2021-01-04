@@ -37,7 +37,7 @@ Class PlayerGone : PlayerChunk
 	{
 		// doesn't affect voodoo dolls (convenient, isn't it?)
 		if ( !p.player || (p.player.mo != p) ) return;
-		let c = PlayerGone(Spawn("PlayerGone",(65535,65535,0)));
+		let c = PlayerGone(Spawn("PlayerGone",(32767,32767,0)));
 		c.player = p.player;
 		c.Health = p.Health;
 		p.player = null;

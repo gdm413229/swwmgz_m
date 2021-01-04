@@ -8,8 +8,6 @@ Class PlayerGone : PlayerChunk
 
 	override void DeathThink()
 	{
-		player.damagecount--;
-		player.poisoncount--;
 		deadtimer++;
 		if ( (deadtimer == 60) && (player == players[consoleplayer]) )
 			A_StartSound("demolitionist/youdied",CHAN_DEMOVOICE,CHANF_OVERLAP|CHANF_UI);
@@ -42,7 +40,13 @@ Class PlayerGone : PlayerChunk
 		c.Health = p.Health;
 		p.player = null;
 		c.ObtainInventory(p);
-		if ( c.player ) c.player.mo = c;
+		if ( c.player )
+		{
+			c.player.mo = c;
+			c.player.damagecount = 0;
+			c.player.bonuscount = 0;
+			c.player.poisoncount = 0;
+		}
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( playeringame[i] && (players[i].camera == p) )

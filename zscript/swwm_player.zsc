@@ -1462,6 +1462,9 @@ Class Demolitionist : PlayerPawn
 				if ( !FindInventory("ReviveCooldown") )
 				{
 					player.Resurrect();
+					player.damagecount = 0;
+					player.bonuscount = 0;
+					player.poisoncount = 0;
 					SetState(FindState("Spawn")+1);	// skip tweening
 					roll = 0;
 					let s = Spawn("DemolitionistShockwave",pos);

@@ -1074,6 +1074,8 @@ Class Demolitionist : PlayerPawn
 		int oldpchance = PainChance;
 		if ( damage < 5 ) PainChance = 0;
 		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		// hotfix damagecount overflow until it's handled engine-side (yes this shit happens)
+		if ( player && (player.damagecount < 0) ) player.damagecount = 100;
 		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage/2,10,40));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
 		{

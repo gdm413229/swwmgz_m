@@ -470,7 +470,7 @@ Class BusterWall : Thinker
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6))).unit()*FRandom[Wallbuster](2.,16.);
 				let s = Actor.Spawn("SWWMChip",spot);
 				s.vel = pvel;
-				s.scale *= FRandom[Wallbuster](1.2,2.4);
+				s.scale *= FRandom[Wallbuster](1.5,3.);
 				s.A_SetTranslation('Rubble');
 			}
 		}
@@ -600,13 +600,25 @@ Class BusterWall : Thinker
 			else if ( d.Tier == TIER_Lower ) hp = 0;	// floor
 			else return false;	// middle ignored
 		}
-		else if ( d.HitType == TRACE_HitCeiling ) hp = 1;
-		else if ( d.HitType == TRACE_HitFloor ) hp = 0;
+		else if ( d.HitType == TRACE_HitCeiling )
+		{
+			// no busting the goat
+			for ( int i=0; i<hs.lines.Size(); i++ )
+			{
+				if( IsIOSWall(hs.lines[i]) ) return false;
+			}
+			hp = 1;
+		}
+		else if ( d.HitType == TRACE_HitFloor )
+		{
+			// no busting the goat
+			for ( int i=0; i<hs.lines.Size(); i++ )
+			{
+				if( IsIOSWall(hs.lines[i]) ) return false;
+			}
+			hp = 0;
+		}
 		else return false; // this isn't a valid hit, needs to be world geometry
-		// needs at least two two-sided lines
-		int lcnt = 0;
-		for ( int i=0; i<hs.Lines.Size(); i++ ) if ( hs.Lines[i].sidedef[1] ) lcnt++;
-		if ( lcnt < 2 ) return false;
 		// Check if it's a door
 		if ( !swwm_cbtall && !SWWMUtility.IsDoorSector(hs,hp) ) return false;
 		let ti = ThinkerIterator.Create("BusterWall",STAT_USER);

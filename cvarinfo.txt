@@ -93,6 +93,10 @@ user int swwm_shadowdist = 2000;		// max distance beyond which blob shadows are 
 server bool swwm_swapweapons = true;		// [DLC1] allows carrying only one weapon in each slot (excluding starter melee and pistol)
 user int swwm_forcestats = 0;			// always shows level stats on the HUD, not just when the automap is open (2 - also show map name, otherwise only stats)
 
+// TODO selection order array of weapons, for user tweaking
+// if empty, use default selection order defined in zscript
+user String swwm_weaponorder = "";
+
 server noarchive bool swwm_iseriouslywanttoplaythiswithbd = false;	// self-explanatory
 
 // cross-session achievement cvars (0: locked, 1: unlocked, 2: notified)

@@ -2896,7 +2896,7 @@ Class SWWMHandler : EventHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/ammo_pkup",CHAN_VOICE,CHANF_UI);
 			}
-			players[e.Args[0]].mo.GiveInventory("HammerspaceEmbiggener",16,true);
+			players[e.Args[0]].mo.GiveInventory("HammerspaceEmbiggener",8,true);
 			for ( Inventory i=players[e.Args[0]].mo.inv; i; i=i.inv )
 			{
 				if ( !(i is 'Ammo') ) continue;

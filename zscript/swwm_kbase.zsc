@@ -812,7 +812,6 @@ Class DemolitionistMenu : GenericMenu
 					return true;
 				}
 				EventHandler.SendNetworkEvent(String.Format("swwmstoregive.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
-				if ( (camt+amt) >= max ) ofs1 = sel0 = max(0,sel0-1);
 				MenuSound("menu/buyinv");
 			}
 			else if ( tabs[curtab] == TAB_LIBRARY )
@@ -2141,6 +2140,8 @@ Class DemolitionistMenu : GenericMenu
 		}
 		else if ( tabs[curtab] == TAB_STORE )
 		{
+			Class<Inventory> lastsel = null;
+			if ( storelist.Size() > 0 ) lastsel = storelist[sel0];
 			storelist.Clear();
 			storeunits.Clear();
 			// price-sorted buyables
@@ -2253,6 +2254,9 @@ Class DemolitionistMenu : GenericMenu
 			}
 			// re-sort by category
 			qsort_store(storelist,storeunits,0,storelist.Size()-1);
+			// shift back if the last selected item was removed
+			if ( lastsel && (storelist.Find(lastsel)) >= storelist.Size() )
+				sel0 = max(0,sel0-1);
 			// crop selection
 			if ( sel0 >= storelist.Size() ) sel0 = max(0,storelist.Size()-1);
 		}

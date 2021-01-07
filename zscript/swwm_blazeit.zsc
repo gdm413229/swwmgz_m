@@ -1442,15 +1442,6 @@ Class Hellblazer : SWWMWeapon
 			p.vel.z += 3.5;
 			return;
 		}
-		for ( int i=0; i<4; i++ )
-		{
-			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (10,3,-5);
-			s.target = self;
-			s.SetShade(cols[type]*Random[Hellblazer](48,63));
-			s.alpha *= .2;
-			s.scale *= 2.;
-		}
 		for ( int i=0; i<5; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);

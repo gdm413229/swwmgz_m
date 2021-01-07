@@ -447,10 +447,11 @@ Class ExplodiumGun : SWWMWeapon
 		}
 		for ( int i=0; i<6; i++ )
 		{
-			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (15,4.5,-3);
-			s.target = self;
-			s.alpha *= 0.5;
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= .15;
+			s.alpha *= .5;
+			s.speed *= .2;
+			s.vel += vel*.5+x*FRandom[Explodium](.2,.5);
 		}
 	}
 
@@ -870,10 +871,11 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		for ( int i=0; i<6; i++ )
 		{
-			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (15,5*side,-3);
-			s.target = self;
-			s.alpha *= 0.5;
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= .15;
+			s.alpha *= .5;
+			s.speed *= .2;
+			s.vel += vel*.5+x*FRandom[Explodium](.2,.5);
 		}
 	}
 

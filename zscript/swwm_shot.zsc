@@ -2187,14 +2187,6 @@ Class Spreadgun : SWWMWeapon
 				sst.waterhitlist.Clear();
 				sst.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
 				ProcessTraceHit(sst,origin,dir,0,12000,"SlugImpact",1,true);
-				for ( int i=0; i<3; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
-					s.alpha *= 0.5;
-				}
 				for ( int i=0; i<6; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
@@ -2223,14 +2215,6 @@ Class Spreadgun : SWWMWeapon
 					p.angle = atan2(dir.y,dir.x);
 					p.pitch = asin(-dir.z);
 				}
-				for ( int i=0; i<5; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
-					s.alpha *= .2;
-				}
 				for ( int i=0; i<15; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
@@ -2258,14 +2242,6 @@ Class Spreadgun : SWWMWeapon
 					b.target = self;
 					b.angle = atan2(x2.y,x2.x);
 					b.pitch = asin(-x2.z);
-				}
-				for ( int i=0; i<9; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,3,4)*Random[Spreadgun](32,63));
-					s.A_SetRenderStyle(.2,STYLE_AddShaded);
 				}
 				for ( int i=0; i<16; i++ )
 				{
@@ -2297,14 +2273,6 @@ Class Spreadgun : SWWMWeapon
 					p.pitch = asin(-dir.z);
 					p.vel = dir*p.speed*FRandom[Spreadgun](.9,1.3);
 				}
-				for ( int i=0; i<12; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](48,128));
-					s.alpha *= .2;
-				}
 				for ( int i=0; i<30; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
@@ -2332,14 +2300,6 @@ Class Spreadgun : SWWMWeapon
 				b.angle = atan2(dir.y,dir.x);
 				b.pitch = asin(-dir.z);
 				b.vel = dir*b.speed;
-				for ( int i=0; i<4; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
-					s.alpha *= 0.4;
-				}
 				for ( int i=0; i<8; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
@@ -2391,14 +2351,6 @@ Class Spreadgun : SWWMWeapon
 					b.pitch = asin(-hitnormal.z);
 					b.target = self;
 				}
-				for ( int i=0; i<3; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
-					s.alpha *= 0.5;
-				}
 				for ( int i=0; i<6; i++ )
 				{
 					let s = Spawn("SWWMSmoke",origin);
@@ -2435,14 +2387,6 @@ Class Spreadgun : SWWMWeapon
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
 					ProcessTraceHit(st,origin,dir,6,7000,bc:5);
-				}
-				for ( int i=0; i<9; i++ )
-				{
-					let s = Spawn("SWWMViewSmoke",origin);
-					SWWMViewSmoke(s).ofs = (15,3,-3);
-					s.target = self;
-					s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
-					s.alpha *= .2;
 				}
 				for ( int i=0; i<16; i++ )
 				{

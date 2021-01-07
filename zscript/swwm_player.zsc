@@ -8,7 +8,7 @@ Class Demolitionist : PlayerPawn
 	bool dashsnd;
 	bool sendtoground;
 	bool key_reentrant;
-	bool bLoreGrossHackFuckThisEngine;
+	bool bInDefaultInventory;
 
 	int lastdamage;
 	transient int lastdamagetic;
@@ -73,6 +73,8 @@ Class Demolitionist : PlayerPawn
 		Mass 500;
 		PainChance 255;
 		Player.DisplayName "$T_DEMOLITIONIST";
+		// StartItem array is defined but not used directly
+		// just declared here for mod compat
 		Player.StartItem "ExplodiumGun";
 		Player.StartItem "DeepImpact";
 		Player.StartItem "AlmasteelPlating";
@@ -359,18 +361,22 @@ Class Demolitionist : PlayerPawn
 	}
 	override void GiveDefaultInventory()
 	{
-		bLoreGrossHackFuckThisEngine = true;	// prevent default inventory from adding lore entries (fixes lore library disappearing when loading saves WHILE DEAD)
-		Super.GiveDefaultInventory();
-		bLoreGrossHackFuckThisEngine = false;
-		// preloaded gun
-		let eg = ExplodiumGun(FindInventory("ExplodiumGun"));
-		if ( !eg ) return;
-		eg.clipcount = eg.default.clipcount;
+		if ( !player ) return;
+		bInDefaultInventory = true;	// prevent default inventory from adding lore entries (fixes lore library disappearing when loading saves WHILE DEAD)
+		// we don't need hexen or basic armors
+		// we can simplify the code a lot here since no handling of many special conditions is needed
+		let sc = Inventory(Spawn('SayaCollar'));
+		sc.AttachToOwner(self);
+		let ap = Inventory(Spawn('AlmasteelPlating'));
+		ap.AttachToOwner(self);
+		let dp = Inventory(Spawn('DeepImpact'));
+		dp.AttachToOwner(self);
+		let eg = ExplodiumGun(Spawn('ExplodiumGun'));
+		eg.AttachToOwner(self);
 		eg.chambered = true;
-		let eg2 = DualExplodiumGun(eg.SisterWeapon);
-		if ( !eg2 ) return;
-		eg2.clipcount = eg2.default.clipcount;
-		eg2.chambered = true;
+		DualExplodiumGun(eg.SisterWeapon).chambered = true;
+		player.ReadyWeapon = player.PendingWeapon = eg;
+		bInDefaultInventory = false;
 	}
 	override void ClearInventory()
 	{
@@ -599,6 +605,47 @@ Class Demolitionist : PlayerPawn
 		PoisonPeriodReceived = 0;
 		PoisonDamageReceived = 0;
 		if ( !player ) return;
+		// double-check that we have these
+		if ( !FindInventory("AlmasteelPlating") )
+		{
+			let ap = Inventory(Spawn("AlmasteelPlating"));
+			ap.AttachToOwner(self);
+			// AddInventory attaches to the front, but we need to be all the way back in the chain (but before the collar)
+			if ( ap.inv )
+			{
+				inv = ap.inv;
+				for ( Inventory i=inv; i; i=i.inv )
+				{
+					if ( i.inv is 'SayaCollar' )
+					{
+						ap.inv = i.inv;
+						i.inv = ap;
+						break;
+					}
+					if ( i.inv ) continue;
+					i.inv = ap;
+					ap.inv = null;
+					break;
+				}
+			}
+		}
+		if ( !FindInventory("SayaCollar") )
+		{
+			let sc = Inventory(Spawn("SayaCollar"));
+			sc.AttachToOwner(self);
+			// AddInventory attaches to the front, but we need to be all the way back in the chain
+			if ( sc.inv )
+			{
+				inv = sc.inv;
+				for ( Inventory i=inv; i; i=i.inv )
+				{
+					if ( i.inv ) continue;
+					i.inv = sc;
+					sc.inv = null;
+					break;
+				}
+			}
+		}
 		if ( !selflight )
 		{
 			selflight = Spawn("DemolitionistSelfLight",pos);
@@ -1868,18 +1915,21 @@ Class Demolitionist : PlayerPawn
 	{
 		Super.AddInventory(item);
 		if ( !player ) return;
-		// add lore if any
-		if ( !bLoreGrossHackFuckThisEngine )
+		if ( !bInDefaultInventory )
+		{
+			// add lore if any
 			SWWMLoreLibrary.Add(player,item.GetClassName());
-		if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
-			SWWMHandler.AddOneliner("getweapon",2);
+			// weapon get oneliner
+			if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
+				SWWMHandler.AddOneliner("getweapon",2);
+		}
 		if ( (item is 'Key') && !key_reentrant && !deathmatch )
 		{
 			// score
 			int score = 100;
 			Console.Printf(StringTable.Localize("$SWWM_FINDKEY"),player.GetUserName(),item.GetTag(),score);
 			SWWMCredits.Give(player,score);
-			SWWMScoreObj.Spawn(100,Vec3Offset(0,0,Height/2));
+			SWWMScoreObj.Spawn(100,player.mo.Vec3Offset(0,0,Height/2));
 			if ( !swwm_sharekeys ) return;
 			// share all keys in mp
 			for ( int i=0; i<MAXPLAYERS; i++ )
@@ -2455,6 +2505,13 @@ Class AlmasteelPlating : Inventory
 		// 50% reduction for normal damage, 80% reduction for explosions
 		if ( flags&DMG_EXPLOSION ) newdamage = max(1,damage/5);
 		else newdamage = max(1,damage/2);
+	}
+	override bool HandlePickup( Inventory item )
+	{
+		// disallow vanilla armors
+		if ( (item is 'BasicArmor') || (item is 'BasicArmorBonus') || (item is 'BasicArmorPickup') || (item is 'HexenArmor') )
+			return true;
+		return false;
 	}
 }
 

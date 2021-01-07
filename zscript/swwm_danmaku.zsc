@@ -713,14 +713,6 @@ Class Eviscerator : SWWMWeapon
 			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
 			if ( invoker.extended ) p.vel *= 1.4;
 		}
-		for ( int i=0; i<4; i++ )
-		{
-			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (10,4,-5);
-			s.target = self;
-			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
-			s.alpha *= .2;
-		}
 		for ( int i=0; i<8; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);
@@ -768,14 +760,6 @@ Class Eviscerator : SWWMWeapon
 		p.angle = atan2(dir.y,dir.x);
 		p.pitch = asin(-dir.z);
 		p.vel = dir*p.speed*(invoker.extended?1.6:.8);
-		for ( int i=0; i<4; i++ )
-		{
-			let s = Spawn("SWWMViewSmoke",origin);
-			SWWMViewSmoke(s).ofs = (10,3,-5);
-			s.target = self;
-			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
-			s.alpha *= .1;
-		}
 		for ( int i=0; i<6; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);
@@ -812,10 +796,10 @@ Class Eviscerator : SWWMWeapon
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*ofs.x+y*ofs.y+z*ofs.z);
-		let s = Spawn("SWWMViewSmoke",origin);
-		SWWMViewSmoke(s).ofs = (ofs.x,ofs.y,ofs.z);
-		s.target = self;
+		let s = Spawn("SWWMHalfSmoke",origin);
+		s.scale *= .2;
 		s.alpha *= .4;
+		s.speed *= .1;
 	}
 
 	Default

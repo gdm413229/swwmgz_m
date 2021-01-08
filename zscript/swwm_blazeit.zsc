@@ -35,14 +35,23 @@ Class HellblazerSubExpl : Actor
 	{
 		RenderStyle "Add";
 		Scale 2.2;
-		Alpha .4;
 		Radius 0.1;
 		Height 0;
+		Alpha .75;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+FORCEXYBILLBOARD;
 		+NOTELEPORT;
 		+NOINTERACTION;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		roll = FRandom[ExploS](0,360);
+		scale.x *= RandomPick[ExploS](-1,1);
+		scale.y *= RandomPick[ExploS](-1,1);
 	}
 	override void Tick()
 	{
@@ -590,7 +599,7 @@ Class HellblazerWarhead : HellblazerMissile
 		special1++;
 		if ( (special1 <= 30) && !(special1%2) )
 		{
-			int numpt = Random[Hellblazer](0,30-special1);
+			int numpt = 30-special1/2;
 			double ang, pt;
 			for ( int i=0; i<numpt; i++ )
 			{
@@ -598,7 +607,7 @@ Class HellblazerWarhead : HellblazerMissile
 				pt = FRandom[Hellblazer](-90,90);
 				FLineTraceData d;
 				Vector3 HitNormal;
-				LineTrace(ang,FRandom[Hellblazer](30,40)+20*special1,pt,TRF_THRUACTORS,data:d);
+				LineTrace(ang,FRandom[Hellblazer](30,40)+12*special1,pt,TRF_THRUACTORS,data:d);
 				hitnormal = -d.HitDir;
 				if ( d.HitType == TRACE_HitFloor )
 				{
@@ -619,7 +628,7 @@ Class HellblazerWarhead : HellblazerMissile
 				p.angle = atan2(hitnormal.y,hitnormal.x);
 				p.pitch = asin(-hitnormal.z);
 				p.target = target;
-				p.scale *= (3-special1*.02);
+				p.scale *= (3-special1*.04);
 				p.alpha *= 1-special1*.02;
 			}
 		}

@@ -911,7 +911,7 @@ Class SWWMUtility
 			bfloor = l.backsector.floorplane.ZAtPoint(a.pos.xy),
 			aceil = l.frontsector.ceilingplane.ZAtPoint(a.pos.xy),
 			bceil = l.backsector.ceilingplane.ZAtPoint(a.pos.xy);
-		if ( (a.pos.z >= min(aceil,bceil)) || (a.pos.z <= max(afloor,bfloor)) )
+		if ( (min(a.pos.z+a.height,a.ceilingz) > min(aceil,bceil)) || (max(a.pos.z,a.floorz) < max(afloor,bfloor)) )
 			return true;
 		return false;
 	}

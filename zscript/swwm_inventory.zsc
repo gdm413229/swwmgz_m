@@ -1026,7 +1026,12 @@ Class SWWMWeapon : Weapon abstract
 		if ( swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
 		{
 			if ( toucher.CheckLocalView() )
-				Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.GetTag(),GetTag()));
+			{
+				// use sisterweapon tag for dual wield (slot 2 weapons)
+				if ( sw.SisterWeapon && (sw.Amount > 1) )
+					Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.SisterWeapon.GetTag(),GetTag()));
+				else Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.GetTag(),GetTag()));
+			}
 			return;
 		}
 		Super.Touch(toucher);
@@ -1045,8 +1050,21 @@ Class SWWMWeapon : Weapon abstract
 		SWWMWeapon sw;
 		if ( swwm_swapweapons && (sw = HasSwapWeapon(user)) )
 		{
-			if ( sw == user.player.ReadyWeapon ) swapto = true;
-			user.DropInventory(sw);
+			if ( (sw == user.player.ReadyWeapon) || (sw.SisterWeapon && (sw.SisterWeapon == user.player.ReadyWeapon)) )
+				swapto = true;
+			int ngun = sw.Amount;
+			double ang = -15*(ngun-1);
+			for ( int i=0; i<ngun; i++ )
+			{
+				let d = user.DropInventory(sw);
+				if ( !d || (ngun <= 1) ) continue;
+				// adjust angle for multi-drops
+				d.angle = user.angle+ang;
+				d.vel.xy = RotateVector((5,0),d.angle);
+				d.vel.z = 1;
+				d.vel += user.vel;
+				ang += 30;
+			}
 			// don't autoswitch just yet (hacky)
 			if ( swapto )
 			{

@@ -2,6 +2,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 
 * **DLC Weaponset:**
   - [1] Itamex Reinforced Hammer *(UnSX 5)*
+  - [2] Plasma Blaster *(SWWM)*
   - [3] Puntzer Beta *(SWWM Iridium)*
   - [4] Puntzer Gamma *(Ultra Suite 2)*
   - [5] Sheen HMG *(SWWM Platinum Ep2)*
@@ -20,7 +21,11 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
-* **Crouch sliding**
+* **Crouch sliding *(+ proper crouch dashing)***
+* **Expand third person animations**
+  - 4-directional movement variants
+  - Height-dependent headpats (current animation was designed for dogs on same floor)
+  - *(Maybe)* Third person item gestures
 * **"Advanced" Item Sense *(detect activatable walls)***
 * **DLC Gameset:**
   - Tetris
@@ -28,7 +33,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Snake
   - ... maybe other small games
   - **[Doom]** Demo Land Adventure (platformer with shooty gameplay)
-  - **[Heretic]** Interstellar Demolitionist (a somewhat simple SHMUP, kinda Touhou styled)
+  - **[Heretic]** Interstellar Demolitionist (a somewhat simple vertical SHMUP, kinda Touhou styled)
   - **[Hexen]** Demolition Quest (a JRPG, kinda like early FF / BoF)
 * **Mothgirl summon for Lämp easter egg**
 * **Ibuki companion add-on *(w/ optional "stream friendly" clothing)***
@@ -37,3 +42,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Japanese localization???**
 * **Strife support, with rewritten dialogue**
 * **Monster/decoration replacements add-on**
+* **Hardcore Mode side mod**
+  - Featuring Demolitionist on Maidbot frame
+  - More complex game mechanics
+  - Manual Hammerspace management
+  - Manual reloading and weapon maintenance
+  - Alternate mobility options (no jetpack)
+  - Non-instant item usage

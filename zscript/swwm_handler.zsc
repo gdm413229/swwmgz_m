@@ -181,7 +181,7 @@ Class HOLYCOWIMTOTALLYGOINGSOFASTOHFUCK : Inventory
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( !Owner ) return;
+		if ( !Owner || (Owner.Health <= 0) ) return;
 		if ( (Owner.tics > 1) && (Owner.tics > max(1,Owner.CurState.tics/2)) )
 			Owner.tics = max(1,Owner.CurState.tics/2);
 	}
@@ -1686,7 +1686,7 @@ Class SWWMHandler : EventHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		// I WANT DIE
-		if ( G_SkillPropertyInt(SKILLP_ACSReturn) >= 4 )
+		if ( G_SkillName() == StringTable.Localize("$SWWM_SKLUNATIC") )
 		{
 			if ( e.Thing.bMISSILE && !e.Thing.FindInventory("DontDuplicate") && !e.Thing.IsZeroDamage() && (e.Thing.target && e.Thing.target.bISMONSTER && !e.Thing.target.player) )
 			{
@@ -2528,10 +2528,20 @@ Class SWWMHandler : EventHandler
 				// drop the swapweapon if we own it first
 				if ( swwm_swapweapons && (item is 'SWWMWeapon') && (sw = SWWMWeapon(def).HasSwapWeapon(players[e.Args[0]].mo)) )
 				{
-					bool swapto = (sw == players[e.Args[0]].ReadyWeapon);
-					let drop = players[e.Args[0]].mo.DropInventory(sw);
-					// add some random velocity so multiple drops don't get bunched together
-					if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
+					bool swapto = (sw == players[e.Args[0]].ReadyWeapon) || (sw.SisterWeapon && (sw.Sisterweapon == players[e.Args[0]].ReadyWeapon));
+					int ngun = sw.Amount;
+					double ang = -15*(ngun-1);
+					for ( int i=0; i<ngun; i++ )
+					{
+						let d = players[e.Args[0]].mo.DropInventory(sw);
+						if ( !d || (ngun <= 1) ) continue;
+						// adjust angle for multi-drops
+						d.angle = players[e.Args[0]].mo.angle+ang;
+						d.vel.xy = Actor.RotateVector((5,0),d.angle);
+						d.vel.z = 1;
+						d.vel += players[e.Args[0]].mo.vel;
+						ang += 30;
+					}
 					// don't autoswitch just yet (hacky)
 					if ( swapto )
 					{

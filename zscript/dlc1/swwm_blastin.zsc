@@ -1,0 +1,53 @@
+// Nuutek Plasma Blaster (from SWWM series)
+// Slot 2, spawns shared with Explodium Gun
+
+Class PlasmaBlast : SWWMWeapon
+{
+	int clipcount, chargelevel;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		Tag "$T_PLASMABLAST";
+		Inventory.PickupMessage "$T_PLASMABLAST";
+		Obituary "$O_PLASMABLAST";
+		Inventory.Icon "graphics/HUD/Icons/W_PlasmaBlast.png";
+		Weapon.SlotNumber 2;
+		Weapon.SlotPriority 3.;
+		Weapon.SelectionOrder 1100;
+		Inventory.MaxAmount 2;
+		Weapon.SisterWeapon "DualPlasmaBlast";
+		Stamina 7000;
+		PlasmaBlast.ClipCount 15;
+		+WEAPON.EXPLOSIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class DualPlasmaBlast : SWWMWeapon
+{
+	int clipcount;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		Tag "$T_PLASMABLAST2";
+		Obituary "$O_PLASMABLAST";
+		Inventory.Icon "graphics/HUD/Icons/W_PlasmaBlast2.png";
+		Weapon.SlotNumber 2;
+		Weapon.SlotPriority 4.;
+		Weapon.SelectionOrder 1050;
+		Weapon.SisterWeapon "PlasmaBlast";
+		DualPlasmaBlast.ClipCount 15;
+		+WEAPON.EXPLOSIVE;
+		+SWWMWEAPON.HIDEINMENU;
+		+SWWMWEAPON.NOSWAPWEAPON;
+	}
+}

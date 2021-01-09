@@ -337,6 +337,9 @@ Class ExplodiumGun : SWWMWeapon
 
 	override bool HandlePickup( Inventory item )
 	{
+		// can't hold both weapons at once
+		if ( swwm_swapweapons && IsSwapWeapon(item) )
+			return true;
 		if ( (item.GetClass() == 'ExplodiumGun') && !item.ShouldStay() )
 		{
 			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
@@ -515,13 +518,14 @@ Class ExplodiumGun : SWWMWeapon
 		return Super.Use(pickup);
 	}
 
-	override Inventory CreateTossable (int amt)
+	override Inventory CreateTossable( int amt )
 	{
 		let copy = ExplodiumGun(Inventory.CreateTossable(1));
 		if ( !copy ) return null;
 		// destroy sister weapon if we're removing ourselves
 		if ( copy == self )
 		{
+			copy.preinit = true;	// need this in case we get picked up again out of order
 			if ( SisterWeapon )
 			{
 				SisterWeapon.SisterWeapon = null;
@@ -559,7 +563,6 @@ Class ExplodiumGun : SWWMWeapon
 		Stamina 8000;
 		ExplodiumGun.ClipCount 7;
 		+WEAPON.EXPLOSIVE;
-		+SWWMWEAPON.NOSWAPWEAPON;
 		Radius 12;
 		Height 24;
 	}

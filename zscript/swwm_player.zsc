@@ -586,6 +586,7 @@ Class Demolitionist : PlayerPawn
 		oldlagpitch = lagpitch;
 		lagangle = lagangle*.8+angle*.2;
 		lagpitch = lagpitch*.8+pitch*.2;
+		if ( !player || (player.mo != self) ) return;
 		if ( (player.playerstate != PST_DEAD) && (player.jumptics != 0) )
 		{
 			// faster falloff
@@ -605,14 +606,20 @@ Class Demolitionist : PlayerPawn
 		PoisonDurationReceived = 0;
 		PoisonPeriodReceived = 0;
 		PoisonDamageReceived = 0;
-		if ( !player ) return;
+		if ( !selflight )
+		{
+			selflight = Spawn("DemolitionistSelfLight",pos);
+			selflight.target = self;
+			selflight.Tick();
+		}
+		if ( !player || (player.mo != self) ) return;
 		// double-check that we have these
 		if ( !FindInventory("AlmasteelPlating") )
 		{
 			let ap = Inventory(Spawn("AlmasteelPlating"));
 			ap.AttachToOwner(self);
 			// AddInventory attaches to the front, but we need to be all the way back in the chain (but before the collar)
-			if ( ap.inv )
+			if ( (inv == ap) && ap.inv )
 			{
 				inv = ap.inv;
 				for ( Inventory i=inv; i; i=i.inv )
@@ -635,7 +642,7 @@ Class Demolitionist : PlayerPawn
 			let sc = Inventory(Spawn("SayaCollar"));
 			sc.AttachToOwner(self);
 			// AddInventory attaches to the front, but we need to be all the way back in the chain
-			if ( sc.inv )
+			if ( (inv == sc) && sc.inv )
 			{
 				inv = sc.inv;
 				for ( Inventory i=inv; i; i=i.inv )
@@ -646,12 +653,6 @@ Class Demolitionist : PlayerPawn
 					break;
 				}
 			}
-		}
-		if ( !selflight )
-		{
-			selflight = Spawn("DemolitionistSelfLight",pos);
-			selflight.target = self;
-			selflight.Tick();
 		}
 		// strife thing
 		if ( mystats.oldlogtext == "" )
@@ -1158,7 +1159,7 @@ Class Demolitionist : PlayerPawn
 		int oldpchance = PainChance;
 		if ( damage < 5 ) PainChance = 0;
 		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
-		// hotfix damagecount overflow until it's handled engine-side (yes this shit happens)
+		// hotfix damagecount overflow until proper fix is in stable gzdoom
 		if ( player && (player.damagecount < 0) ) player.damagecount = 100;
 		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage/2,10,40));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
@@ -2881,6 +2882,8 @@ Class DemolitionistSelfLight : Actor
 		if ( target.InStateSequence(target.CurState,target.FindState("Death")) && ((target.frame == 20) || (target.frame == 22) || (target.frame == 23) || (target.frame == 25) || (target.frame == 27) || (target.frame == 28) || (target.frame == 30) || (target.frame == 31) || (target.frame == 32) || (target.frame == 33) || (target.frame == 34)) )
 			return false;
 		if ( target.InStateSequence(target.CurState,target.FindState("CrouchDeath")) && ((target.frame == 7) || (target.frame == 10) || (target.frame == 11)) )
+			return false;
+		if ( target.InStateSequence(target.CurState,target.FindState("VoodooDeath")) && ((target.frame == 9) || (target.frame == 11) || (target.frame == 12) || (target.frame == 14) || (target.frame == 16) || (target.frame == 18)) )
 			return false;
 		return true;
 	}

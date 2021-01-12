@@ -27,7 +27,7 @@ Class SWWMKey : Key abstract
 	{
 		if ( Owner.player && !propagated )
 		{
-			if ( pickup && CVar.GetCVar('swwm_collectanimkey',Owner.player) )
+			if ( pickup && CVar.GetCVar('swwm_collectanimkey',Owner.player).GetBool() )
 				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture);
 			else if ( !pickup )
 				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture,true);

@@ -16,8 +16,10 @@ Class SWWMStaticHandler : StaticEventHandler
 	bool tainted;
 	String taintver;
 	bool mptaint[MAXPLAYERS];
+	bool mprecv[MAXPLAYERS];
 	String mpver[MAXPLAYERS];
 	int checktic;
+	ui bool mpsent, checked;
 
 	override void NewGame()
 	{
@@ -48,12 +50,6 @@ Class SWWMStaticHandler : StaticEventHandler
 		}
 	}
 
-	override void PlayerEntered( PlayerEvent e )
-	{
-		if ( multiplayer && (e.playernumber == consoleplayer) )
-			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_MODVER"));
-	}
-
 	override void OnRegister()
 	{
 		// preload various fonts
@@ -78,6 +74,7 @@ Class SWWMStaticHandler : StaticEventHandler
 		if ( e.Name.Left(12) ~== "swwmversion." )
 		{
 			String verstr = e.Name.Mid(12);
+			mprecv[e.Player] = true;
 			mpver[e.Player] = verstr;
 			if ( verstr != StringTable.Localize("$SWWM_MODVER") )
 				mptaint[e.Player] = true;
@@ -87,7 +84,23 @@ Class SWWMStaticHandler : StaticEventHandler
 	override void PostUiTick()
 	{
 		// TODO achievement update code would go in here
-		if ( gametic != checktic ) return;
+		if ( !mpsent )
+		{
+			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_MODVER"));
+			mpsent = true;
+			return;
+		}
+		if ( checked || (gametic < checktic) ) return;
+		if ( multiplayer )
+		{
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || mprecv[i] ) continue;
+				// waiting for version info from all players
+				return;
+			}
+		}
+		checked = true;
 		String cver = StringTable.Localize("$SWWM_MODVER");
 		if ( tainted )
 		{

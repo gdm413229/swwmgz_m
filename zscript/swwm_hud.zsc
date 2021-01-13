@@ -683,7 +683,11 @@ Class SWWMStatusBar : BaseStatusBar
 				if ( poi.type == INT_Key ) tag = String.Format("\cf%s\c-",poi.keytag);
 				else if ( poi.type == INT_Exit )
 				{
-					if ( poi.trackedline.special == Exit_Secret )
+					if ( (poi.trackedline.special == Teleport_EndGame)
+						|| ((poi.trackedline.special == Exit_Secret) && (level.nextsecretmap.Left(6) == "enDSeQ"))
+						|| ((poi.trackedline.special == Exit_Normal) && (level.nextmap.Left(6) == "enDSeQ")) )
+						tag = String.Format("\cg%s\c-",StringTable.Localize("$SWWM_EEXIT"));
+					else if ( poi.trackedline.special == Exit_Secret )
 						tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
 					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 				}

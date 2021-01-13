@@ -2898,7 +2898,7 @@ Class DemolitionistSelfLight : Actor
 		if ( tagcolor.a == 0 )
 		{
 			let lmp = Wads.FindLump("tagcolor.txt");
-			if ( lmp )
+			if ( lmp != -1 )
 			{
 				String str = Wads.ReadLump(lmp);
 				Array<String> rgb;

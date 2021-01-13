@@ -301,6 +301,26 @@ Class SWWMBossBrain : BossBrain
 		}
 	}
 
+	// kill every single monster in the map, burn away spawn cubes, remove eyes
+	// just let players have their 100% kills in peace
+	void EverythingDies()
+	{
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( a is 'BossEye' ) a.SetStateLabel("Null");
+			else if ( a is 'SpawnShot' )
+			{
+				a.Spawn("SpawnFire",a.pos,ALLOW_REPLACE);
+				a.SetStateLabel("Null");
+			}
+			else if ( (a.Health > 0) && (a.bBossSpawned || a.bCOUNTKILL) )
+				a.DamageMobj(self,self,int.max,'EndMii',DMG_FORCED|DMG_THRUSTLESS);
+		}
+
+	}
+
 	Default
 	{
 		Tag "$FN_BOSSBRAIN";
@@ -328,7 +348,11 @@ Class SWWMBossBrain : BossBrain
 		{
 			A_StartSound("brain/death",CHAN_VOICE,attenuation:ATTN_NONE);
 			A_QuakeEx(9,9,9,120,0,65535,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
-			if ( !eyeless ) SpawnBrainExpl(true);
+			if ( !eyeless )
+			{
+				SpawnBrainExpl(true);
+				EverythingDies();
+			}
 			Spawn("SWWMBossBrainPain",pos);
 		}
 		MBRN A -1 A_BrainDie();
@@ -1433,7 +1457,7 @@ Class SWWMShadow : Actor
 	private void Update( bool nointerpolate = false )
 	{
 		// update scale / alpha
-		if ( (target is 'Inventory') && (Inventory(target).Owner || !target.bSPECIAL) || target.bKILLED || target.bINVISIBLE || (target.sprite == target.GetSpriteIndex('TNT1')) )
+		if ( ((target is 'Inventory') && Inventory(target).Owner) || target.bKILLED || target.bINVISIBLE || (target.sprite == target.GetSpriteIndex('TNT1')) || (target.sprite == target.GetSpriteIndex('ACLO') )
 			alpha = 0.;
 		else
 		{

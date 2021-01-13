@@ -36,17 +36,18 @@ You are an **Akari Labs Demolitionist Bot**, one of the very first units, fresh 
 
 Additional features:
 
- - **Programmable colour tags:** Located around various parts of your body, allows quick and easy differentiation between multiple units (not available due to *engine limitations™*, so they're always green).
- - **Lucky Collar:** A little something that your creator gives to all of her creations. Reduces incoming damage by 75% when you're below 25% health.
+ - **Glowing color tags:** Located around various parts of your body, allows quick and easy differentiation between multiple units (color not directly configurable due to *engine limitations™*).
+ - **Lucky Collar:** A little something that your creator gives to all of her creations. Reduces incoming damage by 75% when you're below 25% health. Plus an additional 50% reduction to any damage from your own weapons.
+ - **High-Resonant Almasteel Plating:** Your chassis is built from one of the hardest alloys known across the universe. Thus, your body is practically indestructible, but not impervious to damage. All direct damage is reduced by 50%, and all explosive damage is reduced by 80%.
  - **User Menu:** With the press of a button, open a dedicated menu to see all your stats in detail, info on carried items and weapons, check out a grand library of information on things you come across, and access the store for buying extra items with your score points.
- - **Magnetic Utility Belt:** Makes some weapons easier to reload while on the go.
- - **Keychain:** For carrying all your keys around, and other valuable things.
- - **Pocket Hammerspace™ containers:** These will store and deploy your ammunition and weapons on demand. The capacity for ammo storage can be increased by finding **Hammerspace™ Embiggener** modules.
- - **Forx JetBurst™ Units:** Can be used for quick dashes in any direction, or even for short bursts of flight.
+ - **Magnetic Utility Belt:** Holds important equipment tightly, and is also the secret to how you can reload some weapons so damn fast.
+ - **Keychain:** A lil' something to bring some extra good luck charms with you.
+ - **Pocket Hammerspace™ containers:** These will store and deploy items on demand, along with keeping hold of any keys you find. The capacity for ammo storage can be increased by finding **Hammerspace™ Embiggener** modules.
+ - **Forx JetBurst™ Impulsors:** Can be used for quick dashes in any direction, or even for short bursts of flight.
  - **Targetting Array:** Tracks nearby foes and provides basic information on their health. Compatible with **Omnisight™** mapping modules for tracking key items and nearby exits. Can also highlight nearby pickups by holding a dedicated button.
  - **Akari Labs CuteEmotion™ Display:** Equipped onto your visor to show a wide range of predefined facial expressions in order to convey simple emotions to others.
- - **Akari Labs LoudBoi™ Voicebox:** Allows you to 🇪 🇲 🇮 🇹. Additional voice options will be available through add-ons. Note that the default voice is in Japanese, but subtitles will be provided when available.
- - **On-demand Item Obtainers:** AKA "hands". You can pick up certain items from a distance by pressing Use (this is mainly a workaround for any quirks that might come from items in this mod having modified collision).
+ - **Akari Labs LoudBoi™ Voicebox:** Allows you to 🇪 🇲 🇮 🇹. Easily moddable to allow alternate voicepack add-ons. Note that the default voice is in Japanese, but subtitles will be provided when needed.
+ - **On-demand Item Obtainers:** AKA "hands". You can pick up the mod's items from a distance by pressing Use (this is mainly a workaround for any quirks that might come from them having modified collision).
 
 **Note:** Since you're a robutt you pretty much can swim indefinitely and are also immune to poison.
 
@@ -455,6 +456,7 @@ A single-volume manga by Saya Miyamoto "based on true events" about a young girl
 The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart. Like the Saya plush, also emits a cute giggle when squeezed.
 
 ## The HUD
+![](docimg/hudsample.png)
 
 Pretty simplistic so it doesn't get in the way of the action. Some things may be configurable.
 
@@ -479,7 +481,7 @@ The scoring system is pretty straightforward. Each enemy you kill will give you 
 
 You are also given +100 points for each secret found, +1000 if it's the final secret. Countable items give +10 points each or +500 if it's the final item. In addition, +5000 will be given to all players if the level is fully cleared (100% kills/items/secrets).
 
-Score can be used to buy items on the in-game store, and it is preserved between hubs.
+Score can be used to buy items on the in-game store, and it is preserved between hubs, but pistol starts will reset it.
 
 In **Doom** and **Heretic**, collected keys will be displayed below the score box.
 

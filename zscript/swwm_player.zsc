@@ -2865,6 +2865,7 @@ Class DemolitionistSelfLight : Actor
 {
 	bool oldactive;
 	bool oldglow;
+	transient Color tagcolor;
 
 	Default
 	{
@@ -2894,6 +2895,18 @@ Class DemolitionistSelfLight : Actor
 			Destroy();
 			return;
 		}
+		if ( tagcolor.a == 0 )
+		{
+			let lmp = Wads.FindLump("tagcolor.txt");
+			if ( lmp )
+			{
+				String str = Wads.ReadLump(lmp);
+				Array<String> rgb;
+				str.Split(rgb,",",0);
+				tagcolor = Color(255,rgb[0].ToInt(),rgb[1].ToInt(),rgb[2].ToInt());
+			}
+			else tagcolor = Color(255,32,48,24);
+		}
 		bool curactive = activelight();
 		if ( curactive && !oldactive )
 			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
@@ -2901,7 +2914,7 @@ Class DemolitionistSelfLight : Actor
 			target.A_RemoveLight('DemoSelfLight');
 		oldactive = curactive;
 		bool curglow = !(target.bINVISIBLE||(target.alpha <= double.epsilon));
-		if ( curglow && !oldglow ) target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,Color(32,48,24),80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
+		if ( curglow && !oldglow ) target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,tagcolor,80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
 		else if ( !curglow && oldglow ) target.A_RemoveLight('DemoSelfLight2');
 		oldglow = curglow;
 	}

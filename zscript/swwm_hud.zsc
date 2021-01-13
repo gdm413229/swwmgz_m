@@ -1352,7 +1352,9 @@ Class SWWMStatusBar : BaseStatusBar
 					Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
 			alph = clamp((deadtimer-60)/60.,0.,1.);
-			str = String.Format(StringTable.Localize("$SWWM_URDED"),CPlayer.GetUserName());
+			String nam = CPlayer.GetUserName();
+			if ( nam == "Player" ) str = StringTable.Localize("$SWWM_URDED_GEN");
+			else str = String.Format(StringTable.Localize("$SWWM_URDED"),nam);
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
 			xx = int((ss.x-len)/2.);

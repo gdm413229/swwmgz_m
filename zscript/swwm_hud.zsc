@@ -715,7 +715,7 @@ Class SWWMStatusBar : BaseStatusBar
 				double alph = clamp(((s.updated+mtime)-level.maptime)/35.,0.,1.);
 				alph *= clamp(1.5-1.5*(tdir.length()/(thesight?1200.:800.)),0.,1.);
 				tag = s.tag;
-				Screen.DrawText(fnt,Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
 				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			}

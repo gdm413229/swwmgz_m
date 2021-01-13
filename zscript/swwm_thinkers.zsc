@@ -719,6 +719,7 @@ Class SWWMItemSense : Thinker
 	Inventory item;
 	String tag;
 	int updated;
+	bool scoreitem;
 	Demolitionist parent;
 	SWWMItemSense prev, next;
 	Vector3 pos;
@@ -737,6 +738,7 @@ Class SWWMItemSense : Thinker
 		let i = new("SWWMItemSense");
 		i.ChangeStatNum(STAT_USER);
 		i.item = item;
+		i.scoreitem = item.bCOUNTITEM;
 		i.parent = parent;
 		i.updated = level.maptime+35;
 		i.UpdateTag();

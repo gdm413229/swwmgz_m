@@ -53,6 +53,14 @@ Class PlayerGone : PlayerChunk
 				players[i].camera = c;
 		}
 	}
+
+	States
+	{
+	Spawn:
+		TNT1 A 0;
+		TNT1 A 1 A_CheckPlayerDone();
+		Wait;
+	}
 }
 
 Class DSparilHax : Sorcerer2

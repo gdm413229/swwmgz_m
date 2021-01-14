@@ -1877,6 +1877,35 @@ Class YnykronVoidExplLight : PaletteLight
 	}
 }
 
+Class YnykronVoidSparkleTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		XScale 6.;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*.95,scale.y);
+		A_FadeOut(.04);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright;
+		Stop;
+	}
+}
+
 Class YnykronVoidSparkle : Actor
 {
 	Default
@@ -1897,7 +1926,7 @@ Class YnykronVoidSparkle : Actor
 		Scale *= FRandom[ExploS](.75,1.5);
 		specialf1 = FRandom[ExploS](.95,.98);
 		specialf2 = FRandom[ExploS](.005,.015);
-		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch))*FRandom[ExploS](1,16);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch))*FRandom[ExploS](4,32);
 	}
 	override void Tick()
 	{
@@ -1913,7 +1942,20 @@ Class YnykronVoidSparkle : Actor
 			dir += .2*(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1));
 			vel = dir.unit()*magvel;
 		}
-		SetOrigin(level.Vec3Offset(pos,vel),true);
+		Vector3 newpos = level.Vec3Offset(pos,vel);
+		dir = level.Vec3Diff(newpos,pos);
+		double len = dir.length();
+		if ( (len > 0.) && (alpha > .1) )
+		{
+			dir /= len;
+			let t = Spawn("YnykronVoidSparkleTrail",newpos);
+			t.alpha = alpha*.5;
+			t.scale.x *= scale.x;
+			t.scale.y = len;
+			t.angle = atan2(dir.y,dir.x);
+			t.pitch = asin(-dir.z)+90;
+		}
+		SetOrigin(newpos,true);
 	}
 	States
 	{
@@ -2038,7 +2080,7 @@ Class YnykronSingularityExplosion : Actor
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](8,12);
+		int numpt = Random[ExploS](4,8);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](4,20);
@@ -2049,7 +2091,7 @@ Class YnykronSingularityExplosion : Actor
 			s.special1 = Random[ExploS](2,5);
 			s.scale *= 8.;
 		}
-		numpt = Random[ExploS](5,10);
+		numpt = Random[ExploS](0,4);
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);

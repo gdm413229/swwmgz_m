@@ -105,6 +105,35 @@ Class EvisceratorChunkGlow : Actor
 	}
 }
 
+Class EvisceratorChunkTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		XScale 8.;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*.6,scale.y);
+		A_FadeOut(.1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright;
+		Stop;
+	}
+}
+
 Class EvisceratorChunk : Actor
 {
 	Actor lasthit;
@@ -184,6 +213,17 @@ Class EvisceratorChunk : Actor
 			angle += anglevel;
 			pitch += pitchvel;
 			roll += rollvel;
+			double alph = clamp((.7-lifetime)/.7,0,1.);
+			if ( alph < 0 ) return;
+			Vector3 dir = level.Vec3Diff(pos,prev);
+			double dist = dir.length();
+			if ( dist < 1. ) return;
+			dir /= dist;
+			let t = Spawn("EvisceratorChunkTrail",pos);
+			t.alpha = alph;
+			t.scale.y = dist;
+			t.angle = atan2(dir.y,dir.x);
+			t.pitch = asin(-dir.z)+90;
 		}
 	}
 
@@ -581,7 +621,7 @@ Class EvisceratorRing : Actor
 	States
 	{
 	Spawn:
-		XRG3 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.01);
+		XRG0 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.01);
 		Stop;
 	}
 }

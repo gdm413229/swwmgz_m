@@ -737,6 +737,34 @@ Class SWWMBubble : Actor
 	}
 }
 
+Class SWWMSparkTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*.9,scale.y);
+		A_FadeOut(.06);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright;
+		Stop;
+	}
+}
+
 Class SWWMSpark : Actor
 {
 	bool dead;
@@ -787,6 +815,7 @@ Class SWWMSpark : Actor
 			int nstep = 0;
 			while ( dist > 0 )
 			{
+				Vector3 oldpos = newpos;
 				// safeguard, too many bounces
 				if ( nstep > MAXBOUNCEPERTIC )
 				{
@@ -854,6 +883,17 @@ Class SWWMSpark : Actor
 				nstep++;
 			}
 			newpos.z = clamp(newpos.z,floorz,ceilingz);
+			Vector3 taildir = level.Vec3Diff(newpos,pos);
+			double taillen = taildir.length();
+			if ( (taillen > 0.) && (alpha > .3) )
+			{
+				taildir /= taillen;
+				let t = Spawn("SWWMSparkTrail",newpos);
+				t.alpha = alpha*.3;
+				t.scale.y = taillen;
+				t.angle = atan2(taildir.y,taildir.x);
+				t.pitch = asin(-taildir.z)+90;
+			}
 			SetOrigin(newpos,true);
 		}
 		UpdateWaterLevel();

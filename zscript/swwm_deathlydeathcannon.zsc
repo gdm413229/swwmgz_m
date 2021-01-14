@@ -1209,7 +1209,7 @@ Class GatherDust : Actor
 			if ( distto < (32.*target.scale.x) )
 			{
 				// sucked in
-				target.specialf2 += FRandom[ExploS](.5,5.);
+				target.specialf2 += FRandom[ExploS](.5,2.);
 				Destroy();
 				return;
 			}
@@ -1943,6 +1943,16 @@ Class YnykronVoidSparkle : Actor
 			vel = dir.unit()*magvel;
 		}
 		Vector3 newpos = level.Vec3Offset(pos,vel);
+		if ( (newpos.z < floorz) || (newpos.z >= ceilingz) )
+		{
+			vel.z *= -1;
+			newpos = level.Vec3Offset(pos,vel);
+		}
+		if ( !level.IsPointInLevel(newpos) )
+		{
+			vel.xy *= -1;
+			newpos = level.Vec3Offset(pos,vel);
+		}
 		dir = level.Vec3Diff(newpos,pos);
 		double len = dir.length();
 		if ( (len > 0.) && (alpha > .1) )
@@ -2080,7 +2090,7 @@ Class YnykronSingularityExplosion : Actor
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](4,8);
+		int numpt = Random[ExploS](2,4);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](4,20);
@@ -2313,7 +2323,7 @@ Class YnykronSingularity : Actor
 					// delet missile
 					if ( a.bMISSILE )
 					{
-						specialf2 += 10.;
+						specialf2 += 5.;
 						a.Destroy();
 						continue;
 					}
@@ -2435,7 +2445,7 @@ Class YnykronSingularity : Actor
 		}
 		Spawn("YnykronSingularityRing",pos);
 		Spawn("YnykronVoidExplLight",pos);
-		int numpt = Random[ExploS](40,60);
+		int numpt = Random[ExploS](60,80);
 		for ( int i=0; i<numpt; i++ )
 		{
 			let s = Spawn("YnykronVoidSparkle",pos);
@@ -2463,7 +2473,7 @@ Class YnykronSingularity : Actor
 		Vector3 HitNormal;
 		Vector3 origin;
 		double ang, pt;
-		int numpt = clamp(special1/6,2,8);
+		int numpt = clamp((60-special1)/4,2,12);
 		for ( int i=0; i<numpt; i++ )
 		{
 			double totaldist = 30+(special1**2.5)*.1;

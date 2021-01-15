@@ -1003,7 +1003,7 @@ Class SWWMStatusBar : BaseStatusBar
 		else if ( CPlayer.mo.InvSel && !isInventoryBarVisible() ) yy -= 34;
 		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
 		{
-			if ( (i is 'SWWMLamp') )
+			if ( (i is 'SWWMLamp') && SWWMLamp(i).bActivated )
 			{
 				DrawInvIcon(i,xx,yy,aspowerup:true);
 				yy -= 34;

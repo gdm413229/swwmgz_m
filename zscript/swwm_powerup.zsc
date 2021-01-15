@@ -1657,7 +1657,7 @@ Class SWWMLamp : Inventory
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
 
-	bool bActive;
+	bool bActive, bActivated;
 	TextureID OnIcon;
 	Actor thelamp;
 	int charge;
@@ -1711,6 +1711,7 @@ Class SWWMLamp : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
+		bActivated = true;
 		bActive = !bActive;
 		if ( !OnIcon ) OnIcon = TexMan.CheckForTexture("graphics/HUD/Icons/I_Lamp.png",TexMan.Type_MiscPatch);
 		Icon = bActive?OnIcon:default.Icon;
@@ -1721,7 +1722,7 @@ Class SWWMLamp : Inventory
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( !thelamp )
+		if ( !thelamp && bActivated )
 		{
 			thelamp = Spawn("CompanionLamp",Owner.Vec3Offset(cos(Owner.angle)*20,sin(Owner.angle)*20,24));
 			CompanionLamp(thelamp).parent = Owner;
@@ -1748,6 +1749,7 @@ Class SWWMLamp : Inventory
 		}
 		Icon = default.Icon;
 		bActive = false;
+		bActivated = false;
 	}
 	clearscope bool isBlinking()
 	{

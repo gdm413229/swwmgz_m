@@ -181,6 +181,21 @@ Class SWWMUtility
 		return false;
 	}
 
+	static clearscope bool IsTeleportLine( Line l, bool all = false )
+	{
+		// must be two-sided and crossable
+		if ( !l.sidedef[1] || !(l.Activation&(SPAC_Cross|SPAC_MCross|SPAC_PCross|SPAC_AnyCross)) ) return false;
+		if ( (l.special == Teleport) || (l.special == Teleport_NoStop) )
+			return true;
+		// also include sneaky teleports
+		if ( all && ((l.special == Teleport_Line) || (l.special == Teleport_NoFog)) )
+			return true;
+		// exits are included too
+		if ( IsExitLine(l) )
+			return true;
+		return false;
+	}
+
 	// how the fuck is this not available to ZScript?
 	// copied from P_PointOnLineSidePrecise()
 	static clearscope int PointOnLineSide( Vector2 p, Line l )

@@ -805,6 +805,12 @@ Class SWWMHandler : EventHandler
 			for ( int i=0; i<level.lines.Size(); i++ )
 			{
 				Line l = level.lines[i];
+				// while we're at it, add teleporter sparks
+				if ( SWWMUtility.IsTeleportLine(l) )
+				{
+					let a = SWWMTeleportLine(Actor.Spawn("SWWMTeleportLine"));
+					a.tline = l;
+				}
 				if ( !SWWMUtility.IsExitLine(l) )
 					continue;
 				if ( skipme.Find(l) < skipme.Size() ) continue;
@@ -1692,6 +1698,7 @@ Class SWWMHandler : EventHandler
 			let t = bt.Thing;
 			if ( !t || (t == a) || !(t is 'Inventory') || !(t.spawnpoint ~== a.spawnpoint) ) continue;
 			a.floatbobphase = t.floatbobphase;
+			a.angle = t.angle;	// also copy angle
 			break;
 		}
 	}
@@ -1749,6 +1756,11 @@ Class SWWMHandler : EventHandler
 				}
 			}
 		}
+		if ( (e.Thing is 'TeleportDest') || (e.Thing is 'BossTarget') )
+		{
+			let d = Actor.Spawn("SWWMTeleportDest",e.Thing.pos);
+			d.bNOGRAVITY = e.Thing.bNOGRAVITY;
+		}
 		if ( e.Thing is 'Inventory' )
 			CopyFloatBob(e.Thing);
 		if ( swwm_doomfall && e.Thing.bISMONSTER )
@@ -1798,7 +1810,7 @@ Class SWWMHandler : EventHandler
 			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
 				SWWMShadow.Track(e.Thing);
 		}
-		// Ynykron vortex optimization
+		// Ynykron vortex optimization (faster than a thinker iterator)
 		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE )
 			SuckableActors.Push(e.Thing);
 		// vanilla blood color changes
@@ -2272,7 +2284,7 @@ Class SWWMHandler : EventHandler
 		else if ( e.Replacee.GetClassName() == 'KeyRed' ) e.Replacement = 'SWWMKeyRed';
 		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') )
 		{
-			if ( ShouldSpawnDualExpl() ) e.Replacement = Random[Replacements](0,1)?'ExplodiumGun':'PusherWeapon';
+			if ( ShouldSpawnDualExpl() && Random[Replacements](0,1) ) e.Replacement = 'ExplodiumGun';
 			else e.Replacement = 'PusherWeapon';
 		}
 		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
@@ -2328,12 +2340,12 @@ Class SWWMHandler : EventHandler
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacements](0,2)];
+				e.Replacement = redpool[Random[Replacements](0,1)];
 				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacements](0,2)];
+				e.Replacement = greenpool[Random[Replacements](0,1)];
 				break;
 			case 6:
 			case 7:
@@ -2353,7 +2365,6 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
-
 		else if ( e.Replacee is 'ClipBox' ) e.Replacement = Random[Replacements](0,4)?'EvisceratorShell':Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
 		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = 'SWWMNothing';
 		else if ( e.Replacee is 'BlasterHefty' ) e.Replacement = Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';

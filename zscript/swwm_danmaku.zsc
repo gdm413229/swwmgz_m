@@ -277,6 +277,7 @@ Class EvisceratorChunk : Actor
 		if ( (HitNormal dot RealHitNormal) < 0 ) HitNormal *= -.5;
 		vel = FRandom[Eviscerator](.8,.95)*((vel dot HitNormal)*HitNormal*(FRandom[Eviscerator](-1.8,-1.))+vel);
 		bHITOWNER = true;
+		lasthit = null;
 		if ( (vel.length() > 20) && !Random[Eviscerator](0,2) )
 		{
 			let l = Spawn("ChunkImpact",pos);
@@ -352,6 +353,14 @@ Class EvisceratorChunk : Actor
 			}
 			vel *= .65;	// reduce velocity as it rips
 			return 1;
+		}
+		// HACK
+		if ( !victim.bNOBLOOD && !victim.bDORMANT && !victim.bINVULNERABLE ) ExplodeMissile(null,victim);
+		else
+		{
+			BlockingMobj = victim;
+			A_HandleBounce();
+			lasthit = victim;
 		}
 		return -1;
 	}

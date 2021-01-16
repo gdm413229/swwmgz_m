@@ -890,7 +890,7 @@ Class SWWMSpark : Actor
 			newpos.z = clamp(newpos.z,floorz,ceilingz);
 			Vector3 taildir = level.Vec3Diff(newpos,pos);
 			double taillen = taildir.length();
-			if ( (taillen > 0.) && (alpha > .3) )
+			if ( (taillen > 0.) && (alpha > .3) && (waterlevel <= 0) )
 			{
 				taildir /= taillen;
 				let t = Spawn("SWWMSparkTrail",newpos);
@@ -900,6 +900,11 @@ Class SWWMSpark : Actor
 				t.pitch = asin(-taildir.z)+90;
 			}
 			SetOrigin(newpos,true);
+			if ( (pos.z <= floorz) && GetFloorTerrain().IsLiquid )
+			{
+				Destroy();
+				return;
+			}
 		}
 		UpdateWaterLevel();
 		if ( waterlevel > 0 )
@@ -1071,6 +1076,11 @@ Class SWWMChip : Actor
 			}
 			SetOrigin(newpos,true);
 			UpdateWaterLevel();
+			if ( (pos.z <= floorz) && GetFloorTerrain().IsLiquid )
+			{
+				Destroy();
+				return;
+			}
 		}
 		if ( killme ) A_FadeOut(.01);
 		if ( waterlevel > 0 )

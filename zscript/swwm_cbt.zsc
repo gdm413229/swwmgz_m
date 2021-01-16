@@ -243,6 +243,15 @@ Class WallbusterReloadMenu : GenericMenu
 				}
 				MenuSound(didsomething?"menu/demosel":"menu/noinvuse");
 			}
+			else if ( ev.keychar == UiEvent.Key_Del )
+			{
+				// empty it out
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+				MenuSound("menu/democlose");
+				EventHandler.SendNetworkEvent("swwmcbt.EMPTY",consoleplayer);
+				Close();
+			}
 			break;
 		case UIEvent.Type_LButtonDown:
 			isrclick = false;
@@ -829,6 +838,7 @@ Class Wallbuster : SWWMWeapon
 	transient CVar cbtmuffler;
 	int rnum;
 	transient bool cancelreload;
+	transient bool clearout;
 
 	transient ui TextureID WeaponBox, AmmoIcon[4], LoadIcon[4], UsedIcon[4], EmptyIcon;
 	transient ui Font TewiFont;
@@ -1490,7 +1500,19 @@ Class Wallbuster : SWWMWeapon
 	action void A_WaitMenu()
 	{
 		if ( invoker.waitreload ) return;
-		if ( invoker.reloadqueue.Size() <= 0 ) player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
+		if ( invoker.clearout )
+		{
+			bool hasshells = false;
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !invoker.loaded[i] || invoker.fired[i] ) continue;
+				hasshells = true;
+				break;
+			}
+			if ( hasshells ) player.SetPsprite(PSP_WEAPON,ResolveState("Detach"));
+			else player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
+		}
+		else if ( (invoker.reloadqueue.Size() <= 0) ) player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
 		else player.SetPsprite(PSP_WEAPON,ResolveState("Detach"));
 	}
 	action void A_StartDetachOverlays()
@@ -1715,6 +1737,31 @@ Class Wallbuster : SWWMWeapon
 			invoker.rnum = invoker.reloadqueue.Size();
 			invoker.cancelreload = false;
 			A_Overlay(-9999,"CheckCancelReload");
+			// clearing out?
+			if ( invoker.clearout )
+			{
+				// jump to spin if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("DetachSpin");
+				return ResolveState(null);
+			}
 			// if it's a full rotation, don't hand-spin
 			if ( invoker.rnum > 20 ) return ResolveState(null);
 			// jump to spin if current group is full
@@ -1767,15 +1814,49 @@ Class Wallbuster : SWWMWeapon
 			A_Overlay(-9999,"CheckCancelReload");
 			A_HandSpin();
 		}
-		XZWF BCDEFG 2;
+		XZWF BCDEF 2;
+		XZWF G 0
+		{
+			if ( invoker.clearout )
+			{
+				// jump to spin again if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("DetachSpinAgain");
+			}
+			return ResolveState(null);
+		}
+		XZWF G 2;
 		XZWF J 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWF K 0;
 		Goto DetachHold;
+	DetachSpinAgain:
+		XZWF G 2;
+		XZWF H 0;
+		XZWH JKL 1;
+		Goto DetachSpin+5;
 	DetachHold:
 		XZW5 H 1
 		{
 			A_StartDetachOverlays();
 			A_PlayerReload();
+			return A_JumpIf(invoker.clearout,"DetachHoldClear");
 		}
 		XZW5 IJKLMNOPQ 1;
 		XZW5 R 2 A_DropShells();
@@ -1790,6 +1871,26 @@ Class Wallbuster : SWWMWeapon
 			if ( invoker.cancelreload ) invoker.reloadqueue.Clear();
 			player.SetPSprite(-9999,null);
 			return A_JumpIf((invoker.reloadqueue.Size()>0),"AttachSpin");
+		}
+		Goto Attach;
+	DetachHoldClear:
+		XZW5 HIJKLMNOPQ 1;
+		XZW5 R 3 A_DropShells();
+		XZW5 TX 3;
+		XZW6 A 3;
+		XZW6 E 0
+		{
+			bool keepgoing = false;
+			// still have more shells?
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !invoker.loaded[i] || invoker.fired[i] ) continue;
+				keepgoing = true;
+				break;
+			}
+			if ( invoker.cancelreload ) keepgoing = false;
+			player.SetPSprite(-9999,null);
+			return A_JumpIf(keepgoing,"AttachSpin");
 		}
 		Goto Attach;
 	CheckCancelReload:

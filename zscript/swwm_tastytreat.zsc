@@ -1060,7 +1060,7 @@ Class CandyGun : SWWMWeapon
 		p.angle = atan2(dir.y,dir.x);
 		p.pitch = asin(-dir.z);
 		p.vel = dir*p.speed;
-		p.vel.z += 5.;
+		if ( p.waterlevel <= 0 ) p.vel.z += 5.;
 		p.vel += vel*.5;
 	}
 
@@ -1084,7 +1084,7 @@ Class CandyGun : SWWMWeapon
 		p.angle = atan2(dir.y,dir.x);
 		p.pitch = asin(-dir.z);
 		p.vel = dir*p.speed;
-		p.vel.z += 5.;
+		if ( p.waterlevel <= 0 ) p.vel.z += 5.;
 		p.vel += vel*.5;
 	}
 

@@ -448,7 +448,7 @@ Class EvisceratorProj : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		vel.z += 3;
+		if ( waterlevel <= 0 ) vel.z += 3;
 		heat = 1.5;
 	}
 	action void A_EvisExplode()

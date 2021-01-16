@@ -2747,15 +2747,20 @@ Class SWWMHandler : EventHandler
 			let cbt = Wallbuster(players[e.Args[0]].mo.FindInventory("Wallbuster"));
 			if ( !cbt ) return;
 			cbt.reloadqueue.Clear();
-			Array<String> qs;
-			qs.Clear();
-			String rite = e.Name.Mid(8);
-			rite.Split(qs,",",TOK_SKIPEMPTY);
-			for ( int i=0; i<qs.Size(); i++ )
+			if ( e.Name.Mid(8) ~== "EMPTY" ) cbt.clearout = true;
+			else
 			{
-				int qi = qs[i].ToInt();
-				if ( (qi < 0) || (qi > 3) ) continue;
-				cbt.reloadqueue.Push(cbttypes[qi]);
+				cbt.clearout = false;
+				Array<String> qs;
+				qs.Clear();
+				String rite = e.Name.Mid(8);
+				rite.Split(qs,",",TOK_SKIPEMPTY);
+				for ( int i=0; i<qs.Size(); i++ )
+				{
+					int qi = qs[i].ToInt();
+					if ( (qi < 0) || (qi > 3) ) continue;
+					cbt.reloadqueue.Push(cbttypes[qi]);
+				}
 			}
 			cbt.waitreload = false;
 		}

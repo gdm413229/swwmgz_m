@@ -275,6 +275,12 @@ Class SWWMBossBrain : BossBrain
 		let ti = ThinkerIterator.Create("BossEye");
 		if ( ti.Next() ) eyeless = false;
 		else eyeless = true;
+		if ( !eyeless )
+		{
+			// proper boss
+			bCOUNTKILL = true;
+			level.total_monsters++;
+		}
 	}
 
 	void SpawnBrainExpl( bool death = false )
@@ -327,7 +333,6 @@ Class SWWMBossBrain : BossBrain
 		Radius 20;
 		Height 40;
 		+NOBLOOD;
-		+COUNTKILL;
 	}
 	States
 	{

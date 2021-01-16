@@ -1951,6 +1951,24 @@ Class Demolitionist : PlayerPawn
 	}
 	override void AddInventory( Inventory item )
 	{
+		// hackaround for replaced keys
+		if ( item is 'Key' )
+		{
+			let rep = (Class<Inventory>)(GetReplacement(item.GetClass()));
+			if ( rep && (item.GetClass() != rep) )
+			{
+				item.Destroy();
+				// add the new key instead
+				Actor whom = player?player.mo:PlayerPawn(self);
+				if ( !whom.FindInventory(rep) )
+				{
+					let nk = Inventory(Spawn(rep));
+					nk.AttachToOwner(whom);
+					nk.Use(true);
+				}
+				return;
+			}
+		}
 		Super.AddInventory(item);
 		if ( !player ) return;
 		if ( !bInDefaultInventory )

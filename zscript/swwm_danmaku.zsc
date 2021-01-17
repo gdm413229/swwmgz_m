@@ -712,17 +712,17 @@ Class Eviscerator : SWWMWeapon
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( chambered || !pendingload || ((loadtics < 25) && (Ammo1.Amount <= 0)) )
+		if ( chambered || !pendingload || ((loadtics < 20) && (Ammo1.Amount <= 0)) )
 		{
 			loadtics = 0;
 			return;
 		}
 		loadtics++;
-		if ( (loadtics == 15) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
+		if ( (loadtics == 10) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
 			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
-		if ( (loadtics == 25) && !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
+		if ( (loadtics == 20) && !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
 			Ammo1.Amount = max(0,Ammo1.Amount-1);
-		if ( loadtics == 30 )
+		if ( loadtics == 25 )
 		{
 			pendingload = false;
 			chambered = true;

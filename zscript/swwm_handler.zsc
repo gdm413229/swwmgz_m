@@ -70,6 +70,16 @@ Class SWWMStaticHandler : StaticEventHandler
 
 	override void NetworkProcess( ConsoleEvent e )
 	{
+		if ( e.Name ~== "swwmgetversion" )
+		{
+			let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+			let svd = SWWMSaveVerData(ti.Next());
+			if ( svd ) Console.Printf("\cj%s\c-",svd.ver);
+			else Console.Printf("\cg(no version information)\c-");
+			if ( tainted ) Console.Printf("\cgversion is mismatched\c-");
+			else Console.Printf("\cdversion is not mismatched\c-");
+			return;
+		}
 		if ( e.IsManual ) return;
 		if ( e.Name.Left(12) ~== "swwmversion." )
 		{
@@ -84,6 +94,7 @@ Class SWWMStaticHandler : StaticEventHandler
 	override void PostUiTick()
 	{
 		// TODO achievement update code would go in here
+		if ( gamestate != GS_LEVEL ) return;
 		if ( !mpsent )
 		{
 			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_MODVER"));

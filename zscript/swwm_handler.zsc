@@ -2246,7 +2246,8 @@ Class SWWMHandler : EventHandler
 			for ( State s=def.SpawnState; s; s=s.NextState )
 			{
 				if ( s.bDEHACKED ) dehackery = true;
-				if ( s.NextState == s ) break;
+				// keep checking until we hit a loop, just in case
+				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
 			}
 			if ( dehackery ) return;
 			e.Replacement = 'SWWMHangingKeen';
@@ -2258,7 +2259,8 @@ Class SWWMHandler : EventHandler
 			for ( State s=def.SpawnState; s; s=s.NextState )
 			{
 				if ( s.bDEHACKED ) dehackery = true;
-				if ( s.NextState == s ) break;
+				// keep checking until we hit a loop, just in case
+				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
 			}
 			if ( dehackery ) return;
 			e.Replacement = 'SWWMBossBrain';

@@ -1807,7 +1807,9 @@ Class Wallbuster : SWWMWeapon
 		Goto DetachHold;
 	DetachSpin:
 		XZWE U 0;
-		XZWE VWXYZ 1;
+		XZWE VWXY 1;
+	DetachSpinReturn:
+		XZWE Z 1;
 		XZWF A 2
 		{
 			invoker.cancelreload = false;
@@ -1850,7 +1852,7 @@ Class Wallbuster : SWWMWeapon
 		XZWF G 2;
 		XZWF H 0;
 		XZWH JKL 1;
-		Goto DetachSpin+5;
+		Goto DetachSpinReturn;
 	DetachHold:
 		XZW5 H 1
 		{
@@ -1958,10 +1960,44 @@ Class Wallbuster : SWWMWeapon
 			A_Overlay(-9999,"CheckCancelReload");
 			A_HandSpin();
 		}
-		XZW8 EFGHIL 2;
+		XZW8 EFGH 2;
+		XZW8 I 0
+		{
+			if ( invoker.clearout )
+			{
+				// jump to spin again if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("AttachSpinAgain");
+			}
+			return ResolveState(null);
+		}
+		XZW8 IL 2;
 		XZW8 M 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW8 N 0;
 		Goto DetachHold;
+	AttachSpinAgain:
+		XZW8 IJ 2;
+		XZW8 K 1;
+		XZW8 K 0;
+		XZWH MNO 1;
+		Goto DetachSpinReturn;
 	AttachShell0:
 		XZWA OPQRSTUVWXYZ 1;
 		XZWB AB 1;

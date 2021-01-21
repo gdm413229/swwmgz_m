@@ -1,6 +1,5 @@
 **Finishing touches before release:**
 
- - Replace FYS shells with something else (still have them be black shells to save time, though)
  - Collectibles
  - Achievements
 

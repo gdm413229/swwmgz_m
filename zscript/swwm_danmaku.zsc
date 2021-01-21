@@ -978,7 +978,8 @@ Class Eviscerator : SWWMWeapon
 					invoker.pendingload = true;
 			}
 			A_WeaponReady(flg);
-			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+			// avoid the check while still chambering
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) && (invoker.loadtics < 20) )
 				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;
@@ -995,7 +996,8 @@ Class Eviscerator : SWWMWeapon
 					invoker.pendingload = true;
 			}
 			A_WeaponReady(flg);
-			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+			// avoid the check while still chambering
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) && (invoker.loadtics < 20) )
 				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;

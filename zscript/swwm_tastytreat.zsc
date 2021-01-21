@@ -919,6 +919,12 @@ Class CandyGun : SWWMWeapon
 					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 				item.bPickupGood = true;
 			}
+			if ( spareget && !ammoget )
+			{
+				// leave the excess mag behind
+				let m = Spawn(AmmoType1,item.pos);
+				m.angle = item.angle;
+			}
 			return true;
 		}
 		return Super.HandlePickup(item);

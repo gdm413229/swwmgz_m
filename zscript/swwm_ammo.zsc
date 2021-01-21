@@ -1678,7 +1678,6 @@ Class HammerspaceEmbiggener : Inventory
 					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
 					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+self.Amount*factor);
 				}
-				else ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount));
 				if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
 					ammoitem.Amount = ammoitem.MaxAmount;
 				ammoitem.AttachToOwner(other);
@@ -1691,7 +1690,6 @@ Class HammerspaceEmbiggener : Inventory
 					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
 					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+self.Amount*factor);
 				}
-				else ammoitem.MaxAmount = int(ammoitem.default.MaxAmount*(1+self.Amount));
 				if ( ammoitem.Amount < ammoitem.MaxAmount )
 				{
 					ammoitem.Amount += amount;
@@ -1718,7 +1716,6 @@ Class HammerspaceEmbiggener : Inventory
 					double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(MaxAmount);
 					i.MaxAmount = int(i.default.MaxAmount+Amount*factor);
 				}
-				else i.MaxAmount = int(i.default.MaxAmount*(1+Amount));
 				int amount = Ammo(i).BackpackAmount;
 				if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
 				i.Amount += amount;
@@ -1734,7 +1731,6 @@ Class HammerspaceEmbiggener : Inventory
 				double factor = (Ammo(item).BackpackMaxAmount-item.default.MaxAmount)/double(MaxAmount);
 				item.MaxAmount = int(item.default.MaxAmount+Amount*factor);
 			}
-			else item.MaxAmount = int(item.default.MaxAmount*1+Amount);
 			if ( Ammo(item).BackpackMaxAmount > 0 )
 				item.MaxAmount = min(item.MaxAmount,Ammo(item).BackpackMaxAmount);
 		}
@@ -1748,7 +1744,12 @@ Class HammerspaceEmbiggener : Inventory
 		{
 			if ( !(i is 'Ammo') ) continue;
 			i.MaxAmount = i.default.MaxAmount;
-			if ( i.Amount > i.MaxAmount ) i.Amount = i.MaxAmount;
+			if ( i.Amount > i.MaxAmount )
+			{
+				int dropme = max(0,i.Amount-i.MaxAmount);
+				if ( dropme > 0 ) i.CreateTossable(dropme);
+				i.Amount = i.MaxAmount;
+			}
 		}
 		Super.DepleteOrDestroy();
 	}

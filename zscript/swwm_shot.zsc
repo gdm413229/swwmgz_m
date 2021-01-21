@@ -836,7 +836,22 @@ Class BallImpact : Actor
 	}
 }
 
-Class CorrodeSmoke : SWWMHalfSmoke
+Class CorrodeSmoke : SWWMSmoke
+{
+	Default
+	{
+		RenderStyle "Add";
+		Alpha 0.25;
+	}
+	States
+	{
+	Spawn:
+		FRT1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 1 Bright A_SetTics(1+special1);
+		FRT2 ABCDEFGHI 1 Bright A_SetTics(1+special1);
+		Stop;
+	}
+}
+Class CorrodeHalfSmoke : SWWMHalfSmoke
 {
 	Default
 	{
@@ -854,7 +869,7 @@ Class CorrodeSmoke : SWWMHalfSmoke
 
 Class CorrodeDebuff : Inventory
 {
-	int cnt;
+	int cnt, cnt2;
 	Actor instigator;
 	bool wasalive;
 
@@ -862,7 +877,7 @@ Class CorrodeDebuff : Inventory
 	{
 		Obituary "$O_SPREADGUN_BLACK_DEBUFF";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 500;
+		Inventory.MaxAmount 1000;
 		Inventory.InterHubAmount 0;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
@@ -879,9 +894,9 @@ Class CorrodeDebuff : Inventory
 			c.AttachToOwner(target);
 			c.cnt = 5;	// slight delay
 			c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
-			c.Amount = clamp(c.Amount+Damage*5,0,int(Amount*.9));	// prevent "escalating" spread
+			c.Amount = clamp(c.Amount+Damage*8,0,int(Amount*.7));	// prevent "escalating" spread
 		}
-		else c.Amount = clamp(c.Amount+Damage*5,0,int(Amount*.8));	// prevent "escalating" spread
+		else if ( c.Amount < int(Amount*.6) ) c.Amount = clamp(c.Amount+Damage*8,0,int(Amount*.6));	// prevent "escalating" spread
 		c.instigator = instigator;
 		return 0;	// no direct damage
 	}
@@ -895,36 +910,44 @@ Class CorrodeDebuff : Inventory
 		}
 		SetOrigin(Owner.Vec3Offset(0,0,Owner.height/2),false);
 		cnt--;
-		if ( cnt > 0 ) return;
-		cnt = clamp((100-Amount)/5,5,15);
-		if ( !Random[Corrode](0,3) ) Owner.Howl();
-		double maxrad = max(Owner.radius,Owner.height);
-		Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/5,1,50),'Corroded',DMG_THRUSTLESS);
-		bool justdied = (wasalive && (!Owner || Owner.Health <= 0));
-		if ( justdied )
+		if ( cnt < 0 )
 		{
-			maxrad += 60;
-			Amount = max(100,Amount);
-			A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
+			cnt = clamp((100-Amount)/10,5,15);
+			if ( !Random[Corrode](0,3) ) Owner.Howl();
+			double maxrad = max(Owner.radius,Owner.height);
+			Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/8,1,50),'Corroded',DMG_THRUSTLESS);
+			bool justdied = (wasalive && (!Owner || Owner.Health <= 0));
+			if ( justdied )
+			{
+				maxrad += 50;
+				Amount = max(100,Amount+50);
+				A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
+			}
+			if ( !wasalive ) maxrad += 50;
+			SWWMUtility.DoExplosion(self,clamp(Amount/8,1,50),0,maxrad*1.1,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
+			int numpt = Random[Corrode](-2,2);
+			if ( justdied ) numpt = Random[Corrode](8,12);
+			for ( int i=0; i<numpt; i++ )
+			{
+				let s = Spawn(justdied?"CorrodeSmoke":"CorrodeHalfSmoke",level.Vec3Offset(Owner.pos,(.8*FRandom[Corrode](-Owner.radius,Owner.radius),.8*FRandom[Corrode](-Owner.radius,Owner.radius),FRandom[Corrode](.1*Owner.Height,.9*Owner.Height))));
+				s.vel = Owner.vel*.5;
+				if ( justdied ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](2.,4.);
+				else if ( !wasalive ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.2,2.);
+				else s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.1,1.);
+				s.scale *= FRandom[Corrode](2.,3.);
+				s.alpha *= Clamp(Amount/10.,0.,.6);
+				if ( justdied ) s.special1 = Random[Corrode](0,2);
+			}
 		}
-		SWWMUtility.DoExplosion(self,clamp(Amount/5,1,50),0,maxrad*1.1,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
-		int numpt = Random[Corrode](-2,2);
-		if ( justdied ) numpt = Random[Corrode](10,20);
-		for ( int i=0; i<numpt; i++ )
-		{
-			let s = Spawn("CorrodeSmoke",level.Vec3Offset(Owner.pos,(.8*FRandom[Corrode](-Owner.radius,Owner.radius),.8*FRandom[Corrode](-Owner.radius,Owner.radius),FRandom[Corrode](.1*Owner.Height,.9*Owner.Height))));
-			s.vel = Owner.vel*.5;
-			if ( justdied ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](2.,4.);
-			else s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.1,1.);
-			s.scale *= FRandom[Corrode](2.,3.);
-			s.alpha *= Clamp(Amount/10.,0.,.6);
-			s.special1 = Random[Corrode](0,1);
-		}
-		if ( Owner && (Owner.Health <= 0) ) Amount -= 2;
-		else Amount -= 1;
-		if ( Owner && Owner.bNOBLOOD ) Amount -= 2;
-		if ( Demolitionist(Owner) ) Amount -= 5;	// high-resonant almasteel plating dissipates Telubrium
 		wasalive = (Owner && Owner.Health > 0);
+		cnt2++;
+		if ( cnt2 < 4 ) return;
+		cnt2 = 0;
+		Amount -= 1;
+		if ( Amount > 100 ) Amount -= max(0,Amount/50-1);
+		if ( !Owner ) return;
+		if ( Owner.Health > 0 ) Amount -= 1;
+		if ( Owner.bNOBLOOD ) Amount -= 2;
 	}
 }
 
@@ -997,7 +1020,7 @@ Class CorrosiveSplash : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,20,0,40,10,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',tracer);
+		SWWMUtility.DoExplosion(self,20,0,50,15,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',tracer);
 		Destroy();
 	}
 }
@@ -1092,7 +1115,7 @@ Class CorrosiveFlechette : Actor
 						c = CorrodeDebuff(Spawn("CorrodeDebuff",a.pos));
 						c.AttachToOwner(a);
 					}
-					c.Amount = clamp(c.Amount+20,100,c.MaxAmount);
+					c.Amount = clamp(c.Amount+25,100,c.MaxAmount);
 					c.cnt = 0;
 					c.instigator = target;
 					c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);

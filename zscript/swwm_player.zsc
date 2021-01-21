@@ -2538,6 +2538,8 @@ Class SayaCollar : Inventory
 // EXTRA THICC as Saya requested
 Class AlmasteelPlating : Inventory
 {
+	Inventory dbf;
+
 	Default
 	{
 		+INVENTORY.UNDROPPABLE;
@@ -2545,8 +2547,15 @@ Class AlmasteelPlating : Inventory
 		+INVENTORY.UNCLEARABLE;
 		Inventory.RestrictedTo "Demolitionist";
 	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !dbf ) return;
+		dbf.Amount = int(dbf.Amount*.95-1);	// rapidly dissipate Telubrium corrosion
+	}
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
 	{
+		if ( inflictor && (inflictor is 'CorrodeDebuff') ) dbf = Inventory(inflictor);
 		if ( (damage <= 0) || (flags&(DMG_FORCED|DMG_NO_ARMOR)) ) return;
 		// 50% reduction for normal damage, 80% reduction for explosions
 		if ( flags&DMG_EXPLOSION ) newdamage = max(1,damage/5);

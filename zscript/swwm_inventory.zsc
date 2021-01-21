@@ -861,6 +861,7 @@ Class ParryField : Actor
 				if ( a.bSEEKERMISSILE ) a.tracer = a.target;
 				a.target = master;
 			}
+			if ( a.bSKULLFLY ) a.bBLASTED = true; // blast lost souls
 			a.GiveInventory("ParriedBuff",1);
 			let buff = a.FindInventory("ParriedBuff");
 			double mvel = a.vel.length();

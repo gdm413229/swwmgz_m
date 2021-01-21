@@ -123,13 +123,13 @@ Class EvisceratorChunkTrail : Actor
 	override void Tick()
 	{
 		if ( isFrozen() ) return;
-		A_SetScale(scale.x*.6,scale.y);
-		A_FadeOut(.1);
+		A_SetScale(scale.x*(.6+specialf1),scale.y);
+		A_FadeOut(.1+specialf2);
 	}
 	States
 	{
 	Spawn:
-		XZW1 A -1 Bright;
+		XZW1 ABCDEFGHIJ -1 Bright;
 		Stop;
 	}
 }
@@ -141,6 +141,7 @@ Class EvisceratorChunk : Actor
 	double lifetime, lifespeed;
 	Vector3 oldvel;
 	bool justdied;
+	int trailcolor;
 
 	Default
 	{
@@ -224,6 +225,13 @@ Class EvisceratorChunk : Actor
 			t.scale.y = dist;
 			t.angle = atan2(dir.y,dir.x);
 			t.pitch = asin(-dir.z)+90;
+			t.SetState(t.SpawnState+trailcolor);
+			if ( trailcolor > 0 )
+			{
+				// custom trails last longer
+				t.specialf1 = .3;
+				t.specialf2 = -.05;
+			}
 		}
 	}
 
@@ -476,7 +484,7 @@ Class EvisceratorProj : Actor
 		Vector3 x, y, z;
 		double a, s;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-		Actor p;
+		EvisceratorChunk p;
 		Vector3 spawnofs;
 		if ( BlockingMobj ) spawnofs = level.Vec3Diff(pos,BlockingMobj.Vec3Offset(0,0,BlockingMobj.height/2)).unit()*4;
 		else if ( BlockingFloor ) spawnofs = BlockingFloor.floorplane.Normal*4;
@@ -487,9 +495,11 @@ Class EvisceratorProj : Actor
 			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
 				spawnofs *= -1;
 		}
+		int trail = 0;
+		if ( target && target.player ) trail = CVar.GetCVar('swwm_funtrails',target.player).GetInt();
 		for ( int i=0; i<30; i++ )
 		{
-			p = Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs));
+			p = EvisceratorChunk(Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs)));
 			p.bHITOWNER = true;
 			a = FRandom[Eviscerator](0,360);
 			s = FRandom[Eviscerator](0,.4);
@@ -498,6 +508,25 @@ Class EvisceratorProj : Actor
 			p.pitch = -asin(dir.z);
 			p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*(p.speed+FRandom[Eviscerator](-5,20));
 			p.target = target;
+			if ( trail < 8 ) p.trailcolor = max(0,trail);
+			else if ( trail == 8 ) p.trailcolor = (i%6)+2;
+			else if ( trail == 9 )
+			{
+				switch ( i%5 )
+				{
+				case 0:
+				case 3:
+					p.trailcolor = 8;
+					break;
+				case 1:
+				case 4:
+					p.trailcolor = 9;
+					break;
+				case 2:
+					p.trailcolor = 1;
+					break;
+				}
+			}
 		}
 		int numpt = Random[Eviscerator](10,15);
 		for ( int i=0; i<numpt; i++ )
@@ -767,17 +796,37 @@ Class Eviscerator : SWWMWeapon
 		SWWMUtility.DoKnockback(self,-x,25000.);
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
+		int trail = CVar.GetCVar('swwm_funtrails',player).GetInt();
 		for ( int i=0; i<30; i++ )
 		{
 			a = FRandom[Eviscerator](0,360);
 			s = FRandom[Eviscerator](0,invoker.extended?.06:.3);
 			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
-			let p = Spawn("EvisceratorChunk",origin);
+			let p = EvisceratorChunk(Spawn("EvisceratorChunk",origin));
 			p.target = self;
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = asin(-dir.z);
 			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
 			if ( invoker.extended ) p.vel *= 1.4;
+			if ( trail < 8 ) p.trailcolor = max(0,trail);
+			else if ( trail == 8 ) p.trailcolor = (i%6)+2;
+			else if ( trail == 9 )
+			{
+				switch ( i%5 )
+				{
+				case 0:
+				case 3:
+					p.trailcolor = 8;
+					break;
+				case 1:
+				case 4:
+					p.trailcolor = 9;
+					break;
+				case 2:
+					p.trailcolor = 1;
+					break;
+				}
+			}
 		}
 		for ( int i=0; i<8; i++ )
 		{

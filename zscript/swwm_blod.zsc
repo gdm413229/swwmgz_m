@@ -94,7 +94,7 @@ Class mkBloodSpray : Actor
 		Vector3 setofs;
 		setofs = (cos(target.angle)*attachofs.x+sin(target.angle)*attachofs.y,sin(target.angle)*attachofs.x-cos(target.angle)*attachofs.y,attachofs.z);
 		SetOrigin(level.Vec3Offset(target.pos,setofs),false);
-		int sz = max(1,args[0]/2);
+		int sz = max(1,args[0]/2)-Random[Blood](0,2);
 		double ang, pt;
 		for ( int i=0; i<sz; i++ )
 		{
@@ -473,7 +473,7 @@ Class mkFlyingGib : Actor
 		Vector3 dir;
 		if ( invoker.lastbleed > level.maptime ) return;
 		invoker.lastbleed = level.maptime+5;
-		for ( int i=0; i<8; i++ )
+		for ( int i=0; i<4; i++ )
 		{
 			let b = Spawn("mkBloodDrop",pos);
 			ang = FRandom[Gibs](0,360);
@@ -552,7 +552,7 @@ Class mkGibber : Actor
 			a = Spawn("mkBloodSmoke2",pos+(FRandom[Gibs](-.8,.8)*radius,FRandom[Gibs](-.8,.8)*radius,FRandom[Gibs](0.,.9)*height));
 			a.SetShade(shadecol);
 		}
-		for ( int i=0; i<2*gibsize; i++ )
+		for ( int i=0; i<gibsize; i++ )
 		{
 			[dummy, a] = A_SpawnItemEx("mkFlyingGib",FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](.1,.9)*height,flags:SXF_ABSOLUTEANGLE|SXF_USEBLOODCOLOR);
 			a.translation = translation;
@@ -560,7 +560,7 @@ Class mkGibber : Actor
 			a.scale *= scale.x;
 			a.master = gibbed;
 		}
-		for ( int i=0; i<3*gibsize; i++ )
+		for ( int i=0; i<2*gibsize; i++ )
 		{
 			[dummy, a] = A_SpawnItemEx("mkBloodDrop",FRandom[Gibs](-.8,.8)*radius,FRandom[Gibs](-.8,.8)*radius,FRandom[Gibs](0.,.9)*height,flags:SXF_ABSOLUTEANGLE|SXF_USEBLOODCOLOR);
 			ang = FRandom[Gibs](0,360);

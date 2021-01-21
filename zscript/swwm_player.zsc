@@ -618,41 +618,11 @@ Class Demolitionist : PlayerPawn
 		{
 			let ap = Inventory(Spawn("AlmasteelPlating"));
 			ap.AttachToOwner(self);
-			// AddInventory attaches to the front, but we need to be all the way back in the chain (but before the collar)
-			if ( (inv == ap) && ap.inv )
-			{
-				inv = ap.inv;
-				for ( Inventory i=inv; i; i=i.inv )
-				{
-					if ( i.inv is 'SayaCollar' )
-					{
-						ap.inv = i.inv;
-						i.inv = ap;
-						break;
-					}
-					if ( i.inv ) continue;
-					i.inv = ap;
-					ap.inv = null;
-					break;
-				}
-			}
 		}
 		if ( !FindInventory("SayaCollar") )
 		{
 			let sc = Inventory(Spawn("SayaCollar"));
 			sc.AttachToOwner(self);
-			// AddInventory attaches to the front, but we need to be all the way back in the chain
-			if ( (inv == sc) && sc.inv )
-			{
-				inv = sc.inv;
-				for ( Inventory i=inv; i; i=i.inv )
-				{
-					if ( i.inv ) continue;
-					i.inv = sc;
-					sc.inv = null;
-					break;
-				}
-			}
 		}
 		// strife thing
 		if ( mystats.oldlogtext == "" )
@@ -663,7 +633,7 @@ Class Demolitionist : PlayerPawn
 			mystats.oldlogtext = player.logtext;
 		}
 		// overheal fading
-		if ( !isFrozen() )
+		if ( !isFrozen() && !(player.cheats&CF_TOTALLYFROZEN) )
 		{
 			if ( (health <= 200) || (health > oldhealth) )
 			{
@@ -2545,6 +2515,23 @@ Class SayaCollar : Inventory
 			newdamage = splitdmg[0]+splitdmg[1];
 		}
 	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// if first item is health or sandwich, ignore
+		if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'GrilledCheeseSandwich') )
+			return;
+		// if there's items before health/sandwich, squeeze right in
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( (i == self) || (!(i.Inv is 'SWWMHealth' ) && !(i.Inv is 'GrilledCheeseSandwich')) ) continue;
+			Inventory saved = i.Inv;
+			i.Inv = self;
+			other.Inv = Inv;
+			Inv = saved;
+			break;
+		}
+	}
 }
 
 // high-resonant almasteel plating
@@ -2571,6 +2558,22 @@ Class AlmasteelPlating : Inventory
 		if ( (item is 'BasicArmor') || (item is 'BasicArmorBonus') || (item is 'BasicArmorPickup') || (item is 'HexenArmor') )
 			return true;
 		return false;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// if first item is the collar, just ignore
+		if ( other.Inv is 'SayaCollar' ) return;
+		// if there's items before collar, squeeze right in
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( (i == self) || !(i.Inv is 'SayaCollar') ) continue;
+			Inventory saved = i.Inv;
+			i.Inv = self;
+			other.Inv = Inv;
+			Inv = saved;
+			break;
+		}
 	}
 }
 

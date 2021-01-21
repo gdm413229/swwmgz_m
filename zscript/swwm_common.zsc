@@ -322,7 +322,7 @@ Class SWWMBossBrain : BossBrain
 				a.SetStateLabel("Null");
 			}
 			else if ( (a.Health > 0) && (a.bBossSpawned || a.bCOUNTKILL) )
-				a.DamageMobj(self,self,int.max,'EndMii',DMG_FORCED|DMG_THRUSTLESS);
+				a.DamageMobj(self,self,a.Health,'EndMii',DMG_FORCED|DMG_THRUSTLESS);
 		}
 
 	}
@@ -1650,3 +1650,296 @@ Class SWWMShadow : Actor
 		Stop;
 	}
 }
+
+Class OnFireLight : DynamicLight
+{
+	OnFire of;
+
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !of || !of.victim )
+		{
+			Destroy();
+			return;
+		}
+		Args[0] = clamp(of.Amount*4,0,255);
+		Args[1] = clamp(of.Amount*2,0,160);
+		Args[2] = clamp(of.Amount/2,0,24);
+		Args[3] = int(max(of.victim.default.radius,of.victim.default.height)*(of.victim.scale.x+of.victim.scale.y)*1.2+40+clamp(of.amount/5,0,120));
+		SetOrigin(of.Victim.Vec3Offset(0,0,of.Victim.Height/2),true);
+	}
+}
+
+// discarded after FYS shell removal, but will be used by Quadravol eventually
+Class OnFire : Actor
+{
+	OnFire prevfire, nextfire;
+	Actor victim, instigator, lite;
+	int amount, cnt, delay;
+	double oangle;
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.fires_cnt--;
+			if ( !prevfire )
+			{
+				hnd.fires = nextfire;
+				if ( nextfire ) nextfire.prevfire = null;
+			}
+			else
+			{
+				prevfire.nextfire = nextfire;
+				if ( nextfire ) nextfire.prevfire = prevfire;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !victim )
+		{
+			A_StopSound(CHAN_5);
+			Destroy();
+			return;
+		}
+		SetOrigin(victim.pos,false);
+		if ( victim.waterlevel > 0 )
+		{
+			if ( lite ) lite.Destroy();
+			amount -= int(victim.waterlevel**2);
+		}
+		if ( victim.Health <= 0 ) amount = min(amount,100);
+		if ( !(level.maptime%3) )
+			amount--;
+		if ( victim.player ) amount -= int(abs(actor.deltaangle(victim.angle,oangle))/30);
+		oangle = victim.angle;
+		if ( amount < -30 )
+		{
+			A_StopSound(CHAN_5);
+			Destroy();
+			return;
+		}
+		if ( cnt > 0 ) cnt--;
+		else
+		{
+			cnt = min(10,30-int(29*(min(1.,amount/500.)**3.)));
+			if ( victim.bSHOOTABLE && (victim.Health > 0) && (amount > 0) )
+			{
+				int flg = DMG_THRUSTLESS;
+				if ( victim is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're on fire, that shield is worthless
+				victim.DamageMobj(self,instigator,clamp(int(amount*.06),1,20),'Fire',flg);	// need to use this actor as inflictor to have a proper obituary
+				if ( victim.bISMONSTER && !Random[FlameT](0,3) )
+					victim.Howl();
+			}
+			if ( !victim )
+			{
+				A_StopSound(CHAN_5);
+				Destroy();
+				return;
+			}
+			else SWWMUtility.DoExplosion(self,clamp(int(amount*.06),1,20),0,victim.radius+40,victim.radius,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Fire',victim); // radius fire damage
+		}
+		double mult = max(victim.radius,victim.height)/30.;
+		if ( delay > 0 ) delay--;
+		if ( (level.maptime+special1)%6 ) return;
+		A_SoundVolume(CHAN_5,min(1.,mult*amount/80.));
+		int numpt = clamp(int(Random[FlameT](2,4)*amount*.01),1,4);
+		numpt = int(clamp(numpt*mult**.5,1,3));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pos = victim.Vec3Offset(FRandom[FlameT](-victim.radius,victim.radius)*0.8,FRandom[FlameT](-victim.radius,victim.radius)*0.8,FRandom[FlameT](victim.height*0.2,victim.height*0.8));
+			double ang = FRandom[FlameT](0,360);
+			double pt = FRandom[FlameT](-90,90);
+			if ( amount > 0 )
+			{
+				let c = victim.Spawn("OnFireTrail",pos);
+				c.special1 = Random[FlameT](-2,2);
+				c.scale *= max(.3,mult*0.5);
+				c.vel = victim.vel*0.5+(cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[FlameT](.5,2.)*c.scale.x;
+			}
+			if ( !(i%2) )
+			{
+				let s = victim.Spawn("SWWMHalfSmoke",pos);
+				s.scale *= max(1.,1.6*mult);
+				s.alpha *= min(amount+30,100)*.01;
+				s.vel = victim.vel*0.5+(cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt))*FRandom[FlameT](.2,.6)*s.scale.x;
+			}
+		}
+	}
+
+	static OnFire Apply( Actor victim, Actor instigator, int amount, int delay = 0 )
+	{
+		if ( amount <= 0 ) return null;
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		OnFire t;
+		for ( t=hnd.fires; t; t=t.nextfire )
+		{
+			if ( t.victim != victim ) continue;
+			if ( instigator ) t.instigator = instigator;
+			t.amount = min(500,t.amount+amount);
+			t.cnt = min(t.cnt,5);
+			return t;
+		}
+		t = OnFire(Spawn("OnFire",victim.pos));
+		t.victim = victim;
+		t.instigator = instigator;
+		t.amount = min(500,amount);
+		t.cnt = 1;
+		t.special1 = Random[FlameT](0,10);
+		t.A_StartSound("misc/flame",CHAN_5,CHANF_LOOP);
+		double mult = max(victim.radius,victim.height)/30.;
+		t.A_SoundVolume(CHAN_5,min(1.,mult*amount/80.));
+		// for chunks
+		t.delay = delay;
+		t.lite = Actor.Spawn("OnFireLight",victim.pos);
+		OnFireLight(t.lite).of = t;
+		t.oangle = victim.angle;
+		// append
+		t.nextfire = hnd.fires;
+		if ( hnd.fires ) hnd.fires.prevfire = t;
+		hnd.fires = t;
+		hnd.fires_cnt++;
+		return t;
+	}
+
+	static OnFire IsOnFire( Actor victim )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		OnFire t;
+		for ( t=hnd.fires; t; t=t.nextfire )
+		{
+			if ( t.victim != victim ) continue;
+			if ( t.amount <= 0 ) return null;
+			return t;
+		}
+		return null;
+	}
+
+	Default
+	{
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOEXTREMEDEATH;
+		+NOINTERACTION;
+		Obituary "$O_ONFIRE";
+	}
+}
+
+Class OnFireTrailLight : PaletteLight
+{
+	Default
+	{
+		Tag "HellExpl";
+		Args 0,0,0,40;
+		ReactionTime 40;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		Args[0] /= 10;
+		Args[1] /= 10;
+		Args[2] /= 10;
+		Args[3] += 3;
+		if ( !target || (target.waterlevel > 0) )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.pos,true);
+	}
+}
+
+Class OnFireTrail : Actor
+{
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		roll = FRandom[ExploS](0,360);
+	}
+	action void A_Flame()
+	{
+		special1++;
+		if ( waterlevel > 0 )
+			vel *= .9;
+		else
+		{
+			vel *= .98;
+			vel.z += .1+.2*abs(scale.x);
+		}
+		if ( waterlevel > 0 )
+		{
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
+			s.vel += vel*.3;
+			s.alpha *= alpha*2;
+			s.scale *= .5+abs(scale.x)*(.5+special1/6.);
+			Destroy();
+			return;
+		}
+		if ( !Random[FlameT](0,int(40*(default.alpha-alpha))) )
+		{
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = (FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2),FRandom[FlameT](-.2,.2));
+			s.vel += vel*.3;
+			s.alpha *= alpha*1.5;
+			s.scale *= .5+abs(scale.x)*(.5+special1/6.);
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+		UpdateWaterLevel();
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	Default
+	{
+		RenderStyle "Add";
+		Speed 2;
+		Radius 4;
+		Height 4;
+		Alpha .6;
+		Scale .8;
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+NOFRICTION;
+		+SLIDESONWALLS;
+		+NOTELEPORT;
+		+FORCEXYBILLBOARD;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+DROPOFF;
+		+NOBLOCKMONST;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	States
+	{
+	Spawn:
+		XFLM ABCDEFGHIJKLMNOPQRST 1 Bright
+		{
+			A_Flame();
+			A_SetScale(scale.x*0.98);
+			A_FadeOut(0.02);
+		}
+		Wait;
+	}
+}
+

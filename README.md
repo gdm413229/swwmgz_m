@@ -124,14 +124,14 @@ on replaced item, may also come in bundles:
  - **Slug (green):** Concentrated damage in a single, large projectile. Common.
  - **Dragon's breath (white):** Fiery pain in one shot for everything in front of you. Not very effective underwater, but still deals some small heat damage. Somewhat rare.
  - **Kinylum saltshot (blue):** Highly volatile shards of **Kinylum** that leave behind a trail of burning plasma. Rare.
- - ***"Fuck your shit"* round (black):** A special home-made incendiary ammo type that only an absolute madman would have come up with. Sets everything on fire (potentially including yourself). Very rare.
+ - **Telebrium flechette (black):** A discharge of puncturing darts tipped with pure Telebrium, highly corrosive, effects may spread through emitted fumes. Very rare.
  - ***"The ball"* (purple):** A big lead ball, 'nuff said. Somewhat rare.
  - **Golden shell (self-explanatory color):** An extremely rare, but very valuable type. Fires a sabot packed with a very dense, high-grade **Explodium** charge, the shell also contains some gold glitter, but it's just for show. Clearly designed by someone completely insane, and definitely guaranteed to not fail catastrophically and blow up your gun, your hands, your arms, and the rest of your upper body. Unlike the others, this one is only available as a rare drop from powerful monsters (over 1000HP) and bosses. They may also appear in **Chanceboxes**.
 
 ### Wallbuster (slot 4) ~ Replaces SSG, Ethereal Crossbow, Frost Shards
 ![](docimg/wallbuster.png)
 
-A ludicrously overkill weapon, courtesy of the always-overkill **Blackmann Arms**. Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front of you is pretty much dead. Cannot use incendiary ammo types or golden shells.
+A ludicrously overkill weapon, courtesy of the always-overkill **Blackmann Arms**. Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front of you is pretty much dead. Cannot use dragon's breath, flechettes or golden shells.
 
 **Primary fire:** Shoot one barrel at a time.
 

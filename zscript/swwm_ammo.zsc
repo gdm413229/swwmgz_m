@@ -929,7 +929,7 @@ Class HellblazerCrackshots : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 15;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 36;
+		Ammo.BackpackMaxAmount 30;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -975,7 +975,7 @@ Class HellblazerRavagers : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 9;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 24;
+		Ammo.BackpackMaxAmount 18;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1021,7 +1021,7 @@ Class HellblazerWarheads : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 10;
+		Ammo.BackpackMaxAmount 8;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -1159,8 +1159,8 @@ Class SilverBullets : MagAmmo
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet.png";
 		MagAmmo.ParentAmmo "SilverBulletAmmo";
 		MagAmmo.ClipSize 5;
-		Inventory.MaxAmount 15;
-		Inventory.InterHubAmount 15;
+		Inventory.MaxAmount 6;
+		Inventory.InterHubAmount 6;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -1182,8 +1182,8 @@ Class SilverBullets2 : MagAmmo
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet2.png";
 		MagAmmo.ParentAmmo "SilverBulletAmmo2";
 		MagAmmo.ClipSize 5;
-		Inventory.MaxAmount 10;
-		Inventory.InterHubAmount 10;
+		Inventory.MaxAmount 6;
+		Inventory.InterHubAmount 6;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -1285,8 +1285,8 @@ Class CandyGunBullets : MagAmmo
 		Inventory.Icon "graphics/HUD/Icons/A_CandyBullet.png";
 		MagAmmo.ParentAmmo "CandyGunAmmo";
 		MagAmmo.ClipSize 7;
-		Inventory.MaxAmount 27;
-		Inventory.InterHubAmount 27;
+		Inventory.MaxAmount 8;
+		Inventory.InterHubAmount 8;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 2;
@@ -1746,10 +1746,9 @@ Class HammerspaceEmbiggener : Inventory
 		// reset upgrade
 		for ( Inventory i=Owner.Inv; i; i=i.Inv )
 		{
-			if ( !(i is 'Ammo') && !(i is 'MagAmmo') ) continue;
-			i.MaxAmount = i.Default.MaxAmount;
-			if ( i.Amount > i.MaxAmount )
-				i.Amount = i.MaxAmount;
+			if ( !(i is 'Ammo') ) continue;
+			i.MaxAmount = i.default.MaxAmount;
+			if ( i.Amount > i.MaxAmount ) i.Amount = i.MaxAmount;
 		}
 		Super.DepleteOrDestroy();
 	}

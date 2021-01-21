@@ -167,11 +167,11 @@ Class GrilledCheeseSandwich : Inventory
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		// find last armor/health item or invuln/ragekit
+		// find last armor/health item or invuln/ragekit/barrier or the collar
 		Inventory found = null;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
-			if ( !(i is 'SWWMHealth') && !(i is 'SWWMArmor') && !(i is 'InvinciballPower') && !(i is 'RagekitPower') ) continue;
+			if ( !(i is 'SWWMHealth') && !(i is 'SWWMArmor') && !(i is 'InvinciballPower') && !(i is 'RagekitPower') && !(i is 'BarrierPower') && !(i is 'AlmasteelPlating') && !(i is 'SayaCollar') ) continue;
 			found = i;
 		}
 		if ( !found ) return;
@@ -674,24 +674,17 @@ Class InvinciballPower : Powerup
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		// find first with health/armor or sandwich after it
+		// find first with health/armor, plating/collar, sandwich after it
 		Inventory found = null;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
-			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') && !(i.Inv is 'AlmasteelPlating') && !(i.Inv is 'SayaCollar') ) continue;
 			found = i;
 			break;
 		}
 		if ( !found )
 		{
-			// check if first item in inventory is health/armor or a sandwich
-			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'SWWMArmor') || (other.Inv is 'GrilledCheeseSandwich') )
-			{
-				// place ourselves before it
-				Inv = other.Inv;
-				other.Inv = self;
-				return;
-			}
+			// we're good
 			return;
 		}
 		// place ourselves right after it
@@ -943,24 +936,17 @@ Class RagekitPower : Powerup
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
-		// find first with health/armor or sandwich after it
+		// find first with health/armor, plating/collar, sandwich or barrier after it
 		Inventory found = null;
 		for ( Inventory i=other.Inv; i; i=i.Inv )
 		{
-			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') && !(i.Inv is 'AlmasteelPlating') && !(i.Inv is 'SayaCollar') && !(i.Inv is 'BarrierPower') ) continue;
 			found = i;
 			break;
 		}
 		if ( !found )
 		{
-			// check if first item in inventory is health/armor or a sandwich
-			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'SWWMArmor') || (other.Inv is 'GrilledCheeseSandwich') )
-			{
-				// place ourselves before it
-				Inv = other.Inv;
-				other.Inv = self;
-				return;
-			}
+			// we're good
 			return;
 		}
 		// place ourselves right after it
@@ -985,14 +971,21 @@ Class RagekitPower : Powerup
 		lastpulse = max(lastpulse,gametic+35);
 	}
 
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
+	{
+		if ( damageType == 'EndLevel' )
+			return; // don't trigger on endlevel damage
+		if ( damage > 0 ) newdamage = damage/4;
+	}
+
 	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
 	{
-		if ( !passive && ((damageType == 'Melee') || (damageType == 'Jump') || (damageType == 'Dash') || (damageType == 'Buttslam') || (damageType == 'GroundPound')) )
+		if ( passive ) return;
+		if ( (damageType == 'Melee') || (damageType == 'Jump') || (damageType == 'Dash') || (damageType == 'Buttslam') || (damageType == 'GroundPound') )
 		{
 			newdamage = damage*8;
 			DoHitFX();
 		}
-		else if ( passive ) newdamage = damage/4;
 	}
 }
 
@@ -1158,7 +1151,11 @@ Class LampMoth : Actor
 	}
 	override string GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
-		if ( master && master.player ) return String.Format(StringTable.Localize("$O_MOTH"),master.player.GetUserName());
+		if ( inflictor && (inflictor != self) )
+		{
+			if ( inflictor == master ) return StringTable.Localize("$O_MOTHSELF");	// not likely to happen
+			else return StringTable.Localize("$O_MOTH");
+		}
 		return StringTable.Localize("$O_MOTH2");
 	}
 	override void PostBeginPlay()
@@ -1310,7 +1307,7 @@ Class LampMoth : Actor
 			lifespan -= 5;
 			Vector3 awaydir = level.Vec3Diff(target.Vec3Offset(0,0,target.height),pos).unit();
 			vel += awaydir*8.;
-			int dmg = target.DamageMobj(self,self,GetMissileDamage(0,0),'Melee',Random[Moth](0,8)?DMG_NO_PAIN:0);
+			int dmg = target.DamageMobj(self,master?master:Actor(self),GetMissileDamage(0,0),'Melee',Random[Moth](0,8)?DMG_NO_PAIN:0);
 			if ( !target.bNOBLOOD && !target.bDORMANT && !target.bINVULNERABLE )
 			{
 				target.TraceBleed(dmg,self);
@@ -1857,6 +1854,29 @@ Class BarrierPower : PowerIronFeet
 		Powerup.Color "20FF00", 0.1;
 		Powerup.Mode "Full";	// no leaky damage
 		+INVENTORY.ADDITIVETIME;
+	}
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find first item with armor/health, plating/collar, sandwich, invincibility after it
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i.Inv is 'SWWMHealth') && !(i.Inv is 'SWWMArmor') && !(i.Inv is 'GrilledCheeseSandwich') && !(i.Inv is 'AlmasteelPlating') && !(i.Inv is 'SayaCollar') && !(i.Inv is 'InvinciballPower') ) continue;
+			found = i;
+			break;
+		}
+		if ( !found )
+		{
+			// we're good
+			return;
+		}
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
 	}
 
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage )

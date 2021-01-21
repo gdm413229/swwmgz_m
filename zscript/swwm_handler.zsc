@@ -1714,6 +1714,16 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	override void WorldThingDestroyed( WorldEvent e )
+	{
+		if ( !e.Thing.default.bSHOOTABLE || !e.Thing.default.bMISSILE )
+			return;
+		// remove from suckables
+		int pos = suckableactors.Find(e.Thing);
+		if ( pos >= suckableactors.Size() ) return;
+		suckableactors.Delete(pos);
+	}
+
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		// I WANT DIE

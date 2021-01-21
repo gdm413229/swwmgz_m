@@ -303,7 +303,7 @@ Class EvisceratorChunk : Actor
 	override bool CanCollideWith( Actor other, bool passive )
 	{
 		// safer to do here
-		if ( ((vel.length() <= 5) && other.bSHOOTABLE) || ((other == target) && !bHITOWNER) || (other == lasthit) )
+		if ( !(other.bSHOOTABLE && other.bSOLID) || ((vel.length() <= 5) && other.bSHOOTABLE) || ((other == target) && !bHITOWNER) || (other == lasthit) )
 			return false;
 		return true;
 	}
@@ -313,9 +313,12 @@ Class EvisceratorChunk : Actor
 		// directly bounce off shootable solids
 		if ( !victim.bSHOOTABLE )
 		{
-			BlockingMobj = victim;
-			A_HandleBounce();
-			lasthit = victim;
+			if ( bSOLID )
+			{
+				BlockingMobj = victim;
+				A_HandleBounce();
+				lasthit = victim;
+			}
 			return 1;
 		}
 		// with this we can guarantee that the chunk won't just keep on dealing damage
@@ -329,7 +332,10 @@ Class EvisceratorChunk : Actor
 		SWWMDamageAccumulator.Accumulate(victim,dmg,self,target,damagetype);
 		int amt = SWWMDamageAccumulator.GetAmount(victim);
 		// pass through if it's already dead
-		if ( victim.health-amt <= 0 )
+		// + random chance relative to health
+		int posthealth = victim.health-amt;
+		double hratio = posthealth/double(victim.GetSpawnHealth());
+		if ( (posthealth <= 0) || (FRandom[Eviscerator](hratio,1.) < .5) )
 		{
 			if ( !victim.bNOBLOOD && !victim.bDORMANT && !victim.bINVULNERABLE )
 			{
@@ -343,6 +349,8 @@ Class EvisceratorChunk : Actor
 				l.pitch = -pitch;
 				A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.2);
 			}
+			A_Gravity();
+			gravity = .35;
 			vel *= .65;	// reduce velocity as it rips
 			return 1;
 		}

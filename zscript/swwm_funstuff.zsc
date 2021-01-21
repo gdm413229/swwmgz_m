@@ -104,6 +104,7 @@ Class SWWMCollectible : Inventory abstract
 Class SWWMItemGesture : SWWMWeapon abstract
 {
 	SWWMGesture gest;	// the base gesture weapon that we got picked from
+	bool gotused;
 
 	// these should prevent autoswitch when out of ammo
 	override bool ReportHUDAmmo()
@@ -121,6 +122,12 @@ Class SWWMItemGesture : SWWMWeapon abstract
 	override void DoEffect()
 	{
 		Super.DoEffect();
+		if ( gotused )
+		{
+			// clear ourselves after use (don't pollute inventory list)
+			DepleteOrDestroy();
+			return;
+		}
 		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) )
 			return;
 		let psp = Owner.player.FindPSprite(PSP_WEAPON);
@@ -149,6 +156,7 @@ Class SWWMItemGesture : SWWMWeapon abstract
 			// go back to the main gesture
 			player.ReadyWeapon = gest;
 			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.gotused = true;
 			return;
 		}
 		if ( gest.queued )
@@ -159,12 +167,14 @@ Class SWWMItemGesture : SWWMWeapon abstract
 			// go back to the main gesture
 			player.ReadyWeapon = gest;
 			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.gotused = true;
 			return;
 		}
 		// switch to old weapon
 		player.ReadyWeapon = gest;
 		player.PendingWeapon = gest.formerweapon;
 		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Deselect"));
+		invoker.gotused = true;
 	}
 
 	Default
@@ -185,11 +195,11 @@ Class SWWMItemGesture : SWWMWeapon abstract
 		Goto Ready;
 	Ready:
 	Fire:
-		XZW1 A 1 A_Print("Pickup gesture");
+		XZW1 A 1 A_Log("\cgUnimplemented pickup sequence for "..invoker.GetClassName().."\c-");
 		XZW1 A -1 A_FinishGesture();
 		Stop;
 	AltFire:
-		XZW1 A 1 A_Print("Use gesture");
+		XZW1 A 1 A_Log("\cgUnimplemented use sequence for "..invoker.GetClassName().."\c-");
 		XZW1 A -1 A_FinishGesture();
 		Stop;
 	Deselect:

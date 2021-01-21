@@ -836,22 +836,7 @@ Class BallImpact : Actor
 	}
 }
 
-Class CorrodeSmoke : SWWMSmoke
-{
-	Default
-	{
-		RenderStyle "Add";
-		Alpha 0.25;
-	}
-	States
-	{
-	Spawn:
-		FRT1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 1 Bright A_SetTics(1+special1);
-		FRT2 ABCDEFGHI 1 Bright A_SetTics(1+special1);
-		Stop;
-	}
-}
-Class CorrodeHalfSmoke : SWWMHalfSmoke
+Class CorrodeSmoke : SWWMHalfSmoke
 {
 	Default
 	{
@@ -894,9 +879,8 @@ Class CorrodeDebuff : Inventory
 			c.AttachToOwner(target);
 			c.cnt = 5;	// slight delay
 			c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
-			c.Amount = clamp(c.Amount+Damage*8,0,int(Amount*.7));	// prevent "escalating" spread
 		}
-		else if ( c.Amount < int(Amount*.6) ) c.Amount = clamp(c.Amount+Damage*8,0,int(Amount*.6));	// prevent "escalating" spread
+		if ( c.Amount < int(Amount*.6) ) c.Amount = clamp(c.Amount+Damage*8,0,int(Amount*.6));	// prevent "escalating" spread
 		c.instigator = instigator;
 		return 0;	// no direct damage
 	}
@@ -920,23 +904,24 @@ Class CorrodeDebuff : Inventory
 			if ( justdied )
 			{
 				maxrad += 50;
-				Amount = max(100,Amount+50);
+				Amount = max(100,Amount);
 				A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
 			}
-			if ( !wasalive ) maxrad += 50;
-			SWWMUtility.DoExplosion(self,clamp(Amount/8,1,50),0,maxrad*1.1,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
-			int numpt = Random[Corrode](-2,2);
-			if ( justdied ) numpt = Random[Corrode](8,12);
+			if ( !wasalive ) maxrad += 20;
+			SWWMUtility.DoExplosion(self,clamp(Amount/8,1,50),0,maxrad*1.2,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
+			int smokefact = int(clamp(maxrad/32.,1,8));
+			int numpt = Random[Corrode](-1,1*smokefact);
+			if ( justdied ) numpt = Random[Corrode](4,6)*smokefact;
 			for ( int i=0; i<numpt; i++ )
 			{
-				let s = Spawn(justdied?"CorrodeSmoke":"CorrodeHalfSmoke",level.Vec3Offset(Owner.pos,(.8*FRandom[Corrode](-Owner.radius,Owner.radius),.8*FRandom[Corrode](-Owner.radius,Owner.radius),FRandom[Corrode](.1*Owner.Height,.9*Owner.Height))));
+				let s = Spawn("CorrodeSmoke",level.Vec3Offset(Owner.pos,(.8*FRandom[Corrode](-Owner.radius,Owner.radius),.8*FRandom[Corrode](-Owner.radius,Owner.radius),FRandom[Corrode](.1*Owner.Height,.9*Owner.Height))));
 				s.vel = Owner.vel*.5;
 				if ( justdied ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](2.,4.);
 				else if ( !wasalive ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.2,2.);
 				else s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.1,1.);
 				s.scale *= FRandom[Corrode](2.,3.);
 				s.alpha *= Clamp(Amount/10.,0.,.6);
-				if ( justdied ) s.special1 = Random[Corrode](0,2);
+				if ( justdied ) s.special1 = Random[Corrode](0,1);
 			}
 		}
 		wasalive = (Owner && Owner.Health > 0);

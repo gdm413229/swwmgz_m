@@ -251,17 +251,19 @@ Class Demolitionist : PlayerPawn
 		{
 			for ( int i=0; i<AllActorClasses.Size(); i++ )
 			{
-				if ( !(AllActorClasses[i] is "Key") ) continue;
-				// clean up redundant keys
-				if ( !(gameinfo.gametype&GAME_Chex) && ((AllActorClasses[i] is 'ChexRedCard') || (AllActorClasses[i] is 'ChexBlueCard') || (AllActorClasses[i] is 'ChexYellowCard')) ) continue;
-				else if ( (gameinfo.gametype&GAME_Chex) && !(AllActorClasses[i] is 'ChexRedCard') && !(AllActorClasses[i] is 'ChexBlueCard') && !(AllActorClasses[i] is 'ChexYellowCard') ) continue;
-				// don't give heretic keys in doom
-				if ( (gameinfo.gametype&GAME_DoomChex) && ((AllActorClasses[i] is 'KeyYellow') || (AllActorClasses[i] is 'KeyGreen') || (AllActorClasses[i] is 'KeyBlue')) ) continue;
-				let rep = GetReplacement(AllActorClasses[i]);	// handle replacements, just in case
-				let keyitem = GetDefaultByType(rep);
+				let type = (Class<Key>)(AllActorClasses[i]);
+				if ( !type ) continue;
+				let keyitem = GetDefaultByType(type);
 				if ( keyitem.special1 )
 				{
-					let item = Inventory(Spawn(AllActorClasses[i]));
+					let rep = GetReplacement(type);	// handle replaced keys
+					if ( !(rep is 'Key') ) continue;
+					// iwad restrictions (vanilla doesn't care, but here they'll show in the inventory)
+					if ( !(gameinfo.gametype&GAME_HERETIC) && ((rep is 'SWWMKeyGreen') || (rep is 'SWWMKeyBlue') || (rep is 'SWWMKeyYellow')) )
+						continue;
+					if ( !(gameinfo.gametype&GAME_DOOMCHEX) && ((rep is 'SWWMRedCard') || (rep is 'SWWMBlueCard') || (rep is 'SWWMYellowCard')) )
+						continue;
+					let item = Inventory(Spawn(rep));
 					SWWMHandler.KeyTagFix(item);
 					if ( item is 'SWWMKey' ) SWWMKey(item).propagated = true;	// no anim
 					if ( !item.CallTryPickup(self) ) item.Destroy();

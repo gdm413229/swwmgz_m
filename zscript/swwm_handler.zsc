@@ -2511,9 +2511,65 @@ Class SWWMHandler : EventHandler
 				SWWMGesture.SetGesture(mo,GS_BlowKiss);
 				break;
 			}
+			return;
+		}
+		else if ( e.Name ~== "swwmupdatetrackers" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			if ( swwm_notrack )
+			{
+				int n = trackers_cnt;
+				while ( trackers ) trackers.Destroy(); // wow that's simple, all in one line
+				Console.Printf("%d trackers removed.",n);
+			}
+			else
+			{
+				int n = trackers_cnt;
+				let ti = ThinkerIterator.Create("Actor");
+				Actor a;
+				while ( a = Actor(ti.Next()) )
+				{
+					if ( (!a.bSHOOTABLE && !a.bISMONSTER) || (a is 'LampMoth') || (a is 'CompanionLamp') ) continue;
+					let trk = SWWMCombatTracker.Spawn(a);
+					if ( !a.player ) trk.maxhealth = max(a.health,a.GetSpawnHealth());
+				}
+				n = (trackers_cnt-n);
+				Console.Printf("%d trackers added.",n);
+			}
+			return;
+		}
+		else if ( e.Name ~== "swwmtrimsuckables" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			int n = 0;
+			for ( int i=0; i<suckableactors.Size(); i++ )
+			{
+				if ( suckableactors[i] && (suckableactors[i].bSHOOTABLE || suckableactors[i].bMISSILE) ) continue;
+				suckableactors.Delete(i);
+				i--;
+				n++;
+			}
+			Console.Printf("%d suckable actors trimmed.",n);
+			return;
 		}
 		else if ( e.Name ~== "swwmdebugdumprng" )
 		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
 			// dump the values of all mod RNGs (might help someday to track down what desyncs)
 			Console.Printf("\cxSWWM GZ RNG dump for player %d (\c-%s\cx):\c-",consoleplayer,players[consoleplayer].GetUserName());
 			Console.Printf("bdscreen: %d",Random2[bdscreen]());
@@ -2523,10 +2579,13 @@ Class SWWMHandler : EventHandler
 			Console.Printf("Bundle: %d",Random2[Bundle]());
 			Console.Printf("Candy: %d",Random2[Candy]());
 			Console.Printf("Chancebox: %d",Random2[Chancebox]());
+			Console.Printf("Corrode: %d",Random2[Corrode]());
 			Console.Printf("DemoLines: %d",Random2[DemoLines]());
 			Console.Printf("DoBlast: %d",Random2[DoBlast]());
 			Console.Printf("Eviscerator: %d",Random2[Eviscerator]());
+			Console.Printf("Explodium: %d",Random2[Explodium]());
 			Console.Printf("Explos: %d",Random2[Explos]());
+			Console.Printf("ExtraMissiles: %d",Random2[ExtraMissiles]());
 			Console.Printf("FInTheChat: %d",Random2[FInTheChat]());
 			Console.Printf("FlameT: %d",Random2[FlameT]());
 			Console.Printf("Flicker: %d",Random2[Flicker]());
@@ -2562,6 +2621,7 @@ Class SWWMHandler : EventHandler
 			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
 			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
 			Console.Printf("Ynykron: %d",Random2[Ynykron]());
+			return;
 		}
 		if ( e.IsManual ) return;
 		if ( e.Name.Left(14) ~== "swwmstoregive." )

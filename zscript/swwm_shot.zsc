@@ -889,6 +889,12 @@ Class CorrodeDebuff : Inventory
 		Super.DoEffect();
 		if ( (Amount <= 0) || !Owner )
 		{
+			if ( Owner && IsActorPlayingSound(CHAN_VOICE) )
+			{
+				// don't destroy yet, keep following owner until the sound wears off
+				SetOrigin(Owner.Vec3Offset(0,0,Owner.height/2),false);
+				return;
+			}
 			DepleteOrDestroy();
 			return;
 		}

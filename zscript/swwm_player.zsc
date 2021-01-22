@@ -2943,14 +2943,15 @@ Class DemolitionistSelfLight : Actor
 			else tagcolor = Color(255,32,48,24);
 		}
 		bool curactive = activelight();
-		if ( curactive && !oldactive )
-			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(56,72,88),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,30,90,target.pitch);
+		// have to re-attach it repeatedly to update the pitch (wow great thanks)
+		if ( curactive )
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(112,144,176),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,15,60,target.pitch);
 		else if ( !curactive && oldactive )
-			target.A_RemoveLight('DemoSelfLight');
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,0,0,0);
 		oldactive = curactive;
 		bool curglow = !(target.bINVISIBLE||(target.alpha <= double.epsilon));
 		if ( curglow && !oldglow ) target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,tagcolor,80,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE,(0,0,target.height/2));
-		else if ( !curglow && oldglow ) target.A_RemoveLight('DemoSelfLight2');
+		else if ( !curglow && oldglow ) target.A_AttachLight('DemoSelfLight2',DynamicLight.PointLight,0,0,0);
 		oldglow = curglow;
 	}
 }
@@ -3061,24 +3062,6 @@ Class LoveHeartBurstLight : PaletteLight
 		Tag "LovePal";
 		ReactionTime 15;
 		Args 0,0,0,150;
-	}
-}
-
-Class LoveHeartLight : PointLightAttenuated
-{
-	Default
-	{
-		Args 255,176,208,80;
-	}
-	override void Tick()
-	{
-		Super.Tick();
-		if ( target || target.InStateSequence(target.CurState,target.FindState("Death")) )
-		{
-			Destroy();
-			return;
-		}
-		SetOrigin(target.pos,true);
 	}
 }
 
@@ -3210,10 +3193,7 @@ Class LoveHeart : Actor
 	{
 		Super.PostBeginPlay();
 		A_StartSound("misc/heart",CHAN_WEAPON);
-		//A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
-		// can't use Attach/RemoveLight for now due to heavy performance issues
-		let l = Spawn("LoveHeartLight",pos);
-		l.target = self;
+		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
 		special2 = 25;
 	}
 	action void A_HeartBurst()
@@ -3235,6 +3215,8 @@ Class LoveHeart : Actor
 				raging.DoHitFX();
 		}
 		A_SetRenderStyle(1.,STYLE_Add);
+		// RemoveLight causes heavy performance issues, just overwrite with a "blank light"
+		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,0,0,0);
 		//A_RemoveLight('LOVELIGHT');
 		CheckSplash(40);
 		A_QuakeEx(2,2,2,8,0,300,"",QF_RELATIVE|QF_SCALEDOWN);

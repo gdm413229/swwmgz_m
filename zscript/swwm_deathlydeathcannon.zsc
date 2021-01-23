@@ -3057,6 +3057,7 @@ Class Ynykron : SWWMWeapon
 			return A_JumpIf(invoker.inverted,"TakeInverted");
 		}
 	TakeNormal:
+		XZW2 A 2;
 		XZW3 STU 2;
 		XZW3 V 2
 		{
@@ -3064,20 +3065,24 @@ Class Ynykron : SWWMWeapon
 			A_PlayerReload();
 		}
 		XZW3 WXYZ 2;
-		XZW4 ABCDEFGHIJKLMNO 2;
+		XZW4 A 2;
+		XZW4 B 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW4 CDEFGHIJKLMNO 2;
 		XZW4 P 0
 		{
 			invoker.inverted = true;
 		}
 		Goto PutInverted;
 	TakeInverted:
-		XZW5 PQRS 2;
+		XZW5 P 2;
+		XZW5 QRS 2;
 		XZW5 T 2
 		{
 			A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
 			A_PlayerReload();
 		}
-		XZW5 UVWXYZ 2;
+		XZW5 UVWXY 2;
+		XZW5 Z 2 A_StopSound(CHAN_WEAPONEXTRA);
 		XZW6 ABCDEFGHIJKLM 2;
 		XZW6 N 0
 		{
@@ -3089,16 +3094,18 @@ Class Ynykron : SWWMWeapon
 		XZW4 T 2 A_StartSound("ynykron/magin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 UVWXYZ 2;
 		XZW5 A 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW5 BCDEFGHIJK 2;
+		XZW5 B 2 A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+		XZW5 CDEFGHIJK 2;
 		XZW5 L 4;
 		Goto Ready;
 	PutInverted:
 		XZW6 NOPQ 2;
 		XZW6 R 2 A_StartSound("ynykron/magin",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW6 STUVWXY 2;
-		XZW6 Z 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW7 ABCDEFGHIJ 2;
-		XZW7 K 4;
+		XZW6 STUVWX 2;
+		XZW6 Y 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 Z 2 A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+		XZW7 ABCDEFGHI 2;
+		XZW7 J 4;
 		XZW5 P 0;
 		Goto Ready;
 	Discharge:
@@ -3182,10 +3189,13 @@ Class Ynykron : SWWMWeapon
 			return ResolveState(null);
 		}
 	UnloadNormal:
+		XZW2 A 2;
 		XZW3 STU 2;
 		XZW3 V 2 A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 WXYZ 2;
-		XZW4 ABCDEFGHIJKLMNO 2;
+		XZW4 A 2;
+		XZW4 B 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW4 CDEFGHIJKLMNO 2;
 		XZW4 P 0
 		{
 			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
@@ -3203,9 +3213,11 @@ Class Ynykron : SWWMWeapon
 		}
 		Goto PutNormal;
 	UnloadInverted:
-		XZW5 PQRS 2;
+		XZW5 P 2;
+		XZW5 QRS 2;
 		XZW5 T 2 A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW5 UVWXYZ 2;
+		XZW5 UVWXY 2;
+		XZW5 Z 2 A_StopSound(CHAN_WEAPONEXTRA);
 		XZW6 ABCDEFGHIJKLM 2;
 		XZW6 N 0
 		{

@@ -307,7 +307,7 @@ Class HellblazerMissile : Actor
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(4.5);
-		SWWMUtility.DoExplosion(self,200,320000,200,90);
+		SWWMUtility.DoExplosion(self,250,320000,200,90);
 		A_NoGravity();
 		A_QuakeEx(5,5,5,15,0,1500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:.8);
 		A_StopSound(CHAN_BODY);
@@ -342,7 +342,7 @@ Class HellblazerMissile : Actor
 			s.scale *= FRandom[Hellblazer](0.9,1.8);
 		}
 		Spawn("HellblazerRing",pos);
-		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,350,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,250,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	void A_SubExpl( double xscale = 1. )
@@ -403,14 +403,14 @@ Class HellblazerCrackshot : HellblazerMissile
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
-		A_SetScale(6.);
-		SWWMUtility.DoExplosion(self,200,320000,250,100);
+		A_SetScale(3.);
+		SWWMUtility.DoExplosion(self,200,320000,160,60);
 		A_NoGravity();
-		A_QuakeEx(6,6,6,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
+		A_QuakeEx(4,4,4,12,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:400,rollIntensity:.6);
 		A_StopSound(CHAN_BODY);
 		A_StartSound("hellblazer/hitc",CHAN_WEAPON,attenuation:.7);
 		A_StartSound("hellblazer/hitc",CHAN_VOICE,attenuation:.4);
-		A_AlertMonsters(swwm_uncapalert?0:3000);
+		A_AlertMonsters(swwm_uncapalert?0:2400);
 		Spawn("HellblazerExplLight",pos);
 		int numpt = Random[Hellblazer](12,24);
 		for ( int i=0; i<numpt; i++ )
@@ -451,7 +451,7 @@ Class HellblazerCrackshot : HellblazerMissile
 			c.ReactionTime += Random[Hellblazer](-10,10);
 			HellblazerClusterMini(c).A_Steer(tracer);
 		}
-		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,300,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,200,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	States
@@ -475,7 +475,7 @@ Class HellblazerRavager : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("HugeRocketBlast",50);
 		A_SetScale(8.);
-		SWWMUtility.DoExplosion(self,350,320000,300,120);
+		SWWMUtility.DoExplosion(self,400,320000,300,120);
 		A_NoGravity();
 		A_QuakeEx(6,6,6,30,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
 		A_StopSound(CHAN_BODY);
@@ -589,7 +589,7 @@ Class HellblazerWarhead : HellblazerMissile
 			s.scale *= FRandom[Hellblazer](0.9,1.8);
 		}
 		Spawn("HellblazerRing2",pos);
-		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,2000,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,1500,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
 	}
 
 	void A_WarheadSub()

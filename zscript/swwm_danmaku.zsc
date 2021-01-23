@@ -149,7 +149,7 @@ Class EvisceratorChunk : Actor
 		Radius 2;
 		Height 2;
 		Speed 50;
-		DamageFunction int(clamp((vel.length()-5)*.2+max(0,1.-lifetime)*2.,0,15));
+		DamageFunction int(clamp((vel.length()-8)*.2+max(0,1.-lifetime)*2.,0,15));
 		DamageType 'shot';
 		BounceFactor 1.0;
 		WallBounceFactor 1.0;
@@ -291,14 +291,14 @@ Class EvisceratorChunk : Actor
 			let l = Spawn("ChunkImpact",pos);
 			l.angle = atan2(HitNormal.y,HitNormal.x);
 			l.pitch = asin(-HitNormal.z);
-			A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.5);
 		}
 		A_Gravity();
 		gravity = .35;
 		anglevel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
 		pitchvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
 		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
-		A_StartSound("eviscerator/hit",CHAN_WEAPON,CHANF_OVERLAP,.4);
+		A_StartSound("eviscerator/hit",CHAN_WEAPON,CHANF_OVERLAP,.3);
 		if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:300);
 		if ( vel.length() < 3 )
 		{
@@ -343,19 +343,19 @@ Class EvisceratorChunk : Actor
 		// + random chance relative to health
 		int posthealth = victim.health-amt;
 		double hratio = posthealth/double(victim.GetSpawnHealth());
-		if ( (posthealth <= 0) || (FRandom[Eviscerator](hratio,1.) < .5) )
+		if ( (posthealth <= 0) || (FRandom[Eviscerator](hratio,1.) < .7) )
 		{
 			if ( !victim.bNOBLOOD && !victim.bDORMANT && !victim.bINVULNERABLE )
 			{
 				victim.SpawnBlood(pos,AngleTo(victim),dmg);
-				A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.2);
+				A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
 			}
 			else
 			{
 				let l = Spawn("ChunkImpact",pos);
 				l.angle = angle+180;
 				l.pitch = -pitch;
-				A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.2);
+				A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.1);
 			}
 			A_Gravity();
 			gravity = .35;
@@ -366,7 +366,7 @@ Class EvisceratorChunk : Actor
 		if ( !victim.bNOBLOOD && !victim.bDORMANT && !victim.bINVULNERABLE )
 		{
 			victim.SpawnBlood(pos,AngleTo(victim),dmg);
-			A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.2);
+			A_StartSound("eviscerator/hitf",CHAN_WEAPON,CHANF_OVERLAP,.1);
 			ExplodeMissile(null,victim);
 		}
 		else
@@ -486,7 +486,7 @@ Class EvisceratorProj : Actor
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		EvisceratorChunk p;
 		Vector3 spawnofs;
-		if ( BlockingMobj ) spawnofs = level.Vec3Diff(pos,BlockingMobj.Vec3Offset(0,0,BlockingMobj.height/2)).unit()*4;
+		if ( BlockingMobj ) spawnofs = (0,0,0);
 		else if ( BlockingFloor ) spawnofs = BlockingFloor.floorplane.Normal*4;
 		else if ( BlockingCeiling ) spawnofs = BlockingCeiling.ceilingplane.Normal*4;
 		else if ( BlockingLine )
@@ -497,7 +497,7 @@ Class EvisceratorProj : Actor
 		}
 		int trail = 0;
 		if ( target && target.player ) trail = CVar.GetCVar('swwm_funtrails',target.player).GetInt();
-		for ( int i=0; i<30; i++ )
+		for ( int i=0; i<40; i++ )
 		{
 			p = EvisceratorChunk(Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs)));
 			p.bHITOWNER = true;
@@ -797,7 +797,7 @@ Class Eviscerator : SWWMWeapon
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
 		int trail = CVar.GetCVar('swwm_funtrails',player).GetInt();
-		for ( int i=0; i<30; i++ )
+		for ( int i=0; i<40; i++ )
 		{
 			a = FRandom[Eviscerator](0,360);
 			s = FRandom[Eviscerator](0,invoker.extended?.06:.3);

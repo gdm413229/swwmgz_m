@@ -1078,6 +1078,11 @@ Class SparkUnit : Ammo
 		Radius 6;
 		Height 22;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -1112,6 +1117,11 @@ Class SilverBulletAmmo : Ammo
 		Radius 10;
 		Height 26;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -1141,6 +1151,11 @@ Class SilverBulletAmmo2 : Ammo
 		FloatBobStrength 0.25;
 		Radius 10;
 		Height 26;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -1268,6 +1283,11 @@ Class CandyGunAmmo : Ammo
 		Radius 6;
 		Height 24;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -1361,6 +1381,11 @@ Class YnykronAmmo : Ammo
 		FloatBobStrength 0.25;
 		Radius 8;
 		Height 24;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{

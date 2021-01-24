@@ -127,6 +127,11 @@ Class QuadravolAmmo : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -178,6 +183,11 @@ Class DarkCanister : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -205,6 +215,11 @@ Class EMPCore : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -279,6 +294,11 @@ Class RayAmmo : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
 	States
 	{
 	Spawn:
@@ -308,6 +328,11 @@ Class RayBattery : Ammo
 		+INVENTORY.IGNORESKILL;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -358,6 +383,11 @@ Class GrandAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
 	}
 	States
 	{

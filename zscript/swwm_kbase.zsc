@@ -1268,7 +1268,13 @@ Class DemolitionistMenu : GenericMenu
 					{
 						if ( !storelist[i] ) continue;
 						let def = GetDefaultByType(storelist[i]);
-						if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+						if ( sub )
+						{
+							int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+							if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+							else str = def.GetTag();
+						}
+						else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 						else str = def.GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1636,7 +1642,13 @@ Class DemolitionistMenu : GenericMenu
 				{
 					if ( !storelist[i] ) continue;
 					let def = GetDefaultByType(storelist[i]);
-					if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					if ( sub )
+					{
+						int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+						else str = def.GetTag();
+					}
+					else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 					else str = def.GetTag();
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
@@ -3150,7 +3162,13 @@ Class DemolitionistMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				if ( sub )
+				{
+					int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+					else str = def.GetTag();
+				}
+				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 				else str = def.GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -3163,7 +3181,13 @@ Class DemolitionistMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				if ( sub )
+				{
+					int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+					else str = def.GetTag();
+				}
+				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 				else str = def.GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;

@@ -1596,9 +1596,9 @@ Class Wallbuster : SWWMWeapon
 						amo.AttachToOwner(self);
 						amo.Amount = 0;
 					}
-					if ( amo.Amount < amo.MaxAmount ) amo.Amount++;
-					else if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
-						Spawn(types[which],Vec3Angle(10,(angle-20)+i*10,height/3));
+					if ( (amo.Amount >= amo.MaxAmount) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+						amo.CreateTossable(1);
+					amo.Amount++;
 				}
 			}
 			invoker.loaded[invoker.rotation[5]*5+i] = null;
@@ -1620,6 +1620,31 @@ Class Wallbuster : SWWMWeapon
 		if ( (invoker.reloadqueue.Size() > 0) && (invoker.rotation[invoker.rotation[5]] > 0) )
 			invoker.rotation[invoker.rotation[5]]--;
 		A_StartSound("wallbuster/load",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
+		let Owner = ownedWeapon.Owner;
+		if ( (AmmoGive1 == 0) && initialized )
+		{
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !loaded[i] || fired[i] ) continue;
+				let cur = Owner.FindInventory(loaded[i]);
+				if ( !cur )
+				{
+					cur = Inventory(Spawn(loaded[i]));
+					cur.Amount = 0;
+					cur.AttachToOwner(Owner);
+				}
+				// give the loaded shell (or drop)
+				if ( cur.Amount >= cur.MaxAmount ) cur.CreateTossable(1);
+				cur.Amount++;
+				good = true;
+			}
+		}
+		return good;
 	}
 
 	Default

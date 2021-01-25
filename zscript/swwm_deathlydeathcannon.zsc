@@ -2926,6 +2926,13 @@ Class Ynykron : SWWMWeapon
 		}
 	}
 
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// add the loaded box
+		if ( !AmmoGive1 && clipcount ) AmmoGive1++;
+		return Super.PickupForAmmoSWWM(ownedWeapon);
+	}
+
 	Default
 	{
 		Tag "$T_YNYKRON";

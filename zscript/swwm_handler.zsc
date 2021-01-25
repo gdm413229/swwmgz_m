@@ -2751,6 +2751,36 @@ Class SWWMHandler : EventHandler
 				}
 			}
 		}
+		else if ( e.Name.Left(14) ~== "swwmstoretake." )
+		{
+			Class<Inventory> item = e.Name.Mid(14);
+			if ( !item ) return;
+			int amt = e.Args[2];
+			if ( item is 'CandyGun' )
+			{
+				// check if we can sell a spare instead, for the same price
+				int n = players[e.Args[0]].mo.CountInv('CandyGunSpares');
+				if ( n >= amt )
+				{
+					players[e.Args[0]].mo.TakeInventory('CandyGunSpares',amt);
+					SWWMCredits.Give(players[e.Args[0]],e.Args[1]);
+					return;
+				}
+			}
+			// if player currently has the dual wield weapon selected, switch over
+			if ( item is 'SWWMWeapon' )
+			{
+				let c = Weapon(players[e.Args[0]].mo.FindInventory(item));
+				if ( c.SisterWeapon && (players[e.Args[0]].ReadyWeapon == c.SisterWeapon) )
+				{
+					players[e.Args[0]].ReadyWeapon = c;
+					players[e.Args[0]].SetPSprite(PSP_WEAPON,c.FindState("Ready"));
+					players[e.Args[0]].SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+				}
+			}
+			players[e.Args[0]].mo.TakeInventory(item,amt);
+			SWWMCredits.Give(players[e.Args[0]],e.Args[1]);
+		}
 		else if ( e.Name.Left(10) ~== "swwmtrade." )
 		{
 			Class<Inventory> item = e.Name.Mid(10);

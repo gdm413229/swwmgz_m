@@ -486,7 +486,16 @@ Class DemolitionistMenu : GenericMenu
 			if ( tabs[curtab] == TAB_HELP )
 			{
 				String str = StringTable.Localize("$SWWM_HELPTXT");
-				if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
+				for ( int i=0; i<MAXPLAYERS; i++ )
+				{
+					if ( !playeringame[i] || (i == consoleplayer) ) continue;
+					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
+					break;
+				}
+				let bar = SWWMStatusBar(StatusBar);
+				if ( bar && (bar.FullHistory.Size() > 0) )
+					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -785,6 +794,32 @@ Class DemolitionistMenu : GenericMenu
 				let itm = GetDefaultByType(storelist[sel0]);
 				let amt = storeunits[sel0];
 				int price = int(itm.Stamina*(1.+.75*(amt-1)));
+				let cur = players[consoleplayer].mo.FindInventory(storelist[sel0]);
+				if ( sub )
+				{
+					if ( !cur ) return true;
+					if ( storelist[sel0] is 'Weapon' )
+					{
+						let w = Weapon(itm);
+						// subtract price of given ammo, as we're only selling the weapon itself
+						if ( w.AmmoType1 && (w.AmmoGive1 > 0) )
+						{
+							let am1 = GetDefaultByType(w.AmmoType1);
+							if ( am1.Stamina > 0 ) price -= int(am1.Stamina*(1.+.75*(w.AmmoGive1-1)));
+						}
+						// candygun is a special case for secondary ammo
+						if ( w.AmmoType2 && (w.AmmoGive2 > 0) && (storelist[sel0] is 'CandyGun') )
+						{
+							let am2 = GetDefaultByType(w.AmmoType2);
+							if ( am2.Stamina > 0 ) price -= int(am2.Stamina*(1.+.75*(w.AmmoGive2-1)));
+						}
+					}
+					// sell at half price
+					if ( sub ) price /= 2;
+					EventHandler.SendNetworkEvent(String.Format("swwmstoretake.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
+					MenuSound("menu/buyinv");
+					return true;
+				}
 				if ( !SWWMCredits.CanTake(players[consoleplayer],price) )
 				{
 					MenuSound("menu/noinvuse");
@@ -792,7 +827,6 @@ Class DemolitionistMenu : GenericMenu
 					tmsgtic = gametic+70;
 					return true;
 				}
-				let cur = players[consoleplayer].mo.FindInventory(storelist[sel0]);
 				int camt, max;
 				if ( cur )
 				{
@@ -874,6 +908,11 @@ Class DemolitionistMenu : GenericMenu
 			{
 				MenuSound("menu/democlose");
 				sub = false;
+			}
+			else if ( tabs[curtab] == TAB_STORE )
+			{
+				sub = !sub;
+				MenuSound(sub?"menu/demosel":"menu/democlose");
 			}
 			else if ( tabs[curtab] == TAB_TRADING )
 			{
@@ -1037,8 +1076,9 @@ Class DemolitionistMenu : GenericMenu
 							if ( cols > maxcol ) break;
 						}
 					}
+					return res;
 				}
-				else if ( !isrclick )
+				if ( !isrclick )
 				{
 					// check that scrollbar is present
 					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
@@ -1111,8 +1151,9 @@ Class DemolitionistMenu : GenericMenu
 							if ( cols > maxcol ) break;
 						}
 					}
+					return res;
 				}
-				else if ( !isrclick )
+				if ( !isrclick )
 				{
 					// check that scrollbar is present
 					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
@@ -1184,34 +1225,37 @@ Class DemolitionistMenu : GenericMenu
 							if ( cols > maxcol ) break;
 						}
 					}
+					return res;
 				}
-				else if ( !isrclick )
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
 				{
-					// check that scrollbar is present
-					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
-					int longest = 0, len;
-					int maxcol, totalcol;
-					for ( int i=0; i<invlist.Size(); i++ )
-					{
-						if ( !invlist[i] ) continue;
-						str = invlist[i].GetTag();
-						len = fnt.StringWidth(str);
-						if ( len > longest ) longest = len;
-					}
-					maxcol = 622/(longest+24);
-					totalcol = int(ceil(invlist.Size()/22.));
-					if ( maxcol >= totalcol ) return res;	// no scrollbar
-					// calculate offset
-					int szr = totalcol-maxcol;
-					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
-					if ( step > 0 ) step += (maxcol-1);
-					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
-					ofs0 = step*22;
-					drag = 1;
+					if ( !invlist[i] ) continue;
+					str = invlist[i].GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
 				}
+				maxcol = 622/(longest+24);
+				totalcol = int(ceil(invlist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+				drag = 1;
 			}
-			else if ( (tabs[curtab] == TAB_STORE) && !isrclick )
+			else if ( tabs[curtab] == TAB_STORE )
 			{
+				if ( isrclick )
+				{
+					MenuEvent(MKEY_CLEAR,false);
+					return res;
+				}
 				// check what item we clicked
 				if ( mpos.y < 377 )
 				{
@@ -1255,35 +1299,33 @@ Class DemolitionistMenu : GenericMenu
 							if ( cols > maxcol ) break;
 						}
 					}
+					return res;
 				}
-				else if ( !isrclick )
+				// check that scrollbar is present
+				if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
+				xx = 9;
+				yy = 23;
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<storelist.Size(); i++ )
 				{
-					// check that scrollbar is present
-					if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
-					xx = 9;
-					yy = 23;
-					int longest = 0, len;
-					int maxcol, totalcol;
-					for ( int i=0; i<storelist.Size(); i++ )
-					{
-						if ( !storelist[i] ) continue;
-						let def = GetDefaultByType(storelist[i]);
-						if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
-						else str = def.GetTag();
-						len = fnt.StringWidth(str);
-						if ( len > longest ) longest = len;
-					}
-					maxcol = 622/(longest+96);
-					totalcol = int(ceil(storelist.Size()/22.));
-					if ( maxcol >= totalcol ) return res;	// no scrollbar
-					// calculate offset
-					int szr = totalcol-maxcol;
-					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
-					if ( step > 0 ) step += (maxcol-1);
-					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
-					ofs0 = step*22;
-					drag = 1;
+					if ( !storelist[i] ) continue;
+					let def = GetDefaultByType(storelist[i]);
+					if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					else str = def.GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
 				}
+				maxcol = 622/(longest+96);
+				totalcol = int(ceil(storelist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+				drag = 1;
 			}
 			else if ( (tabs[curtab] == TAB_LIBRARY) && !isrclick )
 			{
@@ -1350,12 +1392,13 @@ Class DemolitionistMenu : GenericMenu
 					drag = 3;
 				}
 			}
-			else if ( (tabs[curtab] == TAB_TRADING) && isrclick )
+			else if ( tabs[curtab] == TAB_TRADING )
 			{
-				MenuEvent(MKEY_CLEAR,false);
-			}
-			else if ( (tabs[curtab] == TAB_TRADING) && !isrclick )
-			{
+				if ( isrclick )
+				{
+					MenuEvent(MKEY_CLEAR,false);
+					return res;
+				}
 				if ( !sub )
 				{
 					// check what item we clicked
@@ -1397,30 +1440,28 @@ Class DemolitionistMenu : GenericMenu
 								if ( cols > maxcol ) break;
 							}
 						}
+						return res;
 					}
-					else if ( !isrclick )
+					// check that scrollbar is present (will it ever be???)
+					if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<playerlist.Size(); i++ )
 					{
-						// check that scrollbar is present (will it ever be???)
-						if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
-						int longest = 0, len;
-						int maxcol, totalcol;
-						for ( int i=0; i<playerlist.Size(); i++ )
-						{
-							str = players[playerlist[i]].GetUserName();
-							len = fnt.StringWidth(str);
-							if ( len > longest ) longest = len;
-						}
-						maxcol = 622/(longest+24);
-						totalcol = int(ceil(playerlist.Size()/22.));
-						if ( maxcol >= totalcol ) return res;	// no scrollbar
-						// calculate offset
-						int szr = totalcol-maxcol;
-						int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
-						if ( step > 0 ) step += (maxcol-1);
-						if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
-						ofs0 = step*22;
-						drag = 1;
+						str = players[playerlist[i]].GetUserName();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
 					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(playerlist.Size()/22.));
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
 				}
 				else if ( sel0 == -1 )
 				{
@@ -1456,6 +1497,16 @@ Class DemolitionistMenu : GenericMenu
 				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
 				else kstr = mkey[0];
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				for ( int i=0; i<MAXPLAYERS; i++ )
+				{
+					if ( !playeringame[i] || (i == consoleplayer) ) continue;
+					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
+					break;
+				}
+				let bar = SWWMStatusBar(StatusBar);
+				if ( bar && (bar.FullHistory.Size() > 0) )
+					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -1679,6 +1730,16 @@ Class DemolitionistMenu : GenericMenu
 				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 				String kstr = bindings.NameKeys(k1,k2);
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				for ( int i=0; i<MAXPLAYERS; i++ )
+				{
+					if ( !playeringame[i] || (i == consoleplayer) ) continue;
+					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
+					break;
+				}
+				let bar = SWWMStatusBar(StatusBar);
+				if ( bar && (bar.FullHistory.Size() > 0) )
+					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -2144,40 +2205,47 @@ Class DemolitionistMenu : GenericMenu
 			if ( storelist.Size() > 0 ) lastsel = storelist[sel0];
 			storelist.Clear();
 			storeunits.Clear();
-			// price-sorted buyables
+			// price-sorted buyables/sellables
 			for ( int i=0; i<AllActorClasses.Size(); i++ )
 			{
 				let type = (Class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
 				// no collectibles
 				if ( type is 'SWWMCollectible' ) continue;
-				// no Ynykron in strife
-				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') ) continue;
-				// skip maxed items
+				// no Ynykron in strife (unless selling)
+				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') && !sub ) continue;
+				// can't sell candygun spares
+				if ( sub && (type is 'CandyGunSpares') ) continue;
 				let cur = players[consoleplayer].mo.FindInventory(type);
-				if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
-				// ignore ammo for weapons not owned
-				bool notownedammo = false;
-				if ( type is 'Ammo' )
+				// skip items we don't own or are depleted if selling
+				if ( sub && (!cur || (cur.Amount <= 0)) ) continue;
+				else if ( !sub )
 				{
-					notownedammo = true;
-					let amo = (Class<Ammo>)(type);
-					for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.inv )
+					// skip maxed items if buying
+					if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
+					// ignore ammo for weapons not owned if buying
+					bool notownedammo = false;
+					if ( type is 'Ammo' )
 					{
-						if ( !(inv is 'Weapon') ) continue;
-						if ( (Weapon(inv).AmmoType1 == amo) || (Weapon(inv).AmmoType2 == amo) )
+						notownedammo = true;
+						let amo = (Class<Ammo>)(type);
+						for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.inv )
 						{
-							notownedammo = false;
-							break;
-						}
-						if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).UsesAmmo(amo) )
-						{
-							notownedammo = false;
-							break;
+							if ( !(inv is 'Weapon') ) continue;
+							if ( (Weapon(inv).AmmoType1 == amo) || (Weapon(inv).AmmoType2 == amo) )
+							{
+								notownedammo = false;
+								break;
+							}
+							if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).UsesAmmo(amo) )
+							{
+								notownedammo = false;
+								break;
+							}
 						}
 					}
+					if ( notownedammo ) continue;
 				}
-				if ( notownedammo ) continue;
 				let inv = GetDefaultByType(type);
 				// skip unimplemented weapons
 				if ( type is 'Weapon' )
@@ -2192,30 +2260,38 @@ Class DemolitionistMenu : GenericMenu
 				int price = int(inv.Stamina*(1.+.75*(amt-1)));
 				if ( type is 'Ammo' )
 				{
-					int maxneed = cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
-					// get the largest affordable child pickup amount (that we need)
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;	// we can sell ALL our ammo
+					else maxamt = cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					// get the largest affordable child pickup amount (that we need, or we can sell)
 					for ( int j=0; j<AllActorClasses.Size(); j++ )
 					{
 						let type2 = (Class<Ammo>)(AllActorClasses[j]);
 						if ( !type2 || (type2.GetParentClass() != type) ) continue;
 						let inv2 = GetDefaultByType(type2);
 						int cprice = int(inv.Stamina*(1.+.75*(inv2.Amount-1)));
-						if ( (inv2.Amount > amt) && (inv2.Amount <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
+						if ( (inv2.Amount > amt) && (inv2.Amount <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
 						{
 							price = cprice;
 							amt = inv2.Amount;
 						}
 					}
 				}
-				// nuggets can be bought in bulk
+				// nuggets can be bought/sold in bulk
 				else if ( type is 'HealthNuggetItem' )
 				{
 					let inv2 = GetDefaultByType(SWWMHealth(inv).giveme);
-					int maxneed = (inv2.MaxAmount-players[consoleplayer].Health);
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;
+					else
+					{
+						maxamt = (inv2.MaxAmount-players[consoleplayer].Health);
+						maxamt += cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					}
 					for ( int j=5; j<=20; j+=5 )
 					{
 						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
-						if ( (j <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
+						if ( (j <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
 						{
 							price = cprice;
 							amt = j;
@@ -2226,11 +2302,17 @@ Class DemolitionistMenu : GenericMenu
 				{
 					let inv2 = GetDefaultByType(SWWMSpareArmor(inv).giveme);
 					let cur2 = players[consoleplayer].mo.FindInventory(SWWMSpareArmor(inv).giveme);
-					int maxneed = cur2?(cur2.MaxAmount-cur2.Amount):inv2.MaxAmount;
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;
+					else
+					{
+						maxamt = cur2?(cur2.MaxAmount-cur2.Amount):inv2.MaxAmount;
+						maxamt += cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					}
 					for ( int j=5; j<=20; j+=5 )
 					{
 						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
-						if ( (j <= maxneed) && SWWMCredits.CanTake(players[consoleplayer],cprice) )
+						if ( (j <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
 						{
 							price = cprice;
 							amt = j;
@@ -3055,7 +3137,7 @@ Class DemolitionistMenu : GenericMenu
 		{
 			if ( storelist.Size() <= 0 )
 			{
-				str = StringTable.Localize("$SWWM_NOSTORE");
+				str = StringTable.Localize(sub?"$SWWM_NOSTORESELL":"$SWWM_NOSTORE");
 				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
@@ -3107,10 +3189,29 @@ Class DemolitionistMenu : GenericMenu
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
 				int price = int(def.Stamina*(1.+.75*(storeunits[i]-1)));
+				if ( sub && (storelist[i] is 'Weapon') )
+				{
+					let w = Weapon(def);
+					// subtract price of given ammo, as we're only selling the weapon itself
+					if ( w.AmmoType1 && (w.AmmoGive1 > 0) )
+					{
+						let am1 = GetDefaultByType(w.AmmoType1);
+						if ( am1.Stamina > 0 ) price -= int(am1.Stamina*(1.+.75*(w.AmmoGive1-1)));
+					}
+					// candygun is a special case for secondary ammo
+					if ( w.AmmoType2 && (w.AmmoGive2 > 0) && (storelist[i] is 'CandyGun') )
+					{
+						let am2 = GetDefaultByType(w.AmmoType2);
+						if ( am2.Stamina > 0 ) price -= int(am2.Stamina*(1.+.75*(w.AmmoGive2-1)));
+					}
+				}
+				// sell at half price
+				if ( sub ) price /= 2;
 				str = String.Format("¥%d",price);
 				len = TewiFont.StringWidth(str);
 				int clscol = Font.CR_FIRE;
-				if ( (price > muns1) && (muns2 <= 0) ) clscol = Font.CR_BLACK;
+				if ( sub ) clscol = Font.CR_GREEN;
+				else if ( (price > muns1) && (muns2 <= 0) ) clscol = Font.CR_BLACK;
 				Screen.DrawText(TewiFont,clscol,origin.x+xx+longest+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
 				yy += 16;
 				if ( yy >= 370 )
@@ -3258,7 +3359,16 @@ Class DemolitionistMenu : GenericMenu
 			if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
 			else kstr = mkey[0];
 			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
-			if ( multiplayer ) str = str..StringTable.Localize("$SWWM_HELPTXT_MP");
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || (i == consoleplayer) ) continue;
+				if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+				str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
+				break;
+			}
+			let bar = SWWMStatusBar(StatusBar);
+			if ( bar && (bar.FullHistory.Size() > 0) )
+				str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;

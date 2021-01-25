@@ -7,7 +7,6 @@
 
  - DLC weaponset
  - "White Lady" rare Lämp spawn
- - Sell items at the store
  - More intermission art (shamefully e-begging on Twitter as usual orz)
  - Extra localizations (including Japanese)
  - Mod trailer video (doubt I'd be able to, I might ask someone instead)

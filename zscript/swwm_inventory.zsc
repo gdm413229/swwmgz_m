@@ -1132,6 +1132,61 @@ Class SWWMWeapon : Weapon abstract
 		if ( phair.GetBool() ) crosshair = 99;
 		else crosshair = 0;
 	}
+	// subtracts given ammo from price, drops excess
+	virtual bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// save time, always return false if we don't use ammo
+		if ( !ownedWeapon.Ammo1 && !ownedWeapon.Ammo2 ) return false;
+		bool gotstuff = false;
+		int oldamount1 = 0, oldamount2 = 0;
+		if ( ownedWeapon.Ammo1 ) oldamount1 = ownedWeapon.Ammo1.Amount;
+		if ( ownedWeapon.Ammo2 ) oldamount2 = ownedWeapon.Ammo2.Amount;
+		if ( AmmoGive1 > 0 ) gotstuff = AddExistingAmmo(ownedWeapon.Ammo1,AmmoGive1);
+		if ( AmmoGive2 > 0 ) gotstuff |= AddExistingAmmo(ownedWeapon.Ammo2,AmmoGive2);
+		let Owner = ownedWeapon.Owner;
+		if ( gotstuff && Owner && Owner.player )
+		{
+			if ( ownedWeapon.Ammo1 && (oldamount1 == 0) )
+				PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo1.GetClass());
+			else if ( ownedWeapon.Ammo2 && (oldamount2 == 0) )
+				PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo2.GetClass());
+		}
+		if ( ownedWeapon.Ammo1 )
+		{
+			// subtract price of ammo we don't give
+			int ammonotgiven = default.AmmoGive1-AmmoGive1;
+			if ( ammonotgiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammonotgiven-1)));
+			// subtract price of given ammo
+			int ammogiven = ownedWeapon.Ammo1.Amount-oldamount1;
+			if ( ammogiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammogiven-1)));
+			// drop excess
+			int dropme = AmmoGive1-ammogiven;
+			if ( dropme > 0 )
+			{
+				// hacky, but it works
+				ownedWeapon.Ammo1.CreateTossable(dropme);
+				ownedWeapon.Ammo1.Amount += dropme;
+			}
+		}
+		if ( ownedWeapon.Ammo2 )
+		{
+			// subtract price of ammo we don't give
+			int ammonotgiven = default.AmmoGive2-AmmoGive2;
+			if ( ammonotgiven > 0 ) Stamina -= int(ownedWeapon.Ammo2.Stamina*(1.+.75*(ammonotgiven-1)));
+			// subtract price of given ammo
+			int ammogiven = ownedWeapon.Ammo2.Amount-oldamount2;
+			if ( ammogiven > 0 ) Stamina -= int(ownedWeapon.Ammo2.Stamina*(1.+.75*(ammogiven-1)));
+			// drop excess
+			int dropme = AmmoGive2-ammogiven;
+			if ( dropme > 0 )
+			{
+				// hacky, but it works
+				ownedWeapon.Ammo2.CreateTossable(dropme);
+				ownedWeapon.Ammo2.Amount += dropme;
+			}
+		}
+		return gotstuff;
+	}
 	override bool HandlePickup( Inventory item )
 	{
 		// can't hold both weapons at once
@@ -1139,34 +1194,20 @@ Class SWWMWeapon : Weapon abstract
 			return true;
 		if ( (GetClass() == item.GetClass()) && !item.ShouldStay() )
 		{
-			int oldammo1 = Ammo1?Ammo1.Amount:0;
-			int oldammo2 = Ammo2?Ammo2.Amount:0;
-			if ( Weapon(item).PickupForAmmo(self) )
+			if ( SWWMWeapon(item).PickupForAmmoSWWM(self) )
 				item.bPickupGood = true;
-			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
+			if ( (Amount+item.Amount > MaxAmount) && (item.Stamina > 0) )
 			{
 				// sell excess
-				int sellprice = Stamina;
-				// subtract prices of ammo given
-				if ( Ammo1 )
-				{
-					int ammogiven1 = Ammo1.Amount-oldammo1;
-					if ( ammogiven1 > 0 )
-						sellprice -= int(Ammo1.Stamina*(1.+.75*(ammogiven1-1)));
-				}
-				if ( Ammo2 )
-				{
-					int ammogiven2 = Ammo2.Amount-oldammo2;
-					if ( ammogiven2 > 0 )
-						sellprice -= int(Ammo2.Stamina*(1.+.75*(ammogiven2-1)));
-				}
-				sellprice = int(sellprice*.5);
+				int sellprice = item.Stamina/2;
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
 					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 				item.bPickupGood = true;
 			}
+			// reset the price in case it has to respawn
+			item.Stamina = item.default.Stamina;
 			return true;
 		}
 		return Super.HandlePickup(item);

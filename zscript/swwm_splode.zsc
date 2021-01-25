@@ -363,6 +363,12 @@ Class ExplodiumGun : SWWMWeapon
 					DualExplodiumGun(SisterWeapon).chambered = eg.chambered;
 					DualExplodiumGun(SisterWeapon).clipcount = eg.clipcount;
 				}
+				else
+				{
+					// otherwise use defaults
+					DualExplodiumGun(SisterWeapon).chambered = true;
+					DualExplodiumGun(SisterWeapon).clipcount = DualExplodiumGun(SisterWeapon).default.clipcount;
+				}
 				// autoswitch if enabled
 				if ( !Owner.player.GetNeverSwitch() )
 					Owner.player.PendingWeapon = SisterWeapon;

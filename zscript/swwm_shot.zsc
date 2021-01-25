@@ -1978,9 +1978,9 @@ Class Spreadgun : SWWMWeapon
 					amo.AttachToOwner(self);
 					amo.Amount = 0;
 				}
-				if ( amo.Amount < amo.MaxAmount ) amo.Amount++;
-				else if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
-					Spawn(types[i],Vec3Angle(5,angle,height/2));
+				if ( (amo.Amount >= amo.MaxAmount) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+					amo.CreateTossable(1);
+				amo.Amount++;
 				break;
 			}
 		}
@@ -2357,6 +2357,27 @@ Class Spreadgun : SWWMWeapon
 			A_StartSound("spreadgun/hammer",CHAN_WEAPON,CHANF_OVERLAP);
 			invoker.fired = false;
 		}
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
+		let Owner = ownedWeapon.Owner;
+		if ( (AmmoGive1 == 0) && loadammo && !fired )
+		{
+			let cur = Owner.FindInventory(loadammo);
+			if ( !cur )
+			{
+				cur = Inventory(Spawn(loadammo));
+				cur.Amount = 0;
+				cur.AttachToOwner(Owner);
+			}
+			// give the loaded shell (or drop)
+			if ( cur.Amount >= cur.MaxAmount ) cur.CreateTossable(1);
+			cur.Amount++;
+			good = true;
+		}
+		return good;
 	}
 
 	override void AttachToOwner( Actor other )

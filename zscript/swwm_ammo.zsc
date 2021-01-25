@@ -201,6 +201,40 @@ Class MagAmmo : Inventory abstract
 		Inventory.PickupFlash "SWWMPickupFlash";
 	}
 
+	override bool HandlePickup( Inventory item )
+	{
+		// see if the mag can be split apart
+		if ( (item is 'Ammo') && (ParentAmmo == Ammo(item).GetParentAmmo()) )
+		{
+			// double-check that parent ammo exists
+			if ( !pamo )
+			{
+				pamo = Ammo(Owner.FindInventory(ParentAmmo));
+				if ( !pamo )
+				{
+					pamo = Ammo(Spawn(ParentAmmo));
+					pamo.AttachToOwner(Owner);
+					pamo.Amount = 0;
+				}
+			}
+			if ( (pamo.Amount >= pamo.MaxAmount) && (Amount < MaxAmount) )
+			{
+				// split
+				for ( int i=0; i<item.Amount; i++ )
+				{
+					int bul = ClipSize;
+					int maxgiveamt = min(MaxAmount-Amount,bul);
+					int dropamt = bul-maxgiveamt;
+					if ( dropamt > 0 ) CreateTossable(dropamt);
+					Amount = min(MaxAmount,Amount+bul);
+				}
+				item.bPickupGood = true;
+				return true;
+			}
+		}
+		return Super.HandlePickup(item);
+	}
+
 	private Inventory DoDrop( Class<Inventory> type )
 	{
 		let copy = Inventory(Spawn(type,Owner.Pos,NO_REPLACE));
@@ -1122,6 +1156,17 @@ Class SilverBulletAmmo : Ammo
 		Super.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
 	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('SilverBullets') )
+		{
+			let ma = Inventory(Spawn('SilverBullets'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
 	States
 	{
 	Spawn:
@@ -1156,6 +1201,17 @@ Class SilverBulletAmmo2 : Ammo
 	{
 		Super.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('SilverBullets2') )
+		{
+			let ma = Inventory(Spawn('SilverBullets2'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
 	}
 	States
 	{
@@ -1288,6 +1344,17 @@ Class CandyGunAmmo : Ammo
 		Super.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
 	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('CandyGunBullets') )
+		{
+			let ma = Inventory(Spawn('CandyGunBullets'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
 	States
 	{
 	Spawn:
@@ -1353,6 +1420,25 @@ Class CandyGunSpares : Ammo
 		Inventory.MaxAmount 4;
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 4;
+	}
+	override Inventory CreateTossable( int amt )
+	{
+		if ( Amount > 0 )
+		{
+			// drop an empty spare
+			let spare = Inventory(Spawn('CandyGun',Owner.Pos,NO_REPLACE));
+			if ( !spare ) return null;
+			// spare with empty mag
+			CandyGun(spare).AmmoGive1 = 0;
+			CandyGun(spare).clipcount = 0;
+			CandyGun(spare).chambered = false;
+			spare.SetState(spare.SpawnState+1);
+			spare.DropTime = 30;
+			spare.bSpecial = spare.bSolid = false;
+			Amount--;
+			return spare;
+		}
+		return null;
 	}
 }
 

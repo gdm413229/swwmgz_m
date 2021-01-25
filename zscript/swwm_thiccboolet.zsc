@@ -1052,14 +1052,14 @@ Class SilverBullet : SWWMWeapon
 			if ( invoker.fcbloaded )
 			{
 				if ( (invoker.Ammo2.Amount >= invoker.Ammo2.MaxAmount) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
-					Spawn(invoker.AmmoType2,Vec3Angle(5,angle,height/2));
-				else invoker.Ammo2.Amount = min(invoker.Ammo2.MaxAmount,invoker.Ammo2.Amount+1);
+					invoker.Ammo2.CreateTossable(1);
+				invoker.Ammo2.Amount++;
 			}
 			else
 			{
 				if ( (invoker.Ammo1.Amount >= invoker.Ammo1.MaxAmount) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
-					Spawn(invoker.AmmoType1,Vec3Angle(5,angle,height/2));
-				else invoker.Ammo1.Amount = min(invoker.Ammo1.MaxAmount,invoker.Ammo1.Amount+1);
+					invoker.Ammo1.CreateTossable(1);
+				invoker.Ammo1.Amount++;
 			}
 			invoker.ClipCount = 0;
 			return;	// no mag dropped
@@ -1136,6 +1136,48 @@ Class SilverBullet : SWWMWeapon
 		A_SwitchAmmoType();
 		if ( invoker.zoomed ) player.SetPSPrite(PSP_WEAPON,invoker.FindState("ZoomReady"));
 		else player.SetPSPrite(PSP_WEAPON,invoker.fcbloaded?invoker.FindState("Ready2"):invoker.FindState("Ready"));
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
+		let Owner = ownedWeapon.Owner;
+		if ( (AmmoGive1 == 0) && ((clipcount > 0) || chambered) )
+		{
+			// we were dropped, see if we can add the bullets we contain
+			if ( chambered )
+			{
+				// first check the bullet in the chamber
+				Class<Inventory> wammo = fcbchambered?'SilverBullets2':'SilverBullets';
+				let ma = Owner.FindInventory(wammo);
+				if ( !ma )
+				{
+					ma = Inventory(Spawn(wammo));
+					ma.Amount = 0;
+					ma.AttachToOwner(Owner);
+				}
+				if ( ma.Amount >= ma.MaxAmount ) ma.CreateTossable(1);
+				ma.Amount++;
+				good = true;
+			}
+			if ( clipcount > 0 )
+			{
+				Class<Inventory> wammo = fcbloaded?'SilverBullets2':'SilverBullets';
+				let ma = Owner.FindInventory(wammo);
+				if ( !ma )
+				{
+					ma = Inventory(Spawn(wammo));
+					ma.Amount = 0;
+					ma.AttachToOwner(Owner);
+				}
+				int maxgiveamt = min(ma.MaxAmount-ma.Amount,clipcount);
+				int dropamt = clipcount-maxgiveamt;
+				if ( dropamt > 0 ) ma.CreateTossable(dropamt);
+				ma.Amount = min(ma.MaxAmount,ma.Amount+clipcount);
+				good = true;
+			}
+		}
+		return good;
 	}
 
 	Default

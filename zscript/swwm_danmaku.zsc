@@ -746,6 +746,13 @@ Class Eviscerator : SWWMWeapon
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
 	}
 
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// add the chambered shell in
+		if ( chambered ) AmmoGive1++;
+		return Super.PickupForAmmoSWWM(ownedWeapon);
+	}
+
 	override void DoEffect()
 	{
 		Super.DoEffect();

@@ -909,25 +909,18 @@ Class CandyGun : SWWMWeapon
 			if ( !spareget )
 			{
 				// sell excess
-				int sellprice = Stamina;
-				// subtract price of ammo given
-				if ( ammoget ) sellprice -= Ammo1.Stamina;
-				sellprice = int(sellprice*.5);
+				int sellprice = item.Stamina/2;
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),Font.CR_GOLD);
 				SWWMCredits.Give(Owner.player,sellprice);
 				if ( Owner.player )
 					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
 				item.bPickupGood = true;
 			}
-			if ( spareget && !ammoget )
-			{
-				// leave the excess mag behind
-				let m = Spawn(AmmoType1,item.pos);
-				m.angle = item.angle;
-			}
+			// reset the price in case it has to respawn
+			item.Stamina = item.default.Stamina;
 			return true;
 		}
-		return Super.HandlePickup(item);
+		return Weapon.HandlePickup(item);
 	}
 	protected bool, bool PickupForAmmoAndSpares( Weapon ownedWeapon )
 	{
@@ -938,6 +931,40 @@ Class CandyGun : SWWMWeapon
 		let Owner = ownedWeapon.Owner;
 		if ( gotstuff && Owner && Owner.player && (oldamount == 0) )
 			PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo1.GetClass());
+		if ( ownedWeapon.Ammo1 )
+		{
+			// subtract price of ammo we don't give
+			int ammonotgiven = default.AmmoGive1-AmmoGive1;
+			if ( ammonotgiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammonotgiven-1)));
+			// subtract price of given ammo
+			int ammogiven = ownedWeapon.Ammo1.Amount-oldamount;
+			if ( ammogiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammogiven-1)));
+			// drop excess
+			int dropme = AmmoGive1-ammogiven;
+			if ( dropme > 0 )
+			{
+				// hacky, but it works
+				ownedWeapon.Ammo1.Amount += dropme;
+				ownedWeapon.Ammo1.CreateTossable(dropme);
+			}
+		}
+		if ( (AmmoGive1 == 0) && ((clipcount > 0) || chambered) )
+		{
+			// we were dropped, see if we can add the bullets we contain
+			int bul = clipcount+chambered;
+			MagAmmo ma = MagAmmo(Owner.FindInventory("CandyGunBullets"));
+			if ( !ma )
+			{
+				ma = MagAmmo(Spawn("CandyGunBullets"));
+				ma.Amount = 0;
+				ma.AttachToOwner(Owner);
+			}
+			int maxgiveamt = min(ma.MaxAmount-ma.Amount,bul);
+			int dropamt = bul-maxgiveamt;
+			if ( dropamt > 0 ) ma.CreateTossable(dropamt);
+			ma.Amount = min(ma.MaxAmount,ma.Amount+bul);
+			gotstuff = true;
+		}
 		return gotstuff, gotspares;
 	}
 
@@ -1153,6 +1180,25 @@ Class CandyGun : SWWMWeapon
 		return Super.ReportHUDAmmo();
 	}
 
+	override Inventory CreateTossable( int amt )
+	{
+		if ( Ammo2.Amount > 0 )
+		{
+			// drop an empty spare
+			let spare = Inventory(Spawn('CandyGun',Owner.Pos,NO_REPLACE));
+			if ( !spare ) return null;
+			// spare with empty mag
+			CandyGun(spare).AmmoGive1 = 0;
+			CandyGun(spare).clipcount = 0;
+			CandyGun(spare).chambered = false;
+			spare.SetState(spare.SpawnState+1);
+			spare.DropTime = 30;
+			spare.bSpecial = spare.bSolid = false;
+			Ammo2.Amount--;
+			return spare;
+		}
+		return Super.CreateTossable(amt);
+	}
 	Default
 	{
 		Tag "$T_CANDYGUN";
@@ -1179,7 +1225,7 @@ Class CandyGun : SWWMWeapon
 	States
 	{
 	Spawn:
-		XZW1 A -1;
+		XZW1 AB -1;
 		Stop;
 	Select:
 		XZW2 B 2 A_FullRaise();

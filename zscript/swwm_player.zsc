@@ -596,9 +596,15 @@ Class Demolitionist : PlayerPawn
 			if ( player.onground && (player.jumptics < -18) )
 				player.jumptics = 0;
 		}
-		// quick grenade
-		if ( (player.playerstate != PST_DEAD) && (player.cmd.buttons&BT_USER4) )
-			SWWMGesture.SetGesture(self,GS_Grenade);
+		if ( player.playerstate != PST_DEAD )
+		{
+			// quick grenade
+			if ( player.cmd.buttons&BT_USER4 )
+				SWWMGesture.SetGesture(self,GS_Grenade);
+			// emergency melee with no weapon
+			else if ( !player.ReadyWeapon && (player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1)) )
+				SWWMGesture.SetGesture(self,GS_EmptyMelee);
+		}
 	}
 	override void Tick()
 	{
@@ -3348,6 +3354,7 @@ enum EGestureSlot
 	// special use
 	GS_Headpat = -50,
 	GS_Grenade,
+	GS_EmptyMelee,
 	// no gesture
 	GS_Null = 0,
 	// general gestures
@@ -3694,6 +3701,8 @@ Class SWWMGesture : SWWMWeapon
 				return ResolveState("Headpat");
 			case GS_Grenade:
 				return ResolveState("QuickGrenade");
+			case GS_EmptyMelee:
+				return ResolveState("EmptyMelee");
 			case GS_Wave:
 				return ResolveState("Wave");
 			case GS_ThumbsUp:
@@ -3783,6 +3792,25 @@ Class SWWMGesture : SWWMWeapon
 		XZW5 K 4;
 		XZW4 Q 0 A_JumpIf(player.cmd.buttons&BT_USER4,"QuickGrenade");
 		XZW4 Q -1 A_FinishGesture();
+		Stop;
+	EmptyMelee:
+		XZW0 ABC 1;
+		XZW0 D 1
+		{
+			A_PlayerMelee(true);
+			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_Parry(9);
+		}
+		XZW0 EF 1;
+		XZW0 G 1 A_Melee();
+		XZW0 HIJKLMN 2;
+		XZW0 A -1
+		{
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
+				return ResolveState("EmptyMelee")+3;
+			A_FinishGesture();
+			return ResolveState(null);
+		}
 		Stop;
 	Wave:
 		XZW1 A 3 A_CallPlayerGesture("Wave","CrouchWave");

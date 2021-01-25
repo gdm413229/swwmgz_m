@@ -2314,13 +2314,13 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') || (e.Replacee.GetClassName() == 'TangoPistol') ) e.Replacement = 'ExplodiumGun';
 		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') || (e.Replacee.GetClassName() == 'TangoShotgun') ) e.Replacement = 'Spreadgun';
 		else if ( (e.Replacee is 'SuperShotgun') || (e.Replacee is 'MWeapFrost') || (e.Replacee.GetClassName() == 'TangoSuperShotgun') ) e.Replacement = 'Wallbuster';
-		else if ( (e.Replacee is 'Crossbow') || (e.Replacee.GetClassName() == 'TangoScrapGun') ) e.Replacement = Random[Replacements](0,2)?'Spreadgun':'Wallbuster';
+		else if ( (e.Replacee is 'Crossbow') || (e.Replacee.GetClassName() == 'TangoScrapGun') ) e.Replacement = SWWMPairedSpawns.PickSpreadBuster();
 		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeaponPiece3') || (e.Replacee.GetClassName() == 'TangoAssaultRifle') || (e.Replacee.GetClassName() == 'TangoChaingun') ) e.Replacement = 'Eviscerator';
 		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'FWeapHammer') || (e.Replacee.GetClassName() == 'TangoStomper') ) e.Replacement = 'Hellblazer';
-		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') ) e.Replacement = Random[Replacements](0,2)?'Sparkster':'SilverBullet';
+		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') ) e.Replacement = SWWMPairedSpawns.PickSparkSilver();
 		else if ( e.Replacee is 'CWeapFlame' ) e.Replacement = 'Sparkster';
 		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = 'SilverBullet';
-		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') ) e.Replacement = Random[Replacements](0,2)?'CandyGun':'Ynykron';
+		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') ) e.Replacement = SWWMPairedSpawns.PickCandyFury();
 		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = 'CandyGun';
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = 'Ynykron';
 		else if ( (e.Replacee is 'ShellBox') || (e.Replacee is 'CrossbowHefty') || (e.Replacee.GetClassName() == 'TangoShellBox') || (e.Replacee.GetClassName() == 'TangoScrapDrumPack') )

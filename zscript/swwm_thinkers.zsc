@@ -1,5 +1,75 @@
 // various stat tracking thinkers and others
 
+// weapon spawn mgmt
+Class SWWMPairedSpawns : Thinker
+{
+	// 0 - spawn former, 1 - spawn latter, 2 - random
+	int spreadbuster;	// spreadgun/wallbuster pair (Ethereal Crossbow)
+	int sparksilver;	// sparkster/silverbullet pair (Plasma Rifle, Skull Rod)
+	int candyfury;		// candygun/ynykron pair (BFG9000, Mace)
+
+	// when the DLC weaponset lands, this will also have to account for more weapon pairs (or quartets)
+
+	private static SWWMPairedSpawns Instance()
+	{
+		let s = SWWMPairedSpawns(ThinkerIterator.Create("SWWMPairedSpawns",STAT_STATIC).Next());
+		if ( !s )
+		{
+			s = new("SWWMPairedSpawns");
+			s.ChangeStatNum(STAT_STATIC);
+		}
+		return s;
+	}
+
+	static Class<Actor> PickSpreadBuster()
+	{
+		let s = Instance();
+		if ( s.spreadbuster == 0 )
+		{
+			s.spreadbuster = 1;
+			return 'Spreadgun';
+		}
+		if ( s.spreadbuster == 1 )
+		{
+			s.spreadbuster = 2;
+			return 'Wallbuster';
+		}
+		return Random[Replacements](0,2)?'Spreadgun':'Wallbuster';
+	}
+
+	static Class<Actor> PickSparkSilver()
+	{
+		let s = Instance();
+		if ( s.sparksilver == 0 )
+		{
+			s.sparksilver = 1;
+			return 'Sparkster';
+		}
+		if ( s.sparksilver == 1 )
+		{
+			s.sparksilver = 2;
+			return 'SilverBullet';
+		}
+		return Random[Replacements](0,2)?'Sparkster':'SilverBullet';
+	}
+
+	static Class<Actor> PickCandyFury()
+	{
+		let s = Instance();
+		if ( s.candyfury == 0 )
+		{
+			s.candyfury = 1;
+			return 'CandyGun';
+		}
+		if ( s.candyfury == 1 )
+		{
+			s.candyfury = 2;
+			return 'Ynykron';
+		}
+		return Random[Replacements](0,2)?'CandyGun':'Ynykron';
+	}
+}
+
 // Stats
 Class WeaponUsage
 {

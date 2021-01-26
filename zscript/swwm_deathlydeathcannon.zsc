@@ -2377,7 +2377,7 @@ Class YnykronSingularity : Actor
 				{
 					// v-force field compression (very rough approximation)
 					a.vel *= max(.0,1.-.03*(grav*grav)/(MION_CONST*MION_CONST));
-					a.vel += dirto*grav/(capmass*TICRATE);
+					a.vel += dirto*grav/(capmass*GameTicRate);
 				}
 			}
 		}

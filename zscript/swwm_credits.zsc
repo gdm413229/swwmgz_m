@@ -356,7 +356,7 @@ Class SWWMCreditsMenu : GenericMenu
 	}
 	override void Ticker()
 	{
-		spos -= speed/Thinker.TICRATE;
+		spos -= speed/GameTicRate;
 		if ( spos < -theight ) spos = ss.y;
 		if ( spos > ss.y ) spos = -theight;
 		cdev[0].Ticker();

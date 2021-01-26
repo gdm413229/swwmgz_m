@@ -1182,7 +1182,7 @@ Class Demolitionist : PlayerPawn
 			}
 			else accel = z*player.cmd.upmove*8.;
 			accel *= fs/128.;
-			vel = vel+accel/TICRATE;
+			vel = vel+accel/GameTicRate;
 			if ( sendtoground ) vel.xy *= .6;
 			if ( (pos.z <= floorz) || bOnMobj ) sendtoground = false;
 			if ( vel.length() > 50. )
@@ -1249,8 +1249,8 @@ Class Demolitionist : PlayerPawn
 			Vector3 accel = x*player.cmd.forwardmove+y*player.cmd.sidemove+z*jcmove;
 			accel *= fs/320.;
 			double spd = vel.length();
-			if ( spd > 40. ) vel = (vel+accel/TICRATE).unit()*spd;
-			else vel = vel+accel/TICRATE;
+			if ( spd > 40. ) vel = (vel+accel/GameTicRate).unit()*spd;
+			else vel = vel+accel/GameTicRate;
 			vel *= .97;
 			player.vel = (1,1)*vel.length();
 			player.jumptics = -2;
@@ -1273,8 +1273,8 @@ Class Demolitionist : PlayerPawn
 				Vector3 accel = (RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle),0);
 				accel *= fs/512.;
 				double spd = vel.length();
-				if ( spd > 10. ) vel = (vel+accel/TICRATE).unit()*spd;
-				else vel = vel+accel/TICRATE;
+				if ( spd > 10. ) vel = (vel+accel/GameTicRate).unit()*spd;
+				else vel = vel+accel/GameTicRate;
 			}
 			else if ( player.onground && !bNOGRAVITY && (waterlevel < 2) )
 			{
@@ -1410,7 +1410,7 @@ Class Demolitionist : PlayerPawn
 			{
 				if ( !player.onground && (((walljump || wallclimb) && (level.maptime < last_kick+8)) || (!(walljump || wallclimb) && (level.maptime < last_boost+8))) )
 					return;
-				double jumpvelz = JumpZ*35./TICRATE;
+				double jumpvelz = JumpZ*35./GameTicRate;
 				double jumpfac = 0;
 				for ( let p=Inv; p; p=p.Inv )
 				{
@@ -2886,7 +2886,7 @@ Class ReviveCooldown : Powerup
 	{
 		Super.InitEffect();
 		// adjust the duration
-		EffectTics = max(0,swwm_revivecooldown)*Thinker.TICRATE;
+		EffectTics = max(0,swwm_revivecooldown)*GameTicRate;
 	}
 	override void EndEffect()
 	{
@@ -3170,7 +3170,7 @@ Class LoveHeart : Actor
 	{
 		special1++;
 		if ( !(special1%3) && (special2 > 0) ) special2--;
-		A_SetScale(.2+.02*sin(special1*.25*TICRATE));
+		A_SetScale(.2+.02*sin(special1*.25*GameTicRate));
 		double magvel = vel.length();
 		if ( magvel > 0 )
 		{
@@ -3193,7 +3193,7 @@ Class LoveHeart : Actor
 		}
 		if ( !tracer || (tracer.Health <= 0) ) return;
 		double mag = vel.length();
-		vel = mag*(level.Vec3Diff(pos,tracer.Vec3Offset(0,0,tracer.height/2)).unit()*mag*6./TICRATE+vel).unit();
+		vel = mag*(level.Vec3Diff(pos,tracer.Vec3Offset(0,0,tracer.height/2)).unit()*mag*6./GameTicRate+vel).unit();
 	}
 	override void PostBeginPlay()
 	{

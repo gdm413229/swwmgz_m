@@ -257,7 +257,7 @@ Class DeepImpact : SWWMWeapon
 
 	action void A_ChargeUp()
 	{
-		invoker.charge += 1./TICRATE;
+		invoker.charge += 1./GameTicRate;
 		A_WeaponOffset(FRandom[Impact](-1,1)*invoker.charge,32+FRandom[Impact](-1,1)*invoker.charge);
 		if ( invoker.charge >= (invoker.clipcount*.01) )
 		{

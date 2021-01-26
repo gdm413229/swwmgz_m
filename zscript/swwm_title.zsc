@@ -40,7 +40,7 @@ Class SWWMTitleStuff : EventHandler
 			double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));
 			vsize = (Screen.GetWidth(),Screen.GetHeight())/zoom;
 			Screen.DrawTexture(tex[2],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_ColorOverlay,Color(192,0,0,0));
-			Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/Thinker.TICRATE)*.05,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
+			Screen.Dim("Black",clamp(1.-((level.maptime+e.FracTic)/GameTicRate)*.05,0.,1.),0,0,Screen.GetWidth(),Screen.GetHeight());
 		}
 		else Screen.Dim("Black",1.,0,0,Screen.GetWidth(),Screen.GetHeight());
 		double hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.);
@@ -51,43 +51,43 @@ Class SWWMTitleStuff : EventHandler
 		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
 		else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
 		else vsize = tsize;
-		double alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-2,0.,1.);
-		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-8,0.,1.);
+		double alf = clamp(((level.maptime+e.FracTic)/GameTicRate)-2,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/GameTicRate)-8,0.,1.);
 		Screen.DrawTexture(tex[0],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 		String str = StringTable.Localize("$SWWM_TITLEPRESENTS");
-		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-10,0.,1.);
-		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-16,0.,1.);
+		alf = clamp(((level.maptime+e.FracTic)/GameTicRate)-10,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/GameTicRate)-16,0.,1.);
 		Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-fnt.StringWidth(str))/2,(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 		str = StringTable.Localize("$SWWM_TITLEMODBY");
-		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-18,0.,1.);
-		alf *= 1.-clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-24,0.,1.);
+		alf = clamp(((level.maptime+e.FracTic)/GameTicRate)-18,0.,1.);
+		alf *= 1.-clamp(((level.maptime+e.FracTic)/GameTicRate)-24,0.,1.);
 		Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-fnt.StringWidth(str))/2,(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 		tsize = TexMan.GetScaledSize(tex[1]);
 		sar = tsize.x/tsize.y;
 		if ( sar > ar ) vsize = (tsize.x,tsize.x/ar);
 		else if ( sar < ar ) vsize = (tsize.y*ar,tsize.y);
 		else vsize = tsize;
-		alf = clamp(((level.maptime+e.FracTic)/Thinker.TICRATE)-26,0.,2.)*.5;
+		alf = clamp(((level.maptime+e.FracTic)/GameTicRate)-26,0.,2.)*.5;
 		Screen.DrawTexture(tex[1],false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true,DTA_Alpha,alf);
-		if ( (level.maptime/Thinker.TICRATE) < 30 ) return;
+		if ( (level.maptime/GameTicRate) < 30 ) return;
 		// scrolls
 		if ( (scrolls.Size() <= 0 ) || (lastlang != lang.GetString()) )
 		{
 			scrolls.Clear();
 			String sstr = StringTable.Localize("$SWWM_TITLESCROLL");
 			sstr.Split(scrolls,"\n");
-			sbase = (level.maptime+e.FracTic)/Thinker.TICRATE;
+			sbase = (level.maptime+e.FracTic)/GameTicRate;
 			if ( sline >= scrolls.Size() ) sline = 0;
 		}
 		lastlang = lang.GetString();
 		// estimate scrool length
 		double llen = fnt.StringWidth(scrolls[sline]);
-		double soffset = 40*((level.maptime+e.FracTic)/Thinker.TICRATE-sbase);
+		double soffset = 40*((level.maptime+e.FracTic)/GameTicRate-sbase);
 		if ( soffset > llen+ss.x )
 		{
 			sline++;
 			if ( sline >= scrolls.Size() ) sline = 0;
-			sbase = (level.maptime+e.FracTic)/Thinker.TICRATE;
+			sbase = (level.maptime+e.FracTic)/GameTicRate;
 			soffset = 0;
 		}
 		double xx = ss.x-soffset;
@@ -100,16 +100,16 @@ Class SWWMTitleStuff : EventHandler
 			{
 				for ( double trl = .1; trl < 1.; trl += .04 )
 				{
-					double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl));
+					double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/GameTicRate-90.*(1.-trl));
 					alf = max(0,1.-abs((ss.x/2)-xx)/(ss.x/2))**.5;
 					alf *= .2*trl;
-					double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE-90.*(1.-trl))-16*(1.-trl);
+					double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/GameTicRate-90.*(1.-trl))-16*(1.-trl);
 					Screen.DrawChar(fnt,Font.CR_BLUE,xx-xxofs,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf,DTA_LegacyRenderStyle,STYLE_Add);
 				}
-				double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/Thinker.TICRATE);
+				double yy = (ss.y-40)+10*sin(15*i+160*(level.maptime+e.FracTic)/GameTicRate);
 				alf = max(0,1.-abs((ss.x/2)-xx)/(ss.x/2))**.5;
-				double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/Thinker.TICRATE);
-				Color c = Color(int(127.5+127.5*sin(10*i+80*(level.maptime+e.FracTic)/Thinker.TICRATE)),0,0);
+				double xxofs = 5*sin(15*i+120*(level.maptime+e.FracTic)/GameTicRate);
+				Color c = Color(int(127.5+127.5*sin(10*i+80*(level.maptime+e.FracTic)/GameTicRate)),0,0);
 				Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx-xxofs,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alf);
 			}
 			xx += fnt.GetCharWidth(ch)-1;	// keming

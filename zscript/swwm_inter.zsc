@@ -268,32 +268,30 @@ Class SWWMStatScreen : StatusScreen abstract
 		for ( int i=0; i < MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] ) continue;
+			PlayerInfo p = players[i];
+			if ( (p.cmd.buttons^p.oldbuttons) && ((p.cmd.buttons&p.oldbuttons) == p.oldbuttons) && !p.Bot )
 			{
-				PlayerInfo p = players[i];
-				if ( (p.cmd.buttons^p.oldbuttons) && ((p.cmd.buttons&p.oldbuttons) == p.oldbuttons) && !p.Bot )
+				if ( p.cmd.buttons&(BT_ATTACK|BT_USE) )
 				{
-					if ( p.cmd.buttons&(BT_ATTACK|BT_USE) )
+					acceleratestage = 1;
+					playerready[i] = true;
+				}
+				if ( i == me )
+				{
+					if ( p.cmd.buttons&BT_RELOAD )
 					{
-						acceleratestage = 1;
-						playerready[i] = true;
+						PlaySound("menu/demoscroll");
+						whichtip = 0;
 					}
-					if ( i == consoleplayer )
+					if ( p.cmd.buttons&BT_ZOOM )
 					{
-						if ( p.cmd.buttons&BT_RELOAD )
-						{
-							PlaySound("menu/demoscroll");
-							whichtip = 0;
-						}
-						if ( p.cmd.buttons&BT_ZOOM )
-						{
-							PlaySound("menu/demoscroll");
-							whichart = 0;
-							arttex.SetNull();
-						}
+						PlaySound("menu/demoscroll");
+						whichart = 0;
+						arttex.SetNull();
 					}
 				}
-				p.oldbuttons = p.buttons;
 			}
+			p.oldbuttons = p.buttons;
 		}
 	}
 	override void Ticker( void )
@@ -317,8 +315,8 @@ Class SWWMStatScreen : StatusScreen abstract
 			break;
 		}
 		// check fade
-		if ( players[consoleplayer].cmd.buttons&BT_ALTATTACK ) bgfade = min(1.,bgfade+3./Thinker.TICRATE);
-		else bgfade = max(0.,bgfade-4./Thinker.TICRATE);
+		if ( players[me].cmd.buttons&BT_ALTATTACK ) bgfade = min(1.,bgfade+3./GameTicRate);
+		else bgfade = max(0.,bgfade-4./GameTicRate);
 	}
 	protected String TimeStr( int secs )
 	{
@@ -350,7 +348,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		sp_state = 1;
 		cnt_kills[0] = cnt_items[0] = cnt_secret[0] = -1;
 		cnt_time = cnt_par = -1;
-		cnt_pause = Thinker.TICRATE;
+		cnt_pause = GameTicRate;
 		cnt_total_time = -1;
 	}
 
@@ -365,7 +363,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 			cnt_items[0] = Plrs[me].sitems;
 			cnt_secret[0] = Plrs[me].ssecret;
 			cnt_time = Thinker.Tics2Seconds(Plrs[me].stime);
-			cnt_par = wbs.partime/Thinker.TICRATE;
+			cnt_par = wbs.partime/GameTicRate;
 			cnt_total_time = Thinker.Tics2Seconds(wbs.totaltime);
 		}
 		if ( sp_state == 2 )
@@ -414,7 +412,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		{
 			int sec = Thinker.Tics2Seconds(Plrs[me].stime);
 			int tsec = Thinker.Tics2Seconds(wbs.totaltime);
-			int psec = wbs.partime/Thinker.TICRATE;
+			int psec = wbs.partime/GameTicRate;
 			if ( intermissioncounter )
 			{
 				if ( !(bcnt%2) ) PlaySound("menu/demoscroll");
@@ -450,7 +448,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 			if ( !--cnt_pause )
 			{
 				sp_state++;
-				cnt_pause = Thinker.TICRATE;
+				cnt_pause = GameTicRate;
 			}
 		}
 	}
@@ -522,7 +520,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		}
 		if ( wbs.partime )
 		{
-			str = TimeStr(wbs.partime/Thinker.TICRATE);
+			str = TimeStr(wbs.partime/GameTicRate);
 			len = fnt.StringWidth(str);
 			if ( len > maxlenr ) maxlenr = len;
 		}
@@ -606,7 +604,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		{
 			str = TimeStr(cnt_time);
 			len = fnt.StringWidth(str);
-			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/Thinker.TICRATE)))?Font.CR_GOLD:((wbs.sucktime>0)&&(cnt_time>(wbs.sucktime*3600)))?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,(wbs.partime&&(cnt_time<=(wbs.partime/GameTicRate)))?Font.CR_GOLD:((wbs.sucktime>0)&&(cnt_time>(wbs.sucktime*3600)))?Font.CR_RED:Font.CR_WHITE,xx-len,yy,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		}
 		yy += step;
 		if ( wi_showtotaltime )
@@ -635,7 +633,7 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 		CurState = StatCount;
 		acceleratestage = 0;
 		ng_state = 1;
-		cnt_pause = Thinker.TICRATE;
+		cnt_pause = GameTicRate;
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			playerready[i] = false;
@@ -755,7 +753,7 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 			if ( !--cnt_pause )
 			{
 				ng_state++;
-				cnt_pause = Thinker.TICRATE;
+				cnt_pause = GameTicRate;
 			}
 		}
 	}
@@ -818,7 +816,7 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 			xx += pad;
 			if ( playerready[i] || players[i].Bot ) Screen.DrawChar(TewiFont,Font.CR_GREEN,xx,yy+ryofs,checkmark,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += rwidth;
-			Screen.DrawText(fnt,GetRowColor(players[i],i==consoleplayer),xx,yy,players[i].GetUserName(),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,GetRowColor(players[i],i==me),xx,yy,players[i].GetUserName(),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += namelen+spc;
 			if ( ng_state >= 4 )
 			{
@@ -892,7 +890,7 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 		total_frags = 0;
 		total_deaths = 0;
 		ng_state = 1;
-		cnt_pause = Thinker.TICRATE;
+		cnt_pause = GameTicRate;
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] ) continue;
@@ -977,7 +975,7 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 			if ( !--cnt_pause )
 			{
 				ng_state++;
-				cnt_pause = Thinker.TICRATE;
+				cnt_pause = GameTicRate;
 			}
 		}
 	}
@@ -1034,7 +1032,7 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 			xx += pad;
 			if ( playerready[i] || players[i].Bot ) Screen.DrawChar(TewiFont,Font.CR_GREEN,xx,yy+ryofs,checkmark,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += rwidth;
-			Screen.DrawText(fnt,GetRowColor(players[i],i==consoleplayer),xx,yy,players[i].GetUserName(),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,GetRowColor(players[i],i==me),xx,yy,players[i].GetUserName(),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			xx += namelen+spc;
 			if ( ng_state >= 2 )
 			{

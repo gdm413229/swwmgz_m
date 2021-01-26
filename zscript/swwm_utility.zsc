@@ -764,7 +764,7 @@ Class SWWMUtility
 		Vector3 Momentum = HitDirection*MomentumTransfer;
 		if ( (Victim.pos.z <= Victim.floorz) || !Victim.TestMobjZ() )
 			Momentum.z = max(Momentum.z,.1*Momentum.length());
-		Momentum /= Thinker.TICRATE*max(50,Victim.Mass);
+		Momentum /= GameTicRate*max(50,Victim.Mass);
 		Victim.vel += Momentum;
 	}
 
@@ -832,7 +832,7 @@ Class SWWMUtility
 				Vector3 Momentum = dir*mm;
 				if ( (a.pos.z <= a.floorz) || !a.TestMobjZ() )
 					Momentum.z = max(Momentum.z,(flags&DE_EXTRAZTHRUST?.4:.1)*Momentum.length());
-				Momentum /= Thinker.TICRATE*max(50,a.Mass);	// prevent tiny things from getting yeeted at warp speed
+				Momentum /= GameTicRate*max(50,a.Mass);	// prevent tiny things from getting yeeted at warp speed
 				a.vel += Momentum;
 				if ( (flags&DE_BLAST) && a.bCANBLAST && !a.bDONTBLAST ) a.bBLASTED = true;
 			}

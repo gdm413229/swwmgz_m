@@ -565,7 +565,7 @@ Class SWWMHandler : EventHandler
 		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.MakeUpper(),type.MakeUpper(),whichline);
 		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype,type,whichline);
 		hnd.onelinertic = gametic+delay;
-		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*Thinker.TICRATE);
+		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
 		hnd.onelinerlevel = level;
 		return hnd.onelinertic+hnd.onelinerspan;
 	}
@@ -1545,7 +1545,7 @@ Class SWWMHandler : EventHandler
 		if ( e.Thing.IsFriend(src) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
 			return;
 		int pnum = src.PlayerNumber();
-		if ( level.maptime < (lastkill[pnum]+5*Thinker.TICRATE) )
+		if ( level.maptime < (lastkill[pnum]+5*GameTicRate) )
 			multilevel[pnum]++;
 		else multilevel[pnum] = 0;
 		if ( s && (multilevel[pnum]+1 > s.mkill) )
@@ -3339,7 +3339,7 @@ Class SWWMHandler : EventHandler
 			{
 				Shader.SetEnabled(p,"RagekitShader",false);
 				Shader.SetEnabled(p,"RagekitAltShader",true);
-				Shader.SetUniform1f(p,"RagekitAltShader","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"RagekitAltShader","timer",(gametic+e.FracTic)/GameTicRate);
 				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
 				Shader.SetUniform1f(p,"RagekitAltShader","xtrastr",xstrastr**2.);
 			}
@@ -3347,7 +3347,7 @@ Class SWWMHandler : EventHandler
 			{
 				Shader.SetEnabled(p,"RagekitAltShader",false);
 				Shader.SetEnabled(p,"RagekitShader",true);
-				Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/GameTicRate);
 				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
 				Shader.SetUniform1f(p,"RagekitShader","xtrastr",xstrastr**2.);
 			}
@@ -3372,7 +3372,7 @@ Class SWWMHandler : EventHandler
 		if ( pc && coat && useshaders.GetBool() )
 		{
 			Shader.SetEnabled(p,"BarrierShader",true);
-			Shader.SetUniform1f(p,"BarrierShader","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+			Shader.SetUniform1f(p,"BarrierShader","timer",(gametic+e.FracTic)/GameTicRate);
 		}
 		else Shader.SetEnabled(p,"BarrierShader",false);
 		if ( pc && (mo is 'Demolitionist') && useshaders.GetBool() )
@@ -3381,7 +3381,7 @@ Class SWWMHandler : EventHandler
 			if ( demo.lastunder == Demolitionist.UNDER_WATER )
 			{
 				Shader.SetEnabled(p,"WaterWarp",true);
-				Shader.SetUniform1f(p,"WaterWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"WaterWarp","timer",(gametic+e.FracTic)/GameTicRate);
 				Shader.SetUniform1f(p,"WaterWarp","dfact",coat?.25:1.);
 				Shader.SetUniform3f(p,"WaterWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
 
@@ -3390,7 +3390,7 @@ Class SWWMHandler : EventHandler
 			if ( demo.lastunder == Demolitionist.UNDER_LAVA )
 			{
 				Shader.SetEnabled(p,"LavaWarp",true);
-				Shader.SetUniform1f(p,"LavaWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"LavaWarp","timer",(gametic+e.FracTic)/GameTicRate);
 				Shader.SetUniform1f(p,"LavaWarp","dfact",coat?.25:1.);
 				Shader.SetUniform3f(p,"LavaWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
 			}
@@ -3398,7 +3398,7 @@ Class SWWMHandler : EventHandler
 			if ( demo.lastunder == Demolitionist.UNDER_SLIME )
 			{
 				Shader.SetEnabled(p,"SlimeWarp",true);
-				Shader.SetUniform1f(p,"SlimeWarp","timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"SlimeWarp","timer",(gametic+e.FracTic)/GameTicRate);
 				Shader.SetUniform1f(p,"SlimeWarp","dfact",coat?.25:1.);
 				Shader.SetUniform3f(p,"SlimeWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
 			}
@@ -3410,8 +3410,8 @@ Class SWWMHandler : EventHandler
 			Shader.SetEnabled(p,"Grain",noiz>0);
 			if ( noiz > 0 )
 			{
-				Shader.SetUniform1f(p,"Glitch","Timer",(gametic+e.FracTic)/Thinker.TICRATE);
-				Shader.SetUniform1f(p,"Grain","Timer",(gametic+e.FracTic)/Thinker.TICRATE);
+				Shader.SetUniform1f(p,"Glitch","Timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"Grain","Timer",(gametic+e.FracTic)/GameTicRate);
 				Shader.SetUniform1f(p,"Grain","ni",noiz);
 				noiz = min(lastdmg*.08*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.8);
 				Shader.SetUniform1f(p,"Glitch","str1",noiz);

@@ -325,7 +325,7 @@ Class DemolitionistMenu : GenericMenu
 		static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 		bool leap_year;
 		int y = c_year, m = c_month, d = c_day, h = c_hour, mn = c_minute;
-		int addtime = level.totaltime/Thinker.TICRATE;
+		int addtime = level.totaltime/GameTicRate;
 		while ( addtime > 0 )
 		{
 			leap_year = (!(y%4) && ((y%100) || !(y%400)));
@@ -2431,9 +2431,9 @@ Class DemolitionistMenu : GenericMenu
 		{
 			statlist.Clear();
 			// wish I could use macros for this
-			int thour = ((level.totaltime-stats.lastspawn)/(3600*Thinker.TICRATE));
-			int tmin = ((level.totaltime-stats.lastspawn)/(60*Thinker.TICRATE))%60;
-			int tsec = ((level.totaltime-stats.lastspawn)/Thinker.TICRATE)%60;
+			int thour = ((level.totaltime-stats.lastspawn)/(3600*GameTicRate));
+			int tmin = ((level.totaltime-stats.lastspawn)/(60*GameTicRate))%60;
+			int tsec = ((level.totaltime-stats.lastspawn)/GameTicRate)%60;
 			String str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
 			statlist.Push(str);
 			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
@@ -2456,11 +2456,11 @@ Class DemolitionistMenu : GenericMenu
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.,StringTable.Localize("$SWWM_UNIT_LITER"));
 			statlist.Push(str);
-			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*Thinker.TICRATE),StringTable.Localize("$SWWM_UNIT_KPH"));
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*GameTicRate),StringTable.Localize("$SWWM_UNIT_KPH"));
 			statlist.Push(str);
-			thour = (stats.airtime/(3600*Thinker.TICRATE));
-			tmin = (stats.airtime/(60*Thinker.TICRATE))%60;
-			tsec = (stats.airtime/Thinker.TICRATE)%60;
+			thour = (stats.airtime/(3600*GameTicRate));
+			tmin = (stats.airtime/(60*GameTicRate))%60;
+			tsec = (stats.airtime/GameTicRate)%60;
 			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
@@ -3312,9 +3312,9 @@ Class DemolitionistMenu : GenericMenu
 					{
 						if ( yy >= 370 ) break;
 						let ent = tradelib.ent[tradelib.ent.Size()-(i+1)];
-						int thour = (ent.timestamp/(3600*Thinker.TICRATE));
-						int tmin = (ent.timestamp/(60*Thinker.TICRATE))%60;
-						int tsec = (ent.timestamp/Thinker.TICRATE)%60;
+						int thour = (ent.timestamp/(3600*GameTicRate));
+						int tmin = (ent.timestamp/(60*GameTicRate))%60;
+						int tsec = (ent.timestamp/GameTicRate)%60;
 						str = String.Format("\cu[\cc%02d\cu:\cc%02d\cu:\cc%02d\cu]\c- ",thour,tmin,tsec);
 						str.AppendFormat("\cd%s %s\cd: \cj%dx \cf%s\c-",ent.type?StringTable.Localize("$SWWM_TRADEFROM"):StringTable.Localize("$SWWM_TRADETO"),ent.other,ent.amt,GetDefaultByType(ent.what).GetTag());
 						Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -3348,9 +3348,9 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=ofs; i>=0; i-- )
 			{
 				int col = (bar.FullHistory[i].type==PRINT_TEAMCHAT)?tcol.GetInt():ccol.GetInt();
-				int thour = (bar.FullHistory[i].tic/(3600*Thinker.TICRATE));
-				int tmin = (bar.FullHistory[i].tic/(60*Thinker.TICRATE))%60;
-				int tsec = (bar.FullHistory[i].tic/Thinker.TICRATE)%60;
+				int thour = (bar.FullHistory[i].tic/(3600*GameTicRate));
+				int tmin = (bar.FullHistory[i].tic/(60*GameTicRate))%60;
+				int tsec = (bar.FullHistory[i].tic/GameTicRate)%60;
 				str = String.Format("\cu[\c-%02d\cu:\c-%02d\cu:\c-%02d\cu]\c- ",thour,tmin,tsec);
 				BrokenLines l = fnt.BreakLines(bar.FullHistory[i].str,626-margin);
 				double by = yy-13*l.Count();

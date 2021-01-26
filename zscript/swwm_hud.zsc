@@ -960,7 +960,7 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( i is 'Powerup' )
 		{
 			Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
-			String nstr = String.Format("%ds",Powerup(i).EffectTics/Thinker.TICRATE);
+			String nstr = String.Format("%ds",Powerup(i).EffectTics/GameTicRate);
 			int len = mTewiFont.mFont.StringWidth(nstr);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha);
 			return;

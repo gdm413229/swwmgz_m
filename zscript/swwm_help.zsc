@@ -42,7 +42,7 @@ Class SWWMHelpMenu : GenericMenu
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
 	{
-		double alph = clamp((gametic-fadetic)*(5./Thinker.TICRATE),0.,1.);
+		double alph = clamp((gametic-fadetic)*(5./GameTicRate),0.,1.);
 		switch ( mkey )
 		{
 		case MKEY_Enter:
@@ -213,7 +213,7 @@ Class SWWMHelpMenu : GenericMenu
 		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/266.)),1.);
 		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		Vector2 origin = (ss.x-640,ss.y-266)/2.;
-		double alph = clamp((gametic-fadetic)*(5./Thinker.TICRATE),0.,1.);
+		double alph = clamp((gametic-fadetic)*(5./GameTicRate),0.,1.);
 		if ( (prevpage == -1) || (alph >= 1.) ) DrawPage(curpage,ss,origin);
 		else
 		{

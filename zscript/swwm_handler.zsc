@@ -1032,6 +1032,7 @@ Class SWWMHandler : EventHandler
 				c.Destroy();
 		}
 		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
+		// known bug: the previous weapon will play its select sound regardless, this is ENTIRELY IMPOSSIBLE to fix
 		if ( swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB)) )
 		{
 			if ( swwm_resetscore ) c.credits = c.hcredits = 0;

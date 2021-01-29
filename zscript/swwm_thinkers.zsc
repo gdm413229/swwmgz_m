@@ -114,6 +114,8 @@ Class SWWMStats : Thinker
 	Array<String> questbacklog;
 	// hackaround for stuff getting lost
 	Array<Class<SWWMCollectible> > ownedcollectibles;
+	// for pistol start info (to avoid it within hubs)
+	int lastcluster;
 
 	bool GotWeapon( Class<Weapon> which )
 	{

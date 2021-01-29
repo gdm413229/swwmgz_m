@@ -301,6 +301,7 @@ Class ExplodiumGun : SWWMWeapon
 	int clipcount;
 	bool chambered;
 	bool preinit;
+	double casex, casey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
 
@@ -591,9 +592,26 @@ Class ExplodiumGun : SWWMWeapon
 		Wait;
 	Fire:
 		XZW2 A 1 A_Schutt();
-		XZW2 IJKLMNOPQR 1;
-		XZW2 S 2 A_DropCasing();
+		XZW2 I 1;
+		XZW2 J 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZW2 KLMNOP 1;
+		XZW2 Q 2;
 		Goto Ready;
+	Casing:
+		XZWA A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Explodium](-1.,5.);
+			invoker.casey = FRandom[Explodium](-2.,1.);
+		}
+		XZWA BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing();
+		Stop;
 	AltFire:
 		XZW2 A 2
 		{
@@ -730,6 +748,7 @@ Class DualExplodiumGun : SWWMWeapon
 {
 	int clipcount;
 	bool chambered;
+	double casex, casey, lcasex, lcasey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
 
@@ -1003,14 +1022,48 @@ Class DualExplodiumGun : SWWMWeapon
 		Wait;
 	Fire:
 		XZW2 A 1 A_Schutt();
-		XZW2 IJKLMNOPQR 1;
-		XZW2 S 2 A_DropCasing();
+		XZW2 I 1;
+		XZW2 J 1
+		{
+			int layer = PSP_WEAPON+2;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZW2 KLMNOP 1;
+		XZW2 Q 2;
 		Goto Ready;
 	LeftFire:
 		XZWB A 1 A_Schutt(-1);
-		XZWB IJKLMNOPQR 1;
-		XZWB S 2 A_DropCasing(-1);
+		XZWB I 1;
+		XZWB J 1
+		{
+			int layer = PSP_WEAPON+12;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"LeftCasing");
+		}
+		XZWB KLMNOP 1;
+		XZWB Q 2;
 		Goto LeftReady;
+	Casing:
+		XZWA A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Explodium](-1.,5.);
+			invoker.casey = FRandom[Explodium](-2.,1.);
+		}
+		XZWA BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing();
+		Stop;
+	LeftCasing:
+		XZWI A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.lcasex = FRandom[Explodium](-5.,1.);
+			invoker.lcasey = FRandom[Explodium](-1.,2.);
+		}
+		XZWI BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.lcasex,invoker.lcasey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing(-1);
+		Stop;
 	Lower:
 		XZW2 A 2;
 		XZW7 TUV 2;
@@ -1184,7 +1237,7 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWA T 2;
 		XZWA U 2 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftDeselect")); }
 		XZWA VW 2;
-		XZW2 BBB 2;
+		XZW2 B 6;
 		XZW2 B -1 A_FullLower();
 		Stop;
 	LeftDeselect:

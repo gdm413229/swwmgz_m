@@ -743,11 +743,11 @@ Class SWWMHandler : EventHandler
 	// level end stats
 	override void WorldUnloaded( WorldEvent e )
 	{
-		if ( !(gameinfo.gametype&GAME_STRIFE) )
+		let ti = ThinkerIterator.Create("SWWMStats",Thinker.STAT_STATIC);
+		SWWMStats s;
+		while ( s = SWWMStats(ti.Next()) )
 		{
-			let ti = ThinkerIterator.Create("SWWMStats",Thinker.STAT_STATIC);
-			SWWMStats s;
-			while ( s = SWWMStats(ti.Next()) )
+			if ( !(gameinfo.gametype&GAME_STRIFE) )
 			{
 				int clust = 0;
 				bool secret = false;
@@ -784,8 +784,9 @@ Class SWWMHandler : EventHandler
 					s.clustervisit.Push(clust);
 					s.secretdone.Push(secret|s.secretdone[csiz-1]);
 				}
-				s.AddLevelStats();
 			}
+			s.AddLevelStats();
+			s.lastcluster = level.cluster;
 		}
 		ClearAllShaders(players[consoleplayer]);
 		// reset score on dead players (death exit™)
@@ -1029,6 +1030,24 @@ Class SWWMHandler : EventHandler
 			c.propagated = true;
 			if ( !c.CallTryPickup(p.mo) )
 				c.Destroy();
+		}
+		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
+		if ( swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB)) )
+		{
+			if ( swwm_resetscore ) c.credits = c.hcredits = 0;
+			Actor last = p.mo;
+			while ( last.inv )
+			{
+				let inv = last.inv;
+				if ( !(inv is 'SWWMCollectible') )
+				{
+					inv.Destroy();
+					if ( !inv.bDestroyed ) last = inv;
+				}
+				else last = inv;
+			}
+			p.mo.GiveDefaultInventory();
+			p.mo.BringUpWeapon();
 		}
 	}
 

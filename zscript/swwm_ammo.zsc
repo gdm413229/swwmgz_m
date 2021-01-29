@@ -1855,12 +1855,7 @@ Class HammerspaceEmbiggener : Inventory
 		{
 			if ( !(i is 'Ammo') ) continue;
 			i.MaxAmount = i.default.MaxAmount;
-			if ( i.Amount > i.MaxAmount )
-			{
-				int dropme = max(0,i.Amount-i.MaxAmount);
-				if ( dropme > 0 ) i.CreateTossable(dropme);
-				i.Amount = i.MaxAmount;
-			}
+			if ( i.Amount > i.MaxAmount ) i.Amount = i.MaxAmount;
 		}
 		Super.DepleteOrDestroy();
 	}

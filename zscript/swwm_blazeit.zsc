@@ -1497,13 +1497,10 @@ Class Hellblazer : SWWMWeapon
 
 	action void A_GlassOverlay( StateLabel g )
 	{
-		if ( !player.FindPSprite(PSP_WEAPON+1) )
-		{
-			A_Overlay(PSP_WEAPON+1,g);
-			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
-			A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
-		}
-		else player.SetPSprite(PSP_WEAPON+1,invoker.FindState(g));
+		player.SetPSprite(PSP_WEAPON+1,invoker.FindState(g));
+		// we have to still use A_Overlay* functions for these
+		A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+		A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
 	}
 
 	action state A_JumpByAmmoType( StateLabel a, StateLabel b, StateLabel c, StateLabel d, StateLabel g, StateLabel o = null )

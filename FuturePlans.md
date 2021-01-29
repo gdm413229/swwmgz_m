@@ -12,8 +12,8 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [9] Ray-Khom *(UnSX)*
   - [0] Grand Lance *(SWWM Iridium)*
 * **More collectibles (some of which were initially planned but didn't make it in time):**
+  - Moth Plushy *(She loves a good lämp)*
   - AA-12 *("Ibuki's favorite shotgun. It's just a collectible model, so it doesn't actually shoot")*
-  - Cube *("It's a cube")*
   - Hege Cactus *(Appears to absorb all water, causing intense thirst)*
   - Hoagie *(Can't eat it, but looks delicious)*
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
@@ -25,7 +25,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)
-  - *(Maybe)* Third person item gestures
 * **"Advanced" Item Sense *(detect activatable walls)***
 * **DLC Gameset:**
   - Tetris

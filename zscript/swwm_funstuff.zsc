@@ -298,36 +298,14 @@ Class FroggyChair : Actor
 }
 
 // The collectibles
-Class MothPlushy : SWWMCollectible
+Class GenericCube : SWWMCollectible
 {
-	// TODO post-release :: 1/64 chance after 5th use, set countdown to 175 to activate contract
-	int usetimes;
-	int cdown;
-	bool mashiro; // contract with white lady is active
-
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( cdown > 0 )
-		{
-			if ( Owner && Owner.CheckLocalView() )
-			{
-				if ( cdown == 105 )
-					A_StartSound("mashiro/appear",CHAN_ITEMEXTRA,CHANF_OVERLAP|CHANF_UI,1.,0.);
-				else if ( cdown == 35 )
-					Console.MidPrint(newsmallfont,"$D_MASHIRO");
-			}
-			cdown--;
-			if ( cdown <= 0 ) mashiro = true;
-		}
-	}
-
 	Default
 	{
-		Tag "$T_MOTHPLUSH";
-		Inventory.PickupMessage "$T_MOTHPLUSH";
-		SWWMCollectible.GestureWeapon "MothPlushyGesture";
-		Stamina 4000;
+		Tag "$T_PERFECTLYGENERIC";
+		Inventory.PickupMessage "$T_PERFECTLYGENERIC";
+		SWWMCollectible.GestureWeapon "GenericCubeGesture";
+		Stamina 1000;
 	}
 }
 Class AkariProject : SWWMCollectible
@@ -461,7 +439,7 @@ Class KirinPlush : SWWMCollectible
 }
 
 // TODO them gestures
-Class MothPlushyGesture : SWWMItemGesture {}
+Class GenericCubeGesture : SWWMItemGesture {}
 Class AkariProjectGesture : SWWMItemGesture {}
 Class LoveSignalsCDGesture : SWWMItemGesture {}
 Class NutatcoBarGesture : SWWMItemGesture {}

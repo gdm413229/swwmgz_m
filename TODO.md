@@ -6,6 +6,7 @@
 **Extra things after release:**
 
  - DLC weaponset
+ - Additional collectibles not added due to time constraints
  - "White Lady" rare Lämp spawn
  - More intermission art (shamefully e-begging on Twitter as usual orz)
  - Extra localizations (including Japanese)

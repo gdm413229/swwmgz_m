@@ -421,9 +421,10 @@ A copy of Saya's famous sci-fi novel about interdimensional travel. Saya has fre
 
 Debut album of Maidbot Miyamoto. Very cute and romantic J-Pop. Yes, it's a CD, and yes, some people still have CD drives out there. The album is considered a declaration of love to Saya, although it should be noted that this predates Maidbot gaining sentience (not that it makes much of a difference, as her feelings for Saya turned out to be very real).
 
-### Mashiro Plush
+### Perfectly Generic Cube
+![](docimg/generic.png)
 
-A plush doll of Saya's favorite moth girl, handcrafted by Nukritas 2xx herself. Appears to be cursed, potentially putting you in the sights of a very real moth girl.
+A perfectly generic cube. It is exactly 128mm across each side, sports a pure green color and is quite smoothly polished. Its purpose is unknown, but it's a popular collector's item.
 
 ### Haunted Saya Bean Plush
 ![](docimg/sayabean.png)

@@ -1467,8 +1467,8 @@ Class CompanionLamp : Actor
 		Vector3 spawnpos = level.Vec3Offset(Vec3Offset(0,0,height/2),ofs);
 		if ( !level.IsPointInLevel(spawnpos) ) return;
 		// higher chance of white moths if carrying the Mashiro plush
-		int mchance = parent.FindInventory("MothPlushy")?3:9;
-		let m = LampMoth(Spawn(Random[Moth](0,mchance)?"LampMoth":"LampMoth2",spawnpos));
+		//int mchance = parent.FindInventory("MothPlushy")?3:9;
+		let m = LampMoth(Spawn(Random[Moth](0,9)?"LampMoth":"LampMoth2",spawnpos));
 		if ( !m.TestMobjLocation() )
 		{
 			m.Destroy();

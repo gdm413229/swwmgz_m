@@ -78,7 +78,7 @@ Class SWWMCollectible : Inventory abstract
 		// give credit
 		if ( other.player && (Stamina > 0) )
 		{
-			SWWMScoreObj.Spawn(Stamina,other.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+other.Height/2),Font.CR_GOLD);
+			SWWMScoreObj.Spawn(Stamina,other.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+other.Height/2));
 			SWWMCredits.Give(other.player,Stamina);
 		}
 		// send to all other players

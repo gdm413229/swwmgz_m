@@ -631,6 +631,14 @@ Class SWWMLoreLibrary : Thinker
 	}
 }
 
+Enum EScoreObjType
+{
+	ST_Score,
+	ST_Damage,
+	ST_Health,
+	ST_Armor
+};
+
 // floating scores
 Class SWWMScoreObj : Thinker
 {
@@ -647,7 +655,7 @@ Class SWWMScoreObj : Thinker
 	bool damnum;
 	Actor acc;
 
-	static SWWMScoreObj Spawn( int score, Vector3 pos, int tcolor = Font.CR_GOLD, Actor acc = null )
+	static SWWMScoreObj Spawn( int score, Vector3 pos, int type = ST_Score, Actor acc = null, int tcolor = -1 )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return null;
@@ -656,12 +664,33 @@ Class SWWMScoreObj : Thinker
 		o.score = score;
 		o.pos = pos;
 		o.lifespan = o.initialspan = 60;
-		o.tcolor = tcolor;
+		if ( !hnd.numcolor_scr ) hnd.numcolor_scr = CVar.GetCVar('swwm_numcolor_scr',players[consoleplayer]);
+		if ( !hnd.numcolor_bonus ) hnd.numcolor_bonus = CVar.GetCVar('swwm_numcolor_bonus',players[consoleplayer]);
+		if ( !hnd.numcolor_dmg ) hnd.numcolor_dmg = CVar.GetCVar('swwm_numcolor_dmg',players[consoleplayer]);
+		if ( !hnd.numcolor_hp ) hnd.numcolor_hp = CVar.GetCVar('swwm_numcolor_hp',players[consoleplayer]);
+		if ( !hnd.numcolor_ap ) hnd.numcolor_ap = CVar.GetCVar('swwm_numcolor_ap',players[consoleplayer]);
+		if ( tcolor != -1 ) o.tcolor = tcolor;
+		else switch ( type )
+		{
+		case ST_Score:
+			o.tcolor = hnd.numcolor_scr.GetInt();
+			break;
+		case ST_Damage:
+			o.tcolor = hnd.numcolor_dmg.GetInt();
+			break;
+		case ST_Health:
+			o.tcolor = hnd.numcolor_hp.GetInt();
+			break;
+		case ST_Armor:
+			o.tcolor = hnd.numcolor_ap.GetInt();
+			break;
+		}
 		o.starttic = level.maptime;
 		o.seed = Random[ScoreBits]();
 		o.seed2 = Random[ScoreBits]();
-		o.damnum = (tcolor == Font.CR_RED) || (tcolor == Font.CR_GREEN) || (tcolor == Font.CR_BLUE);
+		o.damnum = (type > ST_Score);
 		o.xcnt = 0;
+		for ( int i=0; i<5; i++ ) o.xtcolor[i] = hnd.numcolor_bonus.GetInt();
 		o.acc = acc;
 		if ( o.damnum )
 		{

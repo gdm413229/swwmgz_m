@@ -819,9 +819,9 @@ Class BusterWall : Thinker
 		// damnums
 		Vector3 bcenter = (bust.boundsmin+bust.boundsmax)*.5;
 		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
-			SWWMScoreObj.Spawn(-bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
+			SWWMScoreObj.Spawn(-bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),ST_Damage);
 		else for ( int i=0; i<bust.acchits.Size(); i++ )
-			SWWMScoreObj.Spawn(-bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),Font.CR_RED);
+			SWWMScoreObj.Spawn(-bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),ST_Damage);
 		return true;
 	}
 }

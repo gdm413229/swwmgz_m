@@ -19,6 +19,11 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
+* **Original English Voice Acting:**
+  - Demolitionist
+  - Ibuki
+  - Saya
+  - Kirin
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding *(+ proper crouch dashing)***

@@ -1542,7 +1542,7 @@ Class Demolitionist : PlayerPawn
 					}
 					SWWMHandler.DoFlash(self,Color(255,255,255,255),10);
 					SWWMHandler.DoFlash(self,Color(255,128,192,255),30);
-					SWWMScoreObj.Spawn(default.health,Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Height/2),Font.CR_BLUE);
+					SWWMScoreObj.Spawn(default.health,Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Height/2),ST_Health);
 					if ( special1 > 2 ) special1 = 0;
 					if ( swwm_revivecooldown > 0 )
 						GiveInventory("ReviveCooldown",1);
@@ -3111,7 +3111,7 @@ Class LoveHeart : Actor
 			}
 			if ( target.GiveBody(healamt,target.GetSpawnHealth()) )
 			{
-				SWWMScoreObj.Spawn(healamt,target.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+target.Height/2),Font.CR_BLUE);
+				SWWMScoreObj.Spawn(healamt,target.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+target.Height/2),ST_Health);
 				SWWMHandler.DoFlash(target,Color(32,224,128,255),10);
 			}
 			if ( target is 'MBFHelperDog' )
@@ -3524,7 +3524,7 @@ Class SWWMGesture : SWWMWeapon
 			}
 			if ( pt.target.GiveBody(healamt,pt.target.GetSpawnHealth()) )
 			{
-				SWWMScoreObj.Spawn(healamt,pt.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+pt.target.Height/2),Font.CR_BLUE);
+				SWWMScoreObj.Spawn(healamt,pt.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+pt.target.Height/2),ST_Health);
 				SWWMHandler.DoFlash(pt.target,Color(32,224,128,255),10);
 			}
 		}

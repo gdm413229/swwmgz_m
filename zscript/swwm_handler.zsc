@@ -252,6 +252,7 @@ Class SWWMHandler : EventHandler
 	transient CVar funtags;
 	transient bool curfuntags;
 	transient int slotstrictwarn;
+	transient CVar numcolor_scr, numcolor_bonus, numcolor_dmg, numcolor_hp, numcolor_ap;
 
 	// optimization
 	OnFire fires;
@@ -1481,7 +1482,7 @@ Class SWWMHandler : EventHandler
 				break;
 			}
 		}
-		if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),Font.CR_RED,e.Thing);
+		if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),ST_Damage,e.Thing);
 		// update combat tracker for it
 		if ( !(e.Thing is 'BossBrain') )
 		{
@@ -1584,7 +1585,6 @@ Class SWWMHandler : EventHandler
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_SHAMEFUL");
 				scr.xcnt = ++ofs;
 			}
@@ -1595,7 +1595,6 @@ Class SWWMHandler : EventHandler
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_BUTTSLAM");
 				scr.xcnt = ++ofs;
 			}
@@ -1617,7 +1616,6 @@ Class SWWMHandler : EventHandler
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_OVERKILL");
 				scr.xcnt = ++ofs;
 			}
@@ -1628,7 +1626,6 @@ Class SWWMHandler : EventHandler
 			if ( scr )
 			{
 				scr.xscore[ofs] = (multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1);
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_MULTIKILL");
 				scr.xcnt = ++ofs;
 			}
@@ -1645,7 +1642,6 @@ Class SWWMHandler : EventHandler
 			if ( (spreecount[pnum] > 0) && scr )
 			{
 				scr.xscore[ofs] = spreecount[pnum];
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_SPREEKILL");
 				scr.xcnt = ++ofs;
 			}
@@ -1656,7 +1652,6 @@ Class SWWMHandler : EventHandler
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
-				scr.xtcolor[ofs] = Font.CR_FIRE;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_BOSSKILL");
 				scr.xcnt = ++ofs;
 			}

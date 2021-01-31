@@ -794,21 +794,24 @@ Class SWWMStatusBar : BaseStatusBar
 			double alph = clamp((snum.lifespan+fractic)/35.,0.,1.);
 			Vector2 fo = (0,0);
 			bool isscore = false;
-			if ( snum.tcolor == Font.CR_RED )
+			if ( snum.damnum )
 			{
-				// damage falls down
-				int initspd = (128-snum.seed);
-				int boostup = 64+snum.seed2;
-				fo.x = (.05*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.8);
-				fo.y = -((snum.initialspan-(snum.lifespan-fractic))**1.5)+boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
-			}
-			else if ( (snum.tcolor == Font.CR_GREEN) || (snum.tcolor == Font.CR_BLUE) )
-			{
-				// health falls up (?)
-				int initspd = (128-snum.seed);
-				int boostup = 16+snum.seed2/4;
-				fo.x = (.15*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.6);
-				fo.y = ((snum.initialspan-(snum.lifespan-fractic))**1.2)-boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
+				if ( snum.score < 0 )
+				{
+					// damage falls down
+					int initspd = (128-snum.seed);
+					int boostup = 64+snum.seed2;
+					fo.x = (.05*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.8);
+					fo.y = -((snum.initialspan-(snum.lifespan-fractic))**1.5)+boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
+				}
+				else
+				{
+					// health falls up (?)
+					int initspd = (128-snum.seed);
+					int boostup = 16+snum.seed2/4;
+					fo.x = (.15*initspd)*((snum.initialspan-(snum.lifespan-fractic))**.6);
+					fo.y = ((snum.initialspan-(snum.lifespan-fractic))**1.2)-boostup*sin((90./snum.initialspan)*(level.maptime+fractic-snum.starttic));
+				}
 			}
 			else
 			{
@@ -817,10 +820,9 @@ Class SWWMStatusBar : BaseStatusBar
 				isscore = true;
 			}
 			Font fnt = mMiniwiFont.mFont;
-			if ( isscore )
-				Screen.DrawText(fnt,snum.tcolor,(vpos.x-hss.x*(fo.x+fnt.StringWidth(tag)/2.))/hss.x,(vpos.y-hss.y*(fo.y+(fnt.GetHeight()/2.)))/hss.y,tag,DTA_VirtualWidthF,sss.x,DTA_VirtualHeightF,sss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			else
-				Screen.DrawText(fnt,snum.tcolor,(vpos.x-hsn.x*(fo.x+fnt.StringWidth(tag)/2.))/hsn.x,(vpos.y-hsn.y*(fo.y+(fnt.GetHeight()/2.)))/hsn.y,tag,DTA_VirtualWidthF,ssn.x,DTA_VirtualHeightF,ssn.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			Vector2 hs0 = isscore?hss:hsn;
+			Vector2 ss0 = isscore?sss:ssn;
+			Screen.DrawText(fnt,snum.tcolor,(vpos.x-hs0.x*(fo.x+fnt.StringWidth(tag)/2.))/hs0.x,(vpos.y-hs0.y*(fo.y+(fnt.GetHeight()/2.)))/hs0.y,tag,DTA_VirtualWidthF,ss0.x,DTA_VirtualHeightF,ss0.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			// extra strings (if available)
 			if ( !scorebonus.GetBool() ) continue;
 			fo.y += fnt.GetHeight();

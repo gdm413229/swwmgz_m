@@ -214,7 +214,8 @@ Class SWWMStats : Thinker
 		else if ( (inflictor is 'BigBiospark') || (inflictor is 'BiosparkBall') || (inflictor is 'BiosparkBeamImpact') || (inflictor is 'BiosparkComboImpact') || (inflictor is 'BiosparkComboImpactSub') || (inflictor is 'BiosparkBeam') || (inflictor is 'BiosparkArc') ) which = 'Sparkster';
 		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
 		else if ( (inflictor is 'YnykronBeam') || (inflictor is 'YnykronImpact') || (inflictor is 'YnykronSingularity') || (inflictor is 'YnykronCloud') || (inflictor is 'YnykronVoidBeam') || (inflictor is 'YnykronLightningArc') || (inflictor is 'YnykronLightningImpact') ) which = 'Ynykron';
-		else if ( (inflictor is 'Demolitionist') || (inflictor is 'DemolitionistShockwave') || (inflictor is 'DemolitionistRadiusShockwave') ) which = 'SWWMWeapon';	// hack to assume Demolitionist as weapon
+		else if ( (inflictor is 'Demolitionist') || (inflictor is 'DemolitionistShockwave') || (inflictor is 'DemolitionistRadiusShockwave') || (inflictor is 'SWWMGesture')
+			|| (inflictor is 'SWWMItemGesture') ) which = 'SWWMWeapon';	// hack to assume Demolitionist as weapon
 		else if ( inflictor is 'BigPunchSplash' )
 		{
 			// guess from damagetype
@@ -224,6 +225,8 @@ Class SWWMStats : Thinker
 				which = 'SWWMGesture';
 			// others are just weapon melee, so keep the readyweapon
 		}
+		else if ( inflictor is 'FroggyChair' )
+			which = 'SWWMItemGesture';	// more gross hacks
 		if ( damagetype == 'Falling' )
 			which = 'Weapon';	// the gross hacks continue
 		if ( !which ) return;

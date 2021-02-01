@@ -1610,6 +1610,17 @@ Class SWWMHandler : EventHandler
 				scr.xcnt = ++ofs;
 			}
 		}
+		else if ( e.Inflictor is 'FroggyChair' )
+		{
+			score += 800;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xtcolor[ofs] = Font.CR_GREEN;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_FROGGED");
+				scr.xcnt = ++ofs;
+			}
+		}
 		if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (src.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !src.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
 		{
 			score *= 2;
@@ -2138,7 +2149,7 @@ Class SWWMHandler : EventHandler
 			// cheat code handling
 			String cht[] =
 			{
-				"swwmlodsofemone", "swwmdeeplore",
+				"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang",
 				// SWWM Platinum cheats
 				"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
 				"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
@@ -2150,7 +2161,7 @@ Class SWWMHandler : EventHandler
 			};
 			String cmd[] =
 			{
-				"swwmmoneycheat", "swwmlorecheat",
+				"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat",
 				// SWWM Platinum cheats
 				"swwmsafecheat",    "swwmweaponcheat",   "swwmhealcheat",
 				"swwmynykroncheat", "swwmgravcheat",   "swwminvischeat",
@@ -3270,6 +3281,23 @@ Class SWWMHandler : EventHandler
 				Console.Printf("\cyThe pinnacle of... wait, I misread that.\c-");
 				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
 			}
+		}
+		else if ( e.Name ~== "swwmfroggycheat" )
+		{
+			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
+				return;
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cdHop!\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+			}
+			let mo = players[e.Args[0]].mo;
+			Actor f = Actor(ThinkerIterator.Create("FroggyChair").Next());
+			if ( !f ) f = mo.Spawn("FroggyChair");
+			f.SetOrigin(mo.Vec2OffsetZ(cos(mo.angle)*40.,sin(mo.angle)*40.,mo.player.viewz-32.),false);
+			f.A_SetAngle(f.AngleTo(mo));
+			f.Spawn("SWWMItemFog",f.pos);
+			f.A_StartSound("bestsound",CHAN_ITEMEXTRA);
 		}
 	}
 

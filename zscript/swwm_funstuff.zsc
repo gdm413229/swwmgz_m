@@ -213,6 +213,9 @@ Class FroggyChair : Actor
 {
 	int cdown;
 	bool carried;
+	bool wasonground;
+	double lastvelz;
+	Actor lasthit;
 
 	Default
 	{
@@ -224,6 +227,7 @@ Class FroggyChair : Actor
 		+NODAMAGE;
 		+NOBLOOD;
 		+INTERPOLATEANGLES;
+		+FORCEPAIN;
 	}
 	private void BeginCarry( Actor carrier )
 	{
@@ -233,10 +237,10 @@ Class FroggyChair : Actor
 		A_SetSize(32,32);	// easier to deselect
 		carried = true;
 		bSOLID = false;
-		bSHOOTABLE = false;
 		bNOGRAVITY = true;
 		vel *= 0;
-		master = carrier;
+		tracer = master = carrier;
+		lasthit = null;
 	}
 	private void EndCarry()
 	{
@@ -245,9 +249,10 @@ Class FroggyChair : Actor
 		A_SetSize(default.radius,default.height);
 		carried = false;
 		bSOLID = true;
-		bSHOOTABLE = true;
 		bNOGRAVITY = false;
 		master = null;
+		vel.z += vel.xy.length()*.2;
+		lasthit = null;
 	}
 	override void Tick()
 	{
@@ -261,22 +266,30 @@ Class FroggyChair : Actor
 		}
 		if ( carried )
 		{
+			prev = pos;
 			if ( !master || (master.Health <= 0) ) EndCarry();
 			else
 			{
 				Vector3 tomove = master.Vec2OffsetZ(cos(master.angle)*40.,sin(master.angle)*40.,master.player.viewz-32.);
 				Vector3 dirto = level.Vec3Diff(pos,tomove);
-				SetOrigin(level.Vec3Offset(pos,dirto*.3),true);
+				double intp = clamp(dirto.length()*.01,.3,.7);
+				SetOrigin(level.Vec3Offset(pos,dirto*intp),true);
 				double magvel = dirto.length();
 				dirto /= magvel;
-				vel = dirto*min(20,magvel);
+				vel = dirto*min(50,magvel);
 				double angleto = deltaangle(angle,AngleTo(master));
 				A_SetAngle(angle+angleto*.3,SPF_INTERPOLATE);
 			}
 			return;
 		}
+		wasonground = ((pos.z <= floorz) || !TestMobjZ());
+		lastvelz = vel.z;
 		Super.Tick();
-		if ( pos.z <= floorz ) vel.xy *= .9;	// fast friction
+		if ( (pos.z <= floorz) || !TestMobjZ() )
+		{
+			if ( !wasonground && (lastvelz < -1) ) A_StartSound("squeak",CHAN_BODY,CHANF_OVERLAP,clamp(-lastvelz*.05,0.,1.));
+			vel.xy *= .9;	// fast friction
+		}
 	}
 	override bool Used( Actor user )
 	{
@@ -287,6 +300,51 @@ Class FroggyChair : Actor
 				EndCarry();
 		}
 		else BeginCarry(user);
+		return true;
+	}
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		if ( (damage > 0) && (special1 < level.maptime) )
+		{
+			special1 = level.maptime+5;
+			A_StartSound("squeak",CHAN_VOICE);
+		}
+		return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+	}
+	override bool CanCollideWith( Actor other, bool passive )
+	{
+		Vector3 dir = vel;
+		double vsize = dir.length();
+		// we need to compare Z height because wow thanks
+		Vector3 diff = level.Vec3Diff(pos,other.pos);
+		if ( (diff.z > height) || (diff.z < -other.height) ) return false;
+		if ( vsize > 1 )
+		{
+			if ( other == lasthit )
+				return false;
+			dir /= vsize;
+			if ( !passive && other.bSHOOTABLE && (!tracer || !other.IsFriend(tracer)) )
+			{
+				lasthit = other;
+				SWWMUtility.DoKnockback(other,dir,5000*vsize);
+				Vector3 dirto = level.Vec3Diff(other.Vec3Offset(0,0,other.height/2),Vec3Offset(0,0,height));
+				double lento = dirto.length();
+				if ( lento <= double.epsilon )
+				{
+					double ang = FRandom[DoBlast](0,360);
+					double pt = FRandom[DoBlast](-90,90);
+					dirto = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+				}
+				else dirto /= lento;
+				vel = (dirto+(0,0,.1))*vsize*.3;
+				Spawn("SWWMItemFog",pos);
+				other.DamageMobj(self,tracer,int(10*vsize),'Melee',DMG_THRUSTLESS);
+				A_StartSound("squeak",CHAN_WEAPON);
+				return false;
+			}
+			if ( other == tracer )
+				return false;
+		}
 		return true;
 	}
 	States

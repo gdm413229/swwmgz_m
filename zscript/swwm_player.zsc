@@ -745,6 +745,8 @@ Class Demolitionist : PlayerPawn
 		// add special check so corpses don't get stuck on top of monsters and players
 		if ( encroached && encroached.bSOLID && (bSOLID || encroached.bACTLIKEBRIDGE) )
 		{
+			if ( (encroached is 'FroggyChair') && (encroached != oldencroached) )
+				encroached.A_StartSound("squeak",CHAN_BODY,CHANF_OVERLAP);
 			// try to follow movement (this method is awkward but works with monsters)
 			if ( encroached == oldencroached )
 			{

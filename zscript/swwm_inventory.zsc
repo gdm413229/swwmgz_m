@@ -1505,7 +1505,8 @@ Class SWWMWeapon : Weapon abstract
 			{
 				// punching is not greeting/patting (that'd be weird)
 				if ( (ut.uses[i].hitactor == self) || (ut.uses[i].hitactor is 'Demolitionist')
-					|| (ut.uses[i].hitactor is 'HeadpatTracker') ) continue;
+					|| (ut.uses[i].hitactor is 'HeadpatTracker')
+					|| (ut.uses[i].hitactor is 'FroggyChair') ) continue;
 				if ( ut.uses[i].hitactor.Used(self) ) break;
 			}
 			else if ( ut.uses[i].hitline && UseLineTracer.TangibleLine(ut.uses[i]) )

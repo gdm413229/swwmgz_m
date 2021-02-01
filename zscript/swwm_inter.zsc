@@ -147,14 +147,14 @@ Class SWWMStatScreen : StatusScreen abstract
 		for ( int i=0; i<l.Count(); i++ )
 			if ( l.StringWidth(i) > lw )
 				lw = l.StringWidth(i);
-		int bw = int((lw+8)*hs), bh = int((fnt.GetHeight()*l.Count()+12)*hs);
-		double xx = 10, yy = (ss.y-10)-(fnt.GetHeight()*l.Count()+4);
+		int bw = int((lw+12)*hs), bh = int((fnt.GetHeight()*l.Count()+8)*hs);
+		double xx = 8, yy = (ss.y-8)-(fnt.GetHeight()*l.Count());
 		Screen.Dim("Black",.8,int((xx-4)*hs),int((yy-4)*hs),bw,bh);
 		for ( int i=0; i<l.Count(); i++ )
 		{
 			Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += fnt.GetHeight();
-			if ( !i ) yy += 4;
+			xx = 12;
 		}
 	}
 	override int DrawLF()
@@ -166,20 +166,20 @@ Class SWWMStatScreen : StatusScreen abstract
 		int dimlen = max(int((len[0]+8)*hs2),int((len[1]+8)*hs));
 		bool auth = (authortexts[0].Length()>0);
 		Screen.Dim("Black",.8,int((Screen.GetWidth()-dimlen)/2.),int(4*hs2),dimlen,int((fnt.GetHeight()+(auth?2:4))*hs2));
-		Screen.DrawText(fnt,Font.CR_GREEN,(ss2.x-len[0])/2.,6,lnametexts[0],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		Screen.DrawText(fnt,Font.CR_GREEN,int((ss2.x-len[0])/2.),6,lnametexts[0],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		double foy = fnt.GetHeight()+(auth?6:8);
 		if ( auth )
 		{
 			double oy = foy*(hs2/hs);
 			Screen.Dim("Black",.8,int((Screen.GetWidth()-dimlen)/2.),int(oy*hs),dimlen,int((fnt.GetHeight()+2)*hs));
-			Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-len[1])/2.,oy,authortexts[0],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,int((ss.x-len[1])/2.),oy,authortexts[0],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			foy += (fnt.GetHeight()+2)*(hs/hs2);
 		}
 		foy += 4.;
 		String str = StringTable.Localize("$WI_FINISHED");
 		len[0] = fnt.StringWidth(str);
 		Screen.Dim("Black",.8,int((ss2.x-len[0]-8)/2*hs2),int(foy*hs2),int((len[0]+8)*hs2),int((fnt.GetHeight()+4)*hs2));
-		Screen.DrawText(fnt,Font.CR_FIRE,(ss2.x-len[0])/2.,foy+2,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		Screen.DrawText(fnt,Font.CR_FIRE,int((ss2.x-len[0])/2.),foy+2,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		// return not used
 		return 0;
 	}
@@ -192,19 +192,19 @@ Class SWWMStatScreen : StatusScreen abstract
 		int len[2];
 		len[0] = fnt.StringWidth(str);
 		Screen.Dim("Black",.8,int((ss2.x-len[0]-8)/2*hs2),int(4*hs2),int((len[0]+8)*hs2),int((fnt.GetHeight()+4)*hs2));
-		Screen.DrawText(fnt,Font.CR_FIRE,(ss2.x-len[0])/2.,6,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		Screen.DrawText(fnt,Font.CR_FIRE,int((ss2.x-len[0])/2.),6,str,DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		double foy = fnt.GetHeight()+12;
 		len[0] = fnt.StringWidth(lnametexts[1]);
 		len[1] = fnt.StringWidth(authortexts[1]);
 		int dimlen = max(int((len[0]+8)*hs2),int((len[1]+8)*hs));
 		bool auth = (authortexts[1].Length()>0);
 		Screen.Dim("Black",.8,int((Screen.GetWidth()-dimlen)/2.),int(foy*hs2),dimlen,int((fnt.GetHeight()+(auth?2:4))*hs2));
-		Screen.DrawText(fnt,Font.CR_GREEN,(ss2.x-len[0])/2.,foy+2,lnametexts[1],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
+		Screen.DrawText(fnt,Font.CR_GREEN,int((ss2.x-len[0])/2.),foy+2,lnametexts[1],DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		if ( auth )
 		{
 			double oy = (foy+fnt.GetHeight()+2)*(hs2/hs);
 			Screen.Dim("Black",.8,int((Screen.GetWidth()-dimlen)/2.),int(oy*hs),dimlen,int((fnt.GetHeight()+2)*hs));
-			Screen.DrawText(fnt,Font.CR_WHITE,(ss.x-len[1])/2.,oy,authortexts[1],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_WHITE,int((ss.x-len[1])/2.),oy,authortexts[1],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
 	}
 	override void drawShowNextLoc( void )
@@ -535,7 +535,7 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 		maxlen = maxlenl+max(100,maxlenr);
 		// draw the whole damn thing
 		if ( sp_state >= 2 ) Screen.Dim("Black",.8,int((ss2.x-maxlen-8)*.5*hs2),int((ss2.y-nl-8)*.5*hs2),int((maxlen+8)*hs2),int((nl+8)*hs2));
-		double xx = (ss2.x-maxlen)/2., yy = (ss2.y-nl)/2.;
+		int xx = int((ss2.x-maxlen)/2), yy = int((ss2.y-nl)/2);
 		if ( sp_state >= 2 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMKILLS")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
 		yy += step;
 		if ( sp_state >= 4 ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMITEMS")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
@@ -550,8 +550,8 @@ Class SWWMStatScreen_SP : SWWMStatScreen
 			yy += step;
 		}
 		if ( wbs.partime && (sp_state >= 8) ) Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,StringTable.Localize("$TXT_IMPAR")..":",DTA_VirtualWidthF,ss2.x,DTA_VirtualHeightF,ss2.y,DTA_KeepRatio,true);
-		xx = (ss2.x+maxlen)/2.;
-		yy = (ss2.y-nl)/2.;
+		xx = int((ss2.x+maxlen)/2);
+		yy = int((ss2.y-nl)/2);
 		if ( wi_percents )
 		{
 			if ( cnt_kills[0] >= 0 )
@@ -786,19 +786,20 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 		int itemslen = max(fnt.StringWidth("100%"),max(fnt.StringWidth(itemstotal),fnt.StringWidth(itemsstr)));
 		int secretlen = max(fnt.StringWidth("100%"),max(fnt.StringWidth(secrettotal),fnt.StringWidth(secretstr)));
 		int killslen = max(fnt.StringWidth("100%"),max(fnt.StringWidth(killstotal),fnt.StringWidth(killsstr)));
-		int pad = 4;
+		int pad = 2;
 		int spc = 12;
-		int lspc = 4;
+		int hspc = 6;
+		int lspc = 2;
 		int rwidth = TewiFont.GetCharWidth(checkmark)+4;
 		int ryofs = (fnt.GetHeight()-TewiFont.GetHeight())/2;
 		int linew = pad+rwidth+namelen+spc+itemslen+spc+secretlen+spc+killslen+pad;
 		int boxwidth = pad+linew+pad;
 		int lineh = fnt.GetHeight();
-		int boxheight = pad+lineh+spc+(lineh+lspc)*nplayers+spc+lineh+lspc+lineh+pad;
+		int boxheight = pad+lineh+hspc+(lineh+lspc)*nplayers+hspc+lineh+lspc+lineh+pad;
 		Screen.Dim("Black",.8,int((ss.x-boxwidth)*hs)/2,int((ss.y-boxheight)*hs)/2,int(boxwidth*hs),int(boxheight*hs));
 		// header
-		double xx = (ss.x-boxwidth)/2.+pad+pad+rwidth;
-		double yy = (ss.y-boxheight)/2.+pad;
+		int xx = int((ss.x-boxwidth)/2+pad+pad+rwidth);
+		int yy = int((ss.y-boxheight)/2+pad);
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,namestr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += namelen+spc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,itemsstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -806,12 +807,12 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,secretstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += secretlen+spc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,killsstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		yy += lineh+spc;
+		yy += lineh+hspc;
 		String str;
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] ) continue;
-			xx = (ss.x-boxwidth)/2.+pad;
+			xx = int((ss.x-boxwidth)/2.+pad);
 			Screen.Dim(players[i].GetDisplayColor(),.4,int(xx*hs),int(yy*hs),int(linew*hs),int(lineh*hs));
 			xx += pad;
 			if ( playerready[i] || players[i].Bot ) Screen.DrawChar(TewiFont,Font.CR_GREEN,xx,yy+ryofs,checkmark,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -837,8 +838,8 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 			missedkills -= cnt_kills[i];
 			yy += lineh+lspc;
 		}
-		xx = (ss.x-boxwidth)/2.+pad+pad+rwidth;
-		yy += spc;
+		xx = int((ss.x-boxwidth)/2+pad+pad+rwidth);
+		yy += hspc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,missedstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += namelen+spc;
 		if ( ng_state >= 4 )
@@ -856,7 +857,7 @@ Class SWWMStatScreen_Coop : SWWMStatScreen
 		str = String.Format("%3d\cu%%\c-",GetPct(missedkills,wbs.maxkills,true));
 		Screen.DrawText(fnt,(wbs.maxkills&&(missedkills>0))?Font.CR_WHITE:Font.CR_GOLD,xx+killslen-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		yy += lineh+lspc;
-		xx = (ss.x-boxwidth)/2.+pad+pad+rwidth;
+		xx = int((ss.x-boxwidth)/2+pad+pad+rwidth);
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,totalstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += namelen+spc;
 		if ( ng_state >= 4 )
@@ -1001,25 +1002,26 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 		String fragstotal = String.Format("%d",total_frags);
 		int deathslen = max(fnt.StringWidth(deathstotal),fnt.StringWidth(deathsstr));
 		int fragslen = max(fnt.StringWidth(fragstotal),fnt.StringWidth(fragsstr));
-		int pad = 4;
+		int pad = 2;
 		int spc = 12;
-		int lspc = 4;
+		int hspc = 6;
+		int lspc = 2;
 		int rwidth = TewiFont.GetCharWidth(checkmark)+4;
 		int ryofs = (fnt.GetHeight()-TewiFont.GetHeight())/2;
 		int linew = pad+rwidth+namelen+spc+deathslen+spc+fragslen+pad;
 		int boxwidth = pad+linew+pad;
 		int lineh = fnt.GetHeight();
-		int boxheight = pad+lineh+spc+(lineh+lspc)*nplayers+spc+lineh+pad;
+		int boxheight = pad+lineh+hspc+(lineh+lspc)*nplayers+hspc+lineh+pad;
 		Screen.Dim("Black",.8,int((ss.x-boxwidth)*hs)/2,int((ss.y-boxheight)*hs)/2,int(boxwidth*hs),int(boxheight*hs));
 		// header
-		double xx = (ss.x-boxwidth)/2.+pad+pad+rwidth;
-		double yy = (ss.y-boxheight)/2.+pad;
+		int xx = int((ss.x-boxwidth)/2+pad+pad+rwidth);
+		int yy = int((ss.y-boxheight)/2+pad);
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,namestr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += namelen+spc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,deathsstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += deathslen+spc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,fragsstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		yy += lineh+spc;
+		yy += lineh+hspc;
 		String str;
 		Array<Int> sorted;
 		GetSortedPlayers(sorted,teamplay);
@@ -1027,7 +1029,7 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 		{
 			int i = sorted[j];
 			if ( !playeringame[i] ) continue;
-			xx = (ss.x-boxwidth)/2.+pad;
+			xx = int((ss.x-boxwidth)/2+pad);
 			Screen.Dim(players[i].GetDisplayColor(),.4,int(xx*hs),int(yy*hs),int(linew*hs),int(lineh*hs));
 			xx += pad;
 			if ( playerready[i] || players[i].Bot ) Screen.DrawChar(TewiFont,Font.CR_GREEN,xx,yy+ryofs,checkmark,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -1044,8 +1046,8 @@ Class SWWMStatScreen_DM : SWWMStatScreen
 			Screen.DrawText(fnt,Font.CR_WHITE,xx+fragslen-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			yy += lineh+lspc;
 		}
-		xx = (ss.x-boxwidth)/2.+pad+pad+rwidth;
-		yy += spc;
+		xx = int((ss.x-boxwidth)/2+pad+pad+rwidth);
+		yy += hspc;
 		Screen.DrawText(fnt,Font.CR_GREEN,xx,yy,totalstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		xx += namelen+spc;
 		if ( ng_state >= 4 )

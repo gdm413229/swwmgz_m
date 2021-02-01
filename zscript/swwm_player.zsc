@@ -455,6 +455,48 @@ Class Demolitionist : PlayerPawn
 			SWWMItemSense.Spawn(self,i);
 		}
 	}
+	void CheckNaziRemove()
+	{
+		if ( player.usedown )
+			return;
+		FLineTraceData d;
+		LineTrace(angle,DEFMELEERANGE*2,pitch,TRF_THRUACTORS,player.viewheight,data:d);
+		if ( d.HitType == TRACE_HitNone ) return;
+		bool remove;
+		TextureID replacewith;
+		[remove, replacewith] = SWWMUtility.NaziTexRemover(d.HitTexture);
+		if ( !remove ) return;
+		player.usedown = true;
+		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+		if ( d.HitType == TRACE_HitWall )
+		{
+			if ( d.Hit3DFloor )
+			{
+				if ( d.Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) d.HitLine.sidedef[d.LineSide].SetTexture(0,replacewith);
+				else if ( d.Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) d.HitLine.sidedef[d.LineSide].SetTexture(2,replacewith);
+				else d.Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);
+			}
+			else d.HitLine.sidedef[d.LineSide].SetTexture(d.LinePart,replacewith);
+		}
+		else if ( d.HitType == TRACE_HitCeiling )
+		{
+			if ( d.Hit3DFloor )
+			{
+				if ( d.Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) d.Hit3DFloor.model.SetTexture(1,replacewith);
+				else d.Hit3DFloor.model.SetTexture(0,replacewith);
+			}
+			else d.HitSector.SetTexture(1,replacewith);
+		}
+		else if ( d.HitType == TRACE_HitFloor )
+		{
+			if ( d.Hit3DFloor )
+			{
+				if ( d.Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) d.Hit3DFloor.model.SetTexture(0,replacewith);
+				else d.Hit3DFloor.model.SetTexture(1,replacewith);
+			}
+			else d.HitSector.SetTexture(0,replacewith);
+		}
+	}
 	void CheckUnderwaterAmb( bool restore = false )
 	{
 		Vector3 headpos = Vec3Offset(0,0,player.viewheight);
@@ -582,6 +624,8 @@ Class Demolitionist : PlayerPawn
 	{
 		oldangle = angle;
 		oldpitch = pitch;
+		if ( player && (player.mo == self) && (player.playerstate != PST_DEAD) && (player.cmd.buttons&BT_USE) )
+			CheckNaziRemove();
 		Super.PlayerThink();
 		oldlagangle = lagangle;
 		oldlagpitch = lagpitch;
@@ -3200,8 +3244,112 @@ Class LoveHeart : Actor
 		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
 		special2 = 25;
 	}
+	void CheckNaziRemove()
+	{
+		TextureID HitTexture;
+		Line HitLine;
+		int LineSide, LinePart;
+		Sector HitSector;
+		F3DFloor Hit3DFloor;
+		bool HitCeiling;
+		if ( BlockingLine )
+		{
+			HitLine = BlockingLine;
+			// which side and part we hit?
+			LineSide = SWWMUtility.PointOnLineSide(pos.xy,BlockingLine);
+			double fl, cl;
+			if ( BlockingLine.sidedef[1] )
+			{
+				fl = min(BlockingLine.frontsector.floorplane.ZAtPoint(pos.xy),BlockingLine.backsector.floorplane.ZAtPoint(pos.xy));
+				cl = max(BlockingLine.frontsector.ceilingplane.ZAtPoint(pos.xy),BlockingLine.backsector.ceilingplane.ZAtPoint(pos.xy));
+				if ( max(floorz,pos.z) < fl ) LinePart = 0;
+				else if ( min(ceilingz,pos.z+height) > cl ) LinePart = 2;
+				else LinePart = 1;
+			}
+			else LinePart = 1;	// always middle
+			if ( Blocking3DFloor )
+			{
+				for ( int i=0; i<BlockingLine.backsector.Get3DFloorCount(); i++ )
+				{
+					F3DFloor ff = BlockingLine.backsector.Get3DFloor(i);
+					if ( ff.model != Blocking3DFloor ) continue;
+					Hit3DFloor = ff;
+					break;
+				}
+				if ( Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(0);
+				else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(2);
+			}
+			else HitTexture = HitLine.sidedef[LineSide].GetTexture(LinePart);
+		}
+		else if ( BlockingCeiling )
+		{
+			if ( Blocking3DFloor )
+			{
+				for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
+				{
+					F3DFloor ff = BlockingCeiling.Get3DFloor(i);
+					if ( ff.model != Blocking3DFloor ) continue;
+					Hit3DFloor = ff;
+					break;
+				}
+			}
+			HitSector = BlockingCeiling;
+			HitCeiling = true;
+			HitTexture = ceilingpic;
+		}
+		else if ( BlockingFloor )
+		{
+			if ( Blocking3DFloor )
+			{
+				for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
+				{
+					F3DFloor ff = BlockingFloor.Get3DFloor(i);
+					if ( ff.model != Blocking3DFloor ) continue;
+					Hit3DFloor = ff;
+					break;
+				}
+			}
+			HitSector = BlockingFloor;
+			HitCeiling = false;
+			HitTexture = floorpic;
+		}
+		bool remove;
+		TextureID replacewith;
+		[remove, replacewith] = SWWMUtility.NaziTexRemover(HitTexture);
+		if ( !remove ) return;
+		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+		if ( HitLine )
+		{
+			if ( Hit3DFloor )
+			{
+				if ( Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) HitLine.sidedef[LineSide].SetTexture(0,replacewith);
+				else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitLine.sidedef[LineSide].SetTexture(2,replacewith);
+				else Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);
+			}
+			else HitLine.sidedef[LineSide].SetTexture(LinePart,replacewith);
+		}
+		else if ( HitSector && HitCeiling )
+		{
+			if ( Hit3DFloor )
+			{
+				if ( Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) Hit3DFloor.model.SetTexture(1,replacewith);
+				else Hit3DFloor.model.SetTexture(0,replacewith);
+			}
+			else HitSector.SetTexture(1,replacewith);
+		}
+		else if ( HitSector && !HitCeiling )
+		{
+			if ( Hit3DFloor )
+			{
+				if ( Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) Hit3DFloor.model.SetTexture(0,replacewith);
+				else Hit3DFloor.model.SetTexture(1,replacewith);
+			}
+			else HitSector.SetTexture(0,replacewith);
+		}
+	}
 	action void A_HeartBurst()
 	{
+		invoker.CheckNaziRemove();
 		// use line
 		if ( BlockingLine )
 		{

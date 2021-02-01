@@ -1286,6 +1286,18 @@ Class SWWMUtility
 		if ( i is 'SWWMLamp' ) return true;
 		return false;
 	}
+
+	static bool, TextureID NaziTexRemover( TextureID checkme )
+	{
+		String tn = TexMan.GetName(checkme);
+		if ( (tn ~== "ZZWOLF2") || (tn ~== "ZZWOLF3") || (tn ~== "ZZWOLF4") )
+			return true, TexMan.CheckForTexture("ZZWOLF1",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF6") || (tn ~== "ZZWOLF7") )
+			return true, TexMan.CheckForTexture("ZZWOLF5",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF12") || (tn ~== "ZZWOLF13") )
+			return true, TexMan.CheckForTexture("ZZWOLF11",TexMan.Type_Any);
+		return false, checkme;
+	}
 }
 
 Class RadiusDebugSphere : Actor

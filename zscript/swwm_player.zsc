@@ -3146,8 +3146,8 @@ Class LoveHeart : Actor
 			bEXTREMEDEATH = false;
 			bNOEXTREMEDEATH = true;
 		}
-		if ( target is 'WolfensteinSS' ) target.bFRIENDLY = false;
-		if ( target.IsFriend(self.target) || (target is 'MBFHelperDog') )
+		if ( (target is 'WolfensteinSS') || (target.Species == 'WolfensteinSS') ) target.bFRIENDLY = false;
+		if ( target.IsFriend(self.target) || SWWMUtility.IdentifyingDog(target) )
 		{
 			int healamt = clamp(special2,5,15);
 			if ( raging )
@@ -3160,7 +3160,7 @@ Class LoveHeart : Actor
 				SWWMScoreObj.Spawn(healamt,target.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+target.Height/2),ST_Health);
 				SWWMHandler.DoFlash(target,Color(32,224,128,255),10);
 			}
-			if ( target is 'MBFHelperDog' )
+			if ( SWWMUtility.IdentifyingDog(target) )
 			{
 				// befriend good doggo
 				if ( target.bCOUNTKILL )
@@ -3183,7 +3183,7 @@ Class LoveHeart : Actor
 			damage *= 8;
 			raging.DoHitFX();
 		}
-		if ( target is 'WolfensteinSS' )
+		if ( (target is 'WolfensteinSS') || (target.Species == 'WolfensteinSS') )
 		{
 			damage = int.max;
 			bEXTREMEDEATH = true;

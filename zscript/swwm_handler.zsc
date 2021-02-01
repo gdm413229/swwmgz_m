@@ -1500,14 +1500,20 @@ Class SWWMHandler : EventHandler
 		{
 			tookdamage[e.Thing.PlayerNumber()] = true;
 			let s = SWWMStats.Find(e.Thing.player);
-			s.AddDamageTaken(e.Damage);
-			if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
+			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
+			{
+				s.AddDamageTaken(e.Damage);
+				if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
+			}
 		}
 		if ( e.DamageSource && e.DamageSource.player )
 		{
 			let s = SWWMStats.Find(e.DamageSource.player);
-			s.AddDamageDealt(e.Damage);
-			if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
+			{
+				s.AddDamageDealt(e.Damage);
+				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+			}
 		}
 	}
 

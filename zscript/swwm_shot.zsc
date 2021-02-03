@@ -1498,6 +1498,40 @@ Class GExploLight2 : PaletteLight
 	}
 }
 
+Class GExploRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 8.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG0 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.05);
+		Stop;
+	}
+}
+
+
 Class GoldenImpact : Actor
 {
 	Default
@@ -1520,7 +1554,7 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:40000);
-		SWWMUtility.DoExplosion(self,777,40000,600,500,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,777,90000,600,500,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1528,15 +1562,15 @@ Class GoldenImpact : Actor
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](10,20);
+		int numpt = Random[ExploS](30,40);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,9);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
-			s.special1 = Random[ExploS](3,5);
-			s.scale *= 3.;
+			s.special1 = Random[ExploS](3,6);
+			s.scale *= 3.5;
 			s.alpha *= .8;
 		}
 		numpt = Random[ExploS](8,12);
@@ -1563,18 +1597,20 @@ Class GoldenImpact : Actor
 			s.vel = pvel;
 		}
 		Spawn("GExploLight",pos);
+		let r = Spawn("GExploRing",pos);
 	}
 	action void A_GoldSpread()
 	{
 		special1++;
-		if ( (special1%3) || (special1 > 20) ) return;
+		if ( (special1%4) || (special1 > 30) ) return;
+		SWWMUtility.DoExplosion(self,777,90000,600-special1*15,500-special1*15,DE_EXTRAZTHRUST);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
 		double ang, pt;
 		for ( int i=0; i<6; i++ )
 		{
-			double totaldist = 30+(special1**2.)*1.2;
+			double totaldist = 30+(special1**2.)*.4;
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,90);
 			origin = pos;
@@ -1627,12 +1663,7 @@ Class GoldenImpact : Actor
 	{
 	Spawn:
 		XEX1 AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ[[\\]] 1 Bright A_GoldSpread();
-		TNT1 A 1
-		{
-			A_GoldSpread();
-			if ( special1 > 20 ) Destroy();
-		}
-		Wait;
+		Stop;
 	}
 }
 
@@ -1658,21 +1689,21 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,77,30000,400,300,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,77,80000,500,400,DE_EXTRAZTHRUST);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](3,8);
+		int numpt = Random[ExploS](6,10);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,9);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
-			s.special1 = Random[ExploS](2,3);
-			s.scale *= 2.2;
+			s.special1 = Random[ExploS](2,4);
+			s.scale *= 2.6;
 			s.alpha *= .5;
 		}
 		numpt = Random[ExploS](4,6);
@@ -1703,14 +1734,15 @@ Class GoldenSubImpact : Actor
 	action void A_GoldSubSpread()
 	{
 		special1++;
-		if ( (special1%2) || (special1 > 10) ) return;
+		if ( (special1%2) || (special1 > 20) ) return;
+		SWWMUtility.DoExplosion(self,77,80000,500-special1*10,400-special1*10,DE_EXTRAZTHRUST);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
 		double ang, pt;
 		for ( int i=0; i<3; i++ )
 		{
-			double totaldist = 20+(special1**2.)*.8;
+			double totaldist = 20+(special1**2.)*.2;
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,90);
 			origin = pos;
@@ -1763,11 +1795,6 @@ Class GoldenSubImpact : Actor
 	{
 	Spawn:
 		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright A_GoldSubSpread();
-		TNT1 A 1
-		{
-			A_GoldSubSpread();
-			if ( special1 > 10 ) Destroy();
-		}
 		Stop;
 	}
 }
@@ -1794,23 +1821,29 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,7,20000,200,100,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,7,70000,400,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("RocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](1,2);
+		int numpt = Random[ExploS](2,4);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
 			let s = Spawn("SWWMSmoke",pos);
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
-			s.special1 = Random[ExploS](0,2);
+			s.special1 = Random[ExploS](0,3);
 			s.scale *= 1.6;
 			s.alpha *= .2;
 		}
+	}
+	action void A_GoldSubSubSpread()
+	{
+		special1++;
+		if ( (special1%2) || (special1 > 10) ) return;
+		SWWMUtility.DoExplosion(self,7,70000,400-special1*5,300-special1*5,DE_EXTRAZTHRUST);
 	}
 	override void Tick()
 	{
@@ -1826,7 +1859,7 @@ Class GoldenSubSubImpact : Actor
 	States
 	{
 	Spawn:
-		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright A_GoldSubSubSpread();
 		Stop;
 	}
 }
@@ -1834,7 +1867,10 @@ Class GoldenSubSubImpact : Actor
 Class Spreadgun : SWWMWeapon
 {
 	bool fired;	// shell was used
+	bool chambered;	// a shell is actually loaded
+	bool emptyup;	// next reload will keep the chamber empty
 	Class<Ammo> loadammo, nextammo;	// currently loaded shell, next shell to load
+	bool initialized;
 
 	transient ui TextureID WeaponBox, AmmoIcon[7], LoadedIcon[7];
 	transient ui Font TewiFont;
@@ -1888,6 +1924,7 @@ Class Spreadgun : SWWMWeapon
 				ox = 33;
 			}
 		}
+		if ( !chambered ) return;
 		for ( int i=0; i<7; i++ )
 		{
 			if ( loadammo != types[i] ) continue;
@@ -1900,7 +1937,7 @@ Class Spreadgun : SWWMWeapon
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
 		for ( int i=0; i<7; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
-		return !fired;
+		return (!fired && chambered);
 	}
 
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
@@ -1908,7 +1945,7 @@ Class Spreadgun : SWWMWeapon
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
 		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
 		{
-			if ( !fired ) return true;
+			if ( !fired && chambered ) return true;
 			for ( int i=0; i<7; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
 			return false;
 		}
@@ -1934,9 +1971,11 @@ Class Spreadgun : SWWMWeapon
 			amidx = i;
 			break;
 		}
-		if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState(primedstates[amidx]));
+		if ( !invoker.chambered ) player.SetPSprite(PSP_WEAPON,invoker.FindState("UnloadEmpty"));	// no "fired" one for this, as it can never happen
+		else if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState(primedstates[amidx]));
 		else player.SetPSprite(PSP_WEAPON,invoker.FindState(firedstates[amidx]));
-		A_Overlay(-9999,"UnloadDummy");
+		if ( invoker.chambered ) A_Overlay(-9999,"UnloadDummy");
+		else A_Overlay(-9999,"UnloadDummyEmpty");
 		A_StartSound("spreadgun/deselect",CHAN_WEAPON,CHANF_OVERLAP);
 	}
 
@@ -1952,14 +1991,21 @@ Class Spreadgun : SWWMWeapon
 			amidx = i;
 			break;
 		}
-		if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState(primedstates[amidx]));
+		if ( invoker.emptyup )
+		{
+			if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState("LoadEmpty"));
+			else player.SetPSprite(PSP_WEAPON,invoker.FindState("LoadEmptyFired"));
+		}
+		else if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState(primedstates[amidx]));
 		else player.SetPSprite(PSP_WEAPON,invoker.FindState(firedstates[amidx]));
-		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		if ( !invoker.emptyup && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
 		{
 			let amo = FindInventory(invoker.nextammo);
 			if ( amo && (amo.Amount > 0) ) amo.Amount--;
 		}
-		A_Overlay(-9999,"LoadDummy");
+		if ( invoker.emptyup ) A_Overlay(-9999,"LoadDummyEmpty");
+		else A_Overlay(-9999,"LoadDummy");
+		invoker.emptyup = false;
 	}
 
 	action void A_DropShell()
@@ -2347,6 +2393,7 @@ Class Spreadgun : SWWMWeapon
 	action void A_LoadShell()
 	{
 		A_StartSound("spreadgun/shellin",CHAN_WEAPON,CHANF_OVERLAP);
+		invoker.chambered = true;
 		invoker.loadammo = invoker.nextammo;
 	}
 
@@ -2363,7 +2410,7 @@ Class Spreadgun : SWWMWeapon
 	{
 		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
 		let Owner = ownedWeapon.Owner;
-		if ( (AmmoGive1 == 0) && loadammo && !fired )
+		if ( (AmmoGive1 == 0) && loadammo && !fired && chambered )
 		{
 			let cur = Owner.FindInventory(loadammo);
 			if ( !cur )
@@ -2384,7 +2431,13 @@ Class Spreadgun : SWWMWeapon
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
 		Super.AttachToOwner(other);
-		if ( !loadammo ) loadammo = "RedShell";
+		if ( !initialized )
+		{
+			initialized = true;
+			if ( !loadammo ) loadammo = "RedShell";
+			fired = false;
+			chambered = true;
+		}
 		for ( int i=0; i<7; i++ )
 		{
 			Ammo a = Ammo(other.FindInventory(types[i]));
@@ -2445,7 +2498,15 @@ Class Spreadgun : SWWMWeapon
 	action void A_AltHold()
 	{
 		A_WeaponReady(WRF_NOFIRE);
+		// tap fire to unload round
+		if ( invoker.chambered && (player.cmd.buttons&BT_ATTACK) )
+		{
+			invoker.emptyup = true;
+			player.SetPSPrite(PSP_WEAPON,invoker.FindState("Reload"));
+			return;
+		}
 		if ( player.cmd.buttons&BT_ALTATTACK ) return;
+		A_SwitchAmmoType();
 		if ( !invoker.fired ) player.SetPSPrite(PSP_WEAPON,invoker.FindState("Ready"));
 		else player.SetPSPrite(PSP_WEAPON,invoker.FindState("ReadyFired"));
 	}
@@ -2514,6 +2575,7 @@ Class Spreadgun : SWWMWeapon
 			if ( invoker.nextammo && (CountInv(invoker.nextammo) > 0) && (invoker.loadammo != invoker.nextammo) )
 				flg |= WRF_ALLOWRELOAD;
 			A_WeaponReady(flg);
+			return ResolveState(null);
 		}
 		Wait;
 	ReadyFired:
@@ -2527,12 +2589,13 @@ Class Spreadgun : SWWMWeapon
 			A_WeaponReady(flg);
 			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
 				invoker.CheckAmmo(EitherFire,true);
+			return ResolveState(null);
 		}
 		Wait;
 	Fire:
 		#### # 1
 		{
-			if ( invoker.fired ) return ResolveState("Reload");
+			if ( invoker.fired || !invoker.chambered ) return ResolveState("Reload");
 			A_FireShell();
 			return ResolveState(null);
 		}
@@ -2540,7 +2603,6 @@ Class Spreadgun : SWWMWeapon
 		XZW2 VWXY 2;
 		Goto ReadyFired;
 	AltFire:
-		#### # 1 A_SwitchAmmoType();
 		#### # 1 A_AltHold();
 		Wait;
 	Reload:
@@ -2552,8 +2614,16 @@ Class Spreadgun : SWWMWeapon
 		Stop;
 	UnloadDummy:	// overlay with shared functions for all unload anims
 		TNT1 A 11;
-		TNT1 A 14 A_StartSound("spreadgun/open",CHAN_WEAPON,CHANF_OVERLAP);
+		TNT1 A 14
+		{
+			invoker.chambered = false;
+			A_StartSound("spreadgun/open",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		TNT1 A 1 A_DropShell();
+		Stop;
+	UnloadDummyEmpty:
+		TNT1 A 11;
+		TNT1 A 14 A_StartSound("spreadgun/open",CHAN_WEAPON,CHANF_OVERLAP);
 		Stop;
 	UnloadRedFired:
 		XZW2 Z 2;
@@ -2648,12 +2718,23 @@ Class Spreadgun : SWWMWeapon
 		XZWP ABCDE 1;
 		XZWW V 1;
 		Goto Reload2;
+	UnloadEmpty:
+		XZW2 A 2;
+		XZWY CDEF 2;
+		XZWY GHIJKLMNOPQRSTU 1;
+		Goto Reload2;
 	Reload2:
 		#### # 1 A_SelectLoadState();
 		Stop;
 	LoadDummy:	// overlay with shared functions for all load anims
 		TNT1 A 9;
 		TNT1 A 12 A_LoadShell();
+		TNT1 A 2 A_StartSound("spreadgun/close",CHAN_WEAPON,CHANF_OVERLAP);
+		TNT1 A 2 A_Prime();
+		TNT1 A 1 { invoker.PlayUpSound(self); }
+		Stop;
+	LoadDummyEmpty:
+		TNT1 A 9;
 		TNT1 A 2 A_StartSound("spreadgun/close",CHAN_WEAPON,CHANF_OVERLAP);
 		TNT1 A 2 A_Prime();
 		TNT1 A 1 { invoker.PlayUpSound(self); }
@@ -2715,6 +2796,14 @@ Class Spreadgun : SWWMWeapon
 		XZWW VWXYZ 1;
 		XZWX ABCDEFGHIJKLMNOPQRSTUVWXYZ 1;
 		XZWY AB 1;
+		Goto Ready;
+	LoadEmpty:
+		XZWY UVWXYZ 1;
+		XZWZ ABCDEFGHIJKLMNO 1;
+		Goto Ready;
+	LoadEmptyFired:
+		XZWZ PQRSTUVWXYZ 1;
+		XZW0 HIJKLMNOPQ 1;
 		Goto Ready;
 	Zoom:
 		XZW2 A 1
@@ -2779,7 +2868,7 @@ Class Spreadgun : SWWMWeapon
 		XZWK FGHI 2;
 		Goto ReadyFired;
 	FlashRed:
-		XZWZ A 2 Bright
+		XZW0 A 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[3] = 120;
@@ -2787,7 +2876,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashGreen:
-		XZWZ B 2 Bright
+		XZW0 B 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[3] = 90;
@@ -2795,7 +2884,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashWhite:
-		XZWZ C 2 Bright
+		XZW0 C 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[1] = 176;
@@ -2805,7 +2894,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashBlue:
-		XZWZ D 2 Bright
+		XZW0 D 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[0] = 96;
@@ -2816,7 +2905,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashBlack:
-		XZWZ E 2 Bright
+		XZW0 E 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[3] = 60;
@@ -2824,7 +2913,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashPurple:
-		XZWZ F 2 Bright
+		XZW0 F 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[3] = 60;
@@ -2832,7 +2921,7 @@ Class Spreadgun : SWWMWeapon
 		}
 		Stop;
 	FlashGold:
-		XZWZ G 2 Bright
+		XZW0 G 2 Bright
 		{
 			let l = Spawn("SWWMWeaponLight",pos);
 			l.args[3] = 300;

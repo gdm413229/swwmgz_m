@@ -408,6 +408,40 @@ Class ExploLight3 : PaletteLight
 		Args 0,0,0,250;
 	}
 }
+
+Class FatChodeRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 3.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG0 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.06);
+		Stop;
+	}
+}
+
 Class FatChodeImpact : Actor
 {
 	double realangle, realpitch;
@@ -491,6 +525,7 @@ Class FatChodeImpact : Actor
 			e.pitch = asin(-dir.z);
 		}
 		Spawn("ExploLight3",pos);
+		Spawn("FatChodeRing",pos);
 	}
 	override void Tick()
 	{

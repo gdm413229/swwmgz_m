@@ -108,7 +108,7 @@ Coming from the **Doom** modding side of things, this gun really packs a punch, 
 
 **Primary fire:** Fires, duh. Depending on the loaded ammo the effects may vary.
 
-**Secondary fire:** Switches ammo type for the next shot to be loaded.
+**Secondary fire:** On tap, switches ammo type for the next shot to be loaded. On hold, also tap primary fire to unload the current shell, but leave the gun empty.
 
 **Reload:** Unload the current shell and load a new one. Unspent shells are re-added to their respective ammo type pool (or dropped if you can't hold more).
 

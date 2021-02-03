@@ -19,11 +19,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
-* **Original English Voice Acting:**
-  - Demolitionist
-  - Ibuki
-  - Saya
-  - Kirin
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding *(+ proper crouch dashing)***
@@ -40,9 +35,14 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - **[Heretic]** Interstellar Demolitionist (a somewhat simple vertical SHMUP, kinda Touhou styled)
   - **[Hexen]** Demolition Quest (a JRPG, kinda like early FF / BoF)
 * **Mothgirl summon for Lämp easter egg**
-* **Ibuki companion add-on *(w/ optional "stream friendly" clothing)***
-* **Saya model, for scenes or something idk *(maybe a companion add-on too)***
-* ***(Maybe)* Kirin model???**
+* **Ibuki companion add-on**
+* **Saya companion add-on**
+* **Kirin companion add-on *(Hexen-exclusive)***
+* **Original English Voice Acting:**
+  - Demolitionist
+  - Ibuki
+  - Saya
+  - Kirin
 * **Japanese localization???**
 * **Strife support, with rewritten dialogue**
 * **Monster/decoration replacements add-on**

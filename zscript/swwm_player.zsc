@@ -904,14 +904,14 @@ Class Demolitionist : PlayerPawn
 				Vector3 pushdir = dirto*.1+dir*.9;
 				if ( !a.bDONTTHRUST && (a.Mass < maxmass) && (a.bSHOOTABLE || a.bPUSHABLE) )
 				{
-					a.vel += pushdir*(15+(spd*20/max(50,a.mass)));
+					a.vel += pushdir*(25+(spd*20/max(50,a.mass)));
 					if ( (a.pos.z <= a.floorz) || !a.TestMobjZ() )
 						a.vel.z += 5+(spd*(5/max(50,a.mass)));
 				}
 				int flg = DMG_THRUSTLESS;
 				if ( raging ) flg |= DMG_FOILINVUL;
 				if ( !a.player && !a.bDONTBLAST ) a.bBLASTED = true;
-				int dmg = int(15+spd*2.5);
+				int dmg = int(25+spd*2.5);
 				bool buttslam = false;
 				// BUTTSLAM
 				if ( dir dot viewdir < -.3 )
@@ -965,7 +965,7 @@ Class Demolitionist : PlayerPawn
 					{
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
-						int dmg = int(15+spd*2.5);
+						int dmg = int(25+spd*2.5);
 						if ( raging ) dmg *= 8;
 						bool buttslam = false;
 						// BUTTSLAM
@@ -985,7 +985,7 @@ Class Demolitionist : PlayerPawn
 								let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
 								ps.damagetype = buttslam?'Buttslam':'Dash';
 								ps.target = self;
-								ps.special1 = int(15+spd*2.5);
+								ps.special1 = int(25+spd*2.5);
 								raging.DoHitFX();
 							}
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
@@ -1017,7 +1017,7 @@ Class Demolitionist : PlayerPawn
 							let ps = Spawn("BigPunchSplash",Vec3Offset(0,0,Height));
 							ps.damagetype = (dir dot viewdir < -3.)?'Buttslam':'Dash';
 							ps.target = self;
-							ps.special1 = int(15+spd*2.5);
+							ps.special1 = int(25+spd*2.5);
 							raging.DoHitFX();
 						}
 					}
@@ -1056,7 +1056,7 @@ Class Demolitionist : PlayerPawn
 					{
 						// see if we can bust it
 						let tempme = new("LineTracer"); // gross hack to pass needed data
-						int dmg = int(15+spd*2.5);
+						int dmg = int(25+spd*2.5);
 						if ( raging ) dmg *= 8;
 						if ( buttslam ) dmg *= 3;
 						tempme.Results.HitLine = BlockingLine;
@@ -1080,7 +1080,7 @@ Class Demolitionist : PlayerPawn
 								let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
 								ps.damagetype = buttslam?'Buttslam':'Dash';
 								ps.target = self;
-								ps.special1 = int(15+spd*2.5);
+								ps.special1 = int(30+spd*2.5);
 								raging.DoHitFX();
 							}
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
@@ -1097,7 +1097,7 @@ Class Demolitionist : PlayerPawn
 					// wallbump
 					bumped = true;
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
-					bumptic = gametic+int(20+spd/4.);
+					bumptic = gametic+int(25+spd/4.);
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 					A_AlertMonsters(swwm_uncapalert?0:800);
 					vel *= .2;
@@ -1110,7 +1110,7 @@ Class Demolitionist : PlayerPawn
 						let ps = Spawn("BigPunchSplash",Vec3Offset(dir.x*radius,dir.y*radius,Height/2.));
 						ps.damagetype = (dir dot viewdir < -3.)?'Buttslam':'Dash';
 						ps.target = self;
-						ps.special1 = int(15+spd*2.5);
+						ps.special1 = int(25+spd*2.5);
 						raging.DoHitFX();
 					}
 					// activate it

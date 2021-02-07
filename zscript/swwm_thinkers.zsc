@@ -99,7 +99,7 @@ Class SWWMStats : Thinker
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
 		deaths,	damagedealt, hdamagedealt, damagetaken, hdamagetaken,
 		mkill, hiscore, hhiscore, topdealt, toptaken, skill, wponch,
-		busts, buttslams, secrets, items;
+		busts, buttslams, secrets, items, parries, pparries;
 	double grounddist, airdist, swimdist, fuelusage, topspeed, teledist;
 	Array<WeaponUsage> wstats;
 	Array<MonsterKill> mstats;
@@ -646,9 +646,9 @@ Enum EScoreObjType
 Class SWWMScoreObj : Thinker
 {
 	int xcnt;
-	int xtcolor[5];
-	int xscore[5];
-	String xstr[5];
+	int xtcolor[6];
+	int xscore[6];
+	String xstr[6];
 	int tcolor;
 	int score;
 	Vector3 pos;
@@ -693,7 +693,7 @@ Class SWWMScoreObj : Thinker
 		o.seed2 = Random[ScoreBits]();
 		o.damnum = (type > ST_Score);
 		o.xcnt = 0;
-		for ( int i=0; i<5; i++ ) o.xtcolor[i] = hnd.numcolor_bonus.GetInt();
+		for ( int i=0; i<6; i++ ) o.xtcolor[i] = hnd.numcolor_bonus.GetInt();
 		o.acc = acc;
 		if ( o.damnum )
 		{

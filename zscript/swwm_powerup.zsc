@@ -305,6 +305,8 @@ Class GhostPower : PowerInvisibility
 
 Class GhostArtifactX : Actor
 {
+	SpriteID bsprite;
+
 	Default
 	{
 		RenderStyle "Add";
@@ -324,12 +326,13 @@ Class GhostArtifactX : Actor
 			Destroy();
 			return;
 		}
-		vel = target.vel;
 		prev = target.prev;
-		SetOrigin(target.pos+vel,true);
-		A_SetAngle(target.angle,SPF_INTERPOLATE);
+		vel = target.vel;
+		if ( (target.pos != pos) || (target.vel != (0,0,0)) ) SetOrigin(target.pos+vel,true);
+		if ( angle != target.angle ) A_SetAngle(target.angle,SPF_INTERPOLATE);
 		FloatBobPhase = target.FloatBobPhase;
-		bInvisible = target.bInvisible||!target.InStateSequence(target.CurState,target.FindState("Spawn"));
+		if ( !bsprite ) bsprite = GetSpriteIndex('XZW1');
+		bInvisible = target.bInvisible||(target.sprite!=bsprite);
 	}
 	States
 	{

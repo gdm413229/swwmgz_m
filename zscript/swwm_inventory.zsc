@@ -820,7 +820,8 @@ Class ParryRing : Actor
 
 Class ParryField : Actor
 {
-	int lasteggtic;
+	bool critsnd;
+	SWWMStats s;
 
 	Default
 	{
@@ -840,6 +841,7 @@ Class ParryField : Actor
 			Destroy();
 			return;
 		}
+		if ( master.player && !s ) s = SWWMStats.Find(master.player);
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(master.pitch,master.angle,master.roll);
 		origin = level.Vec3Offset(master.Vec2OffsetZ(0,0,master.player.viewz),x*20);
@@ -852,11 +854,16 @@ Class ParryField : Actor
 			if ( !((a.bMISSILE && !a.IsZeroDamage() && (a.target != master)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
+			Vector3 hdir = dir;
 			if ( a.bMISSILE )
 			{
 				// deflect directly to target
-				if ( !Random[Parry](0,2) && a.target )
-					dir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
+				if ( a.target )
+				{
+					hdir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
+					double theta = max(FRandom[Parry](0.,1.)**2.,.1);
+					dir = dir*(1.-theta)+hdir*theta;
+				}
 				// push away
 				if ( a.bSEEKERMISSILE ) a.tracer = a.target;
 				a.target = master;
@@ -884,17 +891,26 @@ Class ParryField : Actor
 			i.bAMBUSH = true;
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
-			if ( (level.maptime > lasteggtic) && !Random[Parry](0,4) )
+			if ( special1 >= special2 )	// perfect parry
 			{
+				// increased homing
+				dir = dir*.4+hdir*.6;
+				nspeed = min(100,nspeed*1.5);
+				a.vel = dir*nspeed;
 				for ( int i=1; i<6; i++ )
 				{
 					let r = Spawn("ParryRing",a.pos);
 					r.specialf1 = i*.04;
 				}
 				buff.special1++;
-				A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
-				lasteggtic = level.maptime+5;
+				if ( !critsnd )
+				{
+					A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
+					if ( s ) s.pparries++;
+				}
+				critsnd = true;
 			}
+			if ( s ) s.parries++;
 		}
 		if ( --special1 <= 0 ) Destroy();
 	}
@@ -1430,6 +1446,7 @@ Class SWWMWeapon : Weapon abstract
 		invoker.pfield = Spawn("ParryField",origin);
 		invoker.pfield.master = self;
 		invoker.pfield.special1 = duration;
+		invoker.pfield.special2 = duration;
 		if ( !FindInventory("ParryDamageChecker") )
 			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
 	}

@@ -1597,7 +1597,7 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.DamageType == 'Buttslam' )
 		{
-			score += 200;
+			score += 300;
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
@@ -1618,12 +1618,25 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Inflictor is 'FroggyChair' )
 		{
-			score += 800;
+			score += 1440;
 			if ( scr )
 			{
 				scr.xscore[ofs] = 0;
 				scr.xtcolor[ofs] = Font.CR_GREEN;
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_FROGGED");
+				scr.xcnt = ++ofs;
+			}
+		}
+		Inventory pb;
+		if ( e.Inflictor && (pb = e.Inflictor.FindInventory('ParriedBuff')) )
+		{
+			score += 200;
+			if ( pb.special1&1 ) score += 200;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				if ( pb.special1&1 ) scr.xstr[ofs] = StringTable.Localize("$SWWM_PPARRY");
+				else scr.xstr[ofs] = StringTable.Localize("$SWWM_PARRY");
 				scr.xcnt = ++ofs;
 			}
 		}

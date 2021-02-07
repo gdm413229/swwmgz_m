@@ -2463,6 +2463,10 @@ Class DemolitionistMenu : GenericMenu
 			tsec = (stats.airtime/GameTicRate)%60;
 			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
 			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATPARRY"),stats.parries);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATPPARRY"),stats.pparries);
+			statlist.Push(str);
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUSTS"),stats.busts);

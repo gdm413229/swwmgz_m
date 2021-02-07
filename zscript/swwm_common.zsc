@@ -1313,7 +1313,7 @@ Class SWWMTeleportLine : Actor
 			double pt = FRandom[ExploS](-90,90);
 			double d = FRandom[ExploS](0.,1.);
 			Vector3 ppos = bpos*d+apos*(1.-d)+(0,0,FRandom[ExploS](1,4));
-			Vector3 rpos = level.Vec3Diff(pos,ppos);
+			Vector3 rpos = ppos-pos;
 			A_SpawnParticle("88 AA FF",SPF_FULLBRIGHT,Random[ExploS](120,240),FRandom[ExploS](2.,4.),0,rpos.x,rpos.y,rpos.z,FRandom[ExploS](-.3,.3),FRandom[ExploS](-.3,.3),FRandom[ExploS](-.3,.3),0,0,FRandom[ExploS](.05,.1),FRandom[ExploS](.15,.3),-1,FRandom[ExploS](-.02,-.01));
 		}
 	}

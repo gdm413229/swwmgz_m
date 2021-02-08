@@ -25,32 +25,28 @@
 	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#define _XOPEN_SOURCE 700
-#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <strings.h>
 #include <errno.h>
-#include <sys/stat.h>
-#include <ftw.h>
+#include <dirent.h>
 
 char *lang = 0;
 FILE *lf = 0;
 char *txt = 0;
 long txtlen = 0;
-char *entname = 0;
+char entname[256];
 
-int processentry()
+void processentry()
 {
-	int hadtext = 0;
+	int gottag = 0;
 	long txtpos = 0;
 	int txtnum = 0;
 	char *nl = 0;
 	int hl = 0;
 gettag:
-	if ( txtpos > txtlen-4 ) return hadtext;
+	if ( txtpos > txtlen-4 ) goto processend;
 	if ( !strncmp(txt+txtpos,"TAG\n",4) )
 	{
 		txtpos += 4;
@@ -72,32 +68,39 @@ gettag:
 		txtnum++;
 		goto processtxt;
 	}
-	return hadtext;
+processend:
+	if ( gottag ) printf("\n");
+	else printf(" \033[1;31mEMPTY???\033[0m\n");
+	return;
 processtag:
+	printf(" \033[1;36mTAG\033[0m");
 	nl = strchr(txt+txtpos,'\n');
-	if ( !nl ) return hadtext;
+	if ( !nl ) goto processend;
 	*nl = '\0';
-	hadtext = 1;
 	fprintf(lf,"SWWM_LORETAG_%s = \"%s\";\n",entname,txt+txtpos);
 	txtpos = (nl-txt)+1;
+	gottag = 1;
 	goto gettag;
 processtab:
+	printf(" \033[1;36mTAB\033[0m");
 	nl = strchr(txt+txtpos,'\n');
-	if ( !nl ) return hadtext;
+	if ( !nl ) goto processend;
 	*nl = '\0';
-	hadtext = 1;
 	fprintf(lf,"SWWM_LORETAB_%s = \"%s\";\n",entname,txt+txtpos);
 	txtpos = (nl-txt)+1;
+	gottag = 1;
 	goto gettag;
 processrel:
+	printf(" \033[1;36mREL\033[0m");
 	nl = strchr(txt+txtpos,'\n');
-	if ( !nl ) return hadtext;
+	if ( !nl ) goto processend;
 	*nl = '\0';
-	hadtext = 1;
 	fprintf(lf,"SWWM_LOREREL_%s = \"%s\";\n",entname,txt+txtpos);
 	txtpos = (nl-txt)+1;
+	gottag = 1;
 	goto gettag;
 processtxt:
+	printf(" \033[1;36mTXT\033[0m");
 	hl = 0;
 	if ( txtnum <= 1 ) fprintf(lf,"SWWM_LORETXT_%s = \"",entname);
 	else fprintf(lf,"SWWM_LORETXT_%s%d = \"",entname,txtnum);
@@ -123,30 +126,33 @@ processtxt:
 		}
 	}
 	fprintf(lf,"\";\n");
-	hadtext = 1;
+	gottag = 1;
 	goto gettag;
 }
 
-static int ftw_callback( const char *path, const struct stat *st,
-	const int type, struct FTW *info )
+void readentry( const char *path )
 {
-	if ( type != FTW_F )
-		return FTW_CONTINUE;
-	if ( !strstr(path,".txt") )
-		return FTW_CONTINUE;
 	FILE *f = fopen(path,"rb");
 	if ( !f )
-		return FTW_CONTINUE;
-	txtlen = st->st_size;
+	{
+		fprintf(stderr," \033[31mcannot open file \033[1m'%s'\033[22m: \033[1m%s\033[0m\n",path,strerror(errno));
+		return;
+	}
+	fseek(f,0,SEEK_END);
+	txtlen = ftell(f);
+	rewind(f);
 	if ( txt ) txt = realloc(txt,txtlen+1);
 	else txt = malloc(txtlen+1);
 	memset(txt,0,txtlen+1);
 	fread(txt,1,txtlen,f);
 	fclose(f);
-	// copy over basename and strip extension
-	entname = strdup(path+info->base);
+	// copy over path, set to basename and strip extension
+	char *slash = strrchr(path,'/');
+	if ( slash ) strncpy(entname,slash+1,256);
+	else strncpy(entname,path,256);
 	char *ext = strchr(entname,'.');
 	if ( ext ) *ext = '\0';
+	printf(" \033[1;32m%s\033[22m:\033[0m",entname);
 	char *c = entname;
 	while ( *c )
 	{
@@ -156,52 +162,89 @@ static int ftw_callback( const char *path, const struct stat *st,
 		c++;
 	}
 	processentry();
-	free(entname);
 	free(txt);
-	entname = txt = 0;
-	return FTW_CONTINUE;
+	txt = 0;
 }
 
-#define NLANGS 8
+int txtonly( const struct dirent *e )
+{
+	if ( !strstr(e->d_name,".txt") ) return 0;
+	return 1;
+}
+
+int invalphasort( const struct dirent **a, const struct dirent **b )
+{
+	return strcoll((*b)->d_name,(*a)->d_name);
+}
+
+void loopdir( const char *dname )
+{
+	char fpath[256];
+	int nbase = snprintf(fpath,256,"%s/",dname);
+	struct dirent **e;
+	int ne = scandir(dname,&e,txtonly,invalphasort);
+	if ( ne == -1 )
+	{
+		fprintf(stderr,"\033[31mcannot scan directory \033[1m'%s'\033[22m: \033[1m%s\033[0m\n",dname,strerror(errno));
+		return;
+	}
+	while ( ne-- )
+	{
+		snprintf(fpath+nbase,256-nbase,"%s",e[ne]->d_name);
+		readentry(fpath);
+		free(e[ne]);
+	}
+	free(e);
+}
 
 int main( void )
 {
-	const char langs[NLANGS][16] =
+	const char langs[][16] =
 	{
 		"default",
 		"es",
-		"jp",
+/*		"jp",
 		"ru",
 		"fr",
 		"it",
 		"de",
-		"pl"
+		"pl"*/
 	};
-	const char langfiles[NLANGS][32] =
+	const char langfiles[][32] =
 	{
 		"../language.def_lore",
 		"../language.es_lore",
-		"../language.jp_lore",
+/*		"../language.jp_lore",
 		"../language.ru_lore",
 		"../language.fr_lore",
 		"../language.it_lore",
 		"../language.de_lore",
-		"../language.pl_lore",
+		"../language.pl_lore",*/
 	};
-	for ( int i=0; i<NLANGS; i++ )
+	int nlangs = sizeof(langs)/16;	// hacky, but works
+	for ( int i=0; i<nlangs; i++ )
 	{
 		// [HACKAROUND] only generate if there's no ignore file,
 		// because some people don't do things the right way
 		char ignpath[256];
 		snprintf(ignpath,256,"%s/.ignoreme",langs[i]);
-		struct stat s;
-		if ( !stat(ignpath,&s) ) continue;
+		FILE *ign = fopen(ignpath,"rb");
+		if ( ign )
+		{
+			fclose(ign);
+			printf("\033[33mskipping language \033[1m'%s'\033[0m\n",langs[i]);
+			continue;
+		}
+		printf("\033[33mprocessing language \033[1m'%s'\033[0m\n",langs[i]);
 		lf = fopen(langfiles[i],"wb");
-		if ( !lf ) continue;
-		fprintf(lf,"// this file was generated by mklang, "
-			"do not edit directly\n");
+		if ( !lf )
+		{
+			fprintf(stderr,"\033[31mcannot open \033[1m'%s'\033[22m for writing: \033[1m%s\033[0m\n",langfiles[i],strerror(errno));
+			continue;
+		}
+		fprintf(lf,"// this file was generated by mklang, do not edit directly\n");
 		fprintf(lf,"[%s]\n",langs[i]);
-		nftw(langs[i],ftw_callback,15,FTW_ACTIONRETVAL|FTW_PHYS);
+		loopdir(langs[i]);
 		fclose(lf);
 	}
 	return 0;

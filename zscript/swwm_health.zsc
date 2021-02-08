@@ -173,6 +173,7 @@ Class RefresherItem : SWWMHealth
 	}
 	override bool Use( bool pickup )
 	{
+		// never get auto-used on pickup unless we're in deathmatch
 		if ( pickup && !deathmatch ) return false;
 		return Super.Use(pickup);
 	}

@@ -249,10 +249,6 @@ Class SWWMSpareArmor : Inventory abstract
 
 	override bool Use( bool pickup )
 	{
-		bool shouldautouse = false;
-		if ( swwm_enforceautousearmor == 1 ) shouldautouse = true;
-		else if ( swwm_enforceautousearmor == -1 ) shouldautouse = false;
-		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
 		let cur = Owner.FindInventory(giveme);
 		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (GetDefaultByType(giveme).Amount+cur.Amount <= cur.MaxAmount) )
 		{
@@ -355,11 +351,9 @@ Class SWWMHealth : Inventory abstract
 
 	override bool Use( bool pickup )
 	{
-		bool shouldautouse = false;
-		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
-		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
-		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
 		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
+		// healing items won't get auto-used on pickup if their healing could "be wasted", unless they're powerup health (e.g. Refresher)
+		if ( pickup && !bBIGPOWERUP && (Owner.Health+GetDefaultByType(giveme).Amount > GetDefaultByType(giveme).MaxAmount) ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		SWWMHandler.HealthFlash(Owner.PlayerNumber());
 		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
@@ -368,6 +362,10 @@ Class SWWMHealth : Inventory abstract
 		return true;
 	}
 
+	// additional effects when automatically used
+	//  recursive: if true, the auto-use was called on another copy of the
+	//             item in a "stacked" heal. can be used to prevent certain
+	//             effects from happening multiple times in one go
 	virtual void AutoUseExtra( bool recursive )
 	{
 	}
@@ -388,7 +386,7 @@ Class SWWMHealth : Inventory abstract
 		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
 		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
 		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
-		if ( !shouldautouse && !bBIGPOWERUP ) return;
+		if ( !shouldautouse && !bBIGPOWERUP ) return;	// powerup health is always auto-used
 		if ( (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
 		{
 			newdamage = damage;
@@ -732,6 +730,8 @@ Class ReflectedBullet : SWWMCasing {}
 
 Class ParriedBuff : Inventory
 {
+	Vector3 oldvel;
+
 	Default
 	{
 		+INVENTORY.UNDROPPABLE;
@@ -742,9 +742,12 @@ Class ParriedBuff : Inventory
 	override void DoEffect()
 	{
 		Super.DoEffect();
+		if ( Owner.bBLASTED ) oldvel = Owner.vel;
 		if ( !Owner.bMISSILE && !Owner.bSKULLFLY )
 		{
 			// lost soul is no longer attacking
+			// remove blasted flag just in case
+			Owner.bBLASTED = false;
 			Destroy();
 			return;
 		}
@@ -765,6 +768,16 @@ Class ParriedBuff : Inventory
 			s.scale *= 2.;
 			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
 			s.SetShade(Color(4,2,1)*Random[Ponch](32,63));
+		}
+	}
+	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	{
+		// increase blast damage (way too tiny normally for lost souls)
+		if ( Owner.bBLASTED && (damageType == 'Melee') && !inflictor && !source )
+		{
+			newdamage = 20;
+			if ( special1&1 ) newdamage *= 2;
+			if ( special2 > 1 ) newdamage *= 8;
 		}
 	}
 }
@@ -821,7 +834,6 @@ Class ParryRing : Actor
 Class ParryField : Actor
 {
 	bool critsnd;
-	SWWMStats s;
 
 	Default
 	{
@@ -841,7 +853,6 @@ Class ParryField : Actor
 			Destroy();
 			return;
 		}
-		if ( master.player && !s ) s = SWWMStats.Find(master.player);
 		Vector3 x, y, z, origin;
 		[x, y, z] = swwm_CoordUtil.GetAxes(master.pitch,master.angle,master.roll);
 		origin = level.Vec3Offset(master.Vec2OffsetZ(0,0,master.player.viewz),x*20);
@@ -891,6 +902,7 @@ Class ParryField : Actor
 			i.bAMBUSH = true;
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
+			let s = Demolitionist(master).mystats;
 			if ( special1 >= special2 )	// perfect parry
 			{
 				// increased homing
@@ -1457,7 +1469,7 @@ Class SWWMWeapon : Weapon abstract
 		FLineTraceData d;
 		LineTrace(angle,1.5*DEFMELEERANGE*rangemul,slope,0,player.viewheight,data:d);
 		bool raging = CountInv("RagekitPower");
-		if ( d.HitType == TRACE_HitActor )
+		if ( (d.HitType == TRACE_HitActor) && !d.HitActor.FindInventory("ParriedBuff") )
 		{
 			bool bloodless = true;
 			double diff = deltaangle(self.angle,AngleTo(d.HitActor));

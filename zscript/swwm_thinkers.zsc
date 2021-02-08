@@ -99,7 +99,8 @@ Class SWWMStats : Thinker
 	int lastspawn, dashcount, boostcount, stompcount, airtime, kills,
 		deaths,	damagedealt, hdamagedealt, damagetaken, hdamagetaken,
 		mkill, hiscore, hhiscore, topdealt, toptaken, skill, wponch,
-		busts, buttslams, secrets, items, parries, pparries;
+		busts, buttslams, secrets, items, parries, pparries, pats,
+		befriend, smooch;
 	double grounddist, airdist, swimdist, fuelusage, topspeed, teledist;
 	Array<WeaponUsage> wstats;
 	Array<MonsterKill> mstats;
@@ -125,6 +126,40 @@ Class SWWMStats : Thinker
 		}
 		alreadygot.Push(which);
 		return false;
+	}
+
+	private Class<Weapon> WeaponFromInflictor( Actor inflictor, Name damagetype )
+	{
+		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
+		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
+		if ( which is 'DualExplodiumGun' ) which = 'ExplodiumGun';	// don't credit sister weapon
+		// properly credit some projectiles to their respective gun
+		if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
+		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';
+		else if ( (inflictor is 'ExplodiumMagArm') || (inflictor is 'ExplodiumMagProj') || (inflictor is 'ExplodiumBulletImpact') ) which = 'ExplodiumGun';
+		else if ( (inflictor is 'DragonBreathArm') || ((inflictor is 'SaltImpact') && !inflictor.Args[0]) || ((inflictor is 'SaltBeam') && !inflictor.Args[1]) || (inflictor is 'CorrodeDebuff') || (inflictor is 'CorrosiveFlechette') || ((inflictor is 'TheBall') && !inflictor.special1) || (inflictor is 'GoldenImpact') || (inflictor is 'GoldenSubImpact') || (inflictor is 'GoldenSubSubImpact') ) which = 'Spreadgun';
+		else if ( ((inflictor is 'SaltImpact') && inflictor.Args[0]) || ((inflictor is 'SaltBeam') && inflictor.Args[1]) || ((inflictor is 'TheBall') && inflictor.special1) ) which = 'Wallbuster';
+		else if ( (inflictor is 'EvisceratorChunk') || (inflictor is 'EvisceratorProj') ) which = 'Eviscerator';
+		else if ( (inflictor is 'HellblazerRavagerArm') || (inflictor is 'HellblazerWarheadArm') ) which = 'Hellblazer';
+		else if ( (inflictor is 'BigBiospark') || (inflictor is 'BiosparkBall') || (inflictor is 'BiosparkBeamImpact') || (inflictor is 'BiosparkComboImpact') || (inflictor is 'BiosparkComboImpactSub') || (inflictor is 'BiosparkBeam') || (inflictor is 'BiosparkArc') ) which = 'Sparkster';
+		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
+		else if ( (inflictor is 'YnykronBeam') || (inflictor is 'YnykronImpact') || (inflictor is 'YnykronSingularity') || (inflictor is 'YnykronCloud') || (inflictor is 'YnykronVoidBeam') || (inflictor is 'YnykronLightningArc') || (inflictor is 'YnykronLightningImpact') ) which = 'Ynykron';
+		else if ( (inflictor is 'Demolitionist') || (inflictor is 'DemolitionistShockwave') || (inflictor is 'DemolitionistRadiusShockwave') || (inflictor is 'SWWMGesture')
+			|| (inflictor is 'SWWMItemGesture') ) which = 'SWWMWeapon';	// hack to assume Demolitionist as weapon
+		else if ( inflictor is 'BigPunchSplash' )
+		{
+			// guess from damagetype
+			if ( (damagetype == 'Jump') || (damagetype == 'Dash') || (damagetype == 'Buttslam') || (damagetype == 'GroundPound') )
+				which = 'SWWMWeapon';
+			else if ( damagetype == 'Love' )
+				which = 'SWWMGesture';
+			// others are just weapon melee, so keep the readyweapon
+		}
+		else if ( inflictor is 'FroggyChair' )
+			which = 'SWWMItemGesture';	// more gross hacks
+		if ( damagetype == 'Falling' )
+			which = 'Weapon';	// the gross hacks continue
+		return which;
 	}
 
 	void AddDamageDealt( int dmg )
@@ -200,35 +235,7 @@ Class SWWMStats : Thinker
 				mstats.Push(ms);
 			}
 		}
-		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
-		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
-		if ( which is 'DualExplodiumGun' ) which = 'ExplodiumGun';	// don't credit sister weapon
-		// properly credit some projectiles to their respective gun
-		if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
-		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';
-		else if ( (inflictor is 'ExplodiumMagArm') || (inflictor is 'ExplodiumMagProj') || (inflictor is 'ExplodiumBulletImpact') ) which = 'ExplodiumGun';
-		else if ( (inflictor is 'DragonBreathArm') || ((inflictor is 'SaltImpact') && !inflictor.Args[0]) || ((inflictor is 'SaltBeam') && !inflictor.Args[1]) || (inflictor is 'CorrodeDebuff') || (inflictor is 'CorrosiveFlechette') || ((inflictor is 'TheBall') && !inflictor.special1) || (inflictor is 'GoldenImpact') || (inflictor is 'GoldenSubImpact') || (inflictor is 'GoldenSubSubImpact') ) which = 'Spreadgun';
-		else if ( ((inflictor is 'SaltImpact') && inflictor.Args[0]) || ((inflictor is 'SaltBeam') && inflictor.Args[1]) || ((inflictor is 'TheBall') && inflictor.special1) ) which = 'Wallbuster';
-		else if ( (inflictor is 'EvisceratorChunk') || (inflictor is 'EvisceratorProj') ) which = 'Eviscerator';
-		else if ( (inflictor is 'HellblazerRavagerArm') || (inflictor is 'HellblazerWarheadArm') ) which = 'Hellblazer';
-		else if ( (inflictor is 'BigBiospark') || (inflictor is 'BiosparkBall') || (inflictor is 'BiosparkBeamImpact') || (inflictor is 'BiosparkComboImpact') || (inflictor is 'BiosparkComboImpactSub') || (inflictor is 'BiosparkBeam') || (inflictor is 'BiosparkArc') ) which = 'Sparkster';
-		else if ( (inflictor is 'CandyBeam') || (inflictor is 'CandyPop') || (inflictor is 'CandyMagArm') || (inflictor is 'CandyGunProj') || (inflictor is 'CandyMagProj') || (inflictor is 'CandyBulletImpact') ) which = 'CandyGun';
-		else if ( (inflictor is 'YnykronBeam') || (inflictor is 'YnykronImpact') || (inflictor is 'YnykronSingularity') || (inflictor is 'YnykronCloud') || (inflictor is 'YnykronVoidBeam') || (inflictor is 'YnykronLightningArc') || (inflictor is 'YnykronLightningImpact') ) which = 'Ynykron';
-		else if ( (inflictor is 'Demolitionist') || (inflictor is 'DemolitionistShockwave') || (inflictor is 'DemolitionistRadiusShockwave') || (inflictor is 'SWWMGesture')
-			|| (inflictor is 'SWWMItemGesture') ) which = 'SWWMWeapon';	// hack to assume Demolitionist as weapon
-		else if ( inflictor is 'BigPunchSplash' )
-		{
-			// guess from damagetype
-			if ( (damagetype == 'Jump') || (damagetype == 'Dash') || (damagetype == 'Buttslam') || (damagetype == 'GroundPound') )
-				which = 'SWWMWeapon';
-			else if ( damagetype == 'Love' )
-				which = 'SWWMGesture';
-			// others are just weapon melee, so keep the readyweapon
-		}
-		else if ( inflictor is 'FroggyChair' )
-			which = 'SWWMItemGesture';	// more gross hacks
-		if ( damagetype == 'Falling' )
-			which = 'Weapon';	// the gross hacks continue
+		Class<Weapon> which = WeaponFromInflictor(inflictor,damagetype);
 		if ( !which ) return;
 		for ( int i=0; i<wstats.Size(); i++ )
 		{

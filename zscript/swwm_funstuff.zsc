@@ -678,6 +678,34 @@ Class FancyConfetti : Actor
 		Stop;
 	}
 }
+Class SuperFancyTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		XScale 24.;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*.95,scale.y);
+		A_FadeOut(.01);
+	}
+	States
+	{
+	Spawn:
+		XZW1 ABCDEFGH -1 Bright;
+		Stop;
+	}
+}
 Class SuperFancySparkle : Actor
 {
 	Default
@@ -685,12 +713,13 @@ Class SuperFancySparkle : Actor
 		RenderStyle "Add";
 		Radius 0.1;
 		Height 0;
-		Scale .2;
+		Scale .25;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
 		+ROLLSPRITE;
 		+ROLLCENTER;
+		+INTERPOLATEANGLES;
 		+FORCEXYBILLBOARD;
 		+NOINTERACTION;
 		FloatBobPhase 0;
@@ -698,17 +727,21 @@ Class SuperFancySparkle : Actor
 	override void PostBeginPlay()
 	{
 		Scale *= FRandom[ExploS](.75,1.5);
-		specialf1 = FRandom[ExploS](.95,.98);
-		specialf2 = FRandom[ExploS](.005,.015);
+		specialf1 = FRandom[ExploS](.94,.97);
+		specialf2 = FRandom[ExploS](.004,.012);
 		double ang = FRandom[ExploS](0,360);
 		double pt = FRandom[ExploS](-90,30);
-		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](4,20);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](2.,16.);
 		frame = Random[ExploS](0,7);
+		special1 = RandomPick[ExploS](-1,1)*Random[ExploS](1,6);
+		roll = FRandom[ExploS](0,360);
 	}
 	override void Tick()
 	{
 		if ( isFrozen() ) return;
+		prev = pos;
 		A_SetScale(scale.x*specialf1);
+		A_SetRoll(roll+special1,SPF_INTERPOLATE);
 		A_FadeOut(specialf2);
 		Vector3 dir = vel;
 		double magvel = dir.length();
@@ -720,6 +753,17 @@ Class SuperFancySparkle : Actor
 			vel = dir.unit()*magvel;
 		}
 		SetOrigin(level.Vec3Offset(pos,vel),true);
+		dir = level.Vec3Diff(pos,prev);
+		double dist = dir.length();
+		if ( dist < .1 ) return;
+		dir /= dist;
+		let t = Spawn("SuperFancyTrail",pos);
+		t.alpha = alpha*.5;
+		t.scale.y = dist;
+		t.scale.x *= scale.x;
+		t.angle = atan2(dir.y,dir.x);
+		t.pitch = asin(-dir.z)+90;
+		t.SetState(t.SpawnState+frame);
 	}
 	States
 	{
@@ -793,7 +837,7 @@ Class PartyTime : Actor
 		if ( !bAMBUSH ) A_StartSound("misc/tada",CHAN_ITEM);
 		double ang, pt;
 		int numpt = Random[ExploS](100,120);
-		if ( bAMBUSH ) numpt *= 2;
+		if ( bAMBUSH ) numpt *= 4;
 		for ( int i=0; i<numpt; i++ )
 		{
 			ang = FRandom[ExploS](0,360);
@@ -803,7 +847,7 @@ Class PartyTime : Actor
 			if ( bAMBUSH ) c.vel *= 2;
 		}
 		if ( !bAMBUSH ) return;
-		numpt = Random[ExploS](60,80);
+		numpt = Random[ExploS](60,90);
 		for ( int i=0; i<numpt; i++ )
 			Spawn("SuperFancySparkle",Vec3Offset(0,0,specialf1));
 		numpt = Random[ExploS](6,9);

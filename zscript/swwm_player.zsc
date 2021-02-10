@@ -61,6 +61,8 @@ Class Demolitionist : PlayerPawn
 	int healcooldown, healtimer, oldhealth;
 	bool scriptedinvul;
 
+	transient int lastuse, failcounter, failcooldown;
+
 	Property DashFuel : dashfuel;
 
 	Default
@@ -625,8 +627,21 @@ Class Demolitionist : PlayerPawn
 		oldangle = angle;
 		oldpitch = pitch;
 		if ( player && (player.mo == self) && (player.playerstate != PST_DEAD) && (player.cmd.buttons&BT_USE) )
+		{
+			if ( !player.usedown ) lastuse = gametic;
 			CheckNaziRemove();
+		}
 		Super.PlayerThink();
+		if ( (gametic == lastuse) && IsActorPlayingSound(CHAN_VOICE,"*usefail") )
+		{
+			failcounter++;
+			if ( (failcounter > 8) && !Random[DemoLines](0,max(0,12-failcounter/3)) && (gametic > failcooldown) )
+			{
+				failcooldown = SWWMHandler.AddOneliner("puzzfail",2,20);
+				failcounter = max(4,failcounter-10);
+			}
+		}
+		else if ( gametic > lastuse+50 ) failcounter = 0;
 		oldlagangle = lagangle;
 		oldlagpitch = lagpitch;
 		lagangle = lagangle*.8+angle*.2;
@@ -1164,11 +1179,7 @@ Class Demolitionist : PlayerPawn
 		// no damage whatsoever
 		if ( scriptedinvul )
 			return 0;
-		if ( damage <= 0 )
-		{
-			lastdamage = 0;
-			return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
-		}
+		if ( damage <= 0 ) return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 		if ( !inflictor && !source && (FloorSector.flags&Sector.SECF_ENDLEVEL) )
 		{
 			// end level hax
@@ -1178,9 +1189,10 @@ Class Demolitionist : PlayerPawn
 		}
 		int oldpchance = PainChance;
 		if ( damage < 5 ) PainChance = 0;
-		lastdamage = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+		int realdmg = Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
 		// hotfix damagecount overflow until proper fix is in stable gzdoom
 		if ( player && (player.damagecount < 0) ) player.damagecount = 100;
+		lastdamage = max(lastdamage,realdmg);
 		lastdamagetic = max(lastdamagetic,gametic+clamp(lastdamage/2,10,40));
 		if ( (lastdamage > 0) && (PainChance == 0) && (level.maptime>lastmpain) )
 		{
@@ -1188,7 +1200,7 @@ Class Demolitionist : PlayerPawn
 			A_DemoPain();
 		}
 		PainChance = oldpchance;
-		return lastdamage;
+		return realdmg;
 	}
 	override void CalcHeight()
 	{
@@ -1934,6 +1946,7 @@ Class Demolitionist : PlayerPawn
 			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
+		lastdamage = 0;
 	}
 	void A_DemoScream()
 	{

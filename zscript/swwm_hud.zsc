@@ -956,7 +956,7 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		if ( !i || !i.Icon.IsValid() ) return;
 		Vector2 scl = TexMan.GetScaledSize(i.Icon);
-		double mscl = 30./max(scl.x,scl.y);
+		double mscl = min(1.,30./max(scl.x,scl.y));
 		double dw = (ss.x/mscl), dh = (ss.y/mscl);
 		double dx = (xx+(30-scl.x*mscl)/2)/mscl, dy = (yy+(30-scl.y*mscl)/2)/mscl;
 		if ( i is 'Powerup' )

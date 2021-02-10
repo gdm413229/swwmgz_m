@@ -52,6 +52,27 @@ Class ArmorNuggetItem : SWWMSpareArmor
 		Stop;
 	}
 }
+Class ArmorNuggetBundleSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		int bnd = Random[Bundle](2,3);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn("ArmorNuggetItem",Vec3Angle(8,i*(360/bnd)));
+			a.special = special;
+			a.angle = i*(360/bnd);
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
 
 Class BlastSuit : SWWMArmor
 {

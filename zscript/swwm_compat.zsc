@@ -148,5 +148,15 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				level.ReplaceTextures("RROCK08","EQNXRR08",0);
 				break;
 		}
+		// [Hexen] force Mystic Ambit Incants to spawn outside coop
+		if ( gameinfo.gametype&GAME_Hexen )
+		{
+			for ( int i=0; i<GetThingCount(); i++ )
+			{
+				if ( GetThingEdNum(i) != 10120 ) continue;
+				uint flg = GetThingFlags(i);
+				SetThingFlags(i,flg|MTF_SINGLE);
+			}
+		}
 	}
 }

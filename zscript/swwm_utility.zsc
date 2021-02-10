@@ -1342,6 +1342,107 @@ Class SWWMUtility
 		p.mo.BringUpWeapon();
 		p.health = p.mo.Health = p.mo.SpawnHealth();
 	}
+
+	// check that all players can get enough of this if needed
+	//  multi: check for multiple copies, not just single instances
+	//         (useful e.g. for dual wieldable weapons)
+	static bool CheckNeedsItem( Class<Inventory> itm, bool multi = false )
+	{
+		int np = 0;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo ) continue;
+			np++;
+		}
+		int required = np;
+		if ( multi ) required *= GetDefaultByType(itm).MaxAmount;
+		// subtract all that exist already (either in world or owned)
+		let ti = ThinkerIterator.Create(itm);
+		Inventory i;
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( multi ) required -= i.Amount;
+			else required--;
+		}
+		return (required>0);
+	}
+
+	// multi-weapon spawn stuff
+	static private Class<Inventory> PickPair( Class<Inventory> a, Class<Inventory> b, int weight = 1 )
+	{
+		if ( CheckNeedsItem(a) ) return a;
+		if ( CheckNeedsItem(b) ) return b;
+		return Random[Replacements](weight,0)?a:b;
+	}
+
+	static Class<Inventory> PickSWWMSlot1()
+	{
+		if ( CheckNeedsItem('ExplodiumGun',true) && Random[Replacements](0,1) ) return 'ExplodiumGun';
+		/*if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
+		return PickPair('PusherWeapon','ItamexHammer');*/
+		return 'PusherWeapon';
+	}
+	static Class<Inventory> PickSWWMSlot2()
+	{
+		//return PickPair('ExplodiumGun','PlasmaBlast');
+		return 'ExplodiumGun';
+	}
+	static Class<Inventory> PickSWWMSlot3()
+	{
+		//return PickPair('Spreadgun','PuntzerBeta');
+		return 'Spreadgun';
+	}
+	static Class<Inventory> PickSWWMSlot4()
+	{
+		//return PickPair('Wallbuster','PuntzerGamma');
+		return 'Wallbuster';
+	}
+	static Class<Inventory> PickSWWMSlot5()
+	{
+		//return PickPair('Eviscerator','HeavyMahSheenGun');
+		return 'Eviscerator';
+	}
+	static Class<Inventory> PickSWWMSlot6()
+	{
+		//return PickPair('Hellblazer','Quadravol');
+		return 'Hellblazer';
+	}
+	static Class<Inventory> PickSWWMSlot7()
+	{
+		//return PickPair('Sparkster','BlackfireIgniter');
+		return 'Sparkster';
+	}
+	static Class<Inventory> PickSWWMSlot8()
+	{
+		//return PickPair('SilverBullet','EMPCarbine');
+		return 'SilverBullet';
+	}
+	static Class<Inventory> PickSWWMSlot9()
+	{
+		//return PickPair('CandyGun','RayKhom');
+		return 'CandyGun';
+	}
+	static Class<Inventory> PickSWWMSlot0()
+	{
+		/*if ( gameinfo.GameType&GAME_Strife ) return 'GrandLance';
+		return PickPair('Ynykron','GrandLance');*/
+		return 'Ynykron';
+	}
+	static Class<Inventory> PickDoomSlot6()
+	{
+		//return PickPair(PickSWWMSlot7(),PickSWWMSlot8(),2);
+		return PickPair('Sparkster','SilverBullet',2);
+	}
+	static Class<Inventory> PickDoomSlot7()
+	{
+		//return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
+		return PickPair('CandyGun','Ynykron',2);
+	}
+	static Class<Inventory> PickHereticSlot3()
+	{
+		//return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
+		return PickPair('Spreadgun','Wallbuster',2);
+	}
 }
 
 Class RadiusDebugSphere : Actor

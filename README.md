@@ -62,7 +62,7 @@ All weapons also have a quick melee attack using the **Weapon State 1** button, 
 
 If a weapon has no actions on either the reload or zoom buttons, it may be replaced with some special idle action, such as spinning or fiddling around with it.
 
-For now, the following are all weapons planned for the first release. More will be added afterwards (until then I'll tease you with some empty ZScript files :P).
+For now, the following are all weapons planned for the first release. More will be added afterwards, in a future update (oh boy).
 
 ### Deep Impact (slot 1) ~ Replaces Fist, Staff, Hexen starting weapons
 ![](docimg/deepimpact.png)
@@ -287,17 +287,17 @@ Healing items restore health (duh), armor items do exactly what you'd expect, an
 
 All of these can be carried in your inventory indefinitely before use, except in deathmatch, where they're activated immediately. Healing items are automatically used whenever possible (with the lowest tier healing items taking priority). Armor is immediately carried if you don't have any of that type on you, or if your existing armor drains and you have a spare. Most powerups can be toggled, unless specified otherwise.
 
-### Health Nugget ~ Replaces Health Bonus, Crystal Vial
+### Health Nugget ~ Replaces Health Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette, Mystic Ambit Incant
 ![](docimg/nuggethealth.png)
 
-+1 health boost, up to a cap of 200 points.
++1 health boost, up to a cap of 200 points. Comes in bundles when replacing things other than health bonuses.
 
-### Health Tetrahedron ~ Replaces Stimpak, Quartz Flask
+### Health Tetrahedron ~ Replaces Stimpack, Crystal Vial
 ![](docimg/tetrahealth.png)
 
 +10 health boost, up to a cap of 100 points.
 
-### Health Cube ~ Replaces Medkit, Quartz Flask
+### Health Cube ~ Replaces Medikit, Quartz Flask
 ![](docimg/cubehealth.png)
 
 +20 health boost, up to a cap of 100 points.
@@ -307,19 +307,19 @@ All of these can be carried in your inventory indefinitely before use, except in
 
 This artifact provides a +100 health boost plus a regeneration effect that heals +10 every 5 seconds, for up to 50 seconds, thus it doubles as a powerup. Its overhealing effects cap at 500 points (including the regen). Once its effects wear out, however, your excess health will gradually settle towards the typical 200 point cap. Unlike other health items, the **Refresher** auto-activates only if you're about to die. This usually prevents such a grim outcome... unless the damage is too high to counter.
 
-### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette
+### Armor Nugget ~ Replaces Armor Bonus, Timebomb of the Ancients, Disc of Repulsion, Flechette, Mystic Ambit Incant
 ![](docimg/nuggetarmor.png)
 
-Cumulative armor items that can increase resistance to all damage by as much as you can find. Each nugget adds 1% to the total. Above 100%, damage gets turned into additional health (up to the standard 100% cap). The upper cap for these is 200%.
+Cumulative armor items that can increase resistance to all damage by as much as you can find. Each nugget adds 1% to the total. Above 100%, damage gets turned into additional health (up to the standard 100% cap). The upper cap for these is 200%. Comes in bundles when replacing things other than armor bonuses.
 
-### Blast Suit ~ Replaces Green Armor, Silver Shield, Mesh Armor
+### Blast Suit ~ Replaces Green Armor, Silver Shield, Platinum Helm, Amulet of Warding
 ![](docimg/blastsuit.png)
 
 The blast suit is a nice little light armor which provides a 30% reduction to damage and an additional 50% to splash damage.
 
 Can handle a total of 150 damage points before breaking.
 
-### War Armor ~ Replaces Blue Armor, Enchanted Shield, Falcon Shield
+### War Armor ~ Replaces Blue Armor, Enchanted Shield, Mesh Armor, Falcon Shield
 ![](docimg/wararmor.png)
 
 Decent armor, protects very well against all damage. Reduction factors are as follows:
@@ -330,12 +330,12 @@ Decent armor, protects very well against all damage. Reduction factors are as fo
 
 Can eat up a total of 250 damage points before breaking.
 
-### Grilled Cheese Sandwich ~ Replaces Megasphere, Morph Ovum, Platinum Helm
+### Grilled Cheese Sandwich ~ Replaces Megasphere, Morph Ovum, Dragonskin Bracers
 ![](docimg/sandwich.png)
 
 The ultimate meal. Grants a full 1000 health and magically gives you a full stack of **Armor Nuggets**, a **Blast Suit** and a **War Armor**. In addition it prevents you from dying at all when it activates automatically (this wondrous artifact can even save you from the destruction of the **Ynykron Artifact**). Keep in mind that this overhealing above 500 points fades away much quicker than the **Refresher**'s, and you can't use another sandwich again until the overheal fades.
 
-### Ghost Artifact ~ Replaces Blur Sphere, Shadowsphere, Amulet of Warding
+### Ghost Artifact ~ Replaces Blur Sphere, Shadowsphere
 ![](docimg/ghost.png)
 
 Actual 100% invisibility, a relic from the old **UnSX** days.
@@ -397,7 +397,9 @@ Reveals the entire layout of the map and shows key locations in the HUD. Also al
 ## The Collectibles
 ![](docimg/chancebox.png)
 
-Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. While some will drop very useful goodies, one among them will provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
+Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants and Chaos Devices (as the game generally doesn't have secret areas).
+
+While some will drop very useful goodies, one among them will provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
 
 ***(Do note that this feature is currently not fully implemented, there may be missing models)***
 
@@ -483,7 +485,7 @@ The scoring system is pretty straightforward. Each enemy you kill will give you 
 
 You are also given +100 points for each secret found, +1000 if it's the final secret. Countable items give +10 points each or +500 if it's the final item. In addition, +5000 will be given to all players if the level is fully cleared (100% kills/items/secrets).
 
-Score can be used to buy items on the in-game store, and it is preserved between hubs, but pistol starts will reset it.
+Score can be used to buy items on the in-game store (or gained from selling them), and it is preserved between hubs, but pistol starts will reset it.
 
 In **Doom** and **Heretic**, collected keys will be displayed below the score box.
 

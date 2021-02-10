@@ -5,6 +5,19 @@
 
 Class SWWMLevelCompatibility : LevelPostProcessor
 {
+	private void EquinoxBossBrainHandle( uint lineno, int sectortag )
+	{
+		// don't spawn boss brains until it's time to crush them
+		for ( int i=0; i<GetThingCount(); i++ )
+		{
+			if ( GetThingEdNum(i) != 88 ) continue;
+			SetThingEdNum(i,9001);
+			SetThingID(i,666);
+		}
+		// change the crusher line
+		SetLineSpecial(lineno,ACS_Execute,-Int('EQUINOX_BRAINCRUSH'),0,sectortag);
+	}
+
 	protected void Apply( Name checksum, String mapname )
 	{
 		int numcol = 6;
@@ -55,8 +68,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			int ncellsa = 0, ncellsb = 0;
 			for ( int i=0; i<GetThingCount(); i++ )
 			{
-				int tn = GetThingEdNum(i);
-				if ( tn != 17 ) continue;
+				if ( GetThingEdNum(i) != 17 ) continue;
 				Vector3 pos = GetThingPos(i);
 				if ( pos.y != 480. ) continue;
 				if ( pos.x == -5472. )
@@ -71,6 +83,24 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				}
 			}
 			break;
+		// Equinox MAP04
+		case 'E66BCCFAD7AC40EFB21E2A19131E1522':
+			EquinoxBossBrainHandle(2406,27);
+			// raise floor by 10 units so its untextured lower lines don't glitch out at eye level
+			OffsetSectorPlane(248,0,10.);
+			break;
+		// Equinox MAP07
+		case 'A0B6B83DC8BD50FC84170572840DE585':
+			EquinoxBossBrainHandle(3423,31);
+			break;
+		// Equinox MAP10
+		case 'F91E3FE225F10EECBE21486E1BB14834':
+			EquinoxBossBrainHandle(2813,29);
+			break;
+		// Equinox MAP13
+		case '3805A661D5C4523AFF7BF86991071043':
+			EquinoxBossBrainHandle(4106,60);
+			break;
 		// Kinsie's Test Map (HERETIC)
 		case '0EADB2F82732A968B8513E4DC6138439':
 			numcol = 7;
@@ -82,6 +112,41 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			for ( int i=0; i<numcol; i++ )
 				AddThing(4206900+i,(1472+64*i,640,0));
 			break;
+		}
+		switch ( checksum )
+		{
+			// ALL of Equinox
+			case '9705315427A2F951A538B23C39199236':
+			case '54E9953A3C1A88641E00AA353BAF46E9':
+			case 'DD3986E184829DAB73160F4C122155F9':
+			case 'B3E6CAE9983EA1DC4D9544DA26118569':
+			case '3E4DFC55EAE85A7FE02DD21ED33AABCA':
+			case 'ECCB69F1BBF91D8F67D8583EA2546863':
+			case 'E66BCCFAD7AC40EFB21E2A19131E1522':
+			case 'A0B6B83DC8BD50FC84170572840DE585':
+			case '9BA1ACB72D878AFA3CB22B810D6CCD9A':
+			case 'A26749D9B9CD70ECED5C7B6BAB6D859E':
+			case '3805A661D5C4523AFF7BF86991071043':
+			case 'F91E3FE225F10EECBE21486E1BB14834':
+			case '838BA30EB0B003C070414093BFDFA72A':
+				// replace certain animated flats with duplicates
+				// this avoids unintended TERRAIN defs from applying to them
+				level.ReplaceTextures("SLIME01","EQNXSL01",0);
+				level.ReplaceTextures("SLIME02","EQNXSL02",0);
+				level.ReplaceTextures("SLIME03","EQNXSL03",0);
+				level.ReplaceTextures("SLIME04","EQNXSL04",0);
+				level.ReplaceTextures("SLIME09","EQNXSL09",0);
+				level.ReplaceTextures("SLIME10","EQNXSL10",0);
+				level.ReplaceTextures("SLIME11","EQNXSL11",0);
+				level.ReplaceTextures("SLIME12","EQNXSL12",0);
+				level.ReplaceTextures("BLOOD1","EQNXBLD1",0);
+				level.ReplaceTextures("BLOOD2","EQNXBLD2",0);
+				level.ReplaceTextures("BLOOD3","EQNXBLD3",0);
+				level.ReplaceTextures("RROCK05","EQNXRR05",0);
+				level.ReplaceTextures("RROCK06","EQNXRR06",0);
+				level.ReplaceTextures("RROCK07","EQNXRR07",0);
+				level.ReplaceTextures("RROCK08","EQNXRR08",0);
+				break;
 		}
 	}
 }

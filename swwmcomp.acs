@@ -40,6 +40,12 @@ SCRIPT "NERVE_EXITOPEN" ( void )
 	Ceiling_RaiseByValue(24,8,80);
 }
 
+SCRIPT "EQUINOX_BRAINCRUSH" ( int tag )
+{
+	SpawnSpotFacing("BossBrain",666);
+	Ceiling_CrushAndRaiseDist(tag,8,8,10);
+}
+
 // this one is for forcing episodes to continue seamlessly
 // will be used eventually
 SCRIPT "EPISODIC_CONTD" ( void )

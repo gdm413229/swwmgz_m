@@ -144,9 +144,11 @@ Class DemolitionistMenu : GenericMenu
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		// mission text
+		bool nrftl = false;
 		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
 		{
 			int clus = level.cluster;
+			if ( clus == 11 ) nrftl = true;
 			bool eviternity = SWWMUtility.IsEviternity();
 			if ( eviternity )
 			{
@@ -161,6 +163,9 @@ Class DemolitionistMenu : GenericMenu
 				else if ( level.levelnum <= 32 ) clus = 8;
 				missionstr = String.Format("$SWWM_MISSION_EVITERNITY%d",clus);
 			}
+			// naive method to guess if this is sigil (also handle wadsmoosh, which uses cluster 25 instead)
+			else if ( ((clus == 5) || (clus == 25)) && (level.mapname.Left(2) == "E5") )
+				missionstr = String.Format("$SWWM_MISSION_SIGIL");
 			else missionstr = String.Format("$SWWM_MISSION_DOOM%d",clus);
 			int csiz = stats.clustervisit.Size();
 			if ( (csiz > 0) && stats.secretdone[csiz-1] )
@@ -289,6 +294,13 @@ Class DemolitionistMenu : GenericMenu
 			c_hour = 18;
 			c_minute = 37;
 			c_tz = "EDT";
+			if ( nrftl )
+			{
+				// NRFTL just happens the next day after
+				c_day = 6;
+				c_hour = 15;
+				c_minute = 48;
+			}
 		}
 		if ( (missionstr != "$SWWM_MISSION_NONE") || (missionbacklog.Size() > 0) )
 			tabs.Push(TAB_MISSION);

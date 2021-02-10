@@ -33,3 +33,11 @@ SCRIPT "HHR_BRAINWALL" ( void )
 	Generic_Floor(827,32,0,2,0);
 	ClearLineSpecial();
 }
+
+// this one is for forcing episodes to continue seamlessly
+// will be used eventually
+SCRIPT "EPISODIC_CONTD" ( void )
+{
+	ScriptCall("SWWMUtility","WipeInventory",1);
+	Exit_Normal(0);
+}

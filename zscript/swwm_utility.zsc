@@ -1098,10 +1098,28 @@ Class SWWMUtility
 			 || (csum ~== "589627883DA0AFFEF9AF365203512A5F")
 			 || (csum ~== "771092812F38236C9DF2CB06B2D6B24F")
 			 || (csum ~== "1037366026AAB4B0CF11BAB27DB90E4E")
-			 || (csum ~== "55962881582C9B2B5AB88805B032230A") )
+			 || (csum ~== "55962881582C9B2B5AB88805B032230A")
+			 // NRFTL
+			 || (csum ~== "B2C6635EC41DA8D96065166B0E14E78E")
+			 || (csum ~== "C7471AF46CFDA07BA0EB5C4D4DE2E136")
+			 || (csum ~== "FDE03D8F2D3D8E37483FC4589B3D54E9")
+			 || (csum ~== "FF635FB9A2F076566299910F8C78F707")
+			 || (csum ~== "7E0E3D6E3643082B86C153CC04A0D1D1")
+			 || (csum ~== "7EB864A03948C3F918F9223B2D1F8911")
+			 || (csum ~== "3262C22DD1532DF4DFCFEEB6AE0E11BB")
+			 || (csum ~== "3843B06A279EB9CEDC18C30CF32074C2")
+			 || (csum ~== "047991BB81F9790B69C25B020DF8B25C")
+			 // SIGIL (1.21 only)
+			 || (csum ~== "AEBF219BF02AAEC549BA3EF8CB3F715B")
+			 || (csum ~== "EB984250D4935E93C265AE8C8455560F")
+			 || (csum ~== "2A6B4D277F526BFB3ADB122609FEEAD7")
+			 || (csum ~== "4A4832BEBE16A3D56912490A4E61F59B")
+			 || (csum ~== "4E5D482364F6F787CB8EFC17BDE5D64D")
+			 || (csum ~== "6EAD80DA1F30B4B3546FA294EEF9F87C")
+			 || (csum ~== "8C35EFBA700537035C84F5E1AD35C064")
+			 || (csum ~== "3417A4859C8FECE797C9DAA715D14D63")
+			 || (csum ~== "38028DC7E09DC5C91068AAC565A3962B") )
 			return true;
-		// no sigil
-		// no NRFTL
 		return false;
 	}
 	static bool IsVanillaHereticMap()
@@ -1157,7 +1175,7 @@ Class SWWMUtility
 			 || (csum ~== "916318D8B06DAC2D83424B23E4B66531")
 			 || (csum ~== "7285877BB9726C7B934C28F7E733C28B") )
 			return true;
-		// no episode 6
+		// no episode 6 (these wouldn't have mission data anyway)
 		return false;
 	}
 	static bool IsVanillaHexenMap()
@@ -1262,7 +1280,7 @@ Class SWWMUtility
 			 || (csum ~== "7729174BAA658C8FD86CF8290422F512")
 			 || (csum ~== "33752742BCA8E539A6EE3E5D0FDA8744") )
 			return true;
-		// no deathkings
+		// no deathkings (yet)
 		return false;
 	}
 
@@ -1300,6 +1318,29 @@ Class SWWMUtility
 		if ( (tn ~== "ZZWOLF12") || (tn ~== "ZZWOLF13") )
 			return true, TexMan.CheckForTexture("ZZWOLF11",TexMan.Type_Any);
 		return false, checkme;
+	}
+
+	// full reset of inventory (excluding collectibles, and optionally resetting the score)
+	static play void WipeInventory( Actor mo, bool resetscore = false )
+	{
+		PlayerInfo p = mo.player;
+		if ( !p || !p.mo ) return;
+		SWWMCredits c = SWWMCredits.Find(p);
+		if ( resetscore && c ) c.hcredits = c.credits = 0;
+		Actor last = p.mo;
+		while ( last.inv )
+		{
+			let inv = last.inv;
+			if ( !(inv is 'SWWMCollectible') )
+			{
+				inv.Destroy();
+				if ( !inv.bDestroyed ) last = inv;
+			}
+			else last = inv;
+		}
+		p.mo.GiveDefaultInventory();
+		p.mo.BringUpWeapon();
+		p.health = p.mo.Health = p.mo.SpawnHealth();
 	}
 }
 

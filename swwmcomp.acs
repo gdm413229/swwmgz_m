@@ -34,6 +34,12 @@ SCRIPT "HHR_BRAINWALL" ( void )
 	ClearLineSpecial();
 }
 
+SCRIPT "NERVE_EXITOPEN" ( void )
+{
+	Stairs_BuildUpDoomCrush(14,32,16,0,0);
+	Ceiling_RaiseByValue(24,8,80);
+}
+
 // this one is for forcing episodes to continue seamlessly
 // will be used eventually
 SCRIPT "EPISODIC_CONTD" ( void )

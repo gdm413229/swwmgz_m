@@ -41,6 +41,36 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			SetThingID(50183,666);
 			SetLineSpecial(21964,ACS_Execute,-Int('HHR_BRAINWALL'));
 			break;
+		// NRFTL MAP08
+		case '7EB864A03948C3F918F9223B2D1F8911':
+			// prevent easy cheesing of the exit teleporter
+			AddSectorTag(155,24);
+			OffsetSectorPlane(155,1,-80.);
+			SetLineSpecial(652,ACS_Execute,-Int('NERVE_EXITOPEN'));
+			break;
+		// Micro Slaughter Community Project MAP13
+		case 'E45AA3BE411845AA0DEE7CA5DAAB65FE':
+			// reduce OBSCENELY EXCESSIVE number of cell packs in voodoo doll conveyors (400), which will cause immense lag when replaced with mod ammo
+			// unsurprisingly, this actually makes the map go from completely unplayable to having perfectly smooth performance (gee, I wonder why)
+			int ncellsa = 0, ncellsb = 0;
+			for ( int i=0; i<GetThingCount(); i++ )
+			{
+				int tn = GetThingEdNum(i);
+				if ( tn != 17 ) continue;
+				Vector3 pos = GetThingPos(i);
+				if ( pos.y != 480. ) continue;
+				if ( pos.x == -5472. )
+				{
+					ncellsa++;
+					if ( ncellsa > 20 ) SetThingEdNum(i,0);
+				}
+				else if ( pos.x == -5344. )
+				{
+					ncellsb++;
+					if ( ncellsb > 20 ) SetThingEdNum(i,0);
+				}
+			}
+			break;
 		// Kinsie's Test Map (HERETIC)
 		case '0EADB2F82732A968B8513E4DC6138439':
 			numcol = 7;

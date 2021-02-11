@@ -308,11 +308,12 @@ Class SWWMHandler : EventHandler
 		MAP_DMAP07,
 		MAP_DMAP30,
 		MAP_HMAP12,
-		MAP_HMAP23_HMAP27,
+		MAP_HMAP23_HMAP27_HMAP48_HMAP55,
 		MAP_HMAP36,
 		MAP_HMAP37,
 		MAP_HMAP38,
 		MAP_HMAP40,
+		MAP_HMAP60,
 		MAP_EVMAP30	// eviternity
 	};
 
@@ -350,8 +351,10 @@ Class SWWMHandler : EventHandler
 			|| (mapsum ~== "91AD797F95CC4C6D6AE33B21F664C60B")
 			|| (mapsum ~== "188B1B4244BD8DA501D8532696EC8654")
 			|| (mapsum ~== "5B29D0889DF09A8250D62FA09EB2B452")
-			|| (mapsum ~== "D3C5FA777BA52264546E6569F167AF0D") )
-			return MAP_HMAP23_HMAP27;
+			|| (mapsum ~== "D3C5FA777BA52264546E6569F167AF0D")
+			|| (mapsum ~== "15FC0991D975325556EFF71F241A4458")
+			|| (mapsum ~== "2FAD54B58487884F06EAFA507B553921") )
+			return MAP_HMAP23_HMAP27_HMAP48_HMAP55;
 		if ( (mapsum ~== "4444C95C2029DA6EECAC92DAA31CE665")
 			|| (mapsum ~== "33752742BCA8E539A6EE3E5D0FDA8744")
 			|| (mapsum ~== "3FFAF2F624C1B4BB6F581DCF7B99CBA7") )
@@ -368,6 +371,8 @@ Class SWWMHandler : EventHandler
 			|| (mapsum ~== "1C5DE5A921DEE405E98E7E09D9829387")
 			|| (mapsum ~== "2A6C4235B942467D25FD50D5B313E67A") )
 			return MAP_HMAP40;
+		if ( mapsum ~== "B0ADDB295A3ACCE43978AAC91FB8C58A" )
+			return MAP_HMAP60;
 		if ( mapsum ~== "5C5E5C08AF3572F31CF27318679F2B4E" )
 			return MAP_EVMAP30;
 		return MAP_NONE;
@@ -2033,7 +2038,7 @@ Class SWWMHandler : EventHandler
 				bosstag = "$BT_DRAGON";
 			}
 		}
-		else if ( bossmap == MAP_HMAP23_HMAP27 )
+		else if ( bossmap == MAP_HMAP23_HMAP27_HMAP48_HMAP55 )
 		{
 			if ( e.Thing is 'Heresiarch' )
 			{
@@ -2051,6 +2056,17 @@ Class SWWMHandler : EventHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_KORAX";
+			}
+		}
+		else if ( bossmap == MAP_HMAP60 )
+		{
+			if ( (e.Thing is 'FighterBoss') || (e.Thing is 'ClericBoss') || (e.Thing is 'MageBoss') )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_DEATHKINGS";
+				initialized = true;	// healthbar shows from the start
 			}
 		}
 		else if ( bossmap == MAP_EVMAP30 )
@@ -2320,7 +2336,7 @@ Class SWWMHandler : EventHandler
 		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') ) e.Replacement = SWWMUtility.PickSWWMSlot1();
 		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
 		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') || (e.Replacee.GetClassName() == 'TangoPistol') ) e.Replacement = SWWMUtility.PickSWWMSlot2();
-		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') || (e.Replacee.GetClassName() == 'TangoShotgun') ) e.Replacement = SWWMUtility.PickSWWMSlot3();
+		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') || (e.Replacee.GetClassName() == 'TangoShotgun') ) e.Replacement = SWWMUtility.IsDoomOne()?SWWMUtility.PickHereticSlot3():SWWMUtility.PickSWWMSlot3();
 		else if ( (e.Replacee is 'SuperShotgun') || (e.Replacee is 'MWeapFrost') || (e.Replacee.GetClassName() == 'TangoSuperShotgun') ) e.Replacement = SWWMUtility.PickSWWMSlot4();
 		else if ( (e.Replacee is 'Crossbow') || (e.Replacee.GetClassName() == 'TangoScrapGun') ) e.Replacement = SWWMUtility.PickHereticSlot3();
 		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeaponPiece3') || (e.Replacee.GetClassName() == 'TangoAssaultRifle') || (e.Replacee.GetClassName() == 'TangoChaingun') ) e.Replacement = SWWMUtility.PickSWWMSlot5();

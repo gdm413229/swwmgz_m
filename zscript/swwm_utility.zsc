@@ -1120,6 +1120,7 @@ Class SWWMUtility
 			 || (csum ~== "3417A4859C8FECE797C9DAA715D14D63")
 			 || (csum ~== "38028DC7E09DC5C91068AAC565A3962B") )
 			return true;
+		// no TNT / Plutonia (non-canon Demolitionist appearance)
 		return false;
 	}
 	static bool IsVanillaHereticMap()
@@ -1278,9 +1279,35 @@ Class SWWMUtility
 			 || (csum ~== "78979A583B1E30D94C9DAE2BCFA9A18D")
 			 || (csum ~== "112599C94EB03328D217233D4CB65A70")
 			 || (csum ~== "7729174BAA658C8FD86CF8290422F512")
-			 || (csum ~== "33752742BCA8E539A6EE3E5D0FDA8744") )
+			 || (csum ~== "33752742BCA8E539A6EE3E5D0FDA8744")
+			 // Deathkings
+			 || (csum ~== "0C7B62B11C7970DAAF66F9084C8E408E")
+			 || (csum ~== "A5F820CB016DE3D9A402C0173E7F9998")
+			 || (csum ~== "B0ADDB295A3ACCE43978AAC91FB8C58A")
+			 || (csum ~== "B295A2FBB187A1DC8AEFDE825DFB084A")
+			 || (csum ~== "B77D810C972976C54A694C62361FFF9D")
+			 || (csum ~== "C35E3C2727CCD7EF7793230AEF6255E7")
+			 || (csum ~== "C35F7CB2E9F93BB331FFCEB6622ABD64")
+			 || (csum ~== "CA7825F84BC08E76C6C85A41AEFE4370")
+			 || (csum ~== "CB0334184147FF565F6EF437F316B3EB")
+			 || (csum ~== "E2B5D1400279335811C1C1C0B437D9C8")
+			 || (csum ~== "E3EFB0156A20ADF2DF00915A0EA85DF5")
+			 || (csum ~== "2FAD54B58487884F06EAFA507B553921")
+			 || (csum ~== "3BB1724A4B66E85E2431110E4D7C4B76")
+			 || (csum ~== "6C886A3E37410C6FC83ED87BB6E9864F")
+			 || (csum ~== "6FAFFEAAE301FD341169A3CC63CBE183")
+			 || (csum ~== "7C28FD1ED662667FC54CDA123CF0614A")
+			 || (csum ~== "7DC65D5029DD834481CD716B3D71388A")
+			 || (csum ~== "11A83AAE9F747E1BA649F52D6C2DDB3A")
+			 || (csum ~== "15FC0991D975325556EFF71F241A4458")
+			 || (csum ~== "56D7CFFF0440328ADB20521ED70C739A")
+			 || (csum ~== "90B4951F996BA30096F2D4238EEC39CA")
+			 || (csum ~== "2945EDC2A9D7222AE54F0C68E1EA79FC")
+			 || (csum ~== "4482A52290F42C50D6F80A0D4751A0E4")
+			 || (csum ~== "4945FC07392AF9D2F1FABDD471C691A5")
+			 || (csum ~== "7721B620EA970DF48FF4A18489822F6C")
+			 || (csum ~== "0487193FFC57884EDB053F3E9148C534") )
 			return true;
-		// no deathkings (yet)
 		return false;
 	}
 
@@ -1341,6 +1368,17 @@ Class SWWMUtility
 		p.mo.GiveDefaultInventory();
 		p.mo.BringUpWeapon();
 		p.health = p.mo.Health = p.mo.SpawnHealth();
+	}
+
+	// checks if we're playing in doom 1
+	// this is used so we can sometimes replace the shotgun with a SSG slot weapon
+	static bool IsDoomOne()
+	{
+		if ( !(gameinfo.GameType&GAME_DOOM) ) return false;
+		// is the map in ExMx format? Then it's likely we're playing a doom 1 map
+		if ( (level.mapname.Length() >= 4) && (level.mapname.Mid(0,1) == "E") && (level.mapname.ByteAt(1) >= 0x30) && (level.mapname.ByteAt(1) < 0x40) && (level.mapname.Mid(2,1) == "M") && (level.mapname.ByteAt(3) >= 0x30) && (level.mapname.ByteAt(3) < 0x40) )
+			return true;
+		return false;
 	}
 
 	// check that all players can get enough of this if needed
@@ -1438,7 +1476,7 @@ Class SWWMUtility
 		//return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
 		return PickPair('CandyGun','Ynykron',2);
 	}
-	static Class<Inventory> PickHereticSlot3()
+	static Class<Inventory> PickHereticSlot3()	// also used for Doom 1
 	{
 		//return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
 		return PickPair('Spreadgun','Wallbuster',2);

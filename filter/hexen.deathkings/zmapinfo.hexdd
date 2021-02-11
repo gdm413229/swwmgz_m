@@ -1,0 +1,66 @@
+// edited Hexen ending (for Deathkings)
+// draws the three player classes unconditionally
+// shifts the final text screen so it doesn't get cut off
+// it also gives it a lil' flavor change (heh)
+Intermission Inter_Chess
+{
+	Fader
+	{
+		Music = "Hall"
+		Background = "graphics/FINALE1_noorb.png"
+		Time = 2
+		FadeType = FadeIn
+	}
+	TextScreen
+	{
+		Background = "graphics/FINALE1_noorb.png"
+		TextSpeed = 3
+		Text = "$TXT_HEXDD_WIN1MSG"
+		Time = -250
+	}
+	TextScreen
+	{
+		Music = "Orb"
+		Background = "FINALE2"
+		TextSpeed = 3
+		Text = "$TXT_HEXDD_WIN2MSG"
+		Time = -250
+	}
+	Fader
+	{
+		Background = "FINALE2"
+		Time = 2
+		FadeType = FadeOut
+	}
+	Fader
+	{
+		Music = "music/nomusic.ogg"
+		Sound = "misc/orbexplode"
+		Background = "graphics/FINALE2_splode.png"
+		Time = 6
+		FadeType = FadeOut
+	}
+	TextScreen
+	{
+		Background = "graphics/FINALE2_black.png"
+		TextSpeed = 3
+		Text = "$TXT_HEXDD_WIN3MSG"
+		Time = -250
+	}
+	Fader
+	{
+		Music = "Chess"
+		Background = "FINALE3"
+		Draw = "CHESSALL", 20, 0
+		Time = 2
+		FadeType = FadeIn
+	}
+	TextScreen
+	{
+		Background = "FINALE3"
+		Draw = "CHESSALL", 20, 0
+		TextSpeed = 3
+		Text = "$TXT_HEXDD_WIN4MSG"
+		Position = 10, 120
+	}
+}

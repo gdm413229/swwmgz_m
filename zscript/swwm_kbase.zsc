@@ -145,6 +145,7 @@ Class DemolitionistMenu : GenericMenu
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		// mission text
 		bool nrftl = false;
+		bool hexdd = false;
 		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
 		{
 			int clus = level.cluster;
@@ -214,7 +215,11 @@ Class DemolitionistMenu : GenericMenu
 		}
 		else if ( (gameinfo.gametype&GAME_Hexen) && SWWMUtility.IsKnownMap() )
 		{
-			missionstr = String.Format("$SWWM_MISSION_HEXEN%d",level.cluster);
+			// detect deathkings in the most amazing way imaginable
+			int mapnamenum = level.mapname.Mid(3).ToInt(10);
+			if ( mapnamenum > 40 ) hexdd = true;
+			String gstr = hexdd?"HEXDD":"HEXEN";
+			missionstr = String.Format("$SWWM_MISSION_%s%d",gstr,level.cluster);
 			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
 				missionstr = "$SWWM_MISSION_NONE";
 			int csiz = stats.clustervisit.Size();
@@ -224,7 +229,7 @@ Class DemolitionistMenu : GenericMenu
 				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
 					continue;
 				firstskip = true;
-				String xstr = String.Format("$SWWM_MISSION_HEXEN%d",stats.clustervisit[i]);
+				String xstr = String.Format("$SWWM_MISSION_%s%d",gstr,stats.clustervisit[i]);
 				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
 					continue;
 				missionbacklog.Push(xstr);
@@ -259,6 +264,13 @@ Class DemolitionistMenu : GenericMenu
 			c_hour = 16;
 			c_minute = 41;
 			c_tz = "JST";
+			if ( hexdd )
+			{
+				// deathkings happen the day after
+				c_day = 25;
+				c_hour = 10;
+				c_minute = 28;
+			}
 		}
 		else if ( gameinfo.gametype&GAME_Strife )
 		{

@@ -380,6 +380,17 @@ Class Demolitionist : PlayerPawn
 		eg.chambered = true;
 		DualExplodiumGun(eg.SisterWeapon).chambered = true;
 		player.ReadyWeapon = player.PendingWeapon = eg;
+		// in hexdd, we start with the chaos sphere in our grasp
+		if ( SWWMUtility.IsVanillaHexenMap() )
+		{
+			// this really is a dumb way to detect the expansion
+			int mapnamenum = level.mapname.Mid(3).ToInt(10);
+			if ( mapnamenum > 40 )
+			{
+				let cs = Inventory(Spawn('SWWMChaosSphere'));
+				cs.AttachToOwner(self);
+			}
+		}
 		bInDefaultInventory = false;
 	}
 	override void ClearInventory()
@@ -2016,7 +2027,7 @@ Class Demolitionist : PlayerPawn
 			if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 				SWWMHandler.AddOneliner("getweapon",2);
 		}
-		if ( (item is 'Key') && !key_reentrant && !deathmatch )
+		if ( (item is 'Key') && !key_reentrant && !deathmatch && !bInDefaultInventory )
 		{
 			// score
 			int score = 100;

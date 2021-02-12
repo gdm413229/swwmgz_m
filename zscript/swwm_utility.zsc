@@ -1405,6 +1405,21 @@ Class SWWMUtility
 		return (required>0);
 	}
 
+	// checks if instances of a certain item exist
+	//  skipme: optionally, ignore checking for one specific instance
+	//          (useful to check if we're the only copy of an item)
+	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null )
+	{
+		let ti = ThinkerIterator.Create(itm);
+		Inventory i;
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( i == skipme ) continue;
+			return true;
+		}
+		return false;
+	}
+
 	// multi-weapon spawn stuff
 	static private Class<Inventory> PickPair( Class<Inventory> a, Class<Inventory> b, int weight = 1 )
 	{

@@ -2572,7 +2572,7 @@ Class Spreadgun : SWWMWeapon
 		{
 			if ( CountInv(invoker.nextammo) <= 0 ) A_SwitchAmmoType(true);
 			int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
-			if ( invoker.nextammo && (CountInv(invoker.nextammo) > 0) && (invoker.loadammo != invoker.nextammo) )
+			if ( invoker.nextammo && (CountInv(invoker.nextammo) > 0) && ((invoker.loadammo != invoker.nextammo) || !invoker.chambered) )
 				flg |= WRF_ALLOWRELOAD;
 			A_WeaponReady(flg);
 			return ResolveState(null);

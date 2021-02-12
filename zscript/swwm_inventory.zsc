@@ -1059,6 +1059,7 @@ Class SWWMWeapon : Weapon abstract
 	ui Vector3 cpos;
 	ui Color ccol;
 	ui Vector2 lagvpos;
+	transient ui uint prevms;
 
 	bool IsSwapWeapon( Inventory i ) const
 	{
@@ -1294,6 +1295,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			SWWMWeapon(Owner.player.PendingWeapon).cpos = cpos;
 			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = lagvpos;
+			SWWMWeapon(Owner.player.PendingWeapon).prevms = prevms;
 		}
 	}
 	// extra drawing, usually scopes
@@ -1320,8 +1322,11 @@ Class SWWMWeapon : Weapon abstract
 		if ( !sb.proj.IsInFront() ) return;
 		Vector2 npos = sb.proj.ProjectToNormal();
 		vpos = sb.viewport.SceneToWindow(npos);
-		if ( lagvpos == (0,0) ) lagvpos = vpos;
-		else lagvpos = lagvpos*.7+vpos*.3;	// this will be fucky depending on the FPS, but oh well
+		double frametime = (MSTime()-prevms)/1000.;
+		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
+		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
+		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
+		prevms = MSTime();
 		if ( !ch_img ) ch_img = CVar.GetCVar('crosshair',players[consoleplayer]);
 		int cnum = abs(ch_img.GetInt());
 		if ( !cnum ) return;
@@ -1642,6 +1647,10 @@ Class SWWMWeapon : Weapon abstract
 		if ( swwm_enemydrops > 0 ) return false;
 		else if ( swwm_enemydrops == 0 )
 		{
+			// first, check if no others exist in the map, just in
+			// case this weapon drop MAY be needed
+			if ( !SWWMUtility.ItemExists(GetClass(),self) )
+				return false;	// drop us
 			// drop our corresponding ammo
 			if ( !DropAmmoType ) return true;
 			let a = Inventory(Spawn(DropAmmoType,pos,ALLOW_REPLACE));

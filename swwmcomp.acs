@@ -46,6 +46,61 @@ SCRIPT "EQUINOX_BRAINCRUSH" ( int tag )
 	Ceiling_CrushAndRaiseDist(tag,8,8,10);
 }
 
+SCRIPT "DVACATION_UNFUCK" ( void )
+{
+	Delay(1);
+	SetLineSpecial(2,226,StrArg("DVACATION_EXIT"));
+	SetLineSpecial(3,226,StrArg("DVACATION_BED"));
+}
+
+bool gotexit = false;
+
+SCRIPT "DVACATION_EXIT" ( void )
+{
+	if ( gotexit ) terminate;
+	gotexit = true;
+	SetPlayerProperty(0,1,PROP_FROZEN);
+	for ( int i=0; i<5; i++ )
+	{
+		QuakeEx(666,1,1,1,3,0,120,"",QF_RELATIVE|QF_SCALEDOWN);
+		PlaySound(666,"misc/boink",CHAN_AUTO);
+		Delay(Random(2,4)*3);
+	}
+	Delay(5);
+	QuakeEx(666,3,3,3,15,0,120,"",QF_RELATIVE|QF_SCALEDOWN);
+	PlaySound(666,"misc/boinkend",CHAN_AUTO);
+	Delay(30);
+	SetPlayerProperty(0,0,PROP_FROZEN);
+	Exit_Normal(0);
+}
+
+bool inbed = false;
+int boinks = 0;
+
+SCRIPT "DVACATION_BED" ( void )
+{
+	if ( inbed || (boinks >= 5) ) terminate;
+	inbed = true;
+	SetPlayerProperty(0,1,PROP_FROZEN);
+	for ( int i=0; i<5; i++ )
+	{
+		QuakeEx(667,1,1,1,3,0,120,"",QF_RELATIVE|QF_SCALEDOWN);
+		PlaySound(667,"misc/boink",CHAN_AUTO);
+		Delay(Random(2,4)*3);
+	}
+	Delay(5);
+	QuakeEx(667,3,3,3,15,0,120,"",QF_RELATIVE|QF_SCALEDOWN);
+	PlaySound(667,"misc/boinkend",CHAN_AUTO);
+	SpawnSpot("SWWMItemFog",27);
+	PlaySound(27,"misc/spawn",CHAN_AUTO);
+	Thing_SpawnNoFog(27,Random(23,25),0,0);
+	SetPlayerProperty(0,0,PROP_FROZEN);
+	Delay(15);
+	boinks++;
+	inbed = false;
+	if ( boinks >= 5 ) SetThingSpecial(667,0,0);	// can headpat now
+}
+
 // this one is for forcing episodes to continue seamlessly
 // will be used eventually
 SCRIPT "EPISODIC_CONTD" ( void )

@@ -3453,6 +3453,7 @@ Class HeadpatTracker : Actor
 	double hdoomheightfix;	// certain hdoom monsters kneel down, so their heads are lower than expected
 	double hdoomangfix;	// fix for imp in a chair
 	bool lethalpat;		// ending headpat immediately drops enemy health to 0
+	bool dvacationarghack;	// hackfix for some girls in doom vacation, disallows headpats if args[0] is 1
 
 	default
 	{
@@ -3497,6 +3498,7 @@ Class HeadpatTracker : Actor
 		if ( patting ) return false;	// already on it
 		if ( user.player.crouchdir == -1 ) return false;	// need to be standing up
 		if ( !user.player.onground ) return false;	// need to be on solid ground
+		if ( dvacationarghack && (target.args[0] == 1) ) return false;	// can't pat at the moment
 		// check use range
 		Vector3 diff = level.Vec3Diff(user.Vec2OffsetZ(0,0,user.player.viewz),Vec3Offset(0,0,target.Height));
 		if ( abs(diff.z) > PlayerPawn(user.player.mo).UseRange ) return false;

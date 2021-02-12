@@ -101,6 +101,18 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		case '3805A661D5C4523AFF7BF86991071043':
 			EquinoxBossBrainHandle(4106,60);
 			break;
+		// Doom Vacation MAP01 (1.4)
+		case 'F286BABF0D152259CD6B996E8920CA70':
+		// Doom Vacation MAP01 (1.5)
+		case 'A52BD2038CF814101AAB7D9C78F9ACE2':
+			// two girls shouldn't be headpattable, as they have use lines around them
+			SetThingArgument(314,0,1);
+			SetThingArgument(315,0,1);
+			SetThingID(314,666);
+			SetThingID(315,667);
+			// unfortunately the line special wrangling has to be done one tic after map load
+			// because fuck absolutely everything about how ACS works
+			break;
 		// Kinsie's Test Map (HERETIC)
 		case '0EADB2F82732A968B8513E4DC6138439':
 			numcol = 7;
@@ -146,6 +158,39 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				level.ReplaceTextures("RROCK06","EQNXRR06",0);
 				level.ReplaceTextures("RROCK07","EQNXRR07",0);
 				level.ReplaceTextures("RROCK08","EQNXRR08",0);
+				break;
+			// ALL of Doom Vacation
+			case 'D07842872226058F93D0957EA46ED782':
+			case 'F286BABF0D152259CD6B996E8920CA70':
+			case '7E2707328B6BCF0ACDC2E80049E21167':
+			case '8AA3E9B8E816E72A04368404402DD8E3':
+			case '8B28736D01492F3701CCD736C97EF125':
+			case '10D3C12050518E806801B12057437403':
+			case '48A7FC1AF2D1CCBFE7C6EFB4EEE97A50':
+			case '73B317A0DA2C75BD903E895A27EEEDB9':
+			case '62158F76FC56B62007C1F167A7921304':
+			case '0D33878E4C8164A792AECCDA56F08D60':
+			case 'A52BD2038CF814101AAB7D9C78F9ACE2':
+			case 'F6413AFAEB73B3848A82F70C2A01E47D':
+			case 'F8CBDC96A7E08CAFC5D7C0E711551E40':
+			case '3E821CC90C38B7D71DDEB0324D3900CC':
+			case '05D0AA06742B3C7DCD79E5F659267656':
+			case '8F6710E3570C2056FDCA591EF89B31A9':
+			case '382E99BBFA9301110630CD5F8F8056DA':
+			case '480F6AD2D2E266DA745FD8FA75EC327D':
+			case '968D97F5952E55DB2464274A8EE5F529':
+			case '5669E396BEDDEA6D90EF5AF5EC892811':
+				// get rid of these dumb skulltag ctf actors
+				for ( int i=0; i<GetThingCount(); i++ )
+				{
+					int ednum = GetThingEdNum(i);
+					if ( (ednum == 5130) || (ednum == 5131)
+						|| (ednum == 5080) || (ednum == 5081) )
+						SetThingEdNum(i,0);
+				}
+				// get rid of moan switches
+				level.ReplaceTextures("SW1ZIM","-noflat-",0);
+				level.ReplaceTextures("SW1TEK","-noflat-",0);
 				break;
 		}
 		// [Hexen] force Mystic Ambit Incants to spawn outside coop

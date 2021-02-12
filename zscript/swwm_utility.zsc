@@ -968,6 +968,23 @@ Class SWWMUtility
 		return false;
 	}
 
+	// detect doom vacation
+	static bool InDoomVacation()
+	{
+		// cheap, but hey, it should work
+		if ( Wads.FindLump("VACABEX") != -1 )
+		{
+			// just to make sure
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				if ( AllActorClasses[i].GetClassName() != "Babe" )
+					continue;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// detect vanilla maps (across all IWAD versions)
 	static bool IsVanillaDoomMap()
 	{

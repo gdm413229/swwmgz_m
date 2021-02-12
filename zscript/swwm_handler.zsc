@@ -818,6 +818,12 @@ Class SWWMHandler : EventHandler
 			AddOneliner("mapstart",3);
 		if ( !e.IsSaveGame && !e.IsReopen )
 		{
+			// doom vacation map01 hackaround for OPEN script not letting us
+			// change certain line specials in levelpostprocessor because
+			// HOLY FUCK IS EVERYTHING SHIT SOMETIMES
+			if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
+				 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
+				level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
 			// for skipping over merged exit lines (sharing vertices)
 			Array<Line> skipme;
 			skipme.Clear();
@@ -1852,6 +1858,83 @@ Class SWWMHandler : EventHandler
 		{
 			e.Thing.SetTag("$FN_NDEMON");
 			//e.Thing.Obituary = "$OB_NDEMON";
+		}
+		// doom vacation stuff
+		else if ( SWWMUtility.InDoomVacation() )
+		{
+			if ( e.Thing.GetClassName() == "Babe" )
+			{
+				e.Thing.bSHOOTABLE = false;	// no hurt
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .2;
+			}
+			else if ( e.Thing.GetClassName() == "CommanderKeen" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .4;
+				HeadpatTracker(hp).hdoomangfix = 5;
+			}
+			else if ( e.Thing.GetClassName() == "BBChair" )
+			{
+				e.Thing.bUSESPECIAL = false;
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .2;
+				HeadpatTracker(hp).hdoomangfix = 15;
+				HeadpatTracker(hp).patstate = e.Thing.MeleeState;
+			}
+			else if ( e.Thing.GetClassName() == "EvilEye" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .1;
+			}
+			else if ( e.Thing.GetClassName() == "HeadCandles" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomangfix = 20;
+			}
+			else if ( e.Thing.GetClassName() == "HeartColumn" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = -.3;
+			}
+			else if ( e.Thing.GetClassName() == "Meat2" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = -15;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "Meat3" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = 20;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "LegsBabe" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = -1.5;
+				HeadpatTracker(hp).hdoomangfix = 20;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "Meat4" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = 15;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
 		}
 		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
 			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )

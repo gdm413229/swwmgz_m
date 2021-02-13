@@ -39,7 +39,7 @@ Class DemolitionistMenu : GenericMenu
 	};
 
 	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
-		FancyBg, EasterEgg, LoreSeparator, LoreSeparatorW;
+		FancyBg, Drawing[3], LoreSeparator, LoreSeparatorW;
 	transient CVar lang, fuzz, pauseme;
 	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
 	Array<int> tabs;
@@ -126,7 +126,9 @@ Class DemolitionistMenu : GenericMenu
 		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_MiscPatch);
 		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_MiscPatch);
 		WindowSeparatorH = TexMan.CheckForTexture("graphics/KBase/WindowSeparatorH.png",TexMan.Type_MiscPatch);
-		EasterEgg = TexMan.CheckForTexture("graphics/KBase/Drawing.png",TexMan.Type_MiscPatch);
+		Drawing[0] = TexMan.CheckForTexture("graphics/KBase/Drawing_Saya.png",TexMan.Type_MiscPatch);
+		Drawing[1] = TexMan.CheckForTexture("graphics/KBase/Drawing_Ibuki.png",TexMan.Type_MiscPatch);
+		Drawing[2] = TexMan.CheckForTexture("graphics/KBase/Drawing_Kirin.png",TexMan.Type_MiscPatch);
 		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
 		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
 		MenuSound("menu/demoopen");
@@ -3407,9 +3409,33 @@ Class DemolitionistMenu : GenericMenu
 		}
 		else if ( tabs[curtab] == TAB_SECRET )
 		{
-			Screen.DrawTexture(EasterEgg,false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			str = StringTable.Localize("$SWWM_TODEMO");
-			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( gameinfo.gametype&(GAME_Strife|GAME_Hexen) )
+			{
+				Screen.DrawTexture(Drawing[2],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_KIRINPOEM");
+				BrokenLines l = fnt.BreakLines(str,300);
+				int mxlen = 0;
+				for ( int i=0; i<l.Count(); i++ )
+				{
+					if ( l.StringWidth(i) > mxlen ) mxlen = l.StringWidth(i);
+					xx = (i<l.Count()-1)?350:(350+mxlen-l.StringWidth(i));
+					Screen.DrawText(fnt,Font.CR_GOLD,origin.x+xx,origin.y+43+i*14,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+				str = StringTable.Localize("$SWWM_FROMKIRIN");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+			else if ( gameinfo.gametype&GAME_Heretic )
+			{
+				Screen.DrawTexture(Drawing[1],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_CUTIECLUB");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+			else
+			{
+				Screen.DrawTexture(Drawing[0],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_TODEMO");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 		else if ( tabs[curtab] == TAB_HELP )
 		{

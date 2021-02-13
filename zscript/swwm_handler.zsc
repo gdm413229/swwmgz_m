@@ -1777,7 +1777,9 @@ Class SWWMHandler : EventHandler
 				e.Thing.speed *= 2;
 				e.Thing.vel *= 2;
 				Vector3 x, y, z;
-				[x, y, z] = swwm_CoordUtil.GetAxes(e.Thing.pitch,e.Thing.angle,e.Thing.roll);
+				double ang = e.Thing.target.target?e.Thing.AngleTo(e.Thing.target.target):e.Thing.angle;
+				double pt = e.Thing.target.target?SWWMUtility.PitchTo(e.Thing,e.Thing.target.target,.5):e.Thing.pitch;
+				[x, y, z] = swwm_CoordUtil.GetAxes(pt,ang,e.Thing.roll);
 				int numpt = Random[ExtraMissiles](1,2);
 				for ( int i=0; i<numpt; i++ )
 				{

@@ -1182,6 +1182,9 @@ Class Demolitionist : PlayerPawn
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
+		// we still have to ENSURE ENTIRELY that this gets nullified (TELEFRAG_DAMAGE overrides damage factors somehow)
+		if ( (mod == 'Falling') | (mod == 'Drowning') || (mod == 'Poison') || (mod == 'PoisonCloud') )
+			damage = 0;
 		if ( (swwm_strictuntouchable >= 2) && (damage > 0) && player )
 		{
 			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));

@@ -295,6 +295,11 @@ Class SWWMHandler : EventHandler
 
 	bool nugflip;	// h/a nugget flip-flop spawn counter
 
+	// stuff to reduce worldthingspawned overhead
+	int bossmap;
+	int iwantdie;
+	int indoomvacation;
+
 	enum EVanillaMap
 	{
 		MAP_NONE,
@@ -582,6 +587,10 @@ Class SWWMHandler : EventHandler
 	{
 		// oneliner RNG must be relative to consoleplayer
 		SetRandomSeed[DemoLines](Random[DemoLines]()+consoleplayer+MSTime());
+		// "uninitialize" some vars
+		iwantdie = -1;
+		bossmap = -1;
+		indoomvacation = -1;
 	}
 
 	private static Vector3 UseLinePos( Line l )
@@ -1770,7 +1779,8 @@ Class SWWMHandler : EventHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		// I WANT DIE
-		if ( G_SkillName() == StringTable.Localize("$SWWM_SKLUNATIC") )
+		if ( iwantdie == -1 ) iwantdie = (G_SkillName() == StringTable.Localize("$SWWM_SKLUNATIC"));
+		if ( iwantdie )
 		{
 			if ( e.Thing.bMISSILE && !e.Thing.FindInventory("DontDuplicate") && !e.Thing.IsZeroDamage() && (e.Thing.target && e.Thing.target.bISMONSTER && !e.Thing.target.player) )
 			{
@@ -1836,6 +1846,7 @@ Class SWWMHandler : EventHandler
 			DoKeyTagFix(e.Thing);
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
+		if ( indoomvacation == -1 ) indoomvacation = SWWMUtility.InDoomVacation();
 		if ( e.Thing.GetClass() == 'Pig' )
 			e.Thing.SetTag("$FN_PIG");	// missing in gzdoom
 		// eviternity stuff
@@ -1862,7 +1873,7 @@ Class SWWMHandler : EventHandler
 			//e.Thing.Obituary = "$OB_NDEMON";
 		}
 		// doom vacation stuff
-		else if ( SWWMUtility.InDoomVacation() )
+		else if ( indoomvacation )
 		{
 			if ( e.Thing.GetClassName() == "Babe" )
 			{
@@ -1979,7 +1990,7 @@ Class SWWMHandler : EventHandler
 			e.Thing.bNOBLOOD = true;
 		// vanilla boss stuff
 		bool upgrademe = swwm_upgradebosses;
-		int bossmap = WhichVanillaBossMap();
+		if ( bossmap == -1 ) bossmap = WhichVanillaBossMap();
 		if ( bossmap == MAP_DE1M8 )
 		{
 			if ( e.Thing is 'BaronOfHell' )
@@ -2355,8 +2366,6 @@ Class SWWMHandler : EventHandler
 		if ( e.Replacement is 'DSparilHax' )
 			e.Replacee = 'Sorcerer2';
 	}
-
-
 
 	override void CheckReplacement( ReplaceEvent e )
 	{

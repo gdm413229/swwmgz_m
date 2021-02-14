@@ -819,7 +819,7 @@ Class DemolitionistMenu : GenericMenu
 			{
 				let itm = GetDefaultByType(storelist[sel0]);
 				let amt = storeunits[sel0];
-				int price = int(itm.Stamina*(1.+.75*(amt-1)));
+				int price = int(abs(itm.Stamina)*(1.+.75*(amt-1)));
 				let cur = players[consoleplayer].mo.FindInventory(storelist[sel0]);
 				if ( sub )
 				{
@@ -1810,16 +1810,16 @@ Class DemolitionistMenu : GenericMenu
 		int ta = 0, tb = 0;
 		if ( a is 'Weapon' ) ta = 2;
 		else if ( (a is 'BackpackItem') || (a is 'HammerspaceEmbiggener') ) ta = 3;
-		else if ( (a is 'Ammo') ) ta = 4;
-		else if ( (a is 'MagAmmo') ) ta = 5;
+		else if ( a is 'Ammo' ) ta = 4;
+		else if ( a is 'MagAmmo' ) ta = 5;
 		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || a.bBIGPOWERUP ) ta = -3;
 		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = -2;
 		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = -1;
 		else if ( a is 'PuzzleItem' ) ta = 1;
 		if ( b is 'Weapon' ) tb = 2;
 		else if ( (b is 'BackpackItem') || (b is 'HammerspaceEmbiggener') ) tb = 3;
-		else if ( (b is 'Ammo') ) tb = 4;
-		else if ( (b is 'MagAmmo') ) tb = 5;
+		else if ( b is 'Ammo' ) tb = 4;
+		else if ( b is 'MagAmmo' ) tb = 5;
 		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || b.bBIGPOWERUP ) tb = -3;
 		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = -2;
 		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = -1;
@@ -1874,11 +1874,8 @@ Class DemolitionistMenu : GenericMenu
 					if ( slota == slotb )
 					{
 						// sort by unit value
-						// (special, those with zero value go last)
-						int vala = a.default.Stamina;
-						if ( vala == 0 ) vala = int.max;
-						int valb = b.default.Stamina;
-						if ( valb == 0 ) valb = int.max;
+						int vala = abs(a.default.Stamina);
+						int valb = abs(b.default.Stamina);
 						if ( vala == valb )
 						{
 							// sort alphabetically
@@ -1929,11 +1926,8 @@ Class DemolitionistMenu : GenericMenu
 					if ( slota == slotb )
 					{
 						// sort by unit value
-						// (special, those with zero value go last)
 						int vala = GetDefaultByType(pamoa).Stamina;
-						if ( vala == 0 ) vala = int.max;
 						int valb = GetDefaultByType(pamob).Stamina;
-						if ( valb == 0 ) valb = int.max;
 						if ( vala == valb )
 						{
 							// sort alphabetically
@@ -1947,11 +1941,8 @@ Class DemolitionistMenu : GenericMenu
 			else
 			{
 				// sort by unit value
-				// (special, those with zero value go last)
-				int vala = a.default.Stamina;
-				if ( vala == 0 ) vala = int.max;
-				int valb = b.default.Stamina;
-				if ( valb == 0 ) valb = int.max;
+				int vala = abs(a.default.Stamina);
+				int valb = abs(b.default.Stamina);
 				if ( vala == valb )
 				{
 					// sort alphabetically
@@ -1968,25 +1959,29 @@ Class DemolitionistMenu : GenericMenu
 		int ta = 0, tb = 0;
 		let da = GetDefaultByType(a);
 		let db = GetDefaultByType(b);
-		if ( a is 'Weapon' ) ta = 2;
-		else if ( a is 'Ammo' ) ta = 1;
-		else if ( (a is 'PowerupGiver') || da.bBIGPOWERUP ) ta = 3;
-		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = 5;
-		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = 4;
-		if ( b is 'Weapon' ) tb = 2;
-		else if ( b is 'Ammo' ) tb = 1;
-		else if ( (b is 'PowerupGiver') || db.bBIGPOWERUP ) tb = 3;
-		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 5;
-		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 4;
+		if ( a is 'Weapon' ) ta = 4;
+		else if ( a is 'HammerspaceEmbiggener' ) ta = 3;
+		else if ( a is 'Ammo' ) ta = 2;
+		else if ( a is 'MagAmmo' ) ta = 1;
+		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || da.bBIGPOWERUP ) ta = 5;
+		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = 7;
+		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = 6;
+		if ( b is 'Weapon' ) tb = 4;
+		else if ( b is 'HammerspaceEmbiggener' ) tb = 3;
+		else if ( b is 'Ammo' ) tb = 2;
+		else if ( b is 'MagAmmo' ) ta = 1;
+		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || db.bBIGPOWERUP ) tb = 5;
+		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 7;
+		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 6;
 		if ( ta == tb )
 		{
 			// sort by unit price
-			if ( da.Stamina == db.Stamina )
+			if ( abs(da.Stamina) == abs(db.Stamina) )
 			{
 				// sort alphabetically
 				return da.GetTag() > db.GetTag();
 			}
-			return da.Stamina > db.Stamina;
+			return abs(da.Stamina) > abs(db.Stamina);
 		}
 		return ta < tb;
 	}
@@ -2293,9 +2288,11 @@ Class DemolitionistMenu : GenericMenu
 				}
 				// ignore child ammos
 				if ( (type is 'Ammo') && (type.GetParentClass() != 'Ammo') ) continue;
-				if ( inv.Stamina <= 0 ) continue;
+				if ( inv.Stamina == 0 ) continue;
+				// items with negative stamina can only be sold
+				if ( (inv.Stamina < 0) && !sub ) continue;
 				int amt = inv.Amount;
-				int price = int(inv.Stamina*(1.+.75*(amt-1)));
+				int price = int(abs(inv.Stamina)*(1.+.75*(amt-1)));
 				if ( type is 'Ammo' )
 				{
 					int maxamt;
@@ -2307,7 +2304,7 @@ Class DemolitionistMenu : GenericMenu
 						let type2 = (Class<Ammo>)(AllActorClasses[j]);
 						if ( !type2 || (type2.GetParentClass() != type) ) continue;
 						let inv2 = GetDefaultByType(type2);
-						int cprice = int(inv.Stamina*(1.+.75*(inv2.Amount-1)));
+						int cprice = int(abs(inv.Stamina)*(1.+.75*(inv2.Amount-1)));
 						if ( (inv2.Amount > amt) && (inv2.Amount <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
 						{
 							price = cprice;
@@ -2362,7 +2359,7 @@ Class DemolitionistMenu : GenericMenu
 				for ( int j=0; j<storelist.Size(); j++ )
 				{
 					let inv2 = GetDefaultByType(storelist[j]);
-					if ( inv.Stamina > inv2.Stamina ) continue;
+					if ( abs(inv.Stamina) > abs(inv2.Stamina) ) continue;
 					greater = true;
 					storelist.Insert(j,type);
 					storeunits.Insert(j,amt);
@@ -3228,8 +3225,10 @@ Class DemolitionistMenu : GenericMenu
 				else str = def.GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = Font.CR_GOLD;
+				else if ( storelist[i] is 'MagAmmo' ) clscol = Font.CR_TAN;
+				else if ( (storelist[i] is 'BackpackItem') || (storelist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_DARKBROWN;
 				else if ( storelist[i] is 'Ammo' ) clscol = Font.CR_BROWN;
-				else if ( (storelist[i] is 'PowerupGiver') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
+				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = Font.CR_PURPLE;
 				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
 				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
 				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
@@ -3249,7 +3248,7 @@ Class DemolitionistMenu : GenericMenu
 			{
 				if ( !storelist[i] ) continue;
 				let def = GetDefaultByType(storelist[i]);
-				int price = int(def.Stamina*(1.+.75*(storeunits[i]-1)));
+				int price = int(abs(def.Stamina)*(1.+.75*(storeunits[i]-1)));
 				if ( sub && (storelist[i] is 'Weapon') )
 				{
 					let w = Weapon(def);

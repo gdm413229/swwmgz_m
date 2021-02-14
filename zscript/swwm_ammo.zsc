@@ -783,7 +783,7 @@ Class GoldShell : Ammo
 	Default
 	{
 		Tag "$T_GOLDSHELLS";
-		Stamina 0;
+		Stamina -1000000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsGold.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 7;
@@ -1555,7 +1555,7 @@ Class AmmoFabricator : Inventory abstract
 			// only direct descendants of ammo with a set price below our max unit price
 			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
 			let def = GetDefaultByType(a);
-			if ( !(def.Stamina) || (def.Stamina > maxunitprice) ) continue;
+			if ( (def.Stamina <= 0) || (def.Stamina > maxunitprice) ) continue;
 			// only ammo for weapons that are valid (can be used)
 			bool isvalid = false;
 			for ( int j=0; j<AllActorClasses.Size(); j++ )
@@ -1589,6 +1589,7 @@ Class AmmoFabricator : Inventory abstract
 		int consumed = 0;
 		String fabstr = "";
 		bool comma = false;
+		int tpertype = pertype;
 		for ( int i=0; i<available.Size(); i++ )
 		{
 			int amt, lim;
@@ -1606,7 +1607,9 @@ Class AmmoFabricator : Inventory abstract
 				lim = cur.MaxAmount;
 				cur.AttachToOwner(Owner);
 			}
-			while ( (amt < lim) && (consumed+cur.default.Stamina < budget) && (cnt < pertype) )
+			// percentage based on DEFAULT max amount (capped at 1 minimum)
+			if ( pertype < 0 ) tpertype = max(1,-int(cur.default.MaxAmount*pertype*.01));
+			while ( (amt < lim) && (consumed+cur.default.Stamina < budget) && (cnt < tpertype) )
 			{
 				consumed += cur.default.Stamina;
 				amt = ++cur.Amount;
@@ -1665,6 +1668,7 @@ Class FabricatorTier1 : AmmoFabricator
 	Default
 	{
 		Tag "$T_FABRICATOR1";
+		Stamina -2500;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
 		Inventory.MaxAmount 20;
@@ -1681,6 +1685,7 @@ Class FabricatorTier2 : AmmoFabricator
 	Default
 	{
 		Tag "$T_FABRICATOR2";
+		Stamina -12000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
 		Inventory.MaxAmount 15;
@@ -1697,11 +1702,12 @@ Class FabricatorTier3 : AmmoFabricator
 	Default
 	{
 		Tag "$T_FABRICATOR3";
+		Stamina -80000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
 		Inventory.MaxAmount 10;
 		Inventory.InterHubAmount 10;
-		AmmoFabricator.Budget 80000;
+		AmmoFabricator.Budget 100000;
 		AmmoFabricator.PerType 4;
 		AmmoFabricator.MaxUnitPrice 80000;
 	}
@@ -1711,12 +1717,13 @@ Class FabricatorTier4 : AmmoFabricator
 	Default
 	{
 		Tag "$T_FABRICATOR4";
+		Stamina -1000000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator4.png";
 		Inventory.PickupMessage "$T_FABRICATOR4";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
 		AmmoFabricator.Budget int.max;
-		AmmoFabricator.PerType int.max;
+		AmmoFabricator.PerType -50;
 		AmmoFabricator.MaxUnitPrice 1000000;
 		-INVENTORY.AUTOACTIVATE;
 	}
@@ -1842,8 +1849,6 @@ Class HammerspaceEmbiggener : Inventory
 				double factor = (Ammo(item).BackpackMaxAmount-item.default.MaxAmount)/double(MaxAmount);
 				item.MaxAmount = int(item.default.MaxAmount+Amount*factor);
 			}
-			if ( Ammo(item).BackpackMaxAmount > 0 )
-				item.MaxAmount = min(item.MaxAmount,Ammo(item).BackpackMaxAmount);
 		}
 		return res;
 	}
@@ -1863,6 +1868,7 @@ Class HammerspaceEmbiggener : Inventory
 	Default
 	{
 		Tag "$T_EMBIGGENER";
+		Stamina -800000;
 		Inventory.PickupMessage "$T_EMBIGGENER";
 		Inventory.MaxAmount 8;
 		Inventory.InterHubAmount 8;

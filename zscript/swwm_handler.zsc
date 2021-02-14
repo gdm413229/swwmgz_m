@@ -2917,6 +2917,23 @@ Class SWWMHandler : EventHandler
 					players[e.Args[0]].SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
 				}
 			}
+			// if we're selling an embiggener, we need to readjust ammo
+			if ( item is 'HammerspaceEmbiggener' )
+			{
+				let ritm = players[e.Args[0]].mo.FindInventory(item);
+				for ( Inventory i=players[e.Args[0]].mo.Inv; i; i=i.Inv )
+				{
+					if ( !(i is 'Ammo') ) continue;
+					if ( Ammo(i).BackpackMaxAmount > 0 )
+					{
+						double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(ritm.MaxAmount);
+						i.MaxAmount = int(i.default.MaxAmount+(ritm.Amount-amt)*factor);
+					}
+					// drop excess ammo
+					int excess = i.Amount-i.MaxAmount;
+					if ( excess > 0 ) i.CreateTossable(excess);
+				}
+			}
 			players[e.Args[0]].mo.TakeInventory(item,amt);
 			SWWMCredits.Give(players[e.Args[0]],e.Args[1]);
 		}

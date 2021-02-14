@@ -929,6 +929,7 @@ Class CorrodeDebuff : Inventory
 			}
 			if ( !wasalive ) maxrad += 25;
 			SWWMUtility.DoExplosion(self,clamp(Amount/8,1,50),0,maxrad*1.2,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
+			if ( !Owner ) return;	// yeah this can happen
 			int smokefact = int(clamp(maxrad/32.,1,8));
 			int numpt = Random[Corrode](0,2*smokefact);
 			if ( justdied ) numpt = Random[Corrode](8,12)*smokefact;

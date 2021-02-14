@@ -917,7 +917,9 @@ Class CorrodeDebuff : Inventory
 			if ( !Random[Corrode](0,3) && (Owner.Health > 0) ) Owner.Howl();
 			double maxrad = max(Owner.radius,Owner.height);
 			int defh = Owner.GetSpawnHealth();
-			Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/8,1,50),'Corroded',DMG_THRUSTLESS);
+			int flg = DMG_THRUSTLESS;
+			if ( Owner is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're melting, that shield is worthless
+			Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/8,1,50),'Corroded',flg);
 			bool justdied = (wasalive && (!Owner || (Owner.Health <= 0)));
 			if ( justdied )
 			{

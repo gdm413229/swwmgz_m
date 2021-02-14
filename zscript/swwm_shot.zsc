@@ -914,7 +914,7 @@ Class CorrodeDebuff : Inventory
 		cnt--;
 		if ( cnt < 0 )
 		{
-			if ( !Random[Corrode](0,3) ) Owner.Howl();
+			if ( !Random[Corrode](0,3) && (Owner.Health > 0) ) Owner.Howl();
 			double maxrad = max(Owner.radius,Owner.height);
 			int defh = Owner.GetSpawnHealth();
 			Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/8,1,50),'Corroded',DMG_THRUSTLESS);

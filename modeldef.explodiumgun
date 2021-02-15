@@ -3,7 +3,7 @@ Model "ExplodiumCasing"
 	Path "models"
 
 	Model 0 "ExplodiumCasing_d.3d"
-	Skin 0 "ExplodiumCasing.png"
+	Skin 0 "ExplodiumCasing_Used.png"
 	Scale 0.03 0.03 0.03
 	USEACTORPITCH
 	USEACTORROLL
@@ -87,10 +87,6 @@ Model "ExplodiumGun"
 	FrameIndex XZWZ I 2 0
 	Skin 2 "ExploMuz9.png"
 	FrameIndex XZWZ J 2 0
-}
-
-Model "ExplodiumGun"
-{
 }
 
 Model "ExplodiumGun"
@@ -262,6 +258,7 @@ Model "ExplodiumGun"
 	FrameIndex XZW6 Z 1 121
 	SurfaceSkin 1 5 "ExplodiumGun.png"	// show mag
 	// Check Bullet
+	SurfaceSkin 1 4 "ExplodiumCasing.png"	// show casing
 	FrameIndex XZW7 A 1 157
 	FrameIndex XZW7 B 1 158
 	FrameIndex XZW7 C 1 159
@@ -281,6 +278,7 @@ Model "ExplodiumGun"
 	FrameIndex XZW7 Q 1 173
 	FrameIndex XZW7 R 1 174
 	FrameIndex XZW7 S 1 175
+	SurfaceSkin 1 4 ""	// hide casing
 	// Melee
 	FrameIndex XZW7 T 1 177
 	FrameIndex XZW7 U 1 178
@@ -345,7 +343,7 @@ Model "ExplodiumGun"
 	SurfaceSkin 1 1 ""
 	SurfaceSkin 1 2 ""
 	SurfaceSkin 1 3 ""
-	SurfaceSkin 1 4 "ExplodiumCasing.png"
+	SurfaceSkin 1 4 "ExplodiumCasing_Used.png"
 	SurfaceSkin 1 5 ""
 	FrameIndex XZWA A 1 14
 	FrameIndex XZWA B 1 15

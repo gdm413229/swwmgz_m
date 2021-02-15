@@ -891,6 +891,7 @@ Class CandyGun : SWWMWeapon
 {
 	int clipcount;
 	bool chambered;
+	double casex, casey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
 	bool tospecial;
@@ -1249,9 +1250,26 @@ Class CandyGun : SWWMWeapon
 		Wait;
 	Fire:
 		XZW2 A 1 A_Schutt();
-		XZW2 IJKLMNOPQR 1;
-		XZW2 S 2 A_DropCasing();
+		XZW2 I 1;
+		XZW2 J 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZW2 KLMNOP 1;
+		XZW2 Q 2;
 		Goto Ready;
+	Casing:
+		XZWC A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Explodium](-1.,5.);
+			invoker.casey = FRandom[Explodium](-2.,1.);
+		}
+		XZWC BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing();
+		Stop;
 	AltFire:
 		XZW2 A 2
 		{

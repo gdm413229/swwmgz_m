@@ -417,7 +417,6 @@ Class RedShell2 : RedShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class RedShell4 : RedShell
@@ -426,34 +425,6 @@ Class RedShell4 : RedShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
-	}
-}
-Class RedShell8 : RedShell
-{
-	Default
-	{
-		Inventory.Amount 8;
-		Radius 8;
-		Height 20;
-	}
-}
-Class RedShell12 : RedShell
-{
-	Default
-	{
-		Inventory.Amount 12;
-		Radius 10;
-		Height 20;
-	}
-}
-Class RedShell16 : RedShell
-{
-	Default
-	{
-		Inventory.Amount 16;
-		Radius 10;
-		Height 20;
 	}
 }
 
@@ -492,7 +463,6 @@ Class GreenShell2 : GreenShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class GreenShell4 : GreenShell
@@ -501,25 +471,6 @@ Class GreenShell4 : GreenShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
-	}
-}
-Class GreenShell8 : GreenShell
-{
-	Default
-	{
-		Inventory.Amount 8;
-		Radius 8;
-		Height 20;
-	}
-}
-Class GreenShell12 : GreenShell
-{
-	Default
-	{
-		Inventory.Amount 12;
-		Radius 10;
-		Height 20;
 	}
 }
 
@@ -543,7 +494,6 @@ Class WhiteShell : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
-		Height 20;
 	}
 	States
 	{
@@ -558,7 +508,6 @@ Class WhiteShell2 : WhiteShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class WhiteShell4 : WhiteShell
@@ -567,16 +516,6 @@ Class WhiteShell4 : WhiteShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
-	}
-}
-Class WhiteShell8 : WhiteShell
-{
-	Default
-	{
-		Inventory.Amount 8;
-		Radius 8;
-		Height 20;
 	}
 }
 
@@ -615,7 +554,6 @@ Class BlueShell2 : BlueShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class BlueShell4 : BlueShell
@@ -624,16 +562,6 @@ Class BlueShell4 : BlueShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
-	}
-}
-Class BlueShell8 : BlueShell
-{
-	Default
-	{
-		Inventory.Amount 8;
-		Radius 8;
-		Height 20;
 	}
 }
 
@@ -672,7 +600,6 @@ Class BlackShell2 : BlackShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class BlackShell4 : BlackShell
@@ -681,7 +608,6 @@ Class BlackShell4 : BlackShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
 	}
 }
 
@@ -720,7 +646,6 @@ Class PurpleShell2 : PurpleShell
 	{
 		Inventory.Amount 2;
 		Radius 6;
-		Height 20;
 	}
 }
 Class PurpleShell4 : PurpleShell
@@ -729,7 +654,6 @@ Class PurpleShell4 : PurpleShell
 	{
 		Inventory.Amount 4;
 		Radius 6;
-		Height 20;
 	}
 }
 
@@ -777,7 +701,7 @@ Class GoldShell : Ammo
 	action void A_GoldShellTrail()
 	{
 		if ( Random[Goldy](0,2) ) return;
-		Spawn("GoldShellSparkle",Vec3Offset(FRandom[Goldy](-2,2),FRandom[Goldy](-2,2),FRandom[Goldy](10,18)));
+		Spawn("GoldShellSparkle",Vec3Offset(FRandom[Goldy](-radius,radius)/2.,FRandom[Goldy](-radius,radius)/2.,FRandom[Goldy](10,18)));
 	}
 
 	Default
@@ -801,6 +725,22 @@ Class GoldShell : Ammo
 	Spawn:
 		XZW1 A 1 A_GoldShellTrail();
 		Wait;
+	}
+}
+Class GoldShell2 : GoldShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class GoldShell4 : GoldShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
 	}
 }
 
@@ -1231,7 +1171,6 @@ Class SilverBullets : MagAmmo
 		MagAmmo.ParentAmmo "SilverBulletAmmo";
 		MagAmmo.ClipSize 5;
 		Inventory.MaxAmount 8;
-		Inventory.InterHubAmount 8;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -1254,7 +1193,6 @@ Class SilverBullets2 : MagAmmo
 		MagAmmo.ParentAmmo "SilverBulletAmmo2";
 		MagAmmo.ClipSize 5;
 		Inventory.MaxAmount 8;
-		Inventory.InterHubAmount 8;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -1373,7 +1311,6 @@ Class CandyGunBullets : MagAmmo
 		MagAmmo.ParentAmmo "CandyGunAmmo";
 		MagAmmo.ClipSize 7;
 		Inventory.MaxAmount 10;
-		Inventory.InterHubAmount 10;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 2;
@@ -1461,7 +1398,7 @@ Class YnykronAmmo : Ammo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 4;
+		Ammo.BackpackMaxAmount 3;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;

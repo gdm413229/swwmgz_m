@@ -705,6 +705,7 @@ Class EvisceratorCasing : SWWMCasing
 
 Class Eviscerator : SWWMWeapon
 {
+	double casex, casey;
 	bool isfiring;
 	// barrel is extended
 	bool extended;
@@ -1024,7 +1025,13 @@ Class Eviscerator : SWWMWeapon
 		XZW2 A 4;
 		XZW3 STUV 2;
 		XZW3 W 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW3 X 1 A_Overlay(-9999,"EjectSmoke");
+		XZW3 X 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"EjectCasing");
+			A_Overlay(-9999,"EjectSmoke");
+		}
 		XZW3 YZ 1;
 		XZW4 AB 1;
 		XZW4 C 1
@@ -1039,7 +1046,13 @@ Class Eviscerator : SWWMWeapon
 		XZW4 Z 4;
 		XZW6 RSTU 2;
 		XZW6 V 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW6 W 1 A_Overlay(-9999,"EjectSmoke");
+		XZW6 W 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"EjectCasing");
+			A_Overlay(-9999,"EjectSmoke");
+		}
 		XZW6 XYZ 1;
 		XZW7 A 1;
 		XZW7 B 1
@@ -1050,6 +1063,16 @@ Class Eviscerator : SWWMWeapon
 		XZW7 CDE 1;
 		XZW7 FGH 2;
 		Goto ReadyExt;
+	EjectCasing:
+		XZWB D 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Eviscerator](-2.,2.);
+			invoker.casey = FRandom[Eviscerator](-2.,2.);
+		}
+		XZWB EFGHIJKLM 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_EvisceratorEject();
+		Stop;
 	EjectSmoke:
 		TNT1 A 1 A_EvisceratorCasingSmoke((10,2,-3));
 		TNT1 A 1 A_EvisceratorCasingSmoke((10,-1,-2));
@@ -1059,7 +1082,6 @@ Class Eviscerator : SWWMWeapon
 		TNT1 A 1 A_EvisceratorCasingSmoke((10,-8.5,-5));
 		TNT1 A 1 A_EvisceratorCasingSmoke((10,-10,-9));
 		TNT1 A 1 A_EvisceratorCasingSmoke((10,-11,-14));
-		TNT1 A 1 A_EvisceratorEject();
 		Stop;
 	AltFire:
 		XZW2 A 2

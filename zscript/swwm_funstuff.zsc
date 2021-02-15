@@ -929,7 +929,8 @@ Class CBoxLight : SpotLightAttenuated
 // Collectible box (recycling of discarded "chance box" item)
 Class Chancebox : Actor
 {
-	bool dud;
+	bool dud;	// if true, cannot drop a collectible
+	bool chanceinit;	// internal state has been initialized
 
 	static void SpawnChanceboxes()
 	{
@@ -1077,19 +1078,19 @@ Class Chancebox : Actor
 			if ( Random[Chancebox](0,1) )
 			{
 				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":(Random[Chancebox](0,1)||(gameinfo.gametype&GAME_Strife))?"GrilledCheeseSandwich":"YnykronAmmo",pos);
-				a.bDROPPED = true;
+				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);
 			}
 			else if ( !Random[Chancebox](0,2) )
 			{
-				for ( int i=0; i<=12; i++ )
+				for ( int i=0; i<=6; i++ )
 				{
 					let a = Spawn((i==0)?"CandyGun":"CandyGunBullets",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
-					if ( i > 0 ) a.vel.xy = (cos(i*30),sin(i*30))*FRandom[Chancebox](1,2);
+					if ( i > 0 ) a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](1,2);
 				}
 			}
 			else if ( !Random[Chancebox](0,2) )
@@ -1097,7 +1098,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<3; i++ )
 				{
 					let a = Spawn("SilverBullets2",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
@@ -1105,7 +1106,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<6; i++ )
 				{
 					let a = Spawn("SilverBullets",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](3,4);
@@ -1114,13 +1115,13 @@ Class Chancebox : Actor
 			else if ( Random[Chancebox](0,1) )
 			{
 				let a = Spawn("HellblazerWarheads",pos);
-				a.bDROPPED = true;
+				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);
 				for ( int i=0; i<3; i++ )
 				{
 					a = Spawn("HellblazerRavagers",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
@@ -1128,7 +1129,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<5; i++ )
 				{
 					a = Spawn("HellblazerCrackshots",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
@@ -1136,7 +1137,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<8; i++ )
 				{
 					a = Spawn("HellblazerMissiles",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*45),sin(i*45))*FRandom[Chancebox](5,6);
@@ -1145,13 +1146,13 @@ Class Chancebox : Actor
 			else if ( Random[Chancebox](0,1) )
 			{
 				let a = Spawn("BlackShell",pos);
-				a.bDROPPED = true;
+				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);
 				for ( int i=0; i<3; i++ )
 				{
 					a = Spawn("BlueShell",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
@@ -1159,7 +1160,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<8; i++ )
 				{
 					a = Spawn((i%2)?"WhiteShell":"PurpleShell",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
@@ -1167,7 +1168,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<12; i++ )
 				{
 					a = Spawn((i%2)?"RedShell":"GreenShell",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					a.vel.xy = (cos(i*30),sin(i*30))*FRandom[Chancebox](5,6);
@@ -1175,10 +1176,10 @@ Class Chancebox : Actor
 			}
 			else if ( Random[Chancebox](0,1) )
 			{
-				for ( int i=0; i<100; i++ )
+				for ( int i=0; i<20; i++ )
 				{
 					let a = Spawn("HealthNuggetItem",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,8);
 					a.vel.xy = (cos(i*3.6),sin(i*3.6))*FRandom[Chancebox](1,8);
@@ -1189,7 +1190,7 @@ Class Chancebox : Actor
 				for ( int i=0; i<=15; i++ )
 				{
 					let a = Spawn((i==0)?"RefresherItem":(i%3)?"HealthNuggetItem":"ArmorNuggetItem",pos);
-					a.bDROPPED = true;
+					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
 					if ( i > 0 ) a.vel.xy = (cos(i*24),sin(i*24))*FRandom[Chancebox](1,2);
@@ -1200,7 +1201,7 @@ Class Chancebox : Actor
 		{
 			// pop one at random
 			let a = Spawn(candidates[Random[Chancebox](0,candidates.Size()-1)],pos);
-			a.bDROPPED = true;
+			a.bDROPPED = false;
 			a.bNOGRAVITY = false;
 			a.vel.z = FRandom[Chancebox](2,4);
 		}
@@ -1236,15 +1237,33 @@ Class Chancebox : Actor
 		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
 		if ( abs(diff.z) > rang ) return false;
 		if ( CurState != FindState("Spawn") ) return false;
-		if ( !dud )
+		if ( !chanceinit )
 		{
-			if ( !Random[Chancebox](0,2) )
+			int col = 0;
+			let ti = ThinkerIterator.Create("SWWMCollectible");
+			SWWMCollectible c;
+			while ( c = SWWMCollectible(ti.Next()) ) col++;
+			int tcol = 0;
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+				if ( !c || (c == 'SWWMCollectible') ) continue;
+				let def = GetDefaultByType(c);
+				// check that we can collect it in this IWAD
+				if ( !(gameinfo.gametype&def.avail) ) continue;
+				tcol++;
+			}
+			int alldudchance = 5-(4*col)/tcol;	// chance for all boxes to be duds (no collectibles)
+			if ( (col > 0) && !Random[Chancebox](0,alldudchance) )
 			{
 				// all boxes are duds
 				let ti = ThinkerIterator.Create("Chancebox");
 				Chancebox c;
 				while ( c = Chancebox(ti.Next()) )
+				{
+					c.chanceinit = true;
 					c.dud = true;
+				}
 			}
 			else if ( Random[Chancebox](0,2) )
 			{
@@ -1265,12 +1284,21 @@ Class Chancebox : Actor
 				// the others are duds
 				let ti = ThinkerIterator.Create("Chancebox");
 				Chancebox c;
+				bool onemore = !Random[Chancebox](0,2);	// unless...
 				while ( c = Chancebox(ti.Next()) )
 				{
-					if ( c == self ) continue;
-					c.dud = true;	// we found one, the others just drop goodies
+					if ( (c == self) || c.chanceinit ) continue;
+					c.chanceinit = true;
+					if ( onemore )
+					{
+						onemore = false;
+						// this one isn't a dud either (wow, how lucky)
+						c.dud = false;
+					}
+					else c.dud = true;	// this one's a dud
 				}
 			}
+			chanceinit = true;
 		}
 		if ( bCOUNTITEM )
 		{

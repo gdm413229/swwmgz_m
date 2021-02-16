@@ -232,9 +232,10 @@ Class SWWMHandler : EventHandler
 	int lastkill[MAXPLAYERS];
 	int multilevel[MAXPLAYERS];
 	int lastitemcount[MAXPLAYERS];
+	bool mnotify;
 	bool allkills, allitems, allsecrets;
 	bool mapclear;
-	bool mnotify;
+	int mapclearagain, restartmus;
 	// for custom cheats
 	transient ui int kcode;
 	transient ui String kstr;
@@ -1240,16 +1241,37 @@ Class SWWMHandler : EventHandler
 
 	private void OneHundredPercentCheck()
 	{
+		if ( !mapclear && (restartmus > 0) )
+		{
+			restartmus--;
+			if ( restartmus == 0 ) S_ChangeMusic("*",force:true);
+			return;
+		}
 		// ignore levels that have NOTHING
-		if ( (level.total_secrets <= 0)
-			&& (level.total_items <= 0)
-			&& (level.total_monsters <= 0) ) return;
-		if ( mapclear ) return;
-		if ( (level.found_secrets < level.total_secrets)
-			|| (level.found_items < level.total_items)
-			|| (level.killed_monsters < level.total_monsters) ) return;
+		if ( (level.total_secrets <= 0) && (level.total_items <= 0) && (level.total_monsters <= 0) ) return;
+		if ( mapclear )
+		{
+			if ( (swwm_silencemap > 1) && (musplaying.name != "music/olg.ogg") )
+				S_ChangeMusic("music/olg.ogg",force:true);
+			if ( (level.found_secrets < level.total_secrets) || (level.found_items < level.total_items) || (level.killed_monsters < level.total_monsters) )
+			{
+				if ( swwm_silencemap > 0 )
+				{
+					restartmus = 25;
+					S_ChangeMusic("",force:true);
+					S_StartSound("recordscratch",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				}
+				mapclear = false;
+				if ( mapclearagain > 1 ) Console.Printf(StringTable.Localize("$SWWM_NOTCLEARAGAIN"));
+				else Console.Printf(StringTable.Localize("$SWWM_NOTCLEAR"));
+			}
+			return;
+		}
+		if ( (level.found_secrets < level.total_secrets) || (level.found_items < level.total_items) || (level.killed_monsters < level.total_monsters) ) return;
+		restartmus = 0;
 		mapclear = true;
-		Console.Printf(StringTable.Localize("$SWWM_ALLCLEAR"),5000);
+		if ( mapclearagain ) Console.Printf(StringTable.Localize("$SWWM_ALLCLEARAGAIN"),500);
+		else Console.Printf(StringTable.Localize("$SWWM_ALLCLEAR"),5000);
 		S_StartSound("misc/wow",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 		if ( swwm_silencemap == 1 ) S_ChangeMusic("",force:true);
 		else if ( swwm_silencemap > 1 ) S_ChangeMusic("music/olg.ogg",force:true);
@@ -1258,9 +1280,18 @@ Class SWWMHandler : EventHandler
 			if ( !playeringame[i] || !players[i].mo ) continue;
 			let f = Actor.Spawn("PartyTime",players[i].mo.pos);
 			f.bAMBUSH = true;
-			SWWMCredits.Give(players[i],5000);
-			SWWMScoreObj.Spawn(5000,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
+			if ( mapclearagain )
+			{
+				SWWMCredits.Give(players[i],500);
+				SWWMScoreObj.Spawn(500,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
+			}
+			else
+			{
+				SWWMCredits.Give(players[i],5000);
+				SWWMScoreObj.Spawn(5000,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
+			}
 		}
+		mapclearagain++;
 	}
 
 	override void WorldTick()

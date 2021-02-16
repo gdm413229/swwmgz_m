@@ -223,7 +223,7 @@ Class mkBloodDrop : Actor
 				if ( !d.HitSector )
 				{
 					d.HitSector = floorsector;
-					d.HitTexture = floorpic;
+					d.HitTexture = floorsector.GetTexture(0);
 				}
 				if ( d.HitTexture == skyflatnum )
 				{
@@ -265,7 +265,7 @@ Class mkBloodDrop : Actor
 				if ( !d.HitSector )
 				{
 					d.HitSector = ceilingsector;
-					d.HitTexture = ceilingpic;
+					d.HitTexture = ceilingsector.GetTexture(1);
 				}
 				if ( (d.HitTexture == skyflatnum) || master )
 				{

@@ -935,10 +935,31 @@ Class SWWMStatusBar : BaseStatusBar
 		int colc = 0;
 		double colh = 0;
 		int n = Key.GetKeyTypeCount();
+		Array<Key> klist;
 		for ( int i=0; i<n; i++ )
 		{
 			let k = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)));
 			if ( !k || !k.Icon.IsValid() ) continue;
+			klist.Push(k);
+		}
+		// because we can't call GetReplacement from ui, let's wrangle something real ugly here to clean up replaced keys
+		for ( int i=0; i<klist.Size(); i++ )
+		{
+			if ( !(klist[i] is 'SWWMKey') ) continue;
+			// remove the key this replaces
+			Class<Key> pc = klist[i].Species;
+			if ( !pc ) continue;
+			for ( int j=0; j<klist.Size(); j++ )
+			{
+				if ( klist[j].GetClass() != pc ) continue;
+				klist.Delete(j);
+				j--;
+				if ( i >= j ) i--;
+			}
+		}
+		for ( int i=0; i<klist.Size(); i++ )
+		{
+			let k = klist[i];
 			Vector2 siz = TexMan.GetScaledSize(k.Icon);
 			Screen.DrawTexture(k.Icon,false,keypos.x-siz.x,keypos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			keypos.x -= siz.x+2;

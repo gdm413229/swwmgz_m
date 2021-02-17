@@ -2004,13 +2004,12 @@ Class Demolitionist : PlayerPawn
 	override void AddInventory( Inventory item )
 	{
 		// hackaround for replaced keys
-		if ( item is 'Key' )
+		if ( (item is 'Key') && !key_reentrant )
 		{
 			let rep = (Class<Inventory>)(GetReplacement(item.GetClass()));
 			if ( rep && (item.GetClass() != rep) )
 			{
-				item.Destroy();
-				// add the new key instead
+				// also add the new key
 				Actor whom = player?player.mo:PlayerPawn(self);
 				if ( !whom.FindInventory(rep) )
 				{

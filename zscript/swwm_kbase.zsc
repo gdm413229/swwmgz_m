@@ -2218,7 +2218,23 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=0; i<n; i++ )
 			{
 				let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
-				if ( k ) invlist.Push(k);
+				if ( !k ) continue;
+				invlist.Push(k);
+			}
+			// because we can't call GetReplacement from ui, let's wrangle something real ugly here to clean up replaced keys
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !(invlist[i] is 'SWWMKey') ) continue;
+				// remove the key this replaces
+				Class<Key> pc = invlist[i].Species;
+				if ( !pc ) continue;
+				for ( int j=0; j<invlist.Size(); j++ )
+				{
+					if ( invlist[j].GetClass() != pc ) continue;
+					invlist.Delete(j);
+					j--;
+					if ( i >= j ) i--;
+				}
 			}
 			// collectibles, sorted by name
 			Array<Inventory> cols;

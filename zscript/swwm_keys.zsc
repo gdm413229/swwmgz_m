@@ -23,6 +23,22 @@ Class SWWMKey : Key abstract
 		}
 	}
 
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// also attach the vanilla key that we replace, mainly for script compatibility
+		Class<Key> pc = Species;
+		if ( pc )
+		{
+			let p = Inventory(Spawn(pc));
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).key_reentrant = true;	// avoid infinite loop
+			p.AttachToOwner(Owner);
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).key_reentrant = false;
+		}
+	}
+
 	override bool Use( bool pickup )
 	{
 		if ( Owner.player && !propagated )

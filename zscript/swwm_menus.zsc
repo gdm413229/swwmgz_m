@@ -172,7 +172,7 @@ Class SWWMOptionMenu : OptionMenu
 			y += fontheight;
 			if ( mDesc.mSelectedItem == i )
 			{
-				cy = y;
+				cy = y+fontheight;
 				break;
 			}
 		}
@@ -182,12 +182,12 @@ Class SWWMOptionMenu : OptionMenu
 		Font fnt = TewiFont;
 		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
 		let lines = fnt.BreakLines(ttip,CleanWidth_1-8);
-		int height = (8+fnt.GetHeight()*lines.Count())*CleanYFac_1;
-		// draw at the bottom unless the selected option could is covered by the tooltip
+		int height = (4+fnt.GetHeight()*lines.Count())*CleanYFac_1;
+		// draw at the bottom unless the selected option could be covered by the tooltip
 		int ypos = Screen.GetHeight()-height;
-		if ( cy >= ypos ) ypos = 0;
+		if ( cy > ypos ) ypos = 0;
 		Screen.Dim("Black",.75,0,ypos,Screen.GetWidth(),height);
-		ypos += 4*CleanYFac_1;
+		ypos += 2*CleanYFac_1;
 		for ( int i=0; i<lines.Count(); i++ )
 		{
 			Screen.DrawText(fnt,Font.CR_WHITE,4*CleanXFac_1,ypos,lines.StringAt(i),DTA_CleanNoMove_1,true);

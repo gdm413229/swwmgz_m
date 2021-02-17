@@ -232,6 +232,7 @@ Class FroggyChair : Actor
 	private void BeginCarry( Actor carrier )
 	{
 		if ( !carrier ) return;
+		SWWMLoreLibrary.Add(carrier.player,"FroggyChair");
 		carrier.A_StartSound("demolitionist/handsup",CHAN_ITEM,CHANF_OVERLAP);
 		A_SetRenderStyle(.5,STYLE_Translucent);
 		A_SetSize(32,32);	// easier to deselect
@@ -299,7 +300,16 @@ Class FroggyChair : Actor
 			if ( TestMobjLocation() && level.IsPointInLevel(pos) )
 				EndCarry();
 		}
-		else BeginCarry(user);
+		else
+		{
+			Vector3 itempos = Vec3Offset(0,0,Height/2),
+				userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+			// test vertical range
+			Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+			double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+			if ( abs(diff.z) > rang ) return false;
+			BeginCarry(user);
+		}
 		return true;
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
@@ -313,6 +323,7 @@ Class FroggyChair : Actor
 	}
 	override bool CanCollideWith( Actor other, bool passive )
 	{
+		if ( !other.bSHOOTABLE && !other.bSOLID ) return false;
 		Vector3 dir = vel;
 		double vsize = dir.length();
 		// we need to compare Z height because wow thanks

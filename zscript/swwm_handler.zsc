@@ -236,6 +236,9 @@ Class SWWMHandler : EventHandler
 	bool allkills, allitems, allsecrets;
 	bool mapclear;
 	int mapclearagain, restartmus;
+	String lastmus;
+	int lastorder;
+	bool lastloop;
 	// for custom cheats
 	transient ui int kcode;
 	transient ui String kstr;
@@ -1244,15 +1247,27 @@ Class SWWMHandler : EventHandler
 		if ( !mapclear && (restartmus > 0) )
 		{
 			restartmus--;
-			if ( restartmus == 0 ) S_ChangeMusic("*",force:true);
+			if ( restartmus == 0 ) S_ChangeMusic(lastmus,lastorder,lastloop,true);
 			return;
 		}
 		// ignore levels that have NOTHING
 		if ( (level.total_secrets <= 0) && (level.total_items <= 0) && (level.total_monsters <= 0) ) return;
 		if ( mapclear )
 		{
-			if ( (swwm_silencemap > 1) && (musplaying.name != "music/olg.ogg") )
+			if ( (swwm_silencemap == 1) && (musplaying.name != "") )
+			{
+				lastmus = musplaying.name;
+				lastorder = musplaying.baseorder;
+				lastloop = musplaying.loop;
+				S_ChangeMusic("",force:true);
+			}
+			else if ( (swwm_silencemap > 1) && (musplaying.name != "music/olg.ogg") )
+			{
+				lastmus = musplaying.name;
+				lastorder = musplaying.baseorder;
+				lastloop = musplaying.loop;
 				S_ChangeMusic("music/olg.ogg",force:true);
+			}
 			if ( (level.found_secrets < level.total_secrets) || (level.found_items < level.total_items) || (level.killed_monsters < level.total_monsters) )
 			{
 				if ( swwm_silencemap > 0 )
@@ -1273,6 +1288,9 @@ Class SWWMHandler : EventHandler
 		if ( mapclearagain ) Console.Printf(StringTable.Localize("$SWWM_ALLCLEARAGAIN"),500);
 		else Console.Printf(StringTable.Localize("$SWWM_ALLCLEAR"),5000);
 		S_StartSound("misc/wow",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+		lastmus = musplaying.name;
+		lastorder = musplaying.baseorder;
+		lastloop = musplaying.loop;
 		if ( swwm_silencemap == 1 ) S_ChangeMusic("",force:true);
 		else if ( swwm_silencemap > 1 ) S_ChangeMusic("music/olg.ogg",force:true);
 		for ( int i=0; i<MAXPLAYERS; i++ )
@@ -1848,16 +1866,23 @@ Class SWWMHandler : EventHandler
 					int numpt = Random[ExtraMissiles](1,2);
 					for ( int i=0; i<numpt; i++ )
 					{
-						let x = Actor.Spawn(e.Thing.GetClass(),e.Thing.Vec3Angle(e.Thing.Radius*FRandom[ExtraMissiles](1.5,4.),FRandom[ExtraMissiles](0,360)));
-						if ( !x.TestMobjLocation() || !level.IsPointInLevel(x.pos) )
+						// three attempts for each
+						for ( int j=0; j<3; j++ )
 						{
-							x.ClearCounters();
-							x.Destroy();
-						}
-						else
-						{
-							x.angle = e.Thing.angle;
-							x.GiveInventory("DontDuplicate",1);
+							let x = Actor.Spawn(e.Thing.GetClass(),e.Thing.Vec3Angle(e.Thing.Radius*FRandom[ExtraMissiles](1.5,4.),FRandom[ExtraMissiles](0,360)));
+							if ( x.pos.z+x.height > x.ceilingz ) x.SetZ(x.ceilingz-x.height);
+							if ( x.pos.z < x.floorz ) x.SetZ(x.floorz);
+							if ( !x.TestMobjLocation() || !x.TestMobjZ() || !level.IsPointInLevel(x.pos) )
+							{
+								x.ClearCounters();
+								x.Destroy();
+							}
+							else
+							{
+								x.angle = e.Thing.angle;
+								x.GiveInventory("DontDuplicate",1);
+								break;
+							}
 						}
 					}
 				}

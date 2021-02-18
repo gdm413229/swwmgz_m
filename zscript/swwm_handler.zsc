@@ -1486,8 +1486,8 @@ Class SWWMHandler : EventHandler
 	// gibbing
 	private void DoGibThing( WorldEvent e )
 	{
-		// no gib if it was erased
-		if ( e.DamageType == 'Ynykron' ) return;
+		// no gib if it was erased or used the kill monsters cheat
+		if ( (e.DamageType == 'Ynykron') || (e.DamageType == 'Massacre') ) return;
 		int gibhealth = e.Thing.GetGibHealth();
 		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
 		bool forcegibbed = false;

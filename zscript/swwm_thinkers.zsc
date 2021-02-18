@@ -1205,3 +1205,105 @@ Class SWWMDamageAccumulator : Thinker
 		return 0;
 	}
 }
+
+// prevents floors/ceilings from ever moving again, as they're "broken crushers"
+Class SWWMCrusherBroken : Thinker
+{
+	Sector fsec, csec;
+	double diffh;
+	int fphase, cphase;
+	int ftics, ctics;
+
+	static void Create( Sector f, Sector c, double diffh )
+	{
+		if ( !f && !c ) return;
+		let ti = ThinkerIterator.Create("SWWMCrusherBroken",STAT_USER);
+		SWWMCrusherBroken cb;
+		while ( cb = SWWMCrusherBroken(ti.Next()) )
+		{
+			if ( (cb.fsec == f) && (cb.csec == c) )
+				return;	// we already have this
+			if ( cb.fsec && (cb.fsec == f) )
+			{
+				cb.Destroy();	// we override this one
+				continue;
+			}
+			if ( cb.csec && (cb.csec == c) )
+			{
+				cb.Destroy();	// we override this one
+				continue;
+			}
+		}
+		cb = new("SWWMCrusherBroken");
+		cb.fsec = f;
+		cb.csec = c;
+		cb.ChangeStatNum(STAT_USER);
+		cb.diffh = diffh;
+		if ( f && f.floordata ) f.floordata.Destroy();
+		if ( c && c.ceilingdata ) c.ceilingdata.Destroy();
+	}
+
+	override void Tick()
+	{
+		if ( fsec )
+		{
+			if ( cphase <= 0 )
+			{
+				if ( level.CreateFloor(fsec,Floor.floorLowerByValue,null,16.,diffh*.4) )
+				{
+					ftics = int(diffh*.4/16.)+40;
+					fphase = 1;
+				}
+			}
+			else if ( fphase == 1 )
+			{
+				ftics--;
+				if ( (ftics <= 0) && level.CreateFloor(fsec,Floor.floorLowerByValue,null,1.,diffh*.6) )
+				{
+					ftics = int(diffh*.6)+8;
+					fphase = 2;
+				}
+			}
+			else if ( fphase == 2 )
+			{
+				ftics--;
+				if ( ftics <= 0 ) fphase = 3;
+			}
+			else if ( (fphase >= 3) && fsec.floordata )
+			{
+				fsec.floordata.Destroy();
+				fsec.StopSoundSequence(CHAN_WEAPON);
+			}
+		}
+		if ( csec )
+		{
+			if ( cphase <= 0 )
+			{
+				if ( level.CreateCeiling(csec,Ceiling.ceilRaiseByValue,null,16.,16.,diffh*.4) )
+				{
+					ctics = int(diffh*.4/16.)+40;
+					cphase = 1;
+				}
+			}
+			else if ( cphase == 1 )
+			{
+				ctics--;
+				if ( (ctics <= 0) && level.CreateCeiling(csec,Ceiling.ceilRaiseByValue,null,1.,1.,diffh*.6) )
+				{
+					ctics = int(diffh*.6)+10;
+					cphase = 2;
+				}
+			}
+			else if ( cphase == 2 )
+			{
+				ctics--;
+				if ( ctics <= 0 ) cphase = 3;
+			}
+			else if ( (cphase >= 3) && csec.ceilingdata )
+			{
+				csec.ceilingdata.Destroy();
+				csec.StopSoundSequence(CHAN_VOICE);
+			}
+		}
+	}
+}

@@ -38,7 +38,7 @@ Additional features:
 
  - **Glowing color tags:** Located around various parts of your body, allows quick and easy differentiation between multiple units (color not directly configurable due to *engine limitations™*).
  - **Lucky Collar:** A little something that your creator gives to all of her creations. Reduces incoming damage by 75% when you're below 25% health. Plus an additional 50% reduction to any damage from your own weapons.
- - **High-Resonant Almasteel Plating:** Your chassis is built from one of the hardest alloys known across the universe. Thus, your body is practically indestructible, but not impervious to damage. All direct damage is reduced by 50%, and all explosive damage is reduced by 80%.
+ - **High-Resonant Almasteel Plating:** Your chassis is built from one of the hardest alloys known across the universe. Thus, your body is practically indestructible, but not impervious to damage. All splash damage is reduced by 80%, and you only take half damage from crushers (and may cause them to break, permanently).
  - **User Menu:** With the press of a button, open a dedicated menu to see all your stats in detail, info on carried items and weapons, check out a grand library of information on things you come across, and access the store for buying extra items with your score points.
  - **Magnetic Utility Belt:** Holds important equipment tightly, and is also the secret to how you can reload some weapons so damn fast.
  - **Keychain:** A lil' something to bring some extra good luck charms with you.

@@ -437,6 +437,14 @@ Class SWWMUtility
 						return true;
 			}
 		}
+		// moderate: see if it's a busted crusher, we need to be able to break those in case they cause a softlock
+		let ti = ThinkerIterator.Create("SWWMCrusherBroken",Thinker.STAT_USER);
+		SWWMCrusherBroken cb;
+		while ( cb = SWWMCrusherBroken(ti.Next()) )
+		{
+			if ( (part == 0) && (cb.fsec == s) ) return true;
+			if ( (part == 1) && (cb.csec == s) ) return true;
+		}
 		// hard mode: look for all lines/actors with movement specials referencing us
 		for ( int i=0; i<level.Lines.Size(); i++ )
 		{
@@ -486,7 +494,7 @@ Class SWWMUtility
 						return true;
 			}
 		}
-		let ti = ThinkerIterator.Create("Actor");
+		ti = ThinkerIterator.Create("Actor");
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{

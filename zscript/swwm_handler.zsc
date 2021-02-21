@@ -1436,15 +1436,7 @@ Class SWWMHandler : EventHandler
 			if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
 				continue;
 			if ( (a is 'Chancebox') && (a.CurState != a.SpawnState) )
-			{
-				// "last breath" update
-				for ( SWWMSimpleTracker t=strackers; t; t=t.next )
-				{
-					if ( t.target != a ) continue;
-					if ( !t.expired ) t.Update();
-				}
 				continue;
-			}
 			SWWMSimpleTracker.Track(a);
 		}
 		// prune expired trackers
@@ -1453,8 +1445,7 @@ Class SWWMHandler : EventHandler
 		{
 			SWWMSimpleTracker next = trk.next;
 			// minimize lifespan of destroyed targets
-			if ( !trk.target )
-				trk.lastupdate = min(trk.lastupdate,level.maptime);
+			if ( !trk.target ) trk.lastupdate = min(trk.lastupdate,level.maptime);
 			else if ( !trk.expired )
 			{
 				// "last breath" update

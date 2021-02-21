@@ -1000,7 +1000,7 @@ Class SWWMStatusBar : BaseStatusBar
 				else if ( t.ismonster ) col = am_thingcolor_ncmonster;
 			}
 			int mtime = 35;
-			if ( thesight && !t.expired ) mtime += 105;
+			if ( thesight && !t.expired && t.target ) mtime += 105;
 			double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
 			if ( alph <= 0. ) continue;
 			Vector2 rv = pos-cpos;

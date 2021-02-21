@@ -1750,6 +1750,7 @@ Class HammerspaceEmbiggener : Inventory
 		{
 			if ( !GoAway() ) Destroy();
 			let copy = Inventory(Spawn('HammerspaceEmbiggener'));
+			copy.ClearCounters();
 			copy.Amount = self.Amount;
 			copy.MaxAmount = self.MaxAmount;
 			return copy;
@@ -1757,6 +1758,7 @@ Class HammerspaceEmbiggener : Inventory
 		if ( GoAway() )
 		{
 			let copy = Inventory(Spawn(GetClass()));
+			copy.ClearCounters();
 			copy.Amount = self.Amount;
 			copy.MaxAmount = self.MaxAmount;
 			return copy;
@@ -1828,6 +1830,7 @@ Class HammerspaceEmbiggener : Inventory
 			let t = bt.Thing;
 			if ( !t || (t == self) || !(t is 'HammerspaceEmbiggener') || !(t.spawnpoint ~== spawnpoint) ) continue;
 			tamount += HammerspaceEmbiggener(t).Amount;
+			t.ClearCounters();
 			t.Destroy();
 		}
 		if ( tamount <= 1 ) return;
@@ -1858,6 +1861,7 @@ Class HammerspaceEmbiggener : Inventory
 		n.tracer = tracer;
 		n.target = target;
 		if ( !bDROPPED ) n.bDROPPED = false;
+		ClearCounters();
 		Destroy();
 	}
 

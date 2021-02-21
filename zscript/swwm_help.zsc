@@ -6,7 +6,6 @@ Class SWWMHelpMenu : GenericMenu
 	int fadetic;
 	TextureID bgtex;
 	transient Font TewiFont, MPlusFont;
-	transient CVar lang, fuzz;
 	bool isrclick;
 	int pagedir;
 
@@ -26,8 +25,7 @@ Class SWWMHelpMenu : GenericMenu
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
 	{
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		if ( language ~== "jp" ) return MPlusFont;
 		return req;
 	}
 
@@ -199,8 +197,7 @@ Class SWWMHelpMenu : GenericMenu
 	{
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
-		if ( !fuzz ) fuzz = CVar.GetCvar('swwm_fuzz',players[consoleplayer]);
-		if ( fuzz.GetBool() )
+		if ( swwm_fuzz )
 		{
 			Vector2 tsize = TexMan.GetScaledSize(bgtex);
 			double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));

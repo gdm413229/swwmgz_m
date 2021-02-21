@@ -39,7 +39,7 @@ Class GrilledCheeseSandwich : Inventory
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.GiveBody(1000,1000);
 		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-		if ( CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool() )
+		if ( swwm_accdamage )
 			SWWMScoreObj.Spawn(600,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
 		else
 		{
@@ -918,7 +918,7 @@ Class RagekitPower : Powerup
 			if ( Owner.GiveBody(1,100) )
 				SWWMScoreObj.Spawn(1,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 			Owner.A_AlertMonsters(swwm_uncapalert?0:2000);
-			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() < 2) )
+			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (swwm_mutevoice < 2) )
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 			lastpulse = max(lastpulse,gametic+10);
@@ -967,7 +967,7 @@ Class RagekitPower : Powerup
 		Owner.A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMHandler.DoFlash(Owner,Color(64,255,0,0),10);
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
-		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) )
+		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (swwm_mutevoice < 2) )
 			lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
 		lasteffect = level.maptime;
@@ -1091,6 +1091,15 @@ Class Omnisight : Inventory
 			level.allmap = true;
 		}
 		// not used up, must be kept for the targetting features to work
+		return false;
+	}
+	override bool HandlePickup( Inventory item )
+	{
+		if ( item.GetClass() == GetClass() )
+		{
+			item.bPickupGood = true;
+			return true;
+		}
 		return false;
 	}
 	Default

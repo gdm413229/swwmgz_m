@@ -396,7 +396,7 @@ Class RedShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsNormal.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 30;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 5;
 		Ammo.BackpackMaxAmount 100;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
@@ -442,7 +442,7 @@ Class GreenShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsSlug.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 25;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 4;
 		Ammo.BackpackMaxAmount 80;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
@@ -533,7 +533,7 @@ Class BlueShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 15;
-		Ammo.BackpackAmount 1;
+		Ammo.BackpackAmount 2;
 		Ammo.BackpackMaxAmount 40;
 		Ammo.DropAmount 2;
 		+FLOATBOB;
@@ -625,7 +625,7 @@ Class PurpleShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
-		Ammo.BackpackAmount 1;
+		Ammo.BackpackAmount 3;
 		Ammo.BackpackMaxAmount 60;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
@@ -762,7 +762,7 @@ Class EvisceratorShell : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
-		Ammo.BackpackAmount 2;
+		Ammo.BackpackAmount 5;
 		Ammo.BackpackMaxAmount 90;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
@@ -835,7 +835,7 @@ Class HellblazerMissiles : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 20;
-		Ammo.BackpackAmount 1;
+		Ammo.BackpackAmount 3;
 		Ammo.BackpackMaxAmount 60;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
@@ -902,7 +902,7 @@ Class HellblazerCrackshots : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerCrackshot.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 15;
-		Ammo.BackpackAmount 1;
+		Ammo.BackpackAmount 2;
 		Ammo.BackpackMaxAmount 30;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
@@ -948,7 +948,7 @@ Class HellblazerRavagers : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 9;
-		Ammo.BackpackAmount 0;
+		Ammo.BackpackAmount 1;
 		Ammo.BackpackMaxAmount 18;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
@@ -1675,19 +1675,10 @@ Class HammerspaceEmbiggener : Inventory
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
 
-	bool cheatedin;
-
-	override void SetGiveAmount( Actor receiver, int amount, bool givecheat )
-	{
-		Super.SetGiveAmount(receiver,amount,givecheat);
-		// hackeroo
-		cheatedin = givecheat;
-	}
-
 	override Inventory CreateCopy( Actor other )
 	{
-		if ( !cheatedin ) other.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
-		cheatedin = false;
+		bool traded = (GetClass()=='TradedHammerspaceEmbiggener');
+		if ( !traded ) other.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 		// Find every unique type of ammoitem. Give it to the player if
 		// he doesn't have it already, and increase its maximum capacity.
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
@@ -1719,9 +1710,8 @@ Class HammerspaceEmbiggener : Inventory
 			}
 			if ( !isvalid ) continue;
 			let ammoitem = Ammo(other.FindInventory(type));
-			int amount = GetDefaultByType(type).BackpackAmount;
-			// extra ammo in baby mode and nightmare mode
-			if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
+			int amount = GetDefaultByType(type).BackpackAmount*self.Amount;
+			if ( traded ) amount = 0;
 			if ( amount < 0 ) amount = 0;
 			if ( !ammoitem )
 			{
@@ -1731,7 +1721,7 @@ Class HammerspaceEmbiggener : Inventory
 				if ( ammoitem.BackpackMaxAmount > 0 )
 				{
 					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
-					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+self.Amount*factor);
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+min(self.Amount,MaxAmount)*factor);
 				}
 				if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
 					ammoitem.Amount = ammoitem.MaxAmount;
@@ -1743,25 +1733,48 @@ Class HammerspaceEmbiggener : Inventory
 				if ( ammoitem.BackpackMaxAmount > 0 )
 				{
 					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
-					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+self.Amount*factor);
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+min(self.Amount,MaxAmount)*factor);
 				}
 				if ( ammoitem.Amount < ammoitem.MaxAmount )
 				{
-					ammoitem.Amount += amount;
+					if ( (ammoitem.Amount > 0) && (ammoitem.Amount+amount < 0) )
+						ammoitem.Amount = int.max;
+					else ammoitem.Amount += amount;
 					if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
 						ammoitem.Amount = ammoitem.MaxAmount;
 				}
 			}
 		}
-		return Inventory.CreateCopy(other);
+		self.Amount = min(self.Amount,MaxAmount);
+		if ( GetParentClass() == 'HammerspaceEmbiggener' )
+		{
+			if ( !GoAway() ) Destroy();
+			let copy = Inventory(Spawn('HammerspaceEmbiggener'));
+			copy.Amount = self.Amount;
+			copy.MaxAmount = self.MaxAmount;
+			return copy;
+		}
+		if ( GoAway() )
+		{
+			let copy = Inventory(Spawn(GetClass()));
+			copy.Amount = self.Amount;
+			copy.MaxAmount = self.MaxAmount;
+			return copy;
+		}
+		return self;
 	}
 
 	override bool HandlePickup( Inventory item )
 	{
-		bool res = Super.HandlePickup(item);
-		if ( item.GetClass() == GetClass() )
+		if ( (item.GetClass() == GetClass()) || (item.GetParentClass() == 'HammerspaceEmbiggener') )
 		{
-			if ( !HammerspaceEmbiggener(item).cheatedin ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
+			bool traded = (item.GetClass()=='TradedHammerspaceEmbiggener');
+			if ( !traded ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
+			if ( (Amount > 0) && (Amount+item.Amount < 0) )
+				Amount = int.max;
+			else Amount += item.Amount;
+			if ( Amount > MaxAmount ) Amount = MaxAmount;
+			item.bPickupGood = true;
 			// readjust ammo values to new capacity
 			for ( Inventory i=Owner.Inv; i; i=i.Inv )
 			{
@@ -1771,12 +1784,15 @@ Class HammerspaceEmbiggener : Inventory
 					double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(MaxAmount);
 					i.MaxAmount = int(i.default.MaxAmount+Amount*factor);
 				}
-				int amount = Ammo(i).BackpackAmount;
-				if ( !bIgnoreSkill ) amount = int(amount*G_SkillPropertyFloat(SKILLP_AmmoFactor));
-				i.Amount += amount;
+				int amount = Ammo(i).BackpackAmount*item.Amount;
+				if ( traded ) i.Amount = 0;
+				if ( (i.Amount > 0) && (i.Amount+amount < 0) )
+					i.Amount = int.max;
+				else i.Amount += amount;
 				if ( (i.Amount > i.MaxAmount) && !sv_unlimited_pickup )
 					i.Amount = i.MaxAmount;
 			}
+			return true;
 		}
 		// new ammo suddenly added? upgrade it (this shouldn't happen unless fucky scripting has been involved)
 		if ( (item is 'Ammo') && !Owner.FindInventory(Ammo(item).GetParentAmmo()) )
@@ -1787,7 +1803,7 @@ Class HammerspaceEmbiggener : Inventory
 				item.MaxAmount = int(item.default.MaxAmount+Amount*factor);
 			}
 		}
-		return res;
+		return false;
 	}
 
 	override void DepleteOrDestroy()
@@ -1800,6 +1816,49 @@ Class HammerspaceEmbiggener : Inventory
 			if ( i.Amount > i.MaxAmount ) i.Amount = i.MaxAmount;
 		}
 		Super.DepleteOrDestroy();
+	}
+
+	// merges overlapping embiggeners into a bulk upgrade
+	void A_MergeEmbiggeners()
+	{
+		let bt = BlockThingsIterator.Create(self,16);
+		int tamount = Amount;
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || (t == self) || !(t is 'HammerspaceEmbiggener') || !(t.spawnpoint ~== spawnpoint) ) continue;
+			tamount += HammerspaceEmbiggener(t).Amount;
+			t.Destroy();
+		}
+		if ( tamount <= 1 ) return;
+		tamount -= tamount%2;	// always even numbered
+		if ( GetClass() == 'BulkHammerspaceEmbiggener' )
+		{
+			Amount = min(tamount,MaxAmount);
+			return;
+		}
+		let n = Spawn("BulkHammerspaceEmbiggener",pos);
+		Inventory(n).Amount = min(tamount,MaxAmount);
+		n.spawnpoint = spawnpoint;
+		n.spawnangle = spawnangle;
+		n.angle = angle;
+		n.pitch = pitch;
+		n.roll = roll;
+		n.special = special;
+		for ( int i=0; i<5; i++ ) n.args[i] = args[i];
+		n.special1 = special1;
+		n.special2 = special2;
+		n.spawnflags = spawnflags&~MTF_SECRET;
+		n.HandleSpawnFlags();
+		n.spawnflags = spawnflags;
+		n.bCountSecret = spawnflags&MTF_SECRET;
+		n.ChangeTid(tid);
+		n.vel = vel;
+		n.master = master;
+		n.tracer = tracer;
+		n.target = target;
+		if ( !bDROPPED ) n.bDROPPED = false;
+		Destroy();
 	}
 
 	Default
@@ -1822,7 +1881,37 @@ Class HammerspaceEmbiggener : Inventory
 	States
 	{
 	Spawn:
-		XZW1 A -1;
+		XZW1 A -1 NoDelay A_MergeEmbiggeners();
+		Stop;
+	}
+}
+
+// used when cheating or trading, this version does not give ammo and is meant
+// only for GiveInventory, so it shouldn't be spawned in the world
+Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener {}
+
+// used to denote "merged" embiggeners, changes color based on amount
+//  green (2+)
+//  blue (4+)
+//  purple (6+)
+//  black (8+)
+Class BulkHammerspaceEmbiggener : HammerspaceEmbiggener
+{
+	override string PickupMessage()
+	{
+		return String.Format("%dx %s",Amount,StringTable.Localize("$T_BULKEMBIGGENER"));
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 NoDelay
+		{
+			A_MergeEmbiggeners();
+			if ( bDestroyed ) return ResolveState(null);
+			if ( Amount > 1 ) return SpawnState+min(4,Amount/2);
+			return ResolveState(null);
+		}
+		XZW1 BCDE -1;
 		Stop;
 	}
 }

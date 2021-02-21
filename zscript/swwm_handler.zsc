@@ -250,14 +250,9 @@ Class SWWMHandler : EventHandler
 	// for menu events
 	transient Array<MenuTransaction> checklist;
 
-	transient CVar mutevoice, accdamage;
-	transient ui CVar useshaders, altrage;
-	transient CVar lang;
 	transient String curlang;
-	transient CVar funtags;
 	transient bool curfuntags;
 	transient int slotstrictwarn;
-	transient CVar numcolor_scr, numcolor_bonus, numcolor_dmg, numcolor_hp, numcolor_ap;
 
 	// optimization
 	OnFire fires;
@@ -296,7 +291,6 @@ Class SWWMHandler : EventHandler
 	ui int thealth, hmax;
 	ui int oldhealth[30];
 	ui int cummdamage, lastcummtic;	// please do not misread
-	transient ui CVar dodrawbossbar;
 
 	bool nugflip;	// h/a nugget flip-flop spawn counter
 
@@ -309,7 +303,6 @@ Class SWWMHandler : EventHandler
 
 	// for minimap
 	Array<int> ffsectors;
-	transient CVar showmini;
 
 	enum EVanillaMap
 	{
@@ -552,7 +545,7 @@ Class SWWMHandler : EventHandler
 			return 0;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return 0;
-		String voicetype = CVar.GetCVar('swwm_voicetype',players[consoleplayer]).GetString();
+		String voicetype = CVar.FindCVar('swwm_voicetype').GetString();
 		// suppress non-rage comments when ragekit is active, only screaming allowed
 		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
 		int whichline;
@@ -904,7 +897,6 @@ Class SWWMHandler : EventHandler
 			level.ReplaceTextures("-noflat-","kinstile",0);
 			S_ChangeMusic("music/CARDISH1.XM");
 		}
-		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
 			AddOneliner("mapstart",3);
 		if ( !e.IsSaveGame && !e.IsReopen )
@@ -1204,9 +1196,7 @@ Class SWWMHandler : EventHandler
 
 	private void LangRefresh()
 	{
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
-		if ( (lang.GetString() != curlang) || (funtags.GetBool() != curfuntags) )
+		if ( (language != curlang) || (swwm_funtags != curfuntags) )
 		{
 			// manually refresh some tags if language has changed
 			for ( SWWMCombatTracker t=trackers; t; t=t.next )
@@ -1223,8 +1213,8 @@ Class SWWMHandler : EventHandler
 					s.UpdateTag();
 			}
 		}
-		curlang = lang.GetString();
-		curfuntags = funtags.GetBool();
+		curlang = language;
+		curfuntags = swwm_funtags;
 	}
 
 	private void QueueMaintenance()
@@ -1414,8 +1404,7 @@ Class SWWMHandler : EventHandler
 	// "simple" tracking (used by the minimap)
 	private void SimpleTracking()
 	{
-		if ( !showmini ) showmini = CVar.GetCVar('swwm_showminimap',players[consoleplayer]);
-		if ( !showmini.GetBool() )
+		if ( !swwm_showminimap )
 		{
 			while ( strackers )
 			{
@@ -1517,12 +1506,11 @@ Class SWWMHandler : EventHandler
 					Console.Printf(StringTable.Localize("$SWWM_NEWMISSION"));
 			}
 		}
-		if ( !mutevoice ) mutevoice = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]);
 		if ( onelinertic && (onelinertic < gametic) )
 		{
 			if ( players[consoleplayer].health > 0 )
 			{
-				if ( onelinerlevel > mutevoice.GetInt() )
+				if ( onelinerlevel > swwm_mutevoice )
 					players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
 				SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
 			}
@@ -1698,9 +1686,8 @@ Class SWWMHandler : EventHandler
 	// damage numbers, combat tracking, etc.
 	private void DoDamageHandling( WorldEvent e )
 	{
-		if ( !accdamage ) accdamage = CVar.GetCVar('swwm_accdamage',players[consoleplayer]);
 		bool spawnme = true;
-		if ( accdamage.GetBool() )
+		if ( swwm_accdamage )
 		{
 			// find existing damage number
 			for ( SWWMScoreObj d=damnums; d; d=d.next )
@@ -2428,10 +2415,7 @@ Class SWWMHandler : EventHandler
 	{
 		if ( (gametic == onelinertic) && (oneliner != "") && (players[consoleplayer].health > 0) )
 		{
-			int mute;
-			if ( mutevoice ) mute = mutevoice.GetInt();
-			else mute = CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt();	// we can't assign the variable here since it's play scope
-			if ( onelinerlevel > mute )
+			if ( onelinerlevel > swwm_mutevoice )
 			{
 				let l = SWWMOneLiner.Make(oneliner,onelinerspan);
 				StatusBar.AttachMessage(l,-3473);
@@ -3466,9 +3450,51 @@ Class SWWMHandler : EventHandler
 			}
 			else if ( amt > def.MaxAmount ) amt = def.MaxAmount;
 			bool rslt = false;
-			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(item,amt,true) )
+			Class<Inventory> giveitem = item;
+			if ( item is 'HammerspaceEmbiggener' ) giveitem = 'TradedHammerspaceEmbiggener';
+			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(giveitem,amt,true) )
 			{
-				players[e.Args[0]].mo.TakeInventory(item,amt);
+				// if player currently has the dual wield weapon selected, switch over
+				if ( item is 'SWWMWeapon' )
+				{
+					let c = Weapon(players[e.Args[0]].mo.FindInventory(item));
+					if ( c.SisterWeapon && (players[e.Args[0]].ReadyWeapon == c.SisterWeapon) )
+					{
+						players[e.Args[0]].ReadyWeapon = c;
+						players[e.Args[0]].SetPSprite(PSP_WEAPON,c.FindState("Ready"));
+						players[e.Args[0]].SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+					}
+				}
+				// if we're trading an embiggener, we need to readjust ammo
+				if ( item is 'HammerspaceEmbiggener' )
+				{
+					let ritm = players[e.Args[0]].mo.FindInventory(item);
+					for ( Inventory i=players[e.Args[0]].mo.Inv; i; i=i.Inv )
+					{
+						if ( !(i is 'Ammo') ) continue;
+						if ( Ammo(i).BackpackMaxAmount > 0 )
+						{
+							double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(ritm.MaxAmount);
+							i.MaxAmount = int(i.default.MaxAmount+(ritm.Amount-amt)*factor);
+						}
+						// drop excess ammo
+						int excess = i.Amount-i.MaxAmount;
+						if ( excess > 0 ) i.CreateTossable(excess);
+					}
+				}
+				if ( item is 'CandyGun' )
+				{
+					// see if we can take a fully loaded spare from us instead
+					int n = players[e.Args[0]].mo.CountInv('CandyGunSpares');
+					int na = players[e.Args[0]].mo.CountInv('CandyGunAmmo');
+					if ( (n >= amt) && (na >= amt) )
+					{
+						players[e.Args[0]].mo.TakeInventory('CandyGunSpares',amt);
+						players[e.Args[0]].mo.TakeInventory('CandyGunAmmo',amt);
+					}
+					else players[e.Args[0]].mo.TakeInventory('CandyGun',amt);
+				}
+				else players[e.Args[0]].mo.TakeInventory(item,amt);
 				// add to history
 				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],item,amt);
 				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],item,amt);
@@ -3577,15 +3603,15 @@ Class SWWMHandler : EventHandler
 		else if ( e.Name.Left(16) ~== "swwmremoteliner." )
 		{
 			if ( consoleplayer == e.Args[0] ) return;
-			if ( !CVar.GetCVar('swwm_othervoice',players[consoleplayer]).GetBool() ) return;
-			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= e.Args[1] ) return;
+			if ( !swwm_othervoice ) return;
+			if ( swwm_mutevoice >= e.Args[1] ) return;
 			players[e.Args[0]].mo.A_StartSound(e.Name.Mid(16),CHAN_DEMOVOICE,attenuation:.5);
 		}
 		else if ( e.Name.Left(19) ~== "swwmremotelinertxt." )
 		{
 			if ( consoleplayer == e.Args[0] ) return;
-			if ( !CVar.GetCVar('swwm_othervoice',players[consoleplayer]).GetBool() ) return;
-			if ( CVar.GetCVar('swwm_mutevoice',players[consoleplayer]).GetInt() >= e.Args[1] ) return;
+			if ( !swwm_othervoice ) return;
+			if ( swwm_mutevoice >= e.Args[1] ) return;
 			double dist = players[consoleplayer].Camera.Distance3D(players[e.Args[0]].mo);
 			if ( dist < 2000 )
 				Console.Printf("\cx%s\cx: %s\c-",players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(19)));
@@ -3979,8 +4005,7 @@ Class SWWMHandler : EventHandler
 	ui void DrawBossBar( SWWMStatusBar bar )
 	{
 		if ( !ui_initialized || (bossalpha <= 0.) ) return;
-		if ( !dodrawbossbar ) dodrawbossbar = CVar.GetCVar('swwm_bosshealthbars',players[consoleplayer]);
-		if ( !dodrawbossbar.GetBool() ) return;
+		if ( !swwm_bosshealthbars ) return;
 		if ( !bbar_f ) bbar_f = TexMan.CheckForTexture("graphics/HUD/BossHealthBarBox.png",TexMan.Type_Any);
 		if ( !bbar_r ) bbar_r = TexMan.CheckForTexture("graphics/HUD/BossHealthBar.png",TexMan.Type_Any);
 		if ( !bbar_d ) bbar_d = TexMan.CheckForTexture("graphics/HUD/BossHealthBarDecay.png",TexMan.Type_Any);
@@ -3998,22 +4023,20 @@ Class SWWMHandler : EventHandler
 			string dnum = String.Format("%d",cummdamage);
 			Screen.DrawText(dmgfnt,Font.CR_RED,vpos.x+300-dmgfnt.StringWidth(dnum),vpos.y-(dmgfnt.GetHeight()+2),dnum,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha*calph);
 		}
-		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize((funtags&&funtags.GetBool())?(bosstag.."_FUN"):bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
+		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(swwm_funtags?(bosstag.."_FUN"):bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
 	}
 
 	// various shaders
 	override void RenderOverlay( RenderEvent e )
 	{
 		PlayerInfo p = players[consoleplayer];
-		if ( !useshaders ) useshaders = CVar.GetCVar('swwm_shaders',p);
 		let mo = p.mo;
 		if ( !mo ) return;
 		bool pc = (p.camera == mo);
 		let rage = RagekitPower(mo.FindInventory("RagekitPower"));
-		if ( pc && rage && useshaders.GetBool() )
+		if ( pc && rage && swwm_shaders )
 		{
-			if ( !altrage ) altrage = CVar.GetCVar('swwm_rageshader',p);
-			if ( altrage.GetBool() )
+			if ( swwm_rageshader )
 			{
 				Shader.SetEnabled(p,"RagekitShader",false);
 				Shader.SetEnabled(p,"RagekitAltShader",true);
@@ -4036,10 +4059,10 @@ Class SWWMHandler : EventHandler
 			Shader.SetEnabled(p,"RagekitAltShader",false);
 		}
 		let ghost = GhostPower(mo.FindInventory("GhostPower"));
-		if ( pc && ghost && useshaders.GetBool() ) Shader.SetEnabled(p,"GhostShader",true);
+		if ( pc && ghost && swwm_shaders ) Shader.SetEnabled(p,"GhostShader",true);
 		else Shader.SetEnabled(p,"GhostShader",false);
 		let sunny = InvinciballPower(mo.FindInventory("InvinciballPower"));
-		if ( pc && sunny && useshaders.GetBool() )
+		if ( pc && sunny && swwm_shaders )
 		{
 			Shader.SetEnabled(p,"InvinciShader",true);
 			double str = max(0,sunny.lastpulse-(gametic+e.Fractic))/35.;
@@ -4047,13 +4070,13 @@ Class SWWMHandler : EventHandler
 		}
 		else Shader.SetEnabled(p,"InvinciShader",false);
 		let coat = BarrierPower(mo.FindInventory("BarrierPower"));
-		if ( pc && coat && useshaders.GetBool() )
+		if ( pc && coat && swwm_shaders )
 		{
 			Shader.SetEnabled(p,"BarrierShader",true);
 			Shader.SetUniform1f(p,"BarrierShader","timer",(gametic+e.FracTic)/GameTicRate);
 		}
 		else Shader.SetEnabled(p,"BarrierShader",false);
-		if ( pc && (mo is 'Demolitionist') && useshaders.GetBool() )
+		if ( pc && (mo is 'Demolitionist') && swwm_shaders )
 		{
 			let demo = Demolitionist(mo);
 			if ( demo.lastunder == Demolitionist.UNDER_WATER )

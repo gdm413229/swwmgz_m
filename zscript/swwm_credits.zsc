@@ -108,7 +108,6 @@ Class SWWMCreditsMenu : GenericMenu
 	String stitle, stitle2;
 	String sdev, sassets, smusic, sfanart, slocal, spatrons, sthanks;
 	Array<SWWMCreditsEntry> cdev, cassets, cmusic, cfanart, clocal, cpatrons, cthanks;
-	transient CVar fuzz, lang;
 	String oldlang;
 	transient Font bfnt, sfnt;
 	Vector2 ss;
@@ -129,8 +128,7 @@ Class SWWMCreditsMenu : GenericMenu
 	void UpdateFonts()
 	{
 		if ( !bfnt ) bfnt = Font.GetFont('SWWMBigFont');
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		String curlang = lang.GetString();
+		String curlang = language;
 		if ( !sfnt || (curlang != oldlang) ) sfnt = (curlang ~== "jp")?Font.GetFont('MPlusShaded'):Font.GetFont('TewiShaded');
 		oldlang = curlang;
 	}
@@ -282,8 +280,7 @@ Class SWWMCreditsMenu : GenericMenu
 	override void Drawer()
 	{
 		Super.Drawer();
-		if ( !fuzz ) fuzz = CVar.GetCvar('swwm_fuzz',players[consoleplayer]);
-		if ( fuzz.GetBool() )
+		if ( swwm_fuzz )
 		{
 			Vector2 tsize = TexMan.GetScaledSize(bgtex);
 			double zoom = max(ceil(Screen.GetWidth()/tsize.x),ceil(Screen.GetHeight()/tsize.y));

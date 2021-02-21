@@ -116,7 +116,6 @@ Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
 Class SWWMOptionMenu : OptionMenu
 {
 	private String ttip;
-	transient CVar lang;
 	transient Font TewiFont, MPlusFont;
 
 	override void Init( Menu parent, OptionMenuDescriptor desc )
@@ -178,9 +177,8 @@ Class SWWMOptionMenu : OptionMenu
 		}
 		if ( !TewiFont ) TewiFont = Font.GetFont('Tewi');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlus');
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		Font fnt = TewiFont;
-		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
+		if ( language ~== "jp" ) fnt = MPlusFont;
 		let lines = fnt.BreakLines(ttip,CleanWidth_1-8);
 		int height = (4+fnt.GetHeight()*lines.Count())*CleanYFac_1;
 		// draw at the bottom unless the selected option could be covered by the tooltip
@@ -534,7 +532,6 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 
 Class SWWMMenuDelegate : DoomMenuDelegate
 {
-	transient CVar lang;
 	transient Font TewiFont, MPlusFont, SWWMBigFont;
 
 	override int DrawCaption( String title, Font fnt, int y, bool drawit )
@@ -550,13 +547,12 @@ Class SWWMMenuDelegate : DoomMenuDelegate
 	// this doesn't seem to always work?
 	override Font PickFont( Font fnt )
 	{
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
 		if ( !SWWMBigFont ) SWWMBigFont = Font.GetFont('SWWMBigFont');
 		if ( (fnt == SmallFont) || (fnt == SmallFont2) || (fnt == AlternativeSmallFont) || (fnt == NewSmallFont) || !fnt )
 		{
-			if ( lang.GetString() ~== "jp" ) return MPlusFont;
+			if ( language ~== "jp" ) return MPlusFont;
 			return TewiFont;
 		}
 		if ( (fnt == BigFont) || (fnt == AlternativeBigFont) || (fnt == OriginalBigFont) || (fnt == IntermissionFont) ) return SWWMBigFont;

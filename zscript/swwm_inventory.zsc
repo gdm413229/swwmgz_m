@@ -208,10 +208,9 @@ Class SWWMArmor : Armor abstract
 		{
 			if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
 			int tgive = 0;
-			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();
 			while ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) )
 			{
-				if ( acc ) tgive += default.Amount;
+				if ( swwm_accdamage ) tgive += default.Amount;
 				else SWWMScoreObj.Spawn(default.Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
 				Amount += default.Amount;
 				Owner.TakeInventory(parent,1);
@@ -225,7 +224,7 @@ Class SWWMArmor : Armor abstract
 				amount -= saved;
 				damage = newdamage;
 			}
-			if ( acc ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+			if ( swwm_accdamage ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
 		}
 		else if ( amount <= 0 )
 		{
@@ -403,11 +402,10 @@ Class SWWMHealth : Inventory abstract
 			}
 			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 			int tgive = 0;
-			bool acc = CVar.GetCVar('swwm_accdamage',players[consoleplayer]).GetBool();
 			bool morethanonce = false;
 			while ( (Amount > 0) && (newdamage > 0) )
 			{
-				if ( acc ) tgive += GetDefaultByType(giveme).Amount;
+				if ( swwm_accdamage ) tgive += GetDefaultByType(giveme).Amount;
 				else SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 				newdamage = newdamage-GetDefaultByType(giveme).Amount;
 				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
@@ -416,7 +414,7 @@ Class SWWMHealth : Inventory abstract
 				morethanonce = true;
 				Amount--;
 			}
-			if ( acc ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+			if ( swwm_accdamage ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 		}
 		else newdamage = damage;
 	}
@@ -1053,8 +1051,6 @@ Class SWWMWeapon : Weapon abstract
 	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
 	FlagDef NoSwapWeapon : SWeaponFlags, 2;	// weapon is not affected by slot swapping
 
-	transient CVar phair;		// use custom precise crosshair
-	transient ui CVar ch_img, ch_siz, ch_grow, ch_col, ch_hp, ch_on, ch_force;
 	ui SWWMCrosshairTracer ctr;
 	ui Vector3 cpos;
 	ui Color ccol;
@@ -1156,9 +1152,8 @@ Class SWWMWeapon : Weapon abstract
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( !phair ) phair = CVar.GetCVar('swwm_precisecrosshair',players[consoleplayer]);
 		// force custom crosshair
-		if ( phair.GetBool() ) crosshair = 99;
+		if ( swwm_precisecrosshair ) crosshair = 99;
 		else crosshair = 0;
 	}
 	// subtracts given ammo from price, drops excess
@@ -1303,11 +1298,9 @@ Class SWWMWeapon : Weapon abstract
 	{
 		// draw custom crosshair
 		if ( automapactive || !(players[consoleplayer].Camera is 'PlayerPawn') ) return;
-		if ( !phair || !phair.GetBool() ) return;
-		if ( !ch_on ) ch_on = CVar.GetCVar('crosshairon',players[consoleplayer]);
-		if ( !ch_on.GetBool() ) return;
-		if ( !ch_force ) ch_force = CVar.GetCVar('crosshairforce',players[consoleplayer]);
-		if ( ch_force.GetBool() ) return;
+		if ( !swwm_precisecrosshair ) return;
+		if ( !crosshairon ) return;
+		if ( crosshairforce ) return;
 		let sb = SWWMStatusBar(StatusBar);
 		if ( !sb ) return;
 		sb.viewport.FromHud();
@@ -1327,20 +1320,17 @@ Class SWWMWeapon : Weapon abstract
 		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
 		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
 		prevms = MSTime();
-		if ( !ch_img ) ch_img = CVar.GetCVar('crosshair',players[consoleplayer]);
-		int cnum = abs(ch_img.GetInt());
+		int cnum = abs(CVar.FindCVar('crosshair').GetInt());
 		if ( !cnum ) return;
 		String tn = String.Format("XHAIR%s%d",(Screen.GetWidth()<640)?"S":"B",cnum);
 		TextureID ctex = TexMan.CheckForTexture(tn,TexMan.Type_MiscPatch);
 		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture(String.Format("XHAIR%s1",(Screen.GetWidth()<640)?"S":"B"),TexMan.Type_MiscPatch);
 		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture("XHAIRS1",TexMan.Type_MiscPatch);
 		Vector2 ts = TexMan.GetScaledSize(ctex);
-		if ( !ch_siz ) ch_siz = CVar.GetCVar('crosshairscale',players[consoleplayer]);
-		double cs = ch_siz.GetFloat();
+		double cs = crosshairscale;
 		double sz = 1.;
 		if ( cs > 0. ) sz = Screen.GetHeight()*cs/200.;
-		if ( !ch_grow ) ch_grow = CVar.GetCVar('crosshairgrow',players[consoleplayer]);
-		if ( ch_grow.GetBool() ) sz *= sb.CrosshairSize;
+		if ( crosshairgrow ) sz *= sb.CrosshairSize;
 		Screen.DrawTexture(ctex,false,int(lagvpos.x),int(lagvpos.y),DTA_DestWidthF,ts.x*sz,DTA_DestHeightF,ts.y*sz,DTA_AlphaChannel,true,DTA_FillColor,ccol);
 	}
 	ui Vector3, Color TraceForCrosshair()
@@ -1353,17 +1343,16 @@ Class SWWMWeapon : Weapon abstract
 		ofs = GetTraceOffset();
 		Vector3 origin = level.Vec3Offset(Owner.Vec2OffsetZ(0,0,Owner.player.viewz),ofs.x*x+ofs.y*y+ofs.z*z);
 		ctr.Trace(origin,level.PointInSector(origin.xy),x,10000.,0);
-		if ( !ch_col ) ch_col = CVar.GetCVar('crosshaircolor',players[consoleplayer]);
-		Color col = ch_col.GetInt();
-		if ( !ch_hp ) ch_hp = CVar.GetCVar('crosshairhealth',players[consoleplayer]);
-		if ( ch_hp.GetInt() >= 2 )
+		Color col = crosshaircolor;
+		int chp = crosshairhealth;
+		if ( chp >= 2 )
 		{
 			int hp = Clamp(Owner.Health,0,200);
 			double sat = (hp<150)?1.:(1.-(hp-150)/100.);
 			Vector3 rgb = SWWMUtility.HSVtoRGB((hp/300.,sat,1.));
 			col = Color(int(rgb.x*255),int(rgb.y*255),int(rgb.z*255));
 		}
-		else if ( ch_hp.GetInt() == 1 )
+		else if ( chp == 1 )
 		{
 			double hp = Clamp(Owner.Health,0,100)/100.;
 			if ( hp <= 0 ) col = Color(255,0,0);

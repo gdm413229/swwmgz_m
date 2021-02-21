@@ -657,7 +657,6 @@ Class SilverBullet : SWWMWeapon
 	bool zoomed;
 	double zoomlevel;
 	ui TextureID reticle, scope;
-	transient ui CVar useshaders;
 	int rezoom;
 	bool proneme;
 
@@ -780,12 +779,11 @@ Class SilverBullet : SWWMWeapon
 	}
 	override void RenderUnderlay( RenderEvent e )
 	{
-		if ( !useshaders ) useshaders = CVar.GetCVar('swwm_shaders',players[consoleplayer]);
 		if ( zoomed && (Owner.player == players[consoleplayer]) )
 		{
 			Vector2 ss = (Screen.GetWidth(),Screen.GetHeight());
 			ss *= (512./ss.y);
-			if ( useshaders.GetBool() ) Shader.SetEnabled(players[consoleplayer],"SilverScope",true);
+			if ( swwm_shaders ) Shader.SetEnabled(players[consoleplayer],"SilverScope",true);
 			else
 			{
 				Shader.SetEnabled(players[consoleplayer],"SilverScope",false);

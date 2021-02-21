@@ -10,7 +10,6 @@ Class SWWMStatScreen : StatusScreen abstract
 	transient TextureID bgtex, arttex;
 	transient Font TewiFont, MPlusFont;
 	int whichart, whichtip;
-	transient CVar interart, lang, origmus;
 	double hs, hs2;
 	Vector2 ss, ss2, origin, origin2;
 	double bgfade;
@@ -18,8 +17,7 @@ Class SWWMStatScreen : StatusScreen abstract
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
 	{
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		if ( lang.GetString() ~== "jp" ) return MPlusFont;
+		if ( language ~== "jp" ) return MPlusFont;
 		return req;
 	}
 	override void Start( wbstartstruct wbstartstruct )
@@ -41,20 +39,18 @@ Class SWWMStatScreen : StatusScreen abstract
 	}
 	override void StartMusic()
 	{
-		if ( !origmus ) origmus = CVar.GetCVar('swwm_intermusic',players[consoleplayer]);
-		if ( origmus.GetBool() ) Level.SetInterMusic(wbs.next);
+		if ( swwm_intermusic ) Level.SetInterMusic(wbs.next);
 		else S_ChangeMusic("music/DRAGONY.XM");
 	}
 	private void drawSWWMBg()
 	{
-		if ( !interart ) interart = CVar.GetCVar('swwm_interart',players[consoleplayer]);
 		let pdata = SWWMStatScreenData(ThinkerIterator.Create("SWWMStatScreenData",Thinker.STAT_STATIC).Next());
 		if ( !pdata )
 		{
 			pdata = new("SWWMStatScreenData");
 			pdata.ChangeStatNum(Thinker.STAT_STATIC);
 		}
-		if ( !whichart && interart.GetBool() )
+		if ( !whichart && swwm_interart )
 		{
 			int no = StringTable.Localize("$SWWM_NFANART").ToInt();
 			Array<Int> ents;

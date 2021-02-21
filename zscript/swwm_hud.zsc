@@ -26,9 +26,6 @@ Class SWWMStatusBar : BaseStatusBar
 	// the event handler, holding all sorts of stuff
 	SWWMHandler hnd;
 
-	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil, camhud, forcestats, showmini;
-
 	// shared stuff
 	Vector2 ss, hs;
 	Vector2 ssb, hsb;
@@ -50,13 +47,11 @@ Class SWWMStatusBar : BaseStatusBar
 	swwmLe__SWScreen sw_proj;
 	swwmLe__Viewport viewport;
 	bool can_project;
-	transient CVar cvar_renderer;
 
 	DynamicValueInterpolator HealthInter, ScoreInter, ScoreInter2, FuelInter, DashInter;
 
 	Inventory lastsel;
 	Weapon lastwep;
-	transient CVar ntags;
 	String ntagstr;
 	int ntagtic, ntagcol;
 
@@ -75,8 +70,7 @@ Class SWWMStatusBar : BaseStatusBar
 	// Miniwi -> k6x8
 	Font LangFont( HUDFont req )
 	{
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
-		if ( lang.GetString() ~== "jp" )
+		if ( language ~== "jp" )
 		{
 			if ( req == mMiniwiFont ) return mk6x8Font.mFont;
 			return mMPlusFont.mFont;
@@ -222,13 +216,7 @@ Class SWWMStatusBar : BaseStatusBar
 
 	void PrepareProjection()
 	{
-		if ( !cvar_renderer ) cvar_renderer = CVar.GetCVar("vid_rendermode",players[consoleplayer]);
-		if ( !cvar_renderer )
-		{
-			can_project = proj = gl_proj;
-			return;
-		}
-		switch ( cvar_renderer.GetInt() )
+		switch ( vid_rendermode )
 		{
 		case 0:
 		case 1:
@@ -389,30 +377,20 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		Super.Tick();
 		PrepareProjection();
-		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
-		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
-		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);
-		if ( !targetter ) targetter = CVar.GetCVar('swwm_targeter',players[consoleplayer]);
-		if ( !healthnums ) healthnums = CVar.GetCVar('swwm_healthnums',players[consoleplayer]);
-		if ( !scorenums ) scorenums = CVar.GetCVar('swwm_scorenums',players[consoleplayer]);
-		if ( !pois ) pois = CVar.GetCVar('swwm_pois',players[consoleplayer]);
-		if ( !maxtarg ) maxtarg = CVar.GetCVar('swwm_maxtargets',players[consoleplayer]);
-		if ( !maxscore ) maxscore = CVar.GetCVar('swwm_maxscorenums',players[consoleplayer]);
-		if ( !maxdamns ) maxdamns = CVar.GetCVar('swwm_maxdamnums',players[consoleplayer]);
-		int maxtargetnum = max(0,maxtarg.GetInt());
-		int maxscorenum = max(0,maxscore.GetInt());
-		int maxdamnum = max(0,maxdamns.GetInt());
+		int maxtargetnum = max(0,swwm_maxtargets);
+		int maxscorenum = max(0,swwm_maxscorenums);
+		int maxdamnum = max(0,swwm_maxdamnums);
 		// prune old messages
 		for ( int i=0; i<PickupQueue.Size(); i++ )
 		{
-			if ( level.totaltime < (PickupQueue[i].tic+35*pickduration.GetInt()) ) continue;
+			if ( level.totaltime < (PickupQueue[i].tic+35*swwm_pickduration) ) continue;
 			PickupQueue.Delete(i);
 			i--;
 		}
 		for ( int i=0; i<MainQueue.Size(); i++ )
 		{
-			if ( (MainQueue[i].type <= PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*msgduration.GetInt())) ) continue;
-			else if ( (MainQueue[i].type > PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*chatduration.GetInt())) ) continue;
+			if ( (MainQueue[i].type <= PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*swwm_msgduration)) ) continue;
+			else if ( (MainQueue[i].type > PRINT_HIGH) && (level.totaltime < (MainQueue[i].tic+35*swwm_chatduration)) ) continue;
 			MainQueue.Delete(i);
 			i--;
 		}
@@ -441,7 +419,7 @@ Class SWWMStatusBar : BaseStatusBar
 		let cam = players[consoleplayer].camera;
 		Vector3 viewvec = (cos(viewrot.x)*cos(viewrot.y),sin(viewrot.x)*cos(viewrot.y),sin(-viewrot.y));
 		int sz;
-		if ( thesight && pois.GetBool() )
+		if ( thesight && swwm_pois )
 		{
 			// update omnisight stuff
 			if ( intpoints.Size() != hnd.intpoints_cnt )
@@ -463,7 +441,7 @@ Class SWWMStatusBar : BaseStatusBar
 			// sort by distance
 			qsort_intpoints(intpoints,0,intpoints.Size()-1);
 		}
-		if ( targetter.GetBool() )
+		if ( swwm_targeter )
 		{
 			// update target stuff
 			if ( trackers.Size() != hnd.trackers_cnt )
@@ -506,12 +484,12 @@ Class SWWMStatusBar : BaseStatusBar
 		else trackers.Clear();
 		// update floating scores, adding the scorenums first, then the damnums
 		int total_sz = 0;
-		if ( scorenums.GetBool() ) total_sz += maxscorenum?min(maxscorenum,hnd.scorenums_cnt):hnd.scorenums_cnt;
-		if ( healthnums.GetBool() ) total_sz += maxdamnum?min(maxdamnum,hnd.damnums_cnt):hnd.damnums_cnt;
+		if ( swwm_scorenums ) total_sz += maxscorenum?min(maxscorenum,hnd.scorenums_cnt):hnd.scorenums_cnt;
+		if ( swwm_healthnums ) total_sz += maxdamnum?min(maxdamnum,hnd.damnums_cnt):hnd.damnums_cnt;
 		if ( scoreobjs.Size() != total_sz )
 			scoreobjs.Resize(total_sz);
 		int i = 0;
-		if ( scorenums.GetBool() )
+		if ( swwm_scorenums )
 		{
 			for ( SWWMScoreObj scr=hnd.scorenums; scr && (i<total_sz); scr=scr.next )
 			{
@@ -524,7 +502,7 @@ Class SWWMStatusBar : BaseStatusBar
 				scoreobjs[i++] = scr;
 			}
 		}
-		if ( healthnums.GetBool() )
+		if ( swwm_healthnums )
 		{
 			for ( SWWMScoreObj scr=hnd.damnums; scr && (i<total_sz); scr=scr.next )
 			{
@@ -567,24 +545,23 @@ Class SWWMStatusBar : BaseStatusBar
 			qsort_itemsense(senseitems,0,senseitems.Size()-1);
 		}
 		// part of gross hackery to override nametag display
-		if ( !ntags ) ntags = CVar.GetCVar('displaynametags',players[consoleplayer]);
 		if ( CPlayer.inventorytics > 0 )
 		{
-			if ( CPlayer.mo.InvSel && (CPlayer.mo.InvSel != lastsel) && (ntags.GetInt()&1) && (CPlayer == players[consoleplayer]) )
+			if ( CPlayer.mo.InvSel && (CPlayer.mo.InvSel != lastsel) && (displaynametags&1) && (CPlayer == players[consoleplayer]) )
 			{
 				ntagstr = CPlayer.mo.InvSel.GetTag();
 				ntagtic = level.totaltime;
-				ntagcol = CVar.GetCVar('nametagcolor',players[consoleplayer]).GetInt();
+				ntagcol = nametagcolor;
 			}
 			lastsel = CPlayer.mo.InvSel;
 		}
 		if ( CPlayer.PendingWeapon && (CPlayer.PendingWeapon != WP_NOCHANGE) && (CPlayer.PendingWeapon != lastwep) )
 		{
-			if ( (ntags.GetInt()&2) && (CPlayer == players[consoleplayer]) && !(CPlayer.PendingWeapon is 'SWWMGesture') && !(CPlayer.PendingWeapon is 'SWWMItemGesture') )
+			if ( (displaynametags&2) && (CPlayer == players[consoleplayer]) && !(CPlayer.PendingWeapon is 'SWWMGesture') && !(CPlayer.PendingWeapon is 'SWWMItemGesture') )
 			{
 				ntagstr = CPlayer.PendingWeapon.GetTag();
 				ntagtic = level.totaltime;
-				ntagcol = CVar.GetCVar('nametagcolor',players[consoleplayer]).GetInt();
+				ntagcol = nametagcolor;
 			}
 		}
 		lastwep = CPlayer.PendingWeapon;
@@ -665,7 +642,6 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		// don't draw when dead or with automap open
 		if ( (CPlayer.health <= 0) || automapactive ) return;
-		if ( !targettag ) targettag = CVar.GetCVar('swwm_targettags',players[consoleplayer]);
 		viewport.FromHud();
 		proj.CacheResolution();
 		proj.CacheFov(players[consoleplayer].fov);
@@ -737,10 +713,9 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !proj.IsInFront() ) continue;
 			Vector2 vpos = viewport.SceneToWindow(npos);
 			tag = targ.mytag;
-			if ( !legspoil ) legspoil = CVar.GetCVar('swwm_ldspoil',players[consoleplayer]);
 			if ( tag != "" )
 			{
-				if ( targ.legged && (targ.mutated || legspoil.GetBool()) )
+				if ( targ.legged && (targ.mutated || swwm_ldspoil) )
 				{
 					if ( StringTable.Localize("$SWWM_LEGPREFIX") == "R" ) tag = tag..StringTable.Localize("$SWWM_LEG");
 					else tag = StringTable.Localize("$SWWM_LEG")..tag;
@@ -756,9 +731,8 @@ Class SWWMStatusBar : BaseStatusBar
 			barsiz.y *= hsb.y;
 			Vector2 barpos = vpos-(barsiz/2.);
 			barpos.y -= 16.;
-			if ( !bigtags ) bigtags = CVar.GetCVar('swwm_bigtags',players[consoleplayer]);
-			Font fnt = LangFont(bigtags.GetBool()?mTewiFont:mMiniwiFont);
-			if ( targettag.GetBool() || targ.myplayer && (tag != "") )
+			Font fnt = LangFont(swwm_bigtags?mTewiFont:mMiniwiFont);
+			if ( swwm_targettags || targ.myplayer && (tag != "") )
 				Screen.DrawText(fnt,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			double ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*10);
@@ -785,7 +759,6 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
 			}
 		}
-		if ( !scorebonus ) scorebonus = CVar.GetCVar('swwm_scorebonus',players[consoleplayer]);
 		// floating kill scores and others
 		for ( int i=0; i<scoreobjs.Size(); i++ )
 		{
@@ -830,7 +803,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Vector2 ss0 = isscore?sss:ssn;
 			Screen.DrawText(fnt,snum.tcolor,(vpos.x-hs0.x*(fo.x+fnt.StringWidth(tag)/2.))/hs0.x,(vpos.y-hs0.y*(fo.y+(fnt.GetHeight()/2.)))/hs0.y,tag,DTA_VirtualWidthF,ss0.x,DTA_VirtualHeightF,ss0.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			// extra strings (if available)
-			if ( !scorebonus.GetBool() ) continue;
+			if ( !swwm_scorebonus ) continue;
 			fo.y += fnt.GetHeight();
 			fnt = LangFont(mMiniwiFont);
 			for ( int i=0; i<snum.xcnt; i++ )
@@ -1106,8 +1079,7 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,sstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		int yy = margin+19;
 		// obviously, don't draw the minimap if the automap is open
-		if ( !showmini ) showmini = CVar.GetCVar('swwm_showminimap',players[consoleplayer]);
-		if ( !automapactive && showmini.GetBool() )
+		if ( !automapactive && swwm_showminimap )
 		{
 			xx = int(ss.x-(margin+84));
 			Screen.DrawTexture(MiniBox,false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -1127,22 +1099,15 @@ Class SWWMStatusBar : BaseStatusBar
 			yy += 87;
 		}
 		// draw stats and timer when automap is open
-		if ( !forcestats ) forcestats = CVar.GetCVar('swwm_forcestats',players[consoleplayer]);
-		int fstats = forcestats.GetInt();
+		int fstats = swwm_forcestats;
 		if ( automapactive || (fstats > 0) )
 		{
-			if ( !showitems ) showitems = CVar.GetCVar('am_showitems',players[consoleplayer]);
-			if ( !showmaplabel ) showmaplabel = CVar.GetCVar('am_showmaplabel',players[consoleplayer]);
-			if ( !showmonsters ) showmonsters = CVar.GetCVar('am_showmonsters',players[consoleplayer]);
-			if ( !showsecrets ) showsecrets = CVar.GetCVar('am_showsecrets',players[consoleplayer]);
-			if ( !showtime ) showtime = CVar.GetCVar('am_showtime',players[consoleplayer]);
-			if ( !showtotaltime ) showtotaltime = CVar.GetCVar('am_showtotaltime',players[consoleplayer]);
 			xx = int(ss.x-(margin+2));
 			String str;
 			Font fnt;
 			if ( automapactive || (fstats > 1) )
 			{
-				int label = showmaplabel.GetInt();
+				int label = am_showmaplabel;
 				String ln = level.levelname;
 				int iof = ln.IndexOf(" - by: ");
 				if ( iof != -1 ) ln.Truncate(iof);
@@ -1153,33 +1118,33 @@ Class SWWMStatusBar : BaseStatusBar
 				yy += fnt.GetHeight();
 			}
 			fnt = LangFont(mMiniwiFont);
-			if ( (level.total_monsters > 0) && showmonsters.GetBool() )
+			if ( (level.total_monsters > 0) && am_showmonsters )
 			{
 				str = String.Format("\cxK \c-%d\cu/\c-%d",level.killed_monsters,level.total_monsters);
 				Screen.DrawText(fnt,(level.killed_monsters>=level.total_monsters)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( (level.total_items > 0) && showitems.GetBool() )
+			if ( (level.total_items > 0) && am_showitems )
 			{
 				str = String.Format("\cxI \c-%d\cu/\c-%d",level.found_items,level.total_items);
 				Screen.DrawText(fnt,(level.found_items>=level.total_items)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( (level.total_secrets > 0) && showsecrets.GetBool() )
+			if ( (level.total_secrets > 0) && am_showsecrets )
 			{
 				str = String.Format("\cxS \c-%d\cu/\c-%d",level.found_secrets,level.total_secrets);
 				Screen.DrawText(fnt,(level.found_secrets>=level.total_secrets)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
 			int sec;
-			if ( showtime.GetBool() )
+			if ( am_showtime )
 			{
 				sec = Thinker.Tics2Seconds(level.maptime);
 				str = String.Format("\cxT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
 				Screen.DrawText(fnt,((level.sucktime>0)&&(sec>=(level.sucktime*3600)))?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( showtotaltime.GetBool() )
+			if ( am_showtotaltime )
 			{
 				sec = Thinker.Tics2Seconds(level.totaltime);
 				str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
@@ -1458,8 +1423,6 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawPickups()
 	{
-		if ( !pickduration ) pickduration = CVar.GetCVar('swwm_pickduration',players[consoleplayer]);
-		if ( !pickcol ) pickcol = CVar.GetCVar('msg0color',players[consoleplayer]);
 		Font fnt = LangFont(mTewiFont);
 		int h = fnt.GetHeight();
 		// draw nametags below them
@@ -1479,7 +1442,7 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		if ( PickupQueue.Size() <= 0 ) return;
 		// reverse order since they're drawn bottom to top
-		int mend = max(0,PickupQueue.Size()-(maxpick.GetInt()));
+		int mend = max(0,PickupQueue.Size()-swwm_maxpickup);
 		yy = ss.y-(margin+50);
 		// shift up if boss healthbar is present
 		if ( hnd && (hnd.bossalpha > 0.) ) yy -= int(25*clamp(hnd.bossalpha*2.,0.,1.));
@@ -1489,7 +1452,7 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			String cstr = PickupQueue[i].str;
 			if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
-			int curtime = (PickupQueue[i].tic+35*pickduration.GetInt())-level.totaltime;
+			int curtime = (PickupQueue[i].tic+35*swwm_pickduration)-level.totaltime;
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(cstr,int(ss.x*.75));
 			int maxlen = 0;
@@ -1504,7 +1467,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				int len = fnt.StringWidth(l.StringAt(j));
 				xx = int((ss.x-len)/2.);
-				Screen.DrawText(fnt,pickcol.GetInt(),xx,yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,msg0color,xx,yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy -= h;
 			}
 			yy -= 6;
@@ -1513,23 +1476,14 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawMessages( double boxalph = 1. )
 	{
-		if ( !chatduration ) chatduration = CVar.GetCVar('swwm_chatduration',players[consoleplayer]);
-		if ( !msgduration ) msgduration = CVar.GetCVar('swwm_msgduration',players[consoleplayer]);
-		if ( !midduration ) midduration = CVar.GetCVar('con_midtime',players[consoleplayer]);
-		if ( !obitcol ) obitcol = CVar.GetCVar('msg1color',players[consoleplayer]);
-		if ( !critcol ) critcol = CVar.GetCVar('msg2color',players[consoleplayer]);
-		if ( !chatcol ) chatcol = CVar.GetCVar('msg3color',players[consoleplayer]);
-		if ( !teamcol ) teamcol = CVar.GetCVar('msg4color',players[consoleplayer]);
-		if ( !midcol ) midcol = CVar.GetCVar('msgmidcolor',players[consoleplayer]);
-		if ( !midbcol ) midbcol = CVar.GetCVar('msgmidcolor2',players[consoleplayer]);
 		Font fnt = LangFont(mTewiFont);
 		double xx, yy;
 		if ( midstr != "" )
 		{
 			double ssp = (midtype&1)?.5:1.;
 			double hsp = (midtype&1)?2.:1.;
-			int col = (midtype&2)?midbcol.GetInt():midcol.GetInt();
-			int curtime = (midtic+int(35*midduration.GetFloat()))-level.totaltime;
+			int col = (midtype&2)?msgmidcolor2:msgmidcolor;
+			int curtime = (midtic+int(35*con_midtime))-level.totaltime;
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(midstr,int(ss.x*ssp));
 			int h = fnt.GetHeight();
@@ -1548,7 +1502,7 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 		}
 		if ( MainQueue.Size() <= 0 ) return;
-		int mstart = max(0,MainQueue.Size()-(maxchat[chatopen>=gametic].GetInt()));
+		int mstart = max(0,MainQueue.Size()-((chatopen>=gametic)?swwm_maxshownbig:swwm_maxshown));
 		xx = margin;
 		yy = margin;
 		bool smol = (ss.x<640);
@@ -1556,15 +1510,15 @@ Class SWWMStatusBar : BaseStatusBar
 		yy++;
 		for ( int i=mstart; i<MainQueue.Size(); i++ )
 		{
-			int col = critcol.GetInt();
-			if ( MainQueue[i].type == PRINT_MEDIUM ) col = obitcol.GetInt();
-			else if ( MainQueue[i].type == PRINT_CHAT ) col = chatcol.GetInt();
-			else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = teamcol.GetInt();
+			int col = msg2color;
+			if ( MainQueue[i].type == PRINT_MEDIUM ) col = msg1color;
+			else if ( MainQueue[i].type == PRINT_CHAT ) col = msg3color;
+			else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = msg4color;
 			String cstr = MainQueue[i].str;
 			if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
 			int curtime = MainQueue[i].tic-level.totaltime;
-			if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*msgduration.GetInt();
-			else curtime += 35*chatduration.GetInt();
+			if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*swwm_msgduration;
+			else curtime += 35*swwm_chatduration;
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(cstr,smol?211:361);
 			for ( int j=0; j<l.Count(); j++ )
@@ -1684,44 +1638,33 @@ Class SWWMStatusBar : BaseStatusBar
 		Super.Draw(state,TicFrac);
 		if ( (state != HUD_StatusBar) && (state != HUD_Fullscreen) ) return;
 		if ( !hnd ) hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
-		if ( !maxchat[0] ) maxchat[0] = CVar.GetCVar('swwm_maxshown',players[consoleplayer]);
-		if ( !maxchat[1] ) maxchat[1] = CVar.GetCVar('swwm_maxshownbig',players[consoleplayer]);
-		if ( !maxpick ) maxpick = CVar.GetCVar('swwm_maxpickup',players[consoleplayer]);
-		if ( !hscale ) hscale = CVar.GetCVar('swwm_hudscale',players[consoleplayer]);
-		if ( !bscale ) bscale = CVar.GetCVar('swwm_barscale',players[consoleplayer]);
-		if ( !nscale ) nscale = CVar.GetCVar('swwm_numscale',players[consoleplayer]);
-		if ( !sscale ) sscale = CVar.GetCVar('swwm_scrscale',players[consoleplayer]);
-		if ( !iscale ) iscale = CVar.GetCVar('swwm_poiscale',players[consoleplayer]);
-		if ( !dscale ) dscale = CVar.GetCVar('swwm_detscale',players[consoleplayer]);
-		if ( !camhud ) camhud = CVar.GetCVar('swwm_camhud',players[consoleplayer]);
-		if ( !camhud.GetBool() && !(players[consoleplayer].Camera is 'PlayerPawn') )
+		if ( !swwm_camhud && !(players[consoleplayer].Camera is 'PlayerPawn') )
 			camhidden = true;
 		else camhidden = false;
 		BeginHUD();
-		if ( hscale.GetInt() <= 0 ) hs = GetHUDScale();
-		else hs.x = hscale.GetInt();
+		if ( swwm_hudscale <= 0 ) hs = GetHUDScale();
+		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
 		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		margin = clamp(safezone.GetInt(),0,40);
-		if ( bscale.GetInt() <= 0 ) hsb = GetHUDScale();
-		else hsb.x = bscale.GetInt();
+		margin = clamp(swwm_hudmargin,0,40);
+		if ( swwm_barscale <= 0 ) hsb = GetHUDScale();
+		else hsb.x = swwm_barscale;
 		hsb.y = hsb.x;
 		ssb = (Screen.GetWidth()/hsb.x,Screen.GetHeight()/hsb.y);
-		if ( nscale.GetInt() <= 0 ) hsn = GetHUDScale();
-		else hsn.x = nscale.GetInt();
+		if ( swwm_numscale <= 0 ) hsn = GetHUDScale();
+		else hsn.x = swwm_numscale;
 		hsn.y = hsn.x;
 		ssn = (Screen.GetWidth()/hsn.x,Screen.GetHeight()/hsn.y);
-		if ( sscale.GetInt() <= 0 ) hss = GetHUDScale();
-		else hss.x = sscale.GetInt();
+		if ( swwm_scrscale <= 0 ) hss = GetHUDScale();
+		else hss.x = swwm_scrscale;
 		hss.y = hss.x;
 		sss = (Screen.GetWidth()/hss.x,Screen.GetHeight()/hss.y);
-		if ( iscale.GetInt() <= 0 ) hsi = GetHUDScale();
-		else hsi.x = iscale.GetInt();
+		if ( swwm_poiscale <= 0 ) hsi = GetHUDScale();
+		else hsi.x = swwm_poiscale;
 		hsi.y = hsi.x;
 		ssi = (Screen.GetWidth()/hsi.x,Screen.GetHeight()/hsi.y);
-		if ( dscale.GetInt() <= 0 ) hsd = GetHUDScale();
-		else hsd.x = dscale.GetInt();
+		if ( swwm_detscale <= 0 ) hsd = GetHUDScale();
+		else hsd.x = swwm_detscale;
 		hsd.y = hsd.x;
 		ssd = (Screen.GetWidth()/hsd.x,Screen.GetHeight()/hsd.y);
 		FracTic = TicFrac;

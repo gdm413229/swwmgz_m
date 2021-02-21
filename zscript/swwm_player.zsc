@@ -16,7 +16,7 @@ Class Demolitionist : PlayerPawn
 	double lastvelz, prevvelz;
 	double ssup;
 
-	transient CVar myvoice, mute, fly6dof, clrun;
+	transient CVar myvoice;
 
 	SWWMStats mystats;
 	int cairtime;
@@ -114,10 +114,8 @@ Class Demolitionist : PlayerPawn
 		}
 		if ( giveall || (name ~== "backpack") )
 		{
-			// Select the correct type of backpack based on the game
-			let type = (class<Inventory>)(gameinfo.backpacktype);
-			let def = GetDefaultByType(type);
-			if ( type ) GiveInventory(type,def.MaxAmount,true);
+			let def = GetDefaultByType('HammerspaceEmbiggener');
+			GiveInventory('TradedHammerspaceEmbiggener',def.MaxAmount,true);
 			if ( !giveall ) return;
 		}
 		if ( giveall || (name ~== "ammo") )
@@ -626,8 +624,7 @@ Class Demolitionist : PlayerPawn
 			diffy = abs(diffy)**.5*sgn;
 		}
 		// don't do inertial sway when in 6dof mode, causes issues
-		if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',player);
-		if ( !fly6dof.GetBool() || !((waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2)) )
+		if ( !swwm_fly6dof || !((waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2)) )
 		{
 			cur.x += diffang;
 			cur.y -= diffpitch;
@@ -765,7 +762,6 @@ Class Demolitionist : PlayerPawn
 		if ( player.cmd.buttons&BT_USER3 ) SenseItems();
 		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) )
 		{
 			// bump down weapon
@@ -789,7 +785,7 @@ Class Demolitionist : PlayerPawn
 			}
 			if ( lastvelz < -10 )
 				A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
-			if ( (player == players[consoleplayer]) && (lastvelz < -gruntspeed) && (mute.GetInt() < 4) && (health > 0) )
+			if ( (lastvelz < -gruntspeed) && (swwm_mutevoice < 4) && (health > 0) )
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			if ( lastvelz < -1 )
 				A_Footstep(0,true,clamp(-lastvelz*0.05,0.0,1.0));
@@ -1282,10 +1278,9 @@ Class Demolitionist : PlayerPawn
 			}
 			else guideangle += .2*player.cmd.yaw*(360./65536.);
 			guidepitch -= .2*player.cmd.pitch*(360./65536.);
-			if ( !fly6dof ) fly6dof = CVar.GetCVar('swwm_fly6dof',player);
 			if ( player.centering ) guidepitch = clamp(deltaangle(pitch,0),-3.,3.);
-			if ( player.centering || !fly6dof.GetBool() ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
-			if ( fly6dof.GetBool() )
+			if ( player.centering || !swwm_fly6dof ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
+			if ( swwm_fly6dof )
 			{
 				swwm_Quat orient = swwm_Quat.create_euler(pitch,angle,roll);
 				swwm_Quat angles = swwm_Quat.create_euler(guidepitch,guideangle,guideroll);
@@ -1941,26 +1936,25 @@ Class Demolitionist : PlayerPawn
 		if ( IsActorPlayingSound(CHAN_JETPACK,"demolitionist/jet") )
 			A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		if ( lastdamage > 90 )
 		{
 			A_StartSound("demolitionist/hipain",CHAN_VOICE);
 			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
-			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
+			if ( swwm_mutevoice < 4 )
 				A_StartSound(String.Format("voice/%s/hipain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 30 )
 		{
 			A_StartSound("demolitionist/pain",CHAN_VOICE);
 			if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
-			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
+			if ( swwm_mutevoice < 4 )
 				A_StartSound(String.Format("voice/%s/pain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		else if ( lastdamage > 0 )
 		{
 			A_StartSound("demolitionist/lopain",CHAN_VOICE);
 			if ( !player || (player.mo != self) || (lastdamage < 5) ) return;	// voodoo dolls have no voice
-			if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
+			if ( swwm_mutevoice < 4 )
 				A_StartSound(String.Format("voice/%s/lopain",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 		}
 		lastdamage = 0;
@@ -1971,7 +1965,6 @@ Class Demolitionist : PlayerPawn
 			A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 		A_StopSound(CHAN_DEMOVOICE);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
-		if ( !mute ) mute = CVar.GetCVar('swwm_mutevoice',player);
 		Sound snd = "demolitionist/death";
 		if ( special1 < 10 )
 			snd = "demolitionist/wdeath";
@@ -1979,7 +1972,7 @@ Class Demolitionist : PlayerPawn
 			snd = "demolitionist/xdeath";
 		A_StartSound(snd,CHAN_VOICE);
 		if ( !player || (player.mo != self) ) return;	// voodoo dolls have no voice
-		if ( (player == players[consoleplayer]) && mute && myvoice && (mute.GetInt() < 4) )
+		if ( swwm_mutevoice < 4 )
 			A_StartSound(String.Format("voice/%s/death",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 	}
 	override bool OnGiveSecret( bool printmsg, bool playsound )
@@ -3832,13 +3825,13 @@ Class SWWMGesture : SWWMWeapon
 
 	action void A_Smooch()
 	{
-		if ( (player == players[consoleplayer]) && (CVar.GetCVar('swwm_mutevoice',player).GetInt() < 4) )
+		if ( swwm_mutevoice < 4 )
 			A_StartSound("demolitionist/smooch",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
 	}
 
 	action void A_BlowKiss()
 	{
-		if ( (player == players[consoleplayer]) && (CVar.GetCVar('swwm_mutevoice',player).GetInt() < 4) )
+		if ( swwm_mutevoice < 4 )
 			A_StartSound("demolitionist/blowkiss",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
 		let weap = Weapon(invoker);
 		if ( !weap ) return;

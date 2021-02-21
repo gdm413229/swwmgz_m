@@ -604,25 +604,20 @@ Class SWWMScoreObj : Thinker
 		o.score = score;
 		o.pos = pos;
 		o.lifespan = o.initialspan = 60;
-		if ( !hnd.numcolor_scr ) hnd.numcolor_scr = CVar.GetCVar('swwm_numcolor_scr',players[consoleplayer]);
-		if ( !hnd.numcolor_bonus ) hnd.numcolor_bonus = CVar.GetCVar('swwm_numcolor_bonus',players[consoleplayer]);
-		if ( !hnd.numcolor_dmg ) hnd.numcolor_dmg = CVar.GetCVar('swwm_numcolor_dmg',players[consoleplayer]);
-		if ( !hnd.numcolor_hp ) hnd.numcolor_hp = CVar.GetCVar('swwm_numcolor_hp',players[consoleplayer]);
-		if ( !hnd.numcolor_ap ) hnd.numcolor_ap = CVar.GetCVar('swwm_numcolor_ap',players[consoleplayer]);
 		if ( tcolor != -1 ) o.tcolor = tcolor;
 		else switch ( type )
 		{
 		case ST_Score:
-			o.tcolor = hnd.numcolor_scr.GetInt();
+			o.tcolor = swwm_numcolor_scr;
 			break;
 		case ST_Damage:
-			o.tcolor = hnd.numcolor_dmg.GetInt();
+			o.tcolor = swwm_numcolor_dmg;
 			break;
 		case ST_Health:
-			o.tcolor = hnd.numcolor_hp.GetInt();
+			o.tcolor = swwm_numcolor_hp;
 			break;
 		case ST_Armor:
-			o.tcolor = hnd.numcolor_ap.GetInt();
+			o.tcolor = swwm_numcolor_ap;
 			break;
 		}
 		o.starttic = level.maptime;
@@ -630,7 +625,7 @@ Class SWWMScoreObj : Thinker
 		o.seed2 = Random[ScoreBits]();
 		o.damnum = (type > ST_Score);
 		o.xcnt = 0;
-		for ( int i=0; i<6; i++ ) o.xtcolor[i] = hnd.numcolor_bonus.GetInt();
+		for ( int i=0; i<6; i++ ) o.xtcolor[i] = swwm_numcolor_bonus;
 		o.acc = acc;
 		if ( o.damnum )
 		{
@@ -849,24 +844,15 @@ Class SWWMCombatTracker : Thinker
 	bool legged, mutated;
 	int tcnt;
 	double height;
-	transient CVar funtags, maxdist, damagebars;
-	bool funtag;
 	int mxdist, dbar;
 	bool bBOSS, bFRIENDLY;
 	bool firsthit;
 
 	void UpdateTag()
 	{
-		// only the first tracker accesses the CVar, saves on perf
-		if ( !prev )
-		{
-			if ( !funtags ) funtags = CVar.GetCVar('swwm_funtags',players[consoleplayer]);
-			funtag = funtags.GetBool();
-		}
-		if ( next ) next.funtag = funtag;
 		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') || (mytarget is 'Demolitionist')) )
 		{
-			String realtag = funtag?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
+			String realtag = swwm_funtags?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
 			if ( realtag == FallbackTag )
 			{
 				realtag = mytarget.GetClassName();
@@ -945,10 +931,8 @@ Class SWWMCombatTracker : Thinker
 		// only the first tracker accesses the CVars, saves on perf
 		if ( !prev )
 		{
-			if ( !damagebars ) damagebars = CVar.GetCVar('swwm_damagetarget',players[consoleplayer]);
-			if ( !maxdist ) maxdist = CVar.GetCVar('swwm_maxtargetdist',players[consoleplayer]);
-			dbar = damagebars.GetInt();
-			mxdist = maxdist.GetInt();
+			dbar = swwm_damagetarget;
+			mxdist = swwm_maxtargetdist;
 		}
 		if ( next )
 		{

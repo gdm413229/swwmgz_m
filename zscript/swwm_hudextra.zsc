@@ -60,7 +60,6 @@ Class SWWMOneLiner : HUDMessageBase
 	String whichline;
 	int lifespan, curtime;
 	transient Font TewiFont, MPlusFont;
-	transient CVar safezone, lang, hscale;
 
 	static SWWMOneLiner Make( String whichline, int lifespan )
 	{
@@ -79,22 +78,19 @@ Class SWWMOneLiner : HUDMessageBase
 
 	override void Draw( int bottom, int visibility )
 	{
-		if ( !safezone ) safezone = CVar.GetCVar('swwm_hudmargin',players[consoleplayer]);
-		if ( !lang ) lang = CVar.GetCVar('language',players[consoleplayer]);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
-		if ( !hscale ) hscale = CVar.GetCVar('swwm_hudscale',players[consoleplayer]);
-		int margin = safezone.GetInt();
+		int margin = swwm_hudmargin;
 		Vector2 hs;
-		if ( hscale.GetInt() <= 0 ) hs = StatusBar.GetHUDScale();
-		else hs.x = hscale.GetInt();
+		if ( swwm_hudscale <= 0 ) hs = StatusBar.GetHUDScale();
+		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		String loc = StringTable.Localize(whichline);
 		if ( loc.Length() <= 0 ) return;	// don't draw empty strings
 		String locs = StringTable.Localize("$SWWM_LQUOTE")..loc..StringTable.Localize("$SWWM_RQUOTE");
 		Font fnt = TewiFont;
-		if ( lang.GetString() ~== "jp" ) fnt = MPlusFont;
+		if ( language ~== "jp" ) fnt = MPlusFont;
 		// split so it can fit
 		BrokenLines l = fnt.BreakLines(locs,int(ss.x*.5));
 		int maxlen = 0;
@@ -131,7 +127,7 @@ Class GenericFlash : HUDMessageBase
 	int duration;
 	double alpha;
 	Actor cam;
-	transient CVar str;
+
 	GenericFlash Setup( Actor camera, Color c, int d )
 	{
 		alpha = 1.0;
@@ -149,8 +145,7 @@ Class GenericFlash : HUDMessageBase
 	{
 		if ( automapactive || (visibility != BaseStatusBar.HUDMSGLayer_UnderHUD) ) return;
 		if ( cam && (players[consoleplayer].camera != cam) ) return;
-		if ( !str ) str = CVar.GetCVar('swwm_flashstrength',players[consoleplayer]);
-		Screen.Dim(col,(col.a/255.)*alpha*str.GetFloat(),0,0,Screen.GetWidth(),Screen.GetHeight());
+		Screen.Dim(col,(col.a/255.)*alpha*swwm_flashstrength,0,0,Screen.GetWidth(),Screen.GetHeight());
 	}
 }
 

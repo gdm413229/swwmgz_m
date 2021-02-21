@@ -379,6 +379,10 @@ You're fucking invincible for a total of 20 seconds.
 
 Each of these you pick up increases your ammo capacity (not necessarily doubling it), stacking up to 8 times. They also give you some extra ammo, like a vanilla backpack would (though not for all weapons).
 
+In some special cases you may find "Bulk" versions. These generally only pop up if the mapper decided to spawn several overlapping backpacks in one spot, as they result from all of those items merging together.
+
+Note: In multiplayer, these can be traded between players, but do note that the receiver will not get any extra ammo from it.
+
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
 ![](docimg/fabricator.png)
 
@@ -399,9 +403,7 @@ Reveals the entire layout of the map and shows key locations in the HUD. Also al
 
 Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants and Chaos Devices (as the game generally doesn't have secret areas).
 
-While some will drop very useful goodies, one among them will provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
-
-***(Do note that this feature is currently not fully implemented, there may be missing models)***
+While some will drop very useful goodies, others may provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
 
 ### NUTATCO™ Chocolate Bar
 ![](docimg/nutatcobar.png)
@@ -465,7 +467,7 @@ Pretty simplistic so it doesn't get in the way of the action. Some things may be
 
 ### Top left corner
 
-Message display. Can be configured to show different numbers of messages depending on whether the chat prompt is open. Chat messages take much longer to expire than others, so there's less of a chance to miss them, as they might pop back up when the less important ones expire. In multiplayer games, a full chat history can be read at any time in the **Demolitionist Menu**. Repeated messages are compressed with a multiplier suffix.
+Message display. Can be configured to show different numbers of messages depending on whether the chat prompt is open. Chat messages take much longer to expire than others, so there's less of a chance to miss them, as they might pop back up when the less important ones expire. A full chat history can be read at any time in the **Demolitionist Menu** (if there were any actual messages). Repeated messages are compressed with a multiplier suffix.
 
 ### Top right corner
 

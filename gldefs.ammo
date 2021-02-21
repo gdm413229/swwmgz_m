@@ -10,6 +10,13 @@ HardwareShader Texture "models/Shell_Gold_Used.png"
 	Texture "masktex" "models/Shell_Gold_Used_mask.png"
 	Texture "envtex" "models/goldmap.png"
 }
+HardwareShader Texture "models/SparksterAmmo.png"
+{
+	Shader "shaders/glsl/Shinemask_bright.fp"
+	Texture "masktex" "models/SparksterAmmo_mask.png"
+	Texture "envtex" "models/puromap.png"
+	Texture "brighttex" "models/SparksterAmmo_bright.png"
+}
 HardwareShader Texture "models/Fabricator.png"
 {
 	Shader "shaders/glsl/Shinemask_bright.fp"
@@ -84,6 +91,18 @@ PointLight GOLDSHELLLIGHT
 Object GoldShell
 {
 	Frame "XZW1" { light "GOLDSHELLLIGHT" }
+}
+
+PointLight SPARKUNITLIGHT
+{
+	Color 0.5 0.3 0.6
+	Size 8
+	Offset 0 16 0
+	Attenuate 1
+}
+Object SparkUnit
+{
+	Frame "XZW1" { light "SPARKUNITLIGHT" }
 }
 
 PointLight FABTIER1LIGHT

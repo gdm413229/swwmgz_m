@@ -226,7 +226,8 @@ Class SWWMHandler : EventHandler
 	SWWMCombatTracker trackers;
 	SWWMScoreObj scorenums, damnums;
 	SWWMInterest intpoints;
-	int trackers_cnt, scorenums_cnt, damnums_cnt, intpoints_cnt;
+	SWWMSimpleTracker strackers;
+	int trackers_cnt, scorenums_cnt, damnums_cnt, intpoints_cnt, strackers_cnt;
 	bool tookdamage[MAXPLAYERS];
 	int spreecount[MAXPLAYERS];
 	int lastkill[MAXPLAYERS];
@@ -305,6 +306,10 @@ Class SWWMHandler : EventHandler
 	int indoomvacation;
 
 	bool hasdrlamonsters;
+
+	// for minimap
+	Array<int> ffsectors;
+	transient CVar showmini;
 
 	enum EVanillaMap
 	{
@@ -828,6 +833,70 @@ Class SWWMHandler : EventHandler
 		}
 	}
 
+	private void SetupLockdefsCache( SWWMCachedLockInfo cli )
+	{
+		for ( int i=0; i<Wads.GetNumLumps(); i++ )
+		{
+			String lname = Wads.GetLumpName(i);
+			if ( !(lname ~== "LOCKDEFS") ) continue;
+			String data = Wads.ReadLump(i);
+			Array<String> lines;
+			lines.Clear();
+			data.Split(lines,"\n");
+			bool valid = false;
+			for ( int j=0; j<lines.Size(); j++ )
+			{
+				// strip leading whitespace
+				while ( (lines[j].Left(1) == " ") || (lines[j].Left(1) == "\t") )
+					lines[j] = lines[j].Mid(1);
+				if ( lines[j].Left(10) ~== "CLEARLOCKS" )
+				{
+					for ( int k=0; k<cli.ent.Size(); k++ )
+						cli.ent[k].Destroy();
+					cli.ent.Clear();
+				}
+				else if ( Lines[j].Left(5) ~== "LOCK " )
+				{
+					Array<String> spl;
+					spl.Clear();
+					lines[j].Split(spl," ",TOK_SKIPEMPTY);
+					// check game string (if any)
+					if ( spl.Size() > 2 )
+					{
+						if ( (spl[2] ~== "DOOM") && !(gameinfo.gametype&GAME_Doom) ) continue;
+						else if ( (spl[2] ~== "HERETIC") && !(gameinfo.gametype&GAME_Heretic) ) continue;
+						else if ( (spl[2] ~== "HEXEN") && !(gameinfo.gametype&GAME_Hexen) ) continue;
+						else if ( (spl[2] ~== "STRIFE") && !(gameinfo.gametype&GAME_Strife) ) continue;
+						else if ( (spl[2] ~== "CHEX") && !(gameinfo.gametype&GAME_Chex) ) continue;
+					}
+					// valid lock, prepare it
+					let li = new("LIEntry");
+					li.locknumber = spl[1].ToInt();
+					li.hascolor = false;
+					// see if there's a Mapcolor defined
+					int k = j+1;
+					for ( int k=j+2; k<lines.Size(); k++ )
+					{
+						// strip leading whitespace
+						while ( (lines[k].Left(1) == " ") || (lines[k].Left(1) == "\t") )
+							lines[k] = lines[k].Mid(1);
+						if ( lines[k].Left(5) ~== "LOCK " )
+							break;	// we reached the next lock
+						if ( !(lines[k].Left(9) ~== "MAPCOLOR ") )
+							continue;
+						// here it is
+						spl.Clear();
+						lines[k].Split(spl," ",TOK_SKIPEMPTY);
+						if ( spl.Size() < 4 ) break;
+						li.hascolor = true;
+						li.mapcolor = Color(spl[1].ToInt(),spl[2].ToInt(),spl[3].ToInt());
+					}
+					cli.ent.Push(li);
+				}
+			}
+		}
+	}
+
 	override void WorldLoaded( WorldEvent e )
 	{
 		if ( level.levelname ~== "Modder Test Map" )
@@ -846,6 +915,27 @@ Class SWWMHandler : EventHandler
 			if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
 				 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
 				level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
+			// setup cached lockdefs data
+			let cli = SWWMCachedLockInfo.GetInstance();
+			if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
+			// keep a list of sectors containing 3D floors, for use by the minimap
+			ffsectors.Clear();
+			for ( int i=0; i<level.sectors.Size(); i++ )
+			{
+				Sector s = level.sectors[i];
+				if ( !s.Get3DFloorCount() ) continue;
+				int realcount = 0;
+				for ( int j=0; j<s.Get3DFloorCount(); j++ )
+				{
+					F3DFloor rover = s.Get3DFloor(j);
+					if ( rover.flags&F3DFloor.FF_THISINSIDE ) continue;
+					if ( !(rover.flags&F3DFloor.FF_EXISTS) ) continue;
+					if ( rover.alpha == 0 ) continue;
+					realcount++;
+				}
+				if ( !realcount ) continue;
+				ffsectors.Push(s.Index());
+			}
 			// for skipping over merged exit lines (sharing vertices)
 			Array<Line> skipme;
 			skipme.Clear();
@@ -1321,6 +1411,81 @@ Class SWWMHandler : EventHandler
 		mapclearagain++;
 	}
 
+	// "simple" tracking (used by the minimap)
+	private void SimpleTracking()
+	{
+		if ( !showmini ) showmini = CVar.GetCVar('swwm_showminimap',players[consoleplayer]);
+		if ( !showmini.GetBool() )
+		{
+			while ( strackers )
+			{
+				SWWMSimpleTracker next = strackers.next;
+				strackers.Destroy();
+				strackers = next;
+			}
+			strackers_cnt = 0;
+			return;
+		}
+		// update trackers for anything around the player
+		bool thesight = players[consoleplayer].mo.FindInventory("Omnisight");
+		BlockThingsIterator bt = BlockThingsIterator.Create(players[consoleplayer].Camera,SWWMStatusBar.MAPVIEWDIST);
+		while ( bt.Next() )
+		{
+			let a = bt.Thing;
+			if ( !a ) continue;
+			Vector2 rv = a.pos.xy-players[consoleplayer].Camera.pos.xy;
+			if ( max(abs(rv.x)-a.radius,abs(rv.y)-a.radius) > SWWMStatusBar.MAPVIEWDIST )
+				continue;
+			if ( a == players[consoleplayer].Camera )
+				continue;
+			if ( !a.player && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
+				continue;
+			if ( !thesight && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+				continue;
+			if ( a.bKILLED )
+				continue;
+			if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
+				continue;
+			if ( (a is 'Chancebox') && (a.CurState != a.SpawnState) )
+			{
+				// "last breath" update
+				for ( SWWMSimpleTracker t=strackers; t; t=t.next )
+				{
+					if ( t.target != a ) continue;
+					if ( !t.expired ) t.Update();
+				}
+				continue;
+			}
+			SWWMSimpleTracker.Track(a);
+		}
+		// prune expired trackers
+		SWWMSimpleTracker trk = strackers;
+		while ( trk )
+		{
+			SWWMSimpleTracker next = trk.next;
+			// minimize lifespan of destroyed targets
+			if ( !trk.target )
+				trk.lastupdate = min(trk.lastupdate,level.maptime);
+			else if ( !trk.expired )
+			{
+				// "last breath" update
+				if ( trk.target.bKILLED
+					|| ((trk.target is 'Inventory') && (!trk.target.bSPECIAL || Inventory(trk.target).Owner))
+					|| ((trk.target is 'Chancebox') && (trk.target.CurState != trk.target.SpawnState)) )
+					trk.Update();
+			}
+			if ( trk.lastupdate+140 < level.maptime )
+			{
+				if ( !trk.prev ) strackers = trk.next;
+				else trk.prev.next = trk.next;
+				if ( trk.next ) trk.next.prev = trk.prev;
+				trk.Destroy();
+				strackers_cnt--;
+			}
+			trk = next;
+		}
+	}
+
 	override void WorldTick()
 	{
 		LangRefresh();
@@ -1373,6 +1538,7 @@ Class SWWMHandler : EventHandler
 		ItemCountTrack();
 		CombatTrack();
 		OneHundredPercentCheck();
+		SimpleTracking();
 		if ( initialized ) return;
 		// wait until bosses are active
 		for ( int i=0; i<bossactors.Size(); i++ )

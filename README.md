@@ -1,7 +1,7 @@
 ## Some Weird Weapons Mod ~ GZDoom Edition
 ![](docimg/logo.png)
 
-**SWWM GZ** brings to **GZDoom** a "best of" collection of custom weapons I've made for **Unreal Tournament**, plus many new things that didn't make the cut there.
+**SWWM GZ** brings to **GZDoom** a "best of" collection of custom weapons I've made for **Unreal Tournament**, plus many new things that didn't make the cut there. It is also effectively a reboot of the entire **SWWM** series, which unfortunately ended with the cancelled **SWWM Z**, this mod's direct predecessor.
 
 It contains weapons and items remastered and revived from old projects such as the previous **SWWM** entries, along with the **Zanaveth Ultra Suite** side project, and also notably, the main **UnSX** series that never truly saw the light of day, as all work done on it so far has been lost forever. There may also be some original things here and there just to spice things up.
 
@@ -490,6 +490,8 @@ Score can be used to buy items on the in-game store (or gained from selling them
 In **Doom** and **Heretic**, collected keys will be displayed below the score box.
 
 When the **Automap** is open, the map name and stats will also be shown here.
+
+Optionally, a minimap can be shown below the score box too. This works mostly like the radar did in **SWWM Z**, but it has the added benefit of also showing map geometry. Colors are taken from GZDoom's own custom automap settings.
 
 ### Bottom left corner
 

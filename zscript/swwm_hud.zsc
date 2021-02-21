@@ -9,7 +9,8 @@ Class MsgLine
 Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex[3], InventoryTex, ChatTex[6],
-		HealthTex[5], FuelTex[2], DashTex, EnemyBTex, EnemyHTex[5], GenericAmmoTex[3];
+		HealthTex[5], FuelTex[2], DashTex, EnemyBTex, EnemyHTex[5],
+		GenericAmmoTex[3], MiniBox;
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
 	// "Full History" contains all messages since session start, nothing is flushed
@@ -26,7 +27,7 @@ Class SWWMStatusBar : BaseStatusBar
 	SWWMHandler hnd;
 
 	// client cvars
-	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil, camhud, forcestats;
+	transient CVar safezone, maxchat[2], maxpick, chatduration, msgduration, pickduration, chatcol, teamcol, obitcol, critcol, pickcol, targetter, healthnums, scorenums, scorebonus, pois, targettag, lang, maxtarg, maxscore, maxdamns, hscale, bscale, nscale, sscale, iscale, dscale, midcol, midbcol, midduration, bigtags, showitems, showmaplabel, showmonsters, showsecrets, showtime, showtotaltime, legspoil, camhud, forcestats, showmini;
 
 	// shared stuff
 	Vector2 ss, hs;
@@ -63,6 +64,11 @@ Class SWWMStatusBar : BaseStatusBar
 	int midtic, midtype;
 
 	bool koraxhack;
+
+	// minimap constants
+	const CLIPDIST = 800;		// clip distance for minimap view, with rotation accounted
+	const MAPVIEWDIST = 1132;	// maximum distance for something to be considered visible (rounded up CLIPDIST*sqrt(2))
+	const HALFMAPSIZE = 40;		// half the size of the minimap draw region (unscaled)
 
 	// if playing in Japanese, returns an alternate font of the same height
 	// Tewi -> MPlus
@@ -542,9 +548,8 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			if ( senseitems.Size() != demo.itemsense_cnt )
 				senseitems.Resize(demo.itemsense_cnt);
-			total_sz = demo.itemsense_cnt;
 			i = 0;
-			for ( SWWMItemSense s=demo.itemsense; s && (i<total_sz); s=s.next )
+			for ( SWWMItemSense s=demo.itemsense; s; s=s.next )
 			{
 				// ignore points clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,s.pos);
@@ -556,7 +561,7 @@ Class SWWMStatusBar : BaseStatusBar
 				senseitems[i++] = s;
 			}
 			// squeeze if some were discarded
-			if ( i != total_sz )
+			if ( i != demo.itemsense_cnt )
 				senseitems.Resize(i);
 			// sort by distance
 			qsort_itemsense(senseitems,0,senseitems.Size()-1);
@@ -633,6 +638,7 @@ Class SWWMStatusBar : BaseStatusBar
 		GenericAmmoTex[0] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxL.png",TexMan.Type_Any);
 		GenericAmmoTex[1] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxM.png",TexMan.Type_Any);
 		GenericAmmoTex[2] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxR.png",TexMan.Type_Any);
+		MiniBox = TexMan.CheckForTexture("graphics/HUD/MinimapBox.png",TexMan.Type_Any);
 		mTewiFont = HUDFont.Create("TewiShaded");
 		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		mMPlusFont = HUDFont.Create("MPlusShaded");
@@ -715,7 +721,7 @@ Class SWWMStatusBar : BaseStatusBar
 				double alph = clamp(((s.updated+mtime)-level.maptime)/35.,0.,1.);
 				alph *= clamp(1.5-1.5*(tdir.length()/(thesight?1200.:800.)),0.,1.);
 				tag = s.tag;
-				Screen.DrawText(fnt,s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,s.vipitem?Font.CR_PURPLE:s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
 				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			}
@@ -850,6 +856,238 @@ Class SWWMStatusBar : BaseStatusBar
 		// do nothing, DrawScore handles this
 	}
 
+	// minimap helper code
+	private bool ShowTriggerLine( Line l )
+	{
+		if ( am_showtriggerlines == 0 ) return false;
+		if ( am_showtriggerlines >= 2 ) return true;
+		if ( (l.special == Door_Open)
+			|| (l.special == Door_Close)
+			|| (l.special == Door_CloseWaitOpen)
+			|| (l.special == Door_Raise)
+			|| (l.special == Door_Animated)
+			|| (l.special == Generic_Door) )
+			return false;
+		return true;
+	}
+	private bool CmpFloorPlanes( Line l )
+	{
+		return (l.frontsector.floorplane.Normal == l.backsector.floorplane.Normal)
+			&& (l.frontsector.floorplane.D == l.backsector.floorplane.D);
+	}
+	private bool CmpCeilingPlanes( Line l )
+	{
+		return (l.frontsector.ceilingplane.Normal == l.backsector.ceilingplane.Normal)
+			&& (l.frontsector.ceilingplane.D == l.backsector.ceilingplane.D);
+	}
+
+	private int CheckSecret( Line l )
+	{
+		if ( l.frontsector && (l.frontsector.flags&Sector.SECF_WASSECRET) )
+		{
+			if ( am_map_secrets && !(l.frontsector.flags&Sector.SECF_SECRET) ) return 1;
+			if ( (am_map_secrets == 2) && !(l.flags&Line.ML_SECRET) ) return 2;
+		}
+		if ( l.backsector && (l.backsector.flags&Sector.SECF_WASSECRET) )
+		{
+			if ( am_map_secrets && !(l.backsector.flags&Sector.SECF_SECRET) ) return 1;
+			if ( (am_map_secrets == 2) && !(l.flags&Line.ML_SECRET) ) return 2;
+		}
+		return 0;
+	}
+	private bool CheckFFBoundary( Line l )
+	{
+		if ( !hnd || !hnd.ffsectors.Size() ) return false;
+		int frontidx = hnd.ffsectors.Find(l.frontsector.Index());
+		int backidx = hnd.ffsectors.Find(l.backsector.Index());
+		// no 3D floors, no boundary
+		if ( (frontidx == hnd.ffsectors.Size()) && (backidx == frontidx) )
+			return false;
+		return true;
+	}
+
+	private void DrawMapLines( Vector2 basepos )
+	{
+		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		for ( int i=0; i<level.lines.Size(); i++ )
+		{
+			Line l = level.lines[i];
+			if ( !(l.flags&Line.ML_MAPPED) && !level.allmap && !am_cheat ) continue;
+			if ( (l.flags&Line.ML_DONTDRAW) && ((am_cheat == 0) || (am_cheat >= 4)) )
+				continue;
+			Vector2 rv1 = l.v1.p-cpos, rv2 = l.v2.p-cpos;
+			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > MAPVIEWDIST )
+				continue;
+			// flip Y
+			rv1.y *= -1;
+			rv2.y *= -1;
+			// rotate by view
+			rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
+			rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			// clip to frame
+			bool visible;
+			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,rv1,rv2);
+			if ( !visible ) continue;
+			// scale to minimap frame
+			rv1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+			rv2 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+			// offset to minimap center
+			rv1 += basepos;
+			rv2 += basepos;
+			// get the line color
+			Color col = am_wallcolor;
+			if ( (l.flags&Line.ML_MAPPED) || am_cheat )
+			{
+				int secwit = CheckSecret(l);
+				int lock = SWWMUtility.GetLineLock(l);
+				if ( secwit == 1 ) col = am_secretsectorcolor;
+				else if ( secwit == 2 ) col = am_unexploredsecretcolor;
+				else if ( l.flags&Line.ML_SECRET )
+				{
+					if ( am_cheat && l.backsector )
+						col = am_secretwallcolor;
+					else col = am_wallcolor;
+				}
+				else if ( (l.special == Exit_Normal)
+					|| (l.special == Exit_Secret)
+					|| (l.special == Teleport_NewMap)
+					|| (l.special == Teleport_EndGame) )
+					col = am_interlevelcolor;
+				else if ( (l.activation&SPAC_PlayerActivate)
+					&& (l.special == Teleport)
+					|| (l.special == Teleport_NoFog)
+					|| (l.special == Teleport_ZombieChanger)
+					|| (l.special == Teleport_Line) )
+					col = am_intralevelcolor;
+				else if ( (lock > 1) && (lock < 256) && SWWMUtility.IsValidLockNum(lock) )
+					col = SWWMUtility.GetLockColor(lock);
+				else if ( (l.activation&SPAC_PlayerActivate) && l.special && ShowTriggerLine(l) )
+					col = am_specialwallcolor;
+				else if ( l.frontsector && l.backsector )
+				{
+					if ( !CmpFloorPlanes(l) ) col = am_fdwallcolor;
+					else if ( !CmpCeilingPlanes(l) ) col = am_cdwallcolor;
+					else if ( CheckFFBoundary(l) ) col = am_efwallcolor;
+					else
+					{
+						if ( (am_cheat == 0) || (am_cheat >= 4) )
+							continue;
+						col = am_tswallcolor;
+					}
+				}
+			}
+			else col = am_notseencolor;
+			// draw the line
+			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.5),col);
+		}
+	}
+	private void DrawMapThings( Vector2 basepos )
+	{
+		bool thesight = !!CPlayer.mo.FindInventory("Omnisight");
+		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		for ( SWWMSimpleTracker t=hnd.strackers; t; t=t.next )
+		{
+			Color col = am_thingcolor;
+			bool isitem = false;
+			Vector2 pos;
+			double angle;
+			double radius;
+			if ( t.target )
+			{
+				pos = t.target.prev.xy*(1.-FracTic)+t.target.pos.xy*FracTic;
+				angle = t.target.angle;
+				radius = t.target.radius;
+				if ( t.isitem )
+				{
+					if ( ((t.target is 'Chancebox') && (t.target.CurState == t.target.SpawnState)) || (t.target is 'SWWMCollectible') ) col = "Purple";
+					else if ( t.target.bCOUNTITEM || (t.target is 'Key') ) col = am_thingcolor_citem;
+					else col = am_thingcolor_item;
+					isitem = true;
+				}
+				else if ( t.target.player ) col = t.target.player.GetColor();
+				else if ( t.target.bFRIENDLY ) col = am_thingcolor_friend;
+				else if ( t.target.bCOUNTKILL ) col = am_thingcolor_monster;
+				else if ( t.target.bISMONSTER ) col = am_thingcolor_ncmonster;
+			}
+			else
+			{
+				pos = t.pos.xy;
+				angle = t.angle;
+				radius = t.radius;
+				if ( t.isitem )
+				{
+					if ( t.vipitem ) col = "Purple";
+					else if ( t.countitem ) col = am_thingcolor_citem;
+					else col = am_thingcolor_item;
+					isitem = true;
+				}
+				if ( t.isplayer ) col = t.playercol;
+				else if ( t.friendly ) col = am_thingcolor_friend;
+				else if ( t.countkill ) col = am_thingcolor_monster;
+				else if ( t.ismonster ) col = am_thingcolor_ncmonster;
+			}
+			int mtime = 35;
+			if ( thesight && !t.expired ) mtime += 105;
+			double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
+			if ( alph <= 0. ) continue;
+			Vector2 rv = pos-cpos;
+			if ( min(abs(rv.x)-radius,abs(rv.y)-radius) > MAPVIEWDIST ) continue;
+			// get actor triangle
+			Vector2 tv[4];
+			int nidx = isitem?4:3;
+			if ( isitem )
+			{
+				tv[0] = rv+(-10,-10);
+				tv[1] = rv+(10,10);
+				tv[2] = rv+(10,-10);
+				tv[3] = rv+(-10,10);
+			}
+			else
+			{
+				tv[0] = rv+Actor.RotateVector((radius,0),angle);
+				tv[1] = rv+Actor.RotateVector((-radius,radius),angle);
+				tv[2] = rv+Actor.RotateVector((-radius,-radius),angle);
+			}
+			// flip Y
+			for ( int j=0; j<nidx; j++ ) tv[j].y *= -1;
+			// rotate by view
+			for ( int j=0; j<nidx; j++ ) tv[j] = Actor.RotateVector(tv[j],ViewRot.x-90);
+			bool visible;
+			Vector2 x0, x1;
+			// clip to frame
+			if ( isitem ) for ( int j=0; j<4; j+=2 )
+			{
+				[visible, x0, x1] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,tv[j],tv[j+1]);
+				if ( visible )
+				{
+					// scale to minimap frame
+					x0 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+					x1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+					// offset to minimap center
+					x0 += basepos;
+					x1 += basepos;
+					// draw the line
+					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(alph*255));
+				}
+			}
+			else for ( int j=0; j<3; j++ )
+			{
+				[visible, x0, x1] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,tv[j],tv[(j+1)%3]);
+				if ( visible )
+				{
+					// scale to minimap frame
+					x0 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+					x1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+					// offset to minimap center
+					x0 += basepos;
+					x1 += basepos;
+					// draw the line
+					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(alph*255));
+				}
+			}
+		}
+	}
+
 	private void DrawScore()
 	{
 		String sstr;
@@ -866,10 +1104,31 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		Screen.DrawTexture(ScoreTex[2],false,ss.x-(margin+xx),margin,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,sstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int yy = margin+19;
+		// obviously, don't draw the minimap if the automap is open
+		if ( !showmini ) showmini = CVar.GetCVar('swwm_showminimap',players[consoleplayer]);
+		if ( !automapactive && showmini.GetBool() )
+		{
+			xx = int(ss.x-(margin+84));
+			Screen.DrawTexture(MiniBox,false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Vector2 basemappos = (xx+42,yy+42);
+			// draw dat stuff
+			DrawMapLines(basemappos*hs.x);
+			DrawMapThings(basemappos*hs.x);
+			// finally, draw the player arrow
+			int x0 = int(basemappos.x*hs.x);
+			int x1 = int((basemappos.x+2)*hs.x);
+			int x2 = int((basemappos.x-2)*hs.x);
+			int y0 = int((basemappos.y-2)*hs.x);
+			int y1 = int((basemappos.y+2)*hs.x);
+			Screen.DrawThickLine(x0,y0,x1,y1,max(1.,hs.x*.5),am_yourcolor);
+			Screen.DrawThickLine(x1,y1,x2,y1,max(1.,hs.x*.5),am_yourcolor);
+			Screen.DrawThickLine(x2,y1,x0,y0,max(1.,hs.x*.5),am_yourcolor);
+			yy += 87;
+		}
 		// draw stats and timer when automap is open
 		if ( !forcestats ) forcestats = CVar.GetCVar('swwm_forcestats',players[consoleplayer]);
 		int fstats = forcestats.GetInt();
-		int yy = margin+19;
 		if ( automapactive || (fstats > 0) )
 		{
 			if ( !showitems ) showitems = CVar.GetCVar('am_showitems',players[consoleplayer]);
@@ -878,7 +1137,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( !showsecrets ) showsecrets = CVar.GetCVar('am_showsecrets',players[consoleplayer]);
 			if ( !showtime ) showtime = CVar.GetCVar('am_showtime',players[consoleplayer]);
 			if ( !showtotaltime ) showtotaltime = CVar.GetCVar('am_showtotaltime',players[consoleplayer]);
-			int xx = int(ss.x-(margin+2));
+			xx = int(ss.x-(margin+2));
 			String str;
 			Font fnt;
 			if ( automapactive || (fstats > 1) )

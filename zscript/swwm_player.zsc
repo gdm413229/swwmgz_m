@@ -462,8 +462,11 @@ Class Demolitionist : PlayerPawn
 		let bt = BlockThingsIterator.Create(self,800);
 		while ( bt.Next() )
 		{
-			let i = Inventory(bt.Thing);
-			if ( !i || i.bINVISIBLE || !i.bSPECIAL || i.Owner || !SWWMUtility.SphereIntersect(i,pos,800) ) continue;
+			let i = bt.Thing;
+			if ( !i || (!(i is 'Inventory') && !(i is 'Chancebox')) ) continue;
+			if ( (i is 'Inventory') && (i.bINVISIBLE || !i.bSPECIAL || Inventory(i).Owner) ) continue;
+			if ( (i is 'Chancebox') && (i.CurState != i.SpawnState) ) continue;
+			if ( !SWWMUtility.SphereIntersect(i,pos,800) ) continue;
 			if ( !thesight && !CheckSight(i,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			SWWMItemSense.Spawn(self,i);
 		}

@@ -757,15 +757,15 @@ Class SWWMInterest : Thinker
 
 Class SWWMItemSense : Thinker
 {
-	Inventory item;
+	Actor item;
 	String tag;
 	int updated;
-	bool scoreitem;
+	bool scoreitem, vipitem;
 	Demolitionist parent;
 	SWWMItemSense prev, next;
 	Vector3 pos;
 
-	static SWWMItemSense Spawn( Demolitionist parent, Inventory item )
+	static SWWMItemSense Spawn( Demolitionist parent, Actor item )
 	{
 		if ( !parent || !item ) return null;
 		// only refresh the updated time if existing
@@ -779,7 +779,8 @@ Class SWWMItemSense : Thinker
 		let i = new("SWWMItemSense");
 		i.ChangeStatNum(STAT_USER);
 		i.item = item;
-		i.scoreitem = item.bCOUNTITEM;
+		i.scoreitem = (item is 'Key')||item.bCOUNTITEM;
+		i.vipitem = (item is 'Chancebox')||(item is 'SWWMCollectible');
 		i.parent = parent;
 		i.updated = level.maptime+35;
 		i.UpdateTag();
@@ -800,7 +801,7 @@ Class SWWMItemSense : Thinker
 			|| (item is 'BlackShell') || (item is 'PurpleShell')
 			|| (item is 'GoldShell') || (item is 'SMW05Ammo')
 			|| (item is 'SheenAmmo') )
-			tag = item.PickupMessage();
+			tag = Inventory(item).PickupMessage();
 		else tag = item.GetTag();
 	}
 
@@ -1306,4 +1307,152 @@ Class SWWMCrusherBroken : Thinker
 			}
 		}
 	}
+}
+
+// cache data for manual lockdefs parsing nonsense
+Class LIEntry
+{
+	int locknumber;
+	bool hascolor;
+	Color mapcolor;
+}
+
+Class SWWMCachedLockInfo : Thinker
+{
+	Array<LIEntry> ent;
+
+	static clearscope bool IsValidLock( int l )
+	{
+		let ti = ThinkerIterator.Create("SWWMCachedLockInfo",STAT_STATIC);
+		SWWMCachedLockInfo cli = SWWMCachedLockInfo(ti.Next());
+		if ( !cli ) return false;
+		for ( int i=0; i<cli.ent.Size(); i++ )
+		{
+			if ( cli.ent[i].locknumber == l )
+				return true;
+		}
+		return false;
+	}
+
+	static clearscope Color GetLockColor( int l )
+	{
+		let ti = ThinkerIterator.Create("SWWMCachedLockInfo",STAT_STATIC);
+		SWWMCachedLockInfo cli = SWWMCachedLockInfo(ti.Next());
+		if ( !cli ) return am_lockedcolor;
+		for ( int i=0; i<cli.ent.Size(); i++ )
+		{
+			if ( (cli.ent[i].locknumber == l) && cli.ent[i].hascolor )
+				return cli.ent[i].mapcolor;
+		}
+		return am_lockedcolor;
+	}
+
+	static SWWMCachedLockInfo GetInstance()
+	{
+		let ti = ThinkerIterator.Create("SWWMCachedLockInfo",STAT_STATIC);
+		SWWMCachedLockInfo cli = SWWMCachedLockInfo(ti.Next());
+		if ( cli ) return cli;
+		cli = new("SWWMCachedLockInfo");
+		cli.ChangeStatNum(STAT_STATIC);
+		return cli;
+	}
+}
+
+// ultralight trackers for certain things
+Class SWWMSimpleTracker : Thinker
+{
+	Actor target;
+	double radius;
+	double angle;
+	Vector3 pos;
+	bool isplayer;
+	Color playercol;
+	bool ismonster;
+	bool friendly;
+	bool countkill;
+	bool isitem;
+	bool countitem;
+	bool vipitem;
+	bool expired;
+	int lastupdate;
+	SWWMSimpleTracker prev, next;
+
+	void Update()
+	{
+		if ( !target ) return;
+		radius = target.radius;
+		angle = target.angle;
+		pos = target.pos;
+		isplayer = target.player;
+		if ( isplayer ) playercol = target.player.GetColor();
+		ismonster = target.bISMONSTER;
+		friendly = target.IsFriend(players[consoleplayer].mo);
+		countkill = target.bCOUNTKILL;
+		isitem = (target is 'Inventory');
+		countitem = (target is 'Key')||target.bCOUNTITEM;
+		vipitem = ((target is 'Chancebox')&&(target.CurState==target.SpawnState))||(target is 'SWWMCollectible');
+		lastupdate = level.maptime;
+		if ( isitem )
+		{
+			if ( !target.bSPECIAL || Inventory(target).Owner )
+				expired = true;
+			else
+			{
+				expired = false;
+				lastupdate += 70;
+				if ( countitem ) lastupdate += 70;
+				if ( vipitem ) lastupdate += 70;
+			}
+		}
+		else if ( vipitem )
+		{
+			if ( (target is 'Chancebox') && (target.CurState != target.SpawnState) )
+				expired = true;
+			else
+			{
+				expired = false;
+				lastupdate += 70;
+			}
+		}
+		else if ( friendly )
+		{
+			expired = target.bKILLED;
+			if ( expired ) lastupdate += 35;
+			else lastupdate += 140;
+		}
+		else if ( ismonster )
+		{
+			expired = target.bKILLED;
+			if ( !expired )
+			{
+				lastupdate += 35;
+				if ( target.target == players[consoleplayer].mo )
+					lastupdate += 70;
+			}
+		}
+	}
+
+	static SWWMSimpleTracker Track( Actor target )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		SWWMSimpleTracker t;
+		for ( t=hnd.strackers; t; t=t.next )
+		{
+			if ( t.target != target ) continue;
+			t.Update();
+			return t;
+		}
+		t = new("SWWMSimpleTracker");
+		t.ChangeStatNum(STAT_INFO);
+		t.target = target;
+		t.Update();
+		t.next = hnd.strackers;
+		if ( hnd.strackers ) hnd.strackers.prev = t;
+		hnd.strackers = t;
+		hnd.strackers_cnt++;
+		return t;
+	}
+
+	// no OnDestroy pruning like the others, the cleanup is done manually by the handler
 }

@@ -296,46 +296,62 @@ Class SWWMUtility
 		return (distsq <= (radius**2));
 	}
 
-	// THANKS FOR NOT GIVING US ANY OTHER WAY TO CHECK IF A LOCK NUMBER IS VALID
+	// Liang-Barsky line clipping
+	static clearscope bool, Vector2, Vector2 LiangBarsky( Vector2 minclip, Vector2 maxclip, Vector2 v0, Vector2 v1 )
+	{
+		double t0 = 0., t1 = 1.;
+		double xdelta = v1.x-v0.x;
+		double ydelta = v1.y-v0.y;
+		double p, q, r;
+		for ( int i=0;i<4; i++ )
+		{
+			switch ( i )
+			{
+			case 0:
+				p = -xdelta;
+				q = -(minclip.x-v0.x);
+				break;
+			case 1:
+				p = xdelta;
+				q = (maxclip.x-v0.x);
+				break;
+			case 2:
+				p = -ydelta;
+				q = -(minclip.y-v0.y);
+				break;
+			case 3:
+				p = ydelta;
+				q = (maxclip.y-v0.y);
+				break;
+			}
+			if ( (p == 0.) && (q<0.) ) return false;
+			if ( p < 0 )
+			{
+				r = q/p;
+				if ( r > t1 ) return false;
+				else if ( r > t0 ) t0 = r;
+			}
+			else if ( p > 0 )
+			{
+				r = q/p;
+				if ( r < t0 ) return false;
+				else if ( r < t1 ) t1 = r;
+			}
+		}
+		Vector2 ov0 = v0+(xdelta,ydelta)*t0;
+		Vector2 ov1 = v0+(xdelta,ydelta)*t1;
+		return true, ov0, ov1;
+	}
+
 	static clearscope bool IsValidLockNum( int l )
 	{
 		if ( (l < 1) || (l > 255) ) return true;
-		Array<Int> valid;
-		valid.Clear();
-		for ( int i=0; i<Wads.GetNumLumps(); i++ )
-		{
-			String lname = Wads.GetLumpName(i);
-			if ( !(lname ~== "LOCKDEFS") ) continue;
-			String data = Wads.ReadLump(i);
-			Array<String> lines;
-			lines.Clear();
-			data.Split(lines,"\n");
-			for ( int j=0; j<lines.Size(); j++ )
-			{
-				if ( lines[j].Left(10) ~== "CLEARLOCKS" ) valid.Clear();
-				else if ( Lines[j].Left(5) ~== "LOCK " )
-				{
-					Array<String> spl;
-					spl.Clear();
-					lines[j].Split(spl," ",TOK_SKIPEMPTY);
-					// check game string (if any)
-					if ( spl.Size() > 2 )
-					{
-						if ( (spl[2] ~== "DOOM") && !(gameinfo.gametype&GAME_Doom) ) continue;
-						else if ( (spl[2] ~== "HERETIC") && !(gameinfo.gametype&GAME_Heretic) ) continue;
-						else if ( (spl[2] ~== "HEXEN") && !(gameinfo.gametype&GAME_Hexen) ) continue;
-						else if ( (spl[2] ~== "STRIFE") && !(gameinfo.gametype&GAME_Strife) ) continue;
-						else if ( (spl[2] ~== "CHEX") && !(gameinfo.gametype&GAME_Chex) ) continue;
-					}
-					valid.Push(spl[1].ToInt());
-				}
-			}
-		}
-		for ( int i=0; i<valid.Size(); i++ )
-		{
-			if ( valid[i] == l ) return true;
-		}
-		return false;
+		return SWWMCachedLockInfo.IsValidLock(l);
+	}
+
+	static clearscope Color GetLockColor( int l )
+	{
+		return SWWMCachedLockInfo.GetLockColor(l);
 	}
 
 	// wheeeeeeee, let's play a game of "who is who"

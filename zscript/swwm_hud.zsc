@@ -830,16 +830,77 @@ Class SWWMStatusBar : BaseStatusBar
 	}
 
 	// minimap helper code
+	private bool ShouldDisplaySpecial( int special )
+	{
+		// thanks graf/randi/whoever
+		switch ( special )
+		{
+		// the following have (max_args < 0)
+		// but we can't know this from zscript, so they're hardcoded here
+		case Polyobj_StartLine:
+		case Polyobj_ExplicitLine:
+		case Transfer_WallLight:
+		case Sector_Attach3dMidtex:
+		case ExtraFloor_LightOnly:
+		case Sector_CopyScroller:
+		case Scroll_Texture_Left:
+		case Scroll_Texture_Right:
+		case Scroll_Texture_Up:
+		case Scroll_Texture_Down:
+		case Plane_Copy:
+		case Line_SetIdentification:
+		case Line_SetPortal:
+		case Sector_Set3DFloor:
+		case Sector_SetContents:
+		case Plane_Align:
+		case Static_Init:
+		case Transfer_Heights:
+		case Transfer_FloorLight:
+		case Transfer_CeilingLight:
+		case Scroll_Texture_Model:
+		case Scroll_Texture_Offsets:
+		case PointPush_SetForce:
+			return false;
+		}
+		return true;
+	}
+
+	private bool CheckSectorAction( Sector s, out int special, bool useonly )
+	{
+		for ( Actor act=s.SecActTarget; act; act=act.tracer )
+		{
+			if ( (act.Health&(SectorAction.SECSPAC_Use|SectorAction.SECSPAC_UseWall) || !useonly)
+				&& act.special && !act.bFRIENDLY )
+			{
+				special = act.special;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private bool RealLineSpecial( Line l, out int special )
+	{
+		if ( special && l.activation&SPAC_PlayerActivate )
+			return true;
+		if ( CheckSectorAction(l.frontsector,special,!l.backsector) )
+			return true;
+		return (l.backsector && CheckSectorAction(l.backsector,special,false));
+	}
+
 	private bool ShowTriggerLine( Line l )
 	{
 		if ( am_showtriggerlines == 0 ) return false;
-		if ( am_showtriggerlines >= 2 ) return true;
-		if ( (l.special == Door_Open)
-			|| (l.special == Door_Close)
-			|| (l.special == Door_CloseWaitOpen)
-			|| (l.special == Door_Raise)
-			|| (l.special == Door_Animated)
-			|| (l.special == Generic_Door) )
+		int special = l.special;
+		if ( !RealLineSpecial(l,special) ) return false;
+		if ( !ShouldDisplaySpecial(special) ) return false;
+		if ( special && (am_showtriggerlines >= 2) ) return true;
+		if ( !special || (special == Door_Open)
+			|| (special == Door_Close)
+			|| (special == Door_CloseWaitOpen)
+			|| (special == Door_Raise)
+			|| (special == Door_Animated)
+			|| (special == Generic_Door) )
 			return false;
 		return true;
 	}
@@ -934,7 +995,7 @@ Class SWWMStatusBar : BaseStatusBar
 					col = am_intralevelcolor;
 				else if ( (lock > 1) && (lock < 256) && SWWMUtility.IsValidLockNum(lock) )
 					col = SWWMUtility.GetLockColor(lock);
-				else if ( (l.activation&SPAC_PlayerActivate) && l.special && ShowTriggerLine(l) )
+				else if ( ShowTriggerLine(l) )
 					col = am_specialwallcolor;
 				else if ( l.frontsector && l.backsector )
 				{

@@ -21,6 +21,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
+* **Quick Grenade sticks mags to walls (or things) if facing one**
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding *(+ proper crouch dashing)***
 * **Expand third person animations**

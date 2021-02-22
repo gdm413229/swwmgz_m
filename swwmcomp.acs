@@ -101,10 +101,15 @@ SCRIPT "DVACATION_BED" ( void )
 	if ( boinks >= 5 ) SetThingSpecial(667,0,0);	// can headpat now
 }
 
-// this one is for forcing episodes to continue seamlessly
-// will be used eventually
-SCRIPT "EPISODIC_CONTD" ( void )
+// WHACK
+SCRIPT "E1M8_KNOCKOUT" ( void )
 {
-	ScriptCall("SWWMUtility","WipeInventory",1);
+	Teleport(0,3);
+	SetPlayerProperty(0,1,PROP_TOTALLYFROZEN);
+	Delay(60);
+	AmbientSound("demolitionist/knockout",127);
+	Delay(5);
+	ScriptCall("SWWMUtility","EndLevelDie");
+	Delay(100);
 	Exit_Normal(0);
 }

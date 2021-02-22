@@ -178,6 +178,12 @@ Class SWWMUtility
 	{
 		if ( (l.special == Exit_Normal) || (l.special == Exit_Secret) || (l.special == Teleport_EndGame) || (l.special == Teleport_NewMap) )
 			return true;
+		// E1M8 compat
+		if ( (l.special == ACS_Execute) && (l.Args[0] == -Int('E1M8_KNOCKOUT')) )
+			return true;
+		// spooktober™
+		if ( ((l.special == ACS_Execute) || (l.special == ACS_ExecuteAlways)) && (l.Args[0] == -Int('MapFadeOut')) )
+			return true;
 		return false;
 	}
 
@@ -1392,8 +1398,17 @@ Class SWWMUtility
 	}
 
 	// full reset of inventory (excluding collectibles, and optionally resetting the score)
-	static play void WipeInventory( Actor mo, bool resetscore = false )
+	static play void WipeInventory( Actor mo, bool resetscore = false, bool allplayers = false )
 	{
+		if ( allplayers )
+		{
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !players[i].mo ) continue;
+				WipeInventory(players[i].mo,resetscore,false);
+			}
+			return;
+		}
 		PlayerInfo p = mo.player;
 		if ( !p || !p.mo ) return;
 		SWWMCredits c = SWWMCredits.Find(p);
@@ -1412,6 +1427,12 @@ Class SWWMUtility
 		p.mo.GiveDefaultInventory();
 		p.mo.BringUpWeapon();
 		p.health = p.mo.Health = p.mo.SpawnHealth();
+	}
+
+	// WHACK
+	static play void EndLevelDie( Actor victim )
+	{
+		victim.DamageMobj(null,null,victim.Health,'EndLevel',DMG_FORCED|DMG_THRUSTLESS);
 	}
 
 	// checks if we're playing in doom 1
@@ -1597,5 +1618,16 @@ Class ShinemapDebugSphere : Actor
 		XZW1 O -1 A_SetRenderStyle(1.,STYLE_Normal);
 		XZW1 P -1 A_SetRenderStyle(1.,STYLE_Normal);
 		Loop;
+	}
+}
+
+// used to indicate that the next level resets inventory
+Class InventoryWipeToken : Inventory
+{
+	default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
 	}
 }

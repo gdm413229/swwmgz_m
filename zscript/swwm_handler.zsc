@@ -824,6 +824,15 @@ Class SWWMHandler : EventHandler
 			let c = SWWMCredits.Find(players[i]);
 			if ( c ) c.credits = c.hcredits = 0;
 		}
+		// end of episode resets
+		if ( level.nextsecretmap.Left(6) == "enDSeQ" )
+		{
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !players[i].mo ) continue;
+				players[i].mo.GiveInventory("InventoryWipeToken",1);
+			}
+		}
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )
@@ -1151,7 +1160,7 @@ Class SWWMHandler : EventHandler
 		}
 		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
 		// known bug: the previous weapon will play its select sound regardless, this is ENTIRELY IMPOSSIBLE to fix
-		if ( swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB)) )
+		if ( p.mo.FindInventory("InventoryWipeToken") || (swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB))) )
 			SWWMUtility.WipeInventory(p.mo,swwm_resetscore);
 	}
 

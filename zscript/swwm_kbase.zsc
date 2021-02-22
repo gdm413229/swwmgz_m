@@ -160,8 +160,8 @@ Class DemolitionistMenu : GenericMenu
 				else if ( level.levelnum <= 32 ) clus = 8;
 				missionstr = String.Format("$SWWM_MISSION_EVITERNITY%d",clus);
 			}
-			// naive method to guess if this is sigil (also handle wadsmoosh, which uses cluster 25 instead)
-			else if ( ((clus == 5) || (clus == 25)) && (level.mapname.Left(2) == "E5") )
+			// naive method to guess if this is sigil
+			else if ( (clus == 5) && (level.mapname.Left(2) == "E5") )
 				missionstr = String.Format("$SWWM_MISSION_SIGIL");
 			else missionstr = String.Format("$SWWM_MISSION_DOOM%d",clus);
 			int csiz = stats.clustervisit.Size();
@@ -171,6 +171,17 @@ Class DemolitionistMenu : GenericMenu
 				if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
 					missionstr = tmpstr;
 			}
+			// if we came from the doom 1 episodes, use the alt mission string for Doom 2
+			bool fromdoomone = false;
+			for ( int i=0; i<csiz; i++ )
+			{
+				// also include sigil
+				if ( !eviternity && (stats.clustervisit[i] >= 5) && (stats.clustervisit[i] != 25) ) continue;
+				fromdoomone = true;
+				break;
+			}
+			if ( !eviternity && (clus == 5) && fromdoomone )
+				missionstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
 			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
 				missionstr = "$SWWM_MISSION_NONE";
 			bool firstskip = false;
@@ -180,6 +191,8 @@ Class DemolitionistMenu : GenericMenu
 					continue;
 				firstskip = true;
 				String xstr = String.Format(eviternity?"$SWWM_MISSION_EVITERNITY%d":"$SWWM_MISSION_DOOM%d",stats.clustervisit[i]);
+				if ( !eviternity && (stats.clustervisit[i] == 5) && fromdoomone )
+					xstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
 				if ( stats.secretdone[i] )
 				{
 					String tmpstr = xstr.."_SECRET";

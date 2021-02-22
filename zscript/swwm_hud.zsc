@@ -1231,8 +1231,7 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 			yy += 3;
 		}
-		// in doom/heretic (draw key icons)
-		if ( !(gameinfo.gametype&(GAME_DOOMCHEX|GAME_HERETIC)) ) return;
+		// draw key icons
 		Vector2 keypos = (ss.x-(margin+2),yy);
 		int colc = 0;
 		double colh = 0;
@@ -1259,14 +1258,17 @@ Class SWWMStatusBar : BaseStatusBar
 				if ( i >= j ) i--;
 			}
 		}
+		int maxcolc = (gameinfo.gametype&GAME_DOOMCHEX)?6:4;
 		for ( int i=0; i<klist.Size(); i++ )
 		{
 			let k = klist[i];
-			Vector2 siz = TexMan.GetScaledSize(k.Icon);
-			Screen.DrawTexture(k.Icon,false,keypos.x-siz.x,keypos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// Hexen key icons aren't meant for this kind of HUD
+			TextureID icon = (k is 'HexenKey')?k.SpawnState.GetSpriteTexture(0):k.Icon;
+			Vector2 siz = TexMan.GetScaledSize(icon);
+			Screen.DrawTexture(icon,false,keypos.x-siz.x,keypos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_TopLeft,true);
 			keypos.x -= siz.x+2;
 			colh = max(colh,siz.y);
-			if ( ++colc == 8 )
+			if ( ++colc == maxcolc )
 			{
 				keypos.x = ss.x-(margin+2);
 				keypos.y += colh+2;

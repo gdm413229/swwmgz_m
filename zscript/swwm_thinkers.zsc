@@ -1359,11 +1359,13 @@ Class SWWMSimpleTracker : Thinker
 	bool vipitem;
 	bool expired;
 	int lastupdate;
+	int sightcount;
 	SWWMSimpleTracker prev, next;
 
 	void Update()
 	{
 		if ( !target ) return;
+		sightcount = min(20,sightcount+1);
 		radius = target.radius;
 		angle = target.angle;
 		pos = target.pos;
@@ -1383,8 +1385,8 @@ Class SWWMSimpleTracker : Thinker
 			else
 			{
 				expired = false;
-				lastupdate += 70;
-				if ( countitem ) lastupdate += 70;
+				lastupdate += 35;
+				if ( countitem ) lastupdate += 35;
 				if ( vipitem ) lastupdate += 70;
 			}
 		}
@@ -1414,6 +1416,8 @@ Class SWWMSimpleTracker : Thinker
 					lastupdate += 70;
 			}
 		}
+		else if ( target.default.bSHOOTABLE )
+			expired = (target.Health<=0);
 	}
 
 	static SWWMSimpleTracker Track( Actor target )
@@ -1437,6 +1441,4 @@ Class SWWMSimpleTracker : Thinker
 		hnd.strackers_cnt++;
 		return t;
 	}
-
-	// no OnDestroy pruning like the others, the cleanup is done manually by the handler
 }

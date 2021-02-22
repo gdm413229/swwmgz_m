@@ -1417,21 +1417,22 @@ Class SWWMHandler : EventHandler
 		}
 		// update trackers for anything around the player
 		bool thesight = players[consoleplayer].mo.FindInventory("Omnisight");
-		BlockThingsIterator bt = BlockThingsIterator.Create(players[consoleplayer].Camera,SWWMStatusBar.MAPVIEWDIST);
+		double viewdist = SWWMStatusBar.MAPVIEWDIST*swwm_minimapzoom;
+		BlockThingsIterator bt = BlockThingsIterator.Create(players[consoleplayer].Camera,viewdist);
 		while ( bt.Next() )
 		{
 			let a = bt.Thing;
 			if ( !a ) continue;
 			Vector2 rv = a.pos.xy-players[consoleplayer].Camera.pos.xy;
-			if ( max(abs(rv.x)-a.radius,abs(rv.y)-a.radius) > SWWMStatusBar.MAPVIEWDIST )
+			if ( max(abs(rv.x)-a.radius,abs(rv.y)-a.radius) > viewdist )
 				continue;
 			if ( a == players[consoleplayer].Camera )
 				continue;
-			if ( !a.player && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
+			if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
 				continue;
 			if ( !thesight && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 				continue;
-			if ( a.bKILLED )
+			if ( a.bKILLED || (a.Health <= 0) )
 				continue;
 			if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
 				continue;
@@ -1439,21 +1440,24 @@ Class SWWMHandler : EventHandler
 				continue;
 			SWWMSimpleTracker.Track(a);
 		}
-		// prune expired trackers
 		SWWMSimpleTracker trk = strackers;
 		while ( trk )
 		{
 			SWWMSimpleTracker next = trk.next;
+			// reduce sight counter
+			if ( trk.lastupdate < level.maptime )
+				trk.sightcount = max(0,trk.sightcount-1);
 			// minimize lifespan of destroyed targets
 			if ( !trk.target ) trk.lastupdate = min(trk.lastupdate,level.maptime);
 			else if ( !trk.expired )
 			{
 				// "last breath" update
-				if ( trk.target.bKILLED
+				if ( (trk.target.bKILLED || (trk.target.Health <= 0))
 					|| ((trk.target is 'Inventory') && (!trk.target.bSPECIAL || Inventory(trk.target).Owner))
 					|| ((trk.target is 'Chancebox') && (trk.target.CurState != trk.target.SpawnState)) )
 					trk.Update();
 			}
+			// prune expired trackers
 			if ( trk.lastupdate+140 < level.maptime )
 			{
 				if ( !trk.prev ) strackers = trk.next;
@@ -3105,6 +3109,21 @@ Class SWWMHandler : EventHandler
 			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 				return;
 			Menu.SetMenu('DemolitionistMenu');
+		}
+		else if ( e.Name ~== "swwmzoomin" )
+		{
+			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+				return;
+			double val = max(.5,swwm_minimapzoom/2.);
+			CVar.FindCVar('swwm_minimapzoom').SetFloat(val);
+		}
+		else if ( e.Name ~== "swwmzoomout" )
+		{
+			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+				return;
+			double maxval = players[consoleplayer].mo.FindInventory("Omnisight")?2.:1.;
+			double val = min(maxval,swwm_minimapzoom*2.);
+			CVar.FindCVar('swwm_minimapzoom').SetFloat(val);
 		}
 	}
 

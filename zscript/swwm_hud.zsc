@@ -60,6 +60,7 @@ Class SWWMStatusBar : BaseStatusBar
 
 	bool koraxhack;
 
+	double minimapzoom, oldminimapzoom;
 	// minimap constants
 	const CLIPDIST = 800;		// clip distance for minimap view, with rotation accounted
 	const MAPVIEWDIST = 1132;	// maximum distance for something to be considered visible (rounded up CLIPDIST*sqrt(2))
@@ -416,6 +417,15 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( CPlayer.ReadyWeapon is 'SWWMWeapon' )
 			SWWMWeapon(CPlayer.ReadyWeapon).HudTick();
 		bool thesight = CPlayer.mo.FindInventory("Omnisight");
+		double desiredzoom = clamp(swwm_minimapzoom,.5,thesight?2.:1.);
+		if ( (minimapzoom != swwm_minimapzoom) || (oldminimapzoom != swwm_minimapzoom) )
+		{
+			oldminimapzoom = minimapzoom;
+			double diff = .1*(desiredzoom-minimapzoom);
+			minimapzoom += diff;
+			if ( abs(minimapzoom-desiredzoom) <= double.epsilon )
+				minimapzoom = desiredzoom;
+		}
 		let cam = players[consoleplayer].camera;
 		Vector3 viewvec = (cos(viewrot.x)*cos(viewrot.y),sin(viewrot.x)*cos(viewrot.y),sin(-viewrot.y));
 		int sz;
@@ -616,6 +626,7 @@ Class SWWMStatusBar : BaseStatusBar
 		GenericAmmoTex[1] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxM.png",TexMan.Type_Any);
 		GenericAmmoTex[2] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxR.png",TexMan.Type_Any);
 		MiniBox = TexMan.CheckForTexture("graphics/HUD/MinimapBox.png",TexMan.Type_Any);
+		minimapzoom = oldminimapzoom = 1.;
 		mTewiFont = HUDFont.Create("TewiShaded");
 		mMiniwiFont = HUDFont.Create("MiniwiShaded");
 		mMPlusFont = HUDFont.Create("MPlusShaded");
@@ -942,6 +953,8 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private void DrawMapLines( Vector2 basepos )
 	{
+		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
+		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
 		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
 		for ( int i=0; i<level.lines.Size(); i++ )
 		{
@@ -950,7 +963,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( (l.flags&Line.ML_DONTDRAW) && ((am_cheat == 0) || (am_cheat >= 4)) )
 				continue;
 			Vector2 rv1 = l.v1.p-cpos, rv2 = l.v2.p-cpos;
-			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > MAPVIEWDIST )
+			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > zoomview )
 				continue;
 			// flip Y
 			rv1.y *= -1;
@@ -960,11 +973,11 @@ Class SWWMStatusBar : BaseStatusBar
 			rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
 			// clip to frame
 			bool visible;
-			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,rv1,rv2);
+			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,rv1,rv2);
 			if ( !visible ) continue;
 			// scale to minimap frame
-			rv1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
-			rv2 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+			rv1 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			rv2 *= (HALFMAPSIZE/zoomclip)*hs.x;
 			// offset to minimap center
 			rv1 += basepos;
 			rv2 += basepos;
@@ -1018,11 +1031,14 @@ Class SWWMStatusBar : BaseStatusBar
 	private void DrawMapThings( Vector2 basepos )
 	{
 		bool thesight = !!CPlayer.mo.FindInventory("Omnisight");
+		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
+		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
 		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
 		for ( SWWMSimpleTracker t=hnd.strackers; t; t=t.next )
 		{
 			Color col = am_thingcolor;
 			bool isitem = false;
+			bool plainactor = false;
 			Vector2 pos;
 			double angle;
 			double radius;
@@ -1042,6 +1058,7 @@ Class SWWMStatusBar : BaseStatusBar
 				else if ( t.target.bFRIENDLY ) col = am_thingcolor_friend;
 				else if ( t.target.bCOUNTKILL ) col = am_thingcolor_monster;
 				else if ( t.target.bISMONSTER ) col = am_thingcolor_ncmonster;
+				else plainactor = true;
 			}
 			else
 			{
@@ -1059,25 +1076,39 @@ Class SWWMStatusBar : BaseStatusBar
 				else if ( t.friendly ) col = am_thingcolor_friend;
 				else if ( t.countkill ) col = am_thingcolor_monster;
 				else if ( t.ismonster ) col = am_thingcolor_ncmonster;
+				else plainactor = true;
 			}
 			int mtime = 35;
 			if ( thesight && !t.expired && t.target ) mtime += 105;
 			double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
+			alph *= min(1.,t.sightcount/10.);
 			if ( alph <= 0. ) continue;
 			Vector2 rv = pos-cpos;
-			if ( min(abs(rv.x)-radius,abs(rv.y)-radius) > MAPVIEWDIST ) continue;
-			// get actor triangle
+			if ( min(abs(rv.x)-radius,abs(rv.y)-radius) > zoomview )
+				continue;
 			Vector2 tv[4];
-			int nidx = isitem?4:3;
+			int nidx;
 			if ( isitem )
 			{
-				tv[0] = rv+(-10,-10);
-				tv[1] = rv+(10,10);
-				tv[2] = rv+(10,-10);
-				tv[3] = rv+(-10,10);
+				// rhombus
+				nidx = 4;
+				double crad = min(radius,10);
+				for ( int i=0; i<4; i++ )
+					tv[i] = rv+Actor.RotateVector((crad,0),i*90);
+			}
+			else if ( plainactor )
+			{
+				// aabb box
+				nidx = 4;
+				tv[0] = rv+(-radius,-radius);
+				tv[1] = rv+(radius,-radius);
+				tv[2] = rv+(radius,radius);
+				tv[3] = rv+(-radius,radius);
 			}
 			else
 			{
+				// oriented triangle
+				nidx = 3;
 				tv[0] = rv+Actor.RotateVector((radius,0),angle);
 				tv[1] = rv+Actor.RotateVector((-radius,radius),angle);
 				tv[2] = rv+Actor.RotateVector((-radius,-radius),angle);
@@ -1089,29 +1120,14 @@ Class SWWMStatusBar : BaseStatusBar
 			bool visible;
 			Vector2 x0, x1;
 			// clip to frame
-			if ( isitem ) for ( int j=0; j<4; j+=2 )
+			for ( int j=0; j<nidx; j++ )
 			{
-				[visible, x0, x1] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,tv[j],tv[j+1]);
+				[visible, x0, x1] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,tv[j],tv[(j+1)%nidx]);
 				if ( visible )
 				{
 					// scale to minimap frame
-					x0 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
-					x1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
-					// offset to minimap center
-					x0 += basepos;
-					x1 += basepos;
-					// draw the line
-					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(alph*255));
-				}
-			}
-			else for ( int j=0; j<3; j++ )
-			{
-				[visible, x0, x1] = SWWMUtility.LiangBarsky((-1,-1)*CLIPDIST,(1,1)*CLIPDIST,tv[j],tv[(j+1)%3]);
-				if ( visible )
-				{
-					// scale to minimap frame
-					x0 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
-					x1 *= (HALFMAPSIZE/double(CLIPDIST))*hs.x;
+					x0 *= (HALFMAPSIZE/zoomclip)*hs.x;
+					x1 *= (HALFMAPSIZE/zoomclip)*hs.x;
 					// offset to minimap center
 					x0 += basepos;
 					x1 += basepos;
@@ -1142,9 +1158,10 @@ Class SWWMStatusBar : BaseStatusBar
 		// obviously, don't draw the minimap if the automap is open
 		if ( !automapactive && swwm_showminimap )
 		{
-			xx = int(ss.x-(margin+84));
+			xx = int(ss.x-(margin+(HALFMAPSIZE+2)*2));
 			Screen.DrawTexture(MiniBox,false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			Vector2 basemappos = (xx+42,yy+42);
+			Vector2 basemappos = (xx+HALFMAPSIZE+2,yy+HALFMAPSIZE+2);
+			Screen.Dim(am_backcolor,.5,int((basemappos.x-HALFMAPSIZE)*hs.x),int((basemappos.y-HALFMAPSIZE)*hs.x),int(HALFMAPSIZE*2*hs.x),int(HALFMAPSIZE*2*hs.x));
 			// draw dat stuff
 			DrawMapLines(basemappos*hs.x);
 			DrawMapThings(basemappos*hs.x);
@@ -1157,7 +1174,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawThickLine(x0,y0,x1,y1,max(1.,hs.x*.5),am_yourcolor);
 			Screen.DrawThickLine(x1,y1,x2,y1,max(1.,hs.x*.5),am_yourcolor);
 			Screen.DrawThickLine(x2,y1,x0,y0,max(1.,hs.x*.5),am_yourcolor);
-			yy += 87;
+			yy += ((HALFMAPSIZE+2)*2)+3;
 		}
 		// draw stats and timer when automap is open
 		int fstats = swwm_forcestats;

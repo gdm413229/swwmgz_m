@@ -1049,7 +1049,7 @@ Class SWWMStatusBar : BaseStatusBar
 				radius = t.target.radius;
 				if ( t.isitem )
 				{
-					if ( ((t.target is 'Chancebox') && (t.target.CurState == t.target.SpawnState)) || (t.target is 'SWWMCollectible') ) col = "Purple";
+					if ( ((t.target is 'Chancebox') && (t.target.CurState == t.target.SpawnState)) || (t.target is 'SWWMCollectible') || (t.target is 'GoldShell') ) col = "Purple";
 					else if ( t.target.bCOUNTITEM || (t.target is 'Key') ) col = am_thingcolor_citem;
 					else col = am_thingcolor_item;
 					isitem = true;

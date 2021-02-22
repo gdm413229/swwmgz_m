@@ -775,7 +775,7 @@ Class SWWMItemSense : Thinker
 		i.ChangeStatNum(STAT_USER);
 		i.item = item;
 		i.scoreitem = (item is 'Key')||item.bCOUNTITEM;
-		i.vipitem = (item is 'Chancebox')||(item is 'SWWMCollectible');
+		i.vipitem = (item is 'Chancebox')||(item is 'SWWMCollectible')||(item is 'GoldShell');
 		i.parent = parent;
 		i.updated = level.maptime+35;
 		i.UpdateTag();
@@ -1376,7 +1376,7 @@ Class SWWMSimpleTracker : Thinker
 		countkill = target.bCOUNTKILL;
 		isitem = (target is 'Inventory');
 		countitem = (target is 'Key')||target.bCOUNTITEM;
-		vipitem = ((target is 'Chancebox')&&(target.CurState==target.SpawnState))||(target is 'SWWMCollectible');
+		vipitem = ((target is 'Chancebox')&&(target.CurState==target.SpawnState))||(target is 'SWWMCollectible')||(target is 'GoldShell');
 		lastupdate = level.maptime;
 		if ( isitem )
 		{

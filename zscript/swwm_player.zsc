@@ -675,6 +675,36 @@ Class Demolitionist : PlayerPawn
 				SWWMGesture.SetGesture(self,GS_EmptyMelee);
 		}
 	}
+	void NearbyItemSparkles()
+	{
+		if ( (player != players[consoleplayer]) || !swwm_itemsparkles ) return;
+		let bt = BlockThingsIterator.Create(self,500);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || !(t is 'Inventory') || !t.bSPECIAL || t.bINVISIBLE || Inventory(t).Owner || !SWWMUtility.SphereIntersect(t,pos,500) )
+				continue;
+			Vector3 bpos = (0,0,16);
+			if ( t.bFLOATBOB ) bpos.z += BobSin(t.FloatBobPhase)*t.FloatBobStrength;
+			double alph = clamp((500.-Distance3D(t))/500.,0.,1.);
+			Color pcol = "Gold";
+			if ( Inventory(t).PickupFlash is 'SWWMPickupFlash' )
+			{
+				let def = GetDefaultByType(Inventory(t).PickupFlash);
+				pcol = Color(def.Args[1]*85,def.Args[2]*85,def.Args[3]*85);
+			}
+			int numpt = clamp(int(max(t.radius,t.height-16)/4),1,8);
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ClientSparkles](0,360);
+				double pt = FRandom[ClientSparkles](0,360);
+				double dst = FRandom[ClientSparkles](.5,1.25)*max(t.radius,t.height-16);
+				Vector3 dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+				Vector3 ppos = bpos+dir*dst;
+				t.A_SpawnParticle(pcol,SPF_FULLBRIGHT,30,2.,0,ppos.x,ppos.y,ppos.z,dir.x*.2,dir.y*.2,dir.z*.2,0,0,.05,alph,-1,-2./30.);
+			}
+		}
+	}
 	override void Tick()
 	{
 		Vector3 oldpos = pos;
@@ -690,6 +720,7 @@ Class Demolitionist : PlayerPawn
 			selflight.Tick();
 		}
 		if ( !player || (player.mo != self) ) return;
+		NearbyItemSparkles();
 		// double-check that we have these
 		if ( !FindInventory("AlmasteelPlating") )
 		{

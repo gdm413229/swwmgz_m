@@ -185,9 +185,12 @@ Class SWWMUtility
 	{
 		// must be two-sided and crossable
 		if ( !l.sidedef[1] || !(l.Activation&(SPAC_Cross|SPAC_MCross|SPAC_PCross|SPAC_AnyCross)) ) return false;
+		// filter lines that aren't player-activated (unless checking all)
+		if ( !all && !(l.Activation&SPAC_PlayerActivate) ) return false;
+		// typical teleports
 		if ( (l.special == Teleport) || (l.special == Teleport_NoStop) )
 			return true;
-		// also include sneaky teleports
+		// if checking all, also include sneaky teleports
 		if ( all && ((l.special == Teleport_Line) || (l.special == Teleport_NoFog)) )
 			return true;
 		// exits are included too

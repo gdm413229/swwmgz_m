@@ -3807,7 +3807,9 @@ Class SWWMHandler : EventHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/w_pkup",CHAN_VOICE,CHANF_UI);
 			}
-			players[e.Args[0]].mo.GiveInventory("Ynykron",1);
+			if ( players[e.Args[0]].mo.FindInventory("Ynykron") )
+				players[e.Args[0]].mo.GiveInventory("YnykronAmmo",1);
+			else players[e.Args[0]].mo.GiveInventory("Ynykron",1);
 		}
 		else if ( e.Name ~== "swwmgravcheat" )
 		{
@@ -3986,7 +3988,7 @@ Class SWWMHandler : EventHandler
 		{
 			if ( consoleplayer == e.Args[0] )
 			{
-				Console.Printf("\cyAmnesiacs administered\c-");
+				Console.Printf("\cyAmnesiacs administered.\c-");
 				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("bestsound",CHAN_VOICE,CHANF_UI);
 			}

@@ -3885,6 +3885,7 @@ Class SWWMHandler : EventHandler
 				S_StartSound("fabricator/use",CHAN_VOICE,CHANF_UI);
 			}
 			players[e.Args[0]].mo.CheatGive("all",0);
+			players[e.Args[0]].health = players[e.Args[0]].mo.health = 1000;
 		}
 		else if ( e.Name ~== "swwmflagcheat" )
 		{

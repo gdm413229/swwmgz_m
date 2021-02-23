@@ -265,7 +265,9 @@ Class Demolitionist : PlayerPawn
 					let item = Inventory(Spawn(rep));
 					SWWMHandler.KeyTagFix(item);
 					if ( item is 'SWWMKey' ) SWWMKey(item).propagated = true;	// no anim
+					key_reentrant = true;
 					if ( !item.CallTryPickup(self) ) item.Destroy();
+					key_reentrant = false;
 				}
 			}
 			if ( !giveall ) return;

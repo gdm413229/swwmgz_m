@@ -269,6 +269,7 @@ Class SWWMHandler : EventHandler
 	transient ui int kcode, klinger;
 	transient ui String kstr, klingerstr;
 	transient ui bool kfail;
+	transient ui int rss;
 
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
@@ -2542,8 +2543,13 @@ Class SWWMHandler : EventHandler
 					if ( kstr != cht[i].Left(kstr.length()) ) continue;
 					matchany = true;
 					if ( kstr != cht[i] ) continue;
-					SendNetworkEvent(cmd[i],consoleplayer);
-					kfail = false;
+					if ( SWWMUtility.CheatsDisabled(consoleplayer) )
+						kfail = true;
+					else
+					{
+						kfail = false;
+						SendNetworkEvent(cmd[i],consoleplayer);
+					}
 					klinger = gametic+60;
 					klingerstr = kstr;
 					kcode = 0;
@@ -3380,7 +3386,6 @@ Class SWWMHandler : EventHandler
 			Console.Printf("Sparkster: %d",Random2[Sparkster]());
 			Console.Printf("Spread: %d",Random2[Spread]());
 			Console.Printf("Spreadgun: %d",Random2[Spreadgun]());
-			Console.Printf("TextShake: %d",Random2[TextShake]());
 			Console.Printf("TUID: %d",Random2[TUID]());
 			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
 			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
@@ -3718,8 +3723,6 @@ Class SWWMHandler : EventHandler
 		// CHEATS
 		else if ( e.Name ~== "swwmmoneycheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			// what's that spell?
 			// loadsamoney! ... probably
 			if ( consoleplayer == e.Args[0] )
@@ -3733,8 +3736,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmlorecheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyKNOWLEDGE!\c-");
@@ -3753,8 +3754,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmsafecheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyStay out of trouble.\c-");
@@ -3767,8 +3766,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmweaponcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyYou better be happy now\c-");
@@ -3789,8 +3786,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmhealcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyRemember to stay fit.\c-");
@@ -3801,8 +3796,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmynykroncheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyYou're still crazy.\c-");
@@ -3813,8 +3806,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmgravcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyGot something floatier.\c-");
@@ -3827,8 +3818,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwminvischeat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyProbably because you're invisible.\c-");
@@ -3841,8 +3830,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmbarriercheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cySafe from those pesky elements.\c-");
@@ -3855,8 +3842,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmammocheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyDon't squander it.\c-");
@@ -3872,8 +3857,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmbloodcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyEdgy...\c-");
@@ -3882,8 +3865,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmexplocheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyThat cheat's not needed anymore.\c-");
@@ -3892,8 +3873,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmallcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyStill as wrappy as it's always been.\c-");
@@ -3904,8 +3883,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmflagcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyThere are no flags here.\c-");
@@ -3914,8 +3891,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmballcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cy\"Balls on your head\"? What was I even thinking...\c-");
@@ -3924,8 +3899,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmsmartcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cySkittles are better anyway.\c-");
@@ -3934,8 +3907,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmnutcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyI'm way past that, it was bad for my health.\c-");
@@ -3944,8 +3915,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmweeniecheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyAlways has been.\c-");
@@ -3954,8 +3923,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmpunishcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyThis is a bulli free zone.\c-");
@@ -3964,8 +3931,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmball2cheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cy<insert amiga boing ball here>\c-");
@@ -3974,8 +3939,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmfartcheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyI'd rather not reimplement that one.\c-");
@@ -3984,8 +3947,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmsupercheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyNo, you're the Demolitionist.\c-");
@@ -3994,8 +3955,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmstonecheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyThe pinnacle of... wait, I misread that.\c-");
@@ -4004,8 +3963,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmfroggycheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cdHop!\c-");
@@ -4021,8 +3978,6 @@ Class SWWMHandler : EventHandler
 		}
 		else if ( e.Name ~== "swwmamnesiacheat" )
 		{
-			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
-				return;
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyAmnesiacs administered\c-");
@@ -4104,6 +4059,23 @@ Class SWWMHandler : EventHandler
 		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(swwm_funtags?(bosstag.."_FUN"):bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
 	}
 
+	private ui int GetUIRandom()
+	{
+		return (rss = (rss<<1)*35447+(rss/87));
+	}
+
+	private ui double RandomShiver()
+	{
+		int sd = GetUIRandom();
+		return ((abs(sd)%11)-5)*.1;
+	}
+
+	private ui int RandomFall()
+	{
+		int sd = GetUIRandom();
+		return ((abs(sd)%22)+10);
+	}
+
 	// various shaders
 	override void RenderOverlay( RenderEvent e )
 	{
@@ -4121,13 +4093,14 @@ Class SWWMHandler : EventHandler
 			int width = fnt.StringWidth(chstr)+(tlen-1);
 			int xx = int((ss.x-width)/2.);
 			int yy = int((ss.y-newsmallfont.GetHeight())/2.);
+			rss = (kcode>4)?gametic:klinger;
 			for ( int i=0, pos=0; i<tlen; i++ )
 			{
 				int ch;
 				[ch, pos] = chstr.GetNextCodePoint(pos);
-				if ( col == 0 ) Screen.DrawChar(fnt,Font.CR_DARKGRAY,xx+FRandom[TextShake](-1,1),yy+FRandom[TextShake](-1,1),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				if ( col == 0 ) Screen.DrawChar(fnt,Font.CR_DARKGRAY,xx+RandomShiver(),yy+RandomShiver(),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				else if ( col == 1 ) Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ColorOverlay,Color(int(shine*255),255,255,255));
-				else if ( col == 2 ) Screen.DrawChar(fnt,Font.CR_RED,xx,yy+abs(cos(i*74.3)*8.)*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				else if ( col == 2 ) Screen.DrawChar(fnt,Font.CR_RED,xx,yy+RandomFall()*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				xx += newsmallfont.GetCharWidth(ch)+1;
 			}
 		}

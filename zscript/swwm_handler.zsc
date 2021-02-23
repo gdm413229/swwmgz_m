@@ -266,8 +266,9 @@ Class SWWMHandler : EventHandler
 	int lastorder;
 	bool lastloop;
 	// for custom cheats
-	transient ui int kcode;
-	transient ui String kstr;
+	transient ui int kcode, klinger;
+	transient ui String kstr, klingerstr;
+	transient ui bool kfail;
 
 	// heal/armor flashes need to be handled here so they don't stack
 	transient int hflash[MAXPLAYERS], aflash[MAXPLAYERS];
@@ -1481,9 +1482,6 @@ Class SWWMHandler : EventHandler
 		while ( trk )
 		{
 			SWWMSimpleTracker next = trk.next;
-			// reduce sight counter
-			if ( trk.lastupdate < level.maptime )
-				trk.sightcount = max(0,trk.sightcount-1);
 			// minimize lifespan of destroyed targets
 			if ( !trk.target ) trk.lastupdate = min(trk.lastupdate,level.maptime);
 			else if ( !trk.expired )
@@ -2513,7 +2511,7 @@ Class SWWMHandler : EventHandler
 			// cheat code handling
 			String cht[] =
 			{
-				"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang",
+				"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang", "swwmforgetaboutit",
 				// SWWM Platinum cheats
 				"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
 				"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
@@ -2525,7 +2523,7 @@ Class SWWMHandler : EventHandler
 			};
 			String cmd[] =
 			{
-				"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat",
+				"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat", "swwmamnesiacheat",
 				// SWWM Platinum cheats
 				"swwmsafecheat",    "swwmweaponcheat",   "swwmhealcheat",
 				"swwmynykroncheat", "swwmgravcheat",   "swwminvischeat",
@@ -2545,14 +2543,27 @@ Class SWWMHandler : EventHandler
 					matchany = true;
 					if ( kstr != cht[i] ) continue;
 					SendNetworkEvent(cmd[i],consoleplayer);
+					kfail = false;
+					klinger = gametic+60;
+					klingerstr = kstr;
 					kcode = 0;
 					kstr = "";
 					return true;
 				}
 				if ( !matchany )
 				{
+					bool eatit = false;
+					if ( kcode >= 4 )
+					{
+						kfail = true;
+						klinger = gametic+40;
+						klingerstr = kstr;
+						S_StartSound("bruh",CHAN_VOICE,CHANF_UI);
+						eatit = true;
+					}
 					kcode = 0;
 					kstr = "";
+					if ( eatit ) return true;
 				}
 				else
 				{
@@ -3369,6 +3380,7 @@ Class SWWMHandler : EventHandler
 			Console.Printf("Sparkster: %d",Random2[Sparkster]());
 			Console.Printf("Spread: %d",Random2[Spread]());
 			Console.Printf("Spreadgun: %d",Random2[Spreadgun]());
+			Console.Printf("TextShake: %d",Random2[TextShake]());
 			Console.Printf("TUID: %d",Random2[TUID]());
 			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
 			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
@@ -4007,6 +4019,24 @@ Class SWWMHandler : EventHandler
 			f.Spawn("SWWMItemFog",f.pos);
 			f.A_StartSound("bestsound",CHAN_ITEMEXTRA);
 		}
+		else if ( e.Name ~== "swwmamnesiacheat" )
+		{
+			if ( SWWMUtility.CheatsDisabled(e.Args[0]) )
+				return;
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyAmnesiacs administered\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("bestsound",CHAN_VOICE,CHANF_UI);
+			}
+			let ti = ThinkerIterator.Create("Actor");
+			Actor a;
+			while ( a = Actor(ti.Next()) )
+			{
+				if ( !a.bIsMonster || a.player ) continue;
+				a.A_ClearTarget();
+			}
+		}
 	}
 
 	// stuff for hud
@@ -4077,6 +4107,30 @@ Class SWWMHandler : EventHandler
 	// various shaders
 	override void RenderOverlay( RenderEvent e )
 	{
+		// cheat input
+		if ( (kcode > 4) || ((klinger > gametic) && (klingerstr != "")) )
+		{
+			double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/266.)),1.);
+			Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+			String chstr = (kcode>4)?kstr.Mid(4):klingerstr.Mid(4);
+			double alph = clamp((klinger-(gametic+e.fractic))/20.,0.,1.);
+			double shine = clamp((klinger-(gametic+e.fractic+40))/20.,0.,1.);
+			int col = (kcode>4)?0:(kfail)?2:1;
+			int tlen = chstr.CodePointCount();
+			let fnt = newsmallfont;
+			int width = fnt.StringWidth(chstr)+(tlen-1);
+			int xx = int((ss.x-width)/2.);
+			int yy = int((ss.y-newsmallfont.GetHeight())/2.);
+			for ( int i=0, pos=0; i<tlen; i++ )
+			{
+				int ch;
+				[ch, pos] = chstr.GetNextCodePoint(pos);
+				if ( col == 0 ) Screen.DrawChar(fnt,Font.CR_DARKGRAY,xx+FRandom[TextShake](-1,1),yy+FRandom[TextShake](-1,1),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				else if ( col == 1 ) Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ColorOverlay,Color(int(shine*255),255,255,255));
+				else if ( col == 2 ) Screen.DrawChar(fnt,Font.CR_RED,xx,yy+abs(cos(i*74.3)*8.)*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				xx += newsmallfont.GetCharWidth(ch)+1;
+			}
+		}
 		PlayerInfo p = players[consoleplayer];
 		let mo = p.mo;
 		if ( !mo ) return;

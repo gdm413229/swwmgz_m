@@ -1360,13 +1360,12 @@ Class SWWMSimpleTracker : Thinker
 	bool vipitem;
 	bool expired;
 	int lastupdate;
-	int sightcount;
+	ui double smoothalpha;	// smoothened alpha, for ui
 	SWWMSimpleTracker prev, next;
 
 	void Update()
 	{
 		if ( !target ) return;
-		sightcount = min(20,sightcount+1);
 		radius = target.radius;
 		angle = target.angle;
 		pos = target.pos;

@@ -35,6 +35,8 @@ Class SWWMStatusBar : BaseStatusBar
 	Vector2 ssd, hsd;
 	int margin;
 	double FracTic;
+	double FrameTime;
+	int PrevFrame;
 	int chatopen;
 	bool camhidden;
 
@@ -645,6 +647,7 @@ Class SWWMStatusBar : BaseStatusBar
 		sw_proj = new("swwmLe__SWScreen");
 		PrepareProjection();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		PrevFrame = MSTime();
 	}
 
 	static private string FormatDist( double dist )
@@ -1368,9 +1371,6 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 			int mtime = 35;
 			if ( thesight && !t.expired && t.target ) mtime += 105;
-			double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
-			alph *= min(1.,t.sightcount/10.);
-			if ( alph <= 0. ) continue;
 			Vector2 rv = pos-cpos;
 			if ( min(abs(rv.x)-radius,abs(rv.y)-radius) > zoomview )
 				continue;
@@ -1405,7 +1405,7 @@ Class SWWMStatusBar : BaseStatusBar
 			for ( int j=0; j<nidx; j++ ) tv[j].y *= -1;
 			// rotate by view
 			if ( swwm_mm_rotate ) for ( int j=0; j<nidx; j++ ) tv[j] = Actor.RotateVector(tv[j],ViewRot.x-90);
-			bool visible;
+			bool visible, drawn;
 			Vector2 x0, x1;
 			// clip to frame
 			for ( int j=0; j<nidx; j++ )
@@ -1420,9 +1420,17 @@ Class SWWMStatusBar : BaseStatusBar
 					x0 += basepos;
 					x1 += basepos;
 					// draw the line
-					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(alph*255));
+					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(t.smoothalpha*255));
+					drawn = true;
 				}
 			}
+			if ( drawn )
+			{
+				double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
+				double theta = clamp(5.*FrameTime,0.,1.);
+				t.smoothalpha = t.smoothalpha*(1.-theta)+alph*theta;
+			}
+			else t.smoothalpha = 0.;
 		}
 	}
 
@@ -2005,7 +2013,13 @@ Class SWWMStatusBar : BaseStatusBar
 	override void Draw( int state, double TicFrac )
 	{
 		Super.Draw(state,TicFrac);
-		if ( (state != HUD_StatusBar) && (state != HUD_Fullscreen) ) return;
+		int CurFrame = MSTime();
+		FrameTime = (CurFrame-PrevFrame)/1000.;
+		if ( (state != HUD_StatusBar) && (state != HUD_Fullscreen) )
+		{
+			PrevFrame = CurFrame;
+			return;
+		}
 		if ( !hnd ) hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !swwm_camhud && !(players[consoleplayer].Camera is 'PlayerPawn') )
 			camhidden = true;
@@ -2056,5 +2070,6 @@ Class SWWMStatusBar : BaseStatusBar
 			double malph = DrawDeath();
 			DrawMessages(malph);
 		}
+		PrevFrame = CurFrame;
 	}
 }

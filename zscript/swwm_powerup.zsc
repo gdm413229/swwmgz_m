@@ -1091,7 +1091,7 @@ Class Omnisight : Inventory
 			{
 				Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
 				// automatically zoom out so the player can know how far this goes
-				CVar.FindCVar('swwm_minimapzoom').SetFloat(2.);
+				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
 			level.allmap = true;
 		}
@@ -1107,7 +1107,7 @@ Class Omnisight : Inventory
 				Console.Printf(StringTable.Localize("$D_OMNISHARE"),Owner.player.GetUserName());
 				players[i].mo.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
 				// automatically zoom out so the player can know how far this goes
-				CVar.FindCVar('swwm_minimapzoom').SetFloat(2.);
+				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
 		}
 		// not used up, must be kept for the targetting features to work

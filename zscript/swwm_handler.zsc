@@ -2538,19 +2538,24 @@ Class SWWMHandler : EventHandler
 			kstr.AppendCharacter(e.KeyChar);
 			if ( kstr.Length() > 0 )
 			{
+				if ( kcode >= 4 )
+					S_StartSound("misc/boink",CHAN_WEAPON,CHANF_UI|CHANF_OVERLAP,pitch:FRandom[HudStuff](.8,1.2));
 				for ( int i=0; i<cht.Size(); i++ )
 				{
 					if ( kstr != cht[i].Left(kstr.length()) ) continue;
 					matchany = true;
 					if ( kstr != cht[i] ) continue;
 					if ( SWWMUtility.CheatsDisabled(consoleplayer) )
+					{
 						kfail = true;
+						klinger = gametic+40;
+					}
 					else
 					{
 						kfail = false;
+						klinger = gametic+60;
 						SendNetworkEvent(cmd[i],consoleplayer);
 					}
-					klinger = gametic+60;
 					klingerstr = kstr;
 					kcode = 0;
 					kstr = "";

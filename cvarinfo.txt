@@ -100,9 +100,40 @@ nosave int swwm_numcolor_dmg = 6;		// font color for damage numbers (default: re
 nosave int swwm_numcolor_hp = 7;		// font color for health numbers (default: blue)
 nosave int swwm_numcolor_ap = 3;		// font color for armor numbers (default: green)
 server int swwm_drlaskill = 3;			// [DRLA Monsters] skill setting for monster spawns
-nosave bool swwm_showminimap = true;		// show a minimap below the score counter
-nosave noarchive float swwm_minimapzoom = 1;	// zoom level of minimap
 nosave bool swwm_itemsparkles = false;		// visual aid for low visibility items
+
+// minimap settings
+nosave bool swwm_mm_enable = true;		// show a minimap below the score counter
+nosave noarchive float swwm_mm_zoom = 1;	// zoom level of minimap
+nosave bool swwm_mm_rotate = true;		// rotate minimap
+nosave bool swwm_mm_grid = false;		// show blockmap grid plus (0,0) crosshair
+nosave int swwm_mm_colorset = 0;		// 0: SWWM GZ, 1: GZDoom, 2: Doom, 3: Strife, 4: Raven
+nosave color swwm_mm_backcolor = "10 10 10";
+nosave color swwm_mm_cdwallcolor = "30 50 70";
+nosave color swwm_mm_efwallcolor = "80 a0 c0";
+nosave color swwm_mm_fdwallcolor = "50 70 90";
+nosave color swwm_mm_gridcolor = "30 20 40";
+nosave color swwm_mm_interlevelcolor = "ff 00 60";
+nosave color swwm_mm_intralevelcolor = "00 60 ff";
+nosave color swwm_mm_lockedcolor = "00 80 00";
+nosave color swwm_mm_notseencolor = "20 20 30";
+nosave color swwm_mm_portalcolor = "40 30 20";	// unused
+nosave color swwm_mm_secretsectorcolor = "80 00 ff";
+nosave color swwm_mm_secretwallcolor = "60 40 80";
+nosave color swwm_mm_specialwallcolor = "ff a0 00";
+nosave color swwm_mm_thingcolor = "ff ff ff";
+nosave color swwm_mm_thingcolor_citem = "00 ff ff";
+nosave color swwm_mm_thingcolor_friend = "80 ff a0";
+nosave color swwm_mm_thingcolor_item = "ff c0 00";
+nosave color swwm_mm_thingcolor_monster = "ff 60 40";
+nosave color swwm_mm_thingcolor_ncmonster = "a0 40 20";
+nosave color swwm_mm_thingcolor_shootable = "ff a0 a0";	// thingcolor as fallback
+nosave color swwm_mm_thingcolor_vipitem = "80 60 ff";	// unexploredsecretcolor as fallback
+nosave color swwm_mm_tswallcolor = "30 20 40";
+nosave color swwm_mm_unexploredsecretcolor = "40 00 80";
+nosave color swwm_mm_wallcolor = "c0 e0 ff";
+nosave color swwm_mm_xhaircolor = "80 80 ff";
+nosave color swwm_mm_yourcolor = "80 ff 00";
 
 server noarchive bool swwm_iseriouslywanttoplaythiswithbd = false;	// self-explanatory
 

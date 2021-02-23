@@ -774,8 +774,8 @@ Class SWWMItemSense : Thinker
 		let i = new("SWWMItemSense");
 		i.ChangeStatNum(STAT_USER);
 		i.item = item;
-		i.scoreitem = (item is 'Key')||item.bCOUNTITEM;
-		i.vipitem = (item is 'Chancebox')||(item is 'SWWMCollectible')||(item is 'GoldShell');
+		i.scoreitem = SWWMUtility.IsScoreItem(item);
+		i.vipitem = SWWMUtility.IsVipItem(item);
 		i.parent = parent;
 		i.updated = level.maptime+35;
 		i.UpdateTag();
@@ -1322,13 +1322,13 @@ Class SWWMCachedLockInfo : Thinker
 	{
 		let ti = ThinkerIterator.Create("SWWMCachedLockInfo",STAT_STATIC);
 		SWWMCachedLockInfo cli = SWWMCachedLockInfo(ti.Next());
-		if ( !cli ) return am_lockedcolor;
+		if ( !cli ) return 0;
 		for ( int i=0; i<cli.ent.Size(); i++ )
 		{
 			if ( (cli.ent[i].locknumber == l) && cli.ent[i].hascolor )
 				return cli.ent[i].mapcolor;
 		}
-		return am_lockedcolor;
+		return 0;
 	}
 
 	static SWWMCachedLockInfo GetInstance()
@@ -1354,6 +1354,7 @@ Class SWWMSimpleTracker : Thinker
 	bool ismonster;
 	bool friendly;
 	bool countkill;
+	bool shootable;
 	bool isitem;
 	bool countitem;
 	bool vipitem;
@@ -1374,9 +1375,10 @@ Class SWWMSimpleTracker : Thinker
 		ismonster = target.bISMONSTER;
 		friendly = target.IsFriend(players[consoleplayer].mo);
 		countkill = target.bCOUNTKILL;
+		shootable = target.default.bSHOOTABLE;
 		isitem = (target is 'Inventory');
-		countitem = (target is 'Key')||target.bCOUNTITEM;
-		vipitem = ((target is 'Chancebox')&&(target.CurState==target.SpawnState))||(target is 'SWWMCollectible')||(target is 'GoldShell');
+		countitem = SWWMUtility.IsScoreItem(target);
+		vipitem = SWWMUtility.IsVipItem(target);
 		lastupdate = level.maptime;
 		if ( isitem )
 		{

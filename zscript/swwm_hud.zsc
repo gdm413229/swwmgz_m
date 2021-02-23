@@ -66,6 +66,11 @@ Class SWWMStatusBar : BaseStatusBar
 	const MAPVIEWDIST = 1132;	// maximum distance for something to be considered visible (rounded up CLIPDIST*sqrt(2))
 	const HALFMAPSIZE = 40;		// half the size of the minimap draw region (unscaled)
 
+	// minimap colors (thats a lot of 'em)
+	int mm_colorset;
+	Color mm_backcolor, mm_cdwallcolor, mm_efwallcolor, mm_fdwallcolor, mm_gridcolor, mm_interlevelcolor, mm_intralevelcolor, mm_lockedcolor, mm_notseencolor, mm_portalcolor, mm_secretsectorcolor, mm_secretwallcolor, mm_specialwallcolor, mm_thingcolor, mm_thingcolor_citem, mm_thingcolor_friend, mm_thingcolor_item, mm_thingcolor_monster, mm_thingcolor_ncmonster, mm_thingcolor_shootable, mm_thingcolor_vipitem, mm_tswallcolor, mm_unexploredsecretcolor, mm_wallcolor, mm_xhaircolor, mm_yourcolor;
+	bool mm_displaylocks;
+
 	// if playing in Japanese, returns an alternate font of the same height
 	// Tewi -> MPlus
 	// Miniwi -> k6x8
@@ -417,13 +422,13 @@ Class SWWMStatusBar : BaseStatusBar
 		if ( CPlayer.ReadyWeapon is 'SWWMWeapon' )
 			SWWMWeapon(CPlayer.ReadyWeapon).HudTick();
 		bool thesight = CPlayer.mo.FindInventory("Omnisight");
-		double desiredzoom = clamp(swwm_minimapzoom,.5,thesight?2.:1.);
-		if ( (minimapzoom != swwm_minimapzoom) || (oldminimapzoom != swwm_minimapzoom) )
+		double desiredzoom = clamp(swwm_mm_zoom,.5,thesight?2.:1.);
+		if ( (minimapzoom != swwm_mm_zoom) || (oldminimapzoom != swwm_mm_zoom) )
 		{
 			oldminimapzoom = minimapzoom;
 			double diff = .1*(desiredzoom-minimapzoom);
 			minimapzoom += diff;
-			if ( abs(minimapzoom-desiredzoom) <= double.epsilon )
+			if ( abs(minimapzoom-desiredzoom) <= .01 )
 				minimapzoom = desiredzoom;
 		}
 		let cam = players[consoleplayer].camera;
@@ -841,6 +846,164 @@ Class SWWMStatusBar : BaseStatusBar
 	}
 
 	// minimap helper code
+	private void GetMinimapColors()
+	{
+		mm_colorset = swwm_mm_colorset;
+		switch ( mm_colorset )
+		{
+		case 1:
+			// gzdoom
+			mm_backcolor = am_backcolor;
+			mm_cdwallcolor = am_cdwallcolor;
+			mm_efwallcolor = am_efwallcolor;
+			mm_fdwallcolor = am_fdwallcolor;
+			mm_gridcolor = am_gridcolor;
+			mm_interlevelcolor = am_interlevelcolor;
+			mm_intralevelcolor = am_intralevelcolor;
+			mm_lockedcolor = am_lockedcolor;
+			mm_notseencolor = am_notseencolor;
+			mm_portalcolor = am_portalcolor;
+			mm_secretsectorcolor = am_secretsectorcolor;
+			mm_secretwallcolor = am_secretwallcolor;
+			mm_specialwallcolor = am_specialwallcolor;
+			mm_thingcolor = am_thingcolor;
+			mm_thingcolor_citem = am_thingcolor_citem;
+			mm_thingcolor_friend = am_thingcolor_friend;
+			mm_thingcolor_item = am_thingcolor_item;
+			mm_thingcolor_monster = am_thingcolor_monster;
+			mm_thingcolor_ncmonster = am_thingcolor_ncmonster;
+			mm_thingcolor_shootable = am_thingcolor;
+			mm_thingcolor_vipitem = am_unexploredsecretcolor;
+			mm_tswallcolor = am_tswallcolor;
+			mm_unexploredsecretcolor = am_unexploredsecretcolor;
+			mm_wallcolor = am_wallcolor;
+			mm_xhaircolor = am_xhaircolor;
+			mm_yourcolor = am_yourcolor;
+			mm_displaylocks = true;
+			break;
+		case 2:
+			// doom
+			mm_backcolor = "00 00 00";
+			mm_cdwallcolor = "fc fc 00";
+			mm_efwallcolor = "bc 78 48";
+			mm_fdwallcolor = "bc 78 48";
+			mm_gridcolor = "4c 4c 4c";
+			mm_interlevelcolor = 0;
+			mm_intralevelcolor = 0;
+			mm_lockedcolor = "fc fc 00";
+			mm_notseencolor = "6c 6c 6c";
+			mm_portalcolor = "40 40 40";
+			mm_secretsectorcolor = 0;
+			mm_secretwallcolor = 0;
+			mm_specialwallcolor = 0;
+			mm_thingcolor = "74 fc 6c";
+			mm_thingcolor_citem = "74 fc 6c";
+			mm_thingcolor_friend = "74 fc 6c";
+			mm_thingcolor_item = "74 fc 6c";
+			mm_thingcolor_monster = "74 fc 6c";
+			mm_thingcolor_ncmonster = "74 fc 6c";
+			mm_thingcolor_shootable = "74 fc 6c";
+			mm_thingcolor_vipitem = "74 fc 6c";
+			mm_tswallcolor = "80 80 80";
+			mm_unexploredsecretcolor = 0;
+			mm_wallcolor = "fc 00 00";
+			mm_xhaircolor = "80 80 80";
+			mm_yourcolor = "ff ff ff";
+			mm_displaylocks = false;
+			break;
+		case 3:
+			// strife
+			mm_backcolor = "00 00 00";
+			mm_cdwallcolor = "77 73 73";
+			mm_efwallcolor = "37 3b 5b";
+			mm_fdwallcolor = "37 3b 5b";
+			mm_gridcolor = "4c 4c 4c";
+			mm_interlevelcolor = 0;
+			mm_intralevelcolor = 0;
+			mm_lockedcolor = "77 73 73";
+			mm_notseencolor = "6c 6c 6c";
+			mm_portalcolor = "40 40 40";
+			mm_secretsectorcolor = 0;
+			mm_secretwallcolor = 0;
+			mm_specialwallcolor = 0;
+			mm_thingcolor = "bb 3b 00";
+			mm_thingcolor_citem = "db ab 00";
+			mm_thingcolor_friend = "fc 00 00";
+			mm_thingcolor_item = "db ab 00";
+			mm_thingcolor_monster = "fc 00 00";
+			mm_thingcolor_ncmonster = "fc 00 00";
+			mm_thingcolor_shootable = "bb 3b 00";
+			mm_thingcolor_vipitem = "db ab 00";
+			mm_tswallcolor = "77 73 73";
+			mm_unexploredsecretcolor = 0;
+			mm_wallcolor = "c7 ce ce";
+			mm_xhaircolor = "80 80 80";
+			mm_yourcolor = "ef ef ef";
+			mm_displaylocks = false;
+			break;
+		case 4:
+			// raven
+			mm_backcolor = "6c 54 40";
+			mm_cdwallcolor = "67 3b 1f";
+			mm_efwallcolor = "d0 b0 85";
+			mm_fdwallcolor = "d0 b0 85";
+			mm_gridcolor = "46 32 10";
+			mm_interlevelcolor = 0;
+			mm_intralevelcolor = 0;
+			mm_lockedcolor = "67 3b 1f";
+			mm_notseencolor = "00 00 00";
+			mm_portalcolor = "50 50 50";
+			mm_secretsectorcolor = 0;
+			mm_secretwallcolor = 0;
+			mm_specialwallcolor = 0;
+			mm_thingcolor = "ec ec ec";
+			mm_thingcolor_citem = "ec ec ec";
+			mm_thingcolor_friend = "ec ec ec";
+			mm_thingcolor_item = "ec ec ec";
+			mm_thingcolor_monster = "ec ec ec";
+			mm_thingcolor_ncmonster = "ec ec ec";
+			mm_thingcolor_shootable = "ec ec ec";
+			mm_thingcolor_vipitem = "ec ec ec";
+			mm_tswallcolor = "58 5d 56";
+			mm_unexploredsecretcolor = 0;
+			mm_wallcolor = "4b 32 10";
+			mm_xhaircolor = "00 00 00";
+			mm_yourcolor = "ff ff ff";
+			mm_displaylocks = true;
+			break;
+		default:
+			// swwm
+			mm_backcolor = swwm_mm_backcolor;
+			mm_cdwallcolor = swwm_mm_cdwallcolor;
+			mm_efwallcolor = swwm_mm_efwallcolor;
+			mm_fdwallcolor = swwm_mm_fdwallcolor;
+			mm_gridcolor = swwm_mm_gridcolor;
+			mm_interlevelcolor = swwm_mm_interlevelcolor;
+			mm_intralevelcolor = swwm_mm_intralevelcolor;
+			mm_lockedcolor = swwm_mm_lockedcolor;
+			mm_notseencolor = swwm_mm_notseencolor;
+			mm_portalcolor = swwm_mm_portalcolor;
+			mm_secretsectorcolor = swwm_mm_secretsectorcolor;
+			mm_secretwallcolor = swwm_mm_secretwallcolor;
+			mm_specialwallcolor = swwm_mm_specialwallcolor;
+			mm_thingcolor = swwm_mm_thingcolor;
+			mm_thingcolor_citem = swwm_mm_thingcolor_citem;
+			mm_thingcolor_friend = swwm_mm_thingcolor_friend;
+			mm_thingcolor_item = swwm_mm_thingcolor_item;
+			mm_thingcolor_monster = swwm_mm_thingcolor_monster;
+			mm_thingcolor_ncmonster = swwm_mm_thingcolor_ncmonster;
+			mm_thingcolor_shootable = swwm_mm_thingcolor_shootable;
+			mm_thingcolor_vipitem = swwm_mm_thingcolor_vipitem;
+			mm_tswallcolor = swwm_mm_tswallcolor;
+			mm_unexploredsecretcolor = swwm_mm_unexploredsecretcolor;
+			mm_wallcolor = swwm_mm_wallcolor;
+			mm_xhaircolor = swwm_mm_xhaircolor;
+			mm_yourcolor = swwm_mm_yourcolor;
+			mm_displaylocks = true;
+			break;
+		}
+	}
+
 	private bool ShouldDisplaySpecial( int special )
 	{
 		// thanks graf/randi/whoever
@@ -928,6 +1091,8 @@ Class SWWMStatusBar : BaseStatusBar
 
 	private int CheckSecret( Line l )
 	{
+		if ( !mm_secretsectorcolor || !mm_unexploredsecretcolor )
+			return 0;
 		if ( l.frontsector && (l.frontsector.flags&Sector.SECF_WASSECRET) )
 		{
 			if ( am_map_secrets && !(l.frontsector.flags&Sector.SECF_SECRET) ) return 1;
@@ -951,6 +1116,108 @@ Class SWWMStatusBar : BaseStatusBar
 		return true;
 	}
 
+	private void DrawMapGrid( Vector2 basepos )
+	{
+		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
+		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
+		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		// find farthest visible southwest grid point from camera position
+		int maxlines = int(zoomview/64);
+		Vector2 gpt = (cpos-(zoomview,zoomview))/128;
+		gpt.x = int(gpt.x)*128;
+		gpt.y = int(gpt.y)*128;
+		for ( int i=0; i<maxlines; i++ )
+		{
+			Vector2 rv1 = (gpt+(i*128,0))-cpos;
+			Vector2 rv2 = (gpt+(i*128,maxlines*128))-cpos;
+			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > zoomview )
+				continue;
+			// flip Y
+			rv1.y *= -1;
+			rv2.y *= -1;
+			// rotate by view
+			if ( swwm_mm_rotate )
+			{
+				rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
+				rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			}
+			// clip to frame
+			bool visible;
+			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,rv1,rv2);
+			if ( !visible ) continue;
+			// scale to minimap frame
+			rv1 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			rv2 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			// offset to minimap center
+			rv1 += basepos;
+			rv2 += basepos;
+			// draw the line
+			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.25),mm_gridcolor);
+		}
+		for ( int i=0; i<maxlines; i++ )
+		{
+			Vector2 rv1 = (gpt+(0,i*128))-cpos;
+			Vector2 rv2 = (gpt+(maxlines*128,i*128))-cpos;
+			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > zoomview )
+				continue;
+			// flip Y
+			rv1.y *= -1;
+			rv2.y *= -1;
+			// rotate by view
+			if ( swwm_mm_rotate )
+			{
+				rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
+				rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			}
+			// clip to frame
+			bool visible;
+			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,rv1,rv2);
+			if ( !visible ) continue;
+			// scale to minimap frame
+			rv1 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			rv2 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			// offset to minimap center
+			rv1 += basepos;
+			rv2 += basepos;
+			// draw the line
+			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.25),mm_gridcolor);
+		}
+		// draw the origin crosshair
+		Vector2 tv[4];
+		tv[0] = (-16,0);
+		tv[1] = (16,0);
+		tv[2] = (0,-16);
+		tv[3] = (0,16);
+		for ( int i=0; i<4; i+=2 )
+		{
+			Vector2 rv1 = tv[i]-cpos;
+			Vector2 rv2 = tv[i+1]-cpos;
+			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > zoomview )
+				continue;
+			// flip Y
+			rv1.y *= -1;
+			rv2.y *= -1;
+			// rotate by view
+			if ( swwm_mm_rotate )
+			{
+				rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
+				rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			}
+			// clip to frame
+			bool visible;
+			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,rv1,rv2);
+			if ( !visible ) continue;
+			// scale to minimap frame
+			rv1 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			rv2 *= (HALFMAPSIZE/zoomclip)*hs.x;
+			// offset to minimap center
+			rv1 += basepos;
+			rv2 += basepos;
+			// draw the line
+			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.75),mm_xhaircolor);
+		}
+	}
+
 	private void DrawMapLines( Vector2 basepos )
 	{
 		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
@@ -969,8 +1236,11 @@ Class SWWMStatusBar : BaseStatusBar
 			rv1.y *= -1;
 			rv2.y *= -1;
 			// rotate by view
-			rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
-			rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			if ( swwm_mm_rotate )
+			{
+				rv1 = Actor.RotateVector(rv1,ViewRot.x-90);
+				rv2 = Actor.RotateVector(rv2,ViewRot.x-90);
+			}
 			// clip to frame
 			bool visible;
 			[visible, rv1, rv2] = SWWMUtility.LiangBarsky((-1,-1)*zoomclip,(1,1)*zoomclip,rv1,rv2);
@@ -982,48 +1252,56 @@ Class SWWMStatusBar : BaseStatusBar
 			rv1 += basepos;
 			rv2 += basepos;
 			// get the line color
-			Color col = am_wallcolor;
+			Color col = mm_wallcolor;
 			if ( (l.flags&Line.ML_MAPPED) || am_cheat )
 			{
 				int secwit = CheckSecret(l);
 				int lock = SWWMUtility.GetLineLock(l);
-				if ( secwit == 1 ) col = am_secretsectorcolor;
-				else if ( secwit == 2 ) col = am_unexploredsecretcolor;
+				if ( secwit == 1 ) col = mm_secretsectorcolor;
+				else if ( secwit == 2 ) col = mm_unexploredsecretcolor;
 				else if ( l.flags&Line.ML_SECRET )
 				{
-					if ( am_cheat && l.backsector )
-						col = am_secretwallcolor;
-					else col = am_wallcolor;
+					if ( am_cheat && l.backsector && mm_secretwallcolor )
+						col = mm_secretwallcolor;
+					else col = mm_wallcolor;
 				}
-				else if ( (l.special == Exit_Normal)
+				else if ( mm_interlevelcolor
+					&& ((l.special == Exit_Normal)
 					|| (l.special == Exit_Secret)
 					|| (l.special == Teleport_NewMap)
-					|| (l.special == Teleport_EndGame) )
-					col = am_interlevelcolor;
-				else if ( (l.activation&SPAC_PlayerActivate)
-					&& (l.special == Teleport)
+					|| (l.special == Teleport_EndGame)) )
+					col = mm_interlevelcolor;
+				else if ( mm_intralevelcolor &&
+					(l.activation&SPAC_PlayerActivate)
+					&& ((l.special == Teleport)
 					|| (l.special == Teleport_NoFog)
 					|| (l.special == Teleport_ZombieChanger)
-					|| (l.special == Teleport_Line) )
-					col = am_intralevelcolor;
-				else if ( (lock > 1) && (lock < 256) && SWWMUtility.IsValidLockNum(lock) )
-					col = SWWMUtility.GetLockColor(lock);
-				else if ( ShowTriggerLine(l) )
-					col = am_specialwallcolor;
+					|| (l.special == Teleport_Line)) )
+					col = mm_intralevelcolor;
+				else if ( mm_displaylocks
+					&& (lock > 1) && (lock < 256)
+					&& SWWMUtility.IsValidLockNum(lock) )
+				{
+					let lcol = SWWMUtility.GetLockColor(lock);
+					if ( lcol ) col = lcol;
+					else col = mm_lockedcolor;
+				}
+				else if ( mm_specialwallcolor && ShowTriggerLine(l) )
+					col = mm_specialwallcolor;
 				else if ( l.frontsector && l.backsector )
 				{
-					if ( !CmpFloorPlanes(l) ) col = am_fdwallcolor;
-					else if ( !CmpCeilingPlanes(l) ) col = am_cdwallcolor;
-					else if ( CheckFFBoundary(l) ) col = am_efwallcolor;
+					if ( !CmpFloorPlanes(l) ) col = mm_fdwallcolor;
+					else if ( !CmpCeilingPlanes(l) ) col = mm_cdwallcolor;
+					else if ( CheckFFBoundary(l) ) col = mm_efwallcolor;
 					else
 					{
 						if ( (am_cheat == 0) || (am_cheat >= 4) )
 							continue;
-						col = am_tswallcolor;
+						col = mm_tswallcolor;
 					}
 				}
 			}
-			else col = am_notseencolor;
+			else col = mm_notseencolor;
 			// draw the line
 			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.5),col);
 		}
@@ -1036,7 +1314,7 @@ Class SWWMStatusBar : BaseStatusBar
 		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
 		for ( SWWMSimpleTracker t=hnd.strackers; t; t=t.next )
 		{
-			Color col = am_thingcolor;
+			Color col = mm_thingcolor;
 			bool isitem = false;
 			bool plainactor = false;
 			Vector2 pos;
@@ -1049,16 +1327,21 @@ Class SWWMStatusBar : BaseStatusBar
 				radius = t.target.radius;
 				if ( t.isitem )
 				{
-					if ( ((t.target is 'Chancebox') && (t.target.CurState == t.target.SpawnState)) || (t.target is 'SWWMCollectible') || (t.target is 'GoldShell') ) col = "Purple";
-					else if ( t.target.bCOUNTITEM || (t.target is 'Key') ) col = am_thingcolor_citem;
-					else col = am_thingcolor_item;
+					if ( SWWMUtility.IsVipItem(t.target) ) col = mm_thingcolor_vipitem;
+					else if ( SWWMUtility.IsScoreItem(t.target) ) col = mm_thingcolor_citem;
+					else col = mm_thingcolor_item;
 					isitem = true;
 				}
 				else if ( t.target.player ) col = t.target.player.GetColor();
-				else if ( t.target.bFRIENDLY ) col = am_thingcolor_friend;
-				else if ( t.target.bCOUNTKILL ) col = am_thingcolor_monster;
-				else if ( t.target.bISMONSTER ) col = am_thingcolor_ncmonster;
-				else plainactor = true;
+				else if ( t.target.bFRIENDLY ) col = mm_thingcolor_friend;
+				else if ( t.target.bCOUNTKILL ) col = mm_thingcolor_monster;
+				else if ( t.target.bISMONSTER ) col = mm_thingcolor_ncmonster;
+				else
+				{
+					if ( SWWMUtility.IsVipItem(t.target) ) col = mm_thingcolor_vipitem;	// chanceboxes
+					else if ( t.target.bSHOOTABLE ) col = mm_thingcolor_shootable;
+					plainactor = true;
+				}
 			}
 			else
 			{
@@ -1067,16 +1350,21 @@ Class SWWMStatusBar : BaseStatusBar
 				radius = t.radius;
 				if ( t.isitem )
 				{
-					if ( t.vipitem ) col = "Purple";
-					else if ( t.countitem ) col = am_thingcolor_citem;
-					else col = am_thingcolor_item;
+					if ( t.vipitem ) col = mm_thingcolor_vipitem;
+					else if ( t.countitem ) col = mm_thingcolor_citem;
+					else col = mm_thingcolor_item;
 					isitem = true;
 				}
 				if ( t.isplayer ) col = t.playercol;
-				else if ( t.friendly ) col = am_thingcolor_friend;
-				else if ( t.countkill ) col = am_thingcolor_monster;
-				else if ( t.ismonster ) col = am_thingcolor_ncmonster;
-				else plainactor = true;
+				else if ( t.friendly ) col = mm_thingcolor_friend;
+				else if ( t.countkill ) col = mm_thingcolor_monster;
+				else if ( t.ismonster ) col = mm_thingcolor_ncmonster;
+				else
+				{
+					if ( t.vipitem ) col = mm_thingcolor_vipitem;	// chanceboxes
+					else if ( t.shootable ) col = mm_thingcolor_shootable;
+					plainactor = true;
+				}
 			}
 			int mtime = 35;
 			if ( thesight && !t.expired && t.target ) mtime += 105;
@@ -1110,13 +1398,13 @@ Class SWWMStatusBar : BaseStatusBar
 				// oriented triangle
 				nidx = 3;
 				tv[0] = rv+Actor.RotateVector((radius,0),angle);
-				tv[1] = rv+Actor.RotateVector((-radius,radius),angle);
-				tv[2] = rv+Actor.RotateVector((-radius,-radius),angle);
+				tv[1] = rv+Actor.RotateVector((-radius*.5,radius*.7),angle);
+				tv[2] = rv+Actor.RotateVector((-radius*.5,-radius*.7),angle);
 			}
 			// flip Y
 			for ( int j=0; j<nidx; j++ ) tv[j].y *= -1;
 			// rotate by view
-			for ( int j=0; j<nidx; j++ ) tv[j] = Actor.RotateVector(tv[j],ViewRot.x-90);
+			if ( swwm_mm_rotate ) for ( int j=0; j<nidx; j++ ) tv[j] = Actor.RotateVector(tv[j],ViewRot.x-90);
 			bool visible;
 			Vector2 x0, x1;
 			// clip to frame
@@ -1156,24 +1444,25 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,ss.x-(margin+4+6*digits),margin+1,sstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		int yy = margin+19;
 		// obviously, don't draw the minimap if the automap is open
-		if ( !automapactive && swwm_showminimap )
+		if ( !automapactive && swwm_mm_enable )
 		{
+			GetMinimapColors();
 			xx = int(ss.x-(margin+(HALFMAPSIZE+2)*2));
 			Screen.DrawTexture(MiniBox,false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Vector2 basemappos = (xx+HALFMAPSIZE+2,yy+HALFMAPSIZE+2);
-			Screen.Dim(am_backcolor,.5,int((basemappos.x-HALFMAPSIZE)*hs.x),int((basemappos.y-HALFMAPSIZE)*hs.x),int(HALFMAPSIZE*2*hs.x),int(HALFMAPSIZE*2*hs.x));
+			Screen.Dim(mm_backcolor,1.,int((basemappos.x-HALFMAPSIZE)*hs.x),int((basemappos.y-HALFMAPSIZE)*hs.x),int(HALFMAPSIZE*2*hs.x),int(HALFMAPSIZE*2*hs.x));
 			// draw dat stuff
+			if ( swwm_mm_grid ) DrawMapGrid(basemappos*hs.x);
 			DrawMapLines(basemappos*hs.x);
 			DrawMapThings(basemappos*hs.x);
 			// finally, draw the player arrow
-			int x0 = int(basemappos.x*hs.x);
-			int x1 = int((basemappos.x+2)*hs.x);
-			int x2 = int((basemappos.x-2)*hs.x);
-			int y0 = int((basemappos.y-2)*hs.x);
-			int y1 = int((basemappos.y+2)*hs.x);
-			Screen.DrawThickLine(x0,y0,x1,y1,max(1.,hs.x*.5),am_yourcolor);
-			Screen.DrawThickLine(x1,y1,x2,y1,max(1.,hs.x*.5),am_yourcolor);
-			Screen.DrawThickLine(x2,y1,x0,y0,max(1.,hs.x*.5),am_yourcolor);
+			Vector2 tv[3];
+			tv[0] = (0,-4);
+			tv[1] = (-3,2);
+			tv[2] = (3,2);
+			if ( !swwm_mm_rotate ) for ( int i=0; i<3; i++ ) tv[i] = Actor.RotateVector(tv[i],90-ViewRot.x);
+			for ( int i=0; i<3; i++ ) tv[i] = (tv[i]+basemappos)*hs.x;
+			for ( int i=0; i<3; i++ ) Screen.DrawThickLine(int(tv[i].x),int(tv[i].y),int(tv[(i+1)%3].x),int(tv[(i+1)%3].y),max(1.,hs.x*.5),mm_yourcolor);
 			yy += ((HALFMAPSIZE+2)*2)+3;
 		}
 		// draw stats and timer when automap is open

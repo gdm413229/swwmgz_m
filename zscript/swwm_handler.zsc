@@ -68,6 +68,31 @@ Class SWWMStaticHandler : StaticEventHandler
 		Font.GetFont('SWWMBigFont');
 	}
 
+	override void ConsoleProcess( ConsoleEvent e )
+	{
+		static const Name mmvars[] =
+		{
+			'swwm_mm_backcolor', 'swwm_mm_cdwallcolor',
+			'swwm_mm_efwallcolor', 'swwm_mm_fdwallcolor',
+			'swwm_mm_gridcolor', 'swwm_mm_interlevelcolor',
+			'swwm_mm_intralevelcolor', 'swwm_mm_lockedcolor',
+			'swwm_mm_notseencolor', 'swwm_mm_portalcolor',
+			'swwm_mm_secretsectorcolor', 'swwm_mm_secretwallcolor',
+			'swwm_mm_specialwallcolor', 'swwm_mm_thingcolor',
+			'swwm_mm_thingcolor_citem', 'swwm_mm_thingcolor_friend',
+			'swwm_mm_thingcolor_item', 'swwm_mm_thingcolor_monster',
+			'swwm_mm_thingcolor_ncmonster', 'swwm_mm_thingcolor_shootable',
+			'swwm_mm_thingcolor_vipitem', 'swwm_mm_tswallcolor',
+			'swwm_mm_unexploredsecretcolor', 'swwm_mm_wallcolor',
+			'swwm_mm_xhaircolor', 'swwm_mm_yourcolor'
+		};
+		if ( e.Name ~== "swwmresetmmcolors" )
+		{
+			for ( int i=0; i<mmvars.Size(); i++ )
+				CVar.FindCVar(mmvars[i]).ResetToDefault();
+		}
+	}
+
 	override void NetworkProcess( ConsoleEvent e )
 	{
 		if ( e.Name ~== "swwmgetversion" )
@@ -1252,6 +1277,9 @@ Class SWWMHandler : EventHandler
 		oldmaxdebris = swwm_maxdebris;
 		oldmaxblood = swwm_maxblood;
 		oldmaxgibs = swwm_maxgibs;
+		if ( swwm_blood ) return;
+		while ( blods ) DeQueueBlod(blods);
+		while ( meats ) DeQueueMeat(meats);
 	}
 
 	// countable item scoring
@@ -1413,7 +1441,7 @@ Class SWWMHandler : EventHandler
 	// "simple" tracking (used by the minimap)
 	private void SimpleTracking()
 	{
-		if ( !swwm_showminimap )
+		if ( !swwm_mm_enable )
 		{
 			while ( strackers )
 			{
@@ -1426,7 +1454,7 @@ Class SWWMHandler : EventHandler
 		}
 		// update trackers for anything around the player
 		bool thesight = players[consoleplayer].mo.FindInventory("Omnisight");
-		double viewdist = SWWMStatusBar.MAPVIEWDIST*swwm_minimapzoom;
+		double viewdist = SWWMStatusBar.MAPVIEWDIST*swwm_mm_zoom;
 		BlockThingsIterator bt = BlockThingsIterator.Create(players[consoleplayer].Camera,viewdist);
 		while ( bt.Next() )
 		{
@@ -3123,16 +3151,16 @@ Class SWWMHandler : EventHandler
 		{
 			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 				return;
-			double val = max(.5,swwm_minimapzoom/2.);
-			CVar.FindCVar('swwm_minimapzoom').SetFloat(val);
+			double val = max(.5,swwm_mm_zoom/2.);
+			CVar.FindCVar('swwm_mm_zoom').SetFloat(val);
 		}
 		else if ( e.Name ~== "swwmzoomout" )
 		{
 			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 				return;
 			double maxval = players[consoleplayer].mo.FindInventory("Omnisight")?2.:1.;
-			double val = min(maxval,swwm_minimapzoom*2.);
-			CVar.FindCVar('swwm_minimapzoom').SetFloat(val);
+			double val = min(maxval,swwm_mm_zoom*2.);
+			CVar.FindCVar('swwm_mm_zoom').SetFloat(val);
 		}
 	}
 

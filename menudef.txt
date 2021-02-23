@@ -77,6 +77,9 @@ OptionMenu "SWWMOptionMenu"
 	Class "SWWMOptionMenu"
 	Title "$SWWM_MTITLE"
 
+	Submenu "$SWWM_MMTITLE", "SWWMMinimapMenu"
+	StaticText " "
+
 	StaticText "$SWWM_PTITLE", "Blue"
 	SWWMVoiceOption "$SWWM_VOICETYPE", "swwm_voicetype"
 	Option "$SWWM_MUTELEVEL", "swwm_mutevoice", "SWWMVoice"
@@ -99,7 +102,6 @@ OptionMenu "SWWMOptionMenu"
 	Slider "$SWWM_CHATLEN", "swwm_chatduration", 1, 30, 1, 0
 	Slider "$SWWM_MSGLEN", "swwm_msgduration", 1, 30, 1, 0
 	Slider "$SWWM_PICKLEN", "swwm_pickduration", 1, 30, 1, 0
-	Option "$SWWM_SHOWMINIMAP", "swwm_showminimap", "YesNo"
 	Option "$SWWM_TARGET", "swwm_targeter", "YesNo"
 	Option "$SWWM_TARGETTAG", "swwm_targettags", "YesNo"
 	Option "$SWWM_DAMAGETARGET", "swwm_damagetarget", "SWWMDamageTarget"
@@ -187,6 +189,53 @@ OptionMenu "SWWMOptionMenu"
 	StaticText " "
 	StaticText " "
 
+}
+OptionValue "SWWMMinimapColorset"
+{
+	0, "$SWWM_OWNCOLORS"
+	1, "$SWWM_GZDOOMCOLORS"
+	2, "$SWWM_DOOMCOLORS"
+	3, "$SWWM_STRIFECOLORS"
+	4, "$SWWM_RAVENCOLORS"
+}
+
+OptionMenu "SWWMMinimapMenu"
+{
+	Class "SWWMOptionMenu"
+	Title "$SWWM_MMTITLE"
+
+	Option "$SWWM_MM_ENABLE", "swwm_mm_enable", "YesNo"
+	Option "$SWWM_MM_ROTATE", "swwm_mm_rotate", "YesNo"
+	Option "$SWWM_MM_GRID", "swwm_mm_grid", "YesNo"
+	Option "$SWWM_MM_COLORSET", "swwm_mm_colorset", "SWWMMinimapColorset"
+	SafeCommand "$SWWM_MM_RESET", "event swwmresetmmcolors"
+	StaticText " "
+	ColorPicker "$SWWM_MM_BACKCOLOR", "swwm_mm_backcolor"
+	ColorPicker "$SWWM_MM_YOURCOLOR", "swwm_mm_yourcolor"
+	ColorPicker "$SWWM_MM_WALLCOLOR", "swwm_mm_wallcolor"
+	ColorPicker "$SWWM_MM_FDWALLCOLOR", "swwm_mm_fdwallcolor"
+	ColorPicker "$SWWM_MM_CDWALLCOLOR", "swwm_mm_cdwallcolor"
+	ColorPicker "$SWWM_MM_EFWALLCOLOR", "swwm_mm_efwallcolor"
+	ColorPicker "$SWWM_MM_GRIDCOLOR", "swwm_mm_gridcolor"
+	ColorPicker "$SWWM_MM_XHAIRCOLOR", "swwm_mm_xhaircolor"
+	ColorPicker "$SWWM_MM_NOTSEENCOLOR", "swwm_mm_notseencolor"
+	ColorPicker "$SWWM_MM_LOCKEDCOLOR", "swwm_mm_lockedcolor"
+	ColorPicker "$SWWM_MM_INTRALEVELCOLOR", "swwm_mm_intralevelcolor"
+	ColorPicker "$SWWM_MM_INTERLEVELCOLOR", "swwm_mm_interlevelcolor"
+	ColorPicker "$SWWM_MM_SECRETSECTORCOLOR", "swwm_mm_secretsectorcolor"
+	ColorPicker "$SWWM_MM_UNEXPLOREDSECRETCOLOR", "swwm_mm_unexploredsecretcolor"
+	ColorPicker "$SWWM_MM_SPECIALWALLCOLOR", "swwm_mm_specialwallcolor"
+	//ColorPicker "$SWWM_MM_PORTALCOLOR", "swwm_mm_portalcolor"
+	ColorPicker "$SWWM_MM_TSWALLCOLOR", "swwm_mm_tswallcolor"
+	ColorPicker "$SWWM_MM_SECRETWALLCOLOR", "swwm_mm_secretwallcolor"
+	ColorPicker "$SWWM_MM_THINGCOLOR", "swwm_mm_thingcolor"
+	ColorPicker "$SWWM_MM_THINGCOLOR_MONSTER", "swwm_mm_thingcolor_monster"
+	ColorPicker "$SWWM_MM_THINGCOLOR_NCMONSTER", "swwm_mm_thingcolor_ncmonster"
+	ColorPicker "$SWWM_MM_THINGCOLOR_FRIEND", "swwm_mm_thingcolor_friend"
+	ColorPicker "$SWWM_MM_THINGCOLOR_ITEM", "swwm_mm_thingcolor_item"
+	ColorPicker "$SWWM_MM_THINGCOLOR_CITEM", "swwm_mm_thingcolor_citem"
+	ColorPicker "$SWWM_MM_THINGCOLOR_VIPITEM", "swwm_mm_thingcolor_vipitem"
+	ColorPicker "$SWWM_MM_THINGCOLOR_SHOOTABLE", "swwm_mm_thingcolor_shootable"
 }
 AddOptionMenu "OptionsMenu"
 {

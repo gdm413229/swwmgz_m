@@ -1446,6 +1446,28 @@ Class SWWMUtility
 		return false;
 	}
 
+	static bool IsVipItem( Actor target )
+	{
+		if ( (target is 'Chancebox') && (target.CurState==target.SpawnState) )
+			return true;
+		if ( target is 'SWWMCollectible' )
+			return true;
+		if ( (target is 'Ynykron') || (target is 'GrandLance') )
+			return true;
+		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') )
+			return true;
+		if ( target is 'PuzzleItem' )
+			return true;
+		return false;
+	}
+
+	static bool IsScoreItem( Actor target )
+	{
+		if ( target is 'Key' )
+			return true;
+		return target.bCOUNTITEM;
+	}
+
 	// check that all players can get enough of this if needed
 	//  multi: check for multiple copies, not just single instances
 	//         (useful e.g. for dual wieldable weapons)

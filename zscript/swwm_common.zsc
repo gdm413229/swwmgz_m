@@ -96,8 +96,6 @@ Class SWWMHangingKeen : Actor
 		+DONTFALL;
 		+NOBLOOD;
 		+DONTTHRUST;
-		PainSound "keen/pain";
-		DeathSound "keen/death";
 	}
 	States
 	{
@@ -105,16 +103,16 @@ Class SWWMHangingKeen : Actor
 		KEE2 A -1;
 		Stop;
 	Death:
-		KEE2 A 6;
+		KEE2 A 6 A_StartSound("newkeen/hit");
 		KEE2 B 6 A_DropKeen();
-		KEE2 C 6 A_Scream();
+		KEE2 C 6;
 		KEE2 DE 6;
 		KEE2 F 30;
 		KEE2 F -1 A_KeenDie();
 		Stop;
 	Pain:
-		KEE2 G 4;
-		KEE2 G 8 A_Pain();
+		KEE2 G 4 A_StartSound("newkeen/hit");
+		KEE2 G 8;
 		Goto Spawn;
 	}
 }
@@ -130,15 +128,28 @@ Class SWWMDroppedKeen : Actor
 	States
 	{
 	Spawn:
+		KEE3 A 0 NoDelay
+		{
+			A_StartSound("newkeen/fall",volume:.5);
+			A_StartSound("newkeen/die",CHAN_VOICE);
+		}
 		KEE3 A 1 A_JumpIf(pos.z<=floorz,1);
 		Wait;
-		KEE3 B 1 { vel.z = 4; }
+		KEE3 B 1
+		{
+			A_StartSound("newkeen/bounce");
+			vel.z = 4;
+		}
 		KEE3 B 1 A_JumpIf(pos.z<=floorz,1);
 		Wait;
-		KEE3 B 1 { vel.z = 2; }
+		KEE3 B 1
+		{
+			A_StartSound("newkeen/bounce",volume:.8);
+			vel.z = 2;
+		}
 		KEE3 B 1 A_JumpIf(pos.z<=floorz,1);
 		Wait;
-		KEE3 B 12;
+		KEE3 B 12 A_StartSound("newkeen/bounce",volume:.6);
 		TNT1 A 1 { Spawn("TeleportFog",pos,ALLOW_REPLACE); }
 		Stop;
 	}

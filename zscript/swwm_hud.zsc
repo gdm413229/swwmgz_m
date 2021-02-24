@@ -1006,7 +1006,6 @@ Class SWWMStatusBar : BaseStatusBar
 			break;
 		}
 	}
-
 	private bool ShouldDisplaySpecial( int special )
 	{
 		// thanks graf/randi/whoever
@@ -1041,7 +1040,6 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		return true;
 	}
-
 	private bool CheckSectorAction( Sector s, out int special, bool useonly )
 	{
 		for ( Actor act=s.SecActTarget; act; act=act.tracer )
@@ -1055,7 +1053,6 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 		return false;
 	}
-
 	private bool RealLineSpecial( Line l, out int special )
 	{
 		if ( special && l.activation&SPAC_PlayerActivate )
@@ -1064,7 +1061,6 @@ Class SWWMStatusBar : BaseStatusBar
 			return true;
 		return (l.backsector && CheckSectorAction(l.backsector,special,false));
 	}
-
 	private bool ShowTriggerLine( Line l )
 	{
 		if ( am_showtriggerlines == 0 ) return false;
@@ -1123,7 +1119,7 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
 		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
-		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		Vector2 cpos = players[consoleplayer].Camera.prev.xy*(1.-FracTic)+players[consoleplayer].Camera.pos.xy*FracTic;
 		// find farthest visible southwest grid point from camera position
 		int maxlines = int(zoomview/64);
 		Vector2 gpt = (cpos-(zoomview,zoomview))/128;
@@ -1225,7 +1221,8 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
 		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
-		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		Vector2 cpos = players[consoleplayer].Camera.prev.xy*(1.-FracTic)+players[consoleplayer].Camera.pos.xy*FracTic;
+		Sector csec = players[consoleplayer].Camera.CurSector;
 		for ( int i=0; i<level.lines.Size(); i++ )
 		{
 			Line l = level.lines[i];
@@ -1233,6 +1230,21 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( (l.flags&Line.ML_DONTDRAW) && ((am_cheat == 0) || (am_cheat >= 4)) )
 				continue;
 			Vector2 rv1 = l.v1.p-cpos, rv2 = l.v2.p-cpos;
+			bool isportal = false;
+			if ( swwm_mm_portaloverlay )
+			{
+				Sector linesector;
+				if ( l.sidedef[0].flags&Side.WALLF_POLYOBJ ) linesector = level.PointInSector(l.v1.p+l.delta/2.);
+				else linesector = l.frontsector;
+				isportal = (linesector.portalgroup!=csec.portalgroup);
+				if ( isportal )
+				{
+					// portal displacement
+					Vector2 pofs = SWWMUtility.PortalDisplacement(csec,linesector);
+					rv1 -= pofs;
+					rv2 -= pofs;
+				}
+			}
 			if ( min(min(abs(rv1.x),abs(rv2.x)),min(abs(rv1.y),abs(rv2.y))) > zoomview )
 				continue;
 			// flip Y
@@ -1306,7 +1318,12 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 			else col = mm_notseencolor;
 			// draw the line
-			Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.5),col);
+			if ( isportal )
+			{
+				col = Color((col.r+mm_portalcolor.r*7)/8,(col.g+mm_portalcolor.g*7)/8,(col.b+mm_portalcolor.b*7)/8);
+				Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.25),col);
+			}
+			else Screen.DrawThickLine(int(rv1.x),int(rv1.y),int(rv2.x),int(rv2.y),max(1.,hs.x*.5),col);
 		}
 	}
 	private void DrawMapThings( Vector2 basepos )
@@ -1314,7 +1331,8 @@ Class SWWMStatusBar : BaseStatusBar
 		bool thesight = !!CPlayer.mo.FindInventory("Omnisight");
 		double zoomlevel = oldminimapzoom*(1.-FracTic)+minimapzoom*FracTic;
 		double zoomview = MAPVIEWDIST*zoomlevel, zoomclip = CLIPDIST*zoomlevel;
-		Vector2 cpos = CPlayer.Camera.prev.xy*(1.-FracTic)+CPlayer.Camera.pos.xy*FracTic;
+		Vector2 cpos = players[consoleplayer].Camera.prev.xy*(1.-FracTic)+players[consoleplayer].Camera.pos.xy*FracTic;
+		Sector csec = players[consoleplayer].Camera.CurSector;
 		for ( SWWMSimpleTracker t=hnd.strackers; t; t=t.next )
 		{
 			Color col = mm_thingcolor;
@@ -1372,6 +1390,19 @@ Class SWWMStatusBar : BaseStatusBar
 			int mtime = 35;
 			if ( thesight && !t.expired && t.target ) mtime += 105;
 			Vector2 rv = pos-cpos;
+			bool isportal = false;
+			if ( swwm_mm_portaloverlay )
+			{
+				Sector sec = level.PointInSector(pos);
+				if ( sec.portalgroup != csec.portalgroup )
+				{
+					isportal = true;
+					// portal displacement
+					rv -= SWWMUtility.PortalDisplacement(csec,sec);
+					// and blend in the color too
+					col = Color((col.r+mm_portalcolor.r*7)/8,(col.g+mm_portalcolor.g*7)/8,(col.b+mm_portalcolor.b*7)/8);
+				}
+			}
 			if ( min(abs(rv.x)-radius,abs(rv.y)-radius) > zoomview )
 				continue;
 			Vector2 tv[4];
@@ -1420,7 +1451,8 @@ Class SWWMStatusBar : BaseStatusBar
 					x0 += basepos;
 					x1 += basepos;
 					// draw the line
-					Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(t.smoothalpha*255));
+					if ( isportal ) Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.25),col,int(t.smoothalpha*255));
+					else Screen.DrawThickLine(int(x0.x),int(x0.y),int(x1.x),int(x1.y),max(1.,hs.x*.5),col,int(t.smoothalpha*255));
 					drawn = true;
 				}
 			}

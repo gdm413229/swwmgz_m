@@ -302,6 +302,10 @@ Class SWWMHandler : EventHandler
 	// attempt to optimize Ynykron singularity suction
 	Array<Actor> suckableactors;
 
+	// list contains a sector that belongs to each portal group
+	// used to ease some portal-aware functions
+	Array<int> psectors;
+
 	// vanilla boss stuff
 	String bosstag;
 	Array<Actor> bossactors;
@@ -947,10 +951,15 @@ Class SWWMHandler : EventHandler
 			let cli = SWWMCachedLockInfo.GetInstance();
 			if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
 			// keep a list of sectors containing 3D floors, for use by the minimap
+			// also does the same for the portal group list
 			ffsectors.Clear();
+			psectors.Clear();
 			for ( int i=0; i<level.sectors.Size(); i++ )
 			{
 				Sector s = level.sectors[i];
+				if ( psectors.Size() <= s.portalgroup )
+					psectors.Resize(s.portalgroup+1);
+				psectors[s.portalgroup] = s.Index();
 				if ( !s.Get3DFloorCount() ) continue;
 				int realcount = 0;
 				for ( int j=0; j<s.Get3DFloorCount(); j++ )
@@ -1478,6 +1487,38 @@ Class SWWMHandler : EventHandler
 			if ( (a is 'Chancebox') && (a.CurState != a.SpawnState) )
 				continue;
 			SWWMSimpleTracker.Track(a);
+		}
+		if ( swwm_mm_portaloverlay && (psectors.Size() > 1) )
+		{
+			// oh boy here we go
+			int thisgroup = players[consoleplayer].Camera.CurSector.portalgroup;
+			for ( int i=0; i<psectors.Size(); i++ )
+			{
+				if ( i == thisgroup ) continue;
+				Vector2 relpos = players[consoleplayer].Camera.pos.xy+SWWMUtility.PortalDisplacement(level.Sectors[psectors[thisgroup]],level.Sectors[psectors[i]]);
+				bt = BlockThingsIterator.CreateFromPos(relpos.x,relpos.y,players[consoleplayer].Camera.pos.z,players[consoleplayer].Camera.pos.z+players[consoleplayer].Camera.height,viewdist,false);
+				while ( bt.Next() )
+				{
+					let a = bt.Thing;
+					if ( !a ) continue;
+					Vector2 rv = a.pos.xy-relpos;
+					if ( max(abs(rv.x)-a.radius,abs(rv.y)-a.radius) > viewdist )
+						continue;
+					if ( a == players[consoleplayer].Camera )
+						continue;
+					if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
+						continue;
+					if ( !thesight && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+						continue;
+					if ( a.bKILLED || (a.Health <= 0) )
+						continue;
+					if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
+						continue;
+					if ( (a is 'Chancebox') && (a.CurState != a.SpawnState) )
+						continue;
+					SWWMSimpleTracker.Track(a);
+				}
+			}
 		}
 		SWWMSimpleTracker trk = strackers;
 		while ( trk )

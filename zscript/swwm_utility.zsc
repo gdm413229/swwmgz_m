@@ -967,6 +967,16 @@ Class SWWMUtility
 		return false;
 	}
 
+	// get how much a sector's physical position is offset by portals
+	static Vector2 PortalDisplacement( Sector a, Sector b )
+	{
+		if ( a.portalgroup == b.portalgroup ) return (0,0);	// ez
+		// we can't access level.displacements, so we gotta improvise
+		Vector2 pdisp = b.centerspot-a.centerspot;
+		Vector2 vdisp = level.Vec2Diff(a.centerspot,b.centerspot);
+		return pdisp-vdisp;
+	}
+
 	// shorthand for some of these checks (these are generally used by the mission briefing system)
 	static bool IsKnownMap()
 	{

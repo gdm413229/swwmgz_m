@@ -2554,6 +2554,7 @@ Class SWWMHandler : EventHandler
 			String cht[] =
 			{
 				"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang", "swwmforgetaboutit",
+				"swwmmisterproper",
 				// SWWM Platinum cheats
 				"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
 				"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
@@ -2566,6 +2567,7 @@ Class SWWMHandler : EventHandler
 			String cmd[] =
 			{
 				"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat", "swwmamnesiacheat",
+				"swwmjanitorcheat",
 				// SWWM Platinum cheats
 				"swwmsafecheat",    "swwmweaponcheat",   "swwmhealcheat",
 				"swwmynykroncheat", "swwmgravcheat",   "swwminvischeat",
@@ -4040,6 +4042,22 @@ Class SWWMHandler : EventHandler
 				if ( !a.bIsMonster || a.player ) continue;
 				a.A_ClearTarget();
 			}
+		}
+		else if ( e.Name ~== "swwmjanitorcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyLet's mop up that big mess over there.\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+			}
+			let cc = SWWMCorpseCleaner(ThinkerIterator.Create("SWWMCorpseCleaner",Thinker.STAT_USER).Next());
+			if ( !cc )
+			{
+				cc = new("SWWMCorpseCleaner");
+				cc.ChangeStatNum(Thinker.STAT_USER);
+				cc.Init(players[e.Args[0]].mo);
+			}
+			else cc.Init(players[e.Args[0]].mo);
 		}
 	}
 

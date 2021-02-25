@@ -1342,6 +1342,87 @@ Class SWWMCachedLockInfo : Thinker
 	}
 }
 
+Class SWWMCorpseCleaner : Thinker
+{
+	transient ThinkerIterator ti;
+	Array<Actor> toclean;
+	int nstep, i;
+
+	private bool CmpDist( Actor activator, Vector3 a, Vector3 b )
+	{
+		double dista = level.Vec3Diff(activator.pos,a).length();
+		double distb = level.Vec3Diff(activator.pos,b).length();
+		return (dista > distb);
+	}
+
+	private int partition_cleanup( Actor activator, Array<Actor> a, int l, int h )
+	{
+		Actor pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpDist(activator,pv.pos,a[j].pos) )
+			{
+				i++;
+				Actor tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Actor tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_cleanup( Actor activator, Array<Actor> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_cleanup(activator,a,l,h);
+		qsort_cleanup(activator,a,l,p-1);
+		qsort_cleanup(activator,a,p+1,h);
+	}
+
+	void Init( Actor activator )
+	{
+		toclean.Clear();
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !a.bKILLED || (a.tics != -1) ) continue;
+			toclean.Push(a);
+		}
+		if ( toclean.Size() <= 0 )
+		{
+			Destroy();
+			return;
+		}
+		nstep = max(1,toclean.Size()/100);
+		i = 0;
+		// sort by distance to activator (if any)
+		if ( !activator ) return;
+		qsort_cleanup(activator,toclean,0,toclean.Size()-1);
+	}
+
+	override void Tick()
+	{
+		for ( int j=0; j<nstep; j++ )
+		{
+			if ( i >= toclean.Size() )
+			{
+				Console.Printf("%d corpses cleaned.",toclean.Size());
+				Destroy();
+				return;
+			}
+			Actor a = toclean[i++];
+			if ( !a || !a.bKILLED || (a.tics != -1) ) continue;
+			let f = a.Spawn("SWWMItemFog",a.pos);
+			f.A_StartSound("bestsound",CHAN_ITEM);
+			a.Destroy();
+		}
+	}
+}
+
 // ultralight trackers for certain things
 Class SWWMSimpleTracker : Thinker
 {

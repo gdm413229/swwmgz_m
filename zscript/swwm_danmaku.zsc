@@ -294,7 +294,7 @@ Class EvisceratorChunk : Actor
 			A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.5);
 		}
 		A_Gravity();
-		gravity = .35;
+		gravity = clamp(.35-vel.length()/200.,.15,.35);
 		anglevel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
 		pitchvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
 		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1)*(vel.length()/speed);
@@ -357,9 +357,9 @@ Class EvisceratorChunk : Actor
 				l.pitch = -pitch;
 				A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.1);
 			}
+			vel *= .75;	// reduce velocity as it rips
 			A_Gravity();
-			gravity = .35;
-			vel *= .65;	// reduce velocity as it rips
+			gravity = clamp(.35-vel.length()/200.,.15,.35);
 			return 1;
 		}
 		// HACK

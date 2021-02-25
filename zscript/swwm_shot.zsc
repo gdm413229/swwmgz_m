@@ -1488,16 +1488,7 @@ Class GExploLight : PaletteLight
 	Default
 	{
 		ReactionTime 80;
-		Args 0,0,0,220;
-	}
-}
-
-Class GExploLight2 : PaletteLight
-{
-	Default
-	{
-		ReactionTime 60;
-		Args 0,0,0,120;
+		Args 0,0,0,800;
 	}
 }
 
@@ -1557,7 +1548,7 @@ Class GoldenImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:40000);
-		SWWMUtility.DoExplosion(self,777,90000,600,500,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,7777,90000,600,500,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
 		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
 		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
@@ -1606,12 +1597,11 @@ Class GoldenImpact : Actor
 	{
 		special1++;
 		if ( (special1%4) || (special1 > 30) ) return;
-		SWWMUtility.DoExplosion(self,777,90000,600-special1*15,500-special1*15,DE_EXTRAZTHRUST);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
 		double ang, pt;
-		for ( int i=0; i<6; i++ )
+		for ( int i=0; i<3; i++ )
 		{
 			double totaldist = 30+(special1**2.)*.4;
 			ang = FRandom[ExploS](0,360);
@@ -1692,13 +1682,13 @@ Class GoldenSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,77,80000,500,400,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,777,80000,500,400,DE_EXTRAZTHRUST);
 		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
 		A_SprayDecal("BigRocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](6,10);
+		int numpt = Random[ExploS](4,8);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,9);
@@ -1709,21 +1699,21 @@ Class GoldenSubImpact : Actor
 			s.scale *= 2.6;
 			s.alpha *= .5;
 		}
-		numpt = Random[ExploS](4,6);
+		numpt = Random[ExploS](2,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[ExploS](2,3);
+		numpt = Random[ExploS](1,2);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,18);
 			let s = Spawn("SWWMChip",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[ExploS](2,5);
+		numpt = Random[ExploS](2,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](8,24);
@@ -1732,18 +1722,16 @@ Class GoldenSubImpact : Actor
 			s.bAMBUSH = true;
 			s.vel = pvel;
 		}
-		Spawn("GExploLight2",pos);
 	}
 	action void A_GoldSubSpread()
 	{
 		special1++;
 		if ( (special1%2) || (special1 > 20) ) return;
-		SWWMUtility.DoExplosion(self,77,80000,500-special1*10,400-special1*10,DE_EXTRAZTHRUST);
 		FLineTraceData d;
 		Vector3 HitNormal;
 		Vector3 origin;
 		double ang, pt;
-		for ( int i=0; i<3; i++ )
+		for ( int i=0; i<2; i++ )
 		{
 			double totaldist = 20+(special1**2.)*.2;
 			ang = FRandom[ExploS](0,360);
@@ -1824,13 +1812,13 @@ Class GoldenSubSubImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,7,70000,400,300,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,77,70000,400,300,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
 		A_SprayDecal("RocketBlast",-172);
 		Scale *= FRandom[ExploS](0.8,1.1);
 		Scale.x *= RandomPick[ExploS](-1,1);
 		Scale.y *= RandomPick[ExploS](-1,1);
-		int numpt = Random[ExploS](2,4);
+		int numpt = Random[ExploS](1,2);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
@@ -1846,7 +1834,6 @@ Class GoldenSubSubImpact : Actor
 	{
 		special1++;
 		if ( (special1%2) || (special1 > 10) ) return;
-		SWWMUtility.DoExplosion(self,7,70000,400-special1*5,300-special1*5,DE_EXTRAZTHRUST);
 	}
 	override void Tick()
 	{

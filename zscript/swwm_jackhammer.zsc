@@ -18,7 +18,7 @@ Class PusherImpact : Actor
 		A_QuakeEx(2,2,2,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
 		A_StartSound("pusher/hit",CHAN_VOICE);
 		A_SprayDecal("WallCrack",-20);
-		int numpt = Random[Pusher](4,8);
+		int numpt = Random[Pusher](1,3);
 		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
 		for ( int i=0; i<numpt; i++ )
 		{
@@ -27,14 +27,14 @@ Class PusherImpact : Actor
 			s.vel = pvel;
 			s.SetShade(Color(1,1,1)*Random[Pusher](128,192));
 		}
-		numpt = Random[Pusher](2,6);
+		numpt = Random[Pusher](0,2);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,8);
 			let s = Spawn("SWWMSpark",pos);
 			s.vel = pvel;
 		}
-		numpt = Random[Pusher](3,6);
+		numpt = Random[Pusher](1,3);
 		for ( int i=0; i<numpt; i++ )
 		{
 			Vector3 pvel = (FRandom[Pusher](-1,1),FRandom[Pusher](-1,1),FRandom[Pusher](-1,1)).unit()*FRandom[Pusher](2,8);

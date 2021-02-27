@@ -1,0 +1,185 @@
+// Base class for all SWWM Armors
+Class SWWMArmor : Armor abstract
+{
+	int priority;
+	String drainmsg;
+	Class<SWWMSpareArmor> parent;
+
+	Property ArmorPriority : priority;
+	Property DrainMessage : drainmsg;
+	Property GiverArmor : parent;
+
+	Default
+	{
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.KEEPDEPLETED;
+		+INVENTORY.ALWAYSPICKUP;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find last armor that's better than us
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'SWWMArmor') || (i == self) || (SWWMArmor(i).priority < priority) ) continue;
+			found = i;
+		}
+		if ( !found )
+		{
+			// find first item with an armor worse than us after it
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || !(i.Inv is 'SWWMArmor') ) continue;
+				if ( SWWMArmor(i.Inv).priority > priority ) continue;
+				found = i;
+				break;
+			}
+		}
+		if ( !found )
+		{
+			// is first item plating or a collar?
+			if ( (other.Inv is 'AlmasteelPlating') || (other.Inv is 'SayaCollar') )
+			{
+				// we're good
+				return;
+			}
+			// find first item with plating or collar after it
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || (!(i.Inv is 'AlmasteelPlating' ) && !(i.Inv is 'SayaCollar')) ) continue;
+				found = i;
+				break;
+			}
+		}
+		if ( !found )
+		{
+			// check if first item in inventory is health or a sandwich
+			if ( (other.Inv is 'SWWMHealth') || (other.Inv is 'GrilledCheeseSandwich') )
+			{
+				// we're good
+				return;
+			}
+			// find first item with health or sandwich after it
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || (!(i.Inv is 'SWWMHealth' ) && !(i.Inv is 'GrilledCheeseSandwich')) ) continue;
+				found = i;
+				break;
+			}
+		}
+		if ( !found )
+		{
+			// find last of either invinciball/ragekit/barrier power
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'InvinciballPower') && !(i is 'RagekitPower') && !(i is 'BarrierPower') ) continue;
+				found = i;
+			}
+		}
+		if ( !found ) return;
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
+	// for subclasses
+	virtual int HandleDamage( int damage, Name damageType, int flags )
+	{
+		return damage;
+	}
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
+	{
+		int saved;
+		if ( (amount <= 0) || DamageTypeDefinition.IgnoreArmor(damageType) || (damage <= 0) )
+			return;
+		SWWMHandler.DoFlash(Owner,Color(int(clamp(damage*.15,1,16)),255,224,192),3);
+		Owner.A_StartSound("armor/hit",CHAN_BODY,CHANF_DEFAULT,clamp(damage*.03,0.,1.),2.5);
+		saved = HandleDamage(damage,damageType,flags);
+		int healed = max(0,saved-damage);
+		saved = min(saved,damage);
+		if ( amount <= saved ) saved = amount;
+		newdamage -= saved;
+		if ( healed > 0 ) Owner.GiveBody(healed);
+		if ( (swwm_strictuntouchable == 1) && (saved > 0) && Owner.player )
+		{
+			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+			if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
+		}
+		amount -= saved;
+		damage = newdamage;
+		bool shouldautouse = false;
+		if ( swwm_enforceautousearmor == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousearmor == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
+		if ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) && shouldautouse )
+		{
+			if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+			int tgive = 0;
+			while ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) )
+			{
+				if ( swwm_accdamage ) tgive += default.Amount;
+				else SWWMScoreObj.Spawn(default.Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+				Amount += default.Amount;
+				Owner.TakeInventory(parent,1);
+				// absorb the extra damage too
+				saved = HandleDamage(damage,damageType,flags);
+				healed = max(0,saved-damage);
+				saved = min(saved,damage);
+				if ( amount <= saved ) saved = amount;
+				newdamage -= saved;
+				if ( healed > 0 ) Owner.GiveBody(healed);
+				amount -= saved;
+				damage = newdamage;
+			}
+			if ( swwm_accdamage ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+		}
+		else if ( amount <= 0 )
+		{
+			if ( Owner.CheckLocalView() && (drainmsg != "") ) Console.Printf(StringTable.Localize(drainmsg));
+			DepleteOrDestroy();
+			return;
+		}
+	}
+}
+
+// gives armor when used
+Class SWWMSpareArmor : Inventory abstract
+{
+	Mixin SWWMAutoUseFix;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMOverlapPickupSound;
+
+	Class<SWWMArmor> giveme;
+
+	Property GiveArmor : giveme;
+
+	override bool Use( bool pickup )
+	{
+		let cur = Owner.FindInventory(giveme);
+		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (GetDefaultByType(giveme).Amount+cur.Amount <= cur.MaxAmount) )
+		{
+			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
+			SWWMHandler.ArmorFlash(Owner.PlayerNumber());
+			SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+			return true;
+		}
+		return false;
+	}
+
+	Default
+	{
+		+INVENTORY.INVBAR;
+		+INVENTORY.ISARMOR;
+		+INVENTORY.AUTOACTIVATE;
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+}

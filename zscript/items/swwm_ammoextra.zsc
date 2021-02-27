@@ -1,0 +1,501 @@
+// ============================================================================
+// Ammo fabricator
+// ============================================================================
+
+Class AmmoFabricator : Inventory abstract
+{
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	int budget, pertype, maxunitprice;
+
+	Property Budget : budget;
+	Property PerType : pertype;
+	Property MaxUnitPrice : maxunitprice;
+
+	override Inventory CreateCopy( Actor other )
+	{
+		// additional lore
+		SWWMLoreLibrary.Add(other.player,"Fabricator");
+		return Super.CreateCopy(other);
+	}
+
+	private bool CmpFabAmmo( Class<Ammo> a, Class<Ammo> b )
+	{
+		let ia = Owner.FindInventory(a);
+		int cnta = ia?ia.Amount:0;
+		int maxa = ia?ia.MaxAmount:GetDefaultByType(a).Amount;
+		let ib = Owner.FindInventory(b);
+		int cntb = ib?ib.Amount:0;
+		int maxb = ib?ib.MaxAmount:GetDefaultByType(b).Amount;
+		double facta = cnta/double(maxa);
+		double factb = cntb/double(maxb);
+		return (facta >= factb);
+	}
+
+	private int partition_fabammo( Array<Class<Ammo> > a, int l, int h )
+	{
+		Class<Ammo> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpFabAmmo(pv,a[j]) )
+			{
+				i++;
+				Class<Ammo> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Class<Ammo> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_fabammo( Array<Class<Ammo> > a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_fabammo(a,l,h);
+		qsort_fabammo(a,l,p-1);
+		qsort_fabammo(a,p+1,h);
+	}
+
+	bool FabricateAmmo()
+	{
+		Array<Class<Ammo> > available;
+		// populate ammo production list
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let a = (Class<Ammo>)(AllActorClasses[i]);
+			// skip over candy gun spares, they're "special ammo"
+			if ( a == 'CandyGunSpares' ) continue;
+			// only direct descendants of ammo with a set price below our max unit price
+			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
+			let def = GetDefaultByType(a);
+			if ( (def.Stamina <= 0) || (def.Stamina > maxunitprice) ) continue;
+			// only ammo for weapons that are valid (can be used)
+			bool isvalid = false;
+			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			{
+				let type = (class<Weapon>)(AllActorClasses[j]);
+				if ( !type ) continue;
+				let rep = GetReplacement(type);
+				if ( (rep != type) && !(rep is "DehackedPickup") ) continue;
+				readonly<Weapon> weap = GetDefaultByType(type);
+				if ( !Owner.player || !Owner.player.weapons.LocateWeapon(type) || weap.bCheatNotWeapon ) continue;
+				let ready = weap.FindState("Ready");
+				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				if ( (type is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(a) )
+				{
+					isvalid = true;
+					break;
+				}
+				if ( (weap.AmmoType1 == a) || (weap.AmmoType2 == a) )
+				{
+					isvalid = true;
+					break;
+				}
+			}
+			if ( !isvalid ) continue;
+			available.Push(a);
+		}
+		// sort by "need weight" (prioritize ammo that the player lacks over ammo that the player has plenty of
+		qsort_fabammo(available,0,available.Size()-1);
+		// loop through until we fill the inventory or run out of budget
+		bool given = false;
+		int consumed = 0;
+		String fabstr = "";
+		bool comma = false;
+		int tpertype = pertype;
+		for ( int i=0; i<available.Size(); i++ )
+		{
+			int amt, lim;
+			int cnt = 0;
+			Ammo cur = Ammo(Owner.FindInventory(available[i]));
+			if ( cur )
+			{
+				amt = cur.Amount;
+				lim = cur.MaxAmount;
+			}
+			else
+			{
+				cur = Ammo(Spawn(available[i]));
+				amt = cur.Amount = 0;
+				lim = cur.MaxAmount;
+				cur.AttachToOwner(Owner);
+			}
+			// percentage based on DEFAULT max amount (capped at 1 minimum)
+			if ( pertype < 0 ) tpertype = max(1,-int(cur.default.MaxAmount*pertype*.01));
+			while ( (amt < lim) && (consumed+cur.default.Stamina < budget) && (cnt < tpertype) )
+			{
+				consumed += cur.default.Stamina;
+				amt = ++cur.Amount;
+				cnt++;
+				given = true;
+			}
+			if ( cnt > 0 )
+			{
+				if ( comma ) fabstr.AppendFormat(", %dx %s",cnt,cur.GetTag());
+				else fabstr.AppendFormat("%dx %s",cnt,cur.GetTag());
+				comma = true;
+			}
+		}
+		if ( given ) PrintPickupMessage(true,fabstr);
+		return given;
+	}
+
+	override bool Use( bool pickup )
+	{
+		bool shouldautouse = false;
+		if ( swwm_enforceautouseammo == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautouseammo == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autouseammo',Owner.player).GetBool();
+		if ( pickup && !shouldautouse ) return false;
+		if ( FabricateAmmo() )
+		{
+			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			return true;
+		}
+		return false;
+	}
+
+	Default
+	{
+		+INVENTORY.INVBAR;
+		+INVENTORY.AUTOACTIVATE;
+		+FLOATBOB;
+		Inventory.UseSound "fabricator/use";
+		Inventory.PickupFlash "SWWMPickupFlash";
+		FloatBobStrength 0.25;
+		Radius 10;
+		Height 24;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class FabricatorTier1 : AmmoFabricator
+{
+	Mixin SWWMAutoUseFix;
+
+	Default
+	{
+		Tag "$T_FABRICATOR1";
+		Stamina -2500;
+		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
+		Inventory.PickupMessage "$T_FABRICATOR1";
+		Inventory.MaxAmount 20;
+		Inventory.InterHubAmount 20;
+		AmmoFabricator.Budget 3000;
+		AmmoFabricator.PerType 1;
+		AmmoFabricator.MaxUnitPrice 2500;
+	}
+}
+Class FabricatorTier2 : AmmoFabricator
+{
+	Mixin SWWMAutoUseFix;
+
+	Default
+	{
+		Tag "$T_FABRICATOR2";
+		Stamina -12000;
+		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
+		Inventory.PickupMessage "$T_FABRICATOR2";
+		Inventory.MaxAmount 15;
+		Inventory.InterHubAmount 15;
+		AmmoFabricator.Budget 15000;
+		AmmoFabricator.PerType 2;
+		AmmoFabricator.MaxUnitPrice 12000;
+	}
+}
+Class FabricatorTier3 : AmmoFabricator
+{
+	Mixin SWWMAutoUseFix;
+
+	Default
+	{
+		Tag "$T_FABRICATOR3";
+		Stamina -80000;
+		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
+		Inventory.PickupMessage "$T_FABRICATOR3";
+		Inventory.MaxAmount 10;
+		Inventory.InterHubAmount 10;
+		AmmoFabricator.Budget 100000;
+		AmmoFabricator.PerType 4;
+		AmmoFabricator.MaxUnitPrice 80000;
+	}
+}
+Class FabricatorTier4 : AmmoFabricator
+{
+	Default
+	{
+		Tag "$T_FABRICATOR4";
+		Stamina -1000000;
+		Inventory.Icon "graphics/HUD/Icons/I_Fabricator4.png";
+		Inventory.PickupMessage "$T_FABRICATOR4";
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
+		AmmoFabricator.Budget int.max;
+		AmmoFabricator.PerType -50;
+		AmmoFabricator.MaxUnitPrice 1000000;
+		-INVENTORY.AUTOACTIVATE;
+	}
+}
+
+// ============================================================================
+// Hammerspace embiggener
+// ============================================================================
+
+Class HammerspaceEmbiggener : Inventory
+{
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	override Inventory CreateCopy( Actor other )
+	{
+		bool traded = (GetClass()=='TradedHammerspaceEmbiggener');
+		if ( !traded ) other.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
+		// Find every unique type of ammoitem. Give it to the player if
+		// he doesn't have it already, and increase its maximum capacity.
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let type = (class<Ammo>)(AllActorClasses[i]);
+			if ( !type || (type.GetParentClass() != 'Ammo') ) continue;
+			// check that it's for a valid weapon
+			bool isvalid = false;
+			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			{
+				let type2 = (class<Weapon>)(AllActorClasses[j]);
+				if ( !type2 ) continue;
+				let rep = GetReplacement(type2);
+				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+				readonly<Weapon> weap = GetDefaultByType(type2);
+				if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+				let ready = weap.FindState("Ready");
+				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
+				{
+					isvalid = true;
+					break;
+				}
+				if ( (weap.AmmoType1 == type) || (weap.AmmoType2 == type) )
+				{
+					isvalid = true;
+					break;
+				}
+			}
+			if ( !isvalid ) continue;
+			let ammoitem = Ammo(other.FindInventory(type));
+			int amount = GetDefaultByType(type).BackpackAmount*self.Amount;
+			if ( traded ) amount = 0;
+			if ( amount < 0 ) amount = 0;
+			if ( !ammoitem )
+			{
+				// The player did not have the ammoitem. Add it.
+				ammoitem = Ammo(Spawn(type));
+				ammoitem.Amount = amount;
+				if ( ammoitem.BackpackMaxAmount > 0 )
+				{
+					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+min(self.Amount,MaxAmount)*factor);
+				}
+				if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
+					ammoitem.Amount = ammoitem.MaxAmount;
+				ammoitem.AttachToOwner(other);
+			}
+			else
+			{
+				// The player had the ammoitem. Give some more.
+				if ( ammoitem.BackpackMaxAmount > 0 )
+				{
+					double factor = (ammoitem.BackpackMaxAmount-ammoitem.default.MaxAmount)/double(MaxAmount);
+					ammoitem.MaxAmount = int(ammoitem.default.MaxAmount+min(self.Amount,MaxAmount)*factor);
+				}
+				if ( ammoitem.Amount < ammoitem.MaxAmount )
+				{
+					if ( (ammoitem.Amount > 0) && (ammoitem.Amount+amount < 0) )
+						ammoitem.Amount = int.max;
+					else ammoitem.Amount += amount;
+					if ( (ammoitem.Amount > ammoitem.MaxAmount) && !sv_unlimited_pickup )
+						ammoitem.Amount = ammoitem.MaxAmount;
+				}
+			}
+		}
+		self.Amount = min(self.Amount,MaxAmount);
+		if ( GetParentClass() == 'HammerspaceEmbiggener' )
+		{
+			if ( !GoAway() ) Destroy();
+			let copy = Inventory(Spawn('HammerspaceEmbiggener'));
+			copy.ClearCounters();
+			copy.Amount = self.Amount;
+			copy.MaxAmount = self.MaxAmount;
+			return copy;
+		}
+		if ( GoAway() )
+		{
+			let copy = Inventory(Spawn(GetClass()));
+			copy.ClearCounters();
+			copy.Amount = self.Amount;
+			copy.MaxAmount = self.MaxAmount;
+			return copy;
+		}
+		return self;
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		if ( (item.GetClass() == GetClass()) || (item.GetParentClass() == 'HammerspaceEmbiggener') )
+		{
+			bool traded = (item.GetClass()=='TradedHammerspaceEmbiggener');
+			if ( !traded ) Owner.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
+			if ( (Amount > 0) && (Amount+item.Amount < 0) )
+				Amount = int.max;
+			else Amount += item.Amount;
+			if ( Amount > MaxAmount ) Amount = MaxAmount;
+			item.bPickupGood = true;
+			// readjust ammo values to new capacity
+			for ( Inventory i=Owner.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'Ammo') ) continue;
+				if ( Ammo(i).BackpackMaxAmount > 0 )
+				{
+					double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(MaxAmount);
+					i.MaxAmount = int(i.default.MaxAmount+Amount*factor);
+				}
+				int amount = Ammo(i).BackpackAmount*item.Amount;
+				if ( traded ) i.Amount = 0;
+				if ( (i.Amount > 0) && (i.Amount+amount < 0) )
+					i.Amount = int.max;
+				else i.Amount += amount;
+				if ( (i.Amount > i.MaxAmount) && !sv_unlimited_pickup )
+					i.Amount = i.MaxAmount;
+			}
+			return true;
+		}
+		// new ammo suddenly added? upgrade it (this shouldn't happen unless fucky scripting has been involved)
+		if ( (item is 'Ammo') && !Owner.FindInventory(Ammo(item).GetParentAmmo()) )
+		{
+			if ( Ammo(item).BackpackMaxAmount > 0 )
+			{
+				double factor = (Ammo(item).BackpackMaxAmount-item.default.MaxAmount)/double(MaxAmount);
+				item.MaxAmount = int(item.default.MaxAmount+Amount*factor);
+			}
+		}
+		return false;
+	}
+
+	override void DepleteOrDestroy()
+	{
+		// reset upgrade
+		for ( Inventory i=Owner.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'Ammo') ) continue;
+			i.MaxAmount = i.default.MaxAmount;
+			if ( i.Amount > i.MaxAmount ) i.Amount = i.MaxAmount;
+		}
+		Super.DepleteOrDestroy();
+	}
+
+	// merges overlapping embiggeners into a bulk upgrade
+	void A_MergeEmbiggeners()
+	{
+		let bt = BlockThingsIterator.Create(self,16);
+		int tamount = Amount;
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || (t == self) || !(t is 'HammerspaceEmbiggener') || !(t.spawnpoint ~== spawnpoint) ) continue;
+			tamount += HammerspaceEmbiggener(t).Amount;
+			t.ClearCounters();
+			t.Destroy();
+		}
+		if ( tamount <= 1 ) return;
+		tamount -= tamount%2;	// always even numbered
+		if ( GetClass() == 'BulkHammerspaceEmbiggener' )
+		{
+			Amount = min(tamount,MaxAmount);
+			return;
+		}
+		let n = Spawn("BulkHammerspaceEmbiggener",pos);
+		Inventory(n).Amount = min(tamount,MaxAmount);
+		n.spawnpoint = spawnpoint;
+		n.spawnangle = spawnangle;
+		n.angle = angle;
+		n.pitch = pitch;
+		n.roll = roll;
+		n.special = special;
+		for ( int i=0; i<5; i++ ) n.args[i] = args[i];
+		n.special1 = special1;
+		n.special2 = special2;
+		n.spawnflags = spawnflags&~MTF_SECRET;
+		n.HandleSpawnFlags();
+		n.spawnflags = spawnflags;
+		n.bCountSecret = spawnflags&MTF_SECRET;
+		n.ChangeTid(tid);
+		n.vel = vel;
+		n.master = master;
+		n.tracer = tracer;
+		n.target = target;
+		if ( !bDROPPED ) n.bDROPPED = false;
+		ClearCounters();
+		Destroy();
+	}
+
+	Default
+	{
+		Tag "$T_EMBIGGENER";
+		Stamina -800000;
+		Inventory.PickupMessage "$T_EMBIGGENER";
+		Inventory.MaxAmount 8;
+		Inventory.InterHubAmount 8;
+		Inventory.PickupFlash "SWWMPickupFlash";
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.ALWAYSPICKUP;
+		+COUNTITEM;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 8;
+		Height 24;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 NoDelay A_MergeEmbiggeners();
+		Stop;
+	}
+}
+
+// used when cheating or trading, this version does not give ammo and is meant
+// only for GiveInventory, so it shouldn't be spawned in the world
+Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener {}
+
+// used to denote "merged" embiggeners, changes color based on amount
+//  green (2+)
+//  blue (4+)
+//  purple (6+)
+//  black (8+)
+Class BulkHammerspaceEmbiggener : HammerspaceEmbiggener
+{
+	override string PickupMessage()
+	{
+		return String.Format("%dx %s",Amount,StringTable.Localize("$T_BULKEMBIGGENER"));
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 NoDelay
+		{
+			A_MergeEmbiggeners();
+			if ( bDestroyed ) return ResolveState(null);
+			if ( Amount > 1 ) return SpawnState+min(4,Amount/2);
+			return ResolveState(null);
+		}
+		XZW1 BCDE -1;
+		Stop;
+	}
+}

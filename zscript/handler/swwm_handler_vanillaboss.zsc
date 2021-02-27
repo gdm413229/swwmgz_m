@@ -1,0 +1,399 @@
+// vanilla boss stuff
+
+extend Class SWWMHandler
+{
+	String bosstag;
+	Array<Actor> bossactors;
+
+	Actor bossbrainactor;
+	Actor bossviewactor;
+	TextureID facetex[5];
+
+	bool initialized;
+	ui bool ui_initialized;
+	ui TextureID bbar_f, bbar_r, bbar_d;
+	ui double bossalpha;
+	ui DynamicValueInterpolator ihealth, ihealthr;
+	ui int thealth, hmax;
+	ui int oldhealth[30];
+	ui int cummdamage, lastcummtic;	// please do not misread
+
+	enum EVanillaMap
+	{
+		MAP_NONE,
+		MAP_DE1M8,
+		MAP_DE2M8,
+		MAP_DE3M8,
+		MAP_DE4M8,
+		MAP_HE1M8_HE4M8,
+		MAP_HE2M8_HE5M8,
+		MAP_HE3M8,
+		MAP_DMAP07,
+		MAP_DMAP30,
+		MAP_HMAP12,
+		MAP_HMAP23_HMAP27_HMAP48_HMAP55,
+		MAP_HMAP36,
+		MAP_HMAP37,
+		MAP_HMAP38,
+		MAP_HMAP40,
+		MAP_HMAP60,
+		MAP_EVMAP30	// eviternity
+	};
+
+	private int WhichVanillaBossMap()
+	{
+		String mapsum = level.GetChecksum();
+		if ( (mapsum ~== "94500F4B006B316FE03AC46865AEABF8")
+			|| (mapsum ~== "97079958C7E89C1908890730B8B9FEB7")
+			|| (mapsum ~== "058FB092EA1B70DA1E3CBF501C4A91A1") )
+			return MAP_DE1M8;
+		if ( mapsum ~== "EFFE91DF41AD41F6973C06F0AD67DDB9" )
+			return MAP_DE2M8;
+		if ( mapsum ~== "EF128313112110ED6C1549AF96AF26C9" )
+			return MAP_DE3M8;
+		if ( mapsum ~== "2DC939E508AB8EB68AF79D5B60568711" )
+			return MAP_DE4M8;
+		if ( (mapsum ~== "27639D04F8090D57A47D354992435893")
+			|| (mapsum ~== "30D1480A6D4F3A3153739D4CCF659C4E") )
+			return MAP_HE1M8_HE4M8;
+		if ( (mapsum ~== "5158C22A0F30CE5E558FD2A05D67685E")
+			|| (mapsum ~== "85AC7D20D18F9BC49B9696CC2E67F029") )
+			return MAP_HE2M8_HE5M8;
+		if ( mapsum ~== "4719C2C71EF28F52310B889DD5A9778B" )
+			return MAP_HE3M8;
+		if ( mapsum ~== "291F24417FB3DD411339AE82EF9B3597" )
+			return MAP_DMAP07;
+		if ( mapsum ~== "5EECD88F4491F516D590CE4BBF45F532" )
+			return MAP_DMAP30;
+		if ( (mapsum ~== "89C4CD26EF05E2577B10CAFE56226662")
+			|| (mapsum ~== "441BF111747671066A10A146C03EEFC4")
+			|| (mapsum ~== "55E321849F3699655D7E062C90682F63") )
+			return MAP_HMAP12;
+		if ( (mapsum ~== "E3B06F44DBF6F7E7754D7B1DAEF707E4")
+			|| (mapsum ~== "FC832437D7A2B7094A9B56C3909773D9")
+			|| (mapsum ~== "91AD797F95CC4C6D6AE33B21F664C60B")
+			|| (mapsum ~== "188B1B4244BD8DA501D8532696EC8654")
+			|| (mapsum ~== "5B29D0889DF09A8250D62FA09EB2B452")
+			|| (mapsum ~== "D3C5FA777BA52264546E6569F167AF0D")
+			|| (mapsum ~== "15FC0991D975325556EFF71F241A4458")
+			|| (mapsum ~== "2FAD54B58487884F06EAFA507B553921") )
+			return MAP_HMAP23_HMAP27_HMAP48_HMAP55;
+		if ( (mapsum ~== "4444C95C2029DA6EECAC92DAA31CE665")
+			|| (mapsum ~== "33752742BCA8E539A6EE3E5D0FDA8744")
+			|| (mapsum ~== "3FFAF2F624C1B4BB6F581DCF7B99CBA7") )
+			return MAP_HMAP36;
+		if ( (mapsum ~== "78979A583B1E30D94C9DAE2BCFA9A18D")
+			|| (mapsum ~== "FDC90F44C65A71E0901C1B9FFFCF3D02")
+			|| (mapsum ~== "088ECE0E0F3E68448FA1D901001A0084") )
+			return MAP_HMAP37;
+		if ( (mapsum ~== "3BF62E4F9FB3CF9AF267421CE2D5F348")
+			|| (mapsum ~== "4799E1FDB5A3C0E3AD650B5AC215A737")
+			|| (mapsum ~== "5C63A02B0B04D9AE95CA51687DC3406F") )
+			return MAP_HMAP38;
+		if ( (mapsum ~== "EFAFE59092DE5E613562ACF52B86C37F")
+			|| (mapsum ~== "1C5DE5A921DEE405E98E7E09D9829387")
+			|| (mapsum ~== "2A6C4235B942467D25FD50D5B313E67A") )
+			return MAP_HMAP40;
+		if ( mapsum ~== "B0ADDB295A3ACCE43978AAC91FB8C58A" )
+			return MAP_HMAP60;
+		if ( mapsum ~== "5C5E5C08AF3572F31CF27318679F2B4E" )
+			return MAP_EVMAP30;
+		return MAP_NONE;
+	}
+	private void VanillaBossSpawn( WorldEvent e, SWWMCombatTracker trk )
+	{
+		bool upgrademe = swwm_upgradebosses;
+		if ( bossmap == -1 ) bossmap = WhichVanillaBossMap();
+		if ( bossmap == MAP_DE1M8 )
+		{
+			if ( e.Thing is 'BaronOfHell' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_BRUISERS";
+		}
+		else if ( bossmap == MAP_DE2M8 )
+		{
+			if ( e.Thing is 'Cyberdemon' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_CYBIE";
+		}
+		else if ( bossmap == MAP_DE3M8 )
+		{
+			if ( e.Thing is 'Spidermastermind' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 6;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_SPIDER";
+		}
+		else if ( bossmap == MAP_DE4M8 )
+		{
+			if ( e.Thing is 'Spidermastermind' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_SPIDER2";
+		}
+		else if ( bossmap == MAP_DMAP07 )
+		{
+			if ( (e.Thing is 'Fatso') || (e.Thing is 'Arachnotron') )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_DIMPLE";
+		}
+		else if ( bossmap == MAP_DMAP30 )
+		{
+			if ( e.Thing is 'BossBrain' )
+			{
+				bossbrainactor = e.Thing;
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 40;	// goodbye, instakills
+				if ( trk ) trk.bBOSS = true;
+			}
+			if ( e.Thing is 'BossEye' )
+				bossviewactor = e.Thing;
+			bosstag = "$BT_IOS";
+		}
+		else if ( bossmap == MAP_HE1M8_HE4M8 )
+		{
+			if ( e.Thing is 'IronLich' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_LICHES";
+		}
+		else if ( bossmap == MAP_HE2M8_HE5M8 )
+		{
+			if ( e.Thing is 'Minotaur' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_MINOTAUR";
+		}
+		else if ( bossmap == MAP_HE3M8 )
+		{
+			if ( e.Thing is 'Sorcerer1' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_DSPARIL";
+			}
+			else if ( e.Thing is 'Sorcerer2' )
+			{
+				// second phase
+				bossactors.Clear();
+				initialized = false;
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_DSPARIL2";
+			}
+		}
+		else if ( bossmap == MAP_HMAP38 )
+		{
+			if ( e.Thing is 'ClericBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_CLERIC";
+			}
+		}
+		else if ( bossmap == MAP_HMAP36 )
+		{
+			if ( e.Thing is 'FighterBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_FIGHTER";
+			}
+		}
+		else if ( bossmap == MAP_HMAP37 )
+		{
+			if ( e.Thing is 'MageBoss' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_MAGE";
+			}
+		}
+		else if ( bossmap == MAP_HMAP12 )
+		{
+			if ( e.Thing is 'Dragon' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_DRAGON";
+			}
+		}
+		else if ( bossmap == MAP_HMAP23_HMAP27_HMAP48_HMAP55 )
+		{
+			if ( e.Thing is 'Heresiarch' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_HERESIARCH";
+			}
+		}
+		else if ( bossmap == MAP_HMAP40 )
+		{
+			if ( e.Thing is 'Korax' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_KORAX";
+			}
+		}
+		else if ( bossmap == MAP_HMAP60 )
+		{
+			if ( (e.Thing is 'FighterBoss') || (e.Thing is 'ClericBoss') || (e.Thing is 'MageBoss') )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_DEATHKINGS";
+				initialized = true;	// healthbar shows from the start
+			}
+		}
+		else if ( bossmap == MAP_EVMAP30 )
+		{
+			if ( e.Thing.GetClassName() == "ArchangelusA" )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_ARCHANGELUS";
+			}
+			else if ( e.Thing.GetClassName() == "ArchangelusB" )
+			{
+				// second phase
+				bossactors.Clear();
+				initialized = false;
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
+				if ( trk ) trk.bBOSS = true;
+				bosstag = "$BT_ARCHANGELUS";
+			}
+		}
+	}
+	private void VanillaBossTick()
+	{
+		if ( initialized ) return;
+		// wait until bosses are active
+		for ( int i=0; i<bossactors.Size(); i++ )
+		{
+			if ( !bossactors[i] ) continue;
+			if ( (!bossactors[i].target || !bossactors[i].CheckSight(bossactors[i].target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
+				&& (!bossviewactor || (bossviewactor && !bossviewactor.target)) ) continue;
+			initialized = true;
+			break;
+		}
+	}
+	private ui void VanillaBossUiTick()
+	{
+		if ( (!ui_initialized && initialized) || (ui_initialized && !initialized) )
+		{
+			ui_initialized = true;
+			thealth = 0;
+			for ( int i=0; i<bossactors.Size(); i++ )
+			{
+				if ( !bossactors[i] ) continue;
+				thealth += max(0,bossactors[i].Health);
+			}
+			hmax = thealth;
+			for ( int i=0; i<30; i++ ) oldhealth[i] = thealth;
+			cummdamage = 0;
+			if ( !ihealth ) ihealth = DynamicValueInterpolator.Create(thealth,.1,1,1000);
+			else ihealth.Reset(thealth);
+			if ( !ihealthr ) ihealthr = DynamicValueInterpolator.Create(thealth,.5,1,1000);
+			else ihealthr.Reset(thealth);
+			return;
+		}
+		if ( !ui_initialized ) return;
+		// update healthbar
+		int newhealth = 0;
+		for ( int i=0; i<bossactors.Size(); i++ )
+		{
+			if ( !bossactors[i] ) continue;
+			newhealth += max(0,bossactors[i].Health);
+		}
+		oldhealth[0] = newhealth;
+		int curcumm = max(0,thealth-newhealth);
+		if ( curcumm > 0 )
+		{
+			cummdamage += curcumm;
+			lastcummtic = gametic;
+		}
+		else if ( gametic > lastcummtic+150 ) cummdamage = 0;
+		thealth = newhealth;
+		ihealthr.Update(thealth);
+		if ( thealth > oldhealth[29] )
+			for ( int i=29; i>0; i-- )
+				oldhealth[i] = thealth;
+		ihealth.Update(oldhealth[29]);
+		for ( int i=29; i>0; i-- )
+			oldhealth[i] = oldhealth[i-1];
+		if ( thealth > 0 ) bossalpha = min(3.,bossalpha+1./30.);
+		else bossalpha = max(0,bossalpha-1./50.);
+	}
+	// called by HUD (done here for the sake of cleaner code)
+	ui void DrawBossBar( SWWMStatusBar bar )
+	{
+		if ( !ui_initialized || (bossalpha <= 0.) ) return;
+		if ( !swwm_bosshealthbars ) return;
+		if ( !bbar_f ) bbar_f = TexMan.CheckForTexture("graphics/HUD/BossHealthBarBox.png",TexMan.Type_Any);
+		if ( !bbar_r ) bbar_r = TexMan.CheckForTexture("graphics/HUD/BossHealthBar.png",TexMan.Type_Any);
+		if ( !bbar_d ) bbar_d = TexMan.CheckForTexture("graphics/HUD/BossHealthBarDecay.png",TexMan.Type_Any);
+		Vector2 vpos = ((bar.ss.x-300)/2.,bar.ss.y-(bar.margin+35));
+		Screen.DrawTexture(bbar_f,false,vpos.x-2,vpos.y-2,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
+		int rw = int(clamp((ihealthr.GetValue()*300.)/hmax,0.,300.));
+		int dw = int(clamp((ihealth.GetValue()*300.)/hmax,0.,300.));
+		Screen.DrawTexture(bbar_d,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,dw);
+		Screen.DrawTexture(bbar_r,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,rw);
+		Font barfnt = bar.LangFont(bar.mTewiFont);
+		Font dmgfnt = bar.mTewiFont.mFont;
+		if ( (cummdamage > 0) && (gametic < lastcummtic+150) )
+		{
+			double calph = clamp(((lastcummtic+150)-gametic)/50.,0.,1.);
+			string dnum = String.Format("%d",cummdamage);
+			Screen.DrawText(dmgfnt,Font.CR_RED,vpos.x+300-dmgfnt.StringWidth(dnum),vpos.y-(dmgfnt.GetHeight()+2),dnum,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha*calph);
+		}
+		Screen.DrawText(barfnt,Font.CR_WHITE,vpos.x,vpos.y-(barfnt.GetHeight()+2),StringTable.Localize(swwm_funtags?(bosstag.."_FUN"):bosstag),DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
+	}
+
+	// can't use this until I actually figure out how to make those walls damageable
+	/*override void WorldLineDamaged( WorldEvent e )
+	{
+		// allow boss brain to take (reduced) damage from the facewall being shot
+		if ( level.mapname ~== "MAP30" )
+		{
+			if ( !SWWMUtility.IsIOSWall(e.DamageLine) ) return;
+			if ( bossbrainactor )
+				bossbrainactor.DamageMobj(e.Inflictor,e.DamageSource,e.Damage/3,e.DamageType,e.DamageFlags,e.DamageAngle);
+			e.NewDamage = 0;
+		}
+	}*/
+}

@@ -1,0 +1,402 @@
+// Silver Bullet projectiles and effects
+
+Class SilverBulletCasing : SWWMCasing
+{
+	Default
+	{
+		BounceSound "silverbullet/casing";
+	}
+}
+Class SilverBulletCasing2 : SilverBulletCasing {}
+
+Class SilverBulletMag : SWWMCasing
+{
+	Default
+	{
+		Mass 10;
+		BounceFactor 0.4;
+		WallBounceFactor 0.4;
+		BounceSound "silverbullet/mag";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		heat = 0;
+	}
+	States
+	{
+	Death:
+		XZW1 BC -1
+		{
+			pitch = roll = 0;
+			angle = FRandom[Junk](0,360);
+			frame = RandomPick[Junk](1,2);
+		}
+		Stop;
+	}
+}
+Class SilverBulletMag2 : SilverBulletMag {}
+
+Class SilverAirRip : Actor
+{
+	Default
+	{
+		Obituary "$O_SILVERBULLET";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,40,2000,40,ignoreme:target);
+		Destroy();
+	}
+}
+Class SilverAirRip2 : Actor
+{
+	Default
+	{
+		Obituary "$O_SILVERBULLET2";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,20,2000,30,ignoreme:target);
+		Destroy();
+	}
+}
+
+Class SilverImpact : Actor
+{
+	Default
+	{
+		Obituary "$O_SILVERBULLET";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,100,8000,100,20);
+		A_AlertMonsters(swwm_uncapalert?0:2500);
+		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
+		if ( special1 )
+		{
+			Destroy();
+			return;
+		}
+		A_StartSound("silverbullet/hit",CHAN_VOICE,CHANF_DEFAULT,1.,.7);
+		A_SprayDecal("BigPock",-64);
+		A_SprayDecal("HugeWallCrack",-64);
+		int numpt = Random[Silverbullet](15,25);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Silverbullet](-.4,.4),FRandom[Silverbullet](-.4,.4),FRandom[Silverbullet](-.4,.4))).unit()*FRandom[Silverbullet](.4,2.);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= 1.8;
+			s.special1 = Random[Silverbullet](1,3);
+			s.SetShade(Color(1,1,1)*Random[Silverbullet](96,192));
+		}
+		numpt = Random[Silverbullet](6,9);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Silverbullet](-1,1),FRandom[Silverbullet](-1,1),FRandom[Silverbullet](-1,1)).unit()*FRandom[Silverbullet](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.scale *= 1.3;
+			s.vel = pvel;
+		}
+		numpt = Random[Silverbullet](10,15);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Silverbullet](-.6,.6),FRandom[Silverbullet](-.6,.6),FRandom[Silverbullet](-.6,.6))).unit()*FRandom[Silverbullet](6,20);
+			let s = Spawn("SWWMChip",pos);
+			s.scale *= 1.6;
+			s.vel = pvel;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 20;
+		Stop;
+	}
+}
+
+Class ExploLight3 : PaletteLight
+{
+	Default
+	{
+		ReactionTime 30;
+		Args 0,0,0,250;
+	}
+}
+
+Class FatChodeRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 3.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG0 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.06);
+		Stop;
+	}
+}
+
+Class FatChodeImpact : Actor
+{
+	double realangle, realpitch;
+
+	Default
+	{
+		Obituary "$O_SILVERBULLET2";
+		DamageType 'Explodium';
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+NOTELEPORT;
+		+NOINTERACTION;
+		Scale 4.5;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,600,40000,250,120,DE_THRUWALLS|DE_EXTRAZTHRUST);
+		A_AlertMonsters(swwm_uncapalert?0:8000);
+		A_QuakeEx(7,7,7,50,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:800,rollIntensity:1.);
+		A_StartSound("silverbullet/chode",CHAN_VOICE,CHANF_DEFAULT,1.,.35);
+		A_SprayDecal("BigPock",-64);
+		A_SprayDecal("HugeWallCrack",-64);
+		A_SprayDecal("WumboRocketBlast",-64);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[Silverbullet](15,25);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Silverbullet](-.4,.4),FRandom[Silverbullet](-.4,.4),FRandom[Silverbullet](-.4,.4))).unit()*FRandom[Silverbullet](.4,2.);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= 1.8;
+			s.special1 = Random[Silverbullet](1,4);
+			s.SetShade(Color(1,1,1)*Random[Silverbullet](96,192));
+		}
+		numpt = Random[Silverbullet](6,9);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Silverbullet](-1,1),FRandom[Silverbullet](-1,1),FRandom[Silverbullet](-1,1)).unit()*FRandom[Silverbullet](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.scale *= 1.3;
+			s.vel = pvel;
+		}
+		numpt = Random[Silverbullet](10,15);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Silverbullet](-.6,.6),FRandom[Silverbullet](-.6,.6),FRandom[Silverbullet](-.6,.6))).unit()*FRandom[Silverbullet](6,20);
+			let s = Spawn("SWWMChip",pos);
+			s.scale *= 1.6;
+			s.vel = pvel;
+		}
+		numpt = Random[Silverbullet](16,20);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("FatChodeExtraArm",pos);
+			s.target = target;
+		}
+		numpt = Random[Silverbullet](8,10);
+		Vector3 y, z, dir;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(realpitch,realangle,0);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let e = Spawn("FatChodeExplosionArm",pos);
+			e.target = target;
+			a = FRandom[Silverbullet](0,360);
+			s = FRandom[Silverbullet](0,.2);
+			dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
+			e.angle = atan2(dir.y,dir.x);
+			e.pitch = asin(-dir.z);
+		}
+		Spawn("ExploLight3",pos);
+		Spawn("FatChodeRing",pos);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 1 Bright;
+		Stop;
+	}
+}
+
+Class FatChodeExtraArm : ExplodiumMagArm
+{
+	Default
+	{
+		Obituary "$O_SILVERBULLET2";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		vel *= 1.5;
+	}
+}
+
+Class FatChodeExplosionTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+		Scale 3.;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX1 ACEGIKMOQSUWY[ 1 Bright;
+		Stop;
+	}
+}
+
+Class FatChodeExplosionArm : Actor
+{
+	Default
+	{
+		Obituary "$O_SILVERBULLET2";
+		DamageType 'Explodium';
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOBLOCKMAP;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		reactiontime = Random[ExploS](15,20);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](20.,30.);
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			if ( !(ReactionTime%2) )
+				SWWMUtility.DoExplosion(self,10+reactiontime,8000+1500*reactiontime,80+5*reactiontime,50,DE_THRUWALLS);
+			if ( level.IsPointInLevel(pos) )
+			{
+				A_SprayDecal("HugeRocketBlast",-32);
+				Spawn("FatChodeExplosionTrail",pos);
+				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+				let s = Spawn("SWWMHalfSmoke",pos);
+				s.vel = pvel+vel*.2;
+				s.SetShade(Color(1,1,1)*Random[ExploS](64,224));
+				s.special1 = Random[ExploS](1,4);
+				s.scale *= 2.4;
+				s.alpha *= .1+.4*(ReactionTime/15.);
+			}
+			A_CountDown();
+		}
+		Wait;
+	}
+}

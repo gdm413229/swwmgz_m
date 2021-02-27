@@ -1,0 +1,536 @@
+// class replacements
+
+extend Class SWWMHandler
+{
+	bool nugflip;	// h/a nugget flip-flop spawn counter
+
+	override void CheckReplacee( ReplacedEvent e )
+	{
+		if ( e.Replacement is 'DSparilHax' )
+			e.Replacee = 'Sorcerer2';
+	}
+
+	private Class<Actor> GetDRLAReplacement( Class<Actor> a )
+	{
+		static const String refpool[] =
+		{
+			"Zombieman",
+			"Shotgunguy",
+			"Chaingunguy",
+			"DoomImp",
+			"Demon",
+			"Spectre",
+			"LostSoul",
+			"Cacodemon",
+			"HellKnight",
+			"BaronOfHell",
+			"Arachnotron",
+			"PainElemental",
+			"Revenant",
+			"Fatso",
+			"Archvile",
+			"Cyberdemon",
+			"SpiderMastermind",
+			"BossEye",
+			"BossBrain"
+		};
+		static const String babypool[] =
+		{
+			"RLFormerHumanPistol",
+			"RLFormerSergeantShotgun",
+			"RLFormerCommandoChaingun",
+			"RLImp",
+			"RLDemon",
+			"RLSpectre",
+			"RLLostSoul",
+			"RLCacodemon",
+			"RLHellKnight",
+			"RLBaronOfHell",
+			"RLArachnotron",
+			"RLPainElemental",
+			"RLRevenant",
+			"RLMancubus",
+			"RLArchvile",
+			"RLCyberdemon",
+			"RLSpiderMastermindVariantSpawner",
+			"RLEasyBossEye",
+			"RLBossBrain"
+		};
+		static const String easypool[] =
+		{
+			"RLFormerHumanNoArmageddonSpawner",
+			"RLFormerSergeantNoArmageddonSpawner",
+			"RLFormerCommandoNoArmageddonSpawner",
+			"RLImpNoArmageddonSpawner",
+			"RLDemonNoArmageddonSpawner",
+			"RLSpectreNoArmageddonSpawner",
+			"RLLostSoulNoArmageddonSpawner",
+			"RLCacodemonNoArmageddonSpawner",
+			"RLHellKnightNoArmageddonSpawner",
+			"RLBaronOfHellNoArmageddonSpawner",
+			"RLArachnotronNoArmageddonSpawner",
+			"RLPainElementalNoArmageddonSpawner",
+			"RLRevenantNoArmageddonSpawner",
+			"RLMancubusNoArmageddonSpawner",
+			"RLArchvileNoArmageddonSpawner",
+			"RLCyberdemonNoArmageddonSpawner",
+			"RLSpiderMastermindNoArmageddonSpawner",
+			"RLBossEye",
+			"RLBossBrain"
+		};
+		static const String normalpool[] =
+		{
+			"RLFormerHumanNoArmageddonSpawner",
+			"RLFormerSergeantNoArmageddonSpawner",
+			"RLFormerCommandoNoArmageddonSpawner",
+			"RLImpNoArmageddonSpawner",
+			"RLDemonNoArmageddonSpawner",
+			"RLSpectreNoArmageddonSpawner",
+			"RLLostSoulNoArmageddonSpawner",
+			"RLCacodemonNoArmageddonSpawner",
+			"RLHellKnightNoArmageddonSpawner",
+			"RLBaronOfHellNoArmageddonSpawner",
+			"RLArachnotronNoArmageddonSpawner",
+			"RLPainElementalNoArmageddonSpawner",
+			"RLRevenantNoArmageddonSpawner",
+			"RLMancubusNoArmageddonSpawner",
+			"RLArchvileNoArmageddonSpawner",
+			"RLCyberdemonNoArmageddonSpawner",
+			"RLSpiderMastermindNoArmageddonSpawner",
+			"RLBossEye",
+			"RLBossBrain"
+		};
+		static const String hardpool[] =
+		{
+			"RLFormerHumanSpawner",
+			"RLFormerSergeantSpawner",
+			"RLFormerCommandoSpawner",
+			"RLImpSpawner",
+			"RLDemonSpawner",
+			"RLSpectreSpawner",
+			"RLLostSoulSpawner",
+			"RLCacodemonSpawner",
+			"RLHellKnightSpawner",
+			"RLBaronOfHellSpawner",
+			"RLArachnotronSpawner",
+			"RLPainElementalSpawner",
+			"RLRevenantSpawner",
+			"RLMancubusSpawner",
+			"RLArchvileSpawner",
+			"RLCyberdemonSpawner",
+			"RLSpiderMastermindSpawner",
+			"RLUVBossEye",
+			"RLBossBrain"
+		};
+		static const String nightmarepool[] =
+		{
+			"RLEliteFormerHumanSpawner",
+			"RLEliteFormerSergeantSpawner",
+			"RLEliteFormerCommandoSpawner",
+			"RLNightmareImp",
+			"RLNightmareDemon",
+			"RLNightmareSpectre",
+			"RLNightmareLostSoul",
+			"RLNightmareCacodemon",
+			"RLNightmareHellKnight",
+			"RLNightmareBaronOfHell",
+			"RLNightmareArachnotron",
+			"RLNightmarePainElemental",
+			"RLNightmareRevenant",
+			"RLNightmareMancubus",
+			"RLNightmareArchvile",
+			"RLNightmareCyberdemonSpawner",
+			"RLNightmareSpiderMastermindSpawner",
+			"RLNightmareBossEye",
+			"RLNightmareBossBrain"
+		};
+		static const String technophobiapool[] =
+		{
+			"RLFormerCyborgBattleRifle",
+			"RLFormerCyborgBattleRifle",
+			"RLFormerCyborgBattleRifle",
+			"RLCyberneticImp",
+			"RLCyberneticDemon",
+			"RLCyberneticSpectre",
+			"RLCyberneticLostSoul",
+			"RLCacodemon",
+			"RLCyberneticHellKnight",
+			"RLCyberneticBaronOfHell",
+			"RLCyberneticArachnotron",
+			"RLCyberneticPainElemental",
+			"RLCyberneticRevenant",
+			"RLCyberneticMancubus",
+			"RLCyberneticArchvile",
+			"RLCyberneticCyberdemonSpawner",
+			"RLCyberneticSpiderMastermindSpawner",
+			"RLTechnophobiaBossEye",
+			"RLTechnophobiaBossBrain"
+		};
+		static const String armageddonpool[] =
+		{
+			"RLFormerAssaultTrooper",
+			"RLFormerOverwatch",
+			"RLFormerShocktrooper",
+			"RLArmageddonImp",
+			"RLArmageddonDemon",
+			"RLArmageddonSpectreSpawner",
+			"RLTheHungrySpawner",
+			"RLArmageddonCacodemon",
+			"RLArmageddonHellKnightSpawner",
+			"RLArmageddonBaronOfHell",
+			"RLArmageddonArachnotron",
+			"RLArmageddonPainElemental",
+			"RLArmageddonRevenant",
+			"RLArmageddonMancubus",
+			"RLArmageddonArchvileSpawner",
+			"RLArmageddonCyberdemonSpawner",
+			"RLArmageddonSpiderMastermindSpawner",
+			"RLArmageddonBossEye",
+			"RLArmageddonBossBrain"
+		};
+		static const String adaptivepool[] =
+		{
+			"RLAdaptiveFormerHuman",
+			"RLAdaptiveFormerSergeant",
+			"RLAdaptiveFormerCommando",
+			"RLAdaptiveImp",
+			"RLAdaptiveDemon",
+			"RLAdaptiveSpectre",
+			"RLAdaptiveLostSoul",
+			"RLAdaptiveCacodemon",
+			"RLAdaptiveHellKnight",
+			"RLAdaptiveBaronOfHell",
+			"RLAdaptiveArachnotron",
+			"RLAdaptivePainElemental",
+			"RLAdaptiveRevenant",
+			"RLAdaptiveMancubus",
+			"RLAdaptiveArchvile",
+			"RLAdaptiveCyberdemon",
+			"RLAdaptiveSpiderMastermind",
+			"RLUVBossEye",
+			"RLBossBrain"
+		};
+		switch ( swwm_drlaskill )
+		{
+		case 0:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return babypool[i];
+			}
+			break;
+		case 1:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return easypool[i];
+			}
+			break;
+		case 2:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return normalpool[i];
+			}
+			break;
+		case 3:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return hardpool[i];
+			}
+			break;
+		case 4:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return nightmarepool[i];
+			}
+			break;
+		case 5:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return technophobiapool[i];
+			}
+			break;
+		case 6:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return armageddonpool[i];
+			}
+			break;
+		case 7:
+		default:
+			for ( int i=0; i<18; i++ )
+			{
+				if ( !(a is refpool[i]) ) continue;
+				return adaptivepool[i];
+			}
+			break;
+		}
+		return null;
+	}
+
+	override void CheckReplacement( ReplaceEvent e )
+	{
+		// respect final replacements
+		if ( e.IsFinal ) return;
+		// shell types (sorted by rarity
+		static const Class<Actor> redpool[] = {"RedShell","RedShell2","RedShell4"};
+		static const Class<Actor> greenpool[] = {"GreenShell","GreenShell2","GreenShell4"};
+		static const Class<Actor> whitepool[] = {"WhiteShell","WhiteShell2"};
+		static const Class<Actor> purplepool[] = {"PurpleShell","PurpleShell2","PurpleShell4"};
+		static const Class<Actor> bluepool[] = {"BlueShell","BlueShell2","BlueShell4"};
+		static const Class<Actor> blackpool[] = {"BlackShell","BlackShell2"};
+		// DRLA Monsters stuff
+		if ( hasdrlamonsters )
+		{
+			let rep = GetDRLAReplacement(e.Replacee);
+			if ( rep )
+			{
+				e.Replacement = rep;
+				e.IsFinal = true;
+				return;
+			}
+		}
+		// only replace vanilla blood if no other gore mod is doing it
+		if ( (e.Replacee == "Blood") && (!e.Replacement || e.Replacement == "Blood") && swwm_blood ) e.Replacement = "mkBlood";
+		else if ( e.Replacee is 'ItemFog' ) e.Replacement = 'SWWMItemFog';
+		else if ( e.Replacee is 'TeleportFog' ) e.Replacement = 'SWWMTeleportFog';
+		else if ( (e.Replacee is 'CommanderKeen') && (!e.Replacement || (e.Replacement == 'CommanderKeen')) )
+		{
+			let def = GetDefaultByType(e.Replacee);
+			bool dehackery = false;
+			for ( State s=def.SpawnState; s; s=s.NextState )
+			{
+				if ( s.bDEHACKED ) dehackery = true;
+				// keep checking until we hit a loop, just in case
+				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+			}
+			if ( dehackery ) return;
+			e.Replacement = 'SWWMHangingKeen';
+		}
+		else if ( (e.Replacee is 'BossBrain') && (!e.Replacement || (e.Replacement == 'BossBrain')) )
+		{
+			let def = GetDefaultByType(e.Replacee);
+			bool dehackery = false;
+			for ( State s=def.SpawnState; s; s=s.NextState )
+			{
+				if ( s.bDEHACKED ) dehackery = true;
+				// keep checking until we hit a loop, just in case
+				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+			}
+			if ( dehackery ) return;
+			e.Replacement = 'SWWMBossBrain';
+		}
+		else if ( e.Replacee is 'RedCard' )
+		{
+			if ( level.GetChecksum() ~== "3805A661D5C4523AFF7BF86991071043" )
+				return;	// don't replace red key in Equinox MAP13
+			e.Replacement = 'SWWMRedCard';
+		}
+		else if ( e.Replacee is 'BlueCard' ) e.Replacement = 'SWWMBlueCard';
+		else if ( e.Replacee is 'YellowCard' ) e.Replacement = 'SWWMYellowCard';
+		else if ( e.Replacee.GetClassName() == 'KDiZDSilverKey' ) e.Replacement = 'SWWMSilverCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'KDiZDGreenKey' ) e.Replacement = 'SWWMGreenCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'KDiZDOrangeKey' ) e.Replacement = 'SWWMOrangeCardKDiZD';
+		else if ( e.Replacee.GetClassName() == 'GreenCard' ) e.Replacement = 'SWWMGreenCard';
+		else if ( e.Replacee is 'RedSkull' ) e.Replacement = 'SWWMRedSkull';
+		else if ( e.Replacee is 'BlueSkull' ) e.Replacement = 'SWWMBlueSkull';
+		else if ( e.Replacee is 'YellowSkull' ) e.Replacement = 'SWWMYellowSkull';
+		else if ( e.Replacee is 'KeyGreen' ) e.Replacement = 'SWWMKeyGreen';
+		else if ( e.Replacee is 'KeyBlue' ) e.Replacement = 'SWWMKeyBlue';
+		else if ( e.Replacee is 'KeyYellow' ) e.Replacement = 'SWWMKeyYellow';
+		else if ( e.Replacee.GetClassName() == 'KeyRed' ) e.Replacement = 'SWWMKeyRed';
+		else if ( (e.Replacee is 'Chainsaw') || (e.Replacee is 'Gauntlets') || (e.Replacee is 'FWeapAxe') ) e.Replacement = SWWMUtility.PickSWWMSlot1();
+		else if ( (e.Replacee is 'Fist') || (e.Replacee is 'Staff') ) e.Replacement = 'DeepImpact';
+		else if ( (e.Replacee is 'Pistol') || (e.Replacee is 'GoldWand') || (e.Replacee is 'FWeapFist') || (e.Replacee is 'CWeapMace') || (e.Replacee is 'MWeapWand') ) e.Replacement = SWWMUtility.PickSWWMSlot2();
+		else if ( (e.Replacee is 'Shotgun') || (e.Replacee is 'CWeapStaff') ) e.Replacement = SWWMUtility.IsDoomOne()?SWWMUtility.PickHereticSlot3():SWWMUtility.PickSWWMSlot3();
+		else if ( (e.Replacee is 'SuperShotgun') || (e.Replacee is 'MWeapFrost') ) e.Replacement = SWWMUtility.PickSWWMSlot4();
+		else if ( e.Replacee is 'Crossbow' ) e.Replacement = SWWMUtility.PickHereticSlot3();
+		else if ( (e.Replacee is 'Chaingun') || (e.Replacee is 'Blaster') || (e.Replacee is 'FWeaponPiece3') ) e.Replacement = SWWMUtility.PickSWWMSlot5();
+		else if ( (e.Replacee is 'RocketLauncher') || (e.Replacee is 'PhoenixRod') || (e.Replacee is 'FWeapHammer') ) e.Replacement = SWWMUtility.PickSWWMSlot6();
+		else if ( (e.Replacee is 'PlasmaRifle') || (e.Replacee is 'SkullRod') ) e.Replacement = SWWMUtility.PickDoomSlot6();
+		else if ( e.Replacee is 'CWeapFlame' ) e.Replacement = SWWMUtility.PickSWWMSlot7();
+		else if ( e.Replacee is 'MWeapLightning' ) e.Replacement = SWWMUtility.PickSWWMSlot8();
+		else if ( (e.Replacee is 'BFG9000') || (e.Replacee is 'Mace') ) e.Replacement = SWWMUtility.PickDoomSlot7();
+		else if ( e.Replacee is 'CWeaponPiece2' ) e.Replacement = SWWMUtility.PickSWWMSlot9();
+		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = SWWMUtility.PickSWWMSlot0();
+		else if ( (e.Replacee is 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BigAmmo';
+			else */switch( Random[Replacements](0,14) )
+			{
+			case 0:
+			case 1:
+			case 2:
+				e.Replacement = redpool[Random[Replacements](1,2)];
+				break;
+			case 3:
+			case 4:
+			case 5:
+				e.Replacement = greenpool[Random[Replacements](1,2)];
+				break;
+			case 6:
+			case 7:
+			case 8:
+				e.Replacement = whitepool[Random[Replacements](0,1)];
+				break;
+			case 9:
+			case 10:
+			case 11:
+				e.Replacement = purplepool[Random[Replacements](0,2)];
+				break;
+			case 12:
+			case 13:
+				e.Replacement = bluepool[Random[Replacements](0,2)];
+				break;
+			case 14:
+				e.Replacement = blackpool[Random[Replacements](0,1)];
+				break;
+			}
+		}
+		else if ( (e.Replacee is 'Shell') || (e.Replacee is 'CrossbowAmmo') )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BundleSpawn';
+			else */switch( Random[Replacements](0,13) )
+			{
+			case 0:
+			case 1:
+			case 2:
+				e.Replacement = redpool[Random[Replacements](0,1)];
+				break;
+			case 3:
+			case 4:
+			case 5:
+				e.Replacement = greenpool[Random[Replacements](0,1)];
+				break;
+			case 6:
+			case 7:
+				e.Replacement = whitepool[0];
+				break;
+			case 8:
+			case 9:
+			case 10:
+				e.Replacement = purplepool[Random[Replacements](0,1)];
+				break;
+			case 11:
+			case 12:
+				e.Replacement = bluepool[Random[Replacements](0,1)];
+				break;
+			case 13:
+				e.Replacement = blackpool[0];
+				break;
+			}
+		}
+		else if ( e.Replacee is 'ClipBox' )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenSmallAmmo':'SheenBigAmmo';
+			else */e.Replacement = Random[Replacements](0,4)?'EvisceratorShell':Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+		}
+		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = /*(e.Replacee is 'GoldWandHefty')?'SheenSmallAmmo':'SheenTinyAmmo'*/'SWWMNothing';
+		else if ( e.Replacee is 'BlasterHefty' )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenBigAmmo':'SheenSmallAmmo';
+			else */e.Replacement = Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+		}
+		else if ( e.Replacee is 'BlasterAmmo' )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenSmallAmmo':'SheenTinyAmmo';
+			else */e.Replacement = 'EvisceratorShell';
+		}
+		else if ( (e.Replacee is 'RocketBox') || (e.Replacee is 'PhoenixRodHefty') || (e.Replacee is 'MaceHefty') )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'QuadravolAmmo':'QuadravolAmmoBundleSpawn';
+			else */switch ( Random[Replacements](0,11) )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+				if ( Random[Replacements](0,5) ) e.Replacement = 'HellblazerMissiles';
+				else if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerMissileTrioSpawn';
+				else e.Replacement = 'HellblazerMissileMag';
+				break;
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+				if ( Random[Replacements](0,6) ) e.Replacement = 'HellblazerCrackshots';
+				else e.Replacement = 'HellblazerCrackshotMag';
+				break;
+			case 9:
+			case 10:
+				if ( Random[Replacements](0,8) ) e.Replacement = 'HellblazerRavagers';
+				else e.Replacement = 'HellblazerRavagerMag';
+				break;
+			case 11:
+				if ( Random[Replacements](0,10) ) e.Replacement = 'HellblazerWarheads';
+				else e.Replacement = 'HellblazerWarheadMag';
+				break;
+			}
+		}
+		else if ( (e.Replacee is 'RocketAmmo') || (e.Replacee is 'PhoenixRodAmmo') || (e.Replacee is 'MaceAmmo') )
+		{
+			/*if ( Random[Replacements](0,1) ) e.Replacement = 'QuadravolAmmo';
+			else */e.Replacement = Random[Replacements](0,2)?'HellblazerMissiles':'HellblazerCrackshots';
+		}
+		else if ( (e.Replacee is 'CellPack') || (e.Replacee is 'SkullRodHefty') )
+		{
+			/*if ( Random[Replacements](0,1) )
+			{
+				if ( !Random[Replacements](0,2) ) e.Replacement = Random[Replacements](0,3)?'EMPCoreBundleSpawn':'EMPCore';
+				else if ( Random[Replacements](0,2) ) e.Replacement = 'RayBoltBundleSpawn';
+				else e.Replacement = 'RayAmmo';
+			}
+			else */if ( !Random[Replacements](0,2) )
+			{
+				if ( Random[Replacements](0,3) ) e.Replacement = Random[Replacements](0,2)?'SilverBulletsBundleSpawn':'SilverBullets2BundleSpawn';
+				else e.Replacement = Random[Replacements](0,2)?'SilverBulletAmmo':'SilverBulletAmmo2';
+			}
+			else if ( Random[Replacements](0,2) ) e.Replacement = 'CandyGunBulletsBundleSpawn';
+			else e.Replacement = 'CandyGunAmmo';
+		}
+		else if ( (e.Replacee is 'Cell') || (e.Replacee is 'SkullRodAmmo') )
+		{
+			if ( !Random[Replacements](0,2) ) e.Replacement = /*!Random[Replacements](0,2)?'RayBattery':*/Random[Replacements](0,2)?'HellblazerRavagers':'HellblazerWarheads';
+			else if ( Random[Replacements](0,2) ) e.Replacement = /*Random[Replacements](0,1)?'DarkCanister':*/'SparkUnit';
+			else if ( !Random[Replacements](0,3) ) e.Replacement = /*Random[Replacements](0,1)?'RayBolt':*/'CandyGunBullets';
+			else e.Replacement = /*Random[Replacements](0,1)?'EMPCore':*/Random[Replacements](0,2)?'SilverBullets':'SilverBullets2';
+		}
+		else if ( e.Replacee is 'Mana1' ) e.Replacement = 'FabricatorTier1';
+		else if ( e.Replacee is 'Mana2' ) e.Replacement = 'FabricatorTier2';
+		else if ( e.Replacee is 'Mana3' ) e.Replacement = 'FabricatorTier3';
+		else if ( e.Replacee is 'ArtiBoostMana' ) e.Replacement = 'FabricatorTier4';
+		else if ( (e.Replacee is 'Backpack') || (e.Replacee is 'BagOfHolding') || (e.Replacee is 'ArtiPork') ) e.Replacement = 'HammerspaceEmbiggener';
+		else if ( (e.Replacee is 'FWeaponPiece1') || (e.Replacee is 'FWeaponPiece2')
+			|| (e.Replacee is 'CWeaponPiece1') || (e.Replacee is 'CWeaponPiece3')
+			|| (e.Replacee is 'MWeaponPiece2') || (e.Replacee is 'MWeaponPiece3') ) e.Replacement = 'SWWMNothing';
+		else if ( e.Replacee is 'ArmorBonus' ) e.Replacement = 'ArmorNuggetItem';
+		else if ( e.Replacee is 'HealthBonus' ) e.Replacement = 'HealthNuggetItem';
+		else if ( (e.Replacee is 'ArtiTimeBomb') || (e.Replacee is 'ArtiBlastRadius') || (e.Replacee is 'ArtiPoisonBag') || (e.Replacee is 'ArtiHealingRadius') ) e.Replacement = (nugflip=!nugflip)?'HealthNuggetBundleSpawn':'ArmorNuggetBundleSpawn';
+		else if ( (e.Replacee is 'HealthBonus') ) e.Replacement = 'HealthNuggetItem';
+		else if ( (e.Replacee is 'Stimpack') || (e.Replacee is 'CrystalVial') ) e.Replacement = 'TetraHealthItem';
+		else if ( (e.Replacee is 'Medikit') || (e.Replacee is 'ArtiHealth') ) e.Replacement = 'CubeHealthItem';
+		else if ( (e.Replacee is 'Soulsphere') || (e.Replacee is 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';
+		else if ( (e.Replacee is 'Megasphere') || (e.Replacee is 'ArtiEgg') || (e.Replacee is 'ArtiBoostArmor') ) e.Replacement = 'GrilledCheeseSandwich';
+		else if ( (e.Replacee is 'Blursphere') || (e.Replacee is 'ArtiInvisibility') ) e.Replacement = 'GhostArtifact';
+		else if ( e.Replacee is 'Radsuit' ) e.Replacement = 'EBarrier';
+		else if ( (e.Replacee is 'ArtiFly') ) e.Replacement = 'GravitySuppressor';
+		else if ( (e.Replacee is 'InvulnerabilitySphere') || (e.Replacee is 'ArtiInvulnerability') || (e.Replacee is 'ArtiInvulnerability2') ) e.Replacement = 'FuckingInvinciball';
+		else if ( (e.Replacee is 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'Ragekit';
+		else if ( (e.Replacee is 'AllMap') || (e.Replacee is 'SuperMap') ) e.Replacement = 'Omnisight';
+		else if ( (e.Replacee is 'Infrared') || (e.Replacee is 'ArtiTorch') ) e.Replacement = 'SWWMLamp';
+		else if ( (e.Replacee is 'GreenArmor') || (e.Replacee is 'SilverShield') || (e.Replacee is 'PlatinumHelm') || (e.Replacee is 'AmuletOfWarding') ) e.Replacement = 'BlastSuitItem';
+		else if ( (e.Replacee is 'BlueArmor') || (e.Replacee is 'EnchantedShield') || (e.Replacee is 'MeshArmor') || (e.Replacee is 'FalconShield') ) e.Replacement = 'WarArmorItem';
+		else if ( (e.Replacee is 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'ChanceboxSpawner';
+		else if ( e.Replacee is 'ArtiTeleport' ) e.Replacement = (gameinfo.GameType&GAME_Hexen)?'ChanceboxSpawner':'SWWMNothing';
+		else return;
+		// this last part is kind of ugly, but it works
+		// guarantees that OUR replacements are all final
+		e.IsFinal = true;
+	}
+}

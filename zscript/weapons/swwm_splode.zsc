@@ -1,0 +1,973 @@
+// Munch Innovations Explodium Gun (from SWWM series)
+// Slot 2, replaces Pistol, Elven Wand, Hexen starting weapons
+
+Class ExplodiumGun : SWWMWeapon
+{
+	int clipcount;
+	bool chambered;
+	bool preinit;
+	double casex, casey;
+	transient ui TextureID WeaponBox;
+	transient ui Font TewiFont;
+
+	Property ClipCount : ClipCount;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/ExplodiumDisplay.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Screen.DrawTexture(WeaponBox,false,bx-24,by-22,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-22,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-19,by-14,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override void HudTick()
+	{
+		if ( !Owner ) return;
+		[cpos, ccol] = TraceForCrosshair();
+		let sw = SWWMWeapon(SisterWeapon);
+		// avoid jumpy switching
+		if ( (Owner.player.PendingWeapon is 'SWWMWeapon') && (Owner.player.PendingWeapon != sw) )
+		{
+			SWWMWeapon(Owner.player.PendingWeapon).cpos = cpos;
+			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = lagvpos;
+		}
+		[sw.cpos, sw.ccol] = sw.TraceForCrosshair();
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		if ( Owner.player.ReadyWeapon == SisterWeapon ) return (10.,3.5,-2.);
+		return (10.,3.,-2.);
+	}
+
+	override bool HandlePickup( Inventory item )
+	{
+		// can't hold both weapons at once
+		if ( swwm_swapweapons && IsSwapWeapon(item) )
+			return true;
+		if ( (item.GetClass() == 'ExplodiumGun') && !item.ShouldStay() )
+		{
+			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
+			{
+				// sell excess
+				int sellprice = int(Stamina*.5);
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2));
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+				item.bPickupGood = true;
+			}
+			// give a spare
+			if ( Amount < MaxAmount )
+			{
+				Amount++;
+				// if the gun has status info, override our sister
+				let eg = ExplodiumGun(item);
+				if ( eg && eg.preinit )
+				{
+					DualExplodiumGun(SisterWeapon).chambered = eg.chambered;
+					DualExplodiumGun(SisterWeapon).clipcount = eg.clipcount;
+				}
+				else
+				{
+					// otherwise use defaults
+					DualExplodiumGun(SisterWeapon).chambered = true;
+					DualExplodiumGun(SisterWeapon).clipcount = DualExplodiumGun(SisterWeapon).default.clipcount;
+				}
+				// autoswitch if enabled
+				if ( !Owner.player.GetNeverSwitch() )
+					Owner.player.PendingWeapon = SisterWeapon;
+				item.bPickupGood = true;
+			}
+			return true;
+		}
+		return Weapon.HandlePickup(item);
+	}
+
+	action void A_Schutt()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.chambered = invoker.clipcount;
+		invoker.clipcount = max(invoker.clipcount-1,0);
+		A_StartSound("explodium/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(5,5,5,3,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.5);
+		A_ZoomFactor(.96,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		SWWMHandler.DoFlash(self,Color(64,255,224,64),3);
+		A_AlertMonsters(swwm_uncapalert?0:5000);
+		A_PlayerFire();
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMUtility.DoKnockback(self,-x,4000.);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-2*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.002);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		FLineTraceData d;
+		LineTrace(atan2(dir.y,dir.x),10000,asin(-dir.z),TRF_ABSPOSITION|TRF_NOSKY,origin.z,origin.x,origin.y,d);
+		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
+		if ( d.HitType == TRACE_HitActor )
+		{
+			int dmg = 20;
+			// might as well apply explosion on top
+			if ( dmg >= d.HitActor.Health ) dmg += 25;
+			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
+			{
+				let p = Spawn("SWWMBulletImpact",d.HitLocation);
+				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+				p.pitch = asin(d.HitDir.z);
+			}
+			else
+			{
+				d.HitActor.TraceBleed(dmg,self);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+			}
+			let b = Spawn("ExplodiumBulletImpact",d.HitLocation-d.HitDir*4.);
+			b.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+			b.pitch = asin(d.HitDir.z);
+			b.target = self;
+		}
+		else if ( d.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+			let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
+			b.angle = atan2(hitnormal.y,hitnormal.x);
+			b.pitch = asin(-hitnormal.z);
+			b.target = self;
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
+		}
+		for ( int i=0; i<6; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= .15;
+			s.alpha *= .5;
+			s.speed *= .2;
+			s.vel += vel*.5+x*FRandom[Explodium](.2,.5);
+		}
+	}
+
+	action void A_ThrowMag()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.005);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("ExplodiumMagProj",origin);
+		p.special1 = invoker.special1;
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		if ( p.waterlevel <= 0 ) p.vel.z += 5.;
+		p.vel += vel*.5;
+	}
+
+	action void A_DropMag()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
+		let c = Spawn("ExplodiumMag",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	action void A_DropCasing()
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+8*y-10*z);
+		let c = Spawn("ExplodiumCasing",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](2,4)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		return true;
+	}
+
+	override bool Use( bool pickup )
+	{
+		// switch to dual if already selected
+		if ( Owner.player && (Owner.player.ReadyWeapon == self) && (Amount > 1) )
+		{
+			Owner.player.PendingWeapon = SisterWeapon;
+			return false;
+		}
+		return Super.Use(pickup);
+	}
+
+	override Inventory CreateTossable( int amt )
+	{
+		let copy = ExplodiumGun(Inventory.CreateTossable(1));
+		if ( !copy ) return null;
+		// destroy sister weapon if we're removing ourselves
+		if ( copy == self )
+		{
+			copy.preinit = true;	// need this in case we get picked up again out of order
+			if ( SisterWeapon )
+			{
+				SisterWeapon.SisterWeapon = null;
+				SisterWeapon.Destroy();
+			}
+		}
+		else if ( SisterWeapon )
+		{
+			// pass sister's clipcount and chamber status to copy
+			copy.chambered = DualExplodiumGun(SisterWeapon).chambered;
+			copy.clipcount = DualExplodiumGun(SisterWeapon).clipcount;
+			copy.preinit = true;	// signal that this copy has preset info
+			// forcibly switch back from sister weapon
+			if ( Owner.player.ReadyWeapon == SisterWeapon )
+			{
+				Owner.player.ReadyWeapon = self;
+				Owner.player.SetPSprite(PSP_WEAPON,FindState("Ready"));
+				Owner.player.SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+			}
+		}
+		return copy;
+	}
+
+	Default
+	{
+		Tag "$T_EXPLODIUM";
+		Inventory.PickupMessage "$T_EXPLODIUM";
+		Obituary "$O_EXPLODIUM";
+		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun.png";
+		Weapon.UpSound "explodium/select";
+		Weapon.SlotNumber 2;
+		Weapon.SelectionOrder 1000;
+		Inventory.MaxAmount 2;
+		Weapon.SisterWeapon "DualExplodiumGun";
+		Stamina 8000;
+		ExplodiumGun.ClipCount 7;
+		+WEAPON.EXPLOSIVE;
+		Radius 12;
+		Height 24;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 B 2 A_FullRaise();
+		XZW2 CDEFGH 2;
+		Goto Ready;
+	Ready:
+		XZW2 A 1
+		{
+			if ( (invoker.clipcount <= 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
+			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
+			else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1|WRF_ALLOWRELOAD);
+		}
+		Wait;
+	Fire:
+		XZW2 A 1 A_Schutt();
+		XZW2 I 1;
+		XZW2 J 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZW2 KLMNOP 1;
+		XZW2 Q 2;
+		Goto Ready;
+	Casing:
+		XZWA A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Explodium](-1.,5.);
+			invoker.casey = FRandom[Explodium](-2.,1.);
+		}
+		XZWA BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing();
+		Stop;
+	AltFire:
+		XZW2 A 2
+		{
+			A_PlayerReload();
+			return A_JumpIf(invoker.clipcount<=0,"Reload");
+		}
+		XZW5 NO 2;
+		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 QRSTUVWXYZ 1;
+		XZW6 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 B 1;
+		XZW6 C 1
+		{
+			A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.special1 = invoker.clipcount;
+			invoker.clipcount = 0;
+		}
+		XZW6 D 1
+		{
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
+		XZW6 EFGHIJKLMNOPRS 1;
+		XZW6 T 1 A_ThrowMag();
+		XZW6 UV 2;
+		XZW6 W 2 A_PlayerReload();
+		XZW6 XY 2;
+		XZW6 Z 4;
+		Goto ReloadEnd;
+	Reload:
+		XZW2 A 1
+		{
+			if ( invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
+			A_PlayerReload();
+			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
+			return ResolveState(null);
+		}
+		XZW2 TUVWXYZ 1;
+		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 B 1 { invoker.clipcount = 0; }
+		XZW3 C 1;
+		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 EFGH 1;
+		XZW3 I 1 A_DropMag();
+		Goto ReloadEnd;
+	ReloadEmpty:
+		XZW2 A 1;
+		XZW3 JKLMNOP 1;
+		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 RS 1;
+		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 UVWX 1;
+		XZW3 Y 1 A_DropMag();
+		Goto ReloadEnd;
+	ReloadEnd:
+		XZW3 Z 1;
+		XZW4 ABCDE 1;
+		XZW4 F 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 GHIJKLMNOPQ 1;
+		XZW4 R 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); invoker.clipcount = invoker.default.clipcount; }
+		XZW4 STUV 1;
+		XZW2 A 1 A_JumpIf(!invoker.chambered,"Slide");
+		Goto Ready;
+	Slide:
+		XZW2 A 1;
+		XZW4 WXY 1;
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 BC 1;
+		XZW5 D 1 { invoker.chambered = true; invoker.clipcount--; }
+		XZW5 EFG 1;
+		XZW5 H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 IJKLM 1;
+		Goto Ready;
+	Zoom:
+		XZW2 A 1
+		{
+			A_PlayerCheckGun();
+			return A_Jump(256,"Zoom1","Zoom2","Zoom2");
+		}
+		Goto Ready;
+	CheckBullet:
+		XZW2 A 1;
+		XZW7 ABCDE 1;
+		XZW7 F 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 GHIJKLMNOP 1;
+		XZW7 Q 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 RS 1;
+		Goto Ready;
+	User1:
+		XZW2 A 1;
+		XZW7 TU 1;
+	User1Hold:
+		XZW7 V 1
+		{
+			A_PlayerMelee(true);
+			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_Parry(9);
+		}
+		XZW7 WX 1;
+		XZW7 Y 1 A_Melee();
+		XZW7 Z 2;
+		XZW8 ABCDE 2;
+		XZW8 F 1 A_JumpIf(player.cmd.buttons&BT_USER1,"User1Hold");
+		XZW2 B 0 { invoker.PlayUpSound(self); }
+		Goto Select;
+	Zoom1:
+		XZW2 A 2 A_StartSound("explodium/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 GHIJKLMNOPQRSTUVWXYZ 2;
+		Goto Ready;
+	Zoom2:
+		XZW2 A 1 A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 ABCDEFGHIJKLMNOPQRSTUVW 1;
+		Goto Ready;
+	Deselect:
+		XZW2 A 2 A_StartSound("explodium/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWA TUVW 2;
+		XZW2 B 2;
+		XZW2 B -1 A_FullLower();
+		Stop;
+	Flash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](0,9);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
+	}
+}
+
+// Dual Explodium Guns
+Class DualExplodiumGun : SWWMWeapon
+{
+	int clipcount;
+	bool chambered;
+	double casex, casey, lcasex, lcasey;
+	transient ui TextureID WeaponBox;
+	transient ui Font TewiFont;
+
+	Property ClipCount : ClipCount;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/DualExplodiumDisplay.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Screen.DrawTexture(WeaponBox,false,bx-48,by-22,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( ExplodiumGun(SisterWeapon).chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-22,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-19,by-14,String.Format("%d",max(ExplodiumGun(SisterWeapon).clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( chambered ) Screen.DrawText(TewiFont,Font.CR_FIRE,bx-46,by-21,"⁺¹",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Spacing,-1);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-43,by-14,String.Format("%d",max(clipcount,0)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override void RenderUnderlay( RenderEvent e )
+	{
+		Super.RenderUnderlay(e);
+		// draw both crosshairs
+		SWWMWeapon(SisterWeapon).RenderUnderlay(e);
+	}
+
+	override void HudTick()
+	{
+		if ( !Owner ) return;
+		[cpos, ccol] = TraceForCrosshair();
+		let sw = SWWMWeapon(SisterWeapon);
+		// avoid jumpy switching
+		if ( (Owner.player.PendingWeapon is 'SWWMWeapon') && (Owner.player.PendingWeapon != sw) )
+		{
+			SWWMWeapon(Owner.player.PendingWeapon).cpos = sw.cpos;
+			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = sw.lagvpos;
+			SWWMWeapon(Owner.player.PendingWeapon).prevms = sw.prevms;
+		}
+		[sw.cpos, sw.ccol] = sw.TraceForCrosshair();
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		if ( Owner.player.ReadyWeapon == SisterWeapon ) return (10.,-3.,-2.);
+		return (10.,-3.5,-2.);
+	}
+
+	action void A_LeftFlash( StateLabel flashlabel = null )
+	{
+		if ( !player || !player.ReadyWeapon )
+			return;
+		Weapon weap = player.ReadyWeapon;
+		State flashstate = null;
+		if ( !flashlabel )
+		{
+			if ( weap.bAltFire )
+				flashstate = weap.FindState('LeftAltFlash');
+			if ( !flashstate )
+				flashstate = weap.FindState('LeftFlash');
+		}
+		else flashstate = weap.FindState(flashlabel);
+		player.SetPSprite(PSP_FLASH+1,flashstate);
+		A_OverlayFlags(PSP_FLASH+1,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+		A_OverlayRenderStyle(PSP_FLASH+1,STYLE_Add);
+	}
+
+	action void A_Schutt( int side = 1 )
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		if ( side == 1 )
+		{
+			ExplodiumGun(invoker.SisterWeapon).chambered = ExplodiumGun(invoker.SisterWeapon).clipcount;
+			ExplodiumGun(invoker.SisterWeapon).clipcount = max(ExplodiumGun(invoker.SisterWeapon).clipcount-1,0);
+		}
+		else if ( side == -1 )
+		{
+			invoker.chambered = invoker.clipcount;
+			invoker.clipcount = max(invoker.clipcount-1,0);
+		}
+		A_StartSound("explodium/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(5,5,5,3,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.5);
+		A_ZoomFactor(.96,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		if ( side == 1 )
+			A_SWWMFlash("Flash");
+		else if ( side == -1 )
+			A_LeftFlash("LeftFlash");
+		SWWMHandler.DoFlash(self,Color(64,255,224,64),3);
+		A_AlertMonsters(swwm_uncapalert?0:5000);
+		A_PlayerFire();
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMUtility.DoKnockback(self,-x,4000.);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3.5*side*y-2*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.002);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		FLineTraceData d;
+		LineTrace(atan2(dir.y,dir.x),10000,asin(-dir.z),TRF_ABSPOSITION|TRF_NOSKY,origin.z,origin.x,origin.y,d);
+		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
+		if ( d.HitType == TRACE_HitActor )
+		{
+			int dmg = 20;
+			// might as well apply explosion on top
+			if ( dmg >= d.HitActor.Health ) dmg += 25;
+			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
+			{
+				let p = Spawn("SWWMBulletImpact",d.HitLocation);
+				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+				p.pitch = asin(d.HitDir.z);
+			}
+			else
+			{
+				d.HitActor.TraceBleed(dmg,self);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+			}
+			let b = Spawn("ExplodiumBulletImpact",d.HitLocation-d.HitDir*4.);
+			b.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+			b.pitch = asin(d.HitDir.z);
+			b.target = self;
+		}
+		else if ( d.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+			let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
+			b.angle = atan2(hitnormal.y,hitnormal.x);
+			b.pitch = asin(-hitnormal.z);
+			b.target = self;
+			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
+		}
+		for ( int i=0; i<6; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= .15;
+			s.alpha *= .5;
+			s.speed *= .2;
+			s.vel += vel*.5+x*FRandom[Explodium](.2,.5);
+		}
+	}
+
+	action void A_DropMag( int side = 1 )
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*side*y-10*z);
+		let c = Spawn("ExplodiumMag",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*side*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	action void A_DropCasing( int side = 1 )
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+8*side*y-10*z);
+		let c = Spawn("ExplodiumCasing",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*side*FRandom[Junk](2,4)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+	}
+
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+			return (SisterWeapon&&(SisterWeapon.Amount > 1));
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		return true;
+	}
+
+	override Inventory CreateTossable( int amt )
+	{
+		// disallow dropping if weapon isn't ready for switching
+		if ( (Owner.player.ReadyWeapon == self) && (!(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH)) )
+			return null;
+		// call toss on sister
+		return SisterWeapon.CreateTossable(amt);
+	}
+
+	Default
+	{
+		Tag "$T_EXPLODIUM2";
+		Obituary "$O_EXPLODIUM";
+		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun2.png";
+		Weapon.UpSound "explodium/select";
+		Weapon.SisterWeapon "ExplodiumGun";
+		Weapon.SlotNumber 2;
+		Weapon.SelectionOrder 950;
+		Weapon.SlotPriority 2.;
+		DualExplodiumGun.ClipCount 7;
+		+WEAPON.EXPLOSIVE;
+		+SWWMWEAPON.HIDEINMENU;
+		+SWWMWEAPON.NOSWAPWEAPON;
+	}
+	States
+	{
+	Select:
+		XZW2 B 2 A_FullRaise();
+		XZW2 C 2;
+		XZW2 D 2 { player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftSelect")); }
+		XZW2 EFGHAA 2;
+		Goto Ready;
+	LeftSelect:
+		XZWB BCDEFGH 2;
+		Goto LeftReady;
+	Ready:
+		XZW2 A 1
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( !sis )
+			{
+				player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReady"));
+				sis = player.FindPSprite(PSP_WEAPON+1);
+			}
+			if ( sis.CurState.InStateSequence(ResolveState("LeftReady")) )
+			{
+				if ( (ExplodiumGun(invoker.SisterWeapon).clipcount <= 0) && !ExplodiumGun(invoker.SisterWeapon).chambered )
+					player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
+				else if ( (ExplodiumGun(invoker.SisterWeapon).clipcount > 0) && !ExplodiumGun(invoker.SisterWeapon).chambered )
+					player.SetPSprite(PSP_WEAPON,ResolveState("PreSlide"));
+				else if ( (invoker.clipcount <= 0) && !invoker.chambered )
+					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
+				else if ( (invoker.clipcount > 0) && !invoker.chambered )
+					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftPreSlide"));
+				else if ( (player.cmd.buttons&BT_RELOAD) && (ExplodiumGun(invoker.SisterWeapon).clipcount < ExplodiumGun(invoker.SisterWeapon).default.clipcount)
+					&& (ExplodiumGun(invoker.SisterWeapon).clipcount <= invoker.clipcount) )	// give priority only if less than left hand
+					player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
+				else if ( (player.cmd.buttons&BT_RELOAD) && (invoker.clipcount < invoker.default.clipcount) )
+					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
+				else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1);
+			}
+			else
+			{
+				int flg = WRF_NOSWITCH|WRF_NOSECONDARY;
+				if ( !ExplodiumGun(invoker.SisterWeapon).chambered )
+					flg |= WRF_NOPRIMARY;
+				A_WeaponReady(flg);
+			}
+		}
+		Wait;
+	LeftReady:
+		XZWB A 1
+		{
+			if ( player.cmd.buttons&BT_ALTATTACK && invoker.chambered )
+				player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftFire"));
+		}
+		Wait;
+	Fire:
+		XZW2 A 1 A_Schutt();
+		XZW2 I 1;
+		XZW2 J 1
+		{
+			int layer = PSP_WEAPON+2;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZW2 KLMNOP 1;
+		XZW2 Q 2;
+		Goto Ready;
+	LeftFire:
+		XZWB A 1 A_Schutt(-1);
+		XZWB I 1;
+		XZWB J 1
+		{
+			int layer = PSP_WEAPON+12;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"LeftCasing");
+		}
+		XZWB KLMNOP 1;
+		XZWB Q 2;
+		Goto LeftReady;
+	Casing:
+		XZWA A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Explodium](-1.,5.);
+			invoker.casey = FRandom[Explodium](-2.,1.);
+		}
+		XZWA BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing();
+		Stop;
+	LeftCasing:
+		XZWI A 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.lcasex = FRandom[Explodium](-5.,1.);
+			invoker.lcasey = FRandom[Explodium](-1.,2.);
+		}
+		XZWI BCDEFGHIJ 1 A_OverlayOffset(OverlayID(),invoker.lcasex,invoker.lcasey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_DropCasing(-1);
+		Stop;
+	Lower:
+		XZW2 A 2;
+		XZW7 TUV 2;
+		XZW2 B -1;
+		Stop;
+	LeftLower:
+		XZWB A 2;
+		XZWG TUV 2;
+		XZWB B -1;
+		Stop;
+	Raise:
+		XZW2 B 2;
+		XZW7 VUT 2;
+		XZW2 A 1;
+		Goto Ready;
+	LeftRaise:
+		XZWB B 2;
+		XZWG VUT 2;
+		XZWB A 1;
+		Goto LeftReady;
+	Reload:
+		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
+		XZW2 A 1
+		{
+			A_PlayerReload();
+			if ( ExplodiumGun(invoker.SisterWeapon).clipcount <= 0 ) return ResolveState("ReloadEmpty");
+			return ResolveState(null);
+		}
+		XZW2 TUVWXYZ 1;
+		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 B 1 { ExplodiumGun(invoker.SisterWeapon).clipcount = 0; }
+		XZW3 C 1;
+		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 EFGH 1;
+		XZW3 I 1 A_DropMag();
+		Goto ReloadEnd;
+	ReloadEmpty:
+		XZW2 A 1;
+		XZW3 JKLMNOP 1;
+		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 RS 1;
+		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 UVWX 1;
+		XZW3 Y 1 A_DropMag();
+		Goto ReloadEnd;
+	ReloadEnd:
+		XZW3 Z 1;
+		XZW4 ABCDE 1;
+		XZW4 F 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 GHIJKLMNOPQ 1;
+		XZW4 R 1
+		{
+			A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP);
+			ExplodiumGun(invoker.SisterWeapon).clipcount = ExplodiumGun(invoker.SisterWeapon).default.clipcount;
+		}
+		XZW4 STUV 1;
+		XZW2 A 0 A_JumpIf(!ExplodiumGun(invoker.SisterWeapon).chambered,"Slide");
+		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		Goto Ready;
+	PreSlide:
+		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
+	Slide:
+		XZW2 A 1;
+		XZW4 WXY 1;
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 BC 1;
+		XZW5 D 1
+		{
+			ExplodiumGun(invoker.SisterWeapon).chambered = true;
+			ExplodiumGun(invoker.SisterWeapon).clipcount--;
+		}
+		XZW5 EFG 1;
+		XZW5 H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 IJKLM 1;
+		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		Goto Ready;
+	LeftReload:
+		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+		XZWB A 1
+		{
+			A_PlayerReload();
+			if ( invoker.clipcount <= 0 ) return ResolveState("LeftReloadEmpty");
+			return ResolveState(null);
+		}
+		XZWB TUVWXYZ 1;
+		XZWC A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWC B 1 { invoker.clipcount = 0; }
+		XZWC C 1;
+		XZWC D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWC EFGH 1;
+		XZWC I 1 A_DropMag(-1);
+		Goto LeftReloadEnd;
+	LeftReloadEmpty:
+		XZWB A 1;
+		XZWC JKLMNOP 1;
+		XZWC Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWC RS 1;
+		XZWC T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWC UVWX 1;
+		XZWC Y 1 A_DropMag(-1);
+		Goto LeftReloadEnd;
+	LeftReloadEnd:
+		XZWC Z 1;
+		XZWD ABCDE 1;
+		XZWD F 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWD GHIJKLMNOPQ 1;
+		XZWD R 1
+		{
+			A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.clipcount = invoker.default.clipcount;
+		}
+		XZWD STUV 1;
+		XZWB A 0 A_JumpIf(!invoker.chambered,"LeftSlide");
+		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		Goto LeftReady;
+	LeftPreSlide:
+		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+	LeftSlide:
+		XZWB A 1;
+		XZWD WXY 1;
+		XZWE A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWE BC 1;
+		XZWE D 1
+		{
+			invoker.chambered = true;
+			invoker.clipcount--;
+		}
+		XZWE EFG 1;
+		XZWE H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWE IJKLM 1;
+		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		Goto LeftReady;
+	Zoom:
+		XZW2 A 1
+		{
+			A_PlayerCheckGun();
+			A_StartSound("explodium/speen",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW9 ABCDEFG 1;
+		XZW9 H 1 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftZoom")); }
+		XZW9 IJKLMNOPQRSTUVW 1;
+		Goto Ready;
+	LeftZoom:
+		XZWB A 1;
+		XZWH ABCDEFGHIJKLMNOPQRSTUVW 1;
+		Goto LeftReady;
+	User1:
+		XZW2 A 1 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftUser1")); }
+		XZW7 TU 1;
+	User1Hold:
+		XZW7 V 1
+		{
+			A_PlayerMelee(true);
+			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_Parry(9);
+		}
+		XZW7 WX 1;
+		XZW7 Y 1 A_Melee();
+		XZW7 Z 2;
+		XZW8 ABCDE 2;
+		XZW8 F 1 A_JumpIf(player.cmd.buttons&BT_USER1,"User1Hold");
+		XZW2 B 0 { invoker.PlayUpSound(self); player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftSelect")); }
+		Goto Select;
+	LeftUser1:
+		XZWB A 1;
+		XZWG TUV 1;
+		XZWB B -1;
+		Stop;
+	Deselect:
+		XZW2 A 2 A_StartSound("explodium/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWA T 2;
+		XZWA U 2 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftDeselect")); }
+		XZWA VW 2;
+		XZW2 B 6;
+		XZW2 B -1 A_FullLower();
+		Stop;
+	LeftDeselect:
+		XZWB A 2;
+		XZWA PQRS 2;
+		XZWB B 2;
+		Stop;
+	Flash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](0,9);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
+	LeftFlash:
+		XZWZ K 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH+1);
+			psp.frame = Random[GunFlash](10,19);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
+	}
+}

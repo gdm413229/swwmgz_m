@@ -1,0 +1,1040 @@
+// ============================================================================
+// Spreadgun / Wallbuster ammo
+// ============================================================================
+
+Class RedShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_REDSHELLS";
+		Stamina 500;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsNormal.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 30;
+		Ammo.BackpackAmount 5;
+		Ammo.BackpackMaxAmount 100;
+		Ammo.DropAmount 2;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class RedShell2 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class RedShell4 : RedShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class GreenShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_GREENSHELLS";
+		Stamina 800;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsSlug.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 25;
+		Ammo.BackpackAmount 4;
+		Ammo.BackpackMaxAmount 80;
+		Ammo.DropAmount 2;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class GreenShell2 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class GreenShell4 : GreenShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class WhiteShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_WHITESHELLS";
+		Stamina 1000;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsDragon.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 10;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 30;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class WhiteShell2 : WhiteShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class WhiteShell4 : WhiteShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class BlueShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_BLUESHELLS";
+		Stamina 2500;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 15;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 40;
+		Ammo.DropAmount 2;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class BlueShell2 : BlueShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class BlueShell4 : BlueShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class BlackShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_BLACKSHELLS";
+		Stamina 4000;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsFuck.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 10;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 20;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class BlackShell2 : BlackShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class BlackShell4 : BlackShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class PurpleShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_PURPLESHELLS";
+		Stamina 1500;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 3;
+		Ammo.BackpackMaxAmount 60;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class PurpleShell2 : PurpleShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class PurpleShell4 : PurpleShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+Class GoldShellSparkle : Actor
+{
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[Goldy](.5,1.5);
+		vel.z = FRandom[Goldy](.5,1.5);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		SetOrigin(Vec3Offset(0,0,vel.z),true);
+		alpha -= .02;
+		if ( alpha <= 0 ) Destroy();
+	}
+	Default
+	{
+		RenderStyle "Add";
+		Scale 0.05;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+FORCEXYBILLBOARD;
+		FloatBobPhase 0;
+	}
+	States
+	{
+	Spawn:
+		BLPF A -1 Bright;
+		Stop;
+	}
+}
+
+Class GoldShell : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	action void A_GoldShellTrail()
+	{
+		if ( Random[Goldy](0,2) ) return;
+		Spawn("GoldShellSparkle",Vec3Offset(FRandom[Goldy](-radius,radius)/2.,FRandom[Goldy](-radius,radius)/2.,FRandom[Goldy](10,18)));
+	}
+
+	Default
+	{
+		Tag "$T_GOLDSHELLS";
+		Stamina -1000000;
+		Inventory.Icon "graphics/HUD/Icons/A_ShellsGold.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 7;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 7;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		+DONTGIB;	// don't crush these, they're valuable
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1 A_GoldShellTrail();
+		Wait;
+	}
+}
+Class GoldShell2 : GoldShell
+{
+	Default
+	{
+		Inventory.Amount 2;
+		Radius 6;
+	}
+}
+Class GoldShell4 : GoldShell
+{
+	Default
+	{
+		Inventory.Amount 4;
+		Radius 6;
+	}
+}
+
+// ============================================================================
+// Eviscerator ammo
+// ============================================================================
+
+Class EvisceratorShell : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_EVISHELLS";
+		Inventory.PickupMessage "$T_EVISHELL";
+		Stamina 3000;
+		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 5;
+		Ammo.BackpackMaxAmount 90;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 8;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,4);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class EvisceratorSixPack : EvisceratorShell
+{
+	Default
+	{
+		Tag "$I_EVISHELLPAK";
+		Inventory.PickupMessage "$I_EVISHELLPAK";
+		Inventory.Amount 6;
+		Radius 20;
+		Height 24;
+	}
+}
+
+Class EvisceratorTrioSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		for ( int i=0; i<3; i++ )
+		{
+			let a = Spawn("EvisceratorShell",Vec3Angle(12,i*120));
+			a.special = special;
+			a.angle = i*120;
+			a.FloatBobPhase = FloatBobPhase;
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
+
+// ============================================================================
+// Hellblazer ammo
+// ============================================================================
+
+Class HellblazerMissiles : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_HELLMISSILES";
+		Inventory.PickupMessage "$T_HELLMISSILE";
+		Stamina 8000;
+		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 20;
+		Ammo.BackpackAmount 3;
+		Ammo.BackpackMaxAmount 60;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,3);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerMissileMag : HellblazerMissiles
+{
+	Default
+	{
+		Tag "$T_HELLMISSILEMAG";
+		Inventory.PickupMessage "$T_HELLMISSILEMAG";
+		Inventory.Amount 6;
+		Radius 12;
+		Height 26;
+	}
+}
+Class HellblazerMissileTrioSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		for ( int i=0; i<3; i++ )
+		{
+			let a = Spawn("HellblazerMissiles",Vec3Angle(8,i*120));
+			a.special = special;
+			a.angle = i*120;
+			a.FloatBobPhase = FloatBobPhase;
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
+
+Class HellblazerCrackshots : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_HELLCLUSTERS";
+		Inventory.PickupMessage "$T_HELLCLUSTER";
+		Stamina 15000;
+		Inventory.Icon "graphics/HUD/Icons/A_HellblazerCrackshot.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 15;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 30;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,2);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerCrackshotMag : HellblazerCrackshots
+{
+	Default
+	{
+		Tag "$T_HELLCLUSTERMAG";
+		Inventory.PickupMessage "$T_HELLCLUSTERMAG";
+		Inventory.Amount 3;
+		Radius 12;
+		Height 26;
+	}
+}
+
+Class HellblazerRavagers : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_HELLBURNINATORS";
+		Inventory.PickupMessage "$T_HELLBURNINATOR";
+		Stamina 25000;
+		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 9;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 18;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerRavagerMag : HellblazerRavagers
+{
+	Default
+	{
+		Tag "$T_HELLBURNINATORMAG";
+		Inventory.PickupMessage "$T_HELLBURNINATORMAG";
+		Inventory.Amount 3;
+		Radius 12;
+		Height 26;
+	}
+}
+
+Class HellblazerWarheads : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_HELLNUKES";
+		Inventory.PickupMessage "$T_HELLNUKE";
+		Stamina 40000;
+		Inventory.Icon "graphics/HUD/Icons/A_HellblazerWarhead.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 4;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 8;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class HellblazerWarheadMag : HellblazerWarheads
+{
+	Default
+	{
+		Tag "$T_HELLNUKEMAG";
+		Inventory.PickupMessage "$T_HELLNUKEMAG";
+		Inventory.Amount 2;
+		Radius 12;
+		Height 26;
+	}
+}
+
+// ============================================================================
+// Sparkster ammo
+// ============================================================================
+
+Class SparkUnit : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_SPARKUNIT";
+		Inventory.PickupMessage "$T_SPARKUNIT";
+		Stamina 50000;
+		Inventory.Icon "graphics/HUD/Icons/A_Sparkster.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 10;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 30;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 22;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// ============================================================================
+// Silver Bullet ammo
+// ============================================================================
+
+Class SilverBulletAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_XSBMAG";
+		Inventory.PickupMessage "$T_XSBMAG";
+		Stamina 70000;
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 3;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 8;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 10;
+		Height 26;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('SilverBullets') )
+		{
+			let ma = Inventory(Spawn('SilverBullets'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SilverBulletAmmo2 : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_FCBMAG";
+		Inventory.PickupMessage "$T_FCBMAG";
+		Stamina 80000;
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet2.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 4;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 10;
+		Height 26;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('SilverBullets2') )
+		{
+			let ma = Inventory(Spawn('SilverBullets2'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SilverBullets : MagAmmo
+{
+	Default
+	{
+		Tag "$T_XSBBULLET";
+		Inventory.PickupMessage "$T_XSBBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet.png";
+		MagAmmo.ParentAmmo "SilverBulletAmmo";
+		MagAmmo.ClipSize 5;
+		Inventory.MaxAmount 8;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 22;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SilverBullets2 : MagAmmo
+{
+	Default
+	{
+		Tag "$T_FCBBULLET";
+		Inventory.PickupMessage "$T_FCBBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet2.png";
+		MagAmmo.ParentAmmo "SilverBulletAmmo2";
+		MagAmmo.ClipSize 5;
+		Inventory.MaxAmount 8;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 4;
+		Height 22;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SilverBulletsBundleSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		int bnd = Random[Bundle](2,3);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn("SilverBullets",Vec3Angle(6,i*(360/bnd)));
+			a.special = special;
+			a.angle = i*(360/bnd);
+			a.FloatBobPhase = FloatBobPhase;
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
+Class SilverBullets2BundleSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		int bnd = Random[Bundle](2,3);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn("SilverBullets2",Vec3Angle(6,i*(360/bnd)));
+			a.special = special;
+			a.angle = i*(360/bnd);
+			a.FloatBobPhase = FloatBobPhase;
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
+
+// ============================================================================
+// Candygun ammo
+// ============================================================================
+
+Class CandyGunAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_CANDYMAG";
+		Inventory.PickupMessage "$T_CANDYMAG";
+		Stamina 100000;
+		Inventory.Icon "graphics/HUD/Icons/A_CandyGun.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 6;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 6;
+		Height 24;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( Owner.FindInventory('CandyGunBullets') )
+		{
+			let ma = Inventory(Spawn('CandyGunBullets'));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class CandyGunBullets : MagAmmo
+{
+	Default
+	{
+		Tag "$T_CANDYBULLET";
+		Inventory.PickupMessage "$T_CANDYBULLET";
+		Inventory.Icon "graphics/HUD/Icons/A_CandyBullet.png";
+		MagAmmo.ParentAmmo "CandyGunAmmo";
+		MagAmmo.ClipSize 7;
+		Inventory.MaxAmount 10;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 2;
+		Height 20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class CandyGunBulletsBundleSpawn : Actor
+{
+	override void PostBeginPlay()
+	{
+		if ( bCOUNTSECRET ) level.total_secrets--;
+		int bnd = Random[Bundle](2,3);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn("CandyGunBullets",Vec3Angle(4,i*(360/bnd)));
+			a.special = special;
+			a.angle = i*(360/bnd);
+			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
+			if ( bCOUNTSECRET )
+			{
+				a.bCOUNTSECRET = true;
+				level.total_secrets++;
+			}
+		}
+		Destroy();
+	}
+}
+
+Class CandyGunSpares : Ammo
+{
+	Default
+	{
+		Tag "$T_CANDYSPARE";
+		Stamina 600000;
+		Inventory.Icon "graphics/HUD/Icons/W_CandyGun.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 4;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 4;
+	}
+	override Inventory CreateTossable( int amt )
+	{
+		if ( Amount > 0 )
+		{
+			// drop an empty spare
+			let spare = Inventory(Spawn('CandyGun',Owner.Pos,NO_REPLACE));
+			if ( !spare ) return null;
+			// spare with empty mag
+			CandyGun(spare).AmmoGive1 = 0;
+			CandyGun(spare).clipcount = 0;
+			CandyGun(spare).chambered = false;
+			spare.SetState(spare.SpawnState+1);
+			spare.DropTime = 30;
+			spare.bSpecial = spare.bSolid = false;
+			Amount--;
+			return spare;
+		}
+		return null;
+	}
+}
+
+// ============================================================================
+// Ynykron ammo
+// ============================================================================
+
+Class YnykronAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Default
+	{
+		Tag "$T_YNYKRONAMMO";
+		Inventory.PickupMessage "$T_YNYKRONAMMO";
+		Stamina 3000000;
+		Inventory.Icon "graphics/HUD/Icons/A_Ynykron.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 3;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 8;
+		Height 24;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+

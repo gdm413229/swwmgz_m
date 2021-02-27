@@ -1,0 +1,195 @@
+// various actor budget queues
+
+extend Class SWWMHandler
+{
+	// junk
+	SWWMCasing casings, casings_end;
+	int casings_cnt, oldmaxcasings;
+	SWWMChip chips, chips_end;
+	int chips_cnt, oldmaxdebris;
+	// gore
+	mkBloodDrop blods, blods_end;
+	int blods_cnt, oldmaxblood;
+	mkFlyingGib meats, meats_end;
+	int meats_cnt, oldmaxgibs;
+
+	static void QueueCasing( SWWMCasing c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.casings_cnt++;
+		if ( !hnd.casings )
+		{
+			// this is the initial one
+			hnd.casings = c;
+			hnd.casings_end = c;
+		}
+		else
+		{
+			hnd.casings_end.nextcasing = c;
+			c.prevcasing = hnd.casings_end;
+			hnd.casings_end = c;
+		}
+		while ( hnd.casings && (swwm_maxcasings >= 0) && (hnd.casings_cnt > swwm_maxcasings) )
+			DeQueueCasing(hnd.casings);
+	}
+	static void DeQueueCasing( SWWMCasing c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.casings ) return;
+		if ( (hnd.casings != c) && !c.prevcasing && !c.nextcasing ) return;
+		hnd.casings_cnt--;
+		if ( !c.prevcasing ) hnd.casings = c.nextcasing;
+		else c.prevcasing.nextcasing = c.nextcasing;
+		if ( c == hnd.casings_end ) hnd.casings_end = c.prevcasing;
+		if ( c.nextcasing ) c.nextcasing.prevcasing = c.prevcasing;
+		c.killme = true;
+		c.prevcasing = null;
+		c.nextcasing = null;
+	}
+	static void QueueChip( SWWMChip c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.chips_cnt++;
+		if ( !hnd.chips )
+		{
+			// this is the initial one
+			hnd.chips = c;
+			hnd.chips_end = c;
+		}
+		else
+		{
+			hnd.chips_end.nextchip = c;
+			c.prevchip = hnd.chips_end;
+			hnd.chips_end = c;
+		}
+		while ( hnd.chips && (swwm_maxdebris >= 0) && (hnd.chips_cnt > swwm_maxdebris) )
+			DeQueueChip(hnd.chips);
+	}
+	static void DeQueueChip( SWWMChip c )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.chips ) return;
+		if ( (hnd.chips != c) && !c.prevchip && !c.nextchip ) return;
+		hnd.chips_cnt--;
+		if ( !c.prevchip ) hnd.chips = c.nextchip;
+		else c.prevchip.nextchip = c.nextchip;
+		if ( c == hnd.chips_end ) hnd.chips_end = c.prevchip;
+		if ( c.nextchip ) c.nextchip.prevchip = c.prevchip;
+		c.killme = true;
+		c.prevchip = null;
+		c.nextchip = null;
+	}
+	static void QueueBlod( mkBloodDrop b )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.blods_cnt++;
+		if ( !hnd.blods )
+		{
+			// this is the initial one
+			hnd.blods = b;
+			hnd.blods_end = b;
+		}
+		else
+		{
+			hnd.blods_end.nextblod = b;
+			b.prevblod = hnd.blods_end;
+			hnd.blods_end = b;
+		}
+		while ( hnd.blods && (swwm_maxblood >= 0) && (hnd.blods_cnt > swwm_maxblood) )
+			DeQueueBlod(hnd.blods);
+	}
+	static void DeQueueBlod( mkBloodDrop b )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.blods ) return;
+		if ( (hnd.blods != b) && !b.prevblod && !b.nextblod ) return;
+		hnd.blods_cnt--;
+		if ( !b.prevblod ) hnd.blods = b.nextblod;
+		else b.prevblod.nextblod = b.nextblod;
+		if ( b == hnd.blods_end ) hnd.blods_end = b.prevblod;
+		if ( b.nextblod ) b.nextblod.prevblod = b.prevblod;
+		b.killme = true;
+		b.prevblod = null;
+		b.nextblod = null;
+	}
+	static void QueueMeat( mkFlyingGib m )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		hnd.meats_cnt++;
+		if ( !hnd.meats )
+		{
+			// this is the initial one
+			hnd.meats = m;
+			hnd.meats_end = m;
+		}
+		else
+		{
+			hnd.meats_end.nextmeat = m;
+			m.prevmeat = hnd.meats_end;
+			hnd.meats_end = m;
+		}
+		while ( hnd.meats && (swwm_maxgibs >= 0) && (hnd.meats_cnt > swwm_maxgibs) )
+			DeQueueMeat(hnd.meats);
+	}
+	static void DeQueueMeat( mkFlyingGib m )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd || !hnd.meats ) return;
+		if ( (hnd.meats != m) && !m.prevmeat && !m.nextmeat ) return;
+		hnd.meats_cnt--;
+		if ( !m.prevmeat ) hnd.meats = m.nextmeat;
+		else m.prevmeat.nextmeat = m.nextmeat;
+		if ( m == hnd.meats_end ) hnd.meats_end = m.prevmeat;
+		if ( m.nextmeat ) m.nextmeat.prevmeat = m.prevmeat;
+		m.killme = true;
+		m.prevmeat = null;
+		m.nextmeat = null;
+	}
+
+	private void RecheckQueues()
+	{
+		while ( casings && (casings_cnt > swwm_maxcasings) )
+			DeQueueCasing(casings);
+		while ( chips && (chips_cnt > swwm_maxdebris) )
+			DeQueueChip(chips);
+		while ( blods && (blods_cnt > swwm_maxblood) )
+			DeQueueBlod(blods);
+		while ( meats && (meats_cnt > swwm_maxgibs) )
+			DeQueueMeat(meats);
+	}
+
+	private void QueueMaintenance()
+	{
+		if ( swwm_maxcasings != oldmaxcasings )
+		{
+			while ( casings && (swwm_maxcasings >= 0) && (casings_cnt > swwm_maxcasings) )
+				DeQueueCasing(casings);
+		}
+		if ( swwm_maxdebris != oldmaxdebris )
+		{
+			while ( chips && (swwm_maxdebris >= 0) && (chips_cnt > swwm_maxdebris) )
+				DeQueueChip(chips);
+		}
+		if ( swwm_maxblood != oldmaxblood )
+		{
+			while ( blods && (swwm_maxblood >= 0) && (blods_cnt > swwm_maxblood) )
+				DeQueueBlod(blods);
+		}
+		if ( swwm_maxgibs != oldmaxgibs )
+		{
+			while ( meats && (swwm_maxgibs >= 0) && (meats_cnt > swwm_maxgibs) )
+				DeQueueMeat(meats);
+		}
+		oldmaxcasings = swwm_maxcasings;
+		oldmaxdebris = swwm_maxdebris;
+		oldmaxblood = swwm_maxblood;
+		oldmaxgibs = swwm_maxgibs;
+		if ( swwm_blood ) return;
+		while ( blods ) DeQueueBlod(blods);
+		while ( meats ) DeQueueMeat(meats);
+	}
+}

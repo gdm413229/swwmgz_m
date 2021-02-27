@@ -1,0 +1,82 @@
+// oneliner handling
+
+extend Class SWWMHandler
+{
+	transient String oneliner, onelinersnd;
+	transient int onelinertic, onelinerspan, onelinerlevel;
+	transient Array<LastLine> lastlines;
+
+	static int AddOneliner( String type, int level, int delay = 5 )
+	{
+		// only Demolitionist can play voice lines
+		if ( !(players[consoleplayer].mo is 'Demolitionist') )
+			return 0;
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return 0;
+		String voicetype = CVar.FindCVar('swwm_voicetype').GetString();
+		// suppress non-rage comments when ragekit is active, only screaming allowed
+		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
+		int whichline;
+		String testme = String.Format("SWWM_SUBS_%s_N%s",voicetype.MakeUpper(),type.MakeUpper());
+		String locme = StringTable.Localize(testme,false);
+		int countem;
+		if ( testme == locme ) countem = 0;
+		else countem = locme.ToInt();
+		if ( countem == 0 ) return 0;	// voicepack doesn't have this
+		// check last line so we don't repeat
+		int last = 0, ent;
+		for ( int i=0; i<hnd.lastlines.Size(); i++ )
+		{
+			if ( hnd.lastlines[i].type != type ) continue;
+			last = hnd.lastlines[i].lineno;
+			ent = i;
+			break;
+		}
+		if ( countem == 1 ) whichline = 1;
+		else if ( last > 0 )
+		{
+			whichline = Random[DemoLines](1,countem-1);
+			if ( whichline >= last ) whichline++;
+			hnd.lastlines[ent].lineno = whichline;
+		}
+		else
+		{
+			whichline = Random[DemoLines](1,countem);
+			let lst = new("LastLine");
+			lst.type = type;
+			lst.lineno = whichline;
+			hnd.lastlines.Push(lst);
+		}
+		hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s%d",voicetype.MakeUpper(),type.MakeUpper(),whichline);
+		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype,type,whichline);
+		hnd.onelinertic = gametic+delay;
+		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
+		hnd.onelinerlevel = level;
+		return hnd.onelinertic+hnd.onelinerspan;
+	}
+
+	private void OnelinerTick()
+	{
+		if ( !onelinertic || (onelinertic >= gametic) ) return;
+		if ( players[consoleplayer].health > 0 )
+		{
+			if ( onelinerlevel > swwm_mutevoice )
+				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
+			SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
+		}
+		onelinertic = 0;
+		onelinerspan = 0;
+	}
+
+	private ui void OnelinerUITick()
+	{
+		if ( (gametic != onelinertic) || (oneliner == "") || (players[consoleplayer].health <= 0) )
+			return;
+		if ( onelinerlevel > swwm_mutevoice )
+		{
+			let l = SWWMOneLiner.Make(oneliner,onelinerspan);
+			StatusBar.AttachMessage(l,-3473);
+		}
+		SendNetworkEvent("swwmremotelinertxt."..oneliner,consoleplayer,onelinerlevel);
+	}
+}

@@ -1,0 +1,636 @@
+// stuff related to gestures
+
+Class HHitList
+{
+	Actor a;
+	Vector3 dir;
+}
+
+enum EGestureSlot
+{
+	// special use
+	GS_Headpat = -50,
+	GS_Grenade,
+	GS_EmptyMelee,
+	// no gesture
+	GS_Null = 0,
+	// general gestures
+	GS_Wave = 1,
+	GS_ThumbsUp,
+	GS_Victory,
+	GS_BlowKiss
+};
+
+// First person gestures
+Class SWWMGesture : SWWMWeapon
+{
+	Weapon formerweapon;
+	int whichgesture, nextgesture;
+	bool deaded, queued;
+	bool whichuse;
+	Class<SWWMItemGesture> whichweapon;
+	Array<bool> suse;
+	Array<Class<SWWMItemGesture> > sweapon;
+	int gonect;
+	HeadpatTracker pats;	// for headpat gesture, our current tracker
+
+	// these should prevent autoswitch when out of ammo
+	override bool ReportHUDAmmo()
+	{
+		return false;
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		return false;
+	}
+	override bool Use( bool pickup )
+	{
+		return false;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) )
+			return;
+		let psp = Owner.player.FindPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		if ( (Owner.Health <= 0) && (psp.CurState != ResolveState("Deselect")) )
+			Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
+	static SWWMGesture SetGesture( PlayerPawn mo, int which )
+	{
+		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
+		if ( mo.Health <= 0 ) return null;	// dead
+		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
+		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
+		if ( w && ((mo.player.PendingWeapon is 'SWWMGesture') || (mo.player.ReadyWeapon is 'SWWMGesture')
+			|| (mo.player.PendingWeapon is 'SWWMItemGesture') || (mo.player.ReadyWeapon is 'SWWMItemGesture')) )
+		{
+			// already gesturing
+			// just queue another one
+			if ( which <= 0 ) return null; // these gestures can't be queued
+			else
+			{
+				w.nextgesture = which;
+				w.queued = true;
+			}
+			return null;
+		}
+		if ( !w )
+		{
+			w = SWWMGesture(Spawn("SWWMGesture"));
+			mo.AddInventory(w);
+		}
+		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
+		else w.formerweapon = mo.player.ReadyWeapon;
+		w.whichweapon = null;
+		w.whichgesture = which;
+		mo.player.PendingWeapon = w;
+		return w;
+	}
+
+	// "special" gestures are run by switching to another "weapon"
+	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Class<SWWMItemGesture> a, bool used = false )
+	{
+		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
+		if ( mo.Health <= 0 ) return null;	// dead
+		if ( mo.player.cheats&CF_TOTALLYFROZEN ) return null;	// frozen today
+		if ( !a ) return null;
+		SWWMGesture w = SWWMGesture(mo.FindInventory("SWWMGesture"));
+		if ( w && ((mo.player.PendingWeapon is 'SWWMGesture') || (mo.player.ReadyWeapon is 'SWWMGesture')
+			|| (mo.player.PendingWeapon is 'SWWMItemGesture') || (mo.player.ReadyWeapon is 'SWWMItemGesture')) )
+		{
+			// already gesturing
+			// queue if unique
+			for ( int i=0; i<w.sweapon.Size(); i++ )
+			{
+				if ( (w.sweapon[i] != a) || (w.suse[i] != used) ) continue;
+				return null;
+			}
+			w.sweapon.Push(a);
+			w.suse.Push(used);
+			return null;
+		}
+		if ( !w )
+		{
+			w = SWWMGesture(Spawn("SWWMGesture"));
+			mo.AddInventory(w);
+		}
+		if ( mo.player.PendingWeapon != WP_NOCHANGE ) w.formerweapon = mo.player.PendingWeapon;
+		else w.formerweapon = mo.player.ReadyWeapon;
+		w.whichgesture = GS_Null;
+		w.whichweapon = a;
+		w.whichuse = used;
+		mo.player.PendingWeapon = w;
+		return w;
+	}
+
+	action void A_CallPlayerGesture( statelabel st, statelabel cst )
+	{
+		if ( invoker.Owner.Health <= 0 ) return;
+		if ( (player.crouchdir == -1) && invoker.Owner.FindState(cst) )
+			invoker.Owner.SetStateLabel(cst);
+		else if ( invoker.Owner.FindState(st) )
+			invoker.Owner.SetStateLabel(st);
+	}
+
+	action void A_FinishGesture()
+	{
+		if ( invoker.sweapon.Size() > 0 )
+		{
+			invoker.whichgesture = GS_Null;
+			invoker.whichweapon = invoker.sweapon[0];
+			invoker.whichuse = invoker.suse[0];
+			// push back
+			invoker.sweapon.Delete(0);
+			invoker.suse.Delete(0);
+			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
+			return;
+		}
+		if ( invoker.queued )
+		{
+			invoker.whichweapon = null;
+			invoker.whichgesture = invoker.nextgesture;
+			invoker.queued = false;
+			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
+			return;
+		}
+		player.PendingWeapon = invoker.formerweapon;
+		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
+	action void A_Headpat()
+	{
+		A_StartSound("demolitionist/petting",CHAN_WEAPON,CHANF_OVERLAP,.4);
+		let pt = invoker.pats;
+		if ( !pt ) return;
+		int numpt = Random[ExploS](6,9);
+		Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		Vector3 patpos = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz-4),dir*30.);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("LoveHeartSparkle",patpos);
+			s.angle = FRandom[ExploS](0,360);
+			s.pitch = FRandom[ExploS](-90,90);
+		}
+		if ( pt.target && pt.target.bSHOOTABLE )
+		{
+			int healamt = 10;
+			let raging = RagekitPower(FindInventory("RagekitPower"));
+			if ( raging )
+			{
+				healamt *= 8;
+				raging.DoHitFX();
+			}
+			if ( pt.target.GiveBody(healamt,pt.target.GetSpawnHealth()) )
+			{
+				SWWMScoreObj.Spawn(healamt,pt.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+pt.target.Height/2),ST_Health);
+				SWWMHandler.DoFlash(pt.target,Color(32,224,128,255),10);
+			}
+		}
+		let s = Demolitionist(self).mystats;
+		if ( s ) s.pats++;
+	}
+
+	action void A_HeadpatEnd()
+	{
+		player.cheats &= ~CF_TOTALLYFROZEN;
+		Demolitionist(player.mo).scriptedinvul = false;
+		let pt = invoker.pats;
+		if ( !pt ) return;
+		pt.patting = false;
+		let t = pt.target;
+		if ( t )
+		{
+			if ( pt.patstate ) t.SetState(pt.patstate);
+			else t.tics = pt.oldtargettics;
+			t.bDORMANT = false;
+			if ( t.bISMONSTER )
+			{
+				if ( pt.lethalpat )
+				{
+					t.DamageMobj(invoker,self,t.Health,'Love',DMG_FORCED|DMG_THRUSTLESS);
+					pt.Destroy();
+					return;
+				}
+				// befriend
+				if ( t.bCOUNTKILL )
+				{
+					t.bCOUNTKILL = false;
+					level.total_monsters--;
+				}
+				if ( t.special && !(t.ActivationType&THINGSPEC_NoDeathSpecial) )
+				{
+					Actor whomst = level.actownspecial?t:self;
+					if ( t.ActivationType&THINGSPEC_ThingActs ) whomst = t;
+					else if ( t.ActivationType&THINGSPEC_TriggerActs ) whomst = self;
+					level.ExecuteSpecial(t.special,whomst,null,false,t.args[0],t.args[1],t.args[2],t.args[3],t.args[4]);
+					t.special = 0;
+				}
+				if ( !t.bFRIENDLY )
+				{
+					let s = Demolitionist(self).mystats;
+					if ( s ) s.befriend++;
+				}
+				t.bFRIENDLY = true;
+				if ( deathmatch )
+					t.SetFriendPlayer(player);
+				// cancel any attacks
+				if ( t.InStateSequence(t.CurState,t.FindState("Missile"))
+					|| t.InStateSequence(t.CurState,t.FindState("Melee")) )
+					t.SetState(t.FindState("See"));
+			}
+		}
+	}
+
+	action void A_ThrowMag()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
+		double a = FRandom[Spread](0,360), s = FRandom[Spread](0,.005);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		Vector3 dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("ExplodiumMagProj",origin);
+		p.special1 = 7;
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed;
+		if ( p.waterlevel <= 0 ) p.vel.z += 5.;
+		p.vel += vel*.5;
+	}
+
+	action void A_Smooch()
+	{
+		if ( swwm_mutevoice < 4 )
+			A_StartSound("demolitionist/smooch",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
+	}
+
+	action void A_BlowKiss()
+	{
+		if ( swwm_mutevoice < 4 )
+			A_StartSound("demolitionist/blowkiss",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2, dir;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-1*z);
+		let p = Spawn("LoveHeart",origin);
+		p.target = self;
+		p.angle = angle;
+		p.pitch = BulletSlope();
+		p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*p.speed;
+		// try to catch target in cone of vision
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(p.pitch,p.angle,0);
+		Array<HHitList> hits;
+		hits.Clear();
+		int rings = 1;
+		FLineTraceData d;
+		for ( double i=0; i<.2; i+=.02 )
+		{
+			for ( int j=0; j<360; j+=(360/rings) )
+			{
+				dir = (x2+y2*cos(j)*i+z2*sin(j)*i).unit();
+				LineTrace(atan2(dir.y,dir.x),8000.,asin(-dir.z),TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+				if ( d.HitType != TRACE_HitActor ) continue;
+				bool addme = true;
+				for ( int k=0; k<hits.Size(); k++ )
+				{
+					if ( hits[k].a != d.HitActor ) continue;
+					if ( (hits[k].dir dot x2) < (dir dot x2) )
+						hits[k].dir = dir;	// closer to centerpoint
+					addme = false;
+					break;
+				}
+				if ( !addme ) continue;
+				let nhit = new("HHitList");
+				nhit.a = d.HitActor;
+				nhit.dir = dir;
+				hits.Push(nhit);
+			}
+			rings += 5;
+		}
+		int closest = -1;
+		double closestdot = -1;
+		for ( int i=0; i<hits.Size(); i++ )
+		{
+			double thisdot = (hits[i].dir dot x2);
+			if ( thisdot < closestdot ) continue;
+			closest = i;
+			closestdot = thisdot;
+		}
+		if ( closest != -1 ) p.tracer = hits[closest].a;
+	}
+
+	Default
+	{
+		+WEAPON.CHEATNOTWEAPON;
+		+WEAPON.NO_AUTO_SWITCH;
+		+WEAPON.WIMPY_WEAPON;
+		+SWWMWEAPON.HIDEINMENU;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		Weapon.SelectionOrder int.max;
+	}
+	States
+	{
+	Select:
+		XZW1 A 1 A_FullRaise();
+		Goto Ready;
+	Ready:
+		XZW1 A 1
+		{
+			if ( invoker.whichweapon )
+			{
+				SWWMItemGesture g = SWWMItemGesture(FindInventory(invoker.whichweapon));
+				if ( !g )
+				{
+					g = SWWMItemGesture(Spawn(invoker.whichweapon));
+					AddInventory(g);
+				}
+				g.gest = invoker;
+				player.ReadyWeapon = g;
+				if ( invoker.whichuse ) player.SetPSPrite(PSP_WEAPON,g.FindState("AltFire"));
+				else player.SetPSPrite(PSP_WEAPON,g.FindState("Fire"));
+				return ResolveState(null);
+			}
+			switch ( invoker.whichgesture )
+			{
+			case GS_Headpat:
+				return ResolveState("Headpat");
+			case GS_Grenade:
+				return ResolveState("QuickGrenade");
+			case GS_EmptyMelee:
+				return ResolveState("EmptyMelee");
+			case GS_Wave:
+				return ResolveState("Wave");
+			case GS_ThumbsUp:
+				return ResolveState("Approve");
+			case GS_Victory:
+				return ResolveState("Victory");
+			case GS_BlowKiss:
+				return ResolveState("BlowKiss");
+			}
+			return ResolveState("NoGesture");
+		}
+		Wait;
+	Fire:
+		XZW1 A 1;
+		Goto Ready;
+	Headpat:
+		XZW1 A 0 A_JumpIf(CountInv("RagekitPower"),"Ragepat");
+		XZW1 A 3 A_CallPlayerGesture("Headpat","Headpat");
+		XZW3 TU 3;
+		XZW3 V 2 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 WX 2;
+		XZW3 YZ 1;
+		XZW4 AB 1;
+		XZW4 C 2;
+		XZW4 D 2 A_Headpat();
+		XZW4 EF 2;
+		XZW4 GHI 1;
+		XZW3 YZ 1;
+		XZW4 AB 1;
+		XZW4 C 2;
+		XZW4 D 2 A_Headpat();
+		XZW4 EF 2;
+		XZW4 GHI 1;
+		XZW4 JK 2;
+		XZW4 L 2 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 MNOP 3;
+		XZW1 A 0 A_HeadpatEnd();
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Ragepat:
+		XZW1 A 3 A_CallPlayerGesture("Ragepat","Ragepat");
+		XZW3 TU 2;
+		XZW3 V 1 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 WX 1;
+		XZW3 Y 1;
+		XZW4 AC 1;
+		XZW4 D 1 A_Headpat();
+		XZW4 EF 1;
+		XZW4 GI 1;
+		XZW3 Y 1;
+		XZW4 AC 1;
+		XZW4 D 1 A_Headpat();
+		XZW4 EF 1;
+		XZW4 GI 1;
+		XZW3 Y 1;
+		XZW4 AC 1;
+		XZW4 D 1 A_Headpat();
+		XZW4 EF 1;
+		XZW4 GI 1;
+		XZW3 Y 1;
+		XZW4 AC 1;
+		XZW4 D 1 A_Headpat();
+		XZW4 EF 1;
+		XZW4 GIJK 1;
+		XZW4 L 1 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 MNOP 2;
+		XZW1 A 0 A_HeadpatEnd();
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	QuickGrenade:
+		XZW4 Q 3;
+		XZW4 R 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 ST 3;
+		XZW4 U 3 A_PlayerReload();
+		XZW4 V 2 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 WX 2;
+		XZW4 Y 3;
+		XZW4 Z 2
+		{
+			A_StartSound("explodium/throwmag",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
+		XZW5 AB 2;
+		XZW5 CDEF 2;
+		XZW5 G 2 A_ThrowMag();
+		XZW5 HIJ 3;
+		XZW5 K 4;
+		XZW4 Q 0 A_JumpIf(player.cmd.buttons&BT_USER4,"QuickGrenade");
+		XZW4 Q -1 A_FinishGesture();
+		Stop;
+	EmptyMelee:
+		XZW0 ABC 1;
+		XZW0 D 1
+		{
+			A_PlayerMelee(true);
+			A_StartSound("demolitionist/swing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_Parry(9);
+		}
+		XZW0 EF 1;
+		XZW0 G 1 A_Melee();
+		XZW0 HIJKLMN 2;
+		XZW0 A -1
+		{
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_USER1) )
+				return ResolveState("EmptyMelee")+3;
+			A_FinishGesture();
+			return ResolveState(null);
+		}
+		Stop;
+	Wave:
+		XZW1 A 3 A_CallPlayerGesture("Wave","CrouchWave");
+		XZW1 B 3;
+		XZW1 C 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 DEFGHIJ 3;
+		XZW1 K 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 LMNOP 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Approve:
+		XZW1 A 3 A_CallPlayerGesture("Approve","CrouchApprove");
+		XZW1 QR 3;
+		XZW1 S 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 TUVWXY 3;
+		XZW1 Z 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 3;
+		XZW2 BCDEFG 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Victory:
+		XZW1 A 3 A_CallPlayerGesture("Victory","CrouchVictory");
+		XZW2 HI 3;
+		XZW2 J 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 KLMNOPQR 3;
+		XZW2 S 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 TUVWXYZ 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	BlowKiss:
+		XZW1 A 3 A_CallPlayerGesture("BlowKiss","CrouchBlowKiss");
+		XZW3 A 3;
+		XZW3 B 3;
+		XZW3 C 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 DE 3;
+		XZW3 F 3 A_Smooch();
+		XZW3 GHIJ 3;
+		XZW3 K 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 L 3 A_BlowKiss();
+		XZW3 MNOPQRS 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	NoGesture:
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Deselect:
+		XZW1 A -1 A_FullLower();
+		Stop;
+	}
+}
+
+// item gestures
+
+Class SWWMItemGesture : SWWMWeapon abstract
+{
+	SWWMGesture gest;	// the base gesture weapon that we got picked from
+	bool gotused;
+
+	// these should prevent autoswitch when out of ammo
+	override bool ReportHUDAmmo()
+	{
+		return false;
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		return false;
+	}
+	override bool Use( bool pickup )
+	{
+		return false;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( gotused )
+		{
+			// clear ourselves after use (don't pollute inventory list)
+			DepleteOrDestroy();
+			return;
+		}
+		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) )
+			return;
+		let psp = Owner.player.FindPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		if ( (Owner.Health <= 0) && (psp.CurState != ResolveState("Deselect")) )
+			Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+	}
+
+	action void A_FinishGesture()
+	{
+		A_WeaponOffset(0,32);	// fix key punch offset
+		let gest = invoker.gest;
+		if ( !gest )
+		{
+			ThrowAbortException("Call to A_FinishGesture() without owned SWWMGesture");
+			return;
+		}
+		if ( gest.sweapon.Size() > 0 )
+		{
+			gest.whichgesture = GS_Null;
+			gest.whichweapon = gest.sweapon[0];
+			gest.whichuse = gest.suse[0];
+			// push back
+			gest.sweapon.Delete(0);
+			gest.suse.Delete(0);
+			// go back to the main gesture
+			player.ReadyWeapon = gest;
+			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.gotused = true;
+			return;
+		}
+		if ( gest.queued )
+		{
+			gest.whichweapon = null;
+			gest.whichgesture = gest.nextgesture;
+			gest.queued = false;
+			// go back to the main gesture
+			player.ReadyWeapon = gest;
+			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));
+			invoker.gotused = true;
+			return;
+		}
+		// switch to old weapon
+		player.ReadyWeapon = gest;
+		player.PendingWeapon = gest.formerweapon;
+		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Deselect"));
+		invoker.gotused = true;
+	}
+
+	Default
+	{
+		+WEAPON.CHEATNOTWEAPON;
+		+WEAPON.NO_AUTO_SWITCH;
+		+WEAPON.WIMPY_WEAPON;
+		+SWWMWEAPON.HIDEINMENU;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		Weapon.SelectionOrder int.max;
+	}
+	States
+	{
+	Select:
+		XZW1 A 1 A_FullRaise();
+		Goto Ready;
+	Ready:
+	Fire:
+		XZW1 A 1 A_Log("\cgUnimplemented pickup sequence for "..invoker.GetClassName().."\c-");
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	AltFire:
+		XZW1 A 1 A_Log("\cgUnimplemented use sequence for "..invoker.GetClassName().."\c-");
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	Deselect:
+		XZW1 A -1 A_FullLower();
+		Stop;
+	}
+}

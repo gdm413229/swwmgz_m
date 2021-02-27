@@ -1,0 +1,572 @@
+// thinkers related to the hud
+
+Enum EScoreObjType
+{
+	ST_Score,
+	ST_Damage,
+	ST_Health,
+	ST_Armor
+};
+
+// floating scores
+Class SWWMScoreObj : Thinker
+{
+	int xcnt;
+	int xtcolor[6];
+	int xscore[6];
+	String xstr[6];
+	int tcolor;
+	int score;
+	Vector3 pos;
+	int lifespan, initialspan;
+	int starttic, seed, seed2;
+	SWWMScoreObj prev, next;
+	bool damnum;
+	Actor acc;
+
+	static SWWMScoreObj Spawn( int score, Vector3 pos, int type = ST_Score, Actor acc = null, int tcolor = -1 )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		let o = new("SWWMScoreObj");
+		o.ChangeStatNum(STAT_USER);
+		o.score = score;
+		o.pos = pos;
+		o.lifespan = o.initialspan = 60;
+		if ( tcolor != -1 ) o.tcolor = tcolor;
+		else switch ( type )
+		{
+		case ST_Score:
+			o.tcolor = swwm_numcolor_scr;
+			break;
+		case ST_Damage:
+			o.tcolor = swwm_numcolor_dmg;
+			break;
+		case ST_Health:
+			o.tcolor = swwm_numcolor_hp;
+			break;
+		case ST_Armor:
+			o.tcolor = swwm_numcolor_ap;
+			break;
+		}
+		o.starttic = level.maptime;
+		o.seed = Random[ScoreBits]();
+		o.seed2 = Random[ScoreBits]();
+		o.damnum = (type > ST_Score);
+		o.xcnt = 0;
+		for ( int i=0; i<6; i++ ) o.xtcolor[i] = swwm_numcolor_bonus;
+		o.acc = acc;
+		if ( o.damnum )
+		{
+			o.next = hnd.damnums;
+			if ( hnd.damnums ) hnd.damnums.prev = o;
+			hnd.damnums = o;
+			hnd.damnums_cnt++;
+		}
+		else
+		{
+			o.next = hnd.scorenums;
+			if ( hnd.scorenums ) hnd.scorenums.prev = o;
+			hnd.scorenums = o;
+			hnd.scorenums_cnt++;
+		}
+		return o;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			if ( damnum )
+			{
+				hnd.damnums_cnt--;
+				if ( !prev ) hnd.damnums = next;
+			}
+			else
+			{
+				hnd.scorenums_cnt--;
+				if ( !prev ) hnd.scorenums = next;
+			}
+			if ( !prev )
+			{
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		lifespan--;
+		if ( lifespan <= 0 ) Destroy();
+	}
+}
+
+enum EInterestType
+{
+	INT_Key,
+	INT_Exit
+};
+
+Class SWWMInterest : Thinker
+{
+	int type;
+	Key trackedkey;
+	Line trackedline;
+	Vector3 pos;
+	SWWMInterest prev, next;
+	String keytag;
+
+	static SWWMInterest Spawn( Vector3 pos = (0,0,0), Key thekey = null, Line theline = null )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		if ( (!thekey && !theline) || (thekey && theline) ) return null;
+		let i = new("SWWMInterest");
+		i.ChangeStatNum(STAT_USER);
+		i.trackedkey = thekey;
+		i.trackedline = theline;
+		if ( thekey )
+		{
+			i.type = INT_Key;
+			i.keytag = thekey.GetTag();
+		}
+		else if ( theline ) i.type = INT_Exit;
+		else
+		{
+			i.Destroy();
+			return null;
+		}
+		i.pos = thekey?thekey.Vec3Offset(0,0,thekey.height/2):pos;
+		i.next = hnd.intpoints;
+		if ( hnd.intpoints ) hnd.intpoints.prev = i;
+		hnd.intpoints = i;
+		hnd.intpoints_cnt++;
+		return i;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.intpoints_cnt--;
+			if ( !prev )
+			{
+				hnd.intpoints = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		// update
+		if ( (type == INT_Key) && (!trackedkey || trackedkey.Owner) ) Destroy();
+		else if ( trackedkey ) pos = trackedkey.Vec3Offset(0,0,trackedkey.height/2);
+	}
+}
+
+Class SWWMItemSense : Thinker
+{
+	Actor item;
+	String tag;
+	int updated;
+	bool scoreitem, vipitem;
+	Demolitionist parent;
+	SWWMItemSense prev, next;
+	Vector3 pos;
+
+	static SWWMItemSense Spawn( Demolitionist parent, Actor item )
+	{
+		if ( !parent || !item ) return null;
+		// only refresh the updated time if existing
+		for ( SWWMItemSense s=parent.itemsense; s; s=s.next )
+		{
+			if ( s.item != item ) continue;
+			s.updated = level.maptime+35;
+			s.pos = item.Vec3Offset(0,0,item.height);
+			return s;
+		}
+		let i = new("SWWMItemSense");
+		i.ChangeStatNum(STAT_USER);
+		i.item = item;
+		i.scoreitem = SWWMUtility.IsScoreItem(item);
+		i.vipitem = SWWMUtility.IsVipItem(item);
+		i.parent = parent;
+		i.updated = level.maptime+35;
+		i.UpdateTag();
+		i.pos = item.Vec3Offset(0,0,item.height);
+		i.next = parent.itemsense;
+		if ( parent.itemsense ) parent.itemsense.prev = i;
+		parent.itemsense = i;
+		parent.itemsense_cnt++;
+		return i;
+	}
+
+	void UpdateTag()
+	{
+		if ( !item ) return;
+		// certain ammo types use the pickup message as it's amount-aware
+		if ( (item is 'RedShell') || (item is 'GreenShell')
+			|| (item is 'WhiteShell') || (item is 'BlueShell')
+			|| (item is 'BlackShell') || (item is 'PurpleShell')
+			|| (item is 'GoldShell') || (item is 'SMW05Ammo')
+			|| (item is 'SheenAmmo') )
+			tag = Inventory(item).PickupMessage();
+		else tag = item.GetTag();
+	}
+
+	override void OnDestroy()
+	{
+		if ( parent )
+		{
+			parent.itemsense_cnt--;
+			if ( !prev )
+			{
+				parent.itemsense = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		if ( !parent )
+		{
+			Destroy();
+			return;
+		}
+		// expire
+		if ( level.maptime > updated+70 ) Destroy();
+	}
+}
+
+// enemy combat tracker
+Class SWWMCombatTracker : Thinker
+{
+	Actor mytarget;
+	String mytag;
+	int updated, lasthealth, maxhealth;
+	DynamicValueInterpolator intp;
+	Vector3 pos, prevpos, oldpos, oldprev;
+	PlayerInfo myplayer;
+	SWWMCombatTracker prev, next;
+	bool legged, mutated;
+	int tcnt;
+	double height;
+	int mxdist, dbar;
+	bool bBOSS, bFRIENDLY;
+	bool firsthit;
+
+	void UpdateTag()
+	{
+		if ( mytarget && (mytarget.player || mytarget.bISMONSTER || (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') || (mytarget is 'Demolitionist')) )
+		{
+			String realtag = swwm_funtags?SWWMUtility.GetFunTag(mytarget,FallbackTag):mytarget.GetTag(FallbackTag);
+			if ( realtag == FallbackTag )
+			{
+				realtag = mytarget.GetClassName();
+				SWWMUtility.BeautifyClassName(realtag);
+			}
+			mytag = mytarget.player?(mytarget.player.mo!=mytarget)?String.Format(StringTable.Localize("$FN_VOODOO"),mytarget.player.GetUserName()):mytarget.player.GetUserName():realtag;
+		}
+		else mytag = "";
+	}
+
+	static SWWMCombatTracker Spawn( Actor target )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		SWWMCombatTracker t;
+		for ( t=hnd.trackers; t; t=t.next )
+		{
+			if ( t.mytarget != target ) continue;
+			return t;
+		}
+		t = new("SWWMCombatTracker");
+		t.ChangeStatNum(STAT_USER);
+		t.mytarget = target;
+		t.UpdateTag();
+		if ( target.player )
+		{
+			t.lasthealth = target.health;
+			t.maxhealth = target.default.health;
+		}
+		else t.lasthealth = t.maxhealth = target.health;
+		t.updated = int.min;
+		t.height = target.height;
+		t.pos = level.Vec3Offset(target.pos,(0,0,t.height));
+		t.prevpos = level.Vec3Offset(target.prev,(0,0,t.height));
+		t.oldpos = target.pos;
+		t.oldprev = target.prev;
+		t.intp = DynamicValueInterpolator.Create(t.lasthealth,.5,1,100);
+		t.myplayer = target.player;
+		t.next = hnd.trackers;
+		t.bBOSS = target.bBOSS;
+		t.bFRIENDLY = target.bFRIENDLY;
+		if ( hnd.trackers )
+		{
+			hnd.trackers.prev = t;
+			// propagate cvar values
+			t.mxdist = hnd.trackers.mxdist;
+			t.dbar = hnd.trackers.dbar;
+		}
+		hnd.trackers = t;
+		hnd.trackers_cnt++;
+		return t;
+	}
+
+	override void OnDestroy()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			hnd.trackers_cnt--;
+			if ( !prev )
+			{
+				hnd.trackers = next;
+				if ( next ) next.prev = null;
+			}
+			else
+			{
+				prev.next = next;
+				if ( next ) next.prev = prev;
+			}
+		}
+		Super.OnDestroy();
+	}
+
+	override void Tick()
+	{
+		// only the first tracker accesses the CVars, saves on perf
+		if ( !prev )
+		{
+			dbar = swwm_damagetarget;
+			mxdist = swwm_maxtargetdist;
+		}
+		if ( next )
+		{
+			next.dbar = dbar;
+			next.mxdist = mxdist;
+		}
+		// is target gone or dead?
+		if ( !mytarget || (mytarget.Health <= 0) )
+		{
+			// we're done
+			if ( updated > level.maptime ) updated = level.maptime;
+			lasthealth = 0;
+			prevpos = pos;	// prevent stuttering
+			intp.Update(lasthealth);
+			if ( level.maptime > updated+35 ) Destroy();
+			return;
+		}
+		// don't update dormant targets
+		if ( mytarget.bDORMANT )
+			return;
+		// in deathmatch, don't update for hostile players
+		if ( deathmatch && mytarget.player && (mytarget.player.mo == mytarget) )
+		{
+			if ( teamplay && (mytarget.player.GetTeam() != players[consoleplayer].GetTeam()) )
+				return;
+			else if ( !teamplay ) return;
+		}
+		// only update height/position while alive
+		bool heightchanged = false;
+		if ( height != mytarget.height ) heightchanged = true;
+		height = mytarget.height;
+		if ( heightchanged || (mytarget.pos != oldpos) || (mytarget.prev != oldprev) )
+		{
+			oldpos = mytarget.pos;
+			oldprev = mytarget.prev;
+			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
+			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
+		}
+		tcnt++;
+		if ( (tcnt == 1) && !mytarget.player )
+		{
+			// post-spawn health inflation check
+			if ( lasthealth > maxhealth )
+			{
+				maxhealth = lasthealth;
+				intp.Reset(lasthealth);
+			}
+		}
+		if ( (tcnt == 6) && !mytarget.player )
+		{
+			// legendoom check
+			for ( Inventory i=mytarget.inv; i; i=i.inv )
+			{
+				if ( i.GetClassName() != "LDLegendaryMonsterToken" ) continue;
+				legged = true;
+				// adjust for health inflation
+				if ( lasthealth > maxhealth )
+				{
+					maxhealth = lasthealth;
+					intp.Reset(lasthealth);
+				}
+			}
+		}
+		if ( legged && !mutated )
+		{
+			// check inventory regularly to mark as mutated
+			for ( Inventory i=mytarget.inv; i; i=i.inv )
+			{
+				if ( i.GetClassName() != "LDLegendaryMonsterTransformed" ) continue;
+				mutated = true;
+				Console.Printf(StringTable.Localize("$SWWM_LTFORM"),mytag);
+			}
+		}
+		bFRIENDLY = mytarget.bFRIENDLY;
+		if ( mytarget.Health < lasthealth ) firsthit = true;
+		lasthealth = mytarget.Health;
+		intp.Update(lasthealth);
+		// special update conditions
+		if ( dbar )
+		{
+			if ( (dbar == 2) && (lasthealth >= maxhealth) )
+				return;
+			else if ( (dbar == 1) && !firsthit )
+				return;
+		}
+		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE && !mytarget.bCORPSE )
+		{
+			bool straifu = false;
+			if ( (gameinfo.gametype&GAME_Strife) && (!mytarget.bINCOMBAT && !mytarget.bJUSTATTACKED) || (mytarget is 'Beggar') || (mytarget is 'Peasant') )
+				straifu = true;
+			// players (but not voodoo dolls), always visible
+			if ( mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
+			// friendlies within a set distance
+			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
+			// enemies within a set distance that have us as target
+			else if ( !straifu && mytarget.target && (mytarget.target.Health > 0) && (mytarget.target.player == players[consoleplayer]) && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+70;
+			// any visible enemies within one quarter of the set distance
+			else if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < (mxdist/4))) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+		}
+		else if ( (mytarget is 'BossBrain') || (mytarget is 'SWWMHangingKeen') )
+		{
+			// special stuff, only if visible
+			if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < (mxdist/4))) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime;
+		}
+	}
+}
+
+// ultralight trackers for certain things
+Class SWWMSimpleTracker : Thinker
+{
+	Actor target;
+	double radius;
+	double angle;
+	Vector3 pos;
+	bool isplayer;
+	Color playercol;
+	bool ismonster;
+	bool friendly;
+	bool countkill;
+	bool shootable;
+	bool isitem;
+	bool countitem;
+	bool vipitem;
+	bool expired;
+	int lastupdate;
+	ui double smoothalpha;	// smoothened alpha, for ui
+	SWWMSimpleTracker prev, next;
+
+	void Update()
+	{
+		if ( !target ) return;
+		radius = target.radius;
+		angle = target.angle;
+		pos = target.pos;
+		isplayer = target.player;
+		if ( isplayer ) playercol = target.player.GetColor();
+		ismonster = target.bISMONSTER;
+		friendly = target.IsFriend(players[consoleplayer].mo);
+		countkill = target.bCOUNTKILL;
+		shootable = target.default.bSHOOTABLE;
+		isitem = (target is 'Inventory');
+		countitem = SWWMUtility.IsScoreItem(target);
+		vipitem = SWWMUtility.IsVipItem(target);
+		lastupdate = level.maptime;
+		if ( isitem )
+		{
+			if ( !target.bSPECIAL || Inventory(target).Owner )
+				expired = true;
+			else
+			{
+				expired = false;
+				lastupdate += 35;
+				if ( countitem ) lastupdate += 35;
+				if ( vipitem ) lastupdate += 70;
+			}
+		}
+		else if ( vipitem )
+		{
+			if ( (target is 'Chancebox') && (target.CurState != target.SpawnState) )
+				expired = true;
+			else
+			{
+				expired = false;
+				lastupdate += 70;
+			}
+		}
+		else if ( friendly )
+		{
+			expired = target.bKILLED;
+			if ( expired ) lastupdate += 35;
+			else lastupdate += 140;
+		}
+		else if ( ismonster )
+		{
+			expired = target.bKILLED;
+			if ( !expired )
+			{
+				lastupdate += 35;
+				if ( target.target == players[consoleplayer].mo )
+					lastupdate += 70;
+			}
+		}
+		else if ( target.default.bSHOOTABLE )
+			expired = (target.Health<=0);
+	}
+
+	static SWWMSimpleTracker Track( Actor target )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return null;
+		SWWMSimpleTracker t;
+		for ( t=hnd.strackers; t; t=t.next )
+		{
+			if ( t.target != target ) continue;
+			t.Update();
+			return t;
+		}
+		t = new("SWWMSimpleTracker");
+		t.ChangeStatNum(STAT_INFO);
+		t.target = target;
+		t.Update();
+		t.next = hnd.strackers;
+		if ( hnd.strackers ) hnd.strackers.prev = t;
+		hnd.strackers = t;
+		hnd.strackers_cnt++;
+		return t;
+	}
+}

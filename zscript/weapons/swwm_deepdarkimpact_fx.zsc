@@ -1,0 +1,174 @@
+// Deep Impact projectiles and effects
+
+Class AirBullet : FastProjectile
+{
+	int tcnt;
+	Actor lasthit;
+
+	Default
+	{
+		Obituary "$O_DEEPIMPACT";
+		Radius 2;
+		Height 4;
+		DamageFunction 100;
+		DamageType 'AirRip';
+		Speed 400;
+		PROJECTILE;
+		+FORCERADIUSDMG;
+		+NODAMAGETHRUST;
+		+RIPPER;
+	}
+	override void PostBeginPlay()
+	{
+		A_StartSound("deepimpact/bullet",CHAN_BODY,CHANF_LOOP,1.,1.5);
+	}
+	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
+	{
+		if ( target.bBOSS ) damage = int(damage*.4);
+		if ( !bAMBUSH )
+		{
+			if ( target == lasthit ) return 0;
+			lasthit = target;
+		}
+		Vector3 dirto = level.Vec3Offset(pos,target.Vec3Offset(0,0,target.Height/2.));
+		dirto /= dirto.length();
+		SWWMUtility.DoKnockback(target,vel.unit()*.6+dirto*.4,120000);
+		if ( !target.player ) target.bBLASTED = true;
+		return damage;
+	}
+	override void Effect()
+	{
+		let r = Spawn("AirBulletRing",pos);
+		r.angle = angle;
+		r.pitch = pitch;
+		r.roll = FRandom[Impact](0,360);
+		r.scale *= .3;
+		r.alpha *= .6;
+		int numpt = Random[ExploS](2,4);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.1,.8);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel+vel.unit()*3.;
+			s.SetShade(Color(1,1,1)*Random[ExploS](240,255));
+			s.special1 = Random[ExploS](1,2);
+			s.scale *= 1.8;
+			s.alpha *= .2;
+		}
+		bAMBUSH = true;
+		SWWMUtility.DoExplosion(self,GetMissileDamage(0,0),0,80,ignoreme:target);
+		bAMBUSH = false;
+		tcnt++;
+		if ( tcnt < 2 ) return;
+		tcnt = 0;
+		Spawn("AirRingLight",pos);
+	}
+	void A_Splode()
+	{
+		A_AlertMonsters(swwm_uncapalert?0:8000);
+		if ( target && SWWMUtility.SphereIntersect(target,pos,120) )
+		{
+			// push away
+			Vector3 dir = level.Vec3Diff(pos,target.Vec3Offset(0,0,target.height/2));
+			double dist = dir.length();
+			dir /= dist;
+			double mm = 8000000./max(20.,dist);
+			if ( (target.pos.z > target.floorz) && target.TestMobjZ() ) mm *= 1.6;
+			SWWMUtility.DoKnockback(target,dir,mm);
+		}
+		SWWMUtility.DoExplosion(self,0,150000,150,ignoreme:target);
+		A_QuakeEx(6,6,6,20,0,250,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
+		A_StartSound("deepimpact/bullethit",CHAN_VOICE,CHANF_DEFAULT,1.,.3);
+		A_SprayDecal("ImpactMark");
+		Spawn("AirBulletLight",pos);
+		int numpt = Random[ExploS](10,20);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,6);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](240,255));
+			s.special1 = Random[ExploS](1,2);
+			s.scale *= 2.4;
+			s.alpha *= .4;
+		}
+		numpt = Random[ExploS](8,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,6);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](6,16);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,100,(cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch)));
+	}
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+		Stop;
+	Death:
+		TNT1 A 1 A_Splode();
+		Stop;
+	}
+}
+
+Class AirBulletLight : PaletteLight
+{
+	Default
+	{
+		Tag "ImpactWav";
+		ReactionTime 5;
+		Args 0,0,0,150;
+	}
+}
+
+Class AirRingLight : PaletteLight
+{
+	Default
+	{
+		Tag "ImpactWav,1";
+		ReactionTime 30;
+		Args 0,0,0,120;
+	}
+}
+
+Class AirBulletRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
+		Radius 0.1;
+		Height 0;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG1 ABCDEFGHIJKLMNOPQRSTUVWX 2;
+		Stop;
+	}
+}

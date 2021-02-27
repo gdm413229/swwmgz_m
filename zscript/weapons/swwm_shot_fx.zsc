@@ -1,0 +1,1739 @@
+// Spreadgun projectiles and effects
+
+Class RedShellCasing : SWWMCasing
+{
+	Default
+	{
+		BounceSound "spreadgun/casing";
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		heat = 0;
+	}
+}
+Class GreenShellCasing : RedShellCasing {}
+Class WhiteShellCasing : RedShellCasing {}
+Class BlueShellCasing : RedShellCasing {}
+Class BlackShellCasing : RedShellCasing {}
+Class PurpleShellCasing : RedShellCasing {}
+Class GoldShellCasing : RedShellCasing
+{
+	Default
+	{
+		BounceSound "spreadgun/gcasing";
+	}
+}
+
+Class SpreadImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:200);
+		A_StartSound("spreadgun/pellet",CHAN_VOICE,CHANF_DEFAULT,.4,4.);
+		A_SprayDecal("TinyPock",-20);
+		int numpt = Random[Spreadgun](2,4)-special1;
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8))).unit()*FRandom[Spreadgun](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= .6;
+			s.special1 = Random[Spreadgun](0,1);
+			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+		}
+		numpt = Random[Spreadgun](-1,3)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Spreadgun](2,4)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,4);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class SlugImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:500);
+		A_StartSound("spreadgun/slug",CHAN_VOICE,CHANF_DEFAULT,1.,2.);
+		A_SprayDecal("Pock",-20);
+		int numpt = Random[Spreadgun](5,10)-special1;
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4))).unit()*FRandom[Spreadgun](.4,2.);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.scale *= 1.4;
+			s.special1 = Random[Spreadgun](0,2);
+			s.SetShade(Color(1,1,1)*Random[Spreadgun](96,192));
+		}
+		numpt = Random[Spreadgun](2,5)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Spreadgun](4,8)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class DragonBreathPuff : Actor
+{
+	Vector2 initsc;
+
+	Default
+	{
+		RenderStyle "Add";
+		Scale 0.5;
+		Alpha 0.35;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOINTERACTION;
+		+NOTELEPORT;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		scale *= FRandom[Spreadgun](.8,1.);
+		alpha *= FRandom[Spreadgun](.8,1.);
+		roll = FRandom[Spreadgun](0,360);
+		SetState(FindState("Spawn")+Random[Spreadgun](0,19));
+		initsc = scale;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_FadeOut((waterlevel>0)?.1:.02);
+		scale += initsc*.2;
+	}
+	States
+	{
+	Spawn:
+		XFLM ABCDEFGHIJKLMNOPQRST -1 Bright;
+		Stop;
+	}
+}
+
+Class DragonBreathArm : Actor
+{
+	Vector3 oldvel;
+
+	Default
+	{
+		Obituary "$O_SPREADGUN_WHITE";
+		DamageType 'Fire';
+		PROJECTILE;
+		+THRUACTORS;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+USEBOUNCESTATE;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		-NOGRAVITY;
+		Gravity 0.15;
+		BounceFactor 1.0;
+		Radius 4;
+		Height 4;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		reactiontime = Random[ExploS](18,24);
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*FRandom[ExploS](16.,32.);
+		let l = Spawn("PaletteLight",pos);
+		l.Args[3] = int(60+60*(ReactionTime/20.));
+		l.ReactionTime = ReactionTime+2;
+		l.target = self;
+
+	}
+	override void Tick()
+	{
+		oldvel = vel;
+		Super.Tick();
+	}
+	void A_HandleBounce()
+	{
+		Vector3 HitNormal = -vel.unit();
+		F3DFloor ff;
+		if ( BlockingFloor )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.top.Normal;
+			else HitNormal = BlockingFloor.floorplane.Normal;
+		}
+		else if ( BlockingCeiling )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.bottom.Normal;
+			else HitNormal = BlockingCeiling.ceilingplane.Normal;
+		}
+		else if ( BlockingLine )
+		{
+			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			if ( !SWWMUtility.PointOnLineSide(pos.xy,BlockingLine) )
+				HitNormal *= -1;
+		}
+		else if ( BlockingMobj )
+		{
+			Vector3 diff = level.Vec3Diff(pos,BlockingMobj.pos);
+			if ( (pos.x+radius) <= (BlockingMobj.pos.x-BlockingMobj.radius) )
+				HitNormal = (-1,0,0);
+			else if ( (pos.x-radius) >= (BlockingMobj.pos.x+BlockingMobj.radius) )
+				HitNormal = (1,0,0);
+			else if ( (pos.y+radius) <= (BlockingMobj.pos.y-BlockingMobj.radius) )
+				HitNormal = (0,-1,0);
+			else if ( (pos.y-radius) >= (BlockingMobj.pos.y+BlockingMobj.radius) )
+				HitNormal = (0,1,0);
+			else if ( pos.z >= (BlockingMobj.pos.z+BlockingMobj.height) )
+				HitNormal = (0,0,1);
+			else if ( (pos.z+height) <= BlockingMobj.pos.z )
+				HitNormal = (0,0,-1);
+		}
+		// undo the bounce, we need to hook in our own
+		vel = oldvel;
+		// re-do the bounce with our formula
+		vel = .8*((vel dot HitNormal)*HitNormal*(-1.8+FRandom[Spreadgun](.0,.6))+vel);
+		bHITOWNER = true;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			if ( waterlevel > 0 ) ReactionTime -= 2;
+			let p = Spawn("DragonBreathPuff",pos);
+			p.alpha *= .6+.4*(ReactionTime/20.);
+			p.scale *= 3.5-2.5*(ReactionTime/20.);
+			SWWMUtility.DoExplosion(self,4+(reactiontime/2),1000+200*reactiontime,120+5*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
+			double spd = vel.length();
+			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
+			if ( !(ReactionTime%2) )
+			{
+				let s = Spawn("SWWMHalfSmoke",pos);
+				s.vel = pvel+vel*.2;
+				s.SetShade(Color(1,1,1)*Random[ExploS](96,192));
+				s.special1 = Random[ExploS](2,4);
+				s.scale *= 2.4;
+				s.alpha *= .1+.2*(ReactionTime/20.);
+				int numpt = Random[Spreadgun](-2,4);
+				for ( int i=0; i<numpt; i++ )
+				{
+					Vector3 pvel = vel+(FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,4);
+					let s2 = Spawn("SWWMSpark",pos);
+					s2.scale *= .4;
+					s2.vel = pvel;
+				}
+			}
+			A_CountDown();
+		}
+		Wait;
+	Bounce:
+		TNT1 A 0 A_HandleBounce();
+		Goto Spawn;
+	}
+}
+
+Class SaltTracer : LineTracer
+{
+	Actor ignore;
+	Array<Line> ShootThroughList;
+	Array<WaterHit> WaterHitList;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignore ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&Line.ML_BlockHitscan) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class SaltLight : PaletteLight
+{
+	Default
+	{
+		Tag "SaltExpl,1";
+		ReactionTime 30;
+		Args 0,0,0,240;
+	}
+}
+Class SaltLight2 : PaletteLight
+{
+	Default
+	{
+		Tag "SaltExpl";
+		ReactionTime 30;
+		Args 0,0,0,70;
+	}
+}
+
+Class SaltImpact : Actor
+{
+	Default
+	{
+		Obituary "$O_SPREADGUN_BLUE";
+		DamageType "Electric";
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale 1.8;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( args[0] >= 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_AlertMonsters(swwm_uncapalert?0:6000);
+		SWWMUtility.DoExplosion(self,25+special2*4,15000,100,40);
+		A_QuakeEx(3,3,3,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
+		A_StartSound("spreadgun/salt",CHAN_VOICE,attenuation:.35);
+		A_SprayDecal("ShockMarkSmall",-172);
+		A_SprayDecal("SaltMark",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		int numpt = Random[ExploS](5,9)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,6);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,3,4)*Random[ExploS](48,63));
+			s.special1 = Random[ExploS](1,2);
+			s.scale *= 2.4;
+			s.A_SetRenderStyle(.4,STYLE_AddShaded);
+		}
+		numpt = Random[ExploS](3,9)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,6);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](3,6)-special1;
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Spawn("SaltLight2",pos);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,"Expl1","Expl2","Expl3");
+	Expl1:
+		KSX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		Stop;
+	Expl2:
+		KSX2 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		Stop;
+	Expl3:
+		KSX3 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		Stop;
+	}
+}
+
+Class SaltBeam : Actor
+{
+	Default
+	{
+		Obituary "$O_SPREADGUN_BLUE";
+		DamageType "Electric";
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Stamina 9;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( args[1] >= 1 ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	void SpreadOut()
+	{
+		special1 = 1;
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		let t = new("SaltTracer");
+		t.ignore = target;
+		t.Trace(pos,cursector,x,32,TRACE_HitSky);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+			t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+		}
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Actor.Spawn("InvisibleSplasher",t.WaterHitList[i].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=4; i<t.Results.Distance; i+=8 )
+		{
+			if ( Random[Spreadgun](0,Stamina) ) continue;
+			let b = Actor.Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,x*i));
+			b.Scale *= FRandom[Spreadgun](.6,.8);
+			b.special1 = Random[Spreadgun](1,2);
+			b.A_SetRenderStyle(.3,STYLE_AddShaded);
+			b.SetShade(Color(1,3,4)*Random[Spreadgun](48,63));
+			b.vel += x*FRandom[Spreadgun](-.5,3);
+		}
+		if ( t.Results.HitType != TRACE_HitNone )
+		{
+			if ( (args[1] == 2) || swwm_omnibust ) BusterWall.Bust(t.Results,60+Accuracy*10,target,x,t.Results.HitPos.z);
+			if ( t.Results.HitType == TRACE_HitActor )
+			{
+				SWWMUtility.DoKnockback(t.Results.HitActor,x,25000);
+				t.Results.HitActor.DamageMobj(self,target,35+Accuracy*5,'Salt',DMG_THRUSTLESS);
+				if ( t.Results.HitActor && t.Results.HitActor.bIsMonster && !Random[Spreadgun](0,3) )
+					t.Results.HitActor.Howl();
+			}
+			Vector3 norm = -x;
+			if ( t.Results.HitType == TRACE_HitWall )
+			{
+				norm = (t.Results.HitLine.delta.y,-t.Results.HitLine.delta.x,0).unit();
+				if ( t.Results.Side ) norm *= -1;
+				t.Results.HitLine.RemoteActivate(tracer,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			}
+			else if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.top.Normal;
+				else norm = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.ffloor ) norm = -t.Results.ffloor.bottom.Normal;
+				else norm = t.Results.HitSector.ceilingplane.Normal;
+			}
+			if ( t.Results.HitType != TRACE_HasHitSky )
+			{
+				let i = Spawn("SaltImpact",level.Vec3Offset(t.Results.HitPos,norm*4));
+				i.angle = atan2(norm.y,norm.x);
+				i.pitch = asin(-norm.z);
+				i.target = target;
+				i.special1 = (Stamina-9)/4;
+				i.special2 = Accuracy;
+				i.args[0] = args[1];
+			}
+			return;
+		}
+		else if ( (args[0] > 20) && !Random[Spreadgun](0,800/args[0]) )
+		{
+			let i = Spawn("SaltImpact",level.Vec3Offset(pos,x*32));
+			i.angle = atan2(x.y,x.x);
+			i.pitch = asin(-x.z);
+			i.target = target;
+			i.special1 = (Stamina-9)/4;
+			i.special2 = Accuracy;
+			i.args[0] = args[1];
+			return;
+		}
+		// next beam
+		if ( !(special2%4) && !Random[Spreadgun](0,Stamina) )
+			Spawn("SaltLight",level.Vec3Offset(pos,x*16));
+		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*32));
+		double a = FRandom[Spreadgun](0,360), s = FRandom[Spreadgun](0,.06);
+		Vector3 dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
+		next.angle = atan2(dir.y,dir.x);
+		next.pitch = asin(-dir.z);
+		next.target = target;
+		next.special2 = (special2+1)%10;
+		next.args[0] = args[0]+1;
+		next.args[1] = args[1];
+		next.SetStateLabel("TrailSpawn");
+	}
+
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( !Random[Spreadgun](0,3) )
+			A_StartSound("spreadgun/salttrail",CHAN_VOICE,CHANF_DEFAULT,.3,4.);
+	}
+
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_FadeOut(.04);
+		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
+			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
+		if ( ((special2%4) || args[2]) && !special1 ) SpreadOut();
+		args[2]++;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright NoDelay
+		{
+			return FindState("StarterDev")+Random[Spreadgun](0,11)*2;
+		}
+		Stop;
+	TrailSpawn:
+		XZW2 A -1 Bright
+		{
+			return FindState("TrailerDev")+Random[Spreadgun](0,11)*2;
+		}
+		Stop;
+	StarterDev:
+		#### # 25 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 F -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 G -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 H -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 I -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 J -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 K -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 L -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW1 M -1 Bright;
+		Stop;
+	TrailerDev:
+		#### # 25 Bright;
+		XZW2 B -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 C -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 D -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 E -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 F -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 G -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 H -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 I -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 J -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 K -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 L -1 Bright;
+		Stop;
+		#### # 25 Bright;
+		XZW2 M -1 Bright;
+		Stop;
+	}
+}
+
+Class BallImpact : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:500);
+		A_QuakeEx(3,3,3,12,0,200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.3);
+		A_StartSound("spreadgun/ball",CHAN_VOICE);
+		A_SprayDecal("WallCrack",-20);
+		int numpt = Random[Spreadgun](5,10);
+		Vector3 x = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (x+(FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8),FRandom[Spreadgun](-.8,.8))).unit()*FRandom[Spreadgun](.1,1.2);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[Spreadgun](128,192));
+		}
+		numpt = Random[Spreadgun](4,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[Spreadgun](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](2,8);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		Destroy();
+	}
+}
+
+Class CorrodeSmoke : SWWMHalfSmoke
+{
+	Default
+	{
+		RenderStyle "Add";
+		Alpha 0.25;
+	}
+	States
+	{
+	Spawn:
+		FRT1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 1 Bright A_SetTics(1+special1);
+		FRT2 ABCDEFGHI 1 Bright A_SetTics(1+special1);
+		Stop;
+	}
+}
+
+Class CorrodeDebuff : Inventory
+{
+	int cnt, cnt2, cnt3;
+	Actor instigator;
+	bool wasalive;
+
+	Default
+	{
+		Obituary "$O_SPREADGUN_BLACK_DEBUFF";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1000;
+		Inventory.InterHubAmount 0;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+	}
+	override int DoSpecialDamage( Actor target, int Damage, Name DamageType )
+	{
+		if ( target == Owner ) return Damage;
+		// spread ourselves
+		let c = CorrodeDebuff(target.FindInventory("CorrodeDebuff"));
+		if ( !c )
+		{
+			c = CorrodeDebuff(Spawn("CorrodeDebuff",target.pos));
+			c.AttachToOwner(target);
+			c.cnt = 5;	// slight delay
+			c.Amount = min(Damage*8,int(Amount*.6));	// prevent "escalating" spread
+			c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT,min(c.Amount/100.,1.));
+		}
+		else if ( c.Amount < int(Amount*.6) ) c.Amount = min(c.Amount+Damage*8,int(Amount*.6));	// prevent "escalating" spread
+		c.instigator = instigator;
+		return 0;	// no direct damage
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		cnt3 = Random[Corrode](0,19);	// randomize puff sound offset
+	}
+	override void OwnerDied()
+	{
+		Super.OwnerDied();
+		// forcibly update
+		wasalive = true;
+		cnt = -1;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( (Amount <= 0) || !Owner )
+		{
+			if ( Owner && IsActorPlayingSound(CHAN_VOICE) )
+			{
+				// don't destroy yet, keep following owner until the sound wears off
+				SetOrigin(Owner.Vec3Offset(0,0,Owner.height/2),false);
+				return;
+			}
+			DepleteOrDestroy();
+			return;
+		}
+		SetOrigin(Owner.Vec3Offset(0,0,Owner.height/2),false);
+		cnt--;
+		if ( cnt < 0 )
+		{
+			if ( !Random[Corrode](0,3) && (Owner.Health > 0) ) Owner.Howl();
+			double maxrad = max(Owner.radius,Owner.height);
+			int defh = Owner.GetSpawnHealth();
+			int flg = DMG_THRUSTLESS;
+			if ( Owner is 'Centaur' ) flg |= DMG_FOILINVUL;	// you're melting, that shield is worthless
+			Owner.DamageMobj(self,instigator?instigator:Actor(self),clamp(Amount/8,1,50),'Corroded',flg);
+			bool justdied = (wasalive && (!Owner || (Owner.Health <= 0)));
+			if ( justdied )
+			{
+				maxrad += 60;
+				Amount = min(Amount+int(defh**.5),MaxAmount);
+				A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT);
+			}
+			if ( !wasalive ) maxrad += 25;
+			SWWMUtility.DoExplosion(self,clamp(Amount/8,1,50),0,maxrad*1.2,maxrad*.9,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',Owner);
+			if ( !Owner ) return;	// yeah this can happen
+			int smokefact = int(clamp(maxrad/32.,1,8));
+			int numpt = Random[Corrode](0,2*smokefact);
+			if ( justdied ) numpt = Random[Corrode](8,12)*smokefact;
+			for ( int i=0; i<numpt; i++ )
+			{
+				let s = Spawn("CorrodeSmoke",level.Vec3Offset(Owner.pos,(.8*FRandom[Corrode](-Owner.radius,Owner.radius),.8*FRandom[Corrode](-Owner.radius,Owner.radius),FRandom[Corrode](.1*Owner.Height,.9*Owner.Height))));
+				s.vel = Owner.vel*.5;
+				if ( justdied ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](2.,8.);
+				else if ( !wasalive ) s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.2,2.);
+				else s.vel += (FRandom[Corrode](-1,1),FRandom[Corrode](-1,1),FRandom[Corrode](-1,1))*FRandom[Corrode](.1,1.);
+				s.scale *= FRandom[Corrode](2.,3.);
+				s.alpha *= Clamp(Amount/10.,0.,.6);
+				if ( justdied ) s.special1 = Random[Corrode](0,2);
+				else if ( !wasalive ) s.special1 = Random[Corrode](0,1);
+			}
+			cnt = clamp((100-Amount)/10,5,15);
+		}
+		wasalive = (Owner && Owner.Health > 0);
+		cnt3++;
+		if ( !(cnt3%20) ) A_StartSound("spreadgun/corrodepuff",CHAN_BODY,CHANF_OVERLAP,min(Amount/200.,1.),2.,FRandom[Corrode](.8,1.2)-min(Amount/200.,.4));
+		cnt2++;
+		if ( cnt2 < 3 ) return;
+		cnt2 = (!Owner||(Owner.Health<=Owner.GetGibHealth()))?-2:0;	// slower decay when gibbed
+		Amount -= 1;
+		if ( Amount > 100 ) Amount -= max(0,Amount/50-1);
+		if ( !Owner ) return;
+		if ( Owner.Health > 0 ) Amount -= 1;
+		if ( Owner.bNOBLOOD ) Amount -= 2;
+	}
+}
+
+Class FlechetteTracer : LineTracer
+{
+	Actor ignore;
+	Array<Line> ShootThroughList;
+	Array<WaterHit> WaterHitList;
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignore ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BLOCKEVERYTHING|Line.ML_BLOCKPROJECTILE)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class CorrosiveSplash : Actor
+{
+	Default
+	{
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override int DoSpecialDamage( Actor target, int Damage, Name DamageType )
+	{
+		// spread ourselves
+		let c = CorrodeDebuff(target.FindInventory("CorrodeDebuff"));
+		if ( !c )
+		{
+			c = CorrodeDebuff(Spawn("CorrodeDebuff",target.pos));
+			c.AttachToOwner(target);
+			c.cnt = 5;	// slight delay
+		}
+		c.Amount = min(c.Amount+Damage,c.MaxAmount);
+		c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT,min(c.Amount/100.,1.));
+		c.instigator = self.target;
+		return 0;	// no direct damage
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,20,0,50,15,DE_NOBLEED|DE_NOSPLASH|DE_HOWL,'Corroded',tracer);
+		Destroy();
+	}
+}
+
+Class CorrosiveFlechette : Actor
+{
+	transient FlechetteTracer t;
+	Actor lasthit;
+
+	Default
+	{
+		Obituary "$O_SPREADGUN_BLACK";
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NODAMAGETHRUST;
+		+NOINTERACTION;
+		+INTERPOLATEANGLES;
+		Speed 100;
+		Radius .1;
+		Height 0.;
+		Gravity .35;
+	}
+
+	override void Tick()
+	{
+		prev = pos;	// interpolation
+		if ( isFrozen() ) return;
+		if ( CurState == SpawnState )
+		{
+			// bullet trace
+			if ( (pos.z < floorz) || (pos.z > ceilingz) )
+			{
+				// the fuck just happened???
+				SetStateLabel("Death");
+				return;
+			}
+			Vector3 dir = vel;
+			double dist = vel.length();
+			if ( dist < 1. )
+			{
+				// somehow have no velocity while alive, just die
+				SetStateLabel("Death");
+				return;
+			}
+			dir /= dist;
+			if ( !t ) t = new("FlechetteTracer");
+			if ( lasthit ) t.ignore = lasthit;
+			else if ( !bHITOWNER ) t.ignore = target;
+			else t.ignore = null;
+			t.shootthroughlist.Clear();
+			t.waterhitlist.Clear();
+			t.Trace(pos,CurSector,dir,dist,TRACE_HitSky);
+			for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			{
+				t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			}
+			for ( int i=0; i<t.WaterHitList.Size(); i++ )
+			{
+				let b = Spawn("SmolInvisibleSplasher",t.WaterHitList[i].hitpos);
+				b.A_CheckTerrain();
+			}
+			for ( int i=10; i<t.Results.Distance; i+=20 )
+			{
+				if ( Random[Boolet](0,2) ) continue;
+				let b = Actor.Spawn("SWWMHalfSmoke",level.Vec3Offset(pos,dir*i));
+				b.Scale *= FRandom[Boolet](.3,.5);
+				b.A_SetRenderStyle(b.alpha*.2,STYLE_AddShaded);
+				b.SetShade(Color(3,4,3)*Random[Boolet](10,20));
+				b.vel += vel*.05;
+			}
+			if ( t.Results.HitType == TRACE_HitNone )
+			{
+				// advance bullet
+				SetOrigin(level.Vec3Offset(pos,dir*dist),true);
+				vel = t.Results.HitVector*dist-(0,0,GetGravity());	// slight drop
+				dir = vel.unit();
+				angle = atan2(dir.y,dir.x);
+				pitch = asin(-dir.z);
+				return;
+			}
+			else if ( t.Results.HitType == TRACE_HitActor )
+			{
+				Vector3 hitnormal = -t.Results.HitVector;
+				let a = t.Results.HitActor;
+				if ( a.bSHOOTABLE && (a.Health > 0) )
+				{
+					let c = CorrodeDebuff(a.FindInventory("CorrodeDebuff"));
+					if ( !c )
+					{
+						c = CorrodeDebuff(Spawn("CorrodeDebuff",a.pos));
+						c.AttachToOwner(a);
+					}
+					c.Amount = min(c.Amount+25,c.MaxAmount);
+					c.cnt = 0;
+					c.instigator = target;
+					c.A_StartSound("spreadgun/corrode",CHAN_VOICE,CHANF_DEFAULT,min(c.Amount/100.,1.));
+				}
+				int dmg = 3;
+				int amt = 3;
+				if ( a.bSHOOTABLE )
+				{
+					SWWMUtility.DoKnockback(a,t.Results.HitVector,1000);
+					SWWMDamageAccumulator.Accumulate(a,dmg,self,target,'Shot');
+					amt = SWWMDamageAccumulator.GetAmount(a);
+				}
+				if ( !a.bSHOOTABLE || a.bNOBLOOD || a.bDORMANT || a.bINVULNERABLE )
+				{
+					let p = Spawn("SpreadImpact",t.Results.HitPos);
+					A_SetAngle(atan2(hitnormal.y,hitnormal.x),SPF_INTERPOLATE);
+					A_SetPitch(asin(-hitnormal.z),SPF_INTERPOLATE);
+				}
+				else
+				{
+					a.TraceBleed(dmg,self);
+					a.SpawnBlood(t.Results.HitPos,atan2(t.Results.HitVector.y,t.Results.HitVector.x)+180,dmg);
+					A_StartSound("spreadgun/pelletf",CHAN_VOICE,CHANF_DEFAULT,.5,2.);
+				}
+				let s = Spawn("CorrosiveSplash",t.Results.HitPos);
+				s.target = target;
+				s.tracer = a;
+				// chance to pierce
+				int posthealth = a.health-amt;
+				double hratio = posthealth/double(a.GetSpawnHealth());
+				if ( (!a.bSHOOTABLE && !Random[Corrode](0,2)) || (posthealth <= 0) || (FRandom[Corrode](hratio,1.) < .5) )
+				{
+					SetOrigin(t.Results.HitPos,true);
+					dir = t.Results.HitVector;
+					A_SetAngle(atan2(dir.y,dir.x),SPF_INTERPOLATE);
+					A_SetPitch(asin(-dir.z),SPF_INTERPOLATE);
+					vel = dir*dist;
+					bHITOWNER = true;
+					lasthit = t.Results.HitActor;
+				}
+				else SetStateLabel("Death");
+				return;
+			}
+			else
+			{
+				// Wall busting
+				if ( swwm_omnibust )
+					BusterWall.Bust(t.Results,3,target,t.Results.HitVector,t.Results.HitPos.z);
+				// check what we hit
+				Vector3 hitnormal = -t.Results.HitVector;
+				if ( t.Results.HitType == TRACE_HitFloor )
+				{
+					if ( t.Results.ffloor ) hitnormal = -t.Results.ffloor.top.Normal;
+					else hitnormal = t.Results.HitSector.floorplane.Normal;
+				}
+				else if ( t.Results.HitType == TRACE_HitCeiling )
+				{
+					if ( t.Results.ffloor ) hitnormal = -t.Results.ffloor.bottom.Normal;
+					else hitnormal = t.Results.HitSector.ceilingplane.Normal;
+				}
+				else if ( t.Results.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+					if ( !t.Results.Side ) hitnormal *= -1;
+					t.Results.HitLine.RemoteActivate(target,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+				}
+				if ( t.Results.HitType != TRACE_HasHitSky )
+				{
+					let p = Spawn("SpreadImpact",t.Results.HitPos+hitnormal);
+					p.angle = atan2(hitnormal.y,hitnormal.x);
+					p.pitch = asin(-hitnormal.z);
+					if ( t.Results.HitType == TRACE_HitFloor ) p.CheckSplash(40);
+					let s = Spawn("CorrosiveSplash",t.Results.HitPos+hitnormal);
+					s.target = target;
+				}
+				// can we bounce?
+				if ( t.Results.HitVector dot hitnormal > -.35 )
+				{
+					SetOrigin(t.Results.HitPos+hitnormal,true);
+					dir = t.Results.HitVector-2*hitnormal*(t.Results.HitVector dot hitnormal);
+					A_SetAngle(atan2(dir.y,dir.x),SPF_INTERPOLATE);
+					A_SetPitch(asin(-dir.z),SPF_INTERPOLATE);
+					vel = dir*dist;
+					bHITOWNER = true;
+					lasthit = null;
+				}
+				else SetStateLabel("Death");
+				return;
+			}
+		}
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Death:
+		TNT1 A 35;
+		Stop;
+	}
+}
+
+Class TheBall : Actor
+{
+	double heat;
+	int deadtimer;
+	Vector3 oldvel;
+	Actor lasthit;
+
+	Default
+	{
+		Obituary "$O_SPREADGUN_PURPLE";
+		PROJECTILE;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+CANBOUNCEWATER;
+		+USEBOUNCESTATE;
+		+DONTBOUNCEONSKY;
+		+NODAMAGETHRUST;
+		-NOGRAVITY;
+		Speed 80;
+		Gravity 0.1;
+		BounceFactor 1.0;
+		Radius 2;
+		Height 2;
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( special1 >= 1 ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	override int SpecialMissileHit( Actor victim )
+	{
+		if ( (vel.length() <= 5) || ((victim == target) && !bHITOWNER) || (victim == lasthit) || (!victim.bSHOOTABLE && !victim.bSOLID) )
+			return 1;
+		// check if we should rip or bounce
+		// girthitude
+		double girth = (victim.radius+victim.height)/2.*max(50,victim.mass)*(victim.health/double(victim.GetSpawnHealth()));
+		// how hard this damn thing is going to slam
+		double slamforce = vel.length()*350.+heat*120;
+		int dmg = int(vel.length()*4.+heat*40);
+		bool is_schutt = victim.bSHOOTABLE;
+		// critical hit!
+		bool crit = false;
+		if ( is_schutt && !Random[Spreadgun](0,9) )
+		{
+			Spawn("SWWMItemFog",pos);
+			int whichclonk = Random[Spreadgun](1,11);
+			String snd = String.Format("misc/clonk%d",whichclonk);
+			A_AlertMonsters(swwm_uncapalert?0:2500);
+			A_StartSound(snd,CHAN_VOICE,CHANF_OVERLAP,1.,.2);
+			A_StartSound(snd,CHAN_VOICE,CHANF_OVERLAP,1.,.2);
+			victim.A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
+			victim.A_StartSound(snd,CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
+			slamforce *= 4;
+			dmg *= 4;
+			vel *= 1.1;
+			let numpt = Random[Spreadgun](20,30);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,8);
+				let s = Spawn("SWWMSpark",pos);
+				s.scale *= 3.;
+				s.alpha *= .2;
+				s.vel = pvel;
+			}
+			crit = true;
+		}
+		SWWMUtility.DoKnockback(victim,vel.unit(),slamforce);
+		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && !victim.bDORMANT && is_schutt);
+		int newdmg = victim.DamageMobj(self,target,dmg,'Concussion',crit?(DMG_THRUSTLESS|DMG_FOILINVUL):DMG_THRUSTLESS);	// crits ignore invulnerability
+		Vector3 dir = -vel.unit();
+		// slam jam
+		if ( bleeds )
+		{
+			A_StartSound("spreadgun/ballf",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( victim )
+			{
+				victim.A_StartSound("spreadgun/ballf",CHAN_DAMAGE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+				victim.TraceBleed((newdmg>0)?newdmg:dmg,self);
+				victim.SpawnBlood(pos,atan2(dir.y,dir.x),dmg);
+			}
+		}
+		else
+		{
+			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( victim ) victim.A_StartSound("spreadgun/ball",CHAN_DAMAGE,CHANF_OVERLAP,(vel.length()/30.)**.5);
+			if ( vel.length() > 15. )
+			{
+				let s = Spawn("BallImpact",pos);
+				s.angle = atan2(dir.y,dir.x);
+				s.pitch = asin(-dir.z);
+			}
+		}
+		if ( crit )
+			SWWMUtility.DoExplosion(self,dmg/2,25000,150,80,ignoreme:target);
+		// only rip shootables
+		if ( (slamforce > girth) && is_schutt )
+		{
+			vel *= .7;
+			return 1;
+		}
+		// force bounce
+		BlockingMobj = victim;
+		A_HandleBounce();
+		lasthit = victim;
+		// pretend to pass through
+		return 1;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("pusher/fly",CHAN_WEAPON,CHANF_LOOP,.6,3.,2.);
+		heat = 1.;
+	}
+	override void Tick()
+	{
+		oldvel = vel;
+		Super.Tick();
+		if ( isFrozen() ) return;
+		if ( InStateSequence(CurState,ResolveState("Death")) )
+		{
+			deadtimer++;
+			if ( deadtimer > 300 )
+			{
+				let numpt = Random[Spreadgun](3,6);
+				for ( int i=0; i<numpt; i++ )
+				{
+					Vector3 pvel = (FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1),FRandom[Spreadgun](-1,1)).unit()*FRandom[Spreadgun](1,8);
+					let s = Spawn("SWWMSmallSmoke",pos);
+					s.scale *= 3.;
+					s.alpha *= .2;
+					s.vel = pvel;
+				}
+				Destroy();
+			}
+			return;
+		}
+		heat -= 0.004+0.0004*vel.length();
+		A_SoundVolume(CHAN_WEAPON,vel.length()/75.);
+		if ( heat <= 0 ) return;
+		let s = Spawn("SWWMHalfSmoke",pos);
+		s.alpha *= heat;
+	}
+	void A_HandleBounce()
+	{
+		bHITOWNER = true;
+		lasthit = null;
+		Vector3 HitNormal = -vel.unit();
+		F3DFloor ff;
+		if ( BlockingFloor )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingFloor.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.top.Normal;
+			else HitNormal = BlockingFloor.floorplane.Normal;
+		}
+		else if ( BlockingCeiling )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingCeiling.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
+				break;
+			}
+			if ( ff ) HitNormal = -ff.bottom.Normal;
+			else HitNormal = BlockingCeiling.ceilingplane.Normal;
+		}
+		else if ( BlockingLine )
+		{
+			HitNormal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			int wside = SWWMUtility.PointOnLineSide(pos.xy,BlockingLine);
+			if ( !wside ) HitNormal *= -1;
+			if ( (oldvel.length() > 15) && swwm_balluse )
+			{
+				int locknum = SWWMUtility.GetLineLock(BlockingLine);
+				// remotely activate unlocked lines (that aren't exits)
+				if ( (!locknum || (target && target.CheckKeys(locknum,false,true))) && !SWWMUtility.IsExitLine(BlockingLine) )
+					BlockingLine.RemoteActivate(target,wside,SPAC_Use,pos);
+			}
+		}
+		else if ( BlockingMobj )
+		{
+			Vector3 diff = level.Vec3Diff(BlockingMobj.Vec3Offset(0,0,BlockingMobj.Height/2),pos);
+			HitNormal = diff.unit();
+		}
+		// send the needed data for a bust
+		if ( (special1 == 2) || swwm_omnibust )
+		{
+			int dmg = int(oldvel.length()*4.2+heat*80);
+			BusterWall.ProjectileBust(self,dmg,oldvel.unit());
+		}
+		// undo the bounce, we need to hook in our own
+		vel = oldvel;
+		// re-do the bounce with our formula
+		double bcefact = .9;
+		if ( BlockingMobj )
+		{
+			bcefact *= .7;
+			if ( !BlockingMobj.bINVULNERABLE && !BlockingMobj.bNOBLOOD && !BlockingMobj.bDORMANT )
+				bcefact *= .6;
+		}
+		vel = (vel dot HitNormal)*HitNormal*FRandom[Spreadgun](-1.8,-1.)+vel;
+		vel += (FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4),FRandom[Spreadgun](-.4,.4));
+		vel *= bcefact;
+		// slam jam
+		if ( !BlockingMobj )
+		{
+			A_StartSound("spreadgun/ball",CHAN_VOICE,CHANF_OVERLAP,max(0.,(vel.length()/30.-.2))**.5);
+			if ( vel.length() > 15 )
+			{
+				let s = Spawn("BallImpact",pos);
+				s.angle = atan2(HitNormal.y,HitNormal.x);
+				s.pitch = asin(-HitNormal.z);
+			}
+		}
+		gravity = .35;
+		if ( (vel.length() < 5) && (pos.z <= floorz) )
+		{
+			ClearBounce();
+			ExplodeMissile();
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Bounce:
+		XZW1 A 0 A_HandleBounce();
+		Goto Spawn;
+	Death:
+		XZW1 A -1
+		{
+			bMOVEWITHSECTOR = true;
+			A_StopSound(CHAN_WEAPON);
+		}
+		Stop;
+	}
+}
+
+Class GExploLight : PaletteLight
+{
+	Default
+	{
+		ReactionTime 80;
+		Args 0,0,0,800;
+	}
+}
+
+Class GExploRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale 8.;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XRG0 ABCDEFGHIJKLMNOPQRSTUVWX 1 Bright A_SetScale(scale.x*1.05);
+		Stop;
+	}
+}
+
+
+Class GoldenImpact : Actor
+{
+	Default
+	{
+		DamageType "Explodium";
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale 8.;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_AlertMonsters(swwm_uncapalert?0:40000);
+		SWWMUtility.DoExplosion(self,7777,90000,600,500,DE_EXTRAZTHRUST);
+		A_QuakeEx(9,9,9,40,0,5000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollintensity:1.5);
+		A_StartSound("spreadgun/goldexpl",CHAN_VOICE,attenuation:.3);
+		A_StartSound("spreadgun/goldexpl",CHAN_WEAPON,attenuation:.15);
+		A_SprayDecal("WumboRocketBlast",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](30,40);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,9);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
+			s.special1 = Random[ExploS](3,6);
+			s.scale *= 3.5;
+			s.alpha *= .8;
+		}
+		numpt = Random[ExploS](8,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](6,16);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,24);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](12,24);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](8,40);
+			let s = Spawn("FancyConfetti",pos);
+			s.scale *= 3.;
+			s.bAMBUSH = true;
+			s.vel = pvel;
+		}
+		Spawn("GExploLight",pos);
+		let r = Spawn("GExploRing",pos);
+	}
+	action void A_GoldSpread()
+	{
+		special1++;
+		if ( (special1%4) || (special1 > 30) ) return;
+		FLineTraceData d;
+		Vector3 HitNormal;
+		Vector3 origin;
+		double ang, pt;
+		for ( int i=0; i<3; i++ )
+		{
+			double totaldist = 30+(special1**2.)*.4;
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,90);
+			origin = pos;
+			while ( totaldist > 0 )
+			{
+				LineTrace(ang,totaldist,pt,TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+				hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				totaldist -= d.Distance;
+				if ( totaldist > 0 )
+				{
+					Vector3 bounced = d.HitDir-(1.2*hitnormal*(d.HitDir dot HitNormal));
+					ang = atan2(bounced.y,bounced.x);
+					pt = asin(-bounced.z);
+					origin = d.HitLocation+hitnormal;
+				}
+			}
+			let p = Spawn("GoldenSubImpact",d.HitLocation+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.target = target;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX1 AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ[[\\]] 1 Bright A_GoldSpread();
+		Stop;
+	}
+}
+
+Class GoldenSubImpact : Actor
+{
+	Default
+	{
+		DamageType "Explodium";
+		RenderStyle "Add";
+		Scale 6.;
+		Alpha .8;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,777,80000,500,400,DE_EXTRAZTHRUST);
+		A_QuakeEx(7,7,7,20,0,2000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:.8);
+		A_SprayDecal("BigRocketBlast",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](4,8);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,9);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
+			s.special1 = Random[ExploS](2,4);
+			s.scale *= 2.6;
+			s.alpha *= .5;
+		}
+		numpt = Random[ExploS](2,3);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,12);
+			let s = Spawn("SWWMSpark",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](1,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](2,18);
+			let s = Spawn("SWWMChip",pos);
+			s.vel = pvel;
+		}
+		numpt = Random[ExploS](2,3);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](8,24);
+			let s = Spawn("FancyConfetti",pos);
+			s.scale *= 2.;
+			s.bAMBUSH = true;
+			s.vel = pvel;
+		}
+	}
+	action void A_GoldSubSpread()
+	{
+		special1++;
+		if ( (special1%2) || (special1 > 20) ) return;
+		FLineTraceData d;
+		Vector3 HitNormal;
+		Vector3 origin;
+		double ang, pt;
+		for ( int i=0; i<2; i++ )
+		{
+			double totaldist = 20+(special1**2.)*.2;
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,90);
+			origin = pos;
+			while ( totaldist > 0 )
+			{
+				LineTrace(ang,totaldist,pt,TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+				hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				totaldist -= d.Distance;
+				if ( totaldist > 0 )
+				{
+					Vector3 bounced = d.HitDir-(1.2*hitnormal*(d.HitDir dot HitNormal));
+					ang = atan2(bounced.y,bounced.x);
+					pt = asin(-bounced.z);
+					origin = d.HitLocation+hitnormal;
+				}
+			}
+			let p = Spawn("GoldenSubSubImpact",d.HitLocation+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.target = target;
+		}
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright A_GoldSubSpread();
+		Stop;
+	}
+}
+
+Class GoldenSubSubImpact : Actor
+{
+	Default
+	{
+		DamageType "Explodium";
+		RenderStyle "Add";
+		Scale 3.;
+		Alpha .6;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NODAMAGETHRUST;
+		+FORCERADIUSDMG;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SWWMUtility.DoExplosion(self,77,70000,400,300,DE_EXTRAZTHRUST);
+		A_QuakeEx(4,4,4,15,0,1000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollintensity:.4);
+		A_SprayDecal("RocketBlast",-172);
+		Scale *= FRandom[ExploS](0.8,1.1);
+		Scale.x *= RandomPick[ExploS](-1,1);
+		Scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](1,2);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,3);
+			let s = Spawn("SWWMSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,224)+Color(30,25,0));
+			s.special1 = Random[ExploS](0,3);
+			s.scale *= 1.6;
+			s.alpha *= .2;
+		}
+	}
+	action void A_GoldSubSubSpread()
+	{
+		special1++;
+		if ( (special1%2) || (special1 > 10) ) return;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright A_GoldSubSubSpread();
+		Stop;
+	}
+}

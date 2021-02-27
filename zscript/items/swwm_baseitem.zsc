@@ -1,0 +1,88 @@
+// Inventory stuff
+Mixin Class SWWMAutoUseFix
+{
+	override bool HandlePickup( Inventory item )
+	{
+		if ( GetClass() == item.GetClass() )
+		{
+			if ( Use(true) ) Amount--;
+			// sell excess if there's a price
+			if ( bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina != 0) )
+			{
+				int sellprice = int(abs(Stamina)*.5);
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2));
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+			}
+		}
+		return Super.HandlePickup(item);
+	}
+}
+
+Class CrossLineFinder : LineTracer
+{
+	Array<Line> clines;
+	Array<int> csides;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( (Results.HitType == TRACE_HitWall) && (Results.HitLine.activation&SPAC_Cross) )
+		{
+			clines.Push(Results.HitLine);
+			csides.Push(Results.Side);
+		}
+		return TRACE_Skip;
+	}
+}
+
+Mixin Class SWWMUseToPickup
+{
+	// allow pickup by use
+	override bool Used( Actor user )
+	{
+		Vector3 itempos = Vec3Offset(0,0,Height/2),
+			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
+		Touch(user);
+		// we got picked up
+		if ( bDestroyed || Owner || !bSPECIAL )
+		{
+			Vector3 tracedir = level.Vec3Diff(userpos,itempos);
+			double dist = tracedir.length();
+			tracedir /= dist;
+			let cf = new("CrossLineFinder");
+			cf.Trace(userpos,level.PointInSector(userpos.xy),tracedir,dist,0);
+			// trigger all player cross lines found between user and item
+			for ( int i=0; i<cf.clines.Size(); i++ )
+				cf.clines[i].Activate(user,cf.csides[i],SPAC_Cross);
+			return true;
+		}
+		return false;
+	}
+}
+
+Mixin Class SWWMOverlapPickupSound
+{
+	// overlap sounds
+	override void PlayPickupSound( Actor toucher )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( hnd )
+		{
+			if ( hnd.lastpickuptic[toucher.PlayerNumber()] == gametic )
+				return;	// don't play if picked up on the same exact tic (overlapping items)
+			hnd.lastpickuptic[toucher.PlayerNumber()] = gametic;
+		}
+		double atten;
+		int flags = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
+		if ( bNoAttenPickupSound ) atten = ATTN_NONE;
+		else atten = ATTN_NORM;
+		if ( toucher && toucher.CheckLocalView() )
+			flags |= CHANF_NOPAUSE;
+		toucher.A_StartSound(PickupSound,CHAN_ITEM,flags,1.,atten);
+	}
+}

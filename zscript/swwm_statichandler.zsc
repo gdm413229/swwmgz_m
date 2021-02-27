@@ -1,0 +1,223 @@
+// Static handler responsible for some special stuff
+
+// save version holder
+Class SWWMSaveVerData : Thinker
+{
+	String ver;
+}
+
+Class SWWMStaticHandler : StaticEventHandler
+{
+	// crash handler
+	ui bool wasinmap;
+	ui int timer;
+	// versioning
+	bool tainted;
+	String taintver;
+	bool mptaint[MAXPLAYERS];
+	bool mprecv[MAXPLAYERS];
+	String mpver[MAXPLAYERS];
+	int checktic;
+	ui bool mpsent, checked;
+
+	override void NewGame()
+	{
+		// set save version every new session
+		let svd = new("SWWMSaveVerData");
+		svd.ChangeStatNum(Thinker.STAT_STATIC);
+		svd.ver = StringTable.Localize("$SWWM_SHORTVER");
+	}
+
+	override void WorldLoaded( WorldEvent e )
+	{
+		// save version checker
+		if ( !e.IsSaveGame ) return;
+		checktic = gametic+5;
+		let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+		let svd = SWWMSaveVerData(ti.Next());
+		if ( !svd )
+		{
+			tainted = true;
+			taintver = "\cg(no version info)\c-";
+			return;
+		}
+		String cver = StringTable.Localize("$SWWM_SHORTVER");
+		if ( svd.ver != cver )
+		{
+			tainted = true;
+			taintver = svd.ver;
+		}
+	}
+
+	override void OnRegister()
+	{
+		// preload various fonts
+		Font.GetFont('k6x8');
+		Font.GetFont('k6x8Shaded');
+		Font.GetFont('k6x8ShadedInverse');
+		Font.GetFont('Miniwi');
+		Font.GetFont('MiniwiShaded');
+		Font.GetFont('MiniwiShadedInverse');
+		Font.GetFont('MPlus');
+		Font.GetFont('MPlusShaded');
+		Font.GetFont('MPlusShadedInverse');
+		Font.GetFont('Tewi');
+		Font.GetFont('TewiShaded');
+		Font.GetFont('TewiShadedInverse');
+		Font.GetFont('SWWMBigFont');
+	}
+
+	override void ConsoleProcess( ConsoleEvent e )
+	{
+		static const Name mmvars[] =
+		{
+			'swwm_mm_backcolor', 'swwm_mm_cdwallcolor',
+			'swwm_mm_efwallcolor', 'swwm_mm_fdwallcolor',
+			'swwm_mm_gridcolor', 'swwm_mm_interlevelcolor',
+			'swwm_mm_intralevelcolor', 'swwm_mm_lockedcolor',
+			'swwm_mm_notseencolor', 'swwm_mm_portalcolor',
+			'swwm_mm_secretsectorcolor', 'swwm_mm_secretwallcolor',
+			'swwm_mm_specialwallcolor', 'swwm_mm_thingcolor',
+			'swwm_mm_thingcolor_citem', 'swwm_mm_thingcolor_friend',
+			'swwm_mm_thingcolor_item', 'swwm_mm_thingcolor_monster',
+			'swwm_mm_thingcolor_ncmonster', 'swwm_mm_thingcolor_shootable',
+			'swwm_mm_thingcolor_vipitem', 'swwm_mm_tswallcolor',
+			'swwm_mm_unexploredsecretcolor', 'swwm_mm_wallcolor',
+			'swwm_mm_xhaircolor', 'swwm_mm_yourcolor'
+		};
+		if ( e.Name ~== "swwmresetmmcolors" )
+		{
+			for ( int i=0; i<mmvars.Size(); i++ )
+				CVar.FindCVar(mmvars[i]).ResetToDefault();
+		}
+	}
+
+	override void NetworkProcess( ConsoleEvent e )
+	{
+		if ( e.Name ~== "swwmgetversion" )
+		{
+			let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+			let svd = SWWMSaveVerData(ti.Next());
+			if ( svd ) Console.Printf("\cj%s\c-",svd.ver);
+			else Console.Printf("\cg(no version data)\c-");
+			if ( tainted ) Console.Printf("\cgversion mismatched\c-");
+			else Console.Printf("\cdversion not mismatched\c-");
+			return;
+		}
+		if ( e.IsManual ) return;
+		if ( e.Name.Left(12) ~== "swwmversion." )
+		{
+			String verstr = e.Name.Mid(12);
+			mprecv[e.Player] = true;
+			mpver[e.Player] = verstr;
+			if ( verstr != StringTable.Localize("$SWWM_SHORTVER") )
+				mptaint[e.Player] = true;
+		}
+	}
+
+	override void PostUiTick()
+	{
+		// TODO achievement update code would go in here
+		if ( gamestate != GS_LEVEL ) return;
+		if ( !mpsent )
+		{
+			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_SHORTVER"));
+			mpsent = true;
+			return;
+		}
+		if ( checked || (gametic < checktic) ) return;
+		if ( multiplayer )
+		{
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || mprecv[i] ) continue;
+				// waiting for version info from all players
+				return;
+			}
+		}
+		checked = true;
+		String cver = StringTable.Localize("$SWWM_SHORTVER");
+		if ( tainted )
+		{
+			let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
+			let svd = SWWMSaveVerData(ti.Next());
+			if ( !svd ) Console.Printf("\cgWARNING:\n \cjSave contains no version data. Issues may happen.\c-");
+			else
+			{
+				Console.Printf("\cgWARNING:\n \cjVersion mismatch with save data. Issues may happen.\c-");
+				Console.Printf("\cgSaved:\n \cj"..svd.ver.."\c-");
+				Console.Printf("\cgCurrent:\n \cj"..cver.."\c-");
+			}
+		}
+		if ( multiplayer )
+		{
+			bool found = false;
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || (i == consoleplayer) || (!mptaint[i] && (mpver[i] != "")) ) continue;
+				if ( !found )
+				{
+					Console.Printf("\cfWARNING:\n \cjVersion mismatch between players. Desyncs will happen.\c-");
+					Console.Printf("\cgYou:\n \cj"..cver.."\c-");
+				}
+				found = true;
+				Console.Printf("\cgPlayer %d (\c-%s\cg):\n \cj%s\c-",i+1,players[i].GetUserName(),(mpver[i]=="")?"\cg(no version data)\c-":mpver[i]);
+			}
+		}
+	}
+
+	override void UiTick()
+	{
+		// HACK! Graf, please let us change this in a cleaner way
+		if ( menuDelegate.GetClass() == 'DoomMenuDelegate' )
+		{
+			menuDelegate.Destroy();
+			menuDelegate = new("SWWMMenuDelegate");
+		}
+		// Hey Graf how about you let us replace the class used for the
+		// "Read This!" menu in mapinfo/gameinfo or something so I
+		// don't have to do this hack here?
+		Menu cur = Menu.GetCurrentMenu();
+		if ( cur is 'ReadThisMenu' )
+		{
+			cur.Close();
+			Menu.SetMenu('SWWMHelpMenu');
+		}
+		// Fancy crash effect
+		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )
+		{
+			wasinmap = true;
+			timer = 0;
+		}
+		else if ( (gamestate == GS_FULLCONSOLE) && ((wasinmap && !players[consoleplayer].viewheight) || (timer > 0)) )
+		{
+			wasinmap = false;
+			if ( timer == 1 )
+			{
+				Console.Printf("\cfOopsie Woopsie!\c-");
+				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
+				if ( hnd && hnd.detected )
+				{
+					S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+					S_StartSound("crash/glass",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+				}
+				else S_StartSound("crash/crash",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			}
+			else if ( timer == 70 )
+			{
+				Console.Printf("\cfLooks like GZDoom made a fucky wucky! owo\c-");
+				S_StartSound("crash/curb",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
+			}
+			else if ( timer == 140 )
+			{
+				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
+				if ( hnd && hnd.detected ) Console.Printf("\cfDon't blame me. Shouldn't have tried running this with Brutal Doom.\c-");
+				else Console.Printf("\cfIf you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa.\c-");
+				Console.Printf("\cfLoaded Version:\n \cj%s\c-",StringTable.Localize("$SWWM_SHORTVER"));
+				if ( tainted ) Console.Printf("\cfSavegame Version:\n \cj%s\c-",taintver);
+			}
+			timer++;
+		}
+	}
+}
+

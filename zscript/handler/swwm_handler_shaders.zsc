@@ -1,0 +1,146 @@
+// shaders stuff
+
+extend Class SWWMHandler
+{
+	static clearscope void ClearAllShaders( PlayerInfo p )
+	{
+		Shader.SetEnabled(p,"WaterWarp",false);
+		Shader.SetEnabled(p,"LavaWarp",false);
+		Shader.SetEnabled(p,"SlimeWarp",false);
+		Shader.SetEnabled(p,"ZoomBlur",false);
+		Shader.SetEnabled(p,"RagekitShader",false);
+		Shader.SetEnabled(p,"GhostShader",false);
+		Shader.SetEnabled(p,"InvinciShader",false);
+		Shader.SetEnabled(p,"Glitch",false);
+		Shader.SetEnabled(p,"Grain",false);
+	}
+
+	private ui void RenderShaders( RenderEvent e )
+	{
+		PlayerInfo p = players[consoleplayer];
+		let mo = p.mo;
+		if ( !mo ) return;
+		bool pc = (p.camera == mo);
+		let rage = RagekitPower(mo.FindInventory("RagekitPower"));
+		if ( pc && rage && swwm_shaders )
+		{
+			if ( swwm_rageshader )
+			{
+				Shader.SetEnabled(p,"RagekitShader",false);
+				Shader.SetEnabled(p,"RagekitAltShader",true);
+				Shader.SetUniform1f(p,"RagekitAltShader","timer",(gametic+e.FracTic)/GameTicRate);
+				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
+				Shader.SetUniform1f(p,"RagekitAltShader","xtrastr",xstrastr**2.);
+			}
+			else
+			{
+				Shader.SetEnabled(p,"RagekitAltShader",false);
+				Shader.SetEnabled(p,"RagekitShader",true);
+				Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/GameTicRate);
+				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
+				Shader.SetUniform1f(p,"RagekitShader","xtrastr",xstrastr**2.);
+			}
+		}
+		else
+		{
+			Shader.SetEnabled(p,"RagekitShader",false);
+			Shader.SetEnabled(p,"RagekitAltShader",false);
+		}
+		let ghost = GhostPower(mo.FindInventory("GhostPower"));
+		if ( pc && ghost && swwm_shaders ) Shader.SetEnabled(p,"GhostShader",true);
+		else Shader.SetEnabled(p,"GhostShader",false);
+		let sunny = InvinciballPower(mo.FindInventory("InvinciballPower"));
+		if ( pc && sunny && swwm_shaders )
+		{
+			Shader.SetEnabled(p,"InvinciShader",true);
+			double str = max(0,sunny.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"InvinciShader","str",str);
+		}
+		else Shader.SetEnabled(p,"InvinciShader",false);
+		let coat = BarrierPower(mo.FindInventory("BarrierPower"));
+		if ( pc && coat && swwm_shaders )
+		{
+			Shader.SetEnabled(p,"BarrierShader",true);
+			Shader.SetUniform1f(p,"BarrierShader","timer",(gametic+e.FracTic)/GameTicRate);
+		}
+		else Shader.SetEnabled(p,"BarrierShader",false);
+		if ( pc && (mo is 'Demolitionist') && swwm_shaders )
+		{
+			let demo = Demolitionist(mo);
+			if ( demo.lastunder == Demolitionist.UNDER_WATER )
+			{
+				Shader.SetEnabled(p,"WaterWarp",true);
+				Shader.SetUniform1f(p,"WaterWarp","timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"WaterWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"WaterWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
+
+			}
+			else Shader.SetEnabled(p,"WaterWarp",false);
+			if ( demo.lastunder == Demolitionist.UNDER_LAVA )
+			{
+				Shader.SetEnabled(p,"LavaWarp",true);
+				Shader.SetUniform1f(p,"LavaWarp","timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"LavaWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"LavaWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
+			}
+			else Shader.SetEnabled(p,"LavaWarp",false);
+			if ( demo.lastunder == Demolitionist.UNDER_SLIME )
+			{
+				Shader.SetEnabled(p,"SlimeWarp",true);
+				Shader.SetUniform1f(p,"SlimeWarp","timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"SlimeWarp","dfact",coat?.25:1.);
+				Shader.SetUniform3f(p,"SlimeWarp","lightcol",(demo.undercol.r/255.,demo.undercol.g/255.,demo.undercol.b/255.));
+			}
+			else Shader.SetEnabled(p,"SlimeWarp",false);
+			int lastdmg = (demo.Health>0)?demo.lastdamage:Random[Flicker](60,80);
+			int lastdmgtic = (demo.Health>0)?demo.lastdamagetic:(gametic+Random[Flicker](30,20));
+			double noiz = min(lastdmg*.09*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.5);
+			Shader.SetEnabled(p,"Glitch",noiz>0);
+			Shader.SetEnabled(p,"Grain",noiz>0);
+			if ( noiz > 0 )
+			{
+				Shader.SetUniform1f(p,"Glitch","Timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"Grain","Timer",(gametic+e.FracTic)/GameTicRate);
+				Shader.SetUniform1f(p,"Grain","ni",noiz);
+				noiz = min(lastdmg*.08*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),.8);
+				Shader.SetUniform1f(p,"Glitch","str1",noiz);
+				noiz = min(lastdmg*.03*max(0,(lastdmgtic-(gametic+e.Fractic))/35.),3.5);
+				Shader.SetUniform1f(p,"Glitch","str2",noiz);
+			}
+			if ( !demo.InStateSequence(demo.CurState,demo.FindState("Dash")) )
+			{
+				Shader.SetEnabled(p,"ZoomBlur",false);
+				return;
+			}
+			Shader.SetEnabled(p,"ZoomBlur",true);
+			Vector3 vel = demo.vel+demo.dashdir*demo.dashboost;
+			double baumpu = max(0.,(demo.bumptic-(gametic+e.Fractic))/35.);
+			vel += demo.dashdir*baumpu;
+			double spd = vel.length();
+			Vector3 worlddir = vel/spd;
+			Shader.SetUniform1f(p,"ZoomBlur","Fade",clamp((spd-20.)/60.,0.,1.));
+			double str = min(spd/40.,15.);
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(e.ViewPitch,e.ViewAngle,e.ViewRoll);
+			Vector3 reldir = (worlddir dot y, worlddir dot z, worlddir dot x);
+			Vector2 centerspot = (.5+reldir.x*.5,.5+reldir.y*.5);
+			if ( reldir.z < 0 )
+			{
+				centerspot.x = 1.-centerspot.x;
+				centerspot.y = 1.-centerspot.y;
+				str *= -1;
+			}
+			Shader.SetUniform1f(p,"ZoomBlur","Str",str);
+			Shader.SetUniform2f(p,"ZoomBlur","CenterSpot",centerspot);
+		}
+		else
+		{
+			Shader.SetEnabled(p,"WaterWarp",false);
+			Shader.SetEnabled(p,"LavaWarp",false);
+			Shader.SetEnabled(p,"SlimeWarp",false);
+			Shader.SetEnabled(p,"Glitch",false);
+			Shader.SetEnabled(p,"Grain",false);
+			Shader.SetEnabled(p,"ZoomBlur",false);
+		}
+	}
+}

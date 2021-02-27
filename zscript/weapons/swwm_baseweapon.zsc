@@ -1,0 +1,390 @@
+// Base class for all SWWM Weapons
+Class SWWMWeapon : Weapon abstract
+{
+	Mixin SWWMOverlapPickupSound;
+
+	bool wasused;
+	private int SWeaponFlags;
+
+	Class<Ammo> dropammotype;
+
+	Property DropAmmoType : dropammotype;
+
+	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
+	FlagDef HideInMenu : SWeaponFlags, 1;	// don't show in inventory menu (usually for sister weapons)
+	FlagDef NoSwapWeapon : SWeaponFlags, 2;	// weapon is not affected by slot swapping
+
+	bool IsSwapWeapon( Inventory i ) const
+	{
+		if ( bNoSwapWeapon || (i.GetClass() == GetClass()) ) return false;
+		let w = SWWMWeapon(i);
+		if ( w && !w.bNoSwapWeapon && (SlotNumber != -1) && (w.SlotNumber == SlotNumber) )
+			return true;
+		return false;
+	}
+
+	SWWMWeapon HasSwapWeapon( Actor other ) const
+	{
+		if ( bNoSwapWeapon ) return null;
+		for ( Inventory i=other.inv; i; i=i.inv )
+		{
+			if ( IsSwapWeapon(i) )
+				return SWWMWeapon(i);
+		}
+		return null;
+	}
+
+	override void Touch( Actor toucher )
+	{
+		// cannot pick up swapweapon unless explicitly pressing use
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
+		{
+			if ( toucher.CheckLocalView() )
+			{
+				// use sisterweapon tag for dual wield (slot 2 weapons)
+				if ( sw.SisterWeapon && (sw.Amount > 1) )
+					Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.SisterWeapon.GetTag(),GetTag()));
+				else Console.MidPrint(SmallFont,String.Format(StringTable.Localize("$SWWM_SWAPWEAPON"),sw.GetTag(),GetTag()));
+			}
+			return;
+		}
+		Super.Touch(toucher);
+	}
+	// allow pickup by use + swap weapon support
+	override bool Used( Actor user )
+	{
+		Vector3 itempos = Vec3Offset(0,0,Height/2),
+			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
+		// if the toucher owns our SwapWeapon, drop it before picking us up
+		bool swapto = false;
+		SWWMWeapon sw;
+		if ( swwm_swapweapons && (sw = HasSwapWeapon(user)) )
+		{
+			if ( (sw == user.player.ReadyWeapon) || (sw.SisterWeapon && (sw.SisterWeapon == user.player.ReadyWeapon)) )
+				swapto = true;
+			int ngun = sw.Amount;
+			double ang = -15*(ngun-1);
+			for ( int i=0; i<ngun; i++ )
+			{
+				let d = user.DropInventory(sw);
+				if ( !d || (ngun <= 1) ) continue;
+				// adjust angle for multi-drops
+				d.angle = user.angle+ang;
+				d.vel.xy = RotateVector((5,0),d.angle);
+				d.vel.z = 1;
+				d.vel += user.vel;
+				ang += 30;
+			}
+			// don't autoswitch just yet (hacky)
+			if ( swapto )
+			{
+				user.player.ReadyWeapon = null;
+				user.player.PendingWeapon = WP_NOCHANGE;
+			}
+		}
+		Touch(user);
+		// we got picked up
+		if ( bDestroyed || Owner || !bSPECIAL )
+		{
+			// autoswitch to us if we got swapped
+			if ( swapto ) user.A_SelectWeapon(GetClass());
+			Vector3 tracedir = level.Vec3Diff(userpos,itempos);
+			double dist = tracedir.length();
+			tracedir /= dist;
+			let cf = new("CrossLineFinder");
+			cf.Trace(userpos,level.PointInSector(userpos.xy),tracedir,dist,0);
+			// trigger all player cross lines found between user and item
+			for ( int i=0; i<cf.clines.Size(); i++ )
+				cf.clines[i].Activate(user,cf.csides[i],SPAC_Cross);
+			return true;
+		}
+		return false;
+	}
+
+	// subtracts given ammo from price, drops excess
+	virtual bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// save time, always return false if we don't use ammo
+		if ( !ownedWeapon.Ammo1 && !ownedWeapon.Ammo2 ) return false;
+		bool gotstuff = false;
+		int oldamount1 = 0, oldamount2 = 0;
+		if ( ownedWeapon.Ammo1 ) oldamount1 = ownedWeapon.Ammo1.Amount;
+		if ( ownedWeapon.Ammo2 ) oldamount2 = ownedWeapon.Ammo2.Amount;
+		if ( AmmoGive1 > 0 ) gotstuff = AddExistingAmmo(ownedWeapon.Ammo1,AmmoGive1);
+		if ( AmmoGive2 > 0 ) gotstuff |= AddExistingAmmo(ownedWeapon.Ammo2,AmmoGive2);
+		let Owner = ownedWeapon.Owner;
+		if ( gotstuff && Owner && Owner.player )
+		{
+			if ( ownedWeapon.Ammo1 && (oldamount1 == 0) )
+				PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo1.GetClass());
+			else if ( ownedWeapon.Ammo2 && (oldamount2 == 0) )
+				PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo2.GetClass());
+		}
+		if ( ownedWeapon.Ammo1 )
+		{
+			// subtract price of ammo we don't give
+			int ammonotgiven = default.AmmoGive1-AmmoGive1;
+			if ( ammonotgiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammonotgiven-1)));
+			// subtract price of given ammo
+			int ammogiven = ownedWeapon.Ammo1.Amount-oldamount1;
+			if ( ammogiven > 0 ) Stamina -= int(ownedWeapon.Ammo1.Stamina*(1.+.75*(ammogiven-1)));
+			// drop excess
+			int dropme = AmmoGive1-ammogiven;
+			if ( dropme > 0 )
+			{
+				// hacky, but it works
+				ownedWeapon.Ammo1.CreateTossable(dropme);
+				ownedWeapon.Ammo1.Amount += dropme;
+			}
+		}
+		if ( ownedWeapon.Ammo2 )
+		{
+			// subtract price of ammo we don't give
+			int ammonotgiven = default.AmmoGive2-AmmoGive2;
+			if ( ammonotgiven > 0 ) Stamina -= int(ownedWeapon.Ammo2.Stamina*(1.+.75*(ammonotgiven-1)));
+			// subtract price of given ammo
+			int ammogiven = ownedWeapon.Ammo2.Amount-oldamount2;
+			if ( ammogiven > 0 ) Stamina -= int(ownedWeapon.Ammo2.Stamina*(1.+.75*(ammogiven-1)));
+			// drop excess
+			int dropme = AmmoGive2-ammogiven;
+			if ( dropme > 0 )
+			{
+				// hacky, but it works
+				ownedWeapon.Ammo2.CreateTossable(dropme);
+				ownedWeapon.Ammo2.Amount += dropme;
+			}
+		}
+		return gotstuff;
+	}
+	override bool HandlePickup( Inventory item )
+	{
+		// can't hold both weapons at once
+		if ( swwm_swapweapons && IsSwapWeapon(item) )
+			return true;
+		if ( (GetClass() == item.GetClass()) && !item.ShouldStay() )
+		{
+			if ( SWWMWeapon(item).PickupForAmmoSWWM(self) )
+				item.bPickupGood = true;
+			if ( (Amount+item.Amount > MaxAmount) && (item.Stamina > 0) )
+			{
+				// sell excess
+				int sellprice = item.Stamina/2;
+				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2));
+				SWWMCredits.Give(Owner.player,sellprice);
+				if ( Owner.player )
+					Console.Printf(StringTable.Localize(SWWMUtility.SellFemaleItem(item)?"$SWWM_SELLEXTRA_FEM":"$SWWM_SELLEXTRA"),Owner.player.GetUserName(),GetTag(),sellprice);
+				item.bPickupGood = true;
+			}
+			// reset the price in case it has to respawn
+			item.Stamina = item.default.Stamina;
+			return true;
+		}
+		return Super.HandlePickup(item);
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Inventory.AttachToOwner(other);
+		Ammo1 = AddAmmo(Owner,AmmoType1,bNoFirstGive?0:AmmoGive1);
+		Ammo2 = AddAmmo(Owner,AmmoType2,bNoFirstGive?0:AmmoGive2);
+		SisterWeapon = AddWeapon(SisterWeaponType);
+		if ( Owner.player )
+		{
+			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch )
+				Owner.player.PendingWeapon = self;
+			if ( Owner.player.mo == players[consoleplayer].camera )
+				StatusBar.ReceivedWeapon(self);
+		}
+		GivenAsMorphWeapon = false;
+	}
+	override void DetachFromOwner()
+	{
+		Owner.A_StopSound(CHAN_WEAPON);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA2);
+		Owner.A_StopSound(CHAN_WEAPONEXTRA3);
+		Super.DetachFromOwner();
+	}
+	override void OwnerDied()
+	{
+		if ( Owner.player && (Owner.player.ReadyWeapon == self) )
+		{
+			Owner.A_StopSound(CHAN_WEAPON);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA2);
+			Owner.A_StopSound(CHAN_WEAPONEXTRA3);
+		}
+		A_ClearRefire();
+		Super.OwnerDied();
+	}
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( mod == 'Melee' ) return StringTable.Localize("$O_MELEE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	// draw ammo on hud above weapon box
+	virtual ui void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+	}
+	// animations
+	action void A_PlayerFire()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayFire();
+	}
+	action void A_PlayerMelee( bool bFast = false )
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) )
+		{
+			if ( bFast ) demo.PlayFastMelee();
+			else demo.PlayMelee();
+		}
+	}
+	action void A_PlayerReload()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayReload();
+	}
+	action void A_PlayerCheckGun()
+	{
+		let demo = Demolitionist(player.mo);
+		if ( demo && (demo.Health > 0) ) demo.PlayCheckGun();
+	}
+	// instant raise/lower
+	action void A_FullRaise()
+	{
+		if ( !player ) return;
+		if ( player.PendingWeapon != WP_NOCHANGE )
+		{
+			player.mo.DropWeapon();
+			return;
+		}
+		if ( !player.ReadyWeapon ) return;
+		let psp = player.GetPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		ResetPSprite(psp);
+		psp.y = WEAPONTOP;
+		// do not jump to ready state here, the weapon should do that
+		// directly once it finishes playing its select animation
+	}
+	action void A_FullLower()
+	{
+		if ( !player ) return;
+		if ( !player.ReadyWeapon )
+		{
+			player.mo.BringUpWeapon();
+			return;
+		}
+		let psp = player.GetPSprite(PSP_WEAPON);
+		if ( !psp ) return;
+		psp.y = WEAPONBOTTOM;
+		ResetPSprite(psp);
+		if ( player.playerstate == PST_DEAD )
+		{
+			// Player is dead, so don't bring up a pending weapon
+			// Player is dead, so keep the weapon off screen
+			player.SetPSprite(PSP_FLASH,null);
+			psp.SetState(player.ReadyWeapon.FindState('DeadLowered'));
+			return;
+		}
+		// [RH] Clear the flash state. Only needed for Strife.
+		player.SetPSprite(PSP_FLASH,null);
+		player.mo.BringUpWeapon();
+	}
+	override void PlayUpSound( Actor origin )
+	{
+		if ( UpSound ) origin.A_StartSound(UpSound,CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	action void A_SWWMFlash( StateLabel flashlabel = null )
+	{
+		if ( !player || !player.ReadyWeapon )
+			return;
+		Weapon weap = player.ReadyWeapon;
+		State flashstate = null;
+		if ( !flashlabel )
+		{
+			if ( weap.bAltFire )
+				flashstate = weap.FindState('AltFlash');
+			if ( !flashstate )
+				flashstate = weap.FindState('Flash');
+		}
+		else flashstate = weap.FindState(flashlabel);
+		player.SetPSprite(PSP_FLASH,flashstate);
+		A_OverlayFlags(PSP_FLASH,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+		A_OverlayRenderStyle(PSP_FLASH,STYLE_Add);
+	}
+	// tells the SWWM HUD that this weapon has ammo available
+	virtual clearscope bool ReportHUDAmmo()
+	{
+		return (!Ammo1||(Ammo1.Amount>0)||(Ammo2&&(Ammo2.Amount>0)));
+	}
+	// tells the Embiggener that this weapon uses the specified ammo type
+	// even if it is not its primary one
+	virtual clearscope bool UsesAmmo( Class<Ammo> kind )
+	{
+		return (AmmoType1&&(kind is AmmoType1))||(AmmoType2&&(kind is AmmoType2));
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		if ( (AmmoGive1 <= 0) && (default.AmmoGive1 > 0) )
+			AmmoGive1 = 1;
+		if ( (AmmoGive2 <= 0) && (default.AmmoGive2 > 0) )
+			AmmoGive2 = 1;
+	}
+	override bool SpecialDropAction( Actor dropper )
+	{
+		if ( swwm_enemydrops > 0 ) return false;
+		else if ( swwm_enemydrops == 0 )
+		{
+			// first, check if no others exist in the map, just in
+			// case this weapon drop MAY be needed
+			if ( !SWWMUtility.ItemExists(GetClass(),self) )
+				return false;	// drop us
+			// drop our corresponding ammo
+			if ( !DropAmmoType ) return true;
+			let a = Inventory(Spawn(DropAmmoType,pos,ALLOW_REPLACE));
+			if ( !a ) return true;
+			a.bDROPPED = true;
+			a.bNOGRAVITY = false;
+			if ( !(level.compatflags&COMPATF_NOTOSSDROPS) )
+				a.TossItem();
+			if ( a is 'Ammo' )
+				a.ModifyDropAmount(Ammo(a).DropAmount);
+			a.bTOSSED = true;
+			if ( a.SpecialDropAction(dropper) )
+				a.Destroy();
+			return true;
+		}
+		// no weapon drops from enemies
+		return true;
+	}
+	override Inventory CreateTossable( int amt )
+	{
+		// disallow dropping if weapon isn't ready for switching
+		if ( (Owner.player.ReadyWeapon == self) && (!(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH)) )
+			return null;
+		return Super.CreateTossable(amt);
+	}
+	Default
+	{
+		Weapon.BobStyle "Alpha";
+		Weapon.BobSpeed 3.0;
+		Weapon.BobRangeX 0.5;
+		Weapon.BobRangeY 0.2;
+		Weapon.YAdjust 0;
+		Weapon.SlotPriority 1.;
+		Inventory.RestrictedTo "Demolitionist";
+		Inventory.PickupFlash "SWWMRedPickupFlash";
+		+INVENTORY.IGNORESKILL;
+		+WEAPON.NOALERT;
+		+WEAPON.NODEATHINPUT;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+}

@@ -1,0 +1,368 @@
+// when you need a whole-ass menu to reload a weapon
+
+Class WallbusterReloadMenu : GenericMenu
+{
+	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	TextureID MainWindow, AmmoIcon[4];
+	int sel0;
+	Array<int> queue;
+	int AmmoSets[4];
+	bool isrclick, ismclick;
+
+	// if playing in Japanese, returns an alternate font of the same height
+	// Tewi -> MPlus
+	// Miniwi -> k6x8
+	Font LangFont( Font req )
+	{
+		if ( language ~== "jp" )
+		{
+			if ( req == MiniwiFont ) return k6x8Font;
+			return MPlusFont;
+		}
+		return req;
+	}
+
+	override void Init( Menu parent )
+	{
+		Super.Init(parent);
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].ReadyWeapon is 'Wallbuster') )
+		{
+			EventHandler.SendNetworkEvent("swwmcbt.",consoleplayer);
+			Close();
+			return;
+		}
+		TewiFont = Font.GetFont('TewiShaded');
+		MPlusFont = Font.GetFont('MPlusShaded');
+		MiniwiFont = Font.GetFont('MiniwiShaded');
+		k6x8Font = Font.GetFont('k6x8Shaded');
+		MainWindow = TexMan.CheckForTexture("graphics/HUD/WallbusterMenu.png",TexMan.Type_Any);
+		AmmoIcon[0] = TexMan.CheckForTexture("graphics/HUD/RedShell.png",TexMan.Type_Any);
+		AmmoIcon[1] = TexMan.CheckForTexture("graphics/HUD/GreenShell.png",TexMan.Type_Any);
+		AmmoIcon[2] = TexMan.CheckForTexture("graphics/HUD/BlueShell.png",TexMan.Type_Any);
+		AmmoIcon[3] = TexMan.CheckForTexture("graphics/HUD/PurpleShell.png",TexMan.Type_Any);
+		MenuSound("menu/demotab");
+		queue.Clear();
+		sel0 = swwm_cbtlast;
+	}
+
+	override void Ticker()
+	{
+		Super.Ticker();
+		if ( swwm_cbtpause ) menuactive = Menu.On;
+		else menuactive = Menu.OnNoPause;
+		if ( (players[consoleplayer].Health > 0) && (players[consoleplayer].ReadyWeapon is 'Wallbuster') && (gamestate == GS_LEVEL) ) return;
+		MenuEvent(MKEY_BACK,false);
+	}
+
+	private bool IsDone()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( queue.Size() >= 25 ) return true;
+		for ( int i=0; i<4; i++ )
+		{
+			if ( (players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]) > 0 )
+				return false;
+		}
+		return true;
+	}
+
+	private bool PushAmmo( bool autoshift = false )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( queue.Size() >= 25 ) return true;
+		if ( (players[consoleplayer].mo.CountInv(types[sel0])-AmmoSets[sel0]) <= 0 )
+		{
+			if ( autoshift )
+			{
+				// switch to next available ammo
+				for ( int i=0; i<4; i++ )
+				{
+					int idx = (sel0+i)%4;
+					if ( (players[consoleplayer].mo.CountInv(types[idx])-AmmoSets[idx]) > 0 )
+					{
+						sel0 = idx;
+						CVar.FindCVar('swwm_cbtlast').SetInt(sel0);
+						return PushAmmo(true);
+					}
+				}
+			}
+			MenuSound("menu/noinvuse");
+			return false;
+		}
+		if ( !autoshift ) MenuSound("menu/demosel");
+		AmmoSets[sel0]++;
+		queue.Push(sel0);
+		return true;
+	}
+
+	private void ShuffleAmmo()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		// there's probably a better way to do this but I'm lazy
+		Array<Int> candidates;
+		candidates.Clear();
+		for ( int i=0; i<4; i++ )
+		{
+			if ( (players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]) <= 0 )
+				continue;
+			candidates.Push(i);
+		}
+		if ( candidates.Size() <= 0 ) return;
+		sel0 = candidates[Random[WallbusterMenu](0,candidates.Size()-1)];
+		CVar.FindCVar('swwm_cbtlast').SetInt(sel0);
+		AmmoSets[sel0]++;
+		queue.Push(sel0);
+	}
+
+	private bool PopAmmo()
+	{
+		if ( queue.Size() <= 0 ) return false;
+		AmmoSets[queue[queue.Size()-1]]--;
+		queue.Pop();
+		return true;
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		switch ( mkey )
+		{
+		case MKEY_BACK:
+			queue.Clear();
+			for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent("swwmcbt.",consoleplayer);
+			Close();
+			return true;
+		case MKEY_ENTER:
+			if ( queue.Size() <= 0 )
+			{
+				while ( queue.Size() < 25 )
+				{
+					if ( !PushAmmo(true) )
+						break;
+				}
+			}
+			String cbt = "swwmcbt.";
+			for ( int i=0; i<queue.Size(); i++ )
+				cbt.AppendFormat("%d,",queue[i]);
+			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent(cbt,consoleplayer);
+			Close();
+			return true;
+		case MKEY_UP:
+			if ( queue.Size() <= 0 )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			PopAmmo();
+			MenuSound("menu/demoscroll");
+			return true;
+		case MKEY_DOWN:
+			if ( IsDone() )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			PushAmmo();
+			return true;
+		case MKEY_RIGHT:
+			MenuSound("menu/demotab");
+			sel0++;
+			if ( sel0 > 3 ) sel0 = 0;
+			CVar.FindCVar('swwm_cbtlast').SetInt(sel0);
+			return true;
+		case MKEY_LEFT:
+			MenuSound("menu/demotab");
+			sel0--;
+			if ( sel0 < 0 ) sel0 = 3;
+			CVar.FindCVar('swwm_cbtlast').SetInt(sel0);
+			return true;
+		case MKEY_PAGEUP:
+			if ( queue.Size() <= 0 )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			int i = 0;
+			while ( (queue.Size() > 0) && (i++ < 5) )
+			{
+				if ( !PopAmmo() )
+					break;
+			}
+			MenuSound("menu/demoscroll");
+			return true;
+		case MKEY_PAGEDOWN:
+			if ( IsDone() )
+			{
+				MenuSound("menu/noinvuse");
+				return true;
+			}
+			int j = 0;
+			while ( (queue.Size() < 25) && (j++ < 5) )
+			{
+				if ( !PushAmmo(true) )
+					return true;
+			}
+			MenuSound("menu/demosel");
+			return true;
+		case MKEY_CLEAR:
+			if ( queue.Size() <= 0 ) MenuSound("menu/noinvuse");
+			else
+			{
+				MenuSound("menu/demoscroll");
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+			}
+			return true;
+		}
+		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	override bool OnUiEvent( UIEvent ev )
+	{
+		int y;
+		bool res;
+		switch ( ev.type )
+		{
+		case UIEvent.Type_KeyDown:
+			if ( ev.keychar == UiEvent.Key_Tab )
+			{
+				// shuffle!
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+				bool didsomething = false;
+				while ( !IsDone() )
+				{
+					ShuffleAmmo();
+					didsomething = true;
+				}
+				MenuSound(didsomething?"menu/demosel":"menu/noinvuse");
+			}
+			else if ( ev.keychar == UiEvent.Key_Del )
+			{
+				// empty it out
+				queue.Clear();
+				for ( int i=0; i<4; i++ ) AmmoSets[i] = 0;
+				MenuSound("menu/democlose");
+				EventHandler.SendNetworkEvent("swwmcbt.EMPTY",consoleplayer);
+				Close();
+			}
+			break;
+		case UIEvent.Type_LButtonDown:
+			isrclick = false;
+			ismclick = false;
+			return Super.OnUIEvent(ev);
+			break;
+		case UIEvent.Type_RButtonDown:
+			isrclick = true;
+			ismclick = false;
+			// copy over what base menus do for L click
+			y = ev.MouseY;
+			res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_MButtonDown:
+			isrclick = false;
+			ismclick = true;
+			// copy over what base menus do for L click
+			y = ev.MouseY;
+			res = MouseEventBack(MOUSE_Click,ev.MouseX,y);
+			if ( res ) y = -1;
+			res |= MouseEvent(MOUSE_Click,ev.MouseX,y);
+			if ( res ) SetCapture(true);
+			return false;
+			break;
+		case UIEvent.Type_RButtonUp:
+		case UIEvent.Type_MButtonUp:
+			// copy over what base menus do for L release
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				y = ev.MouseY;
+				res = MouseEventBack(MOUSE_Release,ev.MouseX,y);
+				if ( res ) y = -1;
+				res |= MouseEvent(MOUSE_Release,ev.MouseX,y);
+			}
+			return false;
+			break;
+		}
+		return Super.OnUIEvent(ev);
+	}
+
+	override void Drawer()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		Super.Drawer();
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-132,ss.y-26)/2.;
+		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int ox = 27, oy = 2;
+		for ( int i=0; i<4; i++ )
+		{
+			Screen.DrawTexture(AmmoIcon[i],false,origin.x+ox,origin.y+oy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(0,0,0,0):Color(128,0,0,0));
+			String astr = String.Format("%3d",players[consoleplayer].mo.CountInv(types[i])-AmmoSets[i]);
+			Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+ox-(TewiFont.StringWidth(astr)+1),origin.y+oy-2,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i==sel0)?Color(0,0,0,0):Color(128,0,0,0));
+			ox += 33;
+		}
+		// pointer (▸)
+		Screen.DrawChar(TewiFont,Font.CR_GREEN,origin.x+2+33*sel0,origin.y,0x25B8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int siz = queue.Size()-1;
+		ox = 2+siz*5+(siz/5);
+		oy = 15;
+		for ( int i=0; i<=siz; i++ )
+		{
+			Screen.DrawTexture(AmmoIcon[queue[i]],false,origin.x+ox,origin.y+oy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			ox -= 5;
+			if ( !((i+1)%5) ) ox--;
+		}
+		// text stuff
+		String str;
+		Font fnt;
+		int boxw, sw;
+		double x, y;
+		fnt = LangFont(TewiFont);
+		str = StringTable.Localize("$SWWM_BUSTERTITLE");
+		sw = fnt.StringWidth(str);
+		boxw = sw;
+		fnt = LangFont(MiniwiFont);
+		str = "(C)2148 Akari Labs";
+		sw = fnt.StringWidth(str);
+		if ( sw > boxw ) boxw = sw;
+		x = floor((ss.x-boxw)/2.);
+		y = origin.y-30;
+		Screen.Dim("Black",.8,int((x-2)*hs),int((y-1)*hs),int((boxw+4)*hs),int(25*hs));
+		fnt = LangFont(TewiFont);
+		str = StringTable.Localize("$SWWM_BUSTERTITLE");
+		sw = fnt.StringWidth(str);
+		x = floor((ss.x-sw)/2.);
+		Screen.DrawText(fnt,Font.CR_FIRE,x,y,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		y += 14;
+		fnt = LangFont(MiniwiFont);
+		str = "(C)2148 Akari Labs";
+		sw = fnt.StringWidth(str);
+		x = floor((ss.x-sw)/2.);
+		Screen.DrawText(fnt,Font.CR_GOLD,x,y,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		y = origin.y+36;
+		fnt = LangFont(MiniwiFont);
+		str = StringTable.Localize("$SWWM_BUSTERKEYS");
+		BrokenLines l = fnt.BreakLines(str,300);
+		boxw = 0;
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			sw = l.StringWidth(i);
+			if ( sw > boxw ) boxw = sw;
+		}
+		x = floor((ss.x-boxw)/2.);
+		Screen.Dim("Black",.8,int((x-2)*hs),int((y-2)*hs),int((boxw+4)*hs),int((9*l.Count()+2)*hs));
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			Screen.DrawText(fnt,Font.CR_WHITE,x,y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			y += 9;
+		}
+	}
+}

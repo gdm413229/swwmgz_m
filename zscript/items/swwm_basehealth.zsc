@@ -1,0 +1,160 @@
+// Base class for all SWWM Health
+Class SWWMHealth : Inventory abstract
+{
+	Mixin SWWMAutoUseFix;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMOverlapPickupSound;
+
+	// can't use the Health class for whatever reason
+	// nice parser you got there I guess?
+	Class<Inventory> giveme;
+
+	Property GiveHealth : giveme;
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// find last health item that's better than us
+		Inventory found = null;
+		for ( Inventory i=other.Inv; i; i=i.Inv )
+		{
+			if ( !(i is 'SWWMHealth') || (i == self) || (GetDefaultByType(SWWMHealth(i).giveme).Amount < GetDefaultByType(giveme).Amount) ) continue;
+			found = i;
+		}
+		if ( !found )
+		{
+			// find first item with health that's worse than us after it
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || !(i.Inv is 'SWWMHealth') ) continue;
+				if ( GetDefaultByType(SWWMHealth(i.Inv).giveme).Amount > GetDefaultByType(giveme).Amount ) continue;
+				found = i;
+				break;
+			}
+		}
+		if ( !found )
+		{
+			// find last armor item, plating or collar
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'SWWMArmor') && !(i is 'AlmasteelPlating') && !(i is 'SayaCollar') ) continue;
+				found = i;
+			}
+		}
+		if ( !found )
+		{
+			// check if the first item in inventory is a sandwich
+			if ( other.Inv is 'GrilledCheeseSandwich' )
+			{
+				// we're good
+				return;
+			}
+			// find first item next to a sandwich
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( (i == self) || !(i.Inv is 'GrilledCheeseSandwich') ) continue;
+				found = i;
+				break;
+			}
+		}
+		if ( !found )
+		{
+			// find last of either invinciball/ragekit/barrier power
+			for ( Inventory i=other.Inv; i; i=i.Inv )
+			{
+				if ( !(i is 'InvinciballPower') && !(i is 'RagekitPower') && !(i is 'BarrierPower') ) continue;
+				found = i;
+			}
+		}
+		if ( !found ) return;
+		// place ourselves right after it
+		Inventory saved = found.Inv;
+		found.Inv = self;
+		other.Inv = Inv;
+		Inv = saved;
+	}
+
+	override bool Use( bool pickup )
+	{
+		if ( Owner.Health >= GetDefaultByType(giveme).MaxAmount ) return false;
+		// healing items won't get auto-used on pickup if their healing could "be wasted", unless they're powerup health (e.g. Refresher)
+		if ( pickup && !bBIGPOWERUP && (Owner.Health+GetDefaultByType(giveme).Amount > GetDefaultByType(giveme).MaxAmount) ) return false;
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		SWWMHandler.HealthFlash(Owner.PlayerNumber());
+		Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
+		SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+		AutoUseExtra(false);
+		return true;
+	}
+
+	// additional effects when automatically used
+	//  recursive: if true, the auto-use was called on another copy of the
+	//             item in a "stacked" heal. can be used to prevent certain
+	//             effects from happening multiple times in one go
+	virtual void AutoUseExtra( bool recursive )
+	{
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Amount <= 0 ) DepleteOrDestroy();
+	}
+
+	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
+	{
+		if ( Owner.ApplyDamageFactor(damageType,damage) <= 0 )
+			return;	// this damage type is ignored by the player, so it does not affect us
+		if ( damageType == 'EndLevel' )
+			return; // don't trigger on endlevel damage
+		bool shouldautouse = false;
+		if ( swwm_enforceautousehealth == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousehealth == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousehealth',Owner.player).GetBool();
+		if ( !shouldautouse && !bBIGPOWERUP ) return;	// powerup health is always auto-used
+		if ( (Owner.Health-damage <= (GetDefaultByType(giveme).MaxAmount-GetDefaultByType(giveme).Amount)) )
+		{
+			newdamage = damage;
+			// lesser healing items can't prevent lethal damage
+			// bigger healing items only autoactivate on lethal damage
+			if ( !bBIGPOWERUP && (Owner.Health-damage <= 0) )
+				return;
+			else if ( bBIGPOWERUP && (Owner.Health-damage > 0) )
+				return;
+			if ( (swwm_strictuntouchable == 1) && Owner.player )
+			{
+				let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+				if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
+			}
+			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			int tgive = 0;
+			bool morethanonce = false;
+			while ( (Amount > 0) && (newdamage > 0) )
+			{
+				if ( swwm_accdamage ) tgive += GetDefaultByType(giveme).Amount;
+				else SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+				newdamage = newdamage-GetDefaultByType(giveme).Amount;
+				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
+				newdamage = max(0,newdamage);
+				AutoUseExtra(morethanonce);
+				morethanonce = true;
+				Amount--;
+			}
+			if ( swwm_accdamage ) SWWMScoreObj.Spawn(tgive,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+		}
+		else newdamage = damage;
+	}
+
+	Default
+	{
+		+INVENTORY.INVBAR;
+		+INVENTORY.ISHEALTH;
+		+INVENTORY.AUTOACTIVATE;
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
+		Inventory.UseSound "misc/health_pkup";
+		Inventory.PickupFlash "SWWMBluePickupFlash";
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+}

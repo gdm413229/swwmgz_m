@@ -1,0 +1,346 @@
+// Key item replacements, including some for popular map packs
+
+Class SWWMKey : Key abstract
+{
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	bool propagated;
+	Class<SWWMItemGesture> gesture;
+
+	Property GestureWeapon : gesture;
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Icon.IsNull() )
+		{
+			// fetch icon from parent (if it exists)
+			Class<Key> pc = Species;
+			if ( !pc ) return;
+			let p = GetDefaultByType(pc);
+			Icon = p.Icon;
+		}
+	}
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// also attach the vanilla key that we replace, mainly for script compatibility
+		Class<Key> pc = Species;
+		if ( pc )
+		{
+			let p = Inventory(Spawn(pc));
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).key_reentrant = true;	// avoid infinite loop
+			p.AttachToOwner(Owner);
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).key_reentrant = false;
+		}
+	}
+
+	override bool Use( bool pickup )
+	{
+		if ( Owner.player && !propagated )
+		{
+			if ( pickup && CVar.GetCVar('swwm_collectanimkey',Owner.player).GetBool() )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture);
+			else if ( !pickup )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture,true);
+		}
+		// clean up the flag
+		propagated = false;
+		return false;
+	}
+
+	Default
+	{
+		+NOTDMATCH;
+		+FLOATBOB;
+		+INVENTORY.AUTOACTIVATE;
+		FloatBobStrength 0.25;
+	}
+}
+
+Class SWWMRedCard : SWWMKey
+{
+	Default
+	{
+		Tag "$T_REDCARD";
+		Species "RedCard";
+		Inventory.PickupMessage "$T_REDCARD";
+		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMYellowCard : SWWMKey
+{
+	Default
+	{
+		Tag "$T_YELLOWCARD";
+		Species "YellowCard";
+		Inventory.PickupMessage "$T_YELLOWCARD";
+		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMBlueCard : SWWMKey
+{
+	Default
+	{
+		Tag "$T_BLUECARD";
+		Species "BlueCard";
+		Inventory.PickupMessage "$T_BLUECARD";
+		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMSilverCardKDiZD : SWWMKey
+{
+	Default
+	{
+		Tag "$T_SILVERCARD";
+		Species "BlueSkull";
+		Inventory.PickupMessage "$T_SILVERCARD";
+		Inventory.PickupFlash "SWWMWhitePickupFlash";
+		SWWMKey.GestureWeapon "SWWMSilverCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMGreenCardKDiZD : SWWMKey
+{
+	Default
+	{
+		Tag "$T_GREENCARD";
+		Species "YellowSkull";
+		Inventory.PickupMessage "$T_GREENCARD";
+		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMOrangeCardKDiZD : SWWMKey
+{
+	Default
+	{
+		Tag "$T_ORANGECARD";
+		Species "RedSkull";
+		Inventory.PickupMessage "$T_ORANGECARD";
+		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMOrangeCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+Class SWWMGreenCard : SWWMKey
+{
+	Default
+	{
+		Tag "$T_GREENCARD";
+		Species "GreenCard";
+		Inventory.PickupMessage "$T_GREENCARD";
+		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenCardGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 AB 10;
+		Loop;
+	}
+}
+// more Doom key color variants will be implemented as needed
+
+Class SWWMRedSkull : SWWMKey
+{
+	Default
+	{
+		Tag "$T_REDSKULL";
+		Species "RedSkull";
+		Inventory.PickupMessage "$T_REDSKULL";
+		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedSkullGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMBlueSkull : SWWMKey
+{
+	Default
+	{
+		Tag "$T_BLUESKULL";
+		Species "BlueSkull";
+		Inventory.PickupMessage "$T_BLUESKULL";
+		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueSkullGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMYellowSkull : SWWMKey
+{
+	Default
+	{
+		Tag "$T_YELLOWSKULL";
+		Species "YellowSkull";
+		Inventory.PickupMessage "$T_YELLOWSKULL";
+		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowSkullGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SWWMKeyGreen : SWWMKey
+{
+	Default
+	{
+		Tag "$T_KEYGREEN";
+		Species "KeyGreen";
+		Inventory.PickupMessage "$T_KEYGREEN";
+		Inventory.PickupFlash "SWWMGreenPickupFlash";
+		SWWMKey.GestureWeapon "SWWMGreenKeyGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMKeyBlue : SWWMKey
+{
+	Default
+	{
+		Tag "$T_KEYBLUE";
+		Species "KeyBlue";
+		Inventory.PickupMessage "$T_KEYBLUE";
+		Inventory.PickupFlash "SWWMBluePickupFlash";
+		SWWMKey.GestureWeapon "SWWMBlueKeyGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMKeyYellow : SWWMKey
+{
+	Default
+	{
+		Tag "$T_KEYYELLOW";
+		Species "KeyYellow";
+		Inventory.PickupMessage "$T_KEYYELLOW";
+		Inventory.PickupFlash "SWWMPickupFlash";
+		SWWMKey.GestureWeapon "SWWMYellowKeyGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMKeyRed : SWWMKey
+{
+	Default
+	{
+		Tag "$T_KEYRED";
+		Species "KeyRed";
+		Inventory.PickupMessage "$T_KEYRED";
+		Inventory.PickupFlash "SWWMRedPickupFlash";
+		SWWMKey.GestureWeapon "SWWMRedKeyGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// HEXDD thingy
+Class SWWMChaosSphere : Key
+{
+	Default
+	{
+		Tag "$T_CHAOSSPHERE";
+		Inventory.InterHubAmount 1;	// don't strip, this thing is always kept
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+	}
+}

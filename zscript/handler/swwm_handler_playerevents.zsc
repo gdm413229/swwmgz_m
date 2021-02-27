@@ -1,0 +1,144 @@
+// all the player* virtuals
+
+extend Class SWWMHandler
+{
+	override void PlayerDied( PlayerEvent e )
+	{
+		let s = SWWMStats.Find(players[e.playernumber]);
+		if ( s ) s.deaths++;
+	}
+
+	override void PlayerEntered( PlayerEvent e )
+	{
+		PlayerInfo p = players[e.playernumber];
+		// override KEYCONF-forced player classes when run with other gameplay mods (wish this was easier)
+		if ( !(p.mo is 'Demolitionist') )
+		{
+			// make sure it's defined here, so special purpose classes (player chunks, scripted overrides) are respected
+			for ( int i=0; i<PlayerClasses.Size(); i++ )
+			{
+				if ( !(p.mo is PlayerClasses[i].Type) ) continue;
+				// perform a hotswap, code adapted from my .flow player morph in spooktober
+				let n = PlayerPawn(Actor.Spawn("Demolitionist",p.mo.pos));
+				n.player = p;
+				n.angle = p.mo.angle;
+				n.pitch = p.mo.pitch;
+				p.camera = n;
+				p.mo.Destroy();
+				p.mo = n;
+				n.GiveDefaultInventory();
+				let e = Weapon(n.FindInventory("ExplodiumGun"));
+				if ( e )
+				{
+					p.ReadyWeapon = null;
+					p.PendingWeapon = e;
+					n.BringUpWeapon();
+				}
+				// warn if strict KEYCONF is enabled
+				if ( setslotstrict && (p == players[consoleplayer]) )
+					slotstrictwarn = gametic+300;
+				break;
+			}
+		}
+		// create some static thinkers for this player if needed
+		SWWMTradeHistory th = SWWMTradeHistory.Find(p);
+		if ( !th )
+		{
+			th = new("SWWMTradeHistory");
+			th.ChangeStatNum(Thinker.STAT_STATIC);
+			th.myplayer = p;
+		}
+		SWWMCredits c = SWWMCredits.Find(p);
+		if ( !c )
+		{
+			c = new("SWWMCredits");
+			c.ChangeStatNum(Thinker.STAT_STATIC);
+			c.myplayer = p;
+		}
+		SWWMLoreLibrary l = SWWMLoreLibrary.Find(p);
+		if ( !l )
+		{
+			l = new("SWWMLoreLibrary");
+			l.ChangeStatNum(Thinker.STAT_STATIC);
+			l.myplayer = p;
+		}
+		// pre-add some entries to start with
+		l.DirectAdd("Demolitionist");
+		l.DirectAdd("KnowledgeBase");
+		l.DirectAdd("Saya");
+		l.DirectAdd("UAC");
+		if ( SWWMUtility.IsEviternity() )
+		{
+			l.DirectAdd("Gods");
+			l.DirectAdd("SUSAN");
+		}
+		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
+		{
+			l.DirectAdd("Parthoris");
+			l.DirectAdd("SerpentRiders");
+			l.DirectAdd("Sidhe");
+		}
+		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
+			l.DirectAdd("Cronos");
+		if ( gameinfo.gametype&GAME_Strife )
+		{
+			l.DirectAdd("TheOrder");
+			l.DirectAdd("TheFront");
+		}
+		// starting weapons (if owned)
+		if ( p.mo.FindInventory('DeepImpact') )
+			l.DirectAdd("DeepImpact");
+		if ( p.mo.FindInventory('ExplodiumGun') )
+			l.DirectAdd("ExplodiumGun");
+		SWWMStats s = SWWMStats.Find(p);
+		if ( !s )
+		{
+			s = new("SWWMStats");
+			s.ChangeStatNum(Thinker.STAT_STATIC);
+			s.myplayer = p;
+			s.lastspawn = level.totaltime;
+			s.favweapon = -1;
+			for ( Inventory i=p.mo.Inv; i; i=i.inv )
+			{
+				if ( i is 'Weapon' )
+					s.GotWeapon(Weapon(i).GetClass());
+			}
+		}
+		// reset some vars
+		multilevel[e.playernumber] = 0;
+		spreecount[e.playernumber] = 0;
+		tookdamage[e.playernumber] = false;
+		lastkill[e.playernumber] = int.min;
+		// reset combat tracker
+		if ( !swwm_notrack )
+			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
+		// reset score (optional) if inventory should be cleared
+		if ( swwm_resetscore && level.removeitems && !e.IsReturn )
+			c.credits = c.hcredits = 0;
+		// re-add any missing collectibles after a death exit (yes, this happens)
+		for ( int i=0; i<s.ownedcollectibles.Size(); i++ )
+		{
+			if ( p.mo.FindInventory(s.ownedcollectibles[i]) ) continue;
+			let c = SWWMCollectible(Actor.Spawn(s.ownedcollectibles[i],p.mo.pos));
+			c.propagated = true;
+			if ( !c.CallTryPickup(p.mo) )
+				c.Destroy();
+		}
+		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
+		// known bug: the previous weapon will play its select sound regardless, this is ENTIRELY IMPOSSIBLE to fix
+		if ( p.mo.FindInventory("InventoryWipeToken") || (swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB))) )
+			SWWMUtility.WipeInventory(p.mo,swwm_resetscore);
+	}
+
+	override void PlayerRespawned( PlayerEvent e )
+	{
+		// reset some vars
+		multilevel[e.playernumber] = 0;
+		spreecount[e.playernumber] = 0;
+		tookdamage[e.playernumber] = false;
+		lastkill[e.playernumber] = int.min;
+		// reset combat tracker
+		if ( !swwm_notrack )
+			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
+	}
+}

@@ -1,0 +1,505 @@
+// Mr. BIG SHOT Industries "Eviscerator" High Load Flak Cannon (from SWWM series)
+// Slot 5, replaces Chaingun, Dragon Claw, Hammer of Retribution
+
+Class Eviscerator : SWWMWeapon
+{
+	double casex, casey;
+	bool isfiring;
+	// barrel is extended
+	bool extended;
+	// pending shell load
+	bool pendingload;
+	// has shell chambered
+	bool chambered;
+	// countdown to loading new shell
+	int loadtics;
+
+	transient ui TextureID WeaponBox, AmmoIcon;
+	transient ui Font TewiFont;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/EvisceratorDisplay.png",TexMan.Type_Any);
+		if ( !AmmoIcon ) AmmoIcon = TexMan.CheckForTexture("graphics/HUD/EvisceratorShell.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Screen.DrawTexture(WeaponBox,false,bx-46,by-16,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		String astr = String.Format("%d",Ammo1.Amount);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-14-(TewiFont.StringWidth(astr)+1),by-15,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(AmmoIcon,false,bx-14,by-14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,chambered?Color(0,0,0,0):Color(128,0,0,0));
+		Screen.DrawText(TewiFont,Font.CR_WHITE,bx-44,by-15,extended?"►":"",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		if ( (Ammo1.Amount > 0) || chambered ) return true;
+		return false;
+	}
+
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+		{
+			if ( (Ammo1.Amount > 0) || chambered ) return true;
+			return false;
+		}
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// add the chambered shell in
+		if ( chambered ) AmmoGive1++;
+		return Super.PickupForAmmoSWWM(ownedWeapon);
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( chambered || !pendingload || ((loadtics < 20) && (Ammo1.Amount <= 0)) )
+		{
+			loadtics = 0;
+			return;
+		}
+		loadtics++;
+		if ( (loadtics == 10) && Owner && Owner.player && (Owner.player.ReadyWeapon == self) )
+			Owner.A_StartSound("eviscerator/load",CHAN_WEAPON,CHANF_OVERLAP);
+		if ( (loadtics == 20) && !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo',true) )
+			Ammo1.Amount = max(0,Ammo1.Amount-1);
+		if ( loadtics == 25 )
+		{
+			pendingload = false;
+			chambered = true;
+		}
+	}
+
+	action void A_StartLoad( int delay = 0 )
+	{
+		invoker.pendingload = true;
+		invoker.loadtics = -delay;
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,4.,-5.);
+	}
+
+	action void A_EvisceratorFire()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.isfiring = true;
+		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(6,6,6,3,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.5);
+		A_ZoomFactor(.94,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		A_PlayerFire();
+		SWWMHandler.DoFlash(self,Color(64,255,224,96),3);
+		A_AlertMonsters(swwm_uncapalert?0:4500);
+		Vector3 x, y, z, x2, y2, z2, dir, origin;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMUtility.DoKnockback(self,-x,25000.);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
+		int trail = CVar.GetCVar('swwm_funtrails',player).GetInt();
+		for ( int i=0; i<40; i++ )
+		{
+			a = FRandom[Eviscerator](0,360);
+			s = FRandom[Eviscerator](0,invoker.extended?.06:.3);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			let p = EvisceratorChunk(Spawn("EvisceratorChunk",origin));
+			p.target = self;
+			p.angle = atan2(dir.y,dir.x);
+			p.pitch = asin(-dir.z);
+			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
+			if ( invoker.extended ) p.vel *= 1.4;
+			if ( trail < 8 ) p.trailcolor = max(0,trail);
+			else if ( trail == 8 ) p.trailcolor = (i%6)+2;
+			else if ( trail == 9 )
+			{
+				switch ( i%5 )
+				{
+				case 0:
+				case 3:
+					p.trailcolor = 8;
+					break;
+				case 1:
+				case 4:
+					p.trailcolor = 9;
+					break;
+				case 2:
+					p.trailcolor = 1;
+					break;
+				}
+			}
+		}
+		for ( int i=0; i<8; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.special1 = 1;
+			s.scale *= .9;
+			s.alpha *= .3;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.vel += vel*.5+x*FRandom[Eviscerator](3.,5.)+y*FRandom[Eviscerator](-1,1)+z*FRandom[Eviscerator](-1,1);
+		}
+		for ( int i=0; i<9; i++ )
+		{
+			let s = Spawn("SWWMSpark",origin);
+			s.scale *= .3;
+			s.alpha *= .4;
+			s.vel += vel*.5+x*FRandom[Eviscerator](4.,8.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
+	}
+
+	action void A_EvisceratorAltFire()
+	{
+		let weap = Weapon(invoker);
+		if ( !weap ) return;
+		invoker.chambered = false;
+		invoker.isfiring = true;
+		A_StartSound("eviscerator/altfire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
+		A_QuakeEx(4,4,4,5,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.9);
+		A_ZoomFactor(.91,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_SWWMFlash();
+		A_PlayerFire();
+		SWWMHandler.DoFlash(self,Color(16,255,224,96),3);
+		A_AlertMonsters(swwm_uncapalert?0:4000);
+		Vector3 x, y, z, x2, y2, z2, dir, origin;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		SWWMUtility.DoKnockback(self,-x,32000.);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3*y-5*z);
+		a = FRandom[Eviscerator](0,360);
+		s = FRandom[Eviscerator](0,invoker.extended?.003:.02);
+		dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		let p = Spawn("EvisceratorProj",origin);
+		p.target = self;
+		p.angle = atan2(dir.y,dir.x);
+		p.pitch = asin(-dir.z);
+		p.vel = dir*p.speed*(invoker.extended?1.6:.8);
+		for ( int i=0; i<6; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.special1 = 1;
+			s.scale *= .9;
+			s.alpha *= .2;
+			s.SetShade(Color(1,1,1)*Random[Eviscerator](160,255));
+			s.vel += vel*.5+x*FRandom[Eviscerator](3.,5.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
+		for ( int i=0; i<5; i++ )
+		{
+			let s = Spawn("SWWMSpark",origin);
+			s.scale *= .3;
+			s.alpha *= .4;
+			s.vel += vel*.5+x*FRandom[Eviscerator](4.,8.)+y*FRandom[Eviscerator](-2,2)+z*FRandom[Eviscerator](-2,2);
+		}
+	}
+
+	action void A_EvisceratorEject()
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*10-y*10-z*10);
+		let c = Spawn("EvisceratorCasing",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)-y*FRandom[Junk](3,6)-(0,0,FRandom[Junk](4,6));
+		c.vel += vel*.5;
+		invoker.chambered = false;
+	}
+
+	action void A_EvisceratorCasingSmoke( Vector3 ofs )
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*ofs.x+y*ofs.y+z*ofs.z);
+		let s = Spawn("SWWMHalfSmoke",origin);
+		s.scale *= .2;
+		s.alpha *= .4;
+		s.speed *= .1;
+	}
+
+	Default
+	{
+		Tag "$T_EVISCERATOR";
+		Inventory.PickupMessage "$I_EVISCERATOR";
+		Obituary "$O_EVISCERATOR";
+		Inventory.Icon "graphics/HUD/Icons/W_Eviscerator.png";
+		Weapon.SlotNumber 5;
+		Weapon.UpSound "eviscerator/select";
+		Weapon.SelectionOrder 300;
+		Stamina 50000;
+		Weapon.AmmoType1 "EvisceratorShell";
+		Weapon.AmmoGive1 4;
+		SWWMWeapon.DropAmmoType "EvisceratorShell";
+		+WEAPON.EXPLOSIVE;
+		Radius 20;
+		Height 32;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Deselect:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"DeselectExt");
+		}
+		XZW2 BCDEFGH 2;
+		XZW2 H -1 A_FullLower();
+		Stop;
+	DeselectExt:
+		XZW4 Z 2;
+		XZW5 ABCDEFG 2;
+		XZW5 G -1 A_FullLower();
+		Stop;
+	Select:
+		XZW2 H 2
+		{
+			invoker.isfiring = false;
+			A_FullRaise();
+			return A_JumpIf(invoker.extended,"SelectExt");
+		}
+		XZW2 IJKLMNOPQR 2;
+		Goto Ready;
+	SelectExt:
+		XZW5 GHIJKLMNOPQ 2;
+		Goto ReadyExt;
+	Ready:
+		XZW2 A 1
+		{
+			invoker.isfiring = false;
+			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( !invoker.chambered )
+			{
+				flg |= WRF_NOFIRE;
+				// autoloader
+				if ( !invoker.pendingload )
+					invoker.pendingload = true;
+			}
+			A_WeaponReady(flg);
+			// avoid the check while still chambering
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) && (invoker.loadtics < 20) )
+				invoker.CheckAmmo(EitherFire,true);
+		}
+		Wait;
+	ReadyExt:
+		XZW4 Z 1
+		{
+			invoker.isfiring = false;
+			int flg = WRF_ALLOWRELOAD|WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( !invoker.chambered )
+			{
+				flg |= WRF_NOFIRE;
+				// autoloader
+				if ( !invoker.pendingload )
+					invoker.pendingload = true;
+			}
+			A_WeaponReady(flg);
+			// avoid the check while still chambering
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) && (invoker.loadtics < 20) )
+				invoker.CheckAmmo(EitherFire,true);
+		}
+		Wait;
+	Fire:
+		XZW2 A 1
+		{
+			A_EvisceratorFire();
+			return A_JumpIf(invoker.extended,"FireExt");
+		}
+		XZW3 EFGHIJKLMNOPQR 1;
+		Goto Eject;
+	FireExt:
+		XZW4 Z 1;
+		XZW6 DEFGHIJKLMNOPQ 1;
+		Goto EjectExt;
+	Eject:
+		XZW2 A 4;
+		XZW3 STUV 2;
+		XZW3 W 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 X 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"EjectCasing");
+			A_Overlay(-9999,"EjectSmoke");
+		}
+		XZW3 YZ 1;
+		XZW4 AB 1;
+		XZW4 C 1
+		{
+			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartLoad();
+		}
+		XZW4 DEF 1;
+		XZW4 GHI 2;
+		Goto Ready;
+	EjectExt:
+		XZW4 Z 4;
+		XZW6 RSTU 2;
+		XZW6 V 1 A_StartSound("eviscerator/eject",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 W 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"EjectCasing");
+			A_Overlay(-9999,"EjectSmoke");
+		}
+		XZW6 XYZ 1;
+		XZW7 A 1;
+		XZW7 B 1
+		{
+			A_StartSound("eviscerator/ejectend",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartLoad();
+		}
+		XZW7 CDE 1;
+		XZW7 FGH 2;
+		Goto ReadyExt;
+	EjectCasing:
+		XZWB D 1
+		{
+			A_OverlayOffset(OverlayID(),0,0);
+			invoker.casex = FRandom[Eviscerator](-2.,2.);
+			invoker.casey = FRandom[Eviscerator](-2.,2.);
+		}
+		XZWB EFGHIJKLM 1 A_OverlayOffset(OverlayID(),invoker.casex,invoker.casey,WOF_ADD|WOF_INTERPOLATE);
+		TNT1 A 1 A_EvisceratorEject();
+		Stop;
+	EjectSmoke:
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,2,-3));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-1,-2));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-3,-1.5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-5,-2));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-7,-3.5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-8.5,-5));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-10,-9));
+		TNT1 A 1 A_EvisceratorCasingSmoke((10,-11,-14));
+		Stop;
+	AltFire:
+		XZW2 A 2
+		{
+			A_EvisceratorAltFire();
+			return A_JumpIf(invoker.extended,"AltFireExt");
+		}
+		XZW2 STUVW 1;
+		XZW2 XYZ 2;
+		XZW3 ABCD 2;
+		XZW2 A 1 A_StartLoad(5);
+		Goto Ready;
+	AltFireExt:
+		XZW4 Z 2;
+		XZW5 RSTUV 1;
+		XZW5 WXY 2;
+		XZW5 Z 2;
+		XZW6 ABC 2;
+		XZW4 Z 1 A_StartLoad(5);
+		Goto ReadyExt;
+	Zoom:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.extended,"ZoomExt");
+		}
+		XZW4 JKLMN 2;
+		XZW4 O 1 A_StartSound("eviscerator/switch");
+		XZW4 PQR 1;
+		XZW4 S 2
+		{
+			invoker.extended = !invoker.extended;
+			A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW4 TUVWY 2;
+		Goto ReadyExt;
+	ZoomExt:
+		XZW4 Z 2;
+		XZW7 IJK 3;
+		XZW7 L 1 A_StartSound("eviscerator/switch");
+		XZW7 MNO 1;
+		XZW7 P 2
+		{
+			invoker.extended = !invoker.extended;
+			A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW7 QRSTU 2;
+		Goto Ready;
+	Reload:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/checkgun",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
+			return A_JumpIf(invoker.extended,"ReloadExt");
+		}
+		XZW7 VWXYZ 2;
+		XZW8 A 2;
+		XZW8 BCDEF 3;
+		XZW8 GHIJK 2;
+		XZW8 LMNO 3;
+		XZW8 PQRSTU 2;
+		XZW8 V 3;
+		Goto Ready;
+	ReloadExt:
+		XZW4 Z 2;
+		XZW9 MNOPQR 2;
+		XZW9 STUVW 3;
+		XZW9 XYZ 2;
+		XZWA AB 2;
+		XZWA CDEF 3;
+		XZWA GHIJKL 2;
+		XZWA M 3;
+		Goto ReadyExt;
+	User1:
+		XZW2 A 2
+		{
+			A_StartSound("eviscerator/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+			return A_JumpIf(invoker.extended,"User1Ext");
+		}
+		XZW8 WXY 2;
+		XZW8 Z 1;
+		XZW9 AB 1;
+		XZW9 C 1 A_Parry(9);
+		XZW9 D 1;
+		XZW9 E 2 A_Melee(60,"demolitionist/whitm",1.1);
+		XZW9 FGH 2;
+		XZW9 I 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 JKL 2;
+		Goto Ready;
+	User1Ext:
+		XZW4 Z 2;
+		XZWA NOP 2;
+		XZWA QRS 1;
+		XZWA T 1 A_Parry(9);
+		XZWA U 1;
+		XZWA V 2 A_Melee(60,"demolitionist/whitm",1.1);
+		XZWA WXY 2;
+		XZWA Z 2 A_StartSound("eviscerator/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB ABC 2;
+		Goto ReadyExt;
+	Flash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](0,3);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+		}
+		Stop;
+	AltFlash:
+		XZWZ A 2
+		{
+			let psp = player.GetPSprite(PSP_FLASH);
+			psp.frame = Random[GunFlash](4,7);
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.target = self;
+			l.args[3] -= 20;
+		}
+		Stop;
+	}
+}

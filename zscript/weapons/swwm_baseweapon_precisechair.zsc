@@ -1,0 +1,138 @@
+// precise crosshair
+
+Class SWWMCrosshairTracer : LineTracer
+{
+	Actor ignoreme;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+extend Class SWWMWeapon
+{
+	ui SWWMCrosshairTracer ctr;
+	ui Vector3 cpos;
+	ui Color ccol;
+	ui Vector2 lagvpos;
+	transient ui uint prevms;
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		// force custom crosshair
+		if ( swwm_precisecrosshair ) crosshair = 99;
+		else crosshair = 0;
+	}
+
+	// HUD-side ticking
+	virtual ui void HudTick()
+	{
+		if ( !Owner ) return;
+		[cpos, ccol] = TraceForCrosshair();
+		// avoid jumpy switching
+		if ( Owner.player.PendingWeapon is 'SWWMWeapon' )
+		{
+			SWWMWeapon(Owner.player.PendingWeapon).cpos = cpos;
+			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = lagvpos;
+			SWWMWeapon(Owner.player.PendingWeapon).prevms = prevms;
+		}
+	}
+	// extra drawing, usually scopes
+	virtual ui void RenderUnderlay( RenderEvent e )
+	{
+		// draw custom crosshair
+		if ( automapactive || !(players[consoleplayer].Camera is 'PlayerPawn') ) return;
+		if ( !swwm_precisecrosshair ) return;
+		if ( !crosshairon ) return;
+		if ( crosshairforce ) return;
+		let sb = SWWMStatusBar(StatusBar);
+		if ( !sb ) return;
+		sb.viewport.FromHud();
+		sb.proj.CacheResolution();
+		sb.proj.CacheFov(players[consoleplayer].fov);
+		sb.proj.OrientForRenderUnderlay(e);
+		sb.proj.BeginProjection();
+		Vector3 tdir = level.Vec3Diff(e.ViewPos,cpos);
+		// project
+		sb.proj.ProjectWorldPos(e.ViewPos+tdir);
+		Vector2 vpos;
+		if ( !sb.proj.IsInFront() ) return;
+		Vector2 npos = sb.proj.ProjectToNormal();
+		vpos = sb.viewport.SceneToWindow(npos);
+		double frametime = (MSTime()-prevms)/1000.;
+		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
+		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
+		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
+		prevms = MSTime();
+		int cnum = abs(CVar.FindCVar('crosshair').GetInt());
+		if ( !cnum ) return;
+		String tn = String.Format("XHAIR%s%d",(Screen.GetWidth()<640)?"S":"B",cnum);
+		TextureID ctex = TexMan.CheckForTexture(tn,TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture(String.Format("XHAIR%s1",(Screen.GetWidth()<640)?"S":"B"),TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture("XHAIRS1",TexMan.Type_MiscPatch);
+		Vector2 ts = TexMan.GetScaledSize(ctex);
+		double cs = crosshairscale;
+		double sz = 1.;
+		if ( cs > 0. ) sz = Screen.GetHeight()*cs/200.;
+		if ( crosshairgrow ) sz *= sb.CrosshairSize;
+		Screen.DrawTexture(ctex,false,int(lagvpos.x),int(lagvpos.y),DTA_DestWidthF,ts.x*sz,DTA_DestHeightF,ts.y*sz,DTA_AlphaChannel,true,DTA_FillColor,ccol);
+	}
+	ui Vector3, Color TraceForCrosshair()
+	{
+		if ( !ctr ) ctr = new("SWWMCrosshairTracer");
+		ctr.ignoreme = Owner;
+		Vector3 x, y, z, ofs;
+		double s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(Owner.pitch,Owner.angle,Owner.roll);
+		ofs = GetTraceOffset();
+		Vector3 origin = level.Vec3Offset(Owner.Vec2OffsetZ(0,0,Owner.player.viewz),ofs.x*x+ofs.y*y+ofs.z*z);
+		ctr.Trace(origin,level.PointInSector(origin.xy),x,10000.,0);
+		Color col = crosshaircolor;
+		int chp = crosshairhealth;
+		if ( chp >= 2 )
+		{
+			int hp = Clamp(Owner.Health,0,200);
+			double sat = (hp<150)?1.:(1.-(hp-150)/100.);
+			Vector3 rgb = SWWMUtility.HSVtoRGB((hp/300.,sat,1.));
+			col = Color(int(rgb.x*255),int(rgb.y*255),int(rgb.z*255));
+		}
+		else if ( chp == 1 )
+		{
+			double hp = Clamp(Owner.Health,0,100)/100.;
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		else if ( (ctr.Results.HitType == TRACE_HitActor) && ctr.Results.HitActor.bSHOOTABLE )
+		{
+			// show target health, rather than our own
+			double hp = ctr.Results.HitActor.Health/double(ctr.Results.HitActor.GetSpawnHealth());
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		if ( ctr.Results.HitType == TRACE_HitNone ) return level.Vec3Offset(origin,x*10000.), col;
+		else return ctr.Results.HitPos, col;
+	}
+	// where the trace is coming from relative to eyes
+	virtual clearscope Vector3 GetTraceOffset() const
+	{
+		return (0.,0.,0.);
+	}
+}

@@ -1,0 +1,544 @@
+// Ynykron Artifact (from UnSX Series, featured in SWWM Platinum as a secret weapon)
+// Slot 0, replaces BFG9000, Firemace, Wraithverge (arc)
+
+Class Ynykron : SWWMWeapon
+{
+	transient ui TextureID WeaponBox, ChargeBar[2], BoxSide[2];
+	transient ui Font TewiFont;
+	transient ui DynamicValueInterpolator ChargeInter;
+
+	enum EChargeState
+	{
+		CS_IDLE,
+		CS_CHARGING,
+		CS_READY,
+		CS_DISCHARGING,
+		CS_POSTFIRE
+	};
+
+	int chargestate;
+	double chargelevel;
+	bool inverted, invertreload;
+
+	double ventalpha, ventfade;
+	int ventcooldown;
+
+	int clipcount;
+
+	Property ClipCount : clipcount;
+
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/YnykronDisplay.png",TexMan.Type_Any);
+		if ( !ChargeBar[0] ) ChargeBar[0] = TexMan.CheckForTexture("graphics/HUD/YnykronBarA.png",TexMan.Type_Any);
+		if ( !ChargeBar[1] ) ChargeBar[1] = TexMan.CheckForTexture("graphics/HUD/YnykronBarB.png",TexMan.Type_Any);
+		if ( !BoxSide[0] ) BoxSide[0] = TexMan.CheckForTexture("graphics/HUD/YnykronSideA.png",TexMan.Type_Any);
+		if ( !BoxSide[1] ) BoxSide[1] = TexMan.CheckForTexture("graphics/HUD/YnykronSideB.png",TexMan.Type_Any);
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		Screen.DrawTexture(WeaponBox,false,bx-33,by-44,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int chg = clamp(ChargeInter?ChargeInter.GetValue():int(chargelevel*10),0,400);
+		int ct = int(((by-2)-chg/10.)*hs.y);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-30,by-16,String.Format("%d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(BoxSide[inverted],false,bx-23,by-31,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,clipcount?Color(0,0,0,0):Color(128,0,0,0));
+		Screen.DrawTexture(ChargeBar[inverted],false,bx-6,by-42,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(chargestate==CS_READY)?Color(int(clamp(sin((level.maptime+TicFrac)*8)*40+24,0.,64.)),255,255,255):Color(0,0,0,0),DTA_ClipTop,ct);
+	}
+	override void HudTick()
+	{
+		Super.HudTick();
+		if ( !ChargeInter ) ChargeInter = DynamicValueInterpolator.Create(int(chargelevel*10),.5,1,400);
+		ChargeInter.Update(int(chargelevel*10));
+	}
+
+	override bool ReportHUDAmmo()
+	{
+		if ( clipcount > 0 ) return true;
+		return Super.ReportHUDAmmo();
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
+		if ( (fireMode == PrimaryFire) || (fireMode == AltFire) )
+			return ((clipcount > 0) || (Ammo1.Amount > 0));
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( Owner.player && (Owner.player.Readyweapon == self) )
+		{
+			Owner.A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+			if ( chargestate > CS_IDLE )
+				Owner.A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,(.025*chargelevel)**3.,2.);
+		}
+	}
+
+	override Vector3 GetTraceOffset()
+	{
+		return (15.,4.,-1.);
+	}
+
+	action void A_YnykronFire()
+	{
+		A_SWWMFlash();
+		A_StopSound(CHAN_WEAPONEXTRA2);
+		A_StartSound(invoker.inverted?"ynykron/altfire":"ynykron/fire",CHAN_WEAPON,CHANF_OVERLAP,1.,.2);
+		if ( !swwm_ynykronalert )
+		{
+			// global alert
+			int ns = level.Sectors.Size();
+			for ( int i=0; i<ns; i++ )
+			{
+				Sector s = level.Sectors[i];
+				for ( Actor a=s.thinglist; a; a=a.snext )
+					a.LastHeard = self;
+			}
+		}
+		else A_AlertMonsters();	// full range alert
+		A_QuakeEx(9,9,9,4,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:2.5);
+		A_ZoomFactor(.7,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_PlayerFire();
+		SWWMHandler.DoFlash(self,Color(120,255,255,255),30);
+		A_Overlay(PSP_WEAPON+1,"FireSmoke");
+		A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCESTYLE|PSPF_FORCEALPHA,true);
+		A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
+		A_OverlayAlpha(PSP_WEAPON+1,0.);
+		invoker.chargestate = CS_POSTFIRE;
+		invoker.clipcount = 0;
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*15+y*4-z);
+		Actor s;
+		if ( invoker.inverted ) s = Spawn("YnykronAltShot",origin);
+		else s = Spawn("YnykronShot",origin);
+		s.target = self;
+		s.angle = angle;
+		s.pitch = BulletSlope();
+		invoker.specialf1 = 1.;
+		A_Overlay(PSP_WEAPON+3,"FireBlast");
+	}
+
+	action void A_Backblast()
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),-x*15+y*4-z);
+		int numpt = Random[Ynykron](10,20);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("SWWMSmoke",origin);
+			s.scale *= 3.;
+			s.alpha *= .4*invoker.specialf1;
+			s.special1 = Random[Ynykron](2,8);
+			s.vel += x*FRandom[Ynykron](-40.,-4.)*invoker.specialf1+y*FRandom[Ynykron](-1.,1.)+z*FRandom[Ynykron](-1.,1.);
+		}
+		invoker.specialf1 -= .2;
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner || !Owner.player ) return;
+		if ( chargestate == CS_IDLE ) chargelevel = 0.;
+		else if ( chargestate == CS_CHARGING )
+		{
+			chargelevel = min(chargelevel*0.997+.2,40.);
+			if ( chargelevel >= 40. )
+			{
+				if ( Owner.player == players[consoleplayer] )
+					Console.Printf(StringTable.Localize("$SWWM_YNYKRONREADY"));
+				chargestate = CS_READY;
+			}
+			if ( Owner.player.ReadyWeapon == self )
+				Owner.A_SoundVolume(CHAN_WEAPONEXTRA2,(.025*chargelevel)**3.);
+		}
+		if ( Owner.player.ReadyWeapon != self ) return;
+		let pspm = Owner.player.FindPSprite(PSP_WEAPON);
+		if ( pspm )
+		{
+			double shiver = (chargelevel*.025)**2.;
+			pspm.x = FRandom[Shivers](-1.,1.)*shiver;
+			pspm.y = 32+FRandom[Shivers](-1.,1.)*shiver;
+		}
+		let psp = Owner.player.FindPSprite(PSP_WEAPON+1);
+		if ( !psp ) return;
+		ventalpha = clamp(ventalpha+ventfade,0.,1.);
+		psp.alpha = ventalpha;
+		if ( chargestate >= CS_DISCHARGING )
+		{
+			if ( chargestate == CS_POSTFIRE ) chargelevel = max(chargelevel*1.024-1.,0.);
+			else chargelevel = max(chargelevel*1.005-.24,0.);
+			if ( chargelevel <= 0. ) chargestate = CS_IDLE;
+			if ( Owner.player.ReadyWeapon == self )
+				Owner.A_SoundVolume(CHAN_WEAPONEXTRA2,(.025*chargelevel)**3.);
+		}
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		// add the loaded box
+		if ( !AmmoGive1 && clipcount ) AmmoGive1++;
+		return Super.PickupForAmmoSWWM(ownedWeapon);
+	}
+
+	Default
+	{
+		Tag "$T_YNYKRON";
+		Inventory.PickupMessage "$T_YNYKRON";
+		Obituary "$O_YNYKRON";
+		Inventory.Icon "graphics/HUD/Icons/W_Ynykron.png";
+		Weapon.SlotNumber 0;
+		Weapon.SelectionOrder 9000;
+		Weapon.UpSound "ynykron/select";
+		Stamina 5000000;
+		Weapon.AmmoType1 "YnykronAmmo";
+		Weapon.AmmoGive1 1;
+		SWWMWeapon.DropAmmoType "YnykronAmmo";
+		+SWWMWEAPON.NOFIRSTGIVE;
+		Ynykron.ClipCount 1;
+		+WEAPON.BFG;
+		+WEAPON.EXPLOSIVE;
+		Radius 32;
+		Height 36;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 L 2
+		{
+			invoker.ventcooldown = Random[Ynykron](6,15);
+			A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+			if ( invoker.chargelevel > 0. )
+				A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,(.025*invoker.chargelevel)**3.,2.);
+			A_FullRaise();
+		}
+		XZW2 MNOPQRSTUVWXYZ 2;
+		XZW3 A 2;
+		Goto Ready;
+	Ready:
+		XZW2 A 1
+		{
+			if ( invoker.chargestate == CS_DISCHARGING )
+				return ResolveState("Discharge");
+			int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
+			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true))) )
+				flg |= WRF_ALLOWRELOAD;
+			if ( (invoker.chargestate > CS_IDLE) || ((invoker.clipcount <= 0) && (invoker.Ammo1.Amount <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true)) )
+				flg |= WRF_NOSECONDARY;
+			if ( invoker.chargestate == CS_CHARGING )
+				flg |= WRF_NOPRIMARY;
+			A_WeaponReady(flg);
+			if ( invoker.chargelevel >= 20. )
+			{
+				invoker.ventcooldown--;
+				if ( invoker.ventcooldown <= 0 )
+					return ResolveState("ReadyVent");
+			}
+			if ( player.cmd.buttons&BT_ATTACK )
+				invoker.CheckAmmo(EitherFire,true);
+			return ResolveState(null);
+		}
+		Wait;
+	ReadyVent:
+		XZW2 A 1
+		{
+			invoker.ventcooldown = Random[Ynykron](10,15)*5+2*(40-int(invoker.chargelevel));
+			A_Overlay(PSP_WEAPON+1,"ReadyVentSmoke");
+			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCESTYLE|PSPF_FORCEALPHA,true);
+			A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
+			A_OverlayAlpha(PSP_WEAPON+1,0.);
+			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			A_StartSound("ynykron/ventopen",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWA ABCDEF 2 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+		XZWA G 2
+		{
+			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			A_StartSound("ynykron/ventclose",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWA HI 2 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+		Goto Ready;
+	ReadyVentSmoke:
+		XZWB D 1
+		{
+			invoker.ventfade = .3;
+			A_StartSound("ynykron/puff",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWB EF 2;
+		XZWB G 2
+		{
+			invoker.ventfade = -.1;
+		}
+		XZWB HIJKLM 2;
+		Stop;
+	Fire:
+		XZW2 A 1
+		{
+			if ( (invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+				return ResolveState("Reload");
+			if ( invoker.chargestate == CS_IDLE )
+				return ResolveState("Charge");
+			A_YnykronFire();
+			A_StartSound("ynykron/ventopen",CHAN_WEAPON,CHANF_OVERLAP);
+			return ResolveState(null);
+		}
+		XZW3 JK 2;
+		XZW3 LMNOPQR 3;
+		Goto Discharging;
+	FireBlast:
+		TNT1 AAAAA 1 A_Backblast();
+		Stop;
+	FireSmoke:
+		XZWA J 1
+		{
+			invoker.ventfade = .3;
+			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOP);
+		}
+		XZWA KL 2;
+		XZWA MNOPQRS 3;
+		Goto DischargingSmoke;
+	AltFire:
+		XZW2 A 2
+		{
+			if ( (invoker.clipcount <= 0) && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+			{
+				invoker.invertreload = true;
+				return ResolveState("Reload");
+			}
+			A_StartSound("ynykron/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.inverted,"TakeInverted");
+		}
+	TakeNormal:
+		XZW2 A 2;
+		XZW3 STU 2;
+		XZW3 V 2
+		{
+			A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerReload();
+		}
+		XZW3 WXYZ 2;
+		XZW4 A 2;
+		XZW4 B 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW4 CDEFGHIJKLMNO 2;
+		XZW4 P 0
+		{
+			invoker.inverted = true;
+		}
+		Goto PutInverted;
+	TakeInverted:
+		XZW5 P 2;
+		XZW5 QRS 2;
+		XZW5 T 2
+		{
+			A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerReload();
+		}
+		XZW5 UVWXY 2;
+		XZW5 Z 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW6 ABCDEFGHIJKLM 2;
+		XZW6 N 0
+		{
+			invoker.inverted = false;
+		}
+		Goto PutNormal;
+	PutNormal:
+		XZW4 PQRS 2;
+		XZW4 T 2 A_StartSound("ynykron/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 UVWXYZ 2;
+		XZW5 A 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 B 2 A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+		XZW5 CDEFGHIJK 2;
+		XZW5 L 4;
+		Goto Ready;
+	PutInverted:
+		XZW6 NOPQ 2;
+		XZW6 R 2 A_StartSound("ynykron/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 STUVWX 2;
+		XZW6 Y 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 Z 2 A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);
+		XZW7 ABCDEFGHI 2;
+		XZW7 J 4;
+		XZW5 P 0;
+		Goto Ready;
+	Discharge:
+		XZW2 A 2;
+		XZW7 NO 2;
+		XZW7 P 2 A_StartSound("ynykron/latch",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 Q 2
+		{
+			invoker.chargestate = CS_DISCHARGING;
+			A_Overlay(PSP_WEAPON+1,"DischargeSmoke");
+			A_OverlayFlags(PSP_WEAPON+1,PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCESTYLE|PSPF_FORCEALPHA,true);
+			A_OverlayRenderStyle(PSP_WEAPON+1,STYLE_Add);
+			A_OverlayAlpha(PSP_WEAPON+1,0.);
+			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			A_StartSound("ynykron/ventopen",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW7 RSTUV 2 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+	Discharging:
+		XZW7 W 2
+		{
+			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			return A_JumpIf(invoker.chargestate==CS_IDLE,1);
+		}
+		Wait;
+		XZW7 W 3 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+		XZW7 X 2
+		{
+			A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			A_StartSound("ynykron/ventclose",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW7 YZ 2 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+		Goto Ready;
+	DischargeSmoke:
+		XZWA T 2
+		{
+			invoker.ventfade = .3;
+			A_StartSound("ynykron/puffing",CHAN_WEAPONEXTRA3,CHANF_LOOP);
+		}
+		XZWA UVWXY 2;
+	DischargingSmoke:
+		XZWA Z 2 A_JumpIf(invoker.chargestate==CS_IDLE,1);
+		Wait;
+		XZWA Z 3
+		{
+			invoker.ventfade = -.1;
+			A_SoundVolume(CHAN_WEAPONEXTRA3,.8);
+			A_StartSound("ynykron/puffend",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWB A 2 A_SoundVolume(CHAN_WEAPONEXTRA3,.6);
+		XZWB B 2 A_SoundVolume(CHAN_WEAPONEXTRA3,.4);
+		XZWB C 2 A_SoundVolume(CHAN_WEAPONEXTRA3,.2);
+		XZWB D 2 A_StopSound(CHAN_WEAPONEXTRA3);
+		Stop;
+	Charge:
+		XZW2 A 2;
+		XZW3 BC 2;
+		XZW3 D 2 A_StartSound("ynykron/latch",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 EFGHI 2;
+		XZW2 A 0
+		{
+			if ( gameinfo.gametype&GAME_Strife )
+			{
+				A_StartSound("ynykron/locked",CHAN_WEAPON,CHANF_OVERLAP);
+				if ( player == players[consoleplayer] )
+					Console.Printf(StringTable.Localize("$SWWM_YNYKRONLOCKED"));
+			}
+			else
+			{
+				invoker.chargestate = CS_CHARGING;
+				invoker.ventcooldown = Random[Ynykron](6,15);
+				A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,.01,2.);
+			}
+		}
+		Goto Ready;
+	Reload:
+		XZW2 A 2
+		{
+			if ( invoker.chargestate>CS_IDLE ) return ResolveState("Discharge");
+			if ( invoker.inverted ) return ResolveState("UnloadInverted");
+			A_StartSound("ynykron/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			return ResolveState(null);
+		}
+	UnloadNormal:
+		XZW2 A 2;
+		XZW3 STU 2;
+		XZW3 V 2 A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW3 WXYZ 2;
+		XZW4 A 2;
+		XZW4 B 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW4 CDEFGHIJKLMNO 2;
+		XZW4 P 0
+		{
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(invoker.Ammo1.Amount-1,0);
+			invoker.clipcount = 1;
+			invoker.inverted = false;
+			// no mag is dropped, depleted crystals are hazardous and should be disposed of properly
+			if ( invoker.invertreload )
+			{
+				invoker.invertreload = false;
+				invoker.inverted = true;
+				return ResolveState("PutInverted");
+			}
+			return ResolveState(null);
+		}
+		Goto PutNormal;
+	UnloadInverted:
+		XZW5 P 2;
+		XZW5 QRS 2;
+		XZW5 T 2 A_StartSound("ynykron/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 UVWXY 2;
+		XZW5 Z 2 A_StopSound(CHAN_WEAPONEXTRA);
+		XZW6 ABCDEFGHIJKLM 2;
+		XZW6 N 0
+		{
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(invoker.Ammo1.Amount-1,0);
+			invoker.clipcount = 1;
+			invoker.inverted = false;
+			// no mag is dropped, depleted crystals are hazardous and should be disposed of properly
+			if ( invoker.invertreload )
+			{
+				invoker.invertreload = false;
+				invoker.inverted = true;
+				return ResolveState("PutInverted");
+			}
+			return ResolveState(null);
+		}
+		Goto PutNormal;
+	Zoom:
+		XZW2 A 2
+		{
+			invoker.ventcooldown = Random[Ynykron](6,15);
+			A_StartSound("ynykron/checkout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerCheckGun();
+		}
+		XZW8 ABCDEFGHIJKLMNOPQRSTUVW 2;
+		XZW8 X 4;	// smoothen more
+		Goto Ready;
+	User1:
+		XZW2 A 2
+		{
+			invoker.ventcooldown = Random[Ynykron](6,15);
+			A_StartSound("ynykron/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
+		XZW8 YZ 2;
+		XZW9 AB 2;
+		XZW9 C 1 A_Parry(9);
+		XZW9 DE 1;
+		XZW9 F 1 A_Melee(100,"demolitionist/whitl",1.5);
+		XZW9 GHIJK 1;
+		XZW9 LMNO 2;
+		XZW9 P 2 A_StartSound("ynykron/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 QRSTUVWXYZ 2;
+		Goto Ready;
+	Deselect:
+		XZW2 A 2 A_StartSound("ynykron/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 BCDEFGHIJK 2;
+		XZW2 L -1
+		{
+			A_StopSound(CHAN_WEAPONEXTRA);
+			A_StopSound(CHAN_WEAPONEXTRA2);
+			A_FullLower();
+		}
+		Stop;
+	Flash:
+		XZWZ A 2 Bright
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[0] = 255;
+			l.args[1] = 255;
+			l.args[2] = 255;
+			l.args[3] = 500;
+			l.target = self;
+		}
+		Stop;
+	}
+}

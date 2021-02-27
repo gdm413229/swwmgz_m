@@ -1,0 +1,1125 @@
+// April Fools 2020
+Class FroggyChair : Actor
+{
+	int cdown;
+	bool carried;
+	bool wasonground;
+	double lastvelz;
+	Actor lasthit;
+
+	Default
+	{
+		Tag "$T_FROGGY";
+		Radius 12;
+		Height 16;
+		+SOLID;
+		+SHOOTABLE;
+		+NODAMAGE;
+		+NOBLOOD;
+		+INTERPOLATEANGLES;
+		+FORCEPAIN;
+	}
+	private void BeginCarry( Actor carrier )
+	{
+		if ( !carrier ) return;
+		SWWMLoreLibrary.Add(carrier.player,"FroggyChair");
+		carrier.A_StartSound("demolitionist/handsup",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetRenderStyle(.5,STYLE_Translucent);
+		A_SetSize(32,32);	// easier to deselect
+		carried = true;
+		bSOLID = false;
+		bNOGRAVITY = true;
+		vel *= 0;
+		tracer = master = carrier;
+		lasthit = null;
+	}
+	private void EndCarry()
+	{
+		if ( master ) master.A_StartSound("demolitionist/handsdown",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetRenderStyle(1.,STYLE_Normal);
+		A_SetSize(default.radius,default.height);
+		carried = false;
+		bSOLID = true;
+		bNOGRAVITY = false;
+		master = null;
+		vel.z += vel.xy.length()*.2;
+		lasthit = null;
+	}
+	override void Tick()
+	{
+		if ( cdown < 80 )
+		{
+			cdown++;
+			if ( cdown == 10 )
+				Console.MidPrint(newsmallfont,"$D_FROGGY1");
+			else if ( cdown == 80 )
+				Console.MidPrint(newsmallfont,"$D_FROGGY2");
+		}
+		if ( carried )
+		{
+			prev = pos;
+			if ( !master || (master.Health <= 0) ) EndCarry();
+			else
+			{
+				Vector3 tomove = master.Vec2OffsetZ(cos(master.angle)*40.,sin(master.angle)*40.,master.player.viewz-32.);
+				Vector3 dirto = level.Vec3Diff(pos,tomove);
+				double intp = clamp(dirto.length()*.01,.3,.7);
+				SetOrigin(level.Vec3Offset(pos,dirto*intp),true);
+				double magvel = dirto.length();
+				dirto /= magvel;
+				vel = dirto*min(50,magvel);
+				double angleto = deltaangle(angle,AngleTo(master));
+				A_SetAngle(angle+angleto*.3,SPF_INTERPOLATE);
+			}
+			return;
+		}
+		wasonground = ((pos.z <= floorz) || !TestMobjZ());
+		lastvelz = vel.z;
+		Super.Tick();
+		if ( (pos.z <= floorz) || !TestMobjZ() )
+		{
+			if ( !wasonground && (lastvelz < -1) ) A_StartSound("squeak",CHAN_BODY,CHANF_OVERLAP,clamp(-lastvelz*.05,0.,1.));
+			vel.xy *= .9;	// fast friction
+		}
+	}
+	override bool Used( Actor user )
+	{
+		if ( carried )
+		{
+			if ( user != master ) return false;
+			if ( TestMobjLocation() && level.IsPointInLevel(pos) )
+				EndCarry();
+		}
+		else
+		{
+			Vector3 itempos = Vec3Offset(0,0,Height/2),
+				userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
+			// test vertical range
+			Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+			double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+			if ( abs(diff.z) > rang ) return false;
+			BeginCarry(user);
+		}
+		return true;
+	}
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		if ( (damage > 0) && (special1 < level.maptime) )
+		{
+			special1 = level.maptime+5;
+			A_StartSound("squeak",CHAN_VOICE);
+		}
+		return Super.DamageMobj(inflictor,source,damage,mod,flags,angle);
+	}
+	override bool CanCollideWith( Actor other, bool passive )
+	{
+		if ( !other.bSHOOTABLE && !other.bSOLID ) return false;
+		Vector3 dir = vel;
+		double vsize = dir.length();
+		// we need to compare Z height because wow thanks
+		Vector3 diff = level.Vec3Diff(pos,other.pos);
+		if ( (diff.z > height) || (diff.z < -other.height) ) return false;
+		if ( vsize > 1 )
+		{
+			if ( other == lasthit )
+				return false;
+			dir /= vsize;
+			if ( !passive && other.bSHOOTABLE && (!tracer || !other.IsFriend(tracer)) )
+			{
+				lasthit = other;
+				SWWMUtility.DoKnockback(other,dir,5000*vsize);
+				Vector3 dirto = level.Vec3Diff(other.Vec3Offset(0,0,other.height/2),Vec3Offset(0,0,height));
+				double lento = dirto.length();
+				if ( lento <= double.epsilon )
+				{
+					double ang = FRandom[DoBlast](0,360);
+					double pt = FRandom[DoBlast](-90,90);
+					dirto = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+				}
+				else dirto /= lento;
+				vel = (dirto+(0,0,.1))*vsize*.3;
+				Spawn("SWWMItemFog",pos);
+				other.DamageMobj(self,tracer,int(10*vsize),'Melee',DMG_THRUSTLESS);
+				A_StartSound("squeak",CHAN_WEAPON);
+				return false;
+			}
+			if ( other == tracer )
+				return false;
+		}
+		return true;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// yay!
+Class FancyConfetti : Actor
+{
+	int deadtimer;
+	bool dead;
+	double anglevel, pitchvel, rollvel;
+	Sector tracksector;
+	int trackplane;
+
+	Default
+	{
+		Radius 2;
+		Height 2;
+		+NOBLOCKMAP;
+		+DROPOFF;
+		+THRUACTORS;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		Gravity 0.05;
+		FloatBobPhase 0;
+	}
+	override void PostBeginPlay()
+	{
+		deadtimer = Random[Junk](-30,30);
+		anglevel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		pitchvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		rollvel = FRandom[Junk](3,12)*RandomPick[Junk](-1,1);
+		if ( bAMBUSH ) frame = 0;
+		else frame = Random[Junk](0,13);
+		scale *= Frandom[Junk](0.8,1.2);
+	}
+	override void Tick()
+	{
+		prev = pos;	// for interpolation
+		if ( isFrozen() ) return;
+		if ( dead )
+		{
+			// do nothing but follow floor movement
+			if ( tracksector )
+			{
+				double trackz;
+				if ( trackplane ) trackz = tracksector.ceilingplane.ZAtPoint(pos.xy);
+				else trackz = tracksector.floorplane.ZAtPoint(pos.xy);
+				if ( trackz != pos.z )
+				{
+					SetZ(trackz);
+					UpdateWaterLevel(false);
+				}
+			}
+			deadtimer++;
+			if ( deadtimer > 300 ) A_FadeOut(0.05);
+			return;
+		}
+		vel.z -= GetGravity();
+		vel.xy *= .98;
+		if ( vel.z > 0 ) vel.z *= .98;
+		// linetrace-based movement (hopefully more reliable than traditional methods)
+		Vector3 dir = vel;
+		double spd = vel.length();
+		dir /= spd;
+		double dist = spd;
+		FLineTraceData d;
+		Vector3 newpos = pos;
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
+		int nstep = 0;
+		while ( dist > 0 )
+		{
+			// safeguard, too many bounces
+			if ( nstep > MAXBOUNCEPERTIC )
+			{
+				Destroy();
+				return;
+			}
+			double ang = atan2(dir.y,dir.x);
+			double pt = asin(-dir.z);
+			LineTrace(ang,dist,pt,TRF_THRUACTORS|TRF_THRUHITSCAN|TRF_ABSPOSITION,newpos.z,newpos.x,newpos.y,d);
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			if ( (d.HitType != TRACE_HitNone) && (d.HitType != TRACE_HitFloor) )
+			{
+				dist -= d.Distance;
+				// should only happen if we bounced
+				dir = d.HitDir-(1.2*hitnormal*(d.HitDir dot hitnormal));
+				vel = dir*spd;
+				newpos = d.HitLocation+dir;
+			}
+			else
+			{
+				dist = 0.;
+				newpos = level.Vec3Offset(newpos,dir*spd);
+			}
+			if ( (d.HitType == TRACE_HitFloor) || (newpos.z <= floorz) )
+			{
+				// lose speed and die
+				if ( d.Hit3DFloor )
+				{
+					newpos.z = d.Hit3DFloor.top.ZAtPoint(newpos.xy);
+					tracksector = d.Hit3DFloor.model;
+					trackplane = 1;
+				}
+				else
+				{
+					// hacky workaround
+					if ( !d.HitSector ) d.HitSector = floorsector;
+					newpos.z = d.HitSector.floorplane.ZAtPoint(newpos.xy);
+					tracksector = d.HitSector;
+					trackplane = 0;
+				}
+				vel = (0,0,0);
+				pitch = 0;
+				roll = 0;
+				dead = true;
+				SetStateLabel("Death");
+				break;
+			}
+			nstep++;
+		}
+		newpos.z = clamp(newpos.z,floorz,ceilingz);
+		SetOrigin(newpos,true);
+		UpdateWaterLevel();
+		if ( waterlevel > 0 )
+		{
+			anglevel *= .98;
+			pitchvel *= .98;
+			rollvel *= .98;
+		}
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XZW1 # 1
+		{
+			angle += anglevel;
+			pitch += pitchvel;
+			roll += rollvel;
+		}
+		Wait;
+	Death:
+		XZW1 # -1;
+		Stop;
+	Dummy:
+		XZW1 ABCDEFGHIJKLMN -1;
+		Stop;
+	}
+}
+Class SuperFancyTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		XScale 24.;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_SetScale(scale.x*.95,scale.y);
+		A_FadeOut(.01);
+	}
+	States
+	{
+	Spawn:
+		XZW1 ABCDEFGH -1 Bright;
+		Stop;
+	}
+}
+Class SuperFancySparkle : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		Scale .25;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+ROLLSPRITE;
+		+ROLLCENTER;
+		+INTERPOLATEANGLES;
+		+FORCEXYBILLBOARD;
+		+NOINTERACTION;
+		FloatBobPhase 0;
+	}
+	override void PostBeginPlay()
+	{
+		Scale *= FRandom[ExploS](.75,1.5);
+		specialf1 = FRandom[ExploS](.94,.97);
+		specialf2 = FRandom[ExploS](.004,.012);
+		double ang = FRandom[ExploS](0,360);
+		double pt = FRandom[ExploS](-90,30);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](2.,16.);
+		frame = Random[ExploS](0,7);
+		special1 = RandomPick[ExploS](-1,1)*Random[ExploS](1,6);
+		roll = FRandom[ExploS](0,360);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		prev = pos;
+		A_SetScale(scale.x*specialf1);
+		A_SetRoll(roll+special1,SPF_INTERPOLATE);
+		A_FadeOut(specialf2);
+		Vector3 dir = vel;
+		double magvel = dir.length();
+		magvel *= .99;
+		if ( magvel > 0. )
+		{
+			dir /= magvel;
+			dir += .2*(FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1));
+			vel = dir.unit()*magvel;
+		}
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+		dir = level.Vec3Diff(pos,prev);
+		double dist = dir.length();
+		if ( dist < .1 ) return;
+		dir /= dist;
+		let t = Spawn("SuperFancyTrail",pos);
+		t.alpha = alpha*.5;
+		t.scale.y = dist;
+		t.scale.x *= scale.x;
+		t.angle = atan2(dir.y,dir.x);
+		t.pitch = asin(-dir.z)+90;
+		t.SetState(t.SpawnState+frame);
+	}
+	States
+	{
+	Spawn:
+		BLPF # -1 Bright;
+		Stop;
+	}
+}
+Class SuperPartyLight : PaletteLight
+{
+	Default
+	{
+		Tag "SpRainbow";
+		Args 0,0,0,100;
+		ReactionTime 40;
+	}
+	override void PostBeginPlay()
+	{
+		SetTag(String.Format("SpRainbow,%d",Random[ExploS](0,7)));
+		ReactionTime = Random[ExploS](30,50);
+		double ang = FRandom[ExploS](0,360);
+		double pt = FRandom[ExploS](-90,30);
+		vel = (cos(ang)*cos(pt),sin(ang)*cos(pt),sin(-pt))*FRandom[ExploS](2,10);
+		Super.PostBeginPlay();
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		SetOrigin(level.Vec3Offset(pos,vel),true);
+	}
+}
+Class PartyTime : Actor
+{
+	bool ignite;
+
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void PostBeginPlay()
+	{
+		if ( target ) specialf1 = target.Height/2.;
+		else specialf1 = 16.;
+	}
+	override void Tick()
+	{
+		if ( ignite )
+		{
+			// wait for the sound to stop
+			if ( !IsActorPlayingSound(CHAN_ITEM) )
+				Destroy();
+			return;
+		}
+		if ( !target || (target.tics == -1) )
+		{
+			// burst into treats!
+			ignite = true;
+			A_Confetti();
+			return;
+		}
+		SetOrigin(target.pos,false);
+	}
+	action void A_Confetti()
+	{
+		if ( !bAMBUSH ) A_StartSound("misc/tada",CHAN_ITEM);
+		double ang, pt;
+		int numpt = Random[ExploS](100,120);
+		if ( bAMBUSH ) numpt *= 4;
+		for ( int i=0; i<numpt; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,30);
+			let c = Spawn("FancyConfetti",Vec3Offset(0,0,specialf1));
+			c.vel = (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[ExploS](2,8);
+			if ( bAMBUSH ) c.vel *= 2;
+		}
+		if ( !bAMBUSH ) return;
+		numpt = Random[ExploS](60,90);
+		for ( int i=0; i<numpt; i++ )
+			Spawn("SuperFancySparkle",Vec3Offset(0,0,specialf1));
+		numpt = Random[ExploS](6,9);
+		for ( int i=0; i<numpt; i++ )
+			Spawn("SuperPartyLight",Vec3Offset(0,0,specialf1));
+	}
+}
+
+Class ChanceboxSpawner : Actor
+{
+	override void PostBeginPlay()
+	{
+		int numbox = 0;
+		let ti = ThinkerIterator.Create("ChanceboxSpawner");
+		while ( ti.Next() ) numbox++;
+		ti = ThinkerIterator.Create("Chancebox");
+		while ( ti.Next() ) numbox++;
+		if ( numbox > 3 )
+		{
+			// there's three boxes in the map already (plus ourselves)
+			Destroy();
+			return;
+		}
+		let b = Spawn("Chancebox",pos);
+		// copy all our stuff
+		b.spawnangle = spawnangle;
+		b.angle = angle;
+		b.pitch = pitch;
+		b.roll = roll;
+		b.spawnpoint = spawnpoint;
+		b.special = special;
+		for ( int i=0; i<5; i++ )
+			b.Args[i] = Args[i];
+		b.spawnflags = spawnflags&~MTF_SECRET;
+		b.HandleSpawnFlags();
+		b.bCOUNTSECRET = spawnflags&MTF_SECRET;
+		b.ChangeTid(tid);
+		Destroy();
+	}
+
+	Default
+	{
+		Radius 12;
+		Height 20;
+	}
+}
+
+Class BoxSpawnSpot
+{
+	Vector3 pos;
+	double angle;
+}
+
+Class CBoxLight : SpotLightAttenuated
+{
+	Default
+	{
+		Args 112,64,224,100;
+		DynamicLight.SpotInnerAngle 20;
+		DynamicLight.SpotOuterAngle 80;
+		+INTERPOLATEANGLES;
+	}
+
+	override void Tick()
+	{
+		Super.Tick();
+		if ( !target || target.InStateSequence(target.CurState,target.FindState("BlowUp")) )
+		{
+			Destroy();
+			return;
+		}
+		Vector2 ofs = ((special1<2)?8:-8,(special1%2)?12:-12);
+		double ang = (special1<2)?0:180;
+		angle = target.angle+ang;
+		SetOrigin(target.Vec3Offset(ofs.x*cos(target.angle)-ofs.y*sin(target.angle),ofs.y*cos(target.angle)+ofs.x*sin(target.angle),10),true);
+	}
+}
+
+// Collectible box (recycling of discarded "chance box" item)
+Class Chancebox : Actor
+{
+	bool dud;	// if true, cannot drop a collectible
+	bool chanceinit;	// internal state has been initialized
+
+	static void SpawnChanceboxes()
+	{
+		// find all secret sectors, find potential spawn spots within them
+		// after that, spawn up to 3 boxes total within them
+		int tboxes = 0;
+		for ( int i=0; i<level.Sectors.Size(); i++ )
+		{
+			if ( !(level.Sectors[i].flags&Sector.SECF_SECRET) ) continue;
+			Sector s = level.Sectors[i];
+			// find any spots in the sector that are within it and have no linedefs or blocking actors within a 32 unit box
+			// start from the center, expand in rings
+			Vector2 origin = s.centerspot;
+			double maxradius = 0;
+			for ( int j=0; j<s.lines.Size(); j++ )
+			{
+				Line l = s.lines[j];
+				double v1len = (l.v1.p-origin).length(),
+					v2len = (l.v2.p-origin).length();
+				if ( v1len > maxradius ) maxradius = v1len;
+				if ( v2len > maxradius ) maxradius = v2len;
+			}
+			int rings = 1;
+			bool spawned = false;
+			Array<BoxSpawnSpot> spots;
+			spots.Clear();
+			for ( double j=0.; j<maxradius; j+=16. )
+			{
+				for ( double k=0.; k<360.; k+=(360./rings) )
+				{
+					// check spot
+					Vector3 testpos = (origin.x+j*cos(k),origin.y+j*sin(k),0);
+					testpos.z = s.floorplane.ZAtPoint(testpos.xy);
+					if ( (level.PointInSector(testpos.xy) != s) || !level.IsPointInLevel(testpos) ) continue;
+					double ceil = s.ceilingplane.ZAtPoint(testpos.xy);
+					bool blocked = false;
+					BlockLinesIterator bl = BlockLinesIterator.CreateFromPos(testpos,32,32,s);
+					double tbox[4];
+					// top, bottom, left, right
+					tbox[0] = testpos.y+32;
+					tbox[1] = testpos.y-32;
+					tbox[2] = testpos.x-32;
+					tbox[3] = testpos.x+32;
+					while ( bl.Next() )
+					{
+						Line l =  bl.CurLine;
+						if ( !l ) continue;
+						if ( tbox[2] > l.bbox[3] ) continue;
+						if ( tbox[3] < l.bbox[2] ) continue;
+						if ( tbox[0] < l.bbox[1] ) continue;
+						if ( tbox[1] > l.bbox[0] ) continue;
+						if ( SWWMUtility.BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) != -1 ) continue;
+						blocked = true;
+						break;
+					}
+					if ( blocked ) continue;
+					// check for 3D floors first
+					int nffloor = s.Get3DFloorCount();
+					double bceil = ceil;
+					for ( int l=0; l<nffloor; l++ )
+					{
+						if ( !(s.Get3DFloor(l).flags&F3DFloor.FF_SOLID) ) continue;
+						double fz = s.Get3DFloor(l).top.ZAtPoint(testpos.xy);
+						if ( fz < testpos.z ) continue;
+						double cz = ceil;
+						for ( int l2=0; l2<nffloor; l2++ )
+						{
+							if ( !(s.Get3DFloor(l2).flags&F3DFloor.FF_SOLID) ) continue;
+							if ( (s.Get3DFloor(l2).top.ZAtPoint(testpos.xy) < fz) ) continue;
+							cz = s.Get3DFloor(l2).bottom.ZAtPoint(testpos.xy);
+							break;
+						}
+						if ( cz < bceil ) bceil = cz;
+						if ( cz-fz < 56 ) continue;	// too short
+						bool blockedff = false;
+						BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,fz,56,256,false);
+						while ( bt.Next() )
+						{
+							if ( !bt.Thing ) continue;
+							if ( abs(bt.Thing.pos.x-testpos.x) > 32+bt.Thing.Radius ) continue;
+							if ( abs(bt.Thing.pos.y-testpos.y) > 32+bt.Thing.Radius ) continue;
+							blockedff = true;
+							break;
+						}
+						if ( blockedff ) continue;
+						let sp = new("BoxSpawnSpot");
+						sp.pos = (testpos.x,testpos.y,fz);
+						sp.angle = k+180;
+						spots.Push(sp);
+					}
+					// spawn at the real floor
+					if ( bceil-testpos.z < 56 ) continue;	// too short
+					// don't spawn on sky or hurtfloors if there are 3D floors
+					if ( (nffloor > 0) && ((s.GetTexture(0) == skyflatnum) || (s.damageamount > 0)) ) continue;
+					BlockThingsIterator bt = BlockThingsIterator.CreateFromPos(testpos.x,testpos.y,testpos.z,56,256,false);
+					while ( bt.Next() )
+					{
+						if ( !bt.Thing ) continue;
+						if ( abs(bt.Thing.pos.x-testpos.x) > 32+bt.Thing.Radius ) continue;
+						if ( abs(bt.Thing.pos.y-testpos.y) > 32+bt.Thing.Radius ) continue;
+						blocked = true;
+						break;
+					}
+					if ( blocked ) continue;
+					let sp = new("BoxSpawnSpot");
+					sp.pos = testpos;
+					sp.angle = k+180;
+					spots.Push(sp);
+				}
+				rings += 3;
+			}
+			if ( spots.Size() < 10 ) continue;
+			int ws = Random[Chancebox](0,spots.Size()-1);
+			let c = Spawn("ChanceboxSpawner",spots[ws].pos);
+			c.angle = spots[ws].angle;
+			tboxes++;
+			if ( tboxes >= 3 ) break;	// already spawned 3 boxes in one map (which is a lot)
+		}
+	}
+
+	action void A_DropSomething()
+	{
+		Array<Class <SWWMCollectible> > candidates;
+		candidates.Clear();
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectible') ) continue;
+			let def = GetDefaultByType(c);
+			// check that we can collect it in this IWAD
+			if ( !(gameinfo.gametype&def.avail) ) continue;
+			candidates.Push(c);
+		}
+		let ti = ThinkerIterator.Create("SWWMCollectible");
+		SWWMCollectible c;
+		while ( c = SWWMCollectible(ti.Next()) )
+		{
+			int f = candidates.Find(c.GetClass());
+			if ( f < candidates.Size() )
+				candidates.Delete(f);
+		}
+		if ( (candidates.Size() <= 0) || invoker.dud )
+		{
+			// no candidates? just burst into treats
+			if ( Random[Chancebox](0,1) )
+			{
+				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":(Random[Chancebox](0,1)||(gameinfo.gametype&GAME_Strife))?"GrilledCheeseSandwich":"YnykronAmmo",pos);
+				a.bDROPPED = false;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+			}
+			else if ( !Random[Chancebox](0,2) )
+			{
+				for ( int i=0; i<=6; i++ )
+				{
+					let a = Spawn((i==0)?"CandyGun":"CandyGunBullets",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					if ( i > 0 ) a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](1,2);
+				}
+			}
+			else if ( !Random[Chancebox](0,2) )
+			{
+				for ( int i=0; i<3; i++ )
+				{
+					let a = Spawn("SilverBullets2",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<6; i++ )
+				{
+					let a = Spawn("SilverBullets",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](3,4);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				let a = Spawn("HellblazerWarheads",pos);
+				a.bDROPPED = false;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+				for ( int i=0; i<3; i++ )
+				{
+					a = Spawn("HellblazerRavagers",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<5; i++ )
+				{
+					a = Spawn("HellblazerCrackshots",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
+				}
+				for ( int i=0; i<8; i++ )
+				{
+					a = Spawn("HellblazerMissiles",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*45),sin(i*45))*FRandom[Chancebox](5,6);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				let a = Spawn("BlackShell",pos);
+				a.bDROPPED = false;
+				a.bNOGRAVITY = false;
+				a.vel.z = FRandom[Chancebox](2,4);
+				for ( int i=0; i<3; i++ )
+				{
+					a = Spawn("BlueShell",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*120),sin(i*120))*FRandom[Chancebox](1,2);
+				}
+				for ( int i=0; i<8; i++ )
+				{
+					a = Spawn((i%2)?"WhiteShell":"PurpleShell",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*72),sin(i*72))*FRandom[Chancebox](3,4);
+				}
+				for ( int i=0; i<12; i++ )
+				{
+					a = Spawn((i%2)?"RedShell":"GreenShell",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					a.vel.xy = (cos(i*30),sin(i*30))*FRandom[Chancebox](5,6);
+				}
+			}
+			else if ( Random[Chancebox](0,1) )
+			{
+				for ( int i=0; i<20; i++ )
+				{
+					let a = Spawn("HealthNuggetItem",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,8);
+					a.vel.xy = (cos(i*3.6),sin(i*3.6))*FRandom[Chancebox](1,8);
+				}
+			}
+			else
+			{
+				for ( int i=0; i<=15; i++ )
+				{
+					let a = Spawn((i==0)?"RefresherItem":(i%3)?"HealthNuggetItem":"ArmorNuggetItem",pos);
+					a.bDROPPED = false;
+					a.bNOGRAVITY = false;
+					a.vel.z = FRandom[Chancebox](2,4);
+					if ( i > 0 ) a.vel.xy = (cos(i*24),sin(i*24))*FRandom[Chancebox](1,2);
+				}
+			}
+		}
+		else
+		{
+			// pop one at random
+			let a = Spawn(candidates[Random[Chancebox](0,candidates.Size()-1)],pos);
+			a.bDROPPED = false;
+			a.bNOGRAVITY = false;
+			a.vel.z = FRandom[Chancebox](2,4);
+		}
+		int numpt = Random[ExploS](16,32);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
+			let s = Spawn("SWWMHalfSmoke",Vec3Offset(0,0,16));
+			s.vel = pvel;
+			s.SetShade(Color(2,1,3)*Random[ExploS](64,85));
+			s.special1 = Random[ExploS](1,4);
+			s.alpha *= .4;
+			s.scale *= 2.4;
+		}
+	}
+	action void A_Confetti()
+	{
+		A_StartSound("misc/tada",CHAN_ITEM);
+		double ang, pt;
+		int numpt = Random[ExploS](100,120);
+		for ( int i=0; i<numpt; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,30);
+			let c = Spawn("FancyConfetti",Vec3Offset(0,0,16));
+			c.vel = (cos(pt)*cos(ang),cos(pt)*sin(ang),-sin(pt))*FRandom[ExploS](2,8);
+		}
+	}
+	override bool Used( Actor user )
+	{
+		// test vertical range
+		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
+		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
+		if ( abs(diff.z) > rang ) return false;
+		if ( CurState != FindState("Spawn") ) return false;
+		if ( !chanceinit )
+		{
+			int col = 0;
+			let ti = ThinkerIterator.Create("SWWMCollectible");
+			SWWMCollectible c;
+			while ( c = SWWMCollectible(ti.Next()) ) col++;
+			int tcol = 0;
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+				if ( !c || (c == 'SWWMCollectible') ) continue;
+				let def = GetDefaultByType(c);
+				// check that we can collect it in this IWAD
+				if ( !(gameinfo.gametype&def.avail) ) continue;
+				tcol++;
+			}
+			int alldudchance = 5-(4*col)/tcol;	// chance for all boxes to be duds (no collectibles)
+			if ( (col > 0) && !Random[Chancebox](0,alldudchance) )
+			{
+				// all boxes are duds
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				while ( c = Chancebox(ti.Next()) )
+				{
+					c.chanceinit = true;
+					c.dud = true;
+				}
+			}
+			else if ( Random[Chancebox](0,2) )
+			{
+				int nbox = 0, ndud = 0;
+				// this one's a dud (unless all the others are)
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				while ( c = Chancebox(ti.Next()) )
+				{
+					if ( c == self ) continue;
+					nbox++;
+					if ( c.dud ) ndud++;
+				}
+				if ( ndud < nbox ) dud = true;
+			}
+			else
+			{
+				// the others are duds
+				let ti = ThinkerIterator.Create("Chancebox");
+				Chancebox c;
+				bool onemore = !Random[Chancebox](0,2);	// unless...
+				while ( c = Chancebox(ti.Next()) )
+				{
+					if ( (c == self) || c.chanceinit ) continue;
+					c.chanceinit = true;
+					if ( onemore )
+					{
+						onemore = false;
+						// this one isn't a dud either (wow, how lucky)
+						c.dud = false;
+					}
+					else c.dud = true;	// this one's a dud
+				}
+			}
+			chanceinit = true;
+		}
+		if ( bCOUNTITEM )
+		{
+			user.player.itemcount++;
+			level.found_items++;
+			bCOUNTITEM = false;
+		}
+		if ( bCOUNTSECRET )
+		{
+			user.GiveSecret();
+			bCOUNTSECRET = false;
+		}
+		if ( special )
+		{
+			user.A_CallSpecial(special,args[0],args[1],args[2],args[3],args[4]);
+			special = 0;
+		}
+		SWWMLoreLibrary.Add(user.player,"Chancebox");
+		specialf2 = AngleTo(user);
+		SetStateLabel("PreActive");
+		return true;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		for ( int i=0; i<4; i++ )
+		{
+			let l = Spawn("CBoxLight",pos);
+			l.special1 = i;
+			l.target = self;
+		}
+		let ti = ThinkerIterator.Create("Chancebox");
+		Chancebox c;
+		while ( c = Chancebox(ti.Next()) )
+		{
+			if ( c.dud || (c.CurState == c.FindState("Spawn")) )
+				continue;
+			// automatically become a dud if collectible has been found
+			dud = true;
+			break;
+		}
+	}
+	Default
+	{
+		Tag "$T_CHANCEBOX";
+		Radius 12;
+		Height 20;
+		+MOVEWITHSECTOR;
+		+ROLLSPRITE;
+		+SOLID;
+		+INTERPOLATEANGLES;
+		+COUNTITEM;
+		Species "Chancebox";
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	PreActive:
+		XZW1 A 1
+		{
+			double delta = deltaangle(angle,specialf2);
+			int sign = (delta>=0.)?1:-1;
+			delta = clamp(abs(delta)*.15,.1,10.)*sign;
+			angle += delta;
+			return A_JumpIf(abs(deltaangle(angle,specialf2))<1.,"Active");
+		}
+		Wait;
+	Active:
+		XZW1 A 1
+		{
+			angle = specialf2;
+			specialf1 = angle;
+			A_StartSound("misc/drumroll",CHAN_WEAPON);
+		}
+		XZW1 A 1
+		{
+			bINTERPOLATEANGLES = false;
+			angle = specialf1+FRandom[Chancebox](-5,5);
+			pitch = FRandom[Chancebox](-5,5);
+			roll = FRandom[Chancebox](-5,5);
+			special1++;
+			return A_JumpIf(special1>40,"BlowUp");
+		}
+		Wait;
+	BlowUp:
+		XZW2 A 1
+		{
+			A_SetSize(12,3);
+			A_QuakeEx(2,2,2,9,0,500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollIntensity:.2);
+			A_StartSound("chancebox/explode",CHAN_VOICE);
+			angle = specialf1;
+			pitch = roll = 0;
+			let t = Spawn("ChanceboxTop",Vec3Offset(0,0,20));
+			t.angle = angle;
+			let s1 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((12,0),angle+90),0)));
+			s1.angle = angle+90;
+			let s2 = Spawn("ChanceboxSide",level.Vec3Offset(pos,(RotateVector((12,0),angle-90),0)));
+			s2.angle = angle-90;
+			A_DropSomething();
+		}
+		XZW2 BCDEFGHIJKLMNO 1;
+		XZW2 P -1 A_Confetti();
+		Stop;
+	}
+}
+
+// top side of chancebox, shoots upwards
+Class ChanceboxTop : Actor
+{
+	Default
+	{
+		Radius 12;
+		Height 3;
+		Species "Chancebox";
+		PROJECTILE;
+		+THRUSPECIES;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		vel = (0,0,20);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			double magvel = vel.length();
+			if ( magvel > 0. )
+			{
+				magvel = min(60,magvel*1.2);
+				vel = vel.unit()*magvel;
+			}
+		}
+		Wait;
+	Death:
+		TNT1 A 1 A_SpawnItemEx("ExplodiumBulletImpact");
+		Stop;
+	}
+}
+
+// left/right side of chancebox, shoots forward
+Class ChanceboxSide : Actor
+{
+	Default
+	{
+		Radius 12;
+		Height 24;
+		Species "Chancebox";
+		PROJECTILE;
+		+THRUSPECIES;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		vel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch))*20;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1
+		{
+			double magvel = vel.length();
+			if ( magvel > 0. )
+			{
+				magvel = min(60,magvel*1.2);
+				vel = vel.unit()*magvel;
+			}
+		}
+		Wait;
+	Death:
+		TNT1 A 1 A_SpawnItemEx("ExplodiumBulletImpact");
+		Stop;
+	}
+}

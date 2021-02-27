@@ -1,0 +1,1448 @@
+// Blackmann Arms "Wallbuster" Heavy Armor Perforator Shotgun (planned for unreleased Total Destruction UT mod as the "Armor Perforator")
+// Slot 3, replaces Super Shotgun, Ethereal Crossbow, Frost Shards
+
+Class Wallbuster : SWWMWeapon
+{
+	Class<Ammo> loaded[25];
+	bool fired[25];
+	int rotation[6];
+	bool initialized;
+	Array<Class<Ammo> > reloadqueue;
+	transient bool waitreload;
+	int whichspin;
+	int rnum;
+	transient bool cancelreload;
+	transient bool clearout;
+
+	transient ui TextureID WeaponBox, AmmoIcon[4], LoadIcon[4], UsedIcon[4], EmptyIcon;
+	transient ui Font TewiFont;
+	Class<Ammo> curobt;
+
+	ui Vector3 cpos25[25];
+	ui Color ccol25[25];
+	ui Vector2 lagvpos25[25];
+
+	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
+	{
+		if ( curobt is 'RedShell' ) return StringTable.Localize("$O_WALLBUSTER_RED");
+		if ( curobt is 'GreenShell' ) return StringTable.Localize("$O_WALLBUSTER_GREEN");
+		if ( curobt is 'BlueShell' ) return StringTable.Localize("$O_WALLBUSTER_BLUE");
+		if ( curobt is 'PurpleShell' ) return StringTable.Localize("$O_WALLBUSTER_PURPLE");
+		return Super.GetObituary(victim,inflictor,mod,playerattack);
+	}
+	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		/*
+		    (Layout of indices)
+
+		             0
+		           4   1
+		            3 2
+		       L           9
+		     K   M       8   5
+		      O N         7 6
+
+		         H       D
+		       G   I   C   E
+		        F J     B A
+
+		*/
+		static const int barrelposx[] =
+		{
+			29,24,26,32,34,
+			10,12,18,20,15,
+			17,23,25,20,15,
+			41,43,38,33,35,
+			48,43,38,40,46
+		};
+		static const int barrelposy[] =
+		{
+			46,42,36,36,42,
+			31,25,25,31,35,
+			 8, 8,14,18,14,
+			 8,14,18,14, 8,
+			31,35,31,25,25
+		};
+		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
+		if ( !WeaponBox )
+		{
+			WeaponBox = TexMan.CheckForTexture("graphics/HUD/WallbusterDisplay.png",TexMan.Type_Any);
+			AmmoIcon[0] = TexMan.CheckForTexture("graphics/HUD/RedShell.png",TexMan.Type_Any);
+			AmmoIcon[1] = TexMan.CheckForTexture("graphics/HUD/GreenShell.png",TexMan.Type_Any);
+			AmmoIcon[2] = TexMan.CheckForTexture("graphics/HUD/BlueShell.png",TexMan.Type_Any);
+			AmmoIcon[3] = TexMan.CheckForTexture("graphics/HUD/PurpleShell.png",TexMan.Type_Any);
+			LoadIcon[0] = TexMan.CheckForTexture("graphics/HUD/WallbusterRed.png",TexMan.Type_Any);
+			LoadIcon[1] = TexMan.CheckForTexture("graphics/HUD/WallbusterGreen.png",TexMan.Type_Any);
+			LoadIcon[2] = TexMan.CheckForTexture("graphics/HUD/WallbusterBlue.png",TexMan.Type_Any);
+			LoadIcon[3] = TexMan.CheckForTexture("graphics/HUD/WallbusterPurple.png",TexMan.Type_Any);
+			UsedIcon[0] = TexMan.CheckForTexture("graphics/HUD/WallbusterRedUsed.png",TexMan.Type_Any);
+			UsedIcon[1] = TexMan.CheckForTexture("graphics/HUD/WallbusterGreenUsed.png",TexMan.Type_Any);
+			UsedIcon[2] = TexMan.CheckForTexture("graphics/HUD/WallbusterBlueUsed.png",TexMan.Type_Any);
+			UsedIcon[3] = TexMan.CheckForTexture("graphics/HUD/WallbusterPurpleUsed.png",TexMan.Type_Any);
+			EmptyIcon = TexMan.CheckForTexture("graphics/HUD/WallbusterEmpty.png",TexMan.Type_Any);
+		}
+		Screen.DrawTexture(WeaponBox,false,bx-54,by-72,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		int ox = 6;
+		int oy = 60;
+		for ( int i=0; i<4; i++ )
+		{
+			Screen.DrawTexture(AmmoIcon[i],false,bx-ox,by-oy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			String astr = String.Format("%3d",Owner.CountInv(types[i]));
+			Screen.DrawText(TewiFont,Font.CR_FIRE,bx-ox-(TewiFont.StringWidth(astr)+1),by-oy-2,astr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			oy += 10;
+			if ( i == 1 )
+			{
+				oy = 60;
+				ox = 33;
+			}
+		}
+		// and here's the big clusterdick
+		for ( int i=0; i<25; i++ )
+		{
+			int idx = i;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx-rotation[group]);
+			while ( gidx < 0 ) gidx += 5;
+			idx = gidx+group*5;
+			// shift based on full rotation
+			idx = (idx-rotation[5]*5);
+			while ( idx < 0 ) idx += 25;
+			if ( !loaded[i] )
+			{
+				Screen.DrawTexture(EmptyIcon,false,bx-barrelposx[idx],by-barrelposy[idx],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				continue;
+			}
+			int which = 0;
+			for ( int j=0; j<4; j++ )
+			{
+				if ( !(loaded[i] is types[j]) ) continue;
+				which = j;
+				break;
+			}
+			Screen.DrawTexture(fired[i]?UsedIcon[which]:LoadIcon[which],false,bx-barrelposx[idx],by-barrelposy[idx],DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+	}
+
+	override void HudTick()
+	{
+		Super.HudTick();
+		if ( !Owner ) return;
+		// 25-trace
+		for ( int i=0; i<25; i++ )
+			[cpos25[i], ccol25[i]] = TraceForCrosshair25(i);
+	}
+
+	override void RenderUnderlay( RenderEvent e )
+	{
+		// draw custom crosshair
+		if ( automapactive || !(players[consoleplayer].Camera is 'PlayerPawn') ) return;
+		if ( !swwm_precisecrosshair ) return;
+		if ( !crosshairon ) return;
+		if ( crosshairforce ) return;
+		let sb = SWWMStatusBar(StatusBar);
+		if ( !sb ) return;
+		sb.viewport.FromHud();
+		sb.proj.CacheResolution();
+		sb.proj.CacheFov(players[consoleplayer].fov);
+		sb.proj.OrientForRenderUnderlay(e);
+		sb.proj.BeginProjection();
+		int cnum = abs(CVar.FindCVar('crosshair').GetInt());
+		if ( !cnum ) return;
+		String tn = String.Format("XHAIR%s%d",(Screen.GetWidth()<640)?"S":"B",cnum);
+		TextureID ctex = TexMan.CheckForTexture(tn,TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture(String.Format("XHAIR%s1",(Screen.GetWidth()<640)?"S":"B"),TexMan.Type_MiscPatch);
+		if ( !ctex.IsValid() ) ctex = TexMan.CheckForTexture("XHAIRS1",TexMan.Type_MiscPatch);
+		Vector2 ts = TexMan.GetScaledSize(ctex);
+		double cs = crosshairscale;
+		double sz = 1.;
+		if ( cs > 0. ) sz = Screen.GetHeight()*cs/200.;
+		if ( crosshairgrow ) sz *= sb.CrosshairSize;
+		Vector3 tdir = level.Vec3Diff(e.ViewPos,cpos);
+		// project
+		sb.proj.ProjectWorldPos(e.ViewPos+tdir);
+		Vector2 vpos;
+		if ( !sb.proj.IsInFront() ) return;
+		Vector2 npos = sb.proj.ProjectToNormal();
+		vpos = sb.viewport.SceneToWindow(npos);
+		double frametime = (MSTime()-prevms)/1000.;
+		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
+		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
+		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
+		for ( int i=0; i<25; i++ )
+		{
+			tdir = level.Vec3Diff(e.ViewPos,cpos25[i]);
+			// project
+			sb.proj.ProjectWorldPos(e.ViewPos+tdir);
+			if ( !sb.proj.IsInFront() ) continue;
+			npos = sb.proj.ProjectToNormal();
+			vpos = sb.viewport.SceneToWindow(npos);
+			if ( !prevms || (lagvpos25[i] == (0,0)) ) lagvpos25[i] = vpos;
+			else lagvpos25[i] = lagvpos25[i]*(1.-theta)+vpos*theta;
+			Screen.DrawTexture(ctex,false,int(lagvpos25[i].x),int(lagvpos25[i].y),DTA_DestWidthF,ts.x*sz,DTA_DestHeightF,ts.y*sz,DTA_AlphaChannel,true,DTA_FillColor,ccol25[i]);
+		}
+		prevms = MSTime();
+	}
+
+	ui Vector3, Color TraceForCrosshair25( int i )
+	{
+		if ( !ctr ) ctr = new("SWWMCrosshairTracer");
+		ctr.ignoreme = Owner;
+		Vector3 x, y, z, ofs;
+		double s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(Owner.pitch,Owner.angle,Owner.roll);
+		ofs = GetTraceOffset25(i);
+		Vector3 origin = level.Vec3Offset(Owner.Vec2OffsetZ(0,0,Owner.player.viewz),ofs.x*x+ofs.y*y+ofs.z*z);
+		ctr.Trace(origin,level.PointInSector(origin.xy),x,10000.,0);
+		Color col = crosshaircolor;
+		int chp = crosshairhealth;
+		if ( chp >= 2 )
+		{
+			int hp = Clamp(Owner.Health,0,200);
+			double sat = (hp<150)?1.:(1.-(hp-150)/100.);
+			Vector3 rgb = SWWMUtility.HSVtoRGB((hp/300.,sat,1.));
+			col = Color(int(rgb.x*255),int(rgb.y*255),int(rgb.z*255));
+		}
+		else if ( chp == 1 )
+		{
+			double hp = Clamp(Owner.Health,0,100)/100.;
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		else if ( (ctr.Results.HitType == TRACE_HitActor) && ctr.Results.HitActor.bSHOOTABLE )
+		{
+			// show target health, rather than our own
+			double hp = ctr.Results.HitActor.Health/double(ctr.Results.HitActor.GetSpawnHealth());
+			if ( hp <= 0 ) col = Color(255,0,0);
+			else if ( hp < .3 ) col = Color(255,int(hp*255/.3),0);
+			else if ( hp < .85 ) col = Color(int((.6-hp)*255/.3),255,0);
+			else col = Color(0,255,0);
+		}
+		if ( ctr.Results.HitType == TRACE_HitNone ) return level.Vec3Offset(origin,x*10000.), col;
+		else return ctr.Results.HitPos, col;
+	}
+
+	clearscope Vector3 GetTraceOffset25( int i ) const
+	{
+		double t1 = 90-int(i%5)*72;
+		double t2 = 360-int(i/5)*72;
+		Vector2 b = (cos(t1),sin(t1))*1.2;
+		b.y += 3.;
+		Vector2 n = (b.x*cos(t2)-b.y*sin(t2),b.x*sin(t2)+b.y*cos(t2));
+		return (10.,3.5+n.x,-6.+n.y);
+	}
+
+	override bool UsesAmmo( Class<Ammo> kind )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		for ( int i=0; i<4; i++ ) if ( kind is types[i] ) return true;
+		return false;
+	}
+	override bool ReportHUDAmmo()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		for ( int i=0; i<4; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+		for ( int i=0; i<25; i++ ) if ( loaded[i] && !fired[i] ) return true;
+		return false;
+	}
+	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
+		{
+			for ( int i=0; i<4; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+			for ( int i=0; i<25; i++ ) if ( loaded[i] && !fired[i] ) return true;
+			return false;
+		}
+		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+	}
+	bool CanReload()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		for ( int i=0; i<4; i++ ) if ( Owner.CountInv(types[i]) > 0 ) return true;
+		return false;
+	}
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		if ( !initialized )
+		{
+			// first wallbuster has five barrels loaded
+			initialized = true;
+			for ( int i=0; i<25; i++ )
+				loaded[i] = (i<5)?(Class<Ammo>)("RedShell"):null;
+			for ( int i=0; i<25; i++ )
+				fired[i] = false;
+		}
+	}
+	override void DetachFromOwner()
+	{
+		A_StopSound(CHAN_AMBEXTRA+1);
+		A_StopSound(CHAN_AMBEXTRA+2);
+		Super.DetachFromOwner();
+	}
+	action void A_CBTFlash( StateLabel flashlabel = null, int index = 0 )
+	{
+		if ( !player || !player.ReadyWeapon )
+			return;
+		Weapon weap = player.ReadyWeapon;
+		State flashstate = null;
+		if ( !flashlabel )
+		{
+			if ( weap.bAltFire )
+				flashstate = weap.FindState('AltFlash');
+			if ( !flashstate )
+				flashstate = weap.FindState('Flash');
+		}
+		else flashstate = weap.FindState(flashlabel);
+		player.SetPSprite(PSP_FLASH-index,flashstate+index);
+		A_OverlayFlags(PSP_FLASH-index,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+		A_OverlayRenderStyle(PSP_FLASH-index,STYLE_Add);
+	}
+	action void ProcessTraceHit( SpreadgunTracer t, Vector3 origin, Vector3 dir, int dmg, double mm, Class<Actor> impact = "SpreadImpact", int bc = 1, bool large = false, bool bust = false )
+	{
+		// Wall busting
+		if ( bust )
+		{
+			int bustdmg = dmg;
+			if ( t is 'SpreadSlugTracer' ) bustdmg = int(SpreadSlugTracer(t).penetration);
+			BusterWall.Bust(t.Results,bustdmg,self,t.Results.HitVector,t.Results.HitPos.z);
+		}
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+		{
+			t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
+			t.ShootThroughList[i].Activate(self,0,SPAC_Impact);
+		}
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Spawn(large?"InvisibleSplasher":"SmolInvisibleSplasher",t.WaterHitList[i].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=5; i<t.Results.Distance; i+=10 )
+		{
+			if ( !Random[Boolet](0,bc) ) continue;
+			let b = Actor.Spawn("SWWMBubble",level.Vec3Offset(origin,dir*i));
+			b.Scale *= FRandom[Boolet](.1,.3);
+		}
+		for ( int i=0; i<t.HitList.Size(); i++ )
+		{
+			int realdmg = dmg?dmg:t.HitList[i].HitDamage;
+			SWWMDamageAccumulator.Accumulate(t.HitList[i].HitActor,realdmg,invoker,self,'shot',!large&&!swwm_shotgib);
+			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),mm*FRandom[Wallbuster](0.4,1.2));
+			if ( t.HitList[i].HitActor.bNOBLOOD || t.HitList[i].HitActor.bINVULNERABLE || t.HitList[i].HitActor.bDORMANT )
+			{
+				let p = Spawn(impact,t.HitList[i].HitLocation);
+				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;
+				p.pitch = asin(t.HitList[i].x.z);
+				p.special1 = max(0,(bc-5)/4);
+			}
+			else
+			{
+				t.HitList[i].HitActor.TraceBleed(realdmg,self);
+				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,realdmg);
+				if ( large ) t.HitList[i].HitActor.A_StartSound("spreadgun/slugf",CHAN_DAMAGE,CHANF_OVERLAP,1.,2.);
+				else t.HitList[i].HitActor.A_StartSound("spreadgun/pelletf",CHAN_DAMAGE,CHANF_OVERLAP,.4,4.);
+			}
+		}
+		if ( (t.Results.HitType != TRACE_HitNone) && (t.Results.HitType != TRACE_HasHitSky) && (t.Results.HitType != TRACE_HitActor) )
+		{
+			Vector3 hitnormal = -t.Results.HitVector;
+			if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.top.Normal;
+				else hitnormal = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.bottom.Normal;
+				else hitnormal = t.Results.HitSector.ceilingplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+				if ( !t.Results.Side ) hitnormal *= -1;
+			}
+			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			let p = Spawn(impact,t.Results.HitPos+hitnormal*4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			p.special1 = max(0,(bc-5)/4);
+			if ( t.Results.HitType == TRACE_HitFloor ) p.CheckSplash(40);
+		}
+	}
+	override Vector3 GetTraceOffset()
+	{
+		return (10.,3.5,-6.);
+	}
+	action void A_FireShells( int num = 1 )
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		static const statelabel flashes[] = {"FlashRed","FlashGreen","FlashBlue","FlashPurple"};
+		static const String sounds[] = {"spreadgun/redfire","spreadgun/greenfire","spreadgun/bluefire","spreadgun/purplefire"};
+		static const Color cols[] = {Color(40,255,192,64),Color(36,255,192,80),Color(48,32,176,255),Color(24,255,224,96)};
+		static const int louds[] = {800,1000,1100,1200,1400,600,2500};
+		int redflashstr = 0;
+		int blueflashstr = 0;
+		// speen
+		if ( num == 1 ) invoker.whichspin = 1;
+		else if ( num == 5 ) invoker.whichspin = 2;
+		else invoker.whichspin = 0;
+		// first pass, count fired rounds
+		int howmany = 0;
+		for ( int i=0; i<num; i++ )
+		{
+			// get physical index
+			int idx = i;
+			// shift based on full rotation
+			idx = (idx+invoker.rotation[5]*5);
+			while ( idx > 24 ) idx -= 25;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx+invoker.rotation[group]);
+			while ( gidx > 4 ) gidx -= 5;
+			idx = gidx+group*5;
+			if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+			howmany++;
+		}
+		if ( howmany <= 0 )
+		{
+			A_StartSound("wallbuster/dryfire",CHAN_WEAPON,CHANF_OVERLAP);
+			player.SetPsprite(PSP_WEAPON,ResolveState("DryFire"));
+			return;
+		}
+		Vector3 x, y, z, origin, x2, y2, z2, dir;
+		double a, s;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
+		int alertness = 0;
+		// second pass, play the fire effects
+		for ( int i=0; i<num; i++ )
+		{
+			// get physical index
+			int idx = i;
+			// shift based on full rotation
+			idx = (idx+invoker.rotation[5]*5);
+			while ( idx > 24 ) idx -= 25;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx+invoker.rotation[group]);
+			while ( gidx > 4 ) gidx -= 5;
+			idx = gidx+group*5;
+			if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+			int which = 0;
+			for ( int j=0; j<4; j++ )
+			{
+				if ( !(invoker.loaded[idx] is types[j]) ) continue;
+				which = j;
+				break;
+			}
+			double rfact = swwm_earbuster?.85:.6;
+			A_StartSound(sounds[which],CHAN_WEAPON,CHANF_OVERLAP,1./(howmany**rfact),.6-howmany*.004,1.-howmany*.015);
+			if ( which == 0 ) redflashstr = max(120,redflashstr+10);
+			else if ( which == 1 ) redflashstr = max(90,redflashstr+8);
+			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
+			else if ( which == 3 ) redflashstr = max(60,redflashstr+6);
+			A_CBTFlash(flashes[which],i);
+			if ( alertness > louds[which] ) alertness += louds[which]/4;
+			else alertness += louds[which];
+		}
+		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));
+		else if ( howmany < 15 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireFive"));
+		else player.SetPsprite(PSP_WEAPON,ResolveState("FireTwentyFive"));
+		int qk = min(9,1+howmany/5);
+		int ql = min(25,6+howmany/2);
+		A_QuakeEx(qk,qk,qk,ql,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:qk*.15);
+		A_ZoomFactor(1.-qk*.04,ZOOM_INSTANT);
+		A_ZoomFactor(1.);
+		A_AlertMonsters(swwm_uncapalert?0:alertness);
+		A_PlayerFire();
+		if ( redflashstr > 0 )
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[3] = redflashstr;
+			l.target = self;
+		}
+		if ( blueflashstr > 0 )
+		{
+			let l = Spawn("SWWMWeaponLight",pos);
+			l.args[0] = 96;
+			l.args[1] = 224;
+			l.args[2] = 255;
+			l.args[3] = blueflashstr;
+			l.target = self;
+		}
+		// third pass, actually fire them
+		Vector3 base = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+3.5*y-6*z);
+		SpreadgunTracer st;
+		SpreadSlugTracer sst;
+		for ( int i=0; i<num; i++ )
+		{
+			// get physical index
+			int idx = i;
+			// shift based on full rotation
+			idx = (idx+invoker.rotation[5]*5);
+			while ( idx > 24 ) idx -= 25;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx+invoker.rotation[group]);
+			while ( gidx > 4 ) gidx -= 5;
+			idx = gidx+group*5;
+			if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+			int which = 0;
+			for ( int j=0; j<4; j++ )
+			{
+				if ( !(invoker.loaded[idx] is types[j]) ) continue;
+				which = j;
+				break;
+			}
+			invoker.fired[idx] = true;
+			double t1 = 90-int(i%5)*72;
+			double t2 = 360-int(i/5)*72;
+			Vector2 b = (cos(t1),sin(t1))*1.2;
+			b.y += 3.;
+			Vector2 n = (b.x*cos(t2)-b.y*sin(t2),b.x*sin(t2)+b.y*cos(t2));
+			origin = level.Vec3Offset(base,n.x*y+n.y*z);
+			invoker.curobt = types[which];
+			switch ( which )
+			{
+			case 1:
+				// slug
+				if ( !sst ) sst = new("SpreadSlugTracer");
+				sst.ignoreme = self;
+				sst.penetration = 200.;
+				a = FRandom[Wallbuster](0,360);
+				s = FRandom[Wallbuster](0,.002);
+				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+				sst.hitlist.Clear();
+				sst.shootthroughlist.Clear();
+				sst.waterhitlist.Clear();
+				sst.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
+				ProcessTraceHit(sst,origin,dir,0,12000,"SlugImpact",1+howmany/8,true,(howmany>1));
+				for ( int i=0; i<(6-howmany/4); i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.scale *= .8;
+					s.alpha *= .3;
+					s.SetShade(Color(1,1,1)*Random[Wallbuster](96,192));
+					s.vel += vel*.5+x*FRandom[Wallbuster](3.,5.);
+				}
+				for ( int i=0; i<(10-howmany/3); i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .2;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
+				}
+				SWWMUtility.DoKnockback(self,-x,18000.);
+				break;
+			case 2:
+				// saltshot
+				for ( int j=0; j<(8-howmany/5); j++ )
+				{
+					a = FRandom[Wallbuster](0,360);
+					s = FRandom[Wallbuster](0,.3);
+					let b = Spawn("SaltBeam",level.Vec3Offset(origin,y*cos(a)*s+z*sin(a)*s));
+					b.target = self;
+					b.angle = atan2(x2.y,x2.x);
+					b.pitch = asin(-x2.z);
+					b.Stamina += howmany*16;
+					b.Accuracy += 2+howmany/5;
+					b.Args[1] = (howmany>1)?2:1;	// came from wallbuster
+				}
+				for ( int i=0; i<(16-howmany/2); i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.special1 = 1;
+					s.scale *= .9;
+					s.SetShade(Color(1,3,4)*Random[Wallbuster](32,63));
+					s.A_SetRenderStyle(.3,STYLE_AddShaded);
+					s.vel += vel*.5+x*FRandom[Wallbuster](3.,5.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
+				}
+				for ( int i=0; i<(20-howmany/2); i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .3;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-2,2)+z*FRandom[Wallbuster](-2,2);
+				}
+				SWWMUtility.DoKnockback(self,-x,17000.);
+				break;
+			case 3:
+				// lead ball
+				a = FRandom[Wallbuster](0,360);
+				s = FRandom[Wallbuster](0,.006);
+				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+				let p = Spawn("TheBall",origin);
+				p.target = self;
+				p.angle = atan2(dir.y,dir.x);
+				p.pitch = asin(-dir.z);
+				p.vel = dir*p.speed*1.25;
+				p.special1 = (howmany>1)?2:1;	// came from wallbuster
+				for ( int i=0; i<(8-howmany/4); i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.scale *= .6;
+					s.alpha *= .25;
+					s.SetShade(Color(1,1,1)*Random[Wallbuster](96,192));
+					s.vel += vel*.5+x*FRandom[Wallbuster](3.,5.);
+				}
+				for ( int i=0; i<(8-howmany/4); i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .2;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
+				}
+				SWWMUtility.DoKnockback(self,-x,7200.);
+				break;
+			default:
+				// buckshot
+				if ( !st ) st = new("SpreadgunTracer");
+				st.ignoreme = self;
+				// attempt to uniformize expected damage while reducing traces (mainly for performance)
+				int expecteddmg = 150;
+				int numshot = max(21-howmany,5);
+				int individualdmg = int(ceil(expecteddmg/double(numshot)));
+				for ( int j=0; j<numshot; j++ )
+				{
+					a = FRandom[Wallbuster](0,360);
+					s = FRandom[Wallbuster](0,.1);
+					dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+					st.hitlist.Clear();
+					st.shootthroughlist.Clear();
+					st.waterhitlist.Clear();
+					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
+					ProcessTraceHit(st,origin,dir,individualdmg,7000,bc:5+howmany/6,false,(howmany>1));
+				}
+				for ( int i=0; i<(16-howmany/2); i++ )
+				{
+					let s = Spawn("SWWMSmoke",origin);
+					s.special1 = 1;
+					s.scale *= .9;
+					s.alpha *= .3;
+					s.SetShade(Color(1,1,1)*Random[Wallbuster](96,192));
+					s.vel += vel*.5+x*FRandom[Wallbuster](3.,5.)+y*FRandom[Wallbuster](-1,1)+z*FRandom[Wallbuster](-1,1);
+				}
+				for ( int i=0; i<(20-howmany/2); i++ )
+				{
+					let s = Spawn("SWWMSpark",origin);
+					s.scale *= .3;
+					s.alpha *= .4;
+					s.vel += vel*.5+x*FRandom[Wallbuster](4.,8.)+y*FRandom[Wallbuster](-2,2)+z*FRandom[Wallbuster](-2,2);
+				}
+				SWWMUtility.DoKnockback(self,-x,12000.);
+				break;
+			}
+		}
+	}
+	action void A_SpinOne()
+	{
+		A_StartSound("wallbuster/spin",CHAN_WEAPON,CHANF_OVERLAP);
+		invoker.rotation[invoker.rotation[5]]++;
+		while ( invoker.rotation[invoker.rotation[5]] > 4 ) invoker.rotation[invoker.rotation[5]] -= 5;
+	}
+	action void A_SpinBig()
+	{
+		A_StartSound("wallbuster/spinbig",CHAN_WEAPON,CHANF_OVERLAP);
+		invoker.rotation[5]++;
+		while ( invoker.rotation[5] > 4 ) invoker.rotation[5] -= 5;
+	}
+	action void A_HandSpin()
+	{
+		A_StartSound("wallbuster/handspin",CHAN_WEAPON,CHANF_OVERLAP);
+		invoker.rotation[5]--;
+		while ( invoker.rotation[5] < 0 ) invoker.rotation[5] += 5;
+	}
+	action void A_OpenMenu()
+	{
+		invoker.reloadqueue.Clear();
+		invoker.waitreload = true;
+		if ( player == players[consoleplayer] )
+			Menu.SetMenu('WallbusterReloadMenu');
+	}
+	action void A_WaitMenu()
+	{
+		if ( invoker.waitreload ) return;
+		if ( invoker.clearout )
+		{
+			bool hasshells = false;
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !invoker.loaded[i] || invoker.fired[i] ) continue;
+				hasshells = true;
+				break;
+			}
+			if ( hasshells ) player.SetPsprite(PSP_WEAPON,ResolveState("Detach"));
+			else player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
+		}
+		else if ( (invoker.reloadqueue.Size() <= 0) ) player.SetPsprite(PSP_WEAPON,ResolveState("EndReload"));
+		else player.SetPsprite(PSP_WEAPON,ResolveState("Detach"));
+	}
+	action void A_StartDetachOverlays()
+	{
+		static const statelabel shells[] = {"DetachShell0","DetachShell1","DetachShell2","DetachShell3","DetachShell4"};
+		static const statelabel shellsfired[] = {"DetachShellF0","DetachShellF1","DetachShellF2","DetachShellF3","DetachShellF4"};
+		for ( int i=0; i<5; i++ )
+		{
+			// get physical index
+			int idx = i;
+			// shift based on full rotation
+			idx = (idx+invoker.rotation[5]*5);
+			while ( idx > 24 ) idx -= 25;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx+invoker.rotation[group]);
+			while ( gidx > 4 ) gidx -= 5;
+			idx = gidx+group*5;
+			if ( !invoker.loaded[idx] ) continue;
+			if ( invoker.fired[idx] )
+				A_Overlay(PSP_WEAPON+1+i,shellsfired[i]);
+			else A_Overlay(PSP_WEAPON+1+i,shells[i]);
+		}
+		A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	action void A_StartAttachOverlays()
+	{
+		static const statelabel shells[] = {"AttachShell0","AttachShell1","AttachShell2","AttachShell3","AttachShell4"};
+		for ( int i=0; i<5; i++ )
+		{
+			// get physical index
+			int idx = i;
+			// shift based on full rotation
+			idx = (idx+invoker.rotation[5]*5);
+			while ( idx > 24 ) idx -= 25;
+			int group = idx/5;
+			// shift based on group rotation
+			int gidx = i%5;
+			gidx = (gidx+invoker.rotation[group]);
+			while ( gidx > 4 ) gidx -= 5;
+			idx = gidx+group*5;
+			if ( !invoker.loaded[idx] ) continue;
+			A_Overlay(PSP_WEAPON+1+i,shells[i]);
+		}
+		A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	action void A_DropShells()
+	{
+		static const Class<Ammo> types[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		static const Class<Actor> casetypes[] = {"RedShellCasing","GreenShellCasing","BlueShellCasing","PurpleShellCasing"};
+		for ( int i=0; i<5; i++ )
+		{
+			Class<Ammo> loaded = invoker.loaded[invoker.rotation[5]*5+i];
+			int which = -1;
+			for ( int j=0; j<4; j++ )
+			{
+				if ( loaded != types[j] ) continue;
+				which = j;
+				break;
+			}
+			if ( which != -1 )
+			{
+				if ( invoker.fired[invoker.rotation[5]*5+i] )
+				{
+					Vector3 x, y, z;
+					[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+					Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-3*y-13*z);
+					let c = Spawn(casetypes[which],origin);
+					c.angle = angle;
+					c.pitch = pitch;
+					c.vel = x*FRandom[Junk](-.2,.2)+y*FRandom[Junk](-.2,.2)-(0,0,FRandom[Junk](2,3));
+					c.vel += vel*.5;
+				}
+				else
+				{
+					let amo = FindInventory(types[which]);
+					if ( !amo )
+					{
+						amo = Inventory(Spawn(types[which]));
+						amo.AttachToOwner(self);
+						amo.Amount = 0;
+					}
+					if ( (amo.Amount >= amo.MaxAmount) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+						amo.CreateTossable(1);
+					amo.Amount++;
+				}
+			}
+			invoker.loaded[invoker.rotation[5]*5+i] = null;
+			invoker.fired[invoker.rotation[5]*5+i] = false;
+		}
+		invoker.rotation[invoker.rotation[5]] = 4;
+	}
+	action void A_LoadShell()
+	{
+		if ( invoker.reloadqueue.Size() <= 0 ) return;
+		Class<Ammo> toload = invoker.reloadqueue[invoker.reloadqueue.Size()-1];
+		invoker.reloadqueue.Pop();
+		invoker.loaded[invoker.rotation[5]*5+invoker.rotation[invoker.rotation[5]]] = toload;
+		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		{
+			let am = FindInventory(toload);
+			if ( am && (am.Amount > 0) ) am.Amount--;
+		}
+		if ( (invoker.reloadqueue.Size() > 0) && (invoker.rotation[invoker.rotation[5]] > 0) )
+			invoker.rotation[invoker.rotation[5]]--;
+		A_StartSound("wallbuster/load",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+
+	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
+	{
+		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
+		let Owner = ownedWeapon.Owner;
+		if ( (AmmoGive1 == 0) && initialized )
+		{
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !loaded[i] || fired[i] ) continue;
+				let cur = Owner.FindInventory(loaded[i]);
+				if ( !cur )
+				{
+					cur = Inventory(Spawn(loaded[i]));
+					cur.Amount = 0;
+					cur.AttachToOwner(Owner);
+				}
+				// give the loaded shell (or drop)
+				if ( cur.Amount >= cur.MaxAmount ) cur.CreateTossable(1);
+				cur.Amount++;
+				good = true;
+			}
+		}
+		return good;
+	}
+
+	Default
+	{
+		Tag "$T_WALLBUSTER";
+		Inventory.PickupMessage "$I_WALLBUSTER";
+		Obituary "$O_WALLBUSTER_RED";
+		Inventory.Icon "graphics/HUD/Icons/W_Wallbuster.png";
+		Weapon.SlotNumber 4;
+		Weapon.SelectionOrder 400;
+		Weapon.UpSound "wallbuster/select";
+		Weapon.AmmoType1 "RedShell";
+		Weapon.AmmoGive1 5;
+		SWWMWeapon.DropAmmoType "Shell";
+		Stamina 35000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		Radius 30;
+		Height 36;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Select:
+		XZW2 G 1 A_FullRaise();
+		XZW2 HIJKLMNOP 2;
+		Goto Ready;
+	Ready:
+		XZW2 A 1
+		{
+			int flg = WRF_ALLOWUSER1;
+			if ( invoker.CheckAmmo(PrimaryFire,false) ) flg |= WRF_ALLOWZOOM;
+			if ( invoker.CanReload() ) flg |= WRF_ALLOWRELOAD;
+			A_WeaponReady(flg);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_ZOOM) )
+				invoker.CheckAmmo(EitherFire,true);
+		}
+		Wait;
+	Fire:
+		XZW2 A 0 A_FireShells(1);
+		Goto FireOne;
+	AltFire:
+		XZW2 A 0 A_FireShells(5);
+		Goto FireFive;
+	Zoom:
+		XZW2 A 0 A_FireShells(25);
+		Goto FireTwentyFive;
+	FireOne:
+		XZW2 AQRSTUVWX 1;
+		XZW2 A 0
+		{
+			if ( invoker.whichspin == 2 ) return ResolveState("BigSpin");
+			if ( invoker.whichspin == 1 ) return ResolveState("OneSpin");
+			return ResolveState("Ready");
+		}
+		Goto Ready;
+	FireFive:
+		XZW2 A 2;
+		XZW3 CDEFGHIJK 2;
+		XZW2 A 0
+		{
+			if ( invoker.whichspin == 2 ) return ResolveState("BigSpin");
+			if ( invoker.whichspin == 1 ) return ResolveState("OneSpin");
+			return ResolveState("Ready");
+		}
+		Goto Ready;
+	FireTwentyFive:
+		XZW2 A 2;
+		XZW3 STUVWXYZ 2;
+		XZW4 ABC 2;
+		XZW2 A 0
+		{
+			if ( invoker.whichspin == 2 ) return ResolveState("BigSpin");
+			if ( invoker.whichspin == 1 ) return ResolveState("OneSpin");
+			return ResolveState("Ready");
+		}
+		Goto Ready;
+	DryFire:
+		XZW2 A 2;
+		XZW2 XA 4;
+		XZW2 A 0
+		{
+			if ( invoker.whichspin == 2 ) return ResolveState("BigSpin");
+			if ( invoker.whichspin == 1 ) return ResolveState("OneSpin");
+			return ResolveState("Ready");
+		}
+		Goto Ready;
+	OneSpin:
+		XZW2 A 1 A_SpinOne();
+		XZW2 YZ 2;
+		XZW3 A 2;
+		XZW3 B 0;
+		XZW2 A 0 A_JumpIf(invoker.rotation[invoker.rotation[5]]==0,"BigSpin");
+		Goto Ready;
+	BigSpin:
+		XZW2 A 1 A_SpinBig();
+		XZW3 LMNOPQ 2;
+		XZW3 R 0;
+		XZW2 A 0;
+		Goto Ready;
+	Reload:
+		XZW2 A 2 A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 DEFG 2;
+		XZW4 HIJK 1;
+		XZW4 L 1 A_StartSound("wallbuster/unlock",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW4 MNOPQ 1;
+		XZW4 RSTUV 1;
+		XZW4 W 1 A_OpenMenu();
+		XZW4 W 1 A_WaitMenu();
+		Wait;
+	Detach:
+		XZW4 W 0
+		{
+			invoker.rnum = invoker.reloadqueue.Size();
+			invoker.cancelreload = false;
+			A_Overlay(-9999,"CheckCancelReload");
+			// clearing out?
+			if ( invoker.clearout )
+			{
+				// jump to spin if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("DetachSpin");
+				return ResolveState(null);
+			}
+			// if it's a full rotation, don't hand-spin
+			if ( invoker.rnum > 20 ) return ResolveState(null);
+			// jump to spin if current group is full
+			int nset = 0, nsetp = 0;
+			for ( int i=0; i<5; i++ )
+			{
+				// get physical index
+				int idx = i;
+				// shift based on full rotation
+				idx = (idx+invoker.rotation[5]*5);
+				while ( idx > 24 ) idx -= 25;
+				int group = idx/5;
+				// shift based on group rotation
+				int gidx = i%5;
+				gidx = (gidx+invoker.rotation[group]);
+				while ( gidx > 4 ) gidx -= 5;
+				idx = gidx+group*5;
+				if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+				nset++;
+			}
+			// but previous isn't
+			for ( int i=20; i<25; i++ )
+			{
+				// get physical index
+				int idx = i;
+				// shift based on full rotation
+				idx = (idx+invoker.rotation[5]*5);
+				while ( idx > 24 ) idx -= 25;
+				int group = idx/5;
+				// shift based on group rotation
+				int gidx = i%5;
+				gidx = (gidx+invoker.rotation[group]);
+				while ( gidx > 4 ) gidx -= 5;
+				idx = gidx+group*5;
+				if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+				nsetp++;
+			}
+			return A_JumpIf((nset>=5)&&(nsetp<5),"DetachSpin");
+		}
+		XZW4 WXYZ 1;
+		XZW5 ABCDEF 1;
+		XZW5 G 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		Goto DetachHold;
+	DetachSpin:
+		XZWE U 0;
+		XZWE VWXY 1;
+	DetachSpinReturn:
+		XZWE Z 1;
+		XZWF A 2
+		{
+			invoker.cancelreload = false;
+			A_Overlay(-9999,"CheckCancelReload");
+			A_HandSpin();
+		}
+		XZWF BCDEF 2;
+		XZWF G 0
+		{
+			if ( invoker.clearout )
+			{
+				// jump to spin again if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("DetachSpinAgain");
+			}
+			return ResolveState(null);
+		}
+		XZWF G 2;
+		XZWF J 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWF K 0;
+		Goto DetachHold;
+	DetachSpinAgain:
+		XZWF G 2;
+		XZWF H 0;
+		XZWH JKL 1;
+		Goto DetachSpinReturn;
+	DetachHold:
+		XZW5 H 1
+		{
+			A_StartDetachOverlays();
+			A_PlayerReload();
+			return A_JumpIf(invoker.clearout,"DetachHoldClear");
+		}
+		XZW5 IJKLMNOPQ 1;
+		XZW5 R 2 A_DropShells();
+		XZW5 ST 2;
+		XZW5 V 2 A_LoadShell();
+		XZW5 X 2 A_LoadShell();
+		XZW5 Y 2 A_LoadShell();
+		XZW6 A 2 A_LoadShell();
+		XZW6 C 2 A_LoadShell();
+		XZW6 E 0
+		{
+			if ( invoker.cancelreload ) invoker.reloadqueue.Clear();
+			player.SetPSprite(-9999,null);
+			return A_JumpIf((invoker.reloadqueue.Size()>0),"AttachSpin");
+		}
+		Goto Attach;
+	DetachHoldClear:
+		XZW5 HIJKLMNOPQ 1;
+		XZW5 R 3 A_DropShells();
+		XZW5 TX 3;
+		XZW6 A 3;
+		XZW6 E 0
+		{
+			bool keepgoing = false;
+			// still have more shells?
+			for ( int i=0; i<25; i++ )
+			{
+				if ( !invoker.loaded[i] || invoker.fired[i] ) continue;
+				keepgoing = true;
+				break;
+			}
+			if ( invoker.cancelreload ) keepgoing = false;
+			player.SetPSprite(-9999,null);
+			return A_JumpIf(keepgoing,"AttachSpin");
+		}
+		Goto Attach;
+	CheckCancelReload:
+		TNT1 A 1
+		{
+			if ( player.cmd.buttons&BT_RELOAD )
+				invoker.cancelreload = true;
+		}
+		Wait;
+	DetachShell0:
+		XZWA EFGHIJKLMN 1;
+		Stop;
+	DetachShell1:
+		XZWB CDEFGHIJKL 1;
+		Stop;
+	DetachShell2:
+		XZWC ABCDEFGHIJ 1;
+		Stop;
+	DetachShell3:
+		XZWC YZ 1;
+		XZWD ABCDEFGH 1;
+		Stop;
+	DetachShell4:
+		XZWD WXYZ 1;
+		XZWE ABCDEF 1;
+		Stop;
+	DetachShellF0:
+		XZWF LMNOPQRSTU 1;
+		Stop;
+	DetachShellF1:
+		XZWF VWXYZ 1;
+		XZWG ABCDE 1;
+		Stop;
+	DetachShellF2:
+		XZWG FGHIJKLMNO 1;
+		Stop;
+	DetachShellF3:
+		XZWG PQRSTUVWXY 1;
+		Stop;
+	DetachShellF4:
+		XZWG Z 1;
+		XZWH ABCDEFGHI 1;
+		Stop;
+	Attach:
+		XZW6 EF 2;
+		XZW6 G 1 A_StartAttachOverlays();
+		XZW6 HIJKL 1;
+		XZW6 M 1 A_StartSound("wallbuster/attach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 NOPQ 1;
+		XZW6 RS 2;
+		XZW6 TUVWXYZ 1;
+		XZW7 ABC 1;
+		Goto EndReload;
+	AttachSpin:
+		XZW7 JK 2;
+		XZW7 L 1 A_StartAttachOverlays();
+		XZW7 MNOPQR 1;
+		XZW7 S 1 A_StartSound("wallbuster/attach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW7 TUVW 1;
+		XZW7 XYZ 1;
+		XZW8 ABC 1;
+		XZW8 D 2
+		{
+			invoker.cancelreload = false;
+			A_Overlay(-9999,"CheckCancelReload");
+			A_HandSpin();
+		}
+		XZW8 EFGH 2;
+		XZW8 I 0
+		{
+			if ( invoker.clearout )
+			{
+				// jump to spin again if current group is empty
+				bool hasshells = false;
+				for ( int i=0; i<5; i++ )
+				{
+					// get physical index
+					int idx = i;
+					// shift based on full rotation
+					idx = (idx+invoker.rotation[5]*5);
+					while ( idx > 24 ) idx -= 25;
+					int group = idx/5;
+					// shift based on group rotation
+					int gidx = i%5;
+					gidx = (gidx+invoker.rotation[group]);
+					while ( gidx > 4 ) gidx -= 5;
+					idx = gidx+group*5;
+					if ( !invoker.loaded[idx] || invoker.fired[idx] ) continue;
+					hasshells = true;
+					break;
+				}
+				if ( !hasshells ) return ResolveState("AttachSpinAgain");
+			}
+			return ResolveState(null);
+		}
+		XZW8 IL 2;
+		XZW8 M 1 A_StartSound("wallbuster/detach",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 N 0;
+		Goto DetachHold;
+	AttachSpinAgain:
+		XZW8 IJ 2;
+		XZW8 K 1;
+		XZW8 K 0;
+		XZWH MNO 1;
+		Goto DetachSpinReturn;
+	AttachShell0:
+		XZWA OPQRSTUVWXYZ 1;
+		XZWB AB 1;
+		Stop;
+	AttachShell1:
+		XZWB MNOPQRSTUVWXYZ 1;
+		Stop;
+	AttachShell2:
+		XZWC KLMNOPQRSTUVWX 1;
+		Stop;
+	AttachShell3:
+		XZWD IJKLMNOPQRSTUV 1;
+		Stop;
+	AttachShell4:
+		XZWE GHIJKLMNOPQRST 1;
+		Stop;
+	EndReload:
+		XZW4 W 1;
+		XZW8 OPQRS 1;
+		XZW8 T 1 A_StartSound("wallbuster/lock",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 UVWXY 1;
+		XZW8 Z 1 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 ABC 1;
+		XZW9 DEF 2;
+		Goto Ready;
+	User1:
+		XZW2 A 2
+		{
+			A_StartSound("wallbuster/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerMelee();
+		}
+		XZW9 GHI 2;
+		XZW9 J 2 A_Parry(9);
+		XZW9 KLM 1;
+		XZW9 N 1 A_Melee(70,"demolitionist/whitl",1.2);
+		XZW9 OPQRS 2;
+		XZW9 T 2 A_StartSound("wallbuster/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW9 UVW 2;
+		XZW9 XYZ 1;
+		XZWA ABCD 2;
+		Goto Ready;
+	Deselect:
+		XZW2 A 2 A_StartSound("wallbuster/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 BCDEFG 2;
+		XZW2 G -1 A_FullLower();
+		Stop;
+	FlashRed:
+		XZWW A 2 Bright;
+		Stop;
+		XZWW B 2 Bright;
+		Stop;
+		XZWW C 2 Bright;
+		Stop;
+		XZWW D 2 Bright;
+		Stop;
+		XZWW E 2 Bright;
+		Stop;
+		XZWW F 2 Bright;
+		Stop;
+		XZWW G 2 Bright;
+		Stop;
+		XZWW H 2 Bright;
+		Stop;
+		XZWW I 2 Bright;
+		Stop;
+		XZWW J 2 Bright;
+		Stop;
+		XZWW K 2 Bright;
+		Stop;
+		XZWW L 2 Bright;
+		Stop;
+		XZWW M 2 Bright;
+		Stop;
+		XZWW N 2 Bright;
+		Stop;
+		XZWW O 2 Bright;
+		Stop;
+		XZWW P 2 Bright;
+		Stop;
+		XZWW Q 2 Bright;
+		Stop;
+		XZWW R 2 Bright;
+		Stop;
+		XZWW S 2 Bright;
+		Stop;
+		XZWW T 2 Bright;
+		Stop;
+		XZWW U 2 Bright;
+		Stop;
+		XZWW V 2 Bright;
+		Stop;
+		XZWW W 2 Bright;
+		Stop;
+		XZWW X 2 Bright;
+		Stop;
+		XZWW Y 2 Bright;
+		Stop;
+	FlashGreen:
+		XZWX A 2 Bright;
+		Stop;
+		XZWX B 2 Bright;
+		Stop;
+		XZWX C 2 Bright;
+		Stop;
+		XZWX D 2 Bright;
+		Stop;
+		XZWX E 2 Bright;
+		Stop;
+		XZWX F 2 Bright;
+		Stop;
+		XZWX G 2 Bright;
+		Stop;
+		XZWX H 2 Bright;
+		Stop;
+		XZWX I 2 Bright;
+		Stop;
+		XZWX J 2 Bright;
+		Stop;
+		XZWX K 2 Bright;
+		Stop;
+		XZWX L 2 Bright;
+		Stop;
+		XZWX M 2 Bright;
+		Stop;
+		XZWX N 2 Bright;
+		Stop;
+		XZWX O 2 Bright;
+		Stop;
+		XZWX P 2 Bright;
+		Stop;
+		XZWX Q 2 Bright;
+		Stop;
+		XZWX R 2 Bright;
+		Stop;
+		XZWX S 2 Bright;
+		Stop;
+		XZWX T 2 Bright;
+		Stop;
+		XZWX U 2 Bright;
+		Stop;
+		XZWX V 2 Bright;
+		Stop;
+		XZWX W 2 Bright;
+		Stop;
+		XZWX X 2 Bright;
+		Stop;
+		XZWX Y 2 Bright;
+		Stop;
+	FlashBlue:
+		XZWY A 2 Bright;
+		Stop;
+		XZWY B 2 Bright;
+		Stop;
+		XZWY C 2 Bright;
+		Stop;
+		XZWY D 2 Bright;
+		Stop;
+		XZWY E 2 Bright;
+		Stop;
+		XZWY F 2 Bright;
+		Stop;
+		XZWY G 2 Bright;
+		Stop;
+		XZWY H 2 Bright;
+		Stop;
+		XZWY I 2 Bright;
+		Stop;
+		XZWY J 2 Bright;
+		Stop;
+		XZWY K 2 Bright;
+		Stop;
+		XZWY L 2 Bright;
+		Stop;
+		XZWY M 2 Bright;
+		Stop;
+		XZWY N 2 Bright;
+		Stop;
+		XZWY O 2 Bright;
+		Stop;
+		XZWY P 2 Bright;
+		Stop;
+		XZWY Q 2 Bright;
+		Stop;
+		XZWY R 2 Bright;
+		Stop;
+		XZWY S 2 Bright;
+		Stop;
+		XZWY T 2 Bright;
+		Stop;
+		XZWY U 2 Bright;
+		Stop;
+		XZWY V 2 Bright;
+		Stop;
+		XZWY W 2 Bright;
+		Stop;
+		XZWY X 2 Bright;
+		Stop;
+		XZWY Y 2 Bright;
+		Stop;
+	FlashPurple:
+		XZWZ A 2 Bright;
+		Stop;
+		XZWZ B 2 Bright;
+		Stop;
+		XZWZ C 2 Bright;
+		Stop;
+		XZWZ D 2 Bright;
+		Stop;
+		XZWZ E 2 Bright;
+		Stop;
+		XZWZ F 2 Bright;
+		Stop;
+		XZWZ G 2 Bright;
+		Stop;
+		XZWZ H 2 Bright;
+		Stop;
+		XZWZ I 2 Bright;
+		Stop;
+		XZWZ J 2 Bright;
+		Stop;
+		XZWZ K 2 Bright;
+		Stop;
+		XZWZ L 2 Bright;
+		Stop;
+		XZWZ M 2 Bright;
+		Stop;
+		XZWZ N 2 Bright;
+		Stop;
+		XZWZ O 2 Bright;
+		Stop;
+		XZWZ P 2 Bright;
+		Stop;
+		XZWZ Q 2 Bright;
+		Stop;
+		XZWZ R 2 Bright;
+		Stop;
+		XZWZ S 2 Bright;
+		Stop;
+		XZWZ T 2 Bright;
+		Stop;
+		XZWZ U 2 Bright;
+		Stop;
+		XZWZ V 2 Bright;
+		Stop;
+		XZWZ W 2 Bright;
+		Stop;
+		XZWZ X 2 Bright;
+		Stop;
+		XZWZ Y 2 Bright;
+		Stop;
+	}
+}

@@ -1,0 +1,602 @@
+// event processing
+extend Class SWWMHandler
+{
+	// for menu events
+	transient Array<MenuTransaction> checklist;
+
+	override void ConsoleProcess( ConsoleEvent e )
+	{
+		// doing it with an event because this way we can control WHEN it should be openable
+		if ( e.Name ~== "swwmdemomenu" )
+		{
+			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+				return;
+			Menu.SetMenu('DemolitionistMenu');
+		}
+		else if ( e.Name ~== "swwmzoomin" )
+		{
+			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+				return;
+			double val = max(.5,swwm_mm_zoom/2.);
+			CVar.FindCVar('swwm_mm_zoom').SetFloat(val);
+		}
+		else if ( e.Name ~== "swwmzoomout" )
+		{
+			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+				return;
+			double maxval = players[consoleplayer].mo.FindInventory("Omnisight")?2.:1.;
+			double val = min(maxval,swwm_mm_zoom*2.);
+			CVar.FindCVar('swwm_mm_zoom').SetFloat(val);
+		}
+	}
+
+	override void NetworkProcess( ConsoleEvent e )
+	{
+		static const Class<Ammo> cbttypes[] = {"RedShell","GreenShell","BlueShell","PurpleShell"};
+		if ( e.Name ~== "swwmgesture" )
+		{
+			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
+			let mo = players[e.player].mo;
+			switch( e.Args[0] )
+			{
+			case 0:
+				SWWMGesture.SetGesture(mo,GS_Wave);
+				break;
+			case 1:
+				SWWMGesture.SetGesture(mo,GS_ThumbsUp);
+				break;
+			case 2:
+				SWWMGesture.SetGesture(mo,GS_Victory);
+				break;
+			case 3:
+				SWWMGesture.SetGesture(mo,GS_BlowKiss);
+				break;
+			}
+			return;
+		}
+		else if ( e.Name ~== "swwmfixitemcaps" )
+		{
+			// this command is only really needed when I update item max amounts mid-playthrough
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !players[i].mo ) continue;
+				let mo = players[i].mo;
+				Inventory hams = mo.FindInventory("HammerspaceEmbiggener");
+				if ( hams )
+				{
+					if ( hams.MaxAmount != hams.default.MaxAmount )
+						Console.Printf("Adjust %s capacity (%d -> %d)",hams.GetTag(),hams.MaxAmount,hams.default.MaxAmount);
+					hams.MaxAmount = hams.default.MaxAmount;
+					hams.Amount = min(hams.Amount,hams.MaxAmount);
+				}
+				for ( Inventory inv=mo.inv; inv; inv=inv.inv )
+				{
+					if ( inv is 'Ammo' )
+					{
+						Ammo(inv).BackpackMaxAmount = Ammo(inv).default.BackpackMaxAmount;
+						int newmax = inv.default.MaxAmount;
+						if ( (hams.Amount > 0) && (Ammo(inv).BackpackMaxAmount > 0) )
+						{
+							double factor = (Ammo(inv).BackpackMaxAmount-inv.default.MaxAmount)/double(hams.MaxAmount);
+							newmax = int(inv.default.MaxAmount+hams.Amount*factor);
+						}
+						if ( inv.MaxAmount != newmax )
+							Console.Printf("Adjust %s capacity (%d -> %d)",inv.GetTag(),inv.MaxAmount,newmax);
+						int dropme = max(0,inv.Amount-newmax);
+						if ( dropme )
+						{
+							Console.Printf("Dropped %dx %s.",dropme,inv.GetTag());
+							// non-SWWM ammos won't subdivide, but whatever, this is a debug command
+							inv.CreateTossable(dropme);
+						}
+						inv.MaxAmount = newmax;
+					}
+					else if ( inv is 'MagAmmo' )
+					{
+						if ( inv.MaxAmount != inv.default.MaxAmount )
+							Console.Printf("Adjust %s capacity (%d -> %d)",inv.GetTag(),inv.MaxAmount,inv.default.MaxAmount);
+						// just drop the extras
+						int dropme = max(0,inv.Amount-inv.default.MaxAmount);
+						if ( dropme )
+						{
+							Console.Printf("Dropped %dx %s.",dropme,inv.GetTag());
+							inv.CreateTossable(dropme);
+						}
+						inv.MaxAmount = inv.default.MaxAmount;
+					}
+					else
+					{
+						if ( inv.MaxAmount != inv.default.MaxAmount )
+							Console.Printf("Adjust %s capacity (%d -> %d)",inv.GetTag(),inv.MaxAmount,inv.default.MaxAmount);
+						// only drop droppables (obviously)
+						if ( !inv.bUNDROPPABLE && !inv.bUNTOSSABLE )
+						{
+							int dropme = max(0,inv.Amount-inv.default.MaxAmount);
+							if ( dropme )
+							{
+								Console.Printf("Dropped %dx %s.",dropme,inv.GetTag());
+								for ( int j=0; j<dropme; j++ ) inv.CreateTossable(j);
+							}
+						}
+						inv.MaxAmount = inv.default.MaxAmount;
+						inv.Amount = min(inv.Amount,inv.MaxAmount);
+					}
+				}
+			}
+		}
+		else if ( e.Name ~== "swwmupdatetrackers" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			if ( swwm_notrack )
+			{
+				int n = trackers_cnt;
+				while ( trackers ) trackers.Destroy(); // wow that's simple, all in one line
+				Console.Printf("%d trackers removed.",n);
+			}
+			else
+			{
+				int n = trackers_cnt;
+				let ti = ThinkerIterator.Create("Actor");
+				Actor a;
+				while ( a = Actor(ti.Next()) )
+				{
+					if ( (!a.bSHOOTABLE && !a.bISMONSTER) || (a is 'LampMoth') || (a is 'CompanionLamp') ) continue;
+					let trk = SWWMCombatTracker.Spawn(a);
+					if ( !a.player ) trk.maxhealth = max(a.health,a.GetSpawnHealth());
+				}
+				n = (trackers_cnt-n);
+				Console.Printf("%d trackers added.",n);
+			}
+			return;
+		}
+		else if ( e.Name ~== "swwmtrimsuckables" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			int n = 0;
+			for ( int i=0; i<suckableactors.Size(); i++ )
+			{
+				if ( suckableactors[i] && (suckableactors[i].bSHOOTABLE || suckableactors[i].bMISSILE) ) continue;
+				suckableactors.Delete(i);
+				i--;
+				n++;
+			}
+			Console.Printf("%d suckable actors trimmed.",n);
+			return;
+		}
+		else if ( e.Name ~== "swwmdebugdumprng" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			// dump the values of all mod RNGs (might help someday to track down what desyncs)
+			Console.Printf("\cxSWWM GZ RNG dump for player %d (\c-%s\cx):\c-",consoleplayer,players[consoleplayer].GetUserName());
+			Console.Printf("bdscreen: %d",Random2[bdscreen]());
+			Console.Printf("Blood: %d",Random2[Blood]());
+			Console.Printf("Boolet: %d",Random2[Boolet]());
+			Console.Printf("BrainExplode: %d",Random2[BrainExplode]());
+			Console.Printf("Bundle: %d",Random2[Bundle]());
+			Console.Printf("Candy: %d",Random2[Candy]());
+			Console.Printf("Chancebox: %d",Random2[Chancebox]());
+			Console.Printf("ClientSparkles: %d",Random2[ClientSparkles]());
+			Console.Printf("Corrode: %d",Random2[Corrode]());
+			Console.Printf("DemoLines: %d",Random2[DemoLines]());
+			Console.Printf("DoBlast: %d",Random2[DoBlast]());
+			Console.Printf("Eviscerator: %d",Random2[Eviscerator]());
+			Console.Printf("Explodium: %d",Random2[Explodium]());
+			Console.Printf("Explos: %d",Random2[Explos]());
+			Console.Printf("ExtraMissiles: %d",Random2[ExtraMissiles]());
+			Console.Printf("FInTheChat: %d",Random2[FInTheChat]());
+			Console.Printf("FlameT: %d",Random2[FlameT]());
+			Console.Printf("Flicker: %d",Random2[Flicker]());
+			Console.Printf("FunTags: %d",Random2[FunTags]());
+			Console.Printf("Gibs: %d",Random2[Gibs]());
+			Console.Printf("GoldDrop: %d",Random2[GoldDrop]());
+			Console.Printf("Goldy: %d",Random2[Goldy]());
+			Console.Printf("GunFlash: %d",Random2[GunFlash]());
+			Console.Printf("hdscreen: %d",Random2[hdscreen]());
+			Console.Printf("Hellblazer: %d",Random2[Hellblazer]());
+			Console.Printf("HudStuff: %d",Random2[HudStuff]());
+			Console.Printf("Impact: %d",Random2[Impact]());
+			Console.Printf("InterArt: %d",Random2[InterArt]());
+			Console.Printf("Invinciball: %d",Random2[Invinciball]());
+			Console.Printf("Junk: %d",Random2[Junk]());
+			Console.Printf("Moth: %d",Random2[Moth]());
+			Console.Printf("Nugget: %d",Random2[Nugget]());
+			Console.Printf("Parry: %d",Random2[Parry]());
+			Console.Printf("Ponch: %d",Random2[Ponch]());
+			Console.Printf("Puff: %d",Random2[Puff]());
+			Console.Printf("Pusher: %d",Random2[Pusher]());
+			Console.Printf("Rage: %d",Random2[Rage]());
+			Console.Printf("Replacements: %d",Random2[Replacements]());
+			Console.Printf("ScoreBits: %d",Random2[ScoreBits]());
+			Console.Printf("ShellDrop: %d",Random2[ShellDrop]());
+			Console.Printf("Shivers: %d",Random2[Shivers]());
+			Console.Printf("Silverbullet: %d",Random2[Silverbullet]());
+			Console.Printf("SpareShells: %d",Random2[SpareShells]());
+			Console.Printf("Sparkster: %d",Random2[Sparkster]());
+			Console.Printf("Spread: %d",Random2[Spread]());
+			Console.Printf("Spreadgun: %d",Random2[Spreadgun]());
+			Console.Printf("TUID: %d",Random2[TUID]());
+			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
+			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
+			Console.Printf("Ynykron: %d",Random2[Ynykron]());
+			return;
+		}
+		if ( e.IsManual ) return;
+		if ( e.Name.Left(14) ~== "swwmstoregive." )
+		{
+			Class<Inventory> item = e.Name.Mid(14);
+			if ( !item ) return;
+			if ( SWWMCredits.Take(players[e.Args[0]],e.Args[1]) )
+			{
+				let def = GetDefaultByType(item);
+				SWWMWeapon sw;
+				// drop the swapweapon if we own it first
+				if ( swwm_swapweapons && (item is 'SWWMWeapon') && (sw = SWWMWeapon(def).HasSwapWeapon(players[e.Args[0]].mo)) )
+				{
+					bool swapto = (sw == players[e.Args[0]].ReadyWeapon) || (sw.SisterWeapon && (sw.Sisterweapon == players[e.Args[0]].ReadyWeapon));
+					int ngun = sw.Amount;
+					double ang = -15*(ngun-1);
+					for ( int i=0; i<ngun; i++ )
+					{
+						let d = players[e.Args[0]].mo.DropInventory(sw);
+						if ( !d || (ngun <= 1) ) continue;
+						// adjust angle for multi-drops
+						d.angle = players[e.Args[0]].mo.angle+ang;
+						d.vel.xy = Actor.RotateVector((5,0),d.angle);
+						d.vel.z = 1;
+						d.vel += players[e.Args[0]].mo.vel;
+						ang += 30;
+					}
+					// don't autoswitch just yet (hacky)
+					if ( swapto )
+					{
+						players[e.Args[0]].ReadyWeapon = null;
+						players[e.Args[0]].PendingWeapon = WP_NOCHANGE;
+					}
+				}
+				if ( (item is 'ArmorNuggetItem') || (item is 'HealthNuggetItem') )
+				{
+					// these have to be given in a loop because fun reasons
+					for ( int i=0; i<e.Args[2]; i++ )
+						players[e.Args[0]].mo.GiveInventory(item,1,true);
+				}
+				else players[e.Args[0]].mo.GiveInventory(item,e.Args[2],true);
+				// fucky workaround
+				let inv = players[e.Args[0]].mo.FindInventory(item);
+				if ( inv && (inv.Amount <= 0) && !inv.bKEEPDEPLETED ) inv.Destroy();
+				if ( item is 'Weapon' )
+				{
+					// special case, select dual guns if we bought a second one
+					if ( (item is 'ExplodiumGun') && (players[e.Args[0]].mo.CountInv("ExplodiumGun") > 1) )
+						players[e.Args[0]].mo.A_SelectWeapon("DualExplodiumGun");
+					else players[e.Args[0]].mo.A_SelectWeapon((Class<Weapon>)(item));
+				}
+			}
+		}
+		else if ( e.Name.Left(14) ~== "swwmstoretake." )
+		{
+			Class<Inventory> item = e.Name.Mid(14);
+			if ( !item ) return;
+			int amt = e.Args[2];
+			if ( item is 'CandyGun' )
+			{
+				// check if we can sell a spare instead, for the same price
+				int n = players[e.Args[0]].mo.CountInv('CandyGunSpares');
+				if ( n >= amt )
+				{
+					players[e.Args[0]].mo.TakeInventory('CandyGunSpares',amt);
+					SWWMCredits.Give(players[e.Args[0]],e.Args[1]);
+					return;
+				}
+			}
+			// if player currently has the dual wield weapon selected, switch over
+			if ( item is 'SWWMWeapon' )
+			{
+				let c = Weapon(players[e.Args[0]].mo.FindInventory(item));
+				if ( c.SisterWeapon && (players[e.Args[0]].ReadyWeapon == c.SisterWeapon) )
+				{
+					players[e.Args[0]].ReadyWeapon = c;
+					players[e.Args[0]].SetPSprite(PSP_WEAPON,c.FindState("Ready"));
+					players[e.Args[0]].SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+				}
+			}
+			// if we're selling an embiggener, we need to readjust ammo
+			if ( item is 'HammerspaceEmbiggener' )
+			{
+				let ritm = players[e.Args[0]].mo.FindInventory(item);
+				for ( Inventory i=players[e.Args[0]].mo.Inv; i; i=i.Inv )
+				{
+					if ( !(i is 'Ammo') ) continue;
+					if ( Ammo(i).BackpackMaxAmount > 0 )
+					{
+						double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(ritm.MaxAmount);
+						i.MaxAmount = int(i.default.MaxAmount+(ritm.Amount-amt)*factor);
+					}
+					// drop excess ammo
+					int excess = i.Amount-i.MaxAmount;
+					if ( excess > 0 ) i.CreateTossable(excess);
+				}
+			}
+			players[e.Args[0]].mo.TakeInventory(item,amt);
+			SWWMCredits.Give(players[e.Args[0]],e.Args[1]);
+		}
+		else if ( e.Name.Left(10) ~== "swwmtrade." )
+		{
+			Class<Inventory> item = e.Name.Mid(10);
+			if ( !item ) return;
+			let def = GetDefaultByType(item);
+			int amt = def.Amount;
+			// if it's an ammo, check the largest unit givable
+			if ( item is 'Ammo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<Ammo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
+			Inventory ritm = players[e.Args[1]].mo.FindInventory(item);
+			if ( ritm )
+			{
+				int maxgive = ritm.MaxAmount-ritm.Amount;
+				if ( amt > maxgive ) amt = maxgive;
+			}
+			else if ( amt > def.MaxAmount ) amt = def.MaxAmount;
+			bool rslt = false;
+			Class<Inventory> giveitem = item;
+			if ( item is 'HammerspaceEmbiggener' ) giveitem = 'TradedHammerspaceEmbiggener';
+			if ( (amt > 0) && players[e.Args[1]].mo.GiveInventory(giveitem,amt,true) )
+			{
+				// if player currently has the dual wield weapon selected, switch over
+				if ( item is 'SWWMWeapon' )
+				{
+					let c = Weapon(players[e.Args[0]].mo.FindInventory(item));
+					if ( c.SisterWeapon && (players[e.Args[0]].ReadyWeapon == c.SisterWeapon) )
+					{
+						players[e.Args[0]].ReadyWeapon = c;
+						players[e.Args[0]].SetPSprite(PSP_WEAPON,c.FindState("Ready"));
+						players[e.Args[0]].SetPSprite(PSP_WEAPON+1,null);	// delete left weapon psprite
+					}
+				}
+				// if we're trading an embiggener, we need to readjust ammo
+				if ( item is 'HammerspaceEmbiggener' )
+				{
+					let ritm = players[e.Args[0]].mo.FindInventory(item);
+					for ( Inventory i=players[e.Args[0]].mo.Inv; i; i=i.Inv )
+					{
+						if ( !(i is 'Ammo') ) continue;
+						if ( Ammo(i).BackpackMaxAmount > 0 )
+						{
+							double factor = (Ammo(i).BackpackMaxAmount-i.default.MaxAmount)/double(ritm.MaxAmount);
+							i.MaxAmount = int(i.default.MaxAmount+(ritm.Amount-amt)*factor);
+						}
+						// drop excess ammo
+						int excess = i.Amount-i.MaxAmount;
+						if ( excess > 0 ) i.CreateTossable(excess);
+					}
+				}
+				if ( item is 'CandyGun' )
+				{
+					// see if we can take a fully loaded spare from us instead
+					int n = players[e.Args[0]].mo.CountInv('CandyGunSpares');
+					int na = players[e.Args[0]].mo.CountInv('CandyGunAmmo');
+					if ( (n >= amt) && (na >= amt) )
+					{
+						players[e.Args[0]].mo.TakeInventory('CandyGunSpares',amt);
+						players[e.Args[0]].mo.TakeInventory('CandyGunAmmo',amt);
+					}
+					else players[e.Args[0]].mo.TakeInventory('CandyGun',amt);
+				}
+				else players[e.Args[0]].mo.TakeInventory(item,amt);
+				// add to history
+				SWWMTradeHistory.RegisterSend(players[e.Args[0]],players[e.Args[1]],item,amt);
+				SWWMTradeHistory.RegisterReceive(players[e.Args[1]],players[e.Args[0]],item,amt);
+				// add messages
+				if ( e.Args[0] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGSENT"),amt,def.GetTag(),players[e.Args[1]].GetUserName());
+				if ( e.Args[1] == consoleplayer ) Console.Printf(StringTable.Localize("$SWWM_MSGRECV"),players[e.Args[0]].GetUserName(),amt,def.GetTag());
+				rslt = true;
+			}
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[2];
+				t.type = MenuTransaction.TT_ITEMSEND;
+				t.result = rslt;
+				t.used = item;
+				t.usedup = (players[e.Args[1]].mo.CountInv(item)<=0);
+				checklist.Push(t);
+			}
+		}
+		else if ( e.Name.Left(17) ~== "swwmmarkloreread." )
+		{
+			let l = SWWMLoreLibrary.Find(players[e.Args[0]]);
+			let idx = l.FindEntry(e.Name.Mid(17));
+			l.MarkRead(idx);
+		}
+		else if ( e.Name.Left(12) ~== "swwmuseitem." )
+		{
+			Class<Inventory> item = e.Name.Mid(12);
+			if ( !item ) return;
+			let i = players[e.Args[0]].mo.FindInventory(item);
+			if ( !i ) return;
+			bool rslt = players[e.Args[0]].mo.UseInventory(i);
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[1];
+				t.type = MenuTransaction.TT_ITEMUSE;
+				let w = (Class<Weapon>)(item);
+				if ( w )
+				{
+					t.result = (players[e.Args[0]].PendingWeapon==Weapon(i));
+					// dual wield gun support
+					if ( (i is 'ExplodiumGun') && (players[e.Args[0]].PendingWeapon==Weapon(i).SisterWeapon) )
+						t.result = true;
+				}
+				else t.result = rslt;
+				t.used = item;
+				t.usedup = (!i||(i.Amount<=0));
+				checklist.Push(t);
+			}
+		}
+		else if ( e.Name.Left(13) ~== "swwmdropitem." )
+		{
+			Class<Inventory> item = e.Name.Mid(13);
+			if ( !item ) return;
+			let i = players[e.Args[0]].mo.FindInventory(item);
+			if ( !i ) return;
+			int amt = i.default.Amount;
+			// if it's an ammo, check the largest unit givable
+			if ( i is 'Ammo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<Ammo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
+			if ( amt > i.Amount ) amt = i.Amount;
+			let drop = players[e.Args[0]].mo.DropInventory(i,amt);
+			// add some random velocity so multiple drops don't get bunched together
+			if ( drop ) drop.vel += (Actor.RotateVector((FRandom[Junk](-1.5,.5),FRandom[Junk](-2.5,2.5)),players[e.Args[0]].mo.angle),FRandom[Junk](2.,5.));
+			if ( e.Args[0] == consoleplayer )
+			{
+				let t = new("MenuTransaction");
+				t.uid = e.Args[1];
+				t.type = MenuTransaction.TT_ITEMDROP;
+				t.used = item;
+				t.result = drop;
+				t.usedup = (!i||(i.Amount<=0));
+				checklist.Push(t);
+			}
+		}
+		else if ( e.Name ~== "swwmkoraxline" )
+		{
+			if ( consoleplayer != e.Args[1] ) return;
+			switch ( e.Args[0] )
+			{
+			case 0:
+				AddOneliner("koraxgreet",3,60);
+				break;
+			case 1:
+				AddOneliner("koraxblood",3,150);
+				break;
+			case 2:
+				AddOneliner("koraxgame",3,120);
+				break;
+			case 3:
+				AddOneliner("koraxworship",3,80);
+				break;
+			case 4:
+				AddOneliner("koraxmasters",3,90);
+				break;
+			}
+		}
+		else if ( e.Name.Left(16) ~== "swwmremoteliner." )
+		{
+			if ( consoleplayer == e.Args[0] ) return;
+			if ( !swwm_othervoice ) return;
+			if ( swwm_mutevoice >= e.Args[1] ) return;
+			players[e.Args[0]].mo.A_StartSound(e.Name.Mid(16),CHAN_DEMOVOICE,attenuation:.5);
+		}
+		else if ( e.Name.Left(19) ~== "swwmremotelinertxt." )
+		{
+			if ( consoleplayer == e.Args[0] ) return;
+			if ( !swwm_othervoice ) return;
+			if ( swwm_mutevoice >= e.Args[1] ) return;
+			double dist = players[consoleplayer].Camera.Distance3D(players[e.Args[0]].mo);
+			if ( dist < 2000 )
+				Console.Printf("\cx%s\cx: %s\c-",players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(19)));
+		}
+		else if ( e.Name.Left(8) ~== "swwmcbt." )
+		{
+			// from wikipedia, the free encyclopedia
+			if ( !playeringame[e.Args[0]] || !players[e.Args[0]].mo ) return;
+			let cbt = Wallbuster(players[e.Args[0]].mo.FindInventory("Wallbuster"));
+			if ( !cbt ) return;
+			cbt.reloadqueue.Clear();
+			if ( e.Name.Mid(8) ~== "EMPTY" ) cbt.clearout = true;
+			else
+			{
+				cbt.clearout = false;
+				Array<String> qs;
+				qs.Clear();
+				String rite = e.Name.Mid(8);
+				rite.Split(qs,",",TOK_SKIPEMPTY);
+				for ( int i=0; i<qs.Size(); i++ )
+				{
+					int qi = qs[i].ToInt();
+					if ( (qi < 0) || (qi > 3) ) continue;
+					cbt.reloadqueue.Push(cbttypes[qi]);
+				}
+			}
+			cbt.waitreload = false;
+		}
+		else if ( e.Name ~== "swwmcleartransaction" )
+		{
+			if ( e.Args[1] != consoleplayer ) return;
+			for ( int i=0; i<checklist.Size(); i++ )
+			{
+				if ( checklist[i].uid != e.Args[0] ) continue;
+				checklist.Delete(i);
+				i--;
+			}
+		}
+		else if ( e.Name ~== "swwmclearalltransactions" )
+		{
+			if ( e.Args[0] != consoleplayer ) return;
+			checklist.Clear();
+		}
+		// cheats go here
+		else CheatEvent(e);
+	}
+
+	override bool InputProcess( InputEvent e )
+	{
+		if ( (e.Type == InputEvent.TYPE_KeyDown) && (e.KeyChar >= 0x61) && (e.KeyChar <= 0x7A) )
+		{
+			// F
+			if ( e.KeyChar == 0x66 )
+			{
+				let demo = Demolitionist(players[consoleplayer].mo);
+				let gone = PlayerGone(players[consoleplayer].mo);
+				if ( (demo && (demo.Health <= 0) && (demo.deadtimer > 40))
+					|| (gone && (gone.Health <= 0) && (gone.deadtimer > 40)) )
+				{
+					// pay respects
+					int numf = Random[FInTheChat](1,6);
+					for ( int i=0; i<numf; i++ )
+					{
+						let f = PayRespects.PressF();
+						StatusBar.AttachMessage(f,0,layer:StatusBar.HUDMSGLayer_OverHUD);
+					}
+				}
+			}
+			if ( CheatInput(e) ) return true;
+		}
+		return false;
+	}
+
+}

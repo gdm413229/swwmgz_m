@@ -1,0 +1,428 @@
+// cheatsydoodleing
+
+extend Class SWWMHandler
+{
+	transient ui int kcode, klinger;
+	transient ui String kstr, klingerstr;
+	transient ui bool kfail;
+	transient ui int rss;
+
+	private void CheatEvent( ConsoleEvent e )
+	{
+		if ( e.Name ~== "swwmmoneycheat" )
+		{
+			// what's that spell?
+			// loadsamoney! ... probably
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyLOADSAMONEY!\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
+			}
+			SWWMCredits.Give(players[e.Args[0]],1000000000);
+			SWWMScoreObj.Spawn(1000000000,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
+		}
+		else if ( e.Name ~== "swwmlorecheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyKNOWLEDGE!\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/lamborghini",CHAN_VOICE,CHANF_UI);
+			}
+			// look up all lore files
+			for ( int l=0; l<Wads.GetNumLumps(); l++ )
+			{
+				String fn = Wads.GetLumpFullName(l);
+				if ( fn.Left(13) != "lore/default/" ) continue;
+				int ext = fn.IndexOf(".txt");
+				if ( ext != fn.Length()-4 ) continue;
+				SWWMLoreLibrary.Add(players[e.Args[0]],fn.Mid(13,ext-13));
+			}
+		}
+		else if ( e.Name ~== "swwmsafecheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyStay out of trouble.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+			}
+			Vector3 safepos;
+			double safeangle;
+			[safepos, safeangle] = level.PickPlayerStart(e.Args[0]);
+			players[e.Args[0]].mo.Teleport(safepos,safeangle,TF_TELEFRAG|TF_FORCED|TF_USESPOTZ);
+		}
+		else if ( e.Name ~== "swwmweaponcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyYou better be happy now\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/w_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let w = (Class<SWWMWeapon>)(AllActorClasses[i]);
+				if ( !w || (w == 'SWWMWeapon') ) continue;
+				let def = GetDefaultByType(w);
+				if ( def.bCHEATNOTWEAPON ) continue;
+				let ow = players[e.Args[0]].mo.FindInventory(w);
+				if ( ow && (ow.Amount >= ow.MaxAmount) ) continue;
+				if ( ow ) ow.Amount = ow.MaxAmount;
+				else players[e.Args[0]].mo.GiveInventory(w,def.MaxAmount);
+			}
+		}
+		else if ( e.Name ~== "swwmhealcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyRemember to stay fit.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/health_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			players[e.Args[0]].health = players[e.Args[0]].mo.health = 1000;
+		}
+		else if ( e.Name ~== "swwmynykroncheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyYou're still crazy.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/w_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			if ( players[e.Args[0]].mo.FindInventory("Ynykron") )
+				players[e.Args[0]].mo.GiveInventory("YnykronAmmo",1);
+			else players[e.Args[0]].mo.GiveInventory("Ynykron",1);
+		}
+		else if ( e.Name ~== "swwmgravcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyGot something floatier.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/p_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			let g = GravityPower(players[e.Args[0]].mo.FindInventory("GravityPower"));
+			if ( g ) g.EffectTics += g.default.EffectTics;
+			else players[e.Args[0]].mo.GiveInventory("GravityPower",1);
+		}
+		else if ( e.Name ~== "swwminvischeat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyProbably because you're invisible.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/p_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			let g = GhostPower(players[e.Args[0]].mo.FindInventory("GhostPower"));
+			if ( g ) g.EffectTics += g.default.EffectTics;
+			else players[e.Args[0]].mo.GiveInventory("GhostPower",1);
+		}
+		else if ( e.Name ~== "swwmbarriercheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cySafe from those pesky elements.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/p_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			let b = BarrierPower(players[e.Args[0]].mo.FindInventory("BarrierPower"));
+			if ( b ) b.EffectTics += b.default.EffectTics;
+			else players[e.Args[0]].mo.GiveInventory("BarrierPower",1);
+		}
+		else if ( e.Name ~== "swwmammocheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyDon't squander it.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/ammo_pkup",CHAN_VOICE,CHANF_UI);
+			}
+			players[e.Args[0]].mo.GiveInventory("HammerspaceEmbiggener",8,true);
+			for ( Inventory i=players[e.Args[0]].mo.inv; i; i=i.inv )
+			{
+				if ( !(i is 'Ammo') ) continue;
+				i.Amount = i.MaxAmount;
+			}
+		}
+		else if ( e.Name ~== "swwmbloodcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyEdgy...\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmexplocheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyThat cheat's not needed anymore.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmallcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyStill as wrappy as it's always been.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("fabricator/use",CHAN_VOICE,CHANF_UI);
+			}
+			players[e.Args[0]].mo.CheatGive("all",0);
+			players[e.Args[0]].health = players[e.Args[0]].mo.health = 1000;
+		}
+		else if ( e.Name ~== "swwmflagcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyThere are no flags here.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmballcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cy\"Balls on your head\"? What was I even thinking...\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmsmartcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cySkittles are better anyway.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmnutcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyI'm way past that, it was bad for my health.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmweeniecheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyAlways has been.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmpunishcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyThis is a bulli free zone.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmball2cheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cy<insert amiga boing ball here>\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmfartcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyI'd rather not reimplement that one.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmsupercheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyNo, you're the Demolitionist.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmstonecheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyThe pinnacle of... wait, I misread that.\c-");
+				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+			}
+		}
+		else if ( e.Name ~== "swwmfroggycheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cdHop!\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+			}
+			let mo = players[e.Args[0]].mo;
+			Actor f = Actor(ThinkerIterator.Create("FroggyChair").Next());
+			if ( !f ) f = mo.Spawn("FroggyChair");
+			f.SetOrigin(mo.Vec2OffsetZ(cos(mo.angle)*40.,sin(mo.angle)*40.,mo.player.viewz-32.),false);
+			f.A_SetAngle(f.AngleTo(mo));
+			f.Spawn("SWWMItemFog",f.pos);
+			f.A_StartSound("bestsound",CHAN_ITEMEXTRA);
+		}
+		else if ( e.Name ~== "swwmamnesiacheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyAmnesiacs administered.\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("bestsound",CHAN_VOICE,CHANF_UI);
+			}
+			let ti = ThinkerIterator.Create("Actor");
+			Actor a;
+			while ( a = Actor(ti.Next()) )
+			{
+				if ( !a.bIsMonster || a.player ) continue;
+				a.A_ClearTarget();
+			}
+		}
+		else if ( e.Name ~== "swwmjanitorcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				Console.Printf("\cyLet's mop up that big mess over there.\c-");
+				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+			}
+			let cc = SWWMCorpseCleaner(ThinkerIterator.Create("SWWMCorpseCleaner",Thinker.STAT_USER).Next());
+			if ( !cc )
+			{
+				cc = new("SWWMCorpseCleaner");
+				cc.ChangeStatNum(Thinker.STAT_USER);
+				cc.Init(players[e.Args[0]].mo);
+			}
+			else cc.Init(players[e.Args[0]].mo);
+		}
+	}
+
+	private ui bool CheatInput( InputEvent e )
+	{
+		// cheat code handling
+		String cht[] =
+		{
+			"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang", "swwmforgetaboutit",
+			"swwmmisterproper",
+			// SWWM Platinum cheats
+			"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
+			"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
+			"swwmreflectonme",        "swwmgunzmeneeds",       "swwmbloodrainsfromheaven",
+			"swwmnotwannaboom",       "swwmverywrappyoatmeal", "swwmflaggerybingo",
+			"swwmheadsball",          "swwmsmarties",          "swwmnocilla",
+			"swwmmarioisaweenie",     "swwmpunish",            "swwmboingball",
+			"swwmgassy",              "swwmiamsuperman",       "swwmtouchstone"
+		};
+		String cmd[] =
+		{
+			"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat", "swwmamnesiacheat",
+			"swwmjanitorcheat",
+			// SWWM Platinum cheats
+			"swwmsafecheat",    "swwmweaponcheat",   "swwmhealcheat",
+			"swwmynykroncheat", "swwmgravcheat",   "swwminvischeat",
+			"swwmbarriercheat", "swwmammocheat", "swwmbloodcheat",
+			"swwmexplocheat",   "swwmallcheat",    "swwmflagcheat",
+			"swwmballcheat",    "swwmsmartcheat",  "swwmnutcheat",
+			"swwmweeniecheat",  "swwmpunishcheat", "swwmball2cheat",
+			"swwmfartcheat",    "swwmsupercheat",  "swwmstonecheat"
+		};
+		bool matchany = false;
+		kstr.AppendCharacter(e.KeyChar);
+		if ( kstr.Length() > 0 )
+		{
+			if ( kcode >= 4 )
+				S_StartSound("misc/boink",CHAN_WEAPON,CHANF_UI|CHANF_OVERLAP,pitch:FRandom[HudStuff](.8,1.2));
+			for ( int i=0; i<cht.Size(); i++ )
+			{
+				if ( kstr != cht[i].Left(kstr.length()) ) continue;
+				matchany = true;
+				if ( kstr != cht[i] ) continue;
+				if ( SWWMUtility.CheatsDisabled(consoleplayer) )
+				{
+					kfail = true;
+					klinger = gametic+40;
+				}
+				else
+				{
+					kfail = false;
+					klinger = gametic+60;
+					SendNetworkEvent(cmd[i],consoleplayer);
+				}
+				klingerstr = kstr;
+				kcode = 0;
+				kstr = "";
+				return true;
+			}
+			if ( !matchany )
+			{
+				bool eatit = false;
+				if ( kcode >= 4 )
+				{
+					kfail = true;
+					klinger = gametic+40;
+					klingerstr = kstr;
+					S_StartSound("bruh",CHAN_VOICE,CHANF_UI);
+					eatit = true;
+				}
+				kcode = 0;
+				kstr = "";
+				if ( eatit ) return true;
+			}
+			else
+			{
+				kcode++;
+				if ( kcode > 4 ) return true; // eat keypresses from this point
+			}
+		}
+		return false;
+	}
+
+	private ui int GetUIRandom()
+	{
+		return (rss = (rss<<1)*35447+(rss/87));
+	}
+
+	private ui double RandomShiver()
+	{
+		int sd = GetUIRandom();
+		return ((abs(sd)%11)-5)*.1;
+	}
+
+	private ui int RandomFall()
+	{
+		int sd = GetUIRandom();
+		return ((abs(sd)%22)+10);
+	}
+
+	private ui void CheatOverlay( RenderEvent e )
+	{
+		// cheat input
+		if ( (kcode <= 4) && ((klinger < gametic) || (klingerstr == "")) )
+			return;
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/266.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		String chstr = (kcode>4)?kstr.Mid(4):klingerstr.Mid(4);
+		double alph = clamp((klinger-(gametic+e.fractic))/20.,0.,1.);
+		double shine = clamp((klinger-(gametic+e.fractic+40))/20.,0.,1.);
+		int col = (kcode>4)?0:(kfail)?2:1;
+		int tlen = chstr.CodePointCount();
+		let fnt = newsmallfont;
+		int width = fnt.StringWidth(chstr)+(tlen-1);
+		int xx = int((ss.x-width)/2.);
+		int yy = int((ss.y-newsmallfont.GetHeight())/2.);
+		rss = (kcode>4)?gametic:klinger;
+		for ( int i=0, pos=0; i<tlen; i++ )
+		{
+			int ch;
+			[ch, pos] = chstr.GetNextCodePoint(pos);
+			if ( col == 0 ) Screen.DrawChar(fnt,Font.CR_DARKGRAY,xx+RandomShiver(),yy+RandomShiver(),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			else if ( col == 1 ) Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ColorOverlay,Color(int(shine*255),255,255,255));
+			else if ( col == 2 ) Screen.DrawChar(fnt,Font.CR_RED,xx,yy+RandomFall()*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			xx += newsmallfont.GetCharWidth(ch)+1;
+		}
+	}
+}

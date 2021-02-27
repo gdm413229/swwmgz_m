@@ -1,0 +1,243 @@
+// collectible items that may drop sometimes
+
+Class SWWMCollectible : Inventory abstract
+{
+	Mixin SWWMUseToPickup;
+
+	int avail;
+	bool propagated;
+	Class<SWWMItemGesture> gesture;
+
+	Property Availability : avail;
+	Property GestureWeapon : gesture;
+
+	// minimum gametype requirements
+	enum EAvailability
+	{
+		AVAIL_Strife = GAME_Strife,
+		AVAIL_Hexen = AVAIL_Strife|GAME_Hexen,
+		AVAIL_Heretic = AVAIL_Hexen|GAME_Heretic,
+		AVAIL_All = AVAIL_Heretic|GAME_DoomChex
+	};
+
+	Default
+	{
+		Inventory.PickupSound "menu/buyinv";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+		Inventory.PickupFlash "SWWMCyanPickupFlash";
+		SWWMCollectible.Availability AVAIL_All;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.AUTOACTIVATE;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 8;
+		Height 24;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		// delet ourselves if wrong iwad
+		if ( !(gameinfo.gametype&avail) )
+			Destroy();
+	}
+	override bool CanPickup( Actor toucher )
+	{
+		// no pickup if wrong iwad
+		if ( !(gameinfo.gametype&avail) ) return false;
+		return Super.CanPickup(toucher);
+	}
+	override string PickupMessage()
+	{
+		if ( Stamina > 0 )
+			return StringTable.Localize(PickupMsg)..String.Format(" \cj(\cg¥\cf%d\cj)\c-",Stamina);
+		return Super.PickupMessage();
+	}
+	override bool Use( bool pickup )
+	{
+		if ( Owner.player && !propagated )
+		{
+			if ( pickup && CVar.GetCVar('swwm_collectanim',Owner.player).GetBool() )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture);
+			else if ( !pickup )
+				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture,true);
+		}
+		// clean up the flag
+		propagated = false;
+		return false;
+	}
+
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// we're only attaching to the other players
+		if ( propagated )
+			return;
+		// give credit
+		if ( other.player && (Stamina > 0) )
+		{
+			SWWMScoreObj.Spawn(Stamina,other.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+other.Height/2));
+			SWWMCredits.Give(other.player,Stamina);
+		}
+		// send to all other players
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo || (i == other.PlayerNumber()) )
+				continue;
+			let c = SWWMCollectible(Spawn(GetClass(),pos));
+			c.propagated = true;
+			if ( !c.CallTryPickup(players[i].mo) )
+				c.Destroy();
+		}
+	}
+
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// The collectibles
+Class GenericCube : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_PERFECTLYGENERIC";
+		Inventory.PickupMessage "$T_PERFECTLYGENERIC";
+		SWWMCollectible.GestureWeapon "GenericCubeGesture";
+		Stamina 1000;
+	}
+}
+Class AkariProject : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_AKARIPROJECT";
+		Inventory.PickupMessage "$T_AKARIPROJECT";
+		SWWMCollectible.GestureWeapon "AkariProjectGesture";
+		Stamina 2000;
+		Radius 4;
+		Height 22;
+	}
+}
+Class LoveSignalsCD : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_LOVESIGNALS";
+		Inventory.PickupMessage "$T_LOVESIGNALS";
+		SWWMCollectible.GestureWeapon "LoveSignalsCDGesture";
+		Stamina 3000;
+		Radius 4;
+		Height 21;
+	}
+}
+Class NutatcoBar : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_NUTATCO";
+		Inventory.PickupMessage "$T_NUTATCO";
+		SWWMCollectible.GestureWeapon "NutatcoBarGesture";
+		Stamina 200;
+		Radius 3;
+		Height 22;
+	}
+}
+Class FrispyCorn : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_FRISPYCORN";
+		Inventory.PickupMessage "$T_FRISPYCORN";
+		SWWMCollectible.GestureWeapon "FrispyCornGesture";
+		Stamina 400;
+		Radius 5;
+		Height 23;
+	}
+}
+Class SayaBean : SWWMCollectible
+{
+	bool callout;	// already called the player a perv for loading h-doom
+
+	Default
+	{
+		Tag "$T_SAYABEAN";
+		Inventory.PickupMessage "$T_SAYABEAN";
+		SWWMCollectible.GestureWeapon "SayaBeanGesture";
+		Stamina 5000;
+		Radius 6;
+		Height 23;
+	}
+}
+// Heretic
+Class DemoPlush : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_DEMOPLUSH";
+		Inventory.PickupMessage "$T_DEMOPLUSH";
+		SWWMCollectible.Availability AVAIL_Heretic;
+		SWWMCollectible.GestureWeapon "DemoPlushGesture";
+		Stamina 6000;
+		Radius 12;
+		Height 36;
+	}
+}
+// Hexen
+Class KirinCummies : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_PEACH";
+		Inventory.PickupMessage "$T_PEACH";
+		SWWMCollectible.Availability AVAIL_Hexen;
+		SWWMCollectible.GestureWeapon "KirinCummiesGesture";
+		Stamina 300;
+		Radius 3;
+		Height 21;
+	}
+}
+Class MilkBreads : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_MILKBREAD";
+		Inventory.PickupMessage "$T_MILKBREAD";
+		SWWMCollectible.Availability AVAIL_Hexen;
+		SWWMCollectible.GestureWeapon "MilkBreadsGesture";
+		Stamina 900;
+		Radius 4;
+		Height 21;
+	}
+}
+Class KirinManga : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_KIRINMANGA";
+		Inventory.PickupMessage "$T_KIRINMANGA";
+		SWWMCollectible.Availability AVAIL_Hexen;
+		SWWMCollectible.GestureWeapon "KirinMangaGesture";
+		Stamina 1600;
+		Radius 4;
+		Height 22;
+	}
+}
+Class KirinPlush : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_KIRINPLUSH";
+		Inventory.PickupMessage "$T_KIRINPLUSH";
+		SWWMCollectible.Availability AVAIL_Hexen;
+		SWWMCollectible.GestureWeapon "KirinPlushGesture";
+		Stamina 8000;
+		Radius 14;
+		Height 37;
+	}
+}

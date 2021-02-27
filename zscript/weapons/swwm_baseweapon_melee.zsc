@@ -1,0 +1,440 @@
+// melee/parrying stuff
+
+Class ParriedBuff : Inventory
+{
+	Vector3 oldvel;
+
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( Owner.bBLASTED ) oldvel = Owner.vel;
+		if ( !Owner.bMISSILE && !Owner.bSKULLFLY )
+		{
+			// lost soul is no longer attacking
+			// remove blasted flag just in case
+			Owner.bBLASTED = false;
+			Destroy();
+			return;
+		}
+		if ( special1 <= 0 ) return;
+		// smoke trail
+		Actor s;
+		if ( special1&1 )
+		{
+			s = Spawn("SWWMHalfSmoke",Owner.pos);
+			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,.6);
+			s.scale *= 1.2;
+			s.alpha *= .3;
+		}
+		if ( special1 > 1 )
+		{
+			s = Spawn("SWWMHalfSmoke",Owner.pos);
+			s.vel = Owner.vel*.3+(FRandom[Ponch](-1,1),FRandom[Ponch](-1,1),FRandom[Ponch](-1,1)).unit()*FRandom[Ponch](.1,1.2);
+			s.scale *= 2.;
+			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+			s.SetShade(Color(4,2,1)*Random[Ponch](32,63));
+		}
+	}
+	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	{
+		// increase blast damage (way too tiny normally for lost souls)
+		if ( Owner.bBLASTED && (damageType == 'Melee') && !inflictor && !source )
+		{
+			newdamage = 20;
+			if ( special1&1 ) newdamage *= 2;
+			if ( special2 > 1 ) newdamage *= 8;
+		}
+	}
+}
+
+// amplifies damage of parried projectiles
+Class ParryDamageChecker : Inventory
+{
+	Default
+	{
+		+Inventory.UNDROPPABLE;
+		+Inventory.UNTOSSABLE;
+		+Inventory.UNCLEARABLE;
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+	}
+
+	override void ModifyDamage( int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags )
+	{
+		Inventory buff;
+		if ( inflictor && (buff=inflictor.FindInventory("ParriedBuff")) )
+		{
+			double mult;
+			if ( buff.special1 <= 1 ) mult = 1.5;
+			else if ( buff.special1 >= 2 ) mult = 8.;
+			if ( buff.special1&1 ) mult *= 2.;
+			newdamage = int(damage*mult);
+		}
+	}
+}
+
+Class ParryRing : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Scale .1;
+		Alpha .3;
+		Radius 0.1;
+		Height 0;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	States
+	{
+	Spawn:
+		XRG4 ABCDEFGHIJKLMNOPQRSTUVWX 1 A_SetScale(scale.x*(1+specialf1));
+		Stop;
+	}
+}
+
+Class ParryField : Actor
+{
+	bool critsnd;
+
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+
+	override void Tick()
+	{
+		if ( !master )
+		{
+			Destroy();
+			return;
+		}
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(master.pitch,master.angle,master.roll);
+		origin = level.Vec3Offset(master.Vec2OffsetZ(0,0,master.player.viewz),x*20);
+		SetOrigin(origin,false);
+		// check for projectiles to deflect
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !((a.bMISSILE && !a.IsZeroDamage() && (a.target != master)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
+			Vector3 vdir = a.vel;
+			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
+			Vector3 hdir = dir;
+			if ( a.bMISSILE )
+			{
+				// deflect directly to target
+				if ( a.target )
+				{
+					hdir = level.Vec3Diff(a.pos,a.target.Vec3Offset(0,0,a.target.height/2)).unit();
+					double theta = max(FRandom[Parry](0.,1.)**2.,.1);
+					dir = dir*(1.-theta)+hdir*theta;
+				}
+				// push away
+				if ( a.bSEEKERMISSILE ) a.tracer = a.target;
+				a.target = master;
+			}
+			if ( a.bSKULLFLY ) a.bBLASTED = true; // blast lost souls
+			a.GiveInventory("ParriedBuff",1);
+			let buff = a.FindInventory("ParriedBuff");
+			double mvel = a.vel.length();
+			double nspeed = min(100,mvel*FRandom[Parry](1.2,1.4)+20);
+			a.angle = atan2(dir.y,dir.x);
+			a.pitch = asin(-dir.z);
+			let raging = RagekitPower(master.FindInventory("RagekitPower"));
+			if ( raging )
+			{
+				buff.special1 = 2;
+				nspeed = min(100,nspeed*2.);
+				raging.DoHitFX();
+			}
+			a.vel = dir*nspeed;
+			if ( a.bMISSILE ) a.speed = nspeed;
+			let i = Spawn(raging?"BigPunchImpact":"PunchImpact",a.pos);
+			i.target = master;
+			i.angle = atan2(dir.y,dir.x);
+			i.pitch = asin(-dir.z);
+			i.bAMBUSH = true;
+			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
+			A_StartSound("demolitionist/parry",CHAN_WEAPON);
+			let s = Demolitionist(master).mystats;
+			if ( special1 >= special2 )	// perfect parry
+			{
+				// increased homing
+				dir = dir*.4+hdir*.6;
+				nspeed = min(100,nspeed*1.5);
+				a.vel = dir*nspeed;
+				for ( int i=1; i<6; i++ )
+				{
+					let r = Spawn("ParryRing",a.pos);
+					r.specialf1 = i*.04;
+				}
+				buff.special1++;
+				if ( !critsnd )
+				{
+					A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);
+					if ( s ) s.pparries++;
+				}
+				critsnd = true;
+			}
+			if ( s ) s.parries++;
+		}
+		if ( --special1 <= 0 ) Destroy();
+	}
+}
+
+Class UseList
+{
+	Line hitline;
+	int hitside, hitpart;
+	Actor hitactor;
+	Vector3 pos;
+}
+
+Class UseLineTracer : LineTracer
+{
+	Array<UseList> uses;
+
+	static play bool TangibleLine( UseList u )
+	{
+		if ( u.hitpart != TIER_MIDDLE ) return true;	// lower/upper/ffloor
+		Line l = u.HitLine;
+		if ( !l.sidedef[1] ) return true; // onesided line
+		Side s = l.sidedef[u.hitside];
+		if ( s.GetTexture(1).IsNull() ) return false;	// no midtex
+		double ofs = s.GetTextureYOffset(1);
+		Vector2 siz = TexMan.GetScaledSize(s.GetTexture(1));
+		Vector2 tofs = TexMan.GetScaledOffset(s.GetTexture(1));
+		ofs += tofs.y;
+		ofs *= s.GetTextureYScale(1);
+		siz.y *= s.GetTextureYScale(1);
+		SecPlane ceil, flor;
+		if ( (l.frontsector.floorplane.ZatPoint(l.v1.p) > l.backsector.floorplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.floorplane.ZatPoint(l.v2.p) > l.backsector.floorplane.ZatPoint(l.v2.p)) )
+			flor = l.frontsector.floorplane;
+		else flor = l.backsector.floorplane;
+		if ( (l.frontsector.ceilingplane.ZatPoint(l.v1.p) < l.backsector.ceilingplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.ceilingplane.ZatPoint(l.v2.p) < l.backsector.ceilingplane.ZatPoint(l.v2.p)) )
+			ceil = l.frontsector.ceilingplane;
+		else ceil = l.backsector.ceilingplane;
+		double ceilpoint = max(ceil.ZatPoint(l.v1.p),ceil.ZatPoint(l.v2.p));
+		double florpoint = min(flor.ZatPoint(l.v1.p),flor.ZatPoint(l.v2.p));
+		if ( l.flags&Line.ML_DONTPEGBOTTOM )
+		{
+			if ( u.pos.z > florpoint+ofs+siz.y ) return false;
+			if ( u.pos.z < florpoint+ofs ) return false;
+			return true;
+		}
+		else
+		{
+			if ( u.pos.z > ceilpoint+ofs ) return false;
+			if ( u.pos.z < (ceilpoint+ofs)-siz.y ) return false;
+			return true;
+		}
+		return false;
+	}
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			let u = new("UseList");
+			u.hitline = null;
+			u.hitactor = Results.HitActor;
+			u.pos = Results.HitPos;
+			uses.Push(u);
+			return TRACE_Skip;
+		}
+		if ( Results.HitType == TRACE_HitWall )
+		{
+			if ( Results.HitLine.Activation&(SPAC_Use|SPAC_UseThrough) )
+			{
+				let u = new("UseList");
+				u.hitline = Results.HitLine;
+				u.hitside = Results.Side;
+				u.hitpart = Results.FFloor?TIER_FFLOOR:Results.Tier;
+				u.hitactor = null;
+				u.pos = Results.HitPos;
+				uses.Push(u);
+			}
+			if ( Results.Tier == TIER_Middle )
+			{
+				if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything|Line.ML_BlockUse)) )
+					return TRACE_Stop;
+				return TRACE_Skip;
+			}
+		}
+		return TRACE_Stop;
+	}
+}
+
+extend Class SWWMWeapon
+{
+	Actor pfield;	// instance of parry field for current melee attack
+	bool wallponch;	// is punching a wall (for activation checks)
+
+	action void A_Parry( int duration )
+	{
+		Vector3 x, y, z, origin;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),x*20-(0,0,20));
+		if ( invoker.pfield ) invoker.pfield.Destroy();
+		invoker.pfield = Spawn("ParryField",origin);
+		invoker.pfield.master = self;
+		invoker.pfield.special1 = duration;
+		invoker.pfield.special2 = duration;
+		if ( !FindInventory("ParryDamageChecker") )
+			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
+	}
+	private action bool TryMelee( double angle, int dmg, String hitsound = "", double rangemul = 1. )
+	{
+		FTranslatedLineTarget t;
+		double slope = AimLineAttack(angle,1.5*DEFMELEERANGE*rangemul,t,0.,ALF_CHECK3D);
+		FLineTraceData d;
+		LineTrace(angle,1.5*DEFMELEERANGE*rangemul,slope,0,player.viewheight,data:d);
+		bool raging = CountInv("RagekitPower");
+		if ( (d.HitType == TRACE_HitActor) && !d.HitActor.FindInventory("ParriedBuff") )
+		{
+			bool bloodless = true;
+			double diff = deltaangle(self.angle,AngleTo(d.HitActor));
+			self.angle += clamp(diff,-5.,5.);
+			SWWMUtility.DoKnockback(d.HitActor,d.HitDir+(0,0,.2),dmg*2000);
+			if ( raging )
+			{
+				invoker.bEXTREMEDEATH = true;
+				invoker.bNOEXTREMEDEATH = false;
+			}
+			else
+			{
+				invoker.bEXTREMEDEATH = false;
+				invoker.bNOEXTREMEDEATH = true;
+			}
+			if ( !d.HitActor.bDORMANT )	// lol oops
+				d.HitActor.DaggerAlert(self);
+			int flg = DMG_USEANGLE|DMG_THRUSTLESS;
+			if ( raging ) flg |= DMG_FOILINVUL;
+			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Melee',flg,atan2(d.HitDir.y,d.HitDir.x));
+			invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
+			invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
+			int quakin = raging?8:2;
+			if ( d.HitActor.player ) d.HitActor.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
+			if ( !d.HitActor.bNOBLOOD && !d.HitActor.bDORMANT && (raging || !d.HitActor.bINVULNERABLE) )
+			{
+				d.HitActor.TraceBleed(dmg,invoker);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+				bloodless = false;
+			}
+			else
+			{
+				let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation);
+				p.angle = atan2(-d.HitDir.y,-d.HitDir.x);
+			}
+			if ( raging )
+			{
+				let ps = Spawn("BigPunchSplash",d.HitLocation);
+				ps.target = self;
+				ps.special1 = dmg;
+			}
+			A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
+			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
+			else A_StartSound((hitsound!="")?hitsound:bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
+			A_AlertMonsters(swwm_uncapalert?0:300);
+			return true;
+		}
+		return false;
+	}
+	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1. )
+	{
+		Vector3 origin = Vec3Offset(0,0,player.viewheight);
+		Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
+		// check for usables
+		let ut = new("UseLineTracer");
+		ut.uses.Clear();
+		ut.Trace(origin,CurSector,dir,DEFMELEERANGE*rangemul,0);
+		invoker.wallponch = true;
+		for ( int i=0; i<ut.uses.Size(); i++ )
+		{
+			if ( ut.uses[i].hitactor )
+			{
+				// punching is not greeting/patting (that'd be weird)
+				if ( (ut.uses[i].hitactor == self) || (ut.uses[i].hitactor is 'Demolitionist')
+					|| (ut.uses[i].hitactor is 'HeadpatTracker')
+					|| (ut.uses[i].hitactor is 'FroggyChair') ) continue;
+				if ( ut.uses[i].hitactor.Used(self) ) break;
+			}
+			else if ( ut.uses[i].hitline && UseLineTracer.TangibleLine(ut.uses[i]) )
+			{
+				int locknum = SWWMUtility.GetLineLock(ut.uses[i].hitline);
+				if ( !locknum || CheckKeys(locknum,false,true) )
+					ut.uses[i].hitline.RemoteActivate(self,ut.uses[i].hitside,SPAC_Use,ut.uses[i].pos);
+				if ( !(ut.uses[i].hitline.activation&SPAC_UseThrough) ) break;
+			}
+		}
+		invoker.wallponch = false;
+		// check for shootables
+		SWWMBulletTrail.DoTrail(self,origin,dir,DEFMELEERANGE*rangemul,0);
+		let raging = RagekitPower(FindInventory("RagekitPower"));
+		int maxang = raging?18:12;
+		for ( int i=0; i<maxang; i++ )
+		{
+			if ( TryMelee(angle+i*(45./16),dmg,hitsound,rangemul) || TryMelee(angle-i*(45./16),dmg,hitsound,rangemul) )
+				return;
+		}
+		// check for walls instead
+		FTranslatedLineTarget t;
+		double slope = AimLineAttack(angle,DEFMELEERANGE*rangemul,t,0.,ALF_CHECK3D);
+		FLineTraceData d;
+		LineTrace(angle,DEFMELEERANGE*rangemul,slope,TRF_THRUACTORS,player.viewheight,data:d);
+		if ( d.HitType == TRACE_HitNone ) return;
+		Vector3 HitNormal = -d.HitDir;
+		if ( d.HitType == TRACE_HitFloor )
+		{
+			if ( d.Hit3DFloor ) HitNormal = -d.Hit3DFloor.top.Normal;
+			else HitNormal = d.HitSector.floorplane.Normal;
+		}
+		else if ( d.HitType == TRACE_HitCeiling )
+		{
+			if ( d.Hit3DFloor ) HitNormal = -d.Hit3DFloor.bottom.Normal;
+			else HitNormal = d.HitSector.ceilingplane.Normal;
+		}
+		else if ( d.HitType == TRACE_HitWall )
+		{
+			HitNormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+			if ( !d.LineSide ) HitNormal *= -1;
+			d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation+HitNormal*4);
+		}
+		let p = Spawn(raging?"BigPunchImpact":"PunchImpact",d.HitLocation+HitNormal*4);
+		p.angle = atan2(HitNormal.y,HitNormal.x);
+		p.pitch = asin(-HitNormal.z);
+		if ( d.HitType == TRACE_HitFloor ) p.CheckSplash(40);
+		if ( raging )
+		{
+			let ps = Spawn("BigPunchSplash",d.HitLocation+HitNormal*4);
+			ps.target = self;
+			ps.special1 = dmg;
+		}
+		int quakin = raging?4:1;
+		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
+		A_StartSound(raging?"pusher/althit":(hitsound!="")?hitsound:"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
+		A_AlertMonsters(swwm_uncapalert?0:100);
+		if ( raging ) raging.DoHitFX();
+		if ( swwm_omnibust ) BusterWall.BustLinetrace(d,raging?(dmg*8):dmg,self,d.HitDir,d.HitLocation.z);
+	}
+}

@@ -1,0 +1,1813 @@
+// Misc. Utility code
+
+enum EDoExplosionFlags
+{
+	DE_BLAST = 1,		// sets BLASTED flag on pushed actors
+	DE_NOBLEED = 2,		// does not spawn blood decals on hit
+	DE_NOSPLASH = 4,	// like XF_NOSPLASH
+	DE_THRUWALLS = 8,	// damages through geometry (no sight check)
+	DE_NOTMISSILE = 16,	// instigator is the source itself (normally it'd be its target pointer)
+	DE_EXTRAZTHRUST = 32,	// applies a higher Z thrust to enemies on ground
+	DE_HOWL = 64,		// 25% chance for hit enemies to howl
+};
+
+Class SWWMUtility
+{
+	// thanks zscript
+	static clearscope double fract( double a )
+	{
+		return a-floor(a);
+	}
+
+	// not sure if I should use this, looks a bit ugly
+	static clearscope void ThousandsStr( out String s )
+	{
+		String nstr = s;
+		s.Truncate(0);
+		int len = nstr.CodePointCount();
+		int t = len;
+		if ( nstr.Left(1) == "-" ) t++;
+		for ( int i=0, pos=0; i<len; i++ )
+		{
+			int ch;
+			[ch, pos] = nstr.GetNextCodePoint(pos);
+			s.AppendCharacter(ch);
+			t = (t-1)%3;
+			if ( (pos < len) && !t )
+				s.AppendCharacter(0x2C); // comma
+		}
+	}
+	static clearscope String ThousandsNum( int n )
+	{
+		String nstr = String.Format("%d",n);
+		ThousandsStr(nstr);
+		return nstr;
+	}
+
+	// this can probably be simplified, but I'm lazy
+	static clearscope Vector3 HSVtoRGB( Vector3 hsv )
+	{
+		Vector3 p;
+		p.x = abs(fract(hsv.x+1.)*6.-3.);
+		p.y = abs(fract(hsv.x+(2./3.))*6.-3.);
+		p.z = abs(fract(hsv.x+(1./3.))*6.-3.);
+		Vector3 p2;
+		p2.x = (1.-hsv.y)+clamp(p.x-1.,0.,1.)*hsv.y;
+		p2.y = (1.-hsv.y)+clamp(p.y-1.,0.,1.)*hsv.y;
+		p2.z = (1.-hsv.y)+clamp(p.z-1.,0.,1.)*hsv.y;
+		return p2*hsv.z;
+	}
+
+	static clearscope void StripColor( out String str )
+	{
+		int len = str.CodePointCount();
+		for ( int i=0, pos=0; i<len; i++ )
+		{
+			int remlen = 0;
+			int cplen = 0;
+			int ch, nxt;
+			[ch, nxt] = str.GetNextCodePoint(pos);
+			if ( ch != 0x1C )
+			{
+				pos = nxt;
+				continue;
+			}
+			remlen++;
+			cplen++;
+			[ch, nxt] = str.GetNextCodePoint(pos+remlen);
+			if ( ch == 0x5B )
+			{
+				int ch2;
+				do
+				{
+					[ch2, nxt] = str.GetNextCodePoint(pos+remlen);
+					remlen += nxt-(pos+remlen);
+					cplen++;
+				}
+				while ( ch2 != 0x5D );
+			}
+			remlen++;
+			str.Remove(pos,remlen);
+			len -= cplen;
+			i--;
+		}
+	}
+
+	static clearscope String SuperscriptNum( int val )
+	{
+		// unicode is fun
+		static const int digs[] = {0x2070,0x00B9,0x00B2,0x00B3,0x2074,0x2075,0x2076,0x2077,0x2078,0x2079};
+		String str = "";
+		int digits = int(Log10(val));
+		for ( int i=digits; i>=0; i-- )
+		{
+			int d = int(val/(10**i))%10;
+			str.AppendCharacter(digs[d]);
+		}
+		return str;
+	}
+
+	static clearscope void BeautifyClassName( out String str )
+	{
+		String workstr = str;
+		str.Truncate(0);
+		workstr.Replace("_"," ");
+		int len = workstr.CodePointCount();
+		for ( int i=0, pos=0; i<len; i++ )
+		{
+			int cp1;
+			[cp1, pos] = workstr.GetNextCodePoint(pos);
+			str.AppendCharacter(cp1);
+			if ( i < len-1 )
+			{
+				int cp2 = workstr.GetNextCodePoint(pos);
+				// this looks awkward, but I have to also account for non-letter characters
+				// uppercase after lowercase
+				if ( (String.CharUpper(cp1) != cp1) && (String.CharLower(cp2) != cp2) )
+					str.AppendCharacter(0x20);
+				// uppercase after non-letter
+				else if ( (String.CharUpper(cp1) == cp1) && (String.CharLower(cp1) == cp1) && (String.CharLower(cp2) != cp2) )
+					str.AppendCharacter(0x20);
+				// non-letter after lowercase
+				else if ( (String.CharUpper(cp1) != cp1) && (String.CharLower(cp2) == cp2) && (String.CharUpper(cp2) == cp2) )
+					str.AppendCharacter(0x20);
+			}
+		}
+	}
+
+	static double PitchTo( Actor a, Actor b, double hfact = 1. )
+	{
+		if ( !a || !b ) return 0;
+		Vector3 thispos = a.player?a.Vec2OffsetZ(0,0,a.player.viewz):a.Vec3Offset(0,0,a.missileheight);
+		Vector3 otherpos = b.Vec3Offset(0,0,b.height*hfact);
+		Vector3 diff = level.Vec3Diff(thispos,otherpos);
+		double dist = diff.length();
+		if ( dist > 0 ) return -asin(diff.z/dist);
+		return 0;
+	}
+
+	static clearscope int GetLineLock( Line l )
+	{
+		int locknum = l.locknumber;
+		if ( !locknum )
+		{
+			// check the special
+			switch ( l.special )
+			{
+			case FS_Execute:
+				locknum = l.Args[2];
+				break;
+			case Door_LockedRaise:
+			case Door_Animated:
+				locknum = l.Args[3];
+				break;
+			case ACS_LockedExecute:
+			case ACS_LockedExecuteDoor:
+			case Generic_Door:
+				locknum = l.Args[4];
+				break;
+			}
+		}
+		return locknum;
+	}
+
+	static clearscope bool IsExitLine( Line l )
+	{
+		if ( (l.special == Exit_Normal) || (l.special == Exit_Secret) || (l.special == Teleport_EndGame) || (l.special == Teleport_NewMap) )
+			return true;
+		// E1M8 compat
+		if ( (l.special == ACS_Execute) && (l.Args[0] == -Int('E1M8_KNOCKOUT')) )
+			return true;
+		// spooktober™
+		if ( ((l.special == ACS_Execute) || (l.special == ACS_ExecuteAlways)) && (l.Args[0] == -Int('MapFadeOut')) )
+			return true;
+		return false;
+	}
+
+	static clearscope bool IsTeleportLine( Line l, bool all = false )
+	{
+		// must be two-sided and crossable
+		if ( !l.sidedef[1] || !(l.Activation&(SPAC_Cross|SPAC_MCross|SPAC_PCross|SPAC_AnyCross)) ) return false;
+		// filter lines that aren't player-activated (unless checking all)
+		if ( !all && !(l.Activation&SPAC_PlayerActivate) ) return false;
+		// typical teleports
+		if ( (l.special == Teleport) || (l.special == Teleport_NoStop) )
+			return true;
+		// if checking all, also include sneaky teleports
+		if ( all && ((l.special == Teleport_Line) || (l.special == Teleport_NoFog)) )
+			return true;
+		// exits are included too
+		if ( IsExitLine(l) )
+			return true;
+		return false;
+	}
+
+	// how the fuck is this not available to ZScript?
+	// copied from P_PointOnLineSidePrecise()
+	static clearscope int PointOnLineSide( Vector2 p, Line l )
+	{
+		if ( !l ) return 0;
+		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
+	}
+
+	// haha another one
+	// copied from BoxOnLineSide()
+	static clearscope int BoxOnLineSide( double top, double bottom, double left, double right, Line l )
+	{
+		if ( !l ) return 0;
+		int p1, p2;
+		if ( l.delta.x == 0 )
+		{
+			// ST_VERTICAL:
+			p1 = (right < l.v1.p.x);
+			p2 = (left < l.v1.p.x);
+			if ( l.delta.y < 0 )
+			{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( l.delta.y == 0 )
+		{
+			// ST_HORIZONTAL:
+			p1 = (top > l.v1.p.y);
+			p2 = (bottom > l.v1.p.y);
+			if ( l.delta.x < 0 )
+			{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( (l.delta.x*l.delta.y) >= 0 )
+		{
+			// ST_POSITIVE:
+			p1 = PointOnLineSide((left,top),l);
+			p2 = PointOnLineSide((right,bottom),l);
+		}
+		else
+		{
+			// ST_NEGATIVE:
+			p1 = PointOnLineSide((right,top),l);
+			p2 = PointOnLineSide((left,bottom),l);
+		}
+		return (p1==p2)?p1:-1;
+	}
+
+	// wrapper
+	static clearscope int ActorOnLineSide( Actor a, Line l )
+	{
+		double box[4];
+		box[0] = a.pos.y+a.radius;
+		box[1] = a.pos.y-a.radius;
+		box[2] = a.pos.x-a.radius;
+		box[3] = a.pos.x+a.radius;
+		return BoxOnLineSide(box[0],box[1],box[2],box[3],l);
+	}
+
+	// box intersection check, for collision detection
+	static clearscope bool BoxIntersect( Actor a, Actor b, Vector3 ofs = (0,0,0), int pad = 0 )
+	{
+		Vector3 diff = level.Vec3Diff(level.Vec3Offset(a.pos,ofs),b.pos);
+		if ( (abs(diff.x) > (a.radius+b.radius+pad)) || (abs(diff.y) > (a.radius+b.radius+pad)) ) return false;
+		if ( (diff.z > a.height+pad) || (diff.z < -(b.height+pad)) ) return false;
+		return true;
+	}
+
+	// extruded box intersection check, useful when checking things that might be hit along a path
+	static clearscope bool ExtrudeIntersect( Actor a, Actor b, Vector3 range, int steps, int pad = 0 )
+	{
+		if ( steps <= 0 ) return BoxIntersect(a,b,pad:pad);
+		double step = 1./steps;
+		for ( double i=step; i<=1.; i+=step )
+		{
+			if ( BoxIntersect(a,b,range*i,pad) )
+				return true;
+		}
+		return false;
+	}
+
+	// sphere intersection check, useful for proximity detection
+	static clearscope bool SphereIntersect( Actor a, Vector3 p, double radius )
+	{
+		Vector3 ap = p+level.Vec3Diff(p,a.pos);	// portal-relative actor position
+		Vector3 amin = ap+(-a.radius,-a.radius,0),
+			amax = ap+(a.radius,a.radius,a.height);
+		double distsq = 0.;
+		if ( p.x < amin.x ) distsq += (amin.x-p.x)**2;
+		if ( p.x > amax.x ) distsq += (p.x-amax.x)**2;
+		if ( p.y < amin.y ) distsq += (amin.y-p.y)**2;
+		if ( p.y > amax.y ) distsq += (p.y-amax.y)**2;
+		if ( p.z < amin.z ) distsq += (amin.z-p.z)**2;
+		if ( p.z > amax.z ) distsq += (p.z-amax.z)**2;
+		return (distsq <= (radius**2));
+	}
+
+	// Liang-Barsky line clipping
+	static clearscope bool, Vector2, Vector2 LiangBarsky( Vector2 minclip, Vector2 maxclip, Vector2 v0, Vector2 v1 )
+	{
+		double t0 = 0., t1 = 1.;
+		double xdelta = v1.x-v0.x;
+		double ydelta = v1.y-v0.y;
+		double p, q, r;
+		for ( int i=0;i<4; i++ )
+		{
+			switch ( i )
+			{
+			case 0:
+				p = -xdelta;
+				q = -(minclip.x-v0.x);
+				break;
+			case 1:
+				p = xdelta;
+				q = (maxclip.x-v0.x);
+				break;
+			case 2:
+				p = -ydelta;
+				q = -(minclip.y-v0.y);
+				break;
+			case 3:
+				p = ydelta;
+				q = (maxclip.y-v0.y);
+				break;
+			}
+			if ( (p == 0.) && (q<0.) ) return false;
+			if ( p < 0 )
+			{
+				r = q/p;
+				if ( r > t1 ) return false;
+				else if ( r > t0 ) t0 = r;
+			}
+			else if ( p > 0 )
+			{
+				r = q/p;
+				if ( r < t0 ) return false;
+				else if ( r < t1 ) t1 = r;
+			}
+		}
+		Vector2 ov0 = v0+(xdelta,ydelta)*t0;
+		Vector2 ov1 = v0+(xdelta,ydelta)*t1;
+		return true, ov0, ov1;
+	}
+
+	static clearscope bool IsValidLockNum( int l )
+	{
+		if ( (l < 1) || (l > 255) ) return true;
+		return SWWMCachedLockInfo.IsValidLock(l);
+	}
+
+	static clearscope Color GetLockColor( int l )
+	{
+		return SWWMCachedLockInfo.GetLockColor(l);
+	}
+
+	// wheeeeeeee, let's play a game of "who is who"
+	static clearscope bool IsCivilian( Actor a )
+	{
+		if ( a is 'Beggar' )
+		{
+			if ( (a.level.mapname ~== "MAP32") && (a is 'Beggar1') )
+				return false;	// Prisoner (sorry but we have to)
+			return true;
+		}
+		if ( a is 'Peasant' )
+		{
+			// exclude certain key NPCs
+			if ( (a.level.mapname ~== "MAP01") && (a is 'Peasant9') )
+				return false;	// Beldin (sorry but we have to)
+			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant22') )
+				return false;	// Mourel (fuck that guy)
+			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant4') )
+				return false;	// Harris (also fuck that guy)
+			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant5') )
+				return false;	// Derwin (fat bastard)
+			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant7') )
+				return false;	// Ketrick (THIS IS GARBAGE)
+			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant7') )
+				return false;	// Montag (gimme the damn key)
+			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant8') )
+				return false;	// Wolenick (gimme a hand)
+			if ( (a.level.mapname ~== "MAP33") && (a is 'Peasant5') )
+				return false;	// Harris (also fuck that guy)
+			return true;
+		}
+		return false;
+	}
+
+	// Thanks to ZZYZX and Nash
+	static play void SetToSlope( Actor a, double dang, bool ceil = false )
+	{
+		Sector sect;
+		Vector3 fnormal;
+		if ( ceil )
+		{
+			sect = a.CeilingSector;
+			fnormal = -sect.ceilingplane.Normal;
+		}
+		else
+		{
+			sect = a.FloorSector;
+			fnormal = sect.floorplane.Normal;
+		}
+		// find closest 3d floor for its normal
+		F3DFloor ff;
+		for ( int i=0; i<sect.Get3DFloorCount(); i++ )
+		{
+			if ( !(sect.Get3DFloor(i).flags&F3DFloor.FF_SOLID) ) continue;
+			if ( !ceil && !(sect.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.floorz) ) continue;
+			else if ( ceil && !(sect.Get3DFloor(i).top.ZAtPoint(a.pos.xy) ~== a.ceilingz) ) continue;
+			ff = sect.Get3DFloor(i);
+			break;
+		}
+		if ( ff )
+		{
+			if ( ceil ) fnormal = ff.bottom.Normal;
+			else fnormal = -ff.top.Normal;
+		}
+		vector2 fnormalp1 = ((fnormal.x != 0) || (fnormal.y != 0))?(fnormal.x,fnormal.y).Unit():(0,0);
+		vector2 fnormalp2 = ((fnormal.x,fnormal.y).Length(),fnormal.z);
+		double fang = atan2(fnormalp1.y,fnormalp1.x); // floor angle (not pitch!)
+		double fpitch = atan2(fnormalp2.x,fnormalp2.y); // floor pitch
+		double ddiff1 = sin(fang-dang);
+		double ddiff2 = cos(fang-dang);
+		a.pitch = fpitch*ddiff2;
+		a.roll = -fpitch*ddiff1;
+		a.angle = dang;
+	}
+
+	static clearscope int Round100( double x )
+	{
+		return int(ceil(x/100.)*100.);
+	}
+
+	static clearscope bool IsDoorSector( Sector s, int part )
+	{
+		// super-easy mode: check for boss special sectors
+		if ( (level.mapname ~== "E1M8") || (level.mapname ~== "E2M8") || (level.mapname ~== "E3M8")
+			|| (level.mapname ~== "E4M6") || (level.mapname ~== "E4M8") || (level.mapname ~== "E5M8")
+			|| (level.mapname ~== "MAP07") )
+		{
+			let si = level.CreateSectorTagIterator(666);
+			int idx;
+			while ( (idx = si.Next()) != -1 )
+				if ( level.Sectors[idx] == s )
+					return true;
+			if ( level.mapname ~== "MAP07" )
+			{
+				let si2 = level.CreateSectorTagIterator(667);
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		// moderate: see if it's a busted crusher, we need to be able to break those in case they cause a softlock
+		let ti = ThinkerIterator.Create("SWWMCrusherBroken",Thinker.STAT_USER);
+		SWWMCrusherBroken cb;
+		while ( cb = SWWMCrusherBroken(ti.Next()) )
+		{
+			if ( (part == 0) && (cb.fsec == s) ) return true;
+			if ( (part == 1) && (cb.csec == s) ) return true;
+		}
+		// hard mode: look for all lines/actors with movement specials referencing us
+		for ( int i=0; i<level.Lines.Size(); i++ )
+		{
+			Line l = level.Lines[i];
+			if ( !l.special ) continue;
+			if ( (part && (l.special >= 10) && (l.special <= 13))
+				|| (!part && (l.special >= 20) && (l.special <= 25))
+				|| (!part && (l.special == 28))
+				|| ((l.special >= 29) && (l.special <= 30))
+				|| (!part && (l.special >= 35) && (l.special <= 37))
+				|| (part && (l.special >= 40) && (l.special <= 45))
+				|| (!part && (l.special == 46))
+				|| (part && (l.special == 47))
+				|| (!part && (l.special >= 60) && (l.special <= 68))
+				|| (part && (l.special == 69))
+				|| ((l.special >= 94) && (l.special <= 96))
+				|| (part && (l.special == 97))
+				|| (!part && (l.special == 99))
+				|| (part && (l.special == 104))
+				|| (part && (l.special >= 105) && (l.special <= 106))
+				|| (part && (l.special >= 168) && (l.special <= 169))
+				|| (!part && (l.special == 172))
+				|| (part && (l.special >= 192) && (l.special <= 199))
+				|| (!part && (l.special == 200))
+				|| (part && (l.special >= 201) && (l.special <= 202))
+				|| (!part && (l.special == 203))
+				|| (part && (l.special == 205))
+				|| (!part && (l.special >= 206) && (l.special <= 207))
+				|| (!part && (l.special == 228))
+				|| (!part && (l.special >= 230) && (l.special <= 231))
+				|| (!part && (l.special >= 238) && (l.special <= 242))
+				|| ((l.special >= 245) && (l.special <= 247))
+				|| (part && (l.special == 249))
+				|| (!part && (l.special >= 250) && (l.special <= 251))
+				|| (part && (l.special >= 251) && (l.special <= 255))
+				|| (!part && (l.special >= 256) && (l.special <= 261))
+				|| (part && (l.special >= 262) && (l.special <= 269))
+				|| (!part && (l.special == 275))
+				|| (part && (l.special == 276))
+				|| (!part && (l.special == 279))
+				|| (part && (l.special == 280)) )
+			{
+				let si = level.CreateSectorTagIterator(l.Args[0],l);
+				int idx;
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( !a.special || !a.Args[0] ) continue;
+			if ( (part && (a.special >= 10) && (a.special <= 13))
+				|| (!part && (a.special >= 20) && (a.special <= 25))
+				|| (!part && (a.special == 28))
+				|| ((a.special >= 29) && (a.special <= 30))
+				|| (!part && (a.special >= 35) && (a.special <= 37))
+				|| (part && (a.special >= 40) && (a.special <= 45))
+				|| (!part && (a.special == 46))
+				|| (part && (a.special == 47))
+				|| (!part && (a.special >= 60) && (a.special <= 68))
+				|| (part && (a.special == 69))
+				|| ((a.special >= 94) && (a.special <= 96))
+				|| (part && (a.special == 97))
+				|| (!part && (a.special == 99))
+				|| (part && (a.special == 104))
+				|| (part && (a.special >= 105) && (a.special <= 106))
+				|| (part && (a.special >= 168) && (a.special <= 169))
+				|| (!part && (a.special == 172))
+				|| (part && (a.special >= 192) && (a.special <= 199))
+				|| (!part && (a.special == 200))
+				|| (part && (a.special >= 201) && (a.special <= 202))
+				|| (!part && (a.special == 203))
+				|| (part && (a.special == 205))
+				|| (!part && (a.special >= 206) && (a.special <= 207))
+				|| (!part && (a.special == 228))
+				|| (!part && (a.special >= 230) && (a.special <= 231))
+				|| (!part && (a.special >= 238) && (a.special <= 242))
+				|| ((a.special >= 245) && (a.special <= 247))
+				|| (part && (a.special == 249))
+				|| (!part && (a.special >= 250) && (a.special <= 251))
+				|| (part && (a.special >= 251) && (a.special <= 255))
+				|| (!part && (a.special >= 256) && (a.special <= 261))
+				|| (part && (a.special >= 262) && (a.special <= 269))
+				|| (!part && (a.special == 275))
+				|| (part && (a.special == 276))
+				|| (!part && (a.special == 279))
+				|| (part && (a.special == 280)) )
+			{
+				let si = level.CreateSectorTagIterator(a.Args[0]);
+				int idx;
+				while ( (idx = si.Next()) != -1 )
+					if ( level.Sectors[idx] == s )
+						return true;
+			}
+		}
+		return false;
+	}
+
+	// because GetTag() returns the localized string, we need to do things the hard way
+	static clearscope String GetFunTag( Actor a, String defstr = "" )
+	{
+		if ( a is 'SWWMMonster' ) return SWWMMonster(a).GetFunTag(defstr);
+		int ntags = 1;
+		String basetag = "";
+		switch ( a.GetClassName() )
+		{
+		// Doom
+		case 'ZombieMan':
+		case 'StealthZombieMan':
+			basetag = "ZOMBIE";
+			break;
+		case 'ShotgunGuy':
+		case 'StealthShotgunGuy':
+			basetag = "SHOTGUN";
+			break;
+		case 'ChaingunGuy':
+		case 'StealthChaingunGuy':
+			basetag = "HEAVY";
+			break;
+		case 'DoomImp':
+		case 'StealthDoomImp':
+			basetag = "IMP";
+			break;
+		case 'Demon':
+		case 'StealthDemon':
+			basetag = "DEMON";
+			break;
+		case 'Spectre':
+			basetag = "SPECTRE";
+			break;
+		case 'LostSoul':
+			basetag = "LOST";
+			break;
+		case 'Cacodemon':
+		case 'StealthCacodemon':
+			basetag = "CACO";
+			break;
+		case 'HellKnight':
+		case 'StealthHellKnight':
+			basetag = "HELL";
+			break;
+		case 'BaronOfHell':
+		case 'StealthBaron':
+			basetag = "BARON";
+			break;
+		case 'Arachnotron':
+		case 'StealthArachnotron':
+			basetag = "ARACH";
+			break;
+		case 'PainElemental':
+			basetag = "PAIN";
+			break;
+		case 'Revenant':
+		case 'StealthRevenant':
+			basetag = "REVEN";
+			break;
+		case 'Fatso':
+		case 'StealthFatso':
+			basetag = "MANCU";
+			break;
+		case 'Archvile':
+		case 'StealthArchvile':
+			basetag = "ARCH";
+			break;
+		case 'SpiderMastermind':
+			basetag = "SPIDER";
+			break;
+		case 'Cyberdemon':
+			basetag = "CYBER";
+			break;
+		case 'SWWMBossBrain':
+			basetag = "BOSSBRAIN";
+			break;
+		case 'WolfensteinSS':
+			basetag = "WOLFSS";
+			break;
+		case 'SWWMHangingKeen':
+			basetag = "KEEN";
+			break;
+		case 'MBFHelperDog':
+			basetag = "DOG";
+			break;
+		// Heretic
+		case 'Chicken':
+			basetag = "CHICKEN";
+			break;
+		case 'Beast':
+			basetag = "BEAST";
+			break;
+		case 'Clink':
+			basetag = "CLINK";
+			break;
+		case 'Sorcerer1':
+		case 'Sorcerer2':
+			basetag = "DSPARIL";
+			break;
+		case 'HereticImp':
+		case 'HereticImpLeader':
+			basetag = "HERETICIMP";
+			break;
+		case 'Ironlich':
+			basetag = "IRONLICH";
+			break;
+		case 'Knight':
+		case 'KnightGhost':
+			basetag = "BONEKNIGHT";
+			break;
+		case 'Minotaur':
+		case 'MinotaurFriend':
+			basetag = "MINOTAUR";
+			break;
+		case 'Mummy':
+		case 'MummyGhost':
+			basetag = "MUMMY";
+			break;
+		case 'MummyLeader':
+		case 'MummyLeaderGhost':
+			basetag = "MUMMYLEADER";
+			break;
+		case 'Snake':
+			basetag = "SNAKE";
+			break;
+		case 'Wizard':
+			basetag = "WIZARD";
+			break;
+		// Hexen
+		case 'FireDemon':
+			basetag = "FIREDEMON";
+			break;
+		case 'Demon1':
+		case 'Demon1Mash':
+		case 'Demon2':
+		case 'Demon2Mash':
+			basetag = "DEMON1";
+			break;
+		case 'Ettin':
+		case 'EttinMash':
+			basetag = "ETTIN";
+			break;
+		case 'Centaur':
+		case 'CentaurMash':
+			basetag = "CENTAUR";
+			break;
+		case 'CentaurLeader':
+			basetag = "SLAUGHTAUR";
+			break;
+		case 'Bishop':
+			basetag = "BISHOP";
+			break;
+		case 'IceGuy':
+			basetag = "ICEGUY";
+			break;
+		case 'Serpent':
+		case 'SerpentLeader':
+			basetag = "SERPENT";
+			break;
+		case 'Wraith':
+		case 'WraithBuried':
+			basetag = "WRAITH";
+			break;
+		case 'Dragon':
+			basetag = "DRAGON";
+			break;
+		case 'Korax':
+			basetag = "KORAX";
+			break;
+		case 'FighterBoss':
+			basetag = "FBOSS";
+			break;
+		case 'MageBoss':
+			basetag = "MBOSS";
+			break;
+		case 'ClericBoss':
+			basetag = "CBOSS";
+			break;
+		case 'Heresiarch':
+			basetag = "HERESIARCH";
+			break;
+		case 'Pig':
+			basetag = "PIG";
+			break;
+		// eviternity
+		case 'ArchangelusA':
+		case 'ArchangelusB':
+			basetag = "ANGEL";
+			break;
+		case 'AstralCaco':
+			basetag = "ASTRAL";
+			break;
+		case 'Annihilator':
+			basetag = "ANNIHIL";
+			break;
+		case 'FormerCaptain':
+			basetag = "FCAPTAIN";
+			break;
+		case 'NightmareDemon':
+			basetag = "NDEMON";
+			break;
+		}
+		if ( basetag == "" ) return a.GetTag(defstr);
+		String funtag = "FN_"..basetag.."_FUN";
+		String lfuntag = StringTable.Localize(funtag,false);
+		if ( lfuntag != funtag ) return lfuntag;
+		String nfuntag = "FN_"..basetag.."_FUNN";
+		String lnfuntag = StringTable.Localize(nfuntag,false);
+		if ( lnfuntag == nfuntag ) return a.GetTag(defstr);
+		ntags = lnfuntag.ToInt();
+		return StringTable.Localize(String.Format("$FN_%s_FUN%d",basetag,Random[FunTags](1,ntags)));
+	}
+
+	// Apply full 3D knockback in a specific direction, useful for hitscan
+	static play void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer )
+	{
+		if ( !Victim )
+			return;
+		if ( Victim.bDORMANT )	// no dormant knockback
+			return;
+		if ( !Victim.bSHOOTABLE && !Victim.bVULNERABLE )
+			return;
+		if ( Victim.bDONTTHRUST || (Victim.Mass >= Actor.LARGE_MASS) )
+			return;
+		Vector3 Momentum = HitDirection*MomentumTransfer;
+		if ( (Victim.pos.z <= Victim.floorz) || !Victim.TestMobjZ() )
+			Momentum.z = max(Momentum.z,.1*Momentum.length());
+		Momentum /= GameTicRate*max(50,Victim.Mass);
+		Victim.vel += Momentum;
+	}
+
+	// complete spherical and more accurate replacement of A_Explode
+	// 100% free of the buggery GZDoom's own splash damage has
+	// returns the number of shootables hit/killed
+	static play int, int DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
+	{
+		// debug, display radius sphere
+		if ( swwm_debugblast )
+		{
+			let s = Actor.Spawn("RadiusDebugSphere",Source.pos);
+			s.Scale *= ExplosionRadius;
+			s.SetShade((Damage>0)?"Green":"Blue");
+			if ( FullDamageRadius > 0. )
+			{
+				let s = Actor.Spawn("RadiusDebugSphere",Source.pos);
+				s.Scale *= FullDamageRadius;
+				s.SetShade("Red");
+			}
+		}
+		if ( !(flags&DE_NOSPLASH) ) Source.CheckSplash(ExplosionRadius);
+		double brange = 1./(ExplosionRadius-FullDamageRadius);
+		Actor Instigator = (flags&DE_NOTMISSILE)?Source:Source.target;
+		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius*2);	// test with doubled radius, just to be sure
+		int nhit = 0, nkill = 0;
+		while ( bi.Next() )
+		{
+			Actor a = bi.Thing;
+			// early checks for self and ignored actor (usually the instigator)
+			if ( !a || (a == ignoreme) || (a == Source) )
+				continue;
+			// can't be affected
+			if ( !a.bSHOOTABLE && !a.bVULNERABLE )
+				continue;
+			// no blasting if no radius dmg (unless forced)
+			if ( a.bNORADIUSDMG && !Source.bFORCERADIUSDMG )
+				continue;
+			// check the DONTHARMCLASS/DONTHARMSPECIES flags
+			if ( !a.player && ((Source.bDONTHARMCLASS && (a.GetClass() == Source.GetClass())) || (Source.bDONTHARMSPECIES && (a.GetSpecies() == Source.GetSpecies()))) )
+				continue;
+			// can we see it
+			if ( !(flags&DE_THRUWALLS) && !Source.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+				continue;
+			// intersecting?
+			if ( !SWWMUtility.SphereIntersect(a,Source.pos,ExplosionRadius) )
+				continue;
+			// calculate factor
+			Vector3 dir = level.Vec3Diff(Source.pos,a.Vec3Offset(0,0,a.Height/2));
+			double dist = dir.length();
+			// intersecting, randomize direction
+			if ( dir.length() <= double.epsilon )
+			{
+				double ang = FRandom[DoBlast](0,360);
+				double pt = FRandom[DoBlast](-90,90);
+				dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			}
+			dir /= dist;
+			dist = clamp(dist-FullDamageRadius,0,min(dist,ExplosionRadius));
+			double damagescale = 1.-clamp((dist-a.Radius)*brange,0.,1.);
+			double mm = MomentumTransfer*damagescale;
+			// no knockback if massive/unpushable
+			if ( (abs(mm) > 0.) && !a.bDORMANT && !a.bDONTTHRUST && (a.Mass < Actor.LARGE_MASS) )
+			{
+				Vector3 Momentum = dir*mm;
+				if ( (a.pos.z <= a.floorz) || !a.TestMobjZ() )
+					Momentum.z = max(Momentum.z,(flags&DE_EXTRAZTHRUST?.4:.1)*Momentum.length());
+				Momentum /= GameTicRate*max(50,a.Mass);	// prevent tiny things from getting yeeted at warp speed
+				a.vel += Momentum;
+				if ( (flags&DE_BLAST) && a.bCANBLAST && !a.bDONTBLAST ) a.bBLASTED = true;
+			}
+			// hit it
+			nhit++;
+			int dmg = int(Damage*damagescale);
+			if ( dmg <= 0 ) continue;	// no harm
+			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
+			if ( a && !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
+			if ( (flags&DE_HOWL) && a && a.bISMONSTER && !Random[DoBlast](0,3) ) a.Howl();
+			if ( !a || (a.Health <= 0) ) nkill++;
+		}
+		return nhit, nkill;
+	}
+
+	static play bool InPlayerFOV( PlayerInfo p, Actor a, double maxdist = 0. )
+	{
+		double vfov = p.fov*.5;
+		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
+		let mo = p.camera;
+		Vector3 pp;
+		if ( !mo.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return false;
+		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
+		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);
+		Vector3 sc = level.SphericalCoords(pp,a.pos,(mo.angle,mo.pitch));
+		if ( (abs(sc.x) > hfov) || (abs(sc.y) > vfov) ) return false;
+		if ( (maxdist > 0.) && (sc.z < maxdist) ) return false;
+		return true;
+	}
+
+	static clearscope bool CheatsDisabled( int p = -1 )
+	{
+		if ( cl_blockcheats || ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && !sv_cheats) )
+		{
+			if ( (p != -1) && (p == consoleplayer) )
+			{
+				Console.Printf("\cxSORRY NOTHING\c-");
+				S_StartSound("misc/trombone",CHAN_VOICE,CHANF_UI);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	static clearscope bool IdentifyingDog( Actor a )
+	{
+		if ( a is 'MBFHelperDog' ) return true;
+		// reminder that mark is a terrible person
+		if ( a.GetClassName() == 'GermanDog' ) return true;
+		if ( a.GetClassName() == '64HellHound' ) return true;
+		if ( a.GetClassName() == 'AbyssDemon2' ) return true;	// CH
+		if ( a.GetClassName() == 'WHOLETTHEDOGSOUT' ) return true;	// CH
+		// more dogs will be added as found
+		// because all dogs must be pet
+		return false;
+	}
+
+	static clearscope bool IdentifyingCaco( Actor a )
+	{
+		if ( a is 'DeadCacodemon' ) return false;
+		if ( a is 'Cacodemon' ) return true;
+		if ( a.Species == 'RLCacodemon' ) return true; // DRLA
+		if ( a.Species == 'Caco' ) return true; // CH and others
+		if ( a.Species == 'Cacodemon' ) return true; // Beautiful Doom
+		if ( a.GetClassName() == 'AstralCaco' ) return true; // Eviternity
+		return false;
+	}
+
+	// Друг
+	static clearscope bool IdentifyingDrug( Actor a )
+	{
+		if ( a is 'Beast' ) return true;
+		return false;
+	}
+
+	static clearscope bool IdentifyingDoubleBoi( Actor a )
+	{
+		if ( a is 'Ettin' ) return true;
+		return false;
+	}
+
+	// the stupidest thing ever, it's called BlockingLine but it's not always blocking us
+	static bool BlockingLineIsBlocking( Actor a, int blockflags = Line.ML_BLOCKEVERYTHING )
+	{
+		Line l = a.BlockingLine;
+		// not blocked
+		if ( !l ) return false;
+		// one-sided always blocking
+		if ( !l.sidedef[1] ) return true;
+		// same for block everything lines
+		if ( l.flags&blockflags ) return true;
+		// lower and upper bounds hit?
+		double afloor = l.frontsector.floorplane.ZAtPoint(a.pos.xy),
+			bfloor = l.backsector.floorplane.ZAtPoint(a.pos.xy),
+			aceil = l.frontsector.ceilingplane.ZAtPoint(a.pos.xy),
+			bceil = l.backsector.ceilingplane.ZAtPoint(a.pos.xy);
+		if ( (min(a.pos.z+a.height,a.ceilingz) > min(aceil,bceil)) || (max(a.pos.z,a.floorz) < max(afloor,bfloor)) )
+			return true;
+		return false;
+	}
+
+	static play Vector3 UseLinePos( Line l )
+	{
+		Vector3 al, ah, bl, bh;
+		if ( !l.sidedef[1] )
+		{
+			// just the whole line
+			al = (l.v1.p,l.frontsector.floorplane.ZatPoint(l.v1.p));
+			ah = (l.v1.p,l.frontsector.ceilingplane.ZatPoint(l.v1.p));
+			bl = (l.v2.p,l.frontsector.floorplane.ZatPoint(l.v2.p));
+			bh = (l.v2.p,l.frontsector.ceilingplane.ZatPoint(l.v2.p));
+			return (al+ah+bl+bh)*.25;
+		}
+		SecPlane highestfloor, lowestfloor, lowestceiling, highestceiling;
+		if ( (l.frontsector.floorplane.ZatPoint(l.v1.p) > l.backsector.floorplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.floorplane.ZatPoint(l.v2.p) > l.backsector.floorplane.ZatPoint(l.v2.p)) )
+		{
+			highestfloor = l.frontsector.floorplane;
+			lowestfloor = l.backsector.floorplane;
+		}
+		else
+		{
+			highestfloor = l.backsector.floorplane;
+			lowestfloor = l.frontsector.floorplane;
+		}
+		if ( (l.frontsector.ceilingplane.ZatPoint(l.v1.p) < l.backsector.ceilingplane.ZatPoint(l.v1.p))
+			&& (l.frontsector.ceilingplane.ZatPoint(l.v2.p) < l.backsector.ceilingplane.ZatPoint(l.v2.p)) )
+		{
+			lowestceiling = l.frontsector.ceilingplane;
+			highestceiling = l.backsector.ceilingplane;
+		}
+		else
+		{
+			lowestceiling = l.backsector.ceilingplane;
+			highestceiling = l.frontsector.ceilingplane;
+		}
+		// try to guess what the part that triggers this is
+		if ( l.Activation&SPAC_Cross )
+		{
+			// pick the "intersection"
+			al = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+			ah = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+			bl = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+			bh = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+			return (al+ah+bl+bh)*.25;
+		}
+		// check if lower part available
+		al = (l.v1.p,lowestfloor.ZatPoint(l.v1.p));
+		ah = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+		bl = (l.v2.p,lowestfloor.ZatPoint(l.v2.p));
+		bh = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+		if ( ((al-ah).length() > 0) && ((bl-bh).length() > 0) )
+			return (al+ah+bl+bh)*.25;
+		// check if upper part available
+		al = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+		ah = (l.v1.p,highestceiling.ZatPoint(l.v1.p));
+		bl = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+		bh = (l.v2.p,highestceiling.ZatPoint(l.v2.p));
+		if ( ((al-ah).length() > 0) && ((bl-bh).length() > 0) )
+			return (al+ah+bl+bh)*.25;
+		// check for 3d floors
+		bool floorfound = false;
+		Vector3 fal, fah, fbl, fbh;
+		for ( int i=0; i<l.backsector.Get3DFloorCount(); i++ )
+		{
+			let ff = l.backsector.Get3DFloor(i);
+			fal = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fah = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fbl = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			fbh = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			// skip if higher, we'll go with the lowest 3d floor (may not be right, but whatever)
+			if ( floorfound && (fah.z > ah.z) && (fbh.z > bh.z) && (fal.z > al.z) && (fbl.z > bl.z) ) continue;
+			al = fal;
+			ah = fah;
+			bl = fbl;
+			bh = fbh;
+			floorfound = true;
+		}
+		if ( floorfound ) return (al+ah+bl+bh)*.25;
+		for ( int i=0; i<l.frontsector.Get3DFloorCount(); i++ )
+		{
+			let ff = l.frontsector.Get3DFloor(i);
+			fal = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fah = (l.v1.p,ff.model.floorplane.ZAtPoint(l.v1.p));
+			fbl = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			fbh = (l.v2.p,ff.model.ceilingplane.ZAtPoint(l.v2.p));
+			// skip if higher, we'll go with the lowest 3d floor (may not be right, but whatever)
+			if ( floorfound && (fah.z > ah.z) && (fbh.z > bh.z) && (fal.z > al.z) && (fbl.z > bl.z) ) continue;
+			al = fal;
+			ah = fah;
+			bl = fbl;
+			bh = fbh;
+			floorfound = true;
+		}
+		if ( floorfound ) return (al+ah+bl+bh)*.25;
+		// check for midtex
+		if ( !l.sidedef[0].GetTexture(1).IsNull() )
+		{
+			double ofs = l.sidedef[0].GetTextureYOffset(1);
+			Vector2 siz = TexMan.GetScaledSize(l.sidedef[0].GetTexture(1));
+			Vector2 tofs = TexMan.GetScaledOffset(l.sidedef[0].GetTexture(1));
+			ofs += tofs.y;
+			ofs *= l.sidedef[0].GetTextureYScale(1);
+			siz.y *= l.sidedef[0].GetTextureYScale(1);
+			if ( l.flags&Line.ML_DONTPEGBOTTOM )
+			{
+				al = (l.v1.p,highestfloor.ZAtPoint(l.v1.p)+ofs);
+				bl = (l.v2.p,highestfloor.ZAtPoint(l.v2.p)+ofs);
+				ah = al+(0,0,siz.y);
+				bh = bl+(0,0,siz.y);
+			}
+			else
+			{
+				ah = (l.v1.p,lowestceiling.ZAtPoint(l.v1.p)+ofs);
+				bh = (l.v2.p,lowestceiling.ZAtPoint(l.v2.p)+ofs);
+				al = ah-(0,0,siz.y);
+				bl = bh-(0,0,siz.y);
+			}
+			return (al+ah+bl+bh)*.25;
+		}
+		if ( !l.sidedef[1].GetTexture(1).IsNull() )
+		{
+			double ofs = l.sidedef[1].GetTextureYOffset(1);
+			Vector2 siz = TexMan.GetScaledSize(l.sidedef[1].GetTexture(1));
+			Vector2 tofs = TexMan.GetScaledOffset(l.sidedef[1].GetTexture(1));
+			ofs += tofs.y;
+			ofs *= l.sidedef[1].GetTextureYScale(1);
+			siz.y *= l.sidedef[1].GetTextureYScale(1);
+			if ( l.flags&Line.ML_DONTPEGBOTTOM )
+			{
+				al = (l.v1.p,highestfloor.ZAtPoint(l.v1.p)+ofs);
+				bl = (l.v2.p,highestfloor.ZAtPoint(l.v2.p)+ofs);
+				ah = al+(0,0,siz.y);
+				bh = bl+(0,0,siz.y);
+			}
+			else
+			{
+				ah = (l.v1.p,lowestceiling.ZAtPoint(l.v1.p)+ofs);
+				bh = (l.v2.p,lowestceiling.ZAtPoint(l.v2.p)+ofs);
+				al = ah-(0,0,siz.y);
+				bl = bh-(0,0,siz.y);
+			}
+			return (al+ah+bl+bh)*.25;
+		}
+		// just use the intersection
+		al = (l.v1.p,highestfloor.ZatPoint(l.v1.p));
+		ah = (l.v1.p,lowestceiling.ZatPoint(l.v1.p));
+		bl = (l.v2.p,highestfloor.ZatPoint(l.v2.p));
+		bh = (l.v2.p,lowestceiling.ZatPoint(l.v2.p));
+		return (al+ah+bl+bh)*.25;
+	}
+
+	// get how much a sector's physical position is offset by portals
+	static Vector2 PortalDisplacement( Sector a, Sector b )
+	{
+		if ( a.portalgroup == b.portalgroup ) return (0,0);	// ez
+		// we can't access level.displacements, so we gotta improvise
+		Vector2 pdisp = b.centerspot-a.centerspot;
+		Vector2 vdisp = level.Vec2Diff(a.centerspot,b.centerspot);
+		return pdisp-vdisp;
+	}
+
+	// shorthand for some of these checks (these are generally used by the mission briefing system)
+	static bool IsKnownMap()
+	{
+		if ( (gameinfo.gametype&GAME_DOOM) && (IsKnownCustomWAD() || IsVanillaDoomMap()) )
+			return true;
+		if ( (gameinfo.gametype&GAME_HERETIC) && IsVanillaHereticMap() )
+			return true;
+		if ( (gameinfo.gametype&GAME_HEXEN) && IsVanillaHexenMap() )
+			return true;
+		return false;
+	}
+
+	// to be filled
+	static bool IsKnownCustomWAD()
+	{
+		if ( (gameinfo.gametype&GAME_DOOM) )
+		{
+			if ( IsEviternity() ) return true;
+		}
+		return false;
+	}
+
+	// detect eviternity (naive method)
+	static bool IsEviternity()
+	{
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			if ( AllActorClasses[i].GetClassName() != "Archangelus" )
+				continue;
+			return true;
+		}
+		return false;
+	}
+
+	// detect doom vacation
+	static bool InDoomVacation()
+	{
+		// cheap, but hey, it should work
+		if ( Wads.FindLump("VACABEX") != -1 )
+		{
+			// just to make sure
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				if ( AllActorClasses[i].GetClassName() != "Babe" )
+					continue;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// detect vanilla maps (across all IWAD versions)
+	static bool IsVanillaDoomMap()
+	{
+		String csum = level.GetChecksum();
+		if ( (csum ~== "0BB515B79E0A6C42C4846C4E6F5F1D73")
+			 || (csum ~== "0D491365C1B88B7D1B603890100DD03E")
+			 || (csum ~== "0E11A89BFCAA52A4981F4C20344E5985")
+			 || (csum ~== "A24FE135D5B6FD427FE27BEF89717A65")
+			 || (csum ~== "AA4CA3FC891D13821ACCABD836E29EB5")
+			 || (csum ~== "AA7610E65716B21BA8B99E9B95E76843")
+			 || (csum ~== "AAECADD4D97970AFF702D86FAFAC7D17")
+			 || (csum ~== "AB24AE6E2CB13CBDD04600A4D37F9189")
+			 || (csum ~== "AB55BFB557FA86D06F2F14D2D2ECC70C")
+			 || (csum ~== "B0F573C276A989BBCE350F5397C9830F")
+			 || (csum ~== "B49F7A6C519757D390D52667DB7D8793")
+			 || (csum ~== "B5506B1E8F2FC272AD0C77B9E0DF5491")
+			 || (csum ~== "B87D71143EFD62C23BDEC4DD19F6DC6D")
+			 || (csum ~== "BBDC4253AE277DA5FCE2F19561627496")
+			 || (csum ~== "BD9AB9C1B017AB3583B80C8A6222DCE6")
+			 || (csum ~== "BE6CA7CF3518C2E4D1CFE4A17BE42953")
+			 || (csum ~== "C2E09AB0BDD03925305A48AE935B71CA")
+			 || (csum ~== "C3E95F101FA83894A5476E7B6AB929A5")
+			 || (csum ~== "C4A89A481A32BFEDDEB82E818F2BDEC5")
+			 || (csum ~== "C725E47120CC0BE3E3EAE73E055488C5")
+			 || (csum ~== "C7FF2282BC606FFB28DDCB90357094E6")
+			 || (csum ~== "CAA497916BDD0804644C32454260CCA0")
+			 || (csum ~== "CBAB28B15E38C5CB20A1C0B800218677")
+			 || (csum ~== "CBBFF61A8C231DFFC8E8A2A2BAEB77FF")
+			 || (csum ~== "CEC791136A83EEC4B91D39718BDF9D82")
+			 || (csum ~== "D015344419CD93376A6DB1FFF7DFB77E")
+			 || (csum ~== "D8B3AE3B0D04B523DD7128BE87192A89")
+			 || (csum ~== "D98B2AC8DE02BAB888F80D708A99B4F2")
+			 || (csum ~== "DA0C8281AC70EEC31127C228BCD7FE2C")
+			 || (csum ~== "E1CFD5C6E60C3B6C30F8B95FC287E9FE")
+			 || (csum ~== "E27A5638FC5047E42B38351BCC78483C")
+			 || (csum ~== "EBDAC00E9D25D884B2C8F4B1F0390539")
+			 || (csum ~== "EF128313112110ED6C1549AF96AF26C9")
+			 || (csum ~== "EFFE91DF41AD41F6973C06F0AD67DDB9")
+			 || (csum ~== "F2235342F1591B59154022E1DAF3EB2F")
+			 || (csum ~== "F4F2A769609988837458772AAE99008C")
+			 || (csum ~== "F610DAFA39A5FDB7F5F19DD1009B8764")
+			 || (csum ~== "F62FA69BFF7210F3515A98CBEAC169B3")
+			 || (csum ~== "F6EE16F770AD309D608EA0B1F1E249FC")
+			 || (csum ~== "F951882CB5A8DEF910F0ED966A1054C5")
+			 || (csum ~== "FB564DF28BC8D4BF70F60FB3256BCF9D")
+			 || (csum ~== "FBA6547B9FD44E95671A923A066E516F")
+			 || (csum ~== "FE97DCB9E6235FB3C52AE7C143160D73")
+			 || (csum ~== "1A540BA717BF9EC85F8522594C352F2A")
+			 || (csum ~== "1AF4DEC2627360A55B3EB397BC15C39D")
+			 || (csum ~== "1BC04D646B32D3A3E411DAF3C1A38FF8")
+			 || (csum ~== "1C46D128868ECEF6C8D48C2963775780")
+			 || (csum ~== "1D60EBE11BA774D9B890B04DC573C80F")
+			 || (csum ~== "1D7FD0DE19BACFA1127633BCEBCE4F28")
+			 || (csum ~== "1DBF91738492FB0E29836A2D66406CF1")
+			 || (csum ~== "1EC0AF1E3985650F0C9000319C599D0C")
+			 || (csum ~== "1EC9C5710087141F49C5F219CE61A60B")
+			 || (csum ~== "2B44D7016B25AAAA96EC86AA3890031B")
+			 || (csum ~== "2B65CB046EA40D2E44576949381769CA")
+			 || (csum ~== "2BAF49B4CC36155B60B5330660AC0976")
+			 || (csum ~== "2DC939E508AB8EB68AF79D5B60568711")
+			 || (csum ~== "2DE58E4B58489F3A5B71F9013FBA18E8")
+			 || (csum ~== "3C9902E376CCA1E9C3BE8763BDC21DF5")
+			 || (csum ~== "3CB5FAE83B470A9ACCD9B9B2102447DF")
+			 || (csum ~== "3EFF15C64A03B36E8E47926C6DF9EF70")
+			 || (csum ~== "3FF94E27423F91C1585B3396F0C03459")
+			 || (csum ~== "4AA9B3CE449FB614497756E96509F096")
+			 || (csum ~== "4B65B09DC8FEDF0D32524DB2CD5208C7")
+			 || (csum ~== "4B7AEF0D297FF38C1569EE616CEFF245")
+			 || (csum ~== "5AC51CA9F1B57D4538049422A5E37291")
+			 || (csum ~== "5B26545FF21B051CA06D389CE535684C")
+			 || (csum ~== "5BDA34DA60C0530794CC1EA2DA017976")
+			 || (csum ~== "5E8679670469F92E15CF4219B5B98FEF")
+			 || (csum ~== "5EECD88F4491F516D590CE4BBF45F532")
+			 || (csum ~== "5FAA25F5A6AAB3409CAE0AF87F910341")
+			 || (csum ~== "6B60F37B91309DFF1CDF02E5E476210D")
+			 || (csum ~== "6C620F43705BEC0ABBABBF46AC3E62D2")
+			 || (csum ~== "7DEF5AB5E48D61DC5B100456E846F359")
+			 || (csum ~== "8A6399FAAA2E68649D4E4B16642074BE")
+			 || (csum ~== "8DDEA443C7847951D44C2370F870DC51")
+			 || (csum ~== "9AA7780B46EC4471F630572798943D71")
+			 || (csum ~== "9E061AD7FBCD7FAD968C976CB4AA3B9D")
+			 || (csum ~== "12F312BA35EA1F4431FD67A405FCAC3A")
+			 || (csum ~== "34A8DB0B341A32267CB461D8C219DF0A")
+			 || (csum ~== "36CF4DDCE946096D2B6A1C9167CDFF24")
+			 || (csum ~== "44C443413170B85F49951BF1F05F8FA9")
+			 || (csum ~== "058FB092EA1B70DA1E3CBF501C4A91A1")
+			 || (csum ~== "63F25C97D5B1CC174EFEA7F6AF499960")
+			 || (csum ~== "66C46385EB1A23D60839D1532522076B")
+			 || (csum ~== "66D8E54B173041F981A11CCE766C4215")
+			 || (csum ~== "73D9E03CEE7BF1A97EFD2EAD86688EF8")
+			 || (csum ~== "81A4CC5136CBFA49345654190A626C09")
+			 || (csum ~== "84BB2C8ED2343C91136B87F1832E7CA5")
+			 || (csum ~== "94D4C869A0C02EF4F7375022B36AAE45")
+			 || (csum ~== "98B90CA3AE69D47180DC0BD3A66D49A3")
+			 || (csum ~== "99C580AD8FABE923CAB485CB7F3C5E5D")
+			 || (csum ~== "110F84DE041052B59307FAF0293E6BC0")
+			 || (csum ~== "167DB53BD6755AD0B8A2E31D7CBFB6F1")
+			 || (csum ~== "211E7C0E91CDEC8912C99AAA4648767F")
+			 || (csum ~== "291F24417FB3DD411339AE82EF9B3597")
+			 || (csum ~== "364DEACBC4E8A316C0B6FE3026795EEC")
+			 || (csum ~== "492FEE2B2D54F79C7A23E045062770CA")
+			 || (csum ~== "941E21C5C30E2BF92FFAD047CDFF5CA0")
+			 || (csum ~== "2042D7C0815982EFC992149082E45538")
+			 || (csum ~== "03026CE40DD59D8651BE0168E2BF4FEB")
+			 || (csum ~== "3838AB29292587A7EE3CA71E7040868D")
+			 || (csum ~== "04008AC301A291B4D7EB2AC2BE08176D")
+			 || (csum ~== "8590F489879870C098CD7029C3187159")
+			 || (csum ~== "8898F5EC9CBDCD98019A1BC1BF892A8A")
+			 || (csum ~== "9007F68E7F351A5758198933336F6B9F")
+			 || (csum ~== "20251EDA21B2F2ECF6FF5B8BBC00B26C")
+			 || (csum ~== "34601B4E48CA63A69905FFEFEBEFBD44")
+			 || (csum ~== "36699F787D4D9365FEFB4441624CC48B")
+			 || (csum ~== "62198D501F6E967E8470434A04FF73D6")
+			 || (csum ~== "65455AC523799F8DCE19F3D1968776A2")
+			 || (csum ~== "78556D238FFEC8058CACC48B847E1FAB")
+			 || (csum ~== "82256F04136ADB2413BFC604B5F6ADF3")
+			 || (csum ~== "94500F4B006B316FE03AC46865AEABF8")
+			 || (csum ~== "94893A0DC429A22ADC4B3A73DA537E16")
+			 || (csum ~== "100106C75157B7DECB0DCAD2A59C1919")
+			 || (csum ~== "434575DCB650B4EFC912EFC0782C7ACC")
+			 || (csum ~== "661057B891818322F417BDD87DFD640C")
+			 || (csum ~== "915409A89746D6BFD92C7956BE6A0A2D")
+			 || (csum ~== "918436B3C2D0AD4F2C108183414B4612")
+			 || (csum ~== "922865ACD59F7E7DC475801ED43C2BF2")
+			 || (csum ~== "5024020F3EBC2D9D3C66A1203F87E98B")
+			 || (csum ~== "97079958C7E89C1908890730B8B9FEB7")
+			 || (csum ~== "0352510152C1EC7410FD056AB68C22D4")
+			 || (csum ~== "589627883DA0AFFEF9AF365203512A5F")
+			 || (csum ~== "771092812F38236C9DF2CB06B2D6B24F")
+			 || (csum ~== "1037366026AAB4B0CF11BAB27DB90E4E")
+			 || (csum ~== "55962881582C9B2B5AB88805B032230A")
+			 // NRFTL
+			 || (csum ~== "B2C6635EC41DA8D96065166B0E14E78E")
+			 || (csum ~== "C7471AF46CFDA07BA0EB5C4D4DE2E136")
+			 || (csum ~== "FDE03D8F2D3D8E37483FC4589B3D54E9")
+			 || (csum ~== "FF635FB9A2F076566299910F8C78F707")
+			 || (csum ~== "7E0E3D6E3643082B86C153CC04A0D1D1")
+			 || (csum ~== "7EB864A03948C3F918F9223B2D1F8911")
+			 || (csum ~== "3262C22DD1532DF4DFCFEEB6AE0E11BB")
+			 || (csum ~== "3843B06A279EB9CEDC18C30CF32074C2")
+			 || (csum ~== "047991BB81F9790B69C25B020DF8B25C")
+			 // SIGIL (1.21 only)
+			 || (csum ~== "AEBF219BF02AAEC549BA3EF8CB3F715B")
+			 || (csum ~== "EB984250D4935E93C265AE8C8455560F")
+			 || (csum ~== "2A6B4D277F526BFB3ADB122609FEEAD7")
+			 || (csum ~== "4A4832BEBE16A3D56912490A4E61F59B")
+			 || (csum ~== "4E5D482364F6F787CB8EFC17BDE5D64D")
+			 || (csum ~== "6EAD80DA1F30B4B3546FA294EEF9F87C")
+			 || (csum ~== "8C35EFBA700537035C84F5E1AD35C064")
+			 || (csum ~== "3417A4859C8FECE797C9DAA715D14D63")
+			 || (csum ~== "38028DC7E09DC5C91068AAC565A3962B") )
+			return true;
+		// no TNT / Plutonia (non-canon Demolitionist appearance)
+		return false;
+	}
+	static bool IsVanillaHereticMap()
+	{
+		String csum = level.GetChecksum();
+		if ( (csum ~== "A6A0E37C60C04E88BD4B03D26EA171F7")
+			 || (csum ~== "A7DBAB356525123955A31806CA7E244E")
+			 || (csum ~== "A94561FF9BC91BC28305627CF3BCE856")
+			 || (csum ~== "AD3687E5984C0F03D9CC38920EB775A1")
+			 || (csum ~== "ADD0FAC41AFB0B3C9B9F3C0006F93805")
+			 || (csum ~== "ADEA9DE9E47202E1C4038ACFA6ED7B85")
+			 || (csum ~== "B43106250033C9C3C7BEAE4D55E44A2D")
+			 || (csum ~== "B7FDAB05B21AF564BC9552676F695213")
+			 || (csum ~== "BF320F2055DCA06C7BECBD7BA8389736")
+			 || (csum ~== "BF863A89DE2108FC24979D0565F2F65E")
+			 || (csum ~== "CA3773ED313E8899311F3DD0CA195A68")
+			 || (csum ~== "CAB396CF990DE6B4FF5CF3C60FB2BABF")
+			 || (csum ~== "D4C44A46DAAB28BD7935D1CD9E96BBF7")
+			 || (csum ~== "D94587625BA779644D58151A87897CF1")
+			 || (csum ~== "DB4716B9A4860C8EBC3CD90CCF58CC5B")
+			 || (csum ~== "DC15D3AFB78CACC98C8855C07702038F")
+			 || (csum ~== "DF1DC38BF77A1CD1653718DB51CEE9DA")
+			 || (csum ~== "EB08016DFFC6C5505DF29EE350762F12")
+			 || (csum ~== "EBDF3D5C49B057C24279002461AD2066")
+			 || (csum ~== "EF0C8A7C9E3574AAB5C70C390849078D")
+			 || (csum ~== "F73033F55D3F63DA6B5EAE4CCA4F5BD8")
+			 || (csum ~== "FA52AA4AC70FB6E699DCC09C8D241F85")
+			 || (csum ~== "FAA0550BE9923B3A3332B4F7DB897A4A")
+			 || (csum ~== "FF6C17C38044E1EDACF96F4F4FCF4806")
+			 || (csum ~== "2C9F8F32D6D5713F57A79279718EB30A")
+			 || (csum ~== "5E3FCFDE78310BB89F92B1626A47D0AD")
+			 || (csum ~== "006DEAB129C225F3ED4BF70F67A122F9")
+			 || (csum ~== "9BD531882129C4366845EC1877A46283")
+			 || (csum ~== "9DBC65690993F7988BAAC71D35F2AC4F")
+			 || (csum ~== "30D1480A6D4F3A3153739D4CCF659C4E")
+			 || (csum ~== "41C5437160F07D607AF413C7742DE70C")
+			 || (csum ~== "84CA1839049B7A3266EE3CFE78874AF1")
+			 || (csum ~== "84EC63F1412348F3275075489713478C")
+			 || (csum ~== "85AC7D20D18F9BC49B9696CC2E67F029")
+			 || (csum ~== "85C8DD2C557A490D571FDD44B3963EA3")
+			 || (csum ~== "397A0E17A39542E4E8294E156FAB0502")
+			 || (csum ~== "882CBA8401C29488DF07DC93792995B2")
+			 || (csum ~== "2225DE84BFDD74E984C39022E6499834")
+			 || (csum ~== "4719C2C71EF28F52310B889DD5A9778B")
+			 || (csum ~== "5158C22A0F30CE5E558FD2A05D67685E")
+			 || (csum ~== "5800D43560330827E05F9BB7068DB8D8")
+			 || (csum ~== "9299AC9604195379F01BA27D43468464")
+			 || (csum ~== "17654C1688AB18D046F3B30292EE144F")
+			 || (csum ~== "27639D04F8090D57A47D354992435893")
+			 || (csum ~== "196810E6877808E5D665644A6B0B7519")
+			 || (csum ~== "641362D6DCBFD40BEF31627AC36B3F37")
+			 || (csum ~== "674196BE64A0EDA97BA7916962C20D16")
+			 || (csum ~== "916318D8B06DAC2D83424B23E4B66531")
+			 || (csum ~== "7285877BB9726C7B934C28F7E733C28B") )
+			return true;
+		// no episode 6 (these wouldn't have mission data anyway)
+		return false;
+	}
+	static bool IsVanillaHexenMap()
+	{
+		String csum = level.GetChecksum();
+		if ( (csum ~== "0B64298B66E94FE2D8118D5CF911AEAA")
+			 || (csum ~== "A3597A7946669B5010D3E0B8CED21565")
+			 || (csum ~== "A3D86F121B41320BFD1EB747D9133EF2")
+			 || (csum ~== "A713FF5CE4B03BD757ADD5BD8B4DFF0B")
+			 || (csum ~== "AB1830A7BF82824EA2021CF3AB22EDC8")
+			 || (csum ~== "ACE533627DE4DE4D2418E225D680203C")
+			 || (csum ~== "AE1A5B740FF2D40527116FF80F9DB6A8")
+			 || (csum ~== "B121AD73F325F8DEF61A42AF2AC94D5B")
+			 || (csum ~== "B2A1B321E56494081085E51931EB3158")
+			 || (csum ~== "B54010961D93072ED4A3271F264859F8")
+			 || (csum ~== "B74233898DCAB205A315FE96C8A31253")
+			 || (csum ~== "BBE51852736AC479B58490A28F904629")
+			 || (csum ~== "BF9DFE95D9351AA3A65666185BFC921C")
+			 || (csum ~== "BFDC70A9D445EA5B9010ABB133253D6F")
+			 || (csum ~== "C1341C297526B8F87C6B0EFE90F35C70")
+			 || (csum ~== "C43B64E1E738FFF4FE4AF81C484A3D68")
+			 || (csum ~== "C4C4687AA51129F98A24B1B27D8F51A9")
+			 || (csum ~== "C5311C5F10A3000130C5977A62029629")
+			 || (csum ~== "CA332333A50FC7AEF4C82D0403A91594")
+			 || (csum ~== "CBA787EA6C4C3468D3228C143B8AB780")
+			 || (csum ~== "CBDE77E3ACB4B166D53C1812E5C72F54")
+			 || (csum ~== "CC90EAF7131A1CA59F8322735C92899C")
+			 || (csum ~== "D3C5FA777BA52264546E6569F167AF0D")
+			 || (csum ~== "D48508B92843539B4464235C2B355CC3")
+			 || (csum ~== "D6601C3470A525B9959708CA7C662ABA")
+			 || (csum ~== "DD91E89C70E1C43D610BFC10D1FE1CA2")
+			 || (csum ~== "DFDED622F689CC39CA16BFAD8AE6CF56")
+			 || (csum ~== "E1B55285AA0157A2AF1396DA2576B57F")
+			 || (csum ~== "E3B06F44DBF6F7E7754D7B1DAEF707E4")
+			 || (csum ~== "E89CCC7E155F1032F693359CC219BE6C")
+			 || (csum ~== "E8FAA643CCB5E52AA7B1282DA88D1DDF")
+			 || (csum ~== "E95A9756CB46D94CB9F40BDF2B91384D")
+			 || (csum ~== "EC5A1B294CC7FB822A6C913F811797C4")
+			 || (csum ~== "EFAFE59092DE5E613562ACF52B86C37F")
+			 || (csum ~== "F1266156AF93C0CADFF31EFD5EB12BDD")
+			 || (csum ~== "F37211DDAE80CBFA9DE2ED26CAA69946")
+			 || (csum ~== "F390EA69FF255D9D3DD9FD32CC448B8F")
+			 || (csum ~== "F8DFDCBAA677F83E2CD2409F5C00505F")
+			 || (csum ~== "FC5967D5FDE49566E84801DA1081B16B")
+			 || (csum ~== "FC73BFC52F7D29344848FBFD51A0B554")
+			 || (csum ~== "FC832437D7A2B7094A9B56C3909773D9")
+			 || (csum ~== "FDC90F44C65A71E0901C1B9FFFCF3D02")
+			 || (csum ~== "FDD5934796B91BDE46F85D834DFEEAC0")
+			 || (csum ~== "FEA83EE6BCFC899F06CBE394DFBE6707")
+			 || (csum ~== "1B6DF1FD51FDC3D882009D287B5A28C6")
+			 || (csum ~== "1C5DE5A921DEE405E98E7E09D9829387")
+			 || (csum ~== "1C620C0BED075E218DB93236E0887A8C")
+			 || (csum ~== "2A6C4235B942467D25FD50D5B313E67A")
+			 || (csum ~== "2B41CC6721D76DCBD8F5713A84443236")
+			 || (csum ~== "2CF971EECD6B790782DB44B0E917B5B2")
+			 || (csum ~== "3BF62E4F9FB3CF9AF267421CE2D5F348")
+			 || (csum ~== "3FFAF2F624C1B4BB6F581DCF7B99CBA7")
+			 || (csum ~== "4A4436544EBFA930AE3C4C8C2409FD6E")
+			 || (csum ~== "4A53211E319B98F6C7AC5D00099FC28C")
+			 || (csum ~== "4E1C251C44ED29E1255E0FA137B1542A")
+			 || (csum ~== "5B29D0889DF09A8250D62FA09EB2B452")
+			 || (csum ~== "5C63A02B0B04D9AE95CA51687DC3406F")
+			 || (csum ~== "5C8C5FC89623C9EF22C5F47F79B28590")
+			 || (csum ~== "6CDA2721AA1076F063557CF89D88E92B")
+			 || (csum ~== "7E806D0A625D59A6AC2CDF2C869D26F5")
+			 || (csum ~== "9A72B693E38944F710870185E50777DB")
+			 || (csum ~== "9B51526171228EB2FEB413BA6814A9A1")
+			 || (csum ~== "19CC8ACB7BB48F0F504B7D4AE27A5168")
+			 || (csum ~== "28F6766308D3B39EC5E662FF7156C6C5")
+			 || (csum ~== "35F42514BFE6C9E41A376D4049ED4555")
+			 || (csum ~== "47DDDC8ACBA6CC30D135AC05915621D1")
+			 || (csum ~== "55E321849F3699655D7E062C90682F63")
+			 || (csum ~== "056A5796E924774FE19E9CB7924712C6")
+			 || (csum ~== "56CD5E4B6EF14229EED260BB452D47CD")
+			 || (csum ~== "61F80F4A1684D62A4FBEFA241EABEB11")
+			 || (csum ~== "65EFFD49449AD3FD32A6EB347C6D923B")
+			 || (csum ~== "70F1D5ECDB77B6C39F6413724BB58EFF")
+			 || (csum ~== "088ECE0E0F3E68448FA1D901001A0084")
+			 || (csum ~== "89C4CD26EF05E2577B10CAFE56226662")
+			 || (csum ~== "91AD797F95CC4C6D6AE33B21F664C60B")
+			 || (csum ~== "188B1B4244BD8DA501D8532696EC8654")
+			 || (csum ~== "297C0350ACF8BFFF59D5B3679F5F7756")
+			 || (csum ~== "339B4B50B615BE6E1D8454F6C605A97C")
+			 || (csum ~== "0396DC9B793ADDB0D8805B8BCA22AFA0")
+			 || (csum ~== "0437C4DFACE5D1A6ED43C8512A322364")
+			 || (csum ~== "441BF111747671066A10A146C03EEFC4")
+			 || (csum ~== "515EA2EECD0845BDEC35C29930CCC0E5")
+			 || (csum ~== "580E1113B36E1F7A2BFD0C4F5B20B228")
+			 || (csum ~== "614B1674A664AEEE38EF886008DBB04B")
+			 || (csum ~== "712BF1DF1B88C6DA0016E5917F4B65BE")
+			 || (csum ~== "2639C89B8B7052E2CE4CB9CFC63F4C53")
+			 || (csum ~== "2805AB25F19F719C8E228A5239E0565D")
+			 || (csum ~== "4444C95C2029DA6EECAC92DAA31CE665")
+			 || (csum ~== "4799E1FDB5A3C0E3AD650B5AC215A737")
+			 || (csum ~== "5405DD7C3CDB6AE032529083DA6B6615")
+			 || (csum ~== "6357A782528F44EAF8758E51DC516B77")
+			 || (csum ~== "008227FE7A5E78F0F04C6C7009CF17AC")
+			 || (csum ~== "50876E46C80CC47F1EFC9CE52F4836A0")
+			 || (csum ~== "66342E4468E151FB418F30989A1C78F5")
+			 || (csum ~== "78979A583B1E30D94C9DAE2BCFA9A18D")
+			 || (csum ~== "112599C94EB03328D217233D4CB65A70")
+			 || (csum ~== "7729174BAA658C8FD86CF8290422F512")
+			 || (csum ~== "33752742BCA8E539A6EE3E5D0FDA8744")
+			 // Deathkings
+			 || (csum ~== "0C7B62B11C7970DAAF66F9084C8E408E")
+			 || (csum ~== "A5F820CB016DE3D9A402C0173E7F9998")
+			 || (csum ~== "B0ADDB295A3ACCE43978AAC91FB8C58A")
+			 || (csum ~== "B295A2FBB187A1DC8AEFDE825DFB084A")
+			 || (csum ~== "B77D810C972976C54A694C62361FFF9D")
+			 || (csum ~== "C35E3C2727CCD7EF7793230AEF6255E7")
+			 || (csum ~== "C35F7CB2E9F93BB331FFCEB6622ABD64")
+			 || (csum ~== "CA7825F84BC08E76C6C85A41AEFE4370")
+			 || (csum ~== "CB0334184147FF565F6EF437F316B3EB")
+			 || (csum ~== "E2B5D1400279335811C1C1C0B437D9C8")
+			 || (csum ~== "E3EFB0156A20ADF2DF00915A0EA85DF5")
+			 || (csum ~== "2FAD54B58487884F06EAFA507B553921")
+			 || (csum ~== "3BB1724A4B66E85E2431110E4D7C4B76")
+			 || (csum ~== "6C886A3E37410C6FC83ED87BB6E9864F")
+			 || (csum ~== "6FAFFEAAE301FD341169A3CC63CBE183")
+			 || (csum ~== "7C28FD1ED662667FC54CDA123CF0614A")
+			 || (csum ~== "7DC65D5029DD834481CD716B3D71388A")
+			 || (csum ~== "11A83AAE9F747E1BA649F52D6C2DDB3A")
+			 || (csum ~== "15FC0991D975325556EFF71F241A4458")
+			 || (csum ~== "56D7CFFF0440328ADB20521ED70C739A")
+			 || (csum ~== "90B4951F996BA30096F2D4238EEC39CA")
+			 || (csum ~== "2945EDC2A9D7222AE54F0C68E1EA79FC")
+			 || (csum ~== "4482A52290F42C50D6F80A0D4751A0E4")
+			 || (csum ~== "4945FC07392AF9D2F1FABDD471C691A5")
+			 || (csum ~== "7721B620EA970DF48FF4A18489822F6C")
+			 || (csum ~== "0487193FFC57884EDB053F3E9148C534") )
+			return true;
+		return false;
+	}
+
+	// gendered languages are a fuck
+	static clearscope bool SellFemaleItem( Inventory i )
+	{
+		// no gendered string alt
+		if ( StringTable.Localize("$SWWM_SELLEXTRA_FEM") == "SWWM_SELLEXTRA_FEM" )
+			return false;
+		if ( i is 'DeepImpact' ) return true;
+		if ( i is 'ExplodiumGun' ) return true;
+		if ( i is 'Wallbuster' ) return true;
+		if ( i is 'HeavyMahSheenGun' ) return true;
+		if ( i is 'Quadravol' ) return true;
+		if ( i is 'Sparkster' ) return true;
+		if ( i is 'EMPCarbine' ) return true;
+		if ( i is 'CandyGun' ) return true;
+		if ( i is 'RayKhom' ) return true;
+		if ( i is 'GrandLance' ) return true;
+		if ( i is 'HealthNuggetItem' ) return true;
+		if ( i is 'ArmorNuggetItem' ) return true;
+		if ( i is 'WarArmor' ) return true;
+		if ( i is 'FuckingInvinciball' ) return true;
+		if ( i is 'SWWMLamp' ) return true;
+		return false;
+	}
+
+	static bool, TextureID NaziTexRemover( TextureID checkme )
+	{
+		String tn = TexMan.GetName(checkme);
+		if ( (tn ~== "ZZWOLF2") || (tn ~== "ZZWOLF3") || (tn ~== "ZZWOLF4") )
+			return true, TexMan.CheckForTexture("ZZWOLF1",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF6") || (tn ~== "ZZWOLF7") )
+			return true, TexMan.CheckForTexture("ZZWOLF5",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF12") || (tn ~== "ZZWOLF13") )
+			return true, TexMan.CheckForTexture("ZZWOLF11",TexMan.Type_Any);
+		return false, checkme;
+	}
+
+	// full reset of inventory (excluding collectibles, and optionally resetting the score)
+	static play void WipeInventory( Actor mo, bool resetscore = false, bool allplayers = false )
+	{
+		if ( allplayers )
+		{
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !players[i].mo ) continue;
+				WipeInventory(players[i].mo,resetscore,false);
+			}
+			return;
+		}
+		PlayerInfo p = mo.player;
+		if ( !p || !p.mo ) return;
+		SWWMCredits c = SWWMCredits.Find(p);
+		if ( resetscore && c ) c.hcredits = c.credits = 0;
+		Actor last = p.mo;
+		while ( last.inv )
+		{
+			let inv = last.inv;
+			if ( !(inv is 'SWWMCollectible') )
+			{
+				inv.Destroy();
+				if ( !inv.bDestroyed ) last = inv;
+			}
+			else last = inv;
+		}
+		p.mo.GiveDefaultInventory();
+		p.mo.BringUpWeapon();
+		p.health = p.mo.Health = p.mo.SpawnHealth();
+	}
+
+	// WHACK
+	static play void EndLevelDie( Actor victim )
+	{
+		victim.DamageMobj(null,null,victim.Health,'EndLevel',DMG_FORCED|DMG_THRUSTLESS);
+	}
+
+	// checks if we're playing in doom 1
+	// this is used so we can sometimes replace the shotgun with a SSG slot weapon
+	static bool IsDoomOne()
+	{
+		if ( !(gameinfo.GameType&GAME_DOOM) ) return false;
+		// is the map in ExMx format? Then it's likely we're playing a doom 1 map
+		if ( (level.mapname.Length() >= 4) && (level.mapname.Mid(0,1) == "E") && (level.mapname.ByteAt(1) >= 0x30) && (level.mapname.ByteAt(1) < 0x40) && (level.mapname.Mid(2,1) == "M") && (level.mapname.ByteAt(3) >= 0x30) && (level.mapname.ByteAt(3) < 0x40) )
+			return true;
+		return false;
+	}
+
+	static bool IsVipItem( Actor target )
+	{
+		if ( (target is 'Chancebox') && (target.CurState==target.SpawnState) )
+			return true;
+		if ( target is 'SWWMCollectible' )
+			return true;
+		if ( (target is 'Ynykron') || (target is 'GrandLance') )
+			return true;
+		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') )
+			return true;
+		if ( target is 'PuzzleItem' )
+			return true;
+		return false;
+	}
+
+	static bool IsScoreItem( Actor target )
+	{
+		if ( target is 'Key' )
+			return true;
+		return target.bCOUNTITEM;
+	}
+
+	// check that all players can get enough of this if needed
+	//  multi: check for multiple copies, not just single instances
+	//         (useful e.g. for dual wieldable weapons)
+	static bool CheckNeedsItem( Class<Inventory> itm, bool multi = false )
+	{
+		int np = 0;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo ) continue;
+			np++;
+		}
+		int required = np;
+		if ( multi ) required *= GetDefaultByType(itm).MaxAmount;
+		// subtract all that exist already (either in world or owned)
+		let ti = ThinkerIterator.Create(itm);
+		Inventory i;
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( multi ) required -= i.Amount;
+			else required--;
+		}
+		return (required>0);
+	}
+
+	// checks if instances of a certain item exist
+	//  skipme: optionally, ignore checking for one specific instance
+	//          (useful to check if we're the only copy of an item)
+	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null )
+	{
+		let ti = ThinkerIterator.Create(itm);
+		Inventory i;
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( i == skipme ) continue;
+			return true;
+		}
+		return false;
+	}
+
+	// multi-weapon spawn stuff
+	static private Class<Inventory> PickPair( Class<Inventory> a, Class<Inventory> b, int weight = 1 )
+	{
+		if ( CheckNeedsItem(a) ) return a;
+		if ( CheckNeedsItem(b) ) return b;
+		return Random[Replacements](weight,0)?a:b;
+	}
+
+	static Class<Inventory> PickSWWMSlot1()
+	{
+		if ( CheckNeedsItem('ExplodiumGun',true) && Random[Replacements](0,1) ) return 'ExplodiumGun';
+		/*if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
+		return PickPair('PusherWeapon','ItamexHammer');*/
+		return 'PusherWeapon';
+	}
+	static Class<Inventory> PickSWWMSlot2()
+	{
+		//return PickPair('ExplodiumGun','PlasmaBlast');
+		return 'ExplodiumGun';
+	}
+	static Class<Inventory> PickSWWMSlot3()
+	{
+		//return PickPair('Spreadgun','PuntzerBeta');
+		return 'Spreadgun';
+	}
+	static Class<Inventory> PickSWWMSlot4()
+	{
+		//return PickPair('Wallbuster','PuntzerGamma');
+		return 'Wallbuster';
+	}
+	static Class<Inventory> PickSWWMSlot5()
+	{
+		//return PickPair('Eviscerator','HeavyMahSheenGun');
+		return 'Eviscerator';
+	}
+	static Class<Inventory> PickSWWMSlot6()
+	{
+		//return PickPair('Hellblazer','Quadravol');
+		return 'Hellblazer';
+	}
+	static Class<Inventory> PickSWWMSlot7()
+	{
+		//return PickPair('Sparkster','BlackfireIgniter');
+		return 'Sparkster';
+	}
+	static Class<Inventory> PickSWWMSlot8()
+	{
+		//return PickPair('SilverBullet','EMPCarbine');
+		return 'SilverBullet';
+	}
+	static Class<Inventory> PickSWWMSlot9()
+	{
+		//return PickPair('CandyGun','RayKhom');
+		return 'CandyGun';
+	}
+	static Class<Inventory> PickSWWMSlot0()
+	{
+		/*if ( gameinfo.GameType&GAME_Strife ) return 'GrandLance';
+		return PickPair('Ynykron','GrandLance');*/
+		return 'Ynykron';
+	}
+	static Class<Inventory> PickDoomSlot6()
+	{
+		//return PickPair(PickSWWMSlot7(),PickSWWMSlot8(),2);
+		return PickPair('Sparkster','SilverBullet',2);
+	}
+	static Class<Inventory> PickDoomSlot7()
+	{
+		//return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
+		return PickPair('CandyGun','Ynykron',2);
+	}
+	static Class<Inventory> PickHereticSlot3()	// also used for Doom 1
+	{
+		//return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
+		return PickPair('Spreadgun','Wallbuster',2);
+	}
+}
+
+Class RadiusDebugSphere : Actor
+{
+	Default
+	{
+		RenderStyle "AddStencil";
+		StencilColor "White";
+		Radius .1;
+		Height 0.;
+		+NOGRAVITY;
+		+NOINTERACTION;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A 1 BRIGHT A_FadeOut();
+		Wait;
+	}
+}
+
+Class ShinemapDebugSphere : Actor
+{
+	override bool Used( Actor user )
+	{
+		if ( CurState.NextState )
+			SetState(CurState.NextState);
+		else SetState(SpawnState);
+		return true;
+	}
+	override void Tick() {}
+	Default
+	{
+		RenderStyle "Add";
+		Radius 16;
+		Height 48;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1 Bright NoDelay A_SetRenderStyle(1.,STYLE_Add);
+		XZW1 B -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 C -1 Bright A_SetRenderStyle(1.,STYLE_Add);
+		XZW1 D -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 E -1 Bright A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 F -1 A_SetRenderStyle(1.,STYLE_Add);
+		XZW1 G -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 H -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 I -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 J -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 K -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 L -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 M -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 N -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 O -1 A_SetRenderStyle(1.,STYLE_Normal);
+		XZW1 P -1 A_SetRenderStyle(1.,STYLE_Normal);
+		Loop;
+	}
+}
+
+// used to indicate that the next level resets inventory
+Class InventoryWipeToken : Inventory
+{
+	default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+	}
+}

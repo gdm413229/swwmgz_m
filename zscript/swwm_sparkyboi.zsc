@@ -154,12 +154,13 @@ Class BigBiospark : Actor
 		A_StartSound("biospark/bigspark",CHAN_VOICE,CHANF_LOOP|CHANF_OVERLAP,1.,.6);
 		let h = Spawn("BigBiosparkHitbox",pos);
 		h.target = self;
-		for ( int i=0; i<special1; i++ )
+		if ( special1 <= 0 ) special1 = 4;
+		for ( int i=0; i<special1*2; i++ )
 		{
 			let o = Spawn("BigOrbiter",pos);
 			o.target = self;
 		}
-		if ( special1 > 0 ) health = 200*special1;
+		health = 300*special1;
 	}
 	override void OnDestroy()
 	{
@@ -384,7 +385,7 @@ Class BigBiospark : Actor
 		Obituary "$O_SPARKSTER";
 		DamageType "Electric";
 		RenderStyle "Add";
-		Health 1600;
+		Health 1200;
 		Radius 2;
 		Height 2;
 		Speed 1;
@@ -975,7 +976,7 @@ Class BiosparkComboImpact : Actor
 		if ( special1 > mx ) return;
 		double factor = (mx-special1)/mx;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,(bAMBUSH?(100+Args[0]*15):80)*factor,0.,(bAMBUSH?600.:400.)*invfct,flags:DE_HOWL);
+		SWWMUtility.DoExplosion(self,(bAMBUSH?(100+Args[0]*25):80)*factor,0.,(bAMBUSH?600.:400.)*invfct,flags:DE_HOWL);
 		SWWMUtility.DoExplosion(self,0.,-12000*factor,(bAMBUSH?800:600)*invfct);
 		int numpt = int(Random[ExploS](8,16)*factor);
 		for ( int i=0; i<numpt; i++ )
@@ -1967,10 +1968,12 @@ Class SparksterMag : SWWMCasing
 Class Sparkster : SWWMWeapon
 {
 	int clipcount;
+	bool doublestacc;
+	bool nomag;
 
 	Property ClipCount : clipcount;
 
-	transient ui TextureID WeaponBox, AmmoBar[3];
+	transient ui TextureID WeaponBox, AmmoBar[6];
 	transient ui Font TewiFont;
 	transient ui DynamicValueInterpolator iclip;
 	transient int failtime;
@@ -1984,12 +1987,27 @@ Class Sparkster : SWWMWeapon
 			AmmoBar[0] = TexMan.CheckForTexture("graphics/HUD/BiosparkBar.png",TexMan.Type_Any);
 			AmmoBar[1] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarRed.png",TexMan.Type_Any);
 			AmmoBar[2] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarGray.png",TexMan.Type_Any);
+			AmmoBar[3] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarSlim.png",TexMan.Type_Any);
+			AmmoBar[4] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarSlimRed.png",TexMan.Type_Any);
+			AmmoBar[5] = TexMan.CheckForTexture("graphics/HUD/BiosparkBarSlimGray.png",TexMan.Type_Any);
 		}
 		Screen.DrawTexture(WeaponBox,false,bx-28,by-28,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,bx-26,by-26,String.Format("%2d",Ammo1.Amount),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		Screen.DrawTexture(AmmoBar[2],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( nomag ) return;
 		bool blinking = (failtime>gametic)&&((failtime-gametic)%16>=8);
-		Screen.DrawTexture(AmmoBar[clipcount<4],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(iclip.GetValue()/10.):0.,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
+		if ( doublestacc )
+		{
+			Screen.DrawTexture(AmmoBar[5],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture(AmmoBar[5],false,bx-14,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture(AmmoBar[3+(clipcount<2)],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(iclip.GetValue()/10.):0.,DTA_ColorOverlay,(blinking&&(clipcount<=4))?Color(128,0,0,0):Color(0,0,0,0));
+			if ( clipcount > 4 )
+				Screen.DrawTexture(AmmoBar[3+(clipcount<6)],false,bx-14,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(((iclip.GetValue()/10.))-12.):0.,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
+		}
+		else
+		{
+			Screen.DrawTexture(AmmoBar[2],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture(AmmoBar[clipcount<2],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(iclip.GetValue()/5.):0.,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
+		}
 	}
 
 	override void HudTick()
@@ -2019,8 +2037,12 @@ Class Sparkster : SWWMWeapon
 
 	action void A_FireSpark( int mode )
 	{
-		int scnt = invoker.clipcount;
-		if ( mode == 2 ) invoker.clipcount = 0;
+		int scnt = invoker.clipcount%4;
+		if ( mode == 2 )
+		{
+			if ( invoker.clipcount > 4 ) invoker.clipcount = 4;
+			else invoker.clipcount = 0;
+		}
 		else invoker.clipcount = max(0,invoker.clipcount-1);
 		Vector3 x, y, z, x2, y2, z2, dir;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -2093,12 +2115,19 @@ Class Sparkster : SWWMWeapon
 		}
 	}
 
-	action void A_DropMag()
+	action void A_DropMag( bool stacc = false )
 	{
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
 		let c = Spawn("SparksterMag",origin);
+		c.angle = angle;
+		c.pitch = pitch;
+		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
+		c.vel += vel*.5;
+		if ( !stacc ) return;
+		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),8*x-2*y-12*z);
+		c = Spawn("SparksterMag",origin);
 		c.angle = angle;
 		c.pitch = pitch;
 		c.vel = x*FRandom[Junk](-.5,.5)+y*FRandom[Junk](-1.2,.3)-(0,0,FRandom[Junk](2,3));
@@ -2131,7 +2160,7 @@ Class Sparkster : SWWMWeapon
 		Weapon.AmmoType1 "SparkUnit";
 		Weapon.AmmoGive1 1;
 		SWWMWeapon.DropAmmoType "SparkUnit";
-		Sparkster.ClipCount 8;
+		Sparkster.ClipCount 4;
 		+SWWMWEAPON.NOFIRSTGIVE;
 		+WEAPON.EXPLOSIVE;
 		Radius 22;
@@ -2140,20 +2169,40 @@ Class Sparkster : SWWMWeapon
 	States
 	{
 	Spawn:
-		XZW1 A -1;
+		XZW1 A -1 NoDelay A_JumpIf(invoker.doublestacc,1);
+		XZW1 B -1;
 		Stop;
 	Select:
 		XZW2 G 2
 		{
+			invoker.nomag = false;
 			A_FullRaise();
 			A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.4,4.);
+			return A_JumpIf(invoker.doublestacc,"DoubleSelect");
 		}
 		XZW2 HIJKLM 2;
 		Goto Ready;
+	DoubleSelect:
+		XZW6 XYZ 2;
+		XZW7 ABCD 2;
+		Goto DoubleReady;
 	Deselect:
-		XZW2 A 2 A_StartSound("biospark/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 2
+		{
+			A_StartSound("biospark/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.doublestacc,"DoubleDeselect");
+		}
 		XZW2 BCDEFG 2;
 		XZW2 G -1
+		{
+			A_StopSound(CHAN_WEAPONEXTRA);
+			A_FullLower();
+		}
+		Stop;
+	DoubleDeselect:
+		XZW5 Z 2;
+		XZW6 STUVWX 2;
+		XZW6 X -1
 		{
 			A_StopSound(CHAN_WEAPONEXTRA);
 			A_FullLower();
@@ -2167,20 +2216,48 @@ Class Sparkster : SWWMWeapon
 				invoker.CheckAmmo(EitherFire,true);
 		}
 		Wait;
+	DoubleReady:
+		XZW5 Z 1
+		{
+			A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1|WRF_ALLOWRELOAD);
+			if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK|BT_ZOOM) )
+				invoker.CheckAmmo(EitherFire,true);
+		}
+		Wait;
 	Fire:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
-		XZW2 A 1 A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1
+		{
+			A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.doublestacc,"DoubleFire");
+		}
 		XZW4 Y 12;
 		XZW4 Y 1 A_FireSpark(0);
 		XZW2 NOPQ 2;
 		Goto PreVent;
+	DoubleFire:
+		XZW5 Z 1;
+		XZW8 L 12;
+		XZW8 L 1 A_FireSpark(0);
+		XZW7 EFGH 2;
+		Goto DoublePreVent;
 	AltFire:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
-		XZW2 A 1 A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 1
+		{
+			A_StartSound("biospark/prefire",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf(invoker.doublestacc,"DoubleAltFire");
+		}
 		XZW4 Z 12;
 		XZW4 Z 1 A_FireSpark(1);
 		XZW2 RSTU 2;
 		Goto PreVent;
+	DoubleAltFire:
+		XZW5 Z 1;
+		XZW8 M 12;
+		XZW8 M 1 A_FireSpark(1);
+		XZW7 IJKL 2;
+		Goto DoublePreVent;
 	PreVent:
 		XZW2 AAAAAAAA 1
 		{
@@ -2194,14 +2271,35 @@ Class Sparkster : SWWMWeapon
 			return ResolveState(null);
 		}
 		Goto Vent;
+	DoublePreVent:
+		XZW5 ZZZZZZZZ 1
+		{
+			if ( invoker.ClipCount > 0 )
+			{
+				if ( player.cmd.buttons&BT_ATTACK )
+					return ResolveState("DoubleRefire");
+				if ( player.cmd.buttons&BT_ALTATTACK )
+					return ResolveState("DoubleAltRefire");
+			}
+			return ResolveState(null);
+		}
+		Goto DoubleVent;
 	Refire:
 		XZW2 A 1;
 		XZW4 Y 3;
 		Goto Fire+3;
+	DoubleRefire:
+		XZW5 Z 1;
+		XZW8 L 3;
+		Goto DoubleFire+2;
 	AltRefire:
 		XZW2 A 1;
 		XZW4 Y 3;
 		Goto AltFire+3;
+	DoubleAltRefire:
+		XZW5 Z 1;
+		XZW8 M 3;
+		Goto DoubleAltFire+2;
 	Vent:
 		XZW2 A 8
 		{
@@ -2211,25 +2309,61 @@ Class Sparkster : SWWMWeapon
 			A_StartSound("biospark/hiss",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		Goto Ready;
+	DoubleVent:
+		XZW5 Z 8
+		{
+			A_Overlay(PSP_WEAPON+2,"VentFlash");
+			A_OverlayFlags(PSP_WEAPON+2,PSPF_RENDERSTYLE|PSPF_FORCESTYLE,true);
+			A_OverlayRenderStyle(PSP_WEAPON+2,STYLE_Add);
+			A_StartSound("biospark/hiss",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		Goto DoubleReady;
 	VentFlash:
 		XZWY ABCDEFGHIJKLMNOPQRSTUVWX 1;
 		Stop;
 	Zoom:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"Reload");
-		XZW2 A 0 A_JumpIf(invoker.ClipCount<4,"NoZoom");
+		XZW2 A 0 A_JumpIf(invoker.doublestacc,"DoubleZoom");
+		XZW2 A 0 A_JumpIf(invoker.ClipCount<2,"NoZoom");
 		XZW2 A 1 A_StartSound("biospark/prethird",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 A 12;
 		XZW5 A 1 A_FireSpark(2);
 		XZW2 VWXYZ 2;
 		Goto Ready;
+	DoubleZoom:
+		XZW5 Z 0 A_JumpIf((invoker.ClipCount<2)||((invoker.ClipCount>4)&&(invoker.ClipCount<6)),"DoubleNoZoom");
+		XZW5 Z 1 A_StartSound("biospark/prethird",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 N 12;
+		XZW8 N 1 A_FireSpark(2);
+		XZW7 MNOPQ 2;
+		Goto DoubleReady;
 	NoZoom:
 		XZW2 A 1 A_StartSound("biospark/prethird",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 A 12;
 		XZW5 A 8 A_FailZoom();
 		XZW2 A 20;
 		Goto Ready;
+	DoubleNoZoom:
+		XZW5 Z 1 A_StartSound("biospark/prethird",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 N 12;
+		XZW8 N 8 A_FailZoom();
+		XZW5 Z 20;
+		Goto DoubleReady;
 	Reload:
-		XZW2 A 0 A_JumpIf((invoker.clipcount>0)||((invoker.Ammo1.Amount<=0)&&!sv_infiniteammo&&!FindInventory('PowerInfiniteAmmo',true)),"Idle");
+		XZW2 A 0
+		{
+			if ( invoker.clipcount > 0 )
+			{
+				if ( !invoker.doublestacc && ((invoker.Ammo1.Amount > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo')) )
+					return ResolveState("AttachExtra");
+				return ResolveState("Idle");
+			}
+			if ( (invoker.Ammo1.Amount <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo') )
+				return ResolveState("Idle");
+			if ( invoker.doublestacc )
+				return ResolveState("UnloadExtra");
+			return ResolveState(null);
+		}
 		XZW2 A 2
 		{
 			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
@@ -2239,44 +2373,115 @@ Class Sparkster : SWWMWeapon
 		XZW3 F 2
 		{
 			invoker.clipcount = 0;
+			invoker.nomag = true;
 			A_StartSound("biospark/magout",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StopSound(CHAN_WEAPONEXTRA);
 		}
 		XZW3 GHIJKL 2;
 		XZW3 M 2 A_DropMag();
+		Goto Reload2;
+	UnloadExtra:
+		XZW5 Z 2
+		{
+			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerReload();
+		}
+		XZW9 MNOPQ 2;
+		XZW9 R 2
+		{
+			invoker.clipcount = 0;
+			invoker.nomag = true;
+			invoker.doublestacc = false;
+			A_StartSound("biospark/magout",CHAN_WEAPON,CHANF_OVERLAP);
+			A_StopSound(CHAN_WEAPONEXTRA);
+		}
+		XZW9 STUVWX 2;
+		XZW9 Y 2 A_DropMag(true);
+		XZW9 Z 0;
+		Goto Reload2;
+	Reload2:
 		XZW3 NOPQR 2;
 		XZW3 S 2
 		{
 			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
 				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
 			invoker.clipcount = invoker.default.clipcount;
+			invoker.nomag = false;
 			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.4,4.);
 		}
-		XZW3 UVW 2;
+		XZW3 UV 2;
+		XZW3 W 0 A_JumpIf((player.cmd.buttons&BT_RELOAD)&&((invoker.Ammo1.Amount>0)||sv_infiniteammo||FindInventory('PowerInfiniteAmmo')),"DoubleStacc");
+		Goto Reload3;
+	Reload3:
+		XZW3 W 2;
 		XZW3 X 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 YZ 2;
 		XZW4 ABCD 2;
 		Goto Vent;
+	DoubleStacc:
+		XZWA ABCDEFG 2;
+		XZWA H 2
+		{
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+			invoker.clipcount += invoker.default.clipcount;
+			invoker.doublestacc = true;
+			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZWA IJKL 2;
+		XZWA M 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWA NOPQRS 2;
+		Goto DoubleVent;
+	AttachExtra:
+		XZW2 A 2
+		{
+			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+			A_PlayerReload();
+		}
+		XZW6 ABCDEFGHI 2;
+		XZW6 J 2
+		{
+			if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+			invoker.clipcount += invoker.default.clipcount;
+			invoker.doublestacc = true;
+			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		}
+		XZW6 K 2;
+		XZW6 L 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW6 MNOPQR 2;
+		Goto DoubleVent;
 	Idle:
 		XZW2 A 2
 		{
 			A_StartSound("biospark/checkout",CHAN_WEAPON,CHANF_OVERLAP);
 			A_PlayerCheckGun();
+			return A_JumpIf(invoker.doublestacc,"DoubleIdle");
 		}
 		XZW5 BCDE 2;
 		XZW5 FGHI 3;
 		XZW5 JKLM 2;
 		XZW5 NOPQ 3;
 		XZW5 RST 2;
-		XZW5 UVXY 3;
+		XZW5 UVWXY 3;
 		Goto Ready;
+	DoubleIdle:
+		XZW5 Z 2;
+		XZW8 OPQR 2;
+		XZW8 STUV 3;
+		XZW8 WXYZ 2;
+		XZW9 ABCD 3;
+		XZW9 EFG 2;
+		XZW9 HIJKL 3;
+		Goto DoubleReady;
 	User1:
 		XZW2 A 2
 		{
 			A_StartSound("demolitionist/wswing",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("biospark/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 			A_PlayerMelee();
+			return A_JumpIf(invoker.doublestacc,"DoubleUser1");
 		}
 		XZW4 EFG 2;
 		XZW4 H 1 A_Parry(9);
@@ -2286,6 +2491,17 @@ Class Sparkster : SWWMWeapon
 		XZW4 R 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW4 STUVWX 2;
 		Goto Ready;
+	DoubleUser1:
+		XZW5 Z 2;
+		XZW7 RST 2;
+		XZW7 U 1 A_Parry(9);
+		XZW7 VW 1;
+		XZW7 X 2 A_Melee(60,"demolitionist/whitm");
+		XZW7 YZ 2;
+		XZW8 ABCD 2;
+		XZW8 E 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW8 FGHIJK 2;
+		Goto DoubleReady;
 	Flash:
 		XZWZ A 2 Bright
 		{

@@ -200,6 +200,8 @@ A relic from the olden days of **UnSX**. A potent energy weapon that uses what's
 
 **Tertiary fire (Zoom):** Deploy a capsule that releases a massive sphere of pure energy, which will track down any hostile targets. It will rip through everything and even bounce off surfaces, but it has a rather limited lifespan.
 
+**Reload:** If all energy is depleted, loads in another charge, otherwise, if there's one Biospark Unit already connected, a second one will be attached, allowing for 8 shots instead of 4.
+
 If the beam hits either of the other energy blobs, they will detonate with highly amplified damage and range. Note that it is possible to alternate between primary and secondary modes while rapid firing, making this combo just a matter of precise timing.
 
 ### Biospark Unit ~ Replaces Cells, Runes

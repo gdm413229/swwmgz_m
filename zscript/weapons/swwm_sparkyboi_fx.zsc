@@ -274,6 +274,7 @@ Class BigBiospark : Actor
 			}
 		}
 		Health -= 3;
+		if ( bMISSILEMORE ) Health--;
 		if ( Health <= 0 ) ExplodeMissile();
 	}
 
@@ -445,6 +446,7 @@ Class BiosparkBall : Actor
 		A_StartSound("biospark/spark",CHAN_VOICE,CHANF_LOOP);
 		let h = Spawn("BiosparkHitbox",pos);
 		h.target = self;
+		if ( bMISSILEMORE ) A_SparkTick();	// potential for arcs to hit shooter if overloaded
 	}
 	void A_SparkTick()
 	{
@@ -485,8 +487,8 @@ Class BiosparkBall : Actor
 		magvel *= 1.03;
 		if ( magvel > 50. ) magvel = 50.;
 		Vector3 dir = vel.unit();
-		if ( bAMBUSH )
-			dir = (dir+(FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1))*FRandom[Sparkster](.02,.03)).unit();
+		if ( bMISSILEMORE )
+			dir = (dir+(FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1))*FRandom[Sparkster](.006,.012)).unit();
 		// check targets at an interval, to save on performance
 		if ( !(special2%5) )
 		{
@@ -963,6 +965,8 @@ Class BiosparkComboImpact : Actor
 				s.target = target;
 				s.angle = ang;
 				s.pitch = pt;
+				s.bMISSILEMORE = true;
+				s.bMISSILEEVENMORE = true;
 			}
 		}
 		Spawn("BiosparkExplLight2",pos);
@@ -1193,6 +1197,10 @@ Class BiosparkBeam : Actor
 				dir = (dir+.1*dirto*(clamp(1.-(dist/500.),0.,1.)**4.)).unit();
 			}
 		}
+		if ( bMISSILEEVENMORE )
+			dir = (dir+(FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1))*FRandom[Sparkster](.8,.16)).unit();
+		else if ( bMISSILEMORE )
+			dir = (dir+(FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1),FRandom[Sparkster](-1,1))*FRandom[Sparkster](.02,.04)).unit();
 		invoker.nextdir = dir;
 	}
 
@@ -1207,7 +1215,7 @@ Class BiosparkBeam : Actor
 		int numpt = Random[Sparkster](-1,3);
 		for ( int i=0; i<numpt; i++ )
 		{
-			let a = Spawn("BiosparkArc",level.Vec3Offset(pos,tdir*FRandom[Sparkster](frame?0:.3,1)));
+			let a = Spawn("BiosparkArc",level.Vec3Offset(pos,tdir*FRandom[Sparkster]((frame||bMISSILEMORE)?0:.3,1)));
 			a.angle = angle;
 			a.pitch = pitch;
 			a.target = target;
@@ -1216,7 +1224,7 @@ Class BiosparkBeam : Actor
 		numpt = Random[Sparkster](1,3);
 		for ( int i=0; i<numpt; i++ )
 		{
-			let a = Spawn("BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster](frame?0:.3,1)));
+			let a = Spawn("BiosparkArcSmall",level.Vec3Offset(pos,tdir*FRandom[Sparkster]((frame||bMISSILEMORE)?0:.3,1)));
 			a.angle = angle;
 			a.pitch = pitch;
 			a.target = target;
@@ -1248,6 +1256,8 @@ Class BiosparkBeam : Actor
 		b.pitch = asin(-invoker.nextdir.z);
 		b.target = target;
 		b.special1 = special1+1;
+		b.bMISSILEMORE = bMISSILEMORE;
+		b.bMISSILEEVENMORE = bMISSILEEVENMORE;
 	}
 
 	action void A_Fade()
@@ -1804,6 +1814,7 @@ Class BiosparkCore : Actor
 		s.angle = atan2(dir.y,dir.x);
 		s.pitch = asin(-dir.z);
 		s.special1 = special1;
+		s.bMISSILEMORE = bMISSILEMORE;
 	}
 	void A_SparkExplode()
 	{

@@ -36,7 +36,7 @@ Class Sparkster : SWWMWeapon
 			Screen.DrawTexture(AmmoBar[5],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Screen.DrawTexture(AmmoBar[5],false,bx-14,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			Screen.DrawTexture(AmmoBar[3+(clipcount<2)],false,bx-26,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(iclip.GetValue()/10.):0.,DTA_ColorOverlay,(blinking&&(clipcount<=4))?Color(128,0,0,0):Color(0,0,0,0));
-			if ( clipcount > 4 )
+			if ( (iclip && (iclip.GetValue() > 120)) || (!iclip && (clipcount > 4)) )
 				Screen.DrawTexture(AmmoBar[3+(clipcount<6)],false,bx-14,by-8,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,iclip?(((iclip.GetValue()/10.))-12.):0.,DTA_ColorOverlay,blinking?Color(128,0,0,0):Color(0,0,0,0));
 		}
 		else
@@ -106,6 +106,7 @@ Class Sparkster : SWWMWeapon
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = asin(-dir.z);
 			p.vel = dir*p.speed;
+			if ( invoker.doublestacc ) p.bMISSILEMORE = true;
 			break;
 		case 1:
 			// beam
@@ -126,6 +127,7 @@ Class Sparkster : SWWMWeapon
 			p.angle = atan2(dir.y,dir.x);
 			p.pitch = asin(-dir.z);
 			p.frame = 0;
+			if ( invoker.doublestacc ) p.bMISSILEMORE = true;
 			break;
 		case 2:
 			// big spark
@@ -147,6 +149,11 @@ Class Sparkster : SWWMWeapon
 			p.vel = dir*p.speed;
 			p.vel.z += 3.5;
 			p.special1 = scnt;
+			if ( invoker.doublestacc )
+			{
+				p.bMISSILEMORE = true;
+				p.ReactionTime -= 10;
+			}
 			break;
 		}
 	}
@@ -174,7 +181,10 @@ Class Sparkster : SWWMWeapon
 	{
 		Super.Travelled();
 		if ( Owner.player && (Owner.player.Readyweapon == self) )
-			Owner.A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.4,4.);
+		{
+			Owner.A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,doublestacc?.6:.4,4.);
+			if ( doublestacc ) Owner.A_StartSound("biospark/idle2",CHAN_WEAPONEXTRA2,CHANF_LOOP,.2,4.);
+		}
 	}
 
 	action void A_FailZoom()
@@ -219,7 +229,12 @@ Class Sparkster : SWWMWeapon
 		XZW2 HIJKLM 2;
 		Goto Ready;
 	DoubleSelect:
-		XZW6 XYZ 2;
+		XZW6 X 2
+		{
+			A_SoundVolume(CHAN_WEAPONEXTRA,.6);
+			A_StartSound("biospark/idle2",CHAN_WEAPONEXTRA2,CHANF_LOOP,.2,4.);
+		}
+		XZW6 YZ 2;
 		XZW7 ABCD 2;
 		Goto DoubleReady;
 	Deselect:
@@ -241,6 +256,7 @@ Class Sparkster : SWWMWeapon
 		XZW6 X -1
 		{
 			A_StopSound(CHAN_WEAPONEXTRA);
+			A_StopSound(CHAN_WEAPONEXTRA2);
 			A_FullLower();
 		}
 		Stop;
@@ -310,7 +326,7 @@ Class Sparkster : SWWMWeapon
 	DoublePreVent:
 		XZW5 ZZZZZZZZ 1
 		{
-			if ( invoker.ClipCount > 0 )
+			if ( (invoker.ClipCount > 0) && (invoker.ClipCount%4) )
 			{
 				if ( player.cmd.buttons&BT_ATTACK )
 					return ResolveState("DoubleRefire");
@@ -430,6 +446,7 @@ Class Sparkster : SWWMWeapon
 			invoker.doublestacc = false;
 			A_StartSound("biospark/magout",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StopSound(CHAN_WEAPONEXTRA);
+			A_StopSound(CHAN_WEAPONEXTRA2);
 		}
 		XZW9 STUVWX 2;
 		XZW9 Y 2 A_DropMag(true);
@@ -464,6 +481,8 @@ Class Sparkster : SWWMWeapon
 			invoker.clipcount += invoker.default.clipcount;
 			invoker.doublestacc = true;
 			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
+			A_SoundVolume(CHAN_WEAPONEXTRA,.6);
+			A_StartSound("biospark/idle2",CHAN_WEAPONEXTRA2,CHANF_LOOP,.2,4.);
 		}
 		XZWA IJKL 2;
 		XZWA M 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
@@ -483,6 +502,8 @@ Class Sparkster : SWWMWeapon
 			invoker.clipcount += invoker.default.clipcount;
 			invoker.doublestacc = true;
 			A_StartSound("biospark/magin",CHAN_WEAPON,CHANF_OVERLAP);
+			A_SoundVolume(CHAN_WEAPONEXTRA,.6);
+			A_StartSound("biospark/idle2",CHAN_WEAPONEXTRA2,CHANF_LOOP,.2,4.);
 		}
 		XZW6 K 2;
 		XZW6 L 2 A_StartSound("biospark/meleeend",CHAN_WEAPON,CHANF_OVERLAP);

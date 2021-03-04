@@ -19,6 +19,17 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
+* **Additional items:**
+  - Mykradvo Artifact (but this time it's not auto-use)
+  - Puronamyka Armor (the return of this absurd protection)
+  - Additional grenades (not just Explodium Mags)
+    - Candygun Mags (because why not)
+    - Vacuum Bomb (return of this old weapon)
+    - Kinylum Shard (UnSX 3 callback)
+    - Burrow Mines (return of the Loki Mine)
+    - Shockbombs (stun is fun)
+  - Satellite Companion (lil' thing that schutt)
+  - Gate Node (actual replacement for chaos devices)
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Quick Grenade sticks mags to walls (or things) if facing one**

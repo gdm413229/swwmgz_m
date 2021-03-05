@@ -15,12 +15,72 @@ Class GenericCubeGesture : SWWMItemGesture
 		Stop;
 	}
 }
-Class AkariProjectGesture : SWWMItemGesture {}
-Class LoveSignalsCDGesture : SWWMItemGesture {}
-Class NutatcoBarGesture : SWWMItemGesture {}
-Class FrispyCornGesture : SWWMItemGesture {}
-Class DemoPlushGesture : SWWMItemGesture {}
+Class AkariProjectGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFG 3;
+		XZW1 HIJKLM 4;
+		XZW1 NO 3;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class LoveSignalsCDGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFG 3;
+		XZW1 HIJK 4;
+		XZW1 LM 3;
+		XZW1 N 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 OPQRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class NutatcoBarGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKL 4;
+		XZW1 MN 3;
+		XZW1 O 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 PQRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class FrispyCornGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKLM 4;
+		XZW1 NO 3;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class SayaBeanGesture : SWWMItemGesture {}
+Class DemoPlushGesture : SWWMItemGesture {}
 Class KirinCummiesGesture : SWWMItemGesture {}
 Class MilkBreadsGesture : SWWMItemGesture {}
 Class KirinMangaGesture : SWWMItemGesture {}

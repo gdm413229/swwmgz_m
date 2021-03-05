@@ -1,5 +1,20 @@
-// TODO them gestures
-Class GenericCubeGesture : SWWMItemGesture {}
+// Demo-chan just loves to fiddle around
+Class GenericCubeGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CD 3;
+		XZW1 EFGHIJK 4;
+		XZW1 LM 3;
+		XZW1 N 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 OPQRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class AkariProjectGesture : SWWMItemGesture {}
 Class LoveSignalsCDGesture : SWWMItemGesture {}
 Class NutatcoBarGesture : SWWMItemGesture {}

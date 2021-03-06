@@ -20,6 +20,7 @@ Class Demolitionist : PlayerPawn
 
 	SWWMStats mystats;
 	int cairtime;
+	bool hasteleported;
 
 	int lastmpain;
 
@@ -711,6 +712,12 @@ Class Demolitionist : PlayerPawn
 	{
 		Vector3 oldpos = pos;
 		Super.Tick();
+		if ( hasteleported )
+		{
+			// we just got teleported, don't count the travel distance
+			oldpos = pos;
+			hasteleported = false;
+		}
 		// can't be poisoned
 		PoisonDurationReceived = 0;
 		PoisonPeriodReceived = 0;
@@ -2251,16 +2258,8 @@ Class Demolitionist : PlayerPawn
 	}
 	override void PostTeleport( Vector3 destpos, double destangle, int flags )
 	{
-		// subtract travel distance from the stats, and add it to a separate stat
-		double traveldist = level.Vec3Diff(pretelepos,pos).length();
-		if ( waterlevel < 2 )
-		{
-			if ( !player.onground || bNoGravity )
-				mystats.airdist -= traveldist;
-			else mystats.grounddist -= traveldist;
-		}
-		else mystats.swimdist -= traveldist;
-		mystats.teledist += traveldist;
+		hasteleported = true;	// notify tick that we teleported, so it ignores the travel distance
+		mystats.teledist += level.Vec3Diff(pretelepos,pos).length();
 		// reset all smooth bob variables if angles/velocity aren't carried over
 		if ( !(flags&TELF_KEEPORIENTATION) )
 		{
@@ -2268,7 +2267,10 @@ Class Demolitionist : PlayerPawn
 			oldlagpitch = lagpitch = oldpitch = pitch;
 		}
 		if ( !(flags&TELF_KEEPVELOCITY) )
+		{
 			oldlagvel = lagvel = vel;
+			lastvelz = vel.z;
+		}
 		// notify carried lamp that we just moved
 		let l = SWWMLamp(FindInventory("SWWMLamp"));
 		if ( l && l.thelamp )

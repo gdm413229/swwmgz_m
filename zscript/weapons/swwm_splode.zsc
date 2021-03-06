@@ -111,9 +111,9 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 20;
+			int dmg = 15;
 			// might as well apply explosion on top
-			if ( dmg >= d.HitActor.Health ) dmg += 25;
+			if ( dmg >= d.HitActor.Health ) dmg += 20;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
@@ -554,9 +554,9 @@ Class DualExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
-			int dmg = 20;
+			int dmg = 15;
 			// might as well apply explosion on top
-			if ( dmg >= d.HitActor.Health ) dmg += 25;
+			if ( dmg >= d.HitActor.Health ) dmg += 20;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
 			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )

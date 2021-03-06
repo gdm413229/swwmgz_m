@@ -144,7 +144,7 @@ Class ExplodiumMagProj : Actor
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,15+25*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,10+20*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -241,7 +241,7 @@ Class ExplodiumBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:3000);
-		SWWMUtility.DoExplosion(self,25,80000,90,40,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,20,80000,90,40,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
 		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);

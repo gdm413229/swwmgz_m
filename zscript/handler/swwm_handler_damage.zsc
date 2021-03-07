@@ -1,0 +1,302 @@
+// WorldThingDamaged and friends
+
+extend Class SWWMHandler
+{
+	bool tookdamage[MAXPLAYERS];
+	int spreecount[MAXPLAYERS];
+	int lastkill[MAXPLAYERS];
+	int multilevel[MAXPLAYERS];
+
+	// gibbing
+	private void DoGibThing( WorldEvent e )
+	{
+		// no gib if it was erased or used the kill monsters cheat
+		if ( (e.DamageType == 'Ynykron') || (e.DamageType == 'Massacre') ) return;
+		int gibhealth = e.Thing.GetGibHealth();
+		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
+		bool forcegibbed = false;
+		// force gib availability for some vanilla Doom monsters
+		if ( gotgibbed && ((e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "Cacodemon") || (e.Thing.GetClass() == "Revenant") || (e.Thing.GetClass() == "Archvile")) )
+			forcegibbed = true;
+		if ( !e.Thing.FindState("XDeath",true) && !e.Thing.FindState("Death.Extreme",true) && !forcegibbed )
+			gotgibbed = false;
+		// only do special handling if they use our blood
+		if ( (e.Thing.GetBloodType(0) != "mkBlood") || e.Thing.bNOBLOOD )
+			return;
+		CorpseFallTracker.TrackBody(e.Thing);
+		bool b;
+		Actor a;
+		// special handling of some monsters
+		if ( e.Thing.GetClass() == "Cyberdemon" )
+		{
+			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
+			if ( !b ) return;
+			mkGibber(a).gibbed = e.Thing;
+			mkGibber(a).delay = 40;
+			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
+			return;
+		}
+		else if ( e.Thing.GetClass() == "SpiderMastermind" )
+		{
+			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
+			if ( !b ) return;
+			mkGibber(a).gibbed = e.Thing;
+			mkGibber(a).delay = 60;
+			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
+		}
+		else if ( gotgibbed )
+		{
+			[b,a] = e.Thing.A_SpawnItemEx("mkGibber",flags:SXF_USEBLOODCOLOR);
+			if ( !b ) return;
+			mkGibber(a).gibbed = e.Thing;
+			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
+		}
+	}
+
+	// damage numbers, combat tracking, etc.
+	private void DoDamageHandling( WorldEvent e )
+	{
+		bool spawnme = true;
+		if ( swwm_accdamage )
+		{
+			// find existing damage number
+			for ( SWWMScoreObj d=damnums; d; d=d.next )
+			{
+				if ( (d.starttic < level.maptime) || (d.acc != e.Thing) ) continue;
+				if ( d.score-e.Damage > d.score ) d.score = int.min;
+				else d.score -= e.Damage;
+				spawnme = false;
+				break;
+			}
+		}
+		if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),ST_Damage,e.Thing);
+		// update combat tracker for it
+		if ( !(e.Thing is 'BossBrain') )
+		{
+			for ( SWWMCombatTracker t=trackers; t; t=t.next )
+			{
+				if ( t.mytarget != e.Thing ) continue;
+				t.updated = level.maptime+35;
+				break;
+			}
+		}
+		// fall dmg
+		SWWMWhoPushedMe.SetInstigator(e.Thing,e.DamageSource);
+		// stats
+		if ( e.Thing.player )
+		{
+			tookdamage[e.Thing.PlayerNumber()] = true;
+			let s = SWWMStats.Find(e.Thing.player);
+			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
+			{
+				s.AddDamageTaken(e.Damage);
+				if ( e.Damage > s.toptaken ) s.toptaken = e.Damage;
+			}
+		}
+		if ( e.DamageSource && e.DamageSource.player )
+		{
+			let s = SWWMStats.Find(e.DamageSource.player);
+			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
+			{
+				s.AddDamageDealt(e.Damage);
+				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
+			}
+		}
+	}
+
+	// combat hit chatter
+	private void DoCombatHit( WorldEvent e )
+	{
+		if ( (e.DamageSource.bISMONSTER || e.DamageSource.player || (e.DamageSource is 'ScriptedMarine')) && (e.Thing == players[consoleplayer].mo) && (e.Thing.Health > 0) )
+		{
+			if ( !lastcombat || (gametic > lastcombat+40) )
+			{
+				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.DamageSource)) )
+					lastcombat = AddOneliner("friendhit",1,10);
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.DamageSource.bBOSS?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
+					lastcombat = AddOneliner("gethit",1,15);
+			}
+			highesttic = gametic;
+		}
+		// friendly fire lines only fire up if we didn't kill them right away (because then the teamkill line should take priority)
+		if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player || (e.Thing is 'ScriptedMarine')) && (e.Thing.Health > 0) )
+		{
+			// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
+			if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing)) && !(e.Thing is 'LampMoth') )
+			{
+				if ( !lastcombat || (gametic > lastcombat+40) )
+					lastcombat = AddOneliner("hitfriend",1,10);
+				highesttic = gametic;
+			}
+		}
+	}
+
+	// kill scoring
+	private void DoKillScoring( WorldEvent e )
+	{
+		// fall damage tracking hack
+		let src = e.DamageSource;
+		if ( (e.DamageType == 'Falling') && !e.DamageSource )
+			src = SWWMWhoPushedMe.RecallInstigator(e.Thing);
+		if ( (!src || !src.player || (src == e.Thing)) ) return;
+		let s = SWWMStats.Find(src.player);
+		if ( s )
+		{
+			s.kills++;
+			s.AddWeaponKill(e.Inflictor,e.Thing,e.DamageType);
+		}
+		if ( src == players[consoleplayer].mo )
+		{
+			highesttic = gametic;
+			if ( !lastcombat || (gametic > lastcombat+40) )
+			{
+				if ( e.Thing.IsFriend(src) || SWWMUtility.IsCivilian(e.Thing) )
+					lastcombat = AddOneliner("friendkill",1,5);
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.Thing.bBOSS?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
+					lastcombat = AddOneliner("scorekill",1,15);
+			}
+		}
+		// no credits unless it's a counted kill or marine (that isn't friendly)
+		if ( e.Thing.IsFriend(src) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
+			return;
+		int pnum = src.PlayerNumber();
+		if ( level.maptime < (lastkill[pnum]+5*GameTicRate) )
+			multilevel[pnum]++;
+		else multilevel[pnum] = 0;
+		if ( s && (multilevel[pnum]+1 > s.mkill) )
+			s.mkill = multilevel[pnum]+1;
+		lastkill[pnum] = level.maptime;
+		// scoring
+		int score = min(1000,int(ceil(e.Thing.GetSpawnHealth()*.05)*10));
+		SWWMScoreObj scr = null;
+		if ( src.player == players[consoleplayer] )
+			scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+		int ofs = 0;
+		if ( e.DamageType == 'Push' )
+		{
+			score += 500;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_SHAMEFUL");
+				scr.xcnt = ++ofs;
+			}
+		}
+		else if ( e.DamageType == 'Buttslam' )
+		{
+			score += 300;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_BUTTSLAM");
+				scr.xcnt = ++ofs;
+			}
+		}
+		else if ( e.DamageType == 'Love' )
+		{
+			score += 600;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xtcolor[ofs] = Font.FindFontColor('BlushPink');
+				scr.xstr[ofs] = StringTable.Localize((e.Thing is 'WolfensteinSS')?"$SWWM_LOVED_ALT":"$SWWM_LOVED");
+				scr.xcnt = ++ofs;
+			}
+		}
+		else if ( e.Inflictor is 'FroggyChair' )
+		{
+			score += 1440;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xtcolor[ofs] = Font.CR_GREEN;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_FROGGED");
+				scr.xcnt = ++ofs;
+			}
+		}
+		Inventory pb;
+		if ( e.Inflictor && (pb = e.Inflictor.FindInventory('ParriedBuff')) )
+		{
+			score += 200;
+			if ( pb.special1&1 ) score += 200;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				if ( pb.special1&1 ) scr.xstr[ofs] = StringTable.Localize("$SWWM_PPARRY");
+				else scr.xstr[ofs] = StringTable.Localize("$SWWM_PARRY");
+				scr.xcnt = ++ofs;
+			}
+		}
+		if ( (e.Damage >= e.Thing.GetSpawnHealth()*2) || (((e.Thing.Health <= e.Thing.GetGibHealth()) || (src.bEXTREMEDEATH) || (e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageType == 'Extreme')) && !src.bNOEXTREMEDEATH && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH)) )
+		{
+			score *= 2;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_OVERKILL");
+				scr.xcnt = ++ofs;
+			}
+		}
+		score = int(score*(1.+.5*min(multilevel[pnum],16)));
+		if ( (multilevel[pnum] > 0) && scr )
+		{
+			if ( scr )
+			{
+				scr.xscore[ofs] = (multilevel[pnum]>=16)?int.max:(multilevel[pnum]+1);
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_MULTIKILL");
+				scr.xcnt = ++ofs;
+			}
+		}
+		spreecount[pnum]++;
+		if ( s && (spreecount[pnum] > s.skill) && !tookdamage[pnum] )
+			s.skill = spreecount[pnum];
+		if ( !tookdamage[pnum] )
+		{
+			int spreebonus = 10*(spreecount[pnum]);
+			// taper off after 10x (some people go really far with these, holy fuck)
+			if ( spreecount[pnum] > 10 ) spreebonus = int(spreebonus*((spreecount[pnum]/10.)**.25));
+			score += 100+spreebonus;
+			if ( (spreecount[pnum] > 0) && scr )
+			{
+				scr.xscore[ofs] = spreecount[pnum];
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_SPREEKILL");
+				scr.xcnt = ++ofs;
+			}
+		}
+		if ( e.Thing.bBOSS )
+		{
+			score += 2000;
+			if ( scr )
+			{
+				scr.xscore[ofs] = 0;
+				scr.xstr[ofs] = StringTable.Localize("$SWWM_BOSSKILL");
+				scr.xcnt = ++ofs;
+			}
+		}
+		SWWMCredits.Give(src.player,score);
+		if ( scr ) scr.score = score;	// update final score
+		if ( (level.killed_monsters+1 == level.total_monsters) && !allkills )
+		{
+			allkills = true;
+			SWWMCredits.Give(src.player,1000);
+			Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),src.player.GetUserName(),1000);
+			SWWMScoreObj.Spawn(1000,src.Vec3Offset(0,0,src.Height/2));
+		}
+	}
+
+	override void WorldThingDamaged( WorldEvent e )
+	{
+		if ( e.Damage > 0 ) DoDamageHandling(e);
+		if ( e.DamageSource && (e.DamageSource != e.Thing) ) DoCombatHit(e);
+		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
+		DoGibThing(e);
+		// romero hax
+		if ( (e.Thing is 'BossBrain') && (e.DamageType == 'Telefrag') )
+			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
+		// voodoo doll telefragging barrel hax (eviternity death exits)
+		if ( (e.Thing is 'ExplosiveBarrel') && (e.DamageType == 'Telefrag') && e.DamageSource.player && (e.DamageSource.player.mo != e.DamageSource) )
+			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
+		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
+		DoKillScoring(e);
+	}
+}

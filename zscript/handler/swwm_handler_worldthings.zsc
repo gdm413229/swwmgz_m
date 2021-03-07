@@ -1,0 +1,360 @@
+// WorldThing* events (excluding damage)
+
+extend Class SWWMHandler
+{
+	// prevents revived monsters from spawning in more golden shells
+	Array<Actor> alreadygold;
+
+	// attempt to optimize Ynykron singularity suction
+	Array<Actor> suckableactors;
+
+	override void WorldThingRevived( WorldEvent e )
+	{
+		// reattach combat tracker
+		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
+			SWWMCombatTracker.Spawn(e.Thing);
+		// reattach headpats
+		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
+			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
+		{
+			// you can pet the dog, and you can also pet the caco (and friends)
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+		}
+		if ( !(e.Thing is 'PlayerPawn') ) return;
+		// reset some vars
+		if ( e.Thing.playernumber() != -1 )
+		{
+			multilevel[e.Thing.playernumber()] = 0;
+			spreecount[e.Thing.playernumber()] = 0;
+			tookdamage[e.Thing.playernumber()] = false;
+			lastkill[e.Thing.playernumber()] = int.min;
+		}
+		// reset uptime since player had just died
+		SWWMStats s = SWWMStats.Find(e.Thing.player);
+		if ( s ) s.lastspawn = level.totaltime;
+	}
+
+	private bool HexenMap40()
+	{
+		if ( level.GetChecksum() ~== "2A6C4235B942467D25FD50D5B313E67A" ) return true;	// 1.1
+		if ( level.GetChecksum() ~== "1C5DE5A921DEE405E98E7E09D9829387" ) return true;	// 1.0
+		if ( level.GetChecksum() ~== "EFAFE59092DE5E613562ACF52B86C37F" ) return true;	// beta
+		return false;
+	}
+
+	private static bool ShouldSpawnGold()
+	{
+		int totalneeded = 0;
+		// check "free space" in player inventories
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || !players[i].mo ) continue;
+			let cg = players[i].mo.FindInventory("GoldShell");
+			if ( cg ) totalneeded += cg.MaxAmount-cg.Amount;
+			else totalneeded = GetDefaultByType("GoldShell").MaxAmount;
+		}
+		// subtract any shells already in the world
+		let ti = ThinkerIterator.Create("GoldShell");
+		GoldShell g;
+		while ( g = GoldShell(ti.Next()) )
+		{
+			if ( g.Owner ) continue;
+			totalneeded -= g.Amount;
+		}
+		return (totalneeded > 0);
+	}
+
+	override void WorldThingDied( WorldEvent e )
+	{
+		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
+		{
+			// make sure we can't farm drops from revivable enemies
+			// (or cause some things to spam-spawn gold shells)
+			// (*cough* Touhou Doom *cough*)
+			alreadygold.Push(e.Thing);
+			// weight drop chance based on total count of this monster type
+			// guarantees that maps that get a bit slaughtery won't become easy farms for drops
+			int dropweight = 0;
+			let ti = ThinkerIterator.Create(e.Thing.GetClass());
+			while ( ti.Next() ) dropweight++;
+			int minchance = max(1,6-(e.Thing.GetSpawnHealth()/1000));
+			dropweight = max(minchance,dropweight/4);
+			// make sure the gold shell is "worth spawning", too
+			if ( !Random[GoldDrop](0,dropweight) && ShouldSpawnGold() )
+			{
+				let g = Actor.Spawn("GoldShell",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+				double ang = FRandom[SpareShells](0,360);
+				g.vel.xy = (cos(ang),sin(ang))*FRandom[SpareShells](.4,.8);
+				g.vel.z = FRandom[SpareShells](2.,4.);
+			}
+		}
+		// Korax instakill
+		if ( (e.Thing is 'Korax') && !e.Thing.special2 && HexenMap40() )
+		{
+			e.Thing.special2 = 1;
+			// terminate the monster closet scripts, open all the
+			// doors ourselves
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,220);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,220);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,221);
+			level.ExecuteSpecial(ACS_Terminate,e.Thing,null,false,255);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,10,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,11,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,12,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,13,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,14,16);
+			level.ExecuteSpecial(Door_Open,e.Thing,null,false,10,16);
+			// keep the portal closed, you can't leave unless you
+			// kill everyone else
+			let t = new("UglyBoyGetsFuckedUp");
+			t.ChangeStatNum(Thinker.STAT_USER);
+		}
+		if ( swwm_partytime )
+		{
+			let pt = Actor.Spawn("PartyTime",e.Thing.pos);
+			pt.target = e.Thing;
+		}
+		// force insert gib animations on some vanilla Doom monsters
+		int gibhealth = e.Thing.GetGibHealth();
+		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
+		if ( !gotgibbed ) return;
+		if ( (e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") )
+			ExtraGibDeaths.GibThis(e.Thing,"DemonXDeath");
+		else if ( e.Thing.GetClass() == "HellKnight" )
+			ExtraGibDeaths.GibThis(e.Thing,"KnightXDeath");
+		else if ( e.Thing.GetClass() == "BaronOfHell" )
+			ExtraGibDeaths.GibThis(e.Thing,"BaronXDeath");
+		else if ( e.Thing.GetClass() == "Cacodemon" )
+			ExtraGibDeaths.GibThis(e.Thing,"CacoXDeath");
+		else if ( e.Thing.GetClass() == "Revenant" )
+			ExtraGibDeaths.GibThis(e.Thing,"BonerXDeath");
+		else if ( e.Thing.GetClass() == "Archvile" )
+			ExtraGibDeaths.GibThis(e.Thing,"VileXDeath");
+	}
+
+	private void DoKeyTagFix( Actor a )
+	{
+		if ( a is 'SWWMKey' ) return;	// mod's custom keys are fine
+		if ( a is 'RedCard' ) a.SetTag("$T_REDCARD");
+		else if ( a is 'BlueCard' ) a.SetTag("$T_BLUECARD");
+		else if ( a is 'YellowCard' ) a.SetTag("$T_YELLOWCARD");
+		else if ( a is 'RedSkull' ) a.SetTag("$T_REDSKULL");
+		else if ( a is 'BlueSkull' ) a.SetTag("$T_BLUESKULL");
+		else if ( a is 'YellowSkull' ) a.SetTag("$T_YELLOWSKULL");
+		else if ( a is 'KeyYellow' ) a.SetTag("$T_YELLOWKEY");
+		else if ( a is 'KeyGreen' ) a.SetTag("$T_GREENKEY");
+		else if ( a is 'KeyBlue' ) a.SetTag("$T_BLUEKEY");
+		else if ( a.GetClassName() == 'KeyRed' ) a.SetTag("$T_REDKEY");
+		else if ( a is 'KeySteel' ) a.SetTag("$T_KEYSTEEL");
+		else if ( a is 'KeyCave' ) a.SetTag("$T_KEYCAVE");
+		else if ( a is 'KeyAxe' ) a.SetTag("$T_KEYAXE");
+		else if ( a is 'KeyFire' ) a.SetTag("$T_KEYFIRE");
+		else if ( a is 'KeyEmerald' ) a.SetTag("$T_KEYEMERALD");
+		else if ( a is 'KeyDungeon' ) a.SetTag("$T_KEYDUNGEON");
+		else if ( a is 'KeySilver' ) a.SetTag("$T_KEYSILVER");
+		else if ( a is 'KeyRusted' ) a.SetTag("$T_KEYRUSTED");
+		else if ( a is 'KeyHorn' ) a.SetTag("$T_KEYHORN");
+		else if ( a is 'KeySwamp' ) a.SetTag("$T_KEYSWAMP");
+		else if ( a is 'KeyCastle' ) a.SetTag("$T_KEYCASTLE");
+	}
+
+	// tempfix keys have no tags
+	static void KeyTagFix( Actor a )
+	{
+		let hnd = SWWMHandler(Find("SWWMHandler"));
+		if ( hnd ) hnd.DoKeyTagFix(a);
+	}
+
+	// copies the floatbob of overlapping identical items, so it doesn't look weird
+	private void CopyFloatBob( Actor a )
+	{
+		let bt = BlockThingsIterator.Create(a,16);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || (t == a) || !(t is 'Inventory') || !(t.spawnpoint ~== a.spawnpoint) ) continue;
+			a.floatbobphase = t.floatbobphase;
+			a.angle = t.angle;	// also copy angle
+			break;
+		}
+	}
+
+	override void WorldThingDestroyed( WorldEvent e )
+	{
+		if ( !e.Thing.default.bSHOOTABLE || !e.Thing.default.bMISSILE )
+			return;
+		// remove from suckables
+		int pos = suckableactors.Find(e.Thing);
+		if ( pos >= suckableactors.Size() ) return;
+		suckableactors.Delete(pos);
+	}
+
+	override void WorldThingSpawned( WorldEvent e )
+	{
+		IWantDieSpawn(e);
+		if ( (e.Thing is 'TeleportDest') || (e.Thing is 'BossTarget') )
+		{
+			let d = Actor.Spawn("SWWMTeleportDest",e.Thing.pos);
+			d.bNOGRAVITY = e.Thing.bNOGRAVITY;
+		}
+		if ( e.Thing is 'Inventory' )
+			CopyFloatBob(e.Thing);
+		if ( swwm_doomfall && e.Thing.bISMONSTER )
+			e.Thing.bFALLDAMAGE = true;
+		if ( e.Thing is 'Key' )
+		{
+			DoKeyTagFix(e.Thing);
+			SWWMInterest.Spawn(thekey:Key(e.Thing));
+		}
+		if ( indoomvacation == -1 ) indoomvacation = SWWMUtility.InDoomVacation();
+		if ( e.Thing.GetClass() == 'Pig' )
+			e.Thing.SetTag("$FN_PIG");	// missing in gzdoom
+		// eviternity stuff
+		else if ( (e.Thing.GetClassName() == "Archangelus")
+			|| (e.Thing.GetClassName() == "ArchangelusA")
+			|| (e.Thing.GetClassName() == "ArchangelusB") )
+			e.Thing.SetTag("$FN_ANGEL");
+		else if ( e.Thing.GetClassName() == "AstralCaco" )
+			e.Thing.SetTag("$FN_ASTRAL");
+		else if ( e.Thing.GetClassName() == "Annihilator" )
+		{
+			e.Thing.SetTag("$FN_ANNIHIL");
+			// OH BOY, THESE AREN'T CHANGEABLE
+			//e.Thing.Obituary = "$OB_ANNIHIL";
+		}
+		else if ( e.Thing.GetClassName() == "FormerCaptain" )
+		{
+			e.Thing.SetTag("$FN_FCAPTAIN");
+			//e.Thing.Obituary = "$OB_FCAPTAIN";
+		}
+		else if ( e.Thing.GetClassName() == "NightmareDemon" )
+		{
+			e.Thing.SetTag("$FN_NDEMON");
+			//e.Thing.Obituary = "$OB_NDEMON";
+		}
+		// doom vacation stuff
+		else if ( indoomvacation )
+		{
+			if ( e.Thing.GetClassName() == "Babe" )
+			{
+				e.Thing.bSHOOTABLE = false;	// no hurt
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .2;
+			}
+			else if ( e.Thing.GetClassName() == "CommanderKeen" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .4;
+				HeadpatTracker(hp).hdoomangfix = 5;
+			}
+			else if ( e.Thing.GetClassName() == "BBChair" )
+			{
+				e.Thing.bUSESPECIAL = false;
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .2;
+				HeadpatTracker(hp).hdoomangfix = 15;
+				HeadpatTracker(hp).patstate = e.Thing.MeleeState;
+			}
+			else if ( e.Thing.GetClassName() == "EvilEye" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .1;
+			}
+			else if ( e.Thing.GetClassName() == "HeadCandles" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomangfix = 20;
+			}
+			else if ( e.Thing.GetClassName() == "HeartColumn" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = -.3;
+			}
+			else if ( e.Thing.GetClassName() == "Meat2" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = -15;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "Meat3" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = 20;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "LegsBabe" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = -1.5;
+				HeadpatTracker(hp).hdoomangfix = 20;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+			else if ( e.Thing.GetClassName() == "Meat4" )
+			{
+				let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+				hp.target = e.Thing;
+				HeadpatTracker(hp).hdoomheightfix = .6;
+				HeadpatTracker(hp).hdoomangfix = 15;
+				HeadpatTracker(hp).dvacationarghack = true;
+			}
+		}
+		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
+			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )
+		{
+			// you can pet the dog, and you can also pet the caco (and friends)
+			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
+			hp.target = e.Thing;
+		}
+		SWWMCombatTracker trk;
+		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
+			trk = SWWMCombatTracker.Spawn(e.Thing);
+		if ( !(e.Thing is 'LampMoth') && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory') || (e.Thing is 'CompanionLamp')) )
+		{
+			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
+				SWWMShadow.Track(e.Thing);
+		}
+		// Ynykron vortex optimization (faster than a thinker iterator)
+		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE )
+			SuckableActors.Push(e.Thing);
+		// vanilla blood color changes
+		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )
+		{
+			let gb = Actor.Spawn("GreenBloodReference");
+			e.Thing.CopyBloodColor(gb);
+			gb.Destroy();
+		}
+		else if ( e.Thing.GetClass() == "Cacodemon" )
+		{
+			let bb = Actor.Spawn("BlueBloodReference");
+			e.Thing.CopyBloodColor(bb);
+			bb.Destroy();
+		}
+		else if ( (e.Thing.GetClass() == "Wizard") || (e.Thing.GetClass() == "Heresiarch") || (e.Thing.GetClass() == "Sorcerer2") )
+		{
+			let pb = Actor.Spawn("PurpleBloodReference");
+			e.Thing.CopyBloodColor(pb);
+			pb.Destroy();
+		}
+		else if ( e.Thing.GetClass() == "LostSoul" )
+			e.Thing.bNOBLOOD = true;
+		VanillaBossSpawn(e,trk);
+		// inflation check
+		if ( trk )
+		{
+			trk.maxhealth = trk.lasthealth = e.Thing.Health;
+			trk.intp.Reset(trk.lasthealth);
+		}
+	}
+}

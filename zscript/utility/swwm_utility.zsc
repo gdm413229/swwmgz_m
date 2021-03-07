@@ -394,18 +394,40 @@ Class SWWMUtility
 	}
 
 	// Thanks to ZZYZX and Nash
+	static play void SetToSlopeSpecific( Actor a, double dang, SecPlane plane, bool flipnorm )
+	{
+		Vector3 fnormal;
+		if ( flipnorm ) fnormal = -plane.Normal;
+		else fnormal = plane.Normal;
+		vector2 fnormalp1 = ((fnormal.x != 0) || (fnormal.y != 0))?(fnormal.x,fnormal.y).Unit():(0,0);
+		vector2 fnormalp2 = ((fnormal.x,fnormal.y).Length(),fnormal.z);
+		double fang = atan2(fnormalp1.y,fnormalp1.x); // floor angle (not pitch!)
+		double fpitch = atan2(fnormalp2.x,fnormalp2.y); // floor pitch
+		double ddiff1 = sin(fang-dang);
+		double ddiff2 = cos(fang-dang);
+		a.pitch = fpitch*ddiff2;
+		a.roll = -fpitch*ddiff1;
+		a.angle = dang;
+	}
+
 	static play void SetToSlope( Actor a, double dang, bool ceil = false )
 	{
 		Sector sect;
+		SecPlane plane;
 		Vector3 fnormal;
+		bool flipnorm;
 		if ( ceil )
 		{
 			sect = a.CeilingSector;
+			plane = sect.ceilingplane;
+			flipnorm = true;
 			fnormal = -sect.ceilingplane.Normal;
 		}
 		else
 		{
 			sect = a.FloorSector;
+			plane = sect.floorplane;
+			flipnorm = false;
 			fnormal = sect.floorplane.Normal;
 		}
 		// find closest 3d floor for its normal
@@ -420,18 +442,20 @@ Class SWWMUtility
 		}
 		if ( ff )
 		{
-			if ( ceil ) fnormal = ff.bottom.Normal;
-			else fnormal = -ff.top.Normal;
+			if ( ceil )
+			{
+				plane = ff.bottom;
+				flipnorm = false;
+				fnormal = ff.bottom.Normal;
+			}
+			else
+			{
+				plane = ff.top;
+				flipnorm = true;
+				fnormal = -ff.top.Normal;
+			}
 		}
-		vector2 fnormalp1 = ((fnormal.x != 0) || (fnormal.y != 0))?(fnormal.x,fnormal.y).Unit():(0,0);
-		vector2 fnormalp2 = ((fnormal.x,fnormal.y).Length(),fnormal.z);
-		double fang = atan2(fnormalp1.y,fnormalp1.x); // floor angle (not pitch!)
-		double fpitch = atan2(fnormalp2.x,fnormalp2.y); // floor pitch
-		double ddiff1 = sin(fang-dang);
-		double ddiff2 = cos(fang-dang);
-		a.pitch = fpitch*ddiff2;
-		a.roll = -fpitch*ddiff1;
-		a.angle = dang;
+		SetToSlopeSpecific(a,dang,plane,flipnorm);
 	}
 
 	static clearscope int Round100( double x )

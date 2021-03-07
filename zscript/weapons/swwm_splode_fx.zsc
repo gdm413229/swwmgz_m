@@ -203,6 +203,234 @@ Class ExplodiumMagProj : Actor
 	}
 }
 
+Class ExplodiumMagHitbox : Actor
+{
+	Default
+	{
+		Radius 2;
+		Height 4;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+SHOOTABLE;
+	}
+	override void Tick()
+	{
+		if ( !target || target.bKILLED )
+		{
+			Destroy();
+			return;
+		}
+		SetOrigin(target.Vec3Offset(0,0,-height*.5),false);
+		let bt = BlockThingsIterator.Create(self,128);
+		while ( bt.Next() )
+		{
+			if ( !bt.Thing || (bt.Thing == self) || !bt.Thing.bSHOOTABLE || (bt.Thing == target.target) || !SWWMUtility.BoxIntersect(self,bt.Thing) )
+				continue;
+			target.bKILLED = true;
+			target.SetStateLabel("Detonate");
+			Destroy();
+			break;
+		}
+	}
+	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
+	{
+		if ( target && !target.bKILLED )
+		{
+			target.bKILLED = true;
+			target.SetStateLabel("Detonate");
+			Destroy();
+		}
+		return 0;
+	}
+}
+
+Class ExplodiumMagAttach : ExplodiumMagProj
+{
+	Line atline;
+	int atside;
+	int atpart;
+	int atplane;
+	Sector atsector;
+	double atz;
+	Vector3	normal;
+	Actor hitbox;
+
+	default
+	{
+		+MOVEWITHSECTOR;
+		Speed 15;
+	}
+
+	override int SpecialMissileHit( Actor victim )
+	{
+		if ( victim is 'ExplodiumMagHitbox' ) return 1;
+		return -1;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		if ( bKILLED ) return;
+		if ( atline )	// attempt to follow the movement of the line
+		{
+			if ( atpart == 1 )
+			{
+				if ( atline.flags&Line.ML_DONTPEGTOP ) SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[atside].sector.GetPlaneTexZ(1)),true);
+				else SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[!atside].sector.GetPlaneTexZ(1)),true);
+			}
+			else if ( atpart == -1 )
+			{
+				if ( atline.flags&Line.ML_DONTPEGBOTTOM ) SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[atside].sector.GetPlaneTexZ(0)),true);
+				else SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[!atside].sector.GetPlaneTexZ(0)),true);
+			}
+			else if ( atline.flags&Line.ML_DONTPEGBOTTOM ) SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[atside].sector.GetPlaneTexZ(0)),true);
+			else SetOrigin(Vec2OffsetZ(0,0,atz+atline.sidedef[atside].sector.GetPlaneTexZ(1)),true);
+			if ( (pos.z > ceilingz) || (pos.z < floorz) ) bKILLED = true;
+		}
+		else if ( atsector )	// attempt to follow the movement of the plane
+		{
+			SetOrigin(Vec2OffsetZ(0,0,atz+atsector.GetPlaneTexZ(atplane)),true);
+			if ( ceilingz-floorz <= 2 ) bKILLED = true;
+		}
+		if ( bKILLED ) SetStateLabel("Detonate");
+	}
+	void A_Attach()
+	{
+		F3DFloor ff;
+		A_NoGravity();
+		A_Stop();
+		if ( BlockingFloor )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingFloor.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingFloor.Get3DFloor(i).top.ZAtPoint(pos.xy) ~== floorz) ) continue;
+				ff = BlockingFloor.Get3DFLoor(i);
+				break;
+			}
+			if ( ff )
+			{
+				normal = -ff.top.Normal;
+				atsector = ff.model;
+				atplane = 1;
+				SWWMUtility.SetToSlopeSpecific(self,angle,ff.top,true);
+			}
+			else
+			{
+				normal = BlockingFloor.floorplane.Normal;
+				atsector = BlockingFloor;
+				atplane = 0;
+				SWWMUtility.SetToSlopeSpecific(self,angle,BlockingFloor.floorplane,false);
+			}
+			frame = 1;	// on floor
+			SetOrigin((pos.x,pos.y,floorz)+normal*.75,true);
+			atz = pos.z-atsector.GetPlaneTexZ(atplane);
+		}
+		else if ( BlockingCeiling )
+		{
+			// find closest 3d floor for its normal
+			for ( int i=0; i<BlockingCeiling.Get3DFloorCount(); i++ )
+			{
+				if ( !(BlockingCeiling.Get3DFloor(i).bottom.ZAtPoint(pos.xy) ~== ceilingz) ) continue;
+				ff = BlockingCeiling.Get3DFloor(i);
+				break;
+			}
+			if ( ff )
+			{
+				normal = -ff.bottom.Normal;
+				atsector = ff.model;
+				atplane = 0;
+				SWWMUtility.SetToSlopeSpecific(self,angle,ff.bottom,false);
+			}
+			else
+			{
+				normal = BlockingCeiling.ceilingplane.Normal;
+				atsector = BlockingCeiling;
+				atplane = 1;
+				SWWMUtility.SetToSlopeSpecific(self,angle,BlockingCeiling.ceilingplane,true);
+			}
+			frame = 2;	// on ceiling
+			SetOrigin((pos.x,pos.y,ceilingz)+normal*.75,true);
+			atz = pos.z-atsector.GetPlaneTexZ(atplane);
+		}
+		else if ( BlockingLine )
+		{
+			atline = BlockingLine;
+			normal = (-BlockingLine.delta.y,BlockingLine.delta.x,0).unit();
+			atside = SWWMUtility.PointOnLineSide(pos.xy,BlockingLine);
+			if ( !atside ) normal *= -1;
+			Vector3 orig = (BlockingLine.v1.p.x,BlockingLine.v1.p.y,0);
+			Vector3 onwall = pos-(normal dot (pos-orig))*normal;
+			SetOrigin(onwall+normal*.75,true);
+			// attempt to guess line part (upper/mid/lower)
+			if ( !atline.sidedef[1] ) atpart = 0;	// mid
+			else if ( atline.sidedef[!atside].sector.ceilingplane.ZAtPoint(pos.xy) < pos.z ) atpart = 1;	// upper
+			else if ( atline.sidedef[!atside].sector.floorplane.ZAtPoint(pos.xy) > (pos.z+height) ) atpart = -1;	// lower
+			else
+			{
+				atpart = 0;
+				// check if we're touching a 3d floor line
+				Sector backsector = atline.sidedef[!atside].sector;
+				for ( int i=0; i<backsector.Get3DFloorCount(); i++ )
+				{
+					if ( backsector.Get3DFloor(i).bottom.ZAtPoint(pos.xy) > (pos.z+height) ) continue;
+					if ( backsector.Get3DFloor(i).top.ZAtPoint(pos.xy) < pos.z ) continue;
+					ff = backsector.Get3DFloor(i);
+					break;
+				}
+				// attach to it
+				if ( ff )
+				{
+					atline = ff.master;
+					atside = 0;
+				}
+			}
+			if ( atpart == 1 )
+			{
+				if ( atline.flags&Line.ML_DONTPEGTOP ) atz = pos.z-atline.sidedef[atside].sector.GetPlaneTexZ(1);
+				else atz = pos.z-atline.sidedef[!atside].sector.GetPlaneTexZ(1);
+			}
+			else if ( atpart == -1 )
+			{
+				if ( atline.flags&Line.ML_DONTPEGBOTTOM ) atz = pos.z-atline.sidedef[atside].sector.GetPlaneTexZ(0);
+				else atz = pos.z-atline.sidedef[!atside].sector.GetPlaneTexZ(0);
+			}
+			else if ( atline.flags&Line.ML_DONTPEGBOTTOM ) atz = pos.z-atline.sidedef[atside].sector.GetPlaneTexZ(0);
+			else atz = pos.z-atline.sidedef[atside].sector.GetPlaneTexZ(1);
+			angle = atan2(normal.y,normal.x)+180;
+			pitch = 0;
+		}
+		else
+		{
+			bKILLED = true;
+			SetStateLabel("Detonate");
+			return;
+		}
+		let b = Spawn("ExplodiumMagHitbox",pos);
+		b.target = self;
+		A_StartSound("explodium/jamitin",CHAN_BODY,CHANF_DEFAULT,.65,2.5);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	Death:
+		XZW1 A -1 A_Attach();
+		Stop;
+	Detonate:
+		XZW1 # 2;
+		TNT1 A 0
+		{
+			cvel = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),-sin(pitch));
+			A_BlowUp();
+		}
+		XEX1 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] 1 Bright;
+		Stop;
+	}
+}
+
 Class ExploLight : PaletteLight
 {
 	Default

@@ -32,7 +32,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Gate Node (actual replacement for chaos devices)
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
-* **Quick Grenade sticks mags to walls (or things) if facing one**
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding *(+ proper crouch dashing)***
 * **Expand third person animations**

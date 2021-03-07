@@ -96,6 +96,7 @@ Class Demolitionist : PlayerPawn
 		+NOICEDEATH;
 		+DONTMORPH;
 		+DONTDRAIN;
+		+DONTCORPSE;
 	}
 	// oh yay, more cheat modification
 	override void CheatGive( String name, int amount )
@@ -2342,7 +2343,7 @@ Class Demolitionist : PlayerPawn
 		XZW1 A 2
 		{
 			A_DemoScream();
-			A_NoBlocking();
+			bSOLID = true;	// we need this to avoid clipping into things
 		}
 		XZW2 RSTUVWXYZ 2;
 		XZW3 ABCDEFG 2;
@@ -2547,7 +2548,7 @@ Class Demolitionist : PlayerPawn
 		XZW7 M 2
 		{
 			A_DemoScream();
-			A_NoBlocking();
+			bSOLID = true;	// we need this to avoid clipping into things
 		}
 		XZW8 GHIJK 2;
 		XZW8 L 1 A_DMFade();

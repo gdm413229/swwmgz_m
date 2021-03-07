@@ -91,18 +91,21 @@ Class SWWMStatScreen : StatusScreen abstract
 		{
 			String artstr = StringTable.Localize(String.Format("$SWWM_FANART%d",whichart));
 			int semic = artstr.IndexOf(";");
-			if ( !arttex ) arttex = TexMan.CheckForTexture(String.Format("graphics/Fanart/%s",artstr.Left(semic)),TexMan.Type_MiscPatch);
+			if ( !arttex ) arttex = TexMan.CheckForTexture(String.Format("graphics/Fanart/%s",(semic==-1)?artstr:artstr.Left(semic)),TexMan.Type_MiscPatch);
 			tsize = TexMan.GetScaledSize(arttex);
 			sar = tsize.x/tsize.y;
 			if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
 			else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
 			else vsize = tsize;
 			Screen.DrawTexture(arttex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
-			String bstr = String.Format("\cx%s\c- %s",StringTable.Localize("$SWWM_FANART"),artstr.Mid(semic+1));
-			int len = fnt.StringWidth(bstr);
-			int bw = int((len+8)*hs), bh = int((fnt.GetHeight()+4)*hs);
-			Screen.Dim("Black",.8,Screen.GetWidth()-bw,Screen.GetHeight()-bh,bw,bh);
-			Screen.DrawText(fnt,Font.CR_GOLD,ss.x-(len+4),ss.y-(fnt.GetHeight()+2),bstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( semic != -1 )
+			{
+				String bstr = String.Format("\cx%s\c- %s",StringTable.Localize("$SWWM_FANART"),artstr.Mid(semic+1));
+				int len = fnt.StringWidth(bstr);
+				int bw = int((len+8)*hs), bh = int((fnt.GetHeight()+4)*hs);
+				Screen.Dim("Black",.8,Screen.GetWidth()-bw,Screen.GetHeight()-bh,bw,bh);
+				Screen.DrawText(fnt,Font.CR_GOLD,ss.x-(len+4),ss.y-(fnt.GetHeight()+2),bstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
 		}
 		// intermission tips at the bottom
 		if ( !whichtip )

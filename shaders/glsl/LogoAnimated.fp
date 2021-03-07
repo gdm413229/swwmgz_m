@@ -83,7 +83,7 @@ vec4 ProcessTexel()
 	tmp2.rgb = (tmp.rgb*tmp.a+base.rgb*base.a*(1-tmp.a))/tmp2.a;
 	if ( tmp2.a == 0. ) tmp2.rgb = vec3(0.);
 	// clamp borders
-	vec2 sz = textureSize(tex,0);
+	vec2 sz = vec2(256,128);
 	vec2 px = uv*sz;
 	if ( (px.x <= 1) || (px.x >= (sz.x-1)) || (px.y <= 1) || (px.y >= (sz.y-1)) )
 		tmp2 = vec4(0.);

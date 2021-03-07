@@ -129,6 +129,8 @@ Class ParryField : Actor
 		[x, y, z] = swwm_CoordUtil.GetAxes(master.pitch,master.angle,master.roll);
 		origin = level.Vec3Offset(master.Vec2OffsetZ(0,0,master.player.viewz),x*20);
 		SetOrigin(origin,false);
+		let raging = RagekitPower(master.FindInventory("RagekitPower"));
+		let s = Demolitionist(master).mystats;
 		// check for projectiles to deflect
 		let ti = ThinkerIterator.Create("Actor");
 		Actor a;
@@ -152,13 +154,16 @@ Class ParryField : Actor
 				a.target = master;
 			}
 			if ( a.bSKULLFLY ) a.bBLASTED = true; // blast lost souls
-			a.GiveInventory("ParriedBuff",1);
 			let buff = a.FindInventory("ParriedBuff");
+			if ( !buff )
+			{
+				buff = Inventory(Spawn("ParriedBuff"));
+				buff.AttachToOwner(a);
+			}
 			double mvel = a.vel.length();
 			double nspeed = min(100,mvel*FRandom[Parry](1.2,1.4)+20);
 			a.angle = atan2(dir.y,dir.x);
 			a.pitch = asin(-dir.z);
-			let raging = RagekitPower(master.FindInventory("RagekitPower"));
 			if ( raging )
 			{
 				buff.special1 = 2;
@@ -174,7 +179,6 @@ Class ParryField : Actor
 			i.bAMBUSH = true;
 			A_QuakeEx(3,3,3,10,0,64,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
 			A_StartSound("demolitionist/parry",CHAN_WEAPON);
-			let s = Demolitionist(master).mystats;
 			if ( special1 >= special2 )	// perfect parry
 			{
 				// increased homing
@@ -362,6 +366,8 @@ extend Class SWWMWeapon
 	}
 	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1. )
 	{
+		let raging = RagekitPower(FindInventory("RagekitPower"));
+		if ( raging ) rangemul += .2;
 		Vector3 origin = Vec3Offset(0,0,player.viewheight);
 		Vector3 dir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
 		// check for usables
@@ -390,7 +396,6 @@ extend Class SWWMWeapon
 		invoker.wallponch = false;
 		// check for shootables
 		SWWMBulletTrail.DoTrail(self,origin,dir,DEFMELEERANGE*rangemul,0);
-		let raging = RagekitPower(FindInventory("RagekitPower"));
 		int maxang = raging?18:12;
 		for ( int i=0; i<maxang; i++ )
 		{

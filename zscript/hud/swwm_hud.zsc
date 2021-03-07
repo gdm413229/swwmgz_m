@@ -1606,9 +1606,9 @@ Class SWWMStatusBar : BaseStatusBar
 		}
 	}
 
-	private void DrawInvIcon( Inventory i, double xx, double yy, double alpha = 1., bool forceamt = false, bool aspowerup = false )
+	private bool DrawInvIcon( Inventory i, double xx, double yy, double alpha = 1., bool forceamt = false, bool aspowerup = false )
 	{
-		if ( !i || !i.Icon.IsValid() ) return;
+		if ( !i || !i.Icon.IsValid() ) return false;
 		Vector2 scl = TexMan.GetScaledSize(i.Icon);
 		double mscl = min(1.,30./max(scl.x,scl.y));
 		double dw = (ss.x/mscl), dh = (ss.y/mscl);
@@ -1619,7 +1619,7 @@ Class SWWMStatusBar : BaseStatusBar
 			String nstr = String.Format("%ds",Powerup(i).EffectTics/GameTicRate);
 			int len = mTewiFont.mFont.StringWidth(nstr);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,Powerup(i).IsBlinking()?alpha*.5:alpha);
-			return;
+			return true;
 		}
 		if ( (i is 'SWWMLamp') && aspowerup )
 		{
@@ -1627,7 +1627,7 @@ Class SWWMStatusBar : BaseStatusBar
 			String nstr = String.Format("%d%%",SWWMLamp(i).Charge);
 			int len = mTewiFont.mFont.StringWidth(nstr);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,SWWMLamp(i).isBlinking()?alpha*.5:alpha);
-			return;
+			return true;
 		}
 		Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
 		if ( (i.Amount > 1) || forceamt )
@@ -1638,6 +1638,7 @@ Class SWWMStatusBar : BaseStatusBar
 			int len = mTewiFont.mFont.StringWidth(nstr);
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		}
+		return true;
 	}
 
 	private void DrawInventory()
@@ -1650,7 +1651,7 @@ Class SWWMStatusBar : BaseStatusBar
 		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
 		{
 			if ( (i.Amount <= 0) || (!(i is 'SWWMArmor') && !(i is 'BasicArmor')) ) continue;
-			DrawInvIcon(i,xx,yy,forceamt:true);
+			if ( !DrawInvIcon(i,xx,yy,forceamt:true) ) continue;
 			yy -= 34;
 			drewarmor = true;
 		}
@@ -1666,8 +1667,8 @@ Class SWWMStatusBar : BaseStatusBar
 				continue;
 			}
 			if ( !(i is 'Powerup') || (Powerup(i).EffectTics <= 0) || !(Powerup(i).Icon) ) continue;
-			DrawInvIcon(i,xx,yy);
-			yy -= 34;
+			if ( DrawInvIcon(i,xx,yy) )
+				yy -= 34;
 		}
 		// inventory box / bar
 		if ( !CPlayer.mo.InvSel ) return;
@@ -1774,7 +1775,7 @@ Class SWWMStatusBar : BaseStatusBar
 					// for SWWM weapons I made a function for this at least
 					if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).ReportHUDAmmo() )
 						hasammo = true;
-					else if ( !(inv is 'SWWMWeapon') && ((!Weapon(inv).Ammo1 || (Weapon(inv).Ammo1.Amount > 0)) || (Weapon(inv).Ammo2 && (Weapon(inv).Ammo2.Amount > 0))) )
+					else if ( !(inv is 'SWWMWeapon') && ((!Weapon(inv).Ammo1 || (Weapon(inv).Ammo1.Amount > 0) || Weapon(inv).bAMMO_OPTIONAL) || (Weapon(inv).Ammo2 && ((Weapon(inv).Ammo2.Amount > 0) || Weapon(inv).bALT_AMMO_OPTIONAL))) )
 						hasammo = true;
 				}
 				if ( !hasammo ) ncolor = Font.CR_RED;

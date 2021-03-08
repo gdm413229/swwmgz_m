@@ -225,7 +225,7 @@ Class ExplodiumMagHitbox : Actor
 		let bt = BlockThingsIterator.Create(self,128);
 		while ( bt.Next() )
 		{
-			if ( !bt.Thing || (bt.Thing == self) || !bt.Thing.bSHOOTABLE || (bt.Thing == target.target) || !SWWMUtility.BoxIntersect(self,bt.Thing) )
+			if ( !bt.Thing || (bt.Thing == self) || !bt.Thing.bSHOOTABLE || (bt.Thing == target.target) || bt.Thing.IsFriend(target.target) || !SWWMUtility.BoxIntersect(self,bt.Thing) )
 				continue;
 			target.bKILLED = true;
 			target.SetStateLabel("Detonate");

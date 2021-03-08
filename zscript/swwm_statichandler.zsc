@@ -47,8 +47,8 @@ Class SWWMStaticHandler : StaticEventHandler
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
 		// force a reset of the minimap zoom in case it's set beyond safe levels
 		double mmz = swwm_mm_zoom;
-		if ( players[consoleplayer].mo && players[consoleplayer].mo.FindInventory("Omnisight") && (mmz > 2.) ) mmz = 2.;
-		else if ( mmz > 1. ) mmz = 1.;
+		if ( players[consoleplayer].mo && players[consoleplayer].mo.FindInventory("Omnisight") && (mmz >= 2.) ) mmz = 2.;
+		else if ( mmz >= 1. ) mmz = 1.;
 		else mmz = .5;
 		CVar.FindCVar('swwm_mm_zoom').SetFloat(mmz);
 		if ( !e.IsSaveGame ) return;

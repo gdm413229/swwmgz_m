@@ -142,15 +142,15 @@ extend Class SWWMHandler
 
 	override void WorldLoaded( WorldEvent e )
 	{
-		if ( level.levelname ~== "Modder Test Map" )
-		{
-			level.ReplaceTextures("-noflat-","kinstile",0);
-			S_ChangeMusic("music/CARDISH1.XM");
-		}
 		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
 			AddOneliner("mapstart",3);
 		if ( !e.IsSaveGame && !e.IsReopen )
 		{
+			if ( level.levelname ~== "Modder Test Map" )
+			{
+				level.ReplaceTextures("-noflat-","kinstile",0);
+				S_ChangeMusic("music/CARDISH1.XM");
+			}
 			// doom vacation map01 hackaround for OPEN script not letting us
 			// change certain line specials in levelpostprocessor because
 			// HOLY FUCK IS EVERYTHING SHIT SOMETIMES
@@ -273,5 +273,11 @@ extend Class SWWMHandler
 		ClearAllShaders(players[consoleplayer]);
 		// recheck queues in case limits changed
 		RecheckQueues();
+		// force a reset of the minimap zoom in case it's set beyond safe levels
+		double mmz = swwm_mm_zoom;
+		if ( players[consoleplayer].mo.FindInventory("Omnisight") && (mmz > 2.) ) mmz = 2.;
+		else if ( mmz > 1. ) mmz = 1.;
+		else mmz = .5;
+		CVar.FindCVar('swwm_mm_zoom').SetFloat(mmz);
 	}
 }

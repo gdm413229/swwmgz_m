@@ -1113,6 +1113,13 @@ Class Omnisight : Inventory
 		// not used up, must be kept for the targetting features to work
 		return false;
 	}
+	override void DetachFromOwner()
+	{
+		// reset zoom on removal
+		if ( (Owner.player == players[consoleplayer]) && (swwm_mm_zoom > 1.) )
+			CVar.FindCVar('swwm_mm_zoom').SetFloat(1.);
+		Super.DetachFromOwner();
+	}
 	override bool HandlePickup( Inventory item )
 	{
 		if ( item.GetClass() == GetClass() )

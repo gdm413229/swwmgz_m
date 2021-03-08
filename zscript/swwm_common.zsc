@@ -304,7 +304,7 @@ Class SWWMBossBrain : BossBrain
 		if ( death )
 		{
 			// big explosions throughout
-			for ( int x=-350; x<=350; x+=5 )
+			for ( int x=-350; x<=350; x+=10 )
 			{
 				let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,-280,Random[BrainExplode](120,500)));
 				s.tics = Random[BrainExplode](5,120);
@@ -315,10 +315,10 @@ Class SWWMBossBrain : BossBrain
 		if ( level.maptime < smallcooldown ) return;
 		smallcooldown = level.maptime+10;
 		// small explosion on brain hole
-		for ( int x=-40; x<=40; x+=10 )
+		for ( int x=-40; x<=40; x+=20 )
 		{
 			let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,-280,Random[BrainExplode](380,420)));
-			s.tics = Random[BrainExplode](1,8);
+			s.tics = Random[BrainExplode](1,10);
 			s.scale *= .5;
 		}
 	}

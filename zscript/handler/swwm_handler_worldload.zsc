@@ -57,7 +57,6 @@ extend Class SWWMHandler
 			s.AddLevelStats();
 			s.lastcluster = level.cluster;
 		}
-		ClearAllShaders(players[consoleplayer]);
 		// reset score on dead players (death exit™)
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
@@ -142,142 +141,116 @@ extend Class SWWMHandler
 
 	override void WorldLoaded( WorldEvent e )
 	{
-		if ( !e.IsSaveGame && !e.IsReopen && (gamestate != GS_TITLELEVEL) )
-			AddOneliner("mapstart",3);
-		if ( !e.IsSaveGame && !e.IsReopen )
+		if ( e.IsReopen ) return;
+		if ( gamestate != GS_TITLELEVEL ) AddOneliner("mapstart",3);
+		if ( level.levelname ~== "Modder Test Map" )
 		{
-			if ( level.levelname ~== "Modder Test Map" )
-			{
-				level.ReplaceTextures("-noflat-","kinstile",0);
-				S_ChangeMusic("music/CARDISH1.XM");
-			}
-			// doom vacation map01 hackaround for OPEN script not letting us
-			// change certain line specials in levelpostprocessor because
-			// HOLY FUCK IS EVERYTHING SHIT SOMETIMES
-			if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
-				 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
-				level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
-			// setup cached lockdefs data
-			let cli = SWWMCachedLockInfo.GetInstance();
-			if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
-			// keep a list of sectors containing 3D floors, for use by the minimap
-			// also does the same for the portal group list
-			ffsectors.Clear();
-			psectors.Clear();
-			for ( int i=0; i<level.sectors.Size(); i++ )
-			{
-				Sector s = level.sectors[i];
-				if ( psectors.Size() <= s.portalgroup )
-					psectors.Resize(s.portalgroup+1);
-				psectors[s.portalgroup] = s.Index();
-				if ( !s.Get3DFloorCount() ) continue;
-				int realcount = 0;
-				for ( int j=0; j<s.Get3DFloorCount(); j++ )
-				{
-					F3DFloor rover = s.Get3DFloor(j);
-					if ( rover.flags&F3DFloor.FF_THISINSIDE ) continue;
-					if ( !(rover.flags&F3DFloor.FF_EXISTS) ) continue;
-					if ( rover.alpha == 0 ) continue;
-					realcount++;
-				}
-				if ( !realcount ) continue;
-				ffsectors.Push(s.Index());
-			}
-			// for skipping over merged exit lines (sharing vertices)
-			Array<Line> skipme;
-			skipme.Clear();
-			// find exit lines, and use lines that aren't exits
-			for ( int i=0; i<level.lines.Size(); i++ )
-			{
-				Line l = level.lines[i];
-				// while we're at it, add teleporter sparks
-				if ( SWWMUtility.IsTeleportLine(l) )
-				{
-					let a = SWWMTeleportLine(Actor.Spawn("SWWMTeleportLine"));
-					a.tline = l;
-				}
-				if ( !SWWMUtility.IsExitLine(l) )
-					continue;
-				if ( skipme.Find(l) < skipme.Size() ) continue;
-				Vector3 lpos = SWWMUtility.UseLinePos(l);
-				// look for connected lines
-				int xcnt = 1;
-				if ( l.frontsector )
-				{
-					for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
-					{
-						let l2 = l.frontsector.Lines[j];
-						if ( (l2 == l) || (l2.special != l.special) ) continue;
-						// needs to have a point in common with this one or any of the added lines
-						if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
-						{
-							bool nomatches = true;
-							for ( int k=0; k<skipme.Size(); k++ )
-							{
-								if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
-									continue;
-								nomatches = false;
-								break;
-							}
-							if ( nomatches ) continue;
-						}
-						skipme.Push(l2);
-						xcnt++;
-						lpos += SWWMUtility.UseLinePos(l2);
-					}
-				}
-				if ( l.backsector )
-				{
-					for ( int j=0; j<l.backsector.Lines.Size(); j++ )
-					{
-						let l2 = l.backsector.Lines[j];
-						if ( (l2 == l) || (l2.special != l.special) ) continue;
-						// needs to have a point in common with this one or any of the added lines
-						if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
-						{
-							bool nomatches = true;
-							for ( int k=0; k<skipme.Size(); k++ )
-							{
-								if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
-									continue;
-								nomatches = false;
-								break;
-							}
-							if ( nomatches ) continue;
-						}
-						skipme.Push(l2);
-						xcnt++;
-						lpos += SWWMUtility.UseLinePos(l2);
-					}
-				}
-				lpos /= xcnt;
-				SWWMInterest.Spawn(lpos,theline:l);
-			}
-			// spawn loot
-			Chancebox.SpawnChanceboxes();
+			level.ReplaceTextures("-noflat-","kinstile",0);
+			S_ChangeMusic("music/CARDISH1.XM");
 		}
-		else if ( e.IsSaveGame || e.IsReopen )
+		// doom vacation map01 hackaround for OPEN script not letting us
+		// change certain line specials in levelpostprocessor because
+		// HOLY FUCK IS EVERYTHING SHIT SOMETIMES
+		if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
+			 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
+			level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
+		// setup cached lockdefs data
+		let cli = SWWMCachedLockInfo.GetInstance();
+		if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
+		// keep a list of sectors containing 3D floors, for use by the minimap
+		// also does the same for the portal group list
+		ffsectors.Clear();
+		psectors.Clear();
+		for ( int i=0; i<level.sectors.Size(); i++ )
 		{
-			// clear all floating numbers
-			for ( SWWMScoreObj sc=scorenums; sc; sc=sc.Next )
-				sc.lifespan = 0;
-			for ( SWWMScoreObj sc=damnums; sc; sc=sc.Next )
-				sc.lifespan = 0;
-			// restore underwater sounds for players
-			for ( int i=0; i<MAXPLAYERS; i++ )
+			Sector s = level.sectors[i];
+			if ( psectors.Size() <= s.portalgroup )
+				psectors.Resize(s.portalgroup+1);
+			psectors[s.portalgroup] = s.Index();
+			if ( !s.Get3DFloorCount() ) continue;
+			int realcount = 0;
+			for ( int j=0; j<s.Get3DFloorCount(); j++ )
 			{
-				if ( !playeringame[i] || !(players[i].mo is 'Demolitionist') ) continue;
-				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
+				F3DFloor rover = s.Get3DFloor(j);
+				if ( rover.flags&F3DFloor.FF_THISINSIDE ) continue;
+				if ( !(rover.flags&F3DFloor.FF_EXISTS) ) continue;
+				if ( rover.alpha == 0 ) continue;
+				realcount++;
 			}
+			if ( !realcount ) continue;
+			ffsectors.Push(s.Index());
 		}
-		ClearAllShaders(players[consoleplayer]);
-		// recheck queues in case limits changed
-		RecheckQueues();
-		// force a reset of the minimap zoom in case it's set beyond safe levels
-		double mmz = swwm_mm_zoom;
-		if ( players[consoleplayer].mo.FindInventory("Omnisight") && (mmz > 2.) ) mmz = 2.;
-		else if ( mmz > 1. ) mmz = 1.;
-		else mmz = .5;
-		CVar.FindCVar('swwm_mm_zoom').SetFloat(mmz);
+		// for skipping over merged exit lines (sharing vertices)
+		Array<Line> skipme;
+		skipme.Clear();
+		// find exit lines, and use lines that aren't exits
+		for ( int i=0; i<level.lines.Size(); i++ )
+		{
+			Line l = level.lines[i];
+			// while we're at it, add teleporter sparks
+			if ( SWWMUtility.IsTeleportLine(l) )
+			{
+				let a = SWWMTeleportLine(Actor.Spawn("SWWMTeleportLine"));
+				a.tline = l;
+			}
+			if ( !SWWMUtility.IsExitLine(l) )
+				continue;
+			if ( skipme.Find(l) < skipme.Size() ) continue;
+			Vector3 lpos = SWWMUtility.UseLinePos(l);
+			// look for connected lines
+			int xcnt = 1;
+			if ( l.frontsector )
+			{
+				for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
+				{
+					let l2 = l.frontsector.Lines[j];
+					if ( (l2 == l) || (l2.special != l.special) ) continue;
+					// needs to have a point in common with this one or any of the added lines
+					if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+					{
+						bool nomatches = true;
+						for ( int k=0; k<skipme.Size(); k++ )
+						{
+							if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
+								continue;
+							nomatches = false;
+							break;
+						}
+						if ( nomatches ) continue;
+					}
+					skipme.Push(l2);
+					xcnt++;
+					lpos += SWWMUtility.UseLinePos(l2);
+				}
+			}
+			if ( l.backsector )
+			{
+				for ( int j=0; j<l.backsector.Lines.Size(); j++ )
+				{
+					let l2 = l.backsector.Lines[j];
+					if ( (l2 == l) || (l2.special != l.special) ) continue;
+					// needs to have a point in common with this one or any of the added lines
+					if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+					{
+						bool nomatches = true;
+						for ( int k=0; k<skipme.Size(); k++ )
+						{
+							if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
+								continue;
+							nomatches = false;
+							break;
+						}
+						if ( nomatches ) continue;
+					}
+					skipme.Push(l2);
+					xcnt++;
+					lpos += SWWMUtility.UseLinePos(l2);
+				}
+			}
+			lpos /= xcnt;
+			SWWMInterest.Spawn(lpos,theline:l);
+		}
+		// spawn loot
+		Chancebox.SpawnChanceboxes();
 	}
 }

@@ -28,10 +28,31 @@ Class SWWMStaticHandler : StaticEventHandler
 		svd.ver = StringTable.Localize("$SWWM_SHORTVER");
 	}
 
+	override void WorldUnloaded( WorldEvent e )
+	{
+		SWWMHandler.ClearAllShaders(players[consoleplayer]);
+	}
+
 	override void WorldLoaded( WorldEvent e )
 	{
-		// save version checker
+		if ( e.IsSavegame || e.IsReopen )
+		{
+			// restore underwater sounds for players
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || !(players[i].mo is 'Demolitionist') ) continue;
+				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
+			}
+		}
+		SWWMHandler.ClearAllShaders(players[consoleplayer]);
+		// force a reset of the minimap zoom in case it's set beyond safe levels
+		double mmz = swwm_mm_zoom;
+		if ( players[consoleplayer].mo && players[consoleplayer].mo.FindInventory("Omnisight") && (mmz > 2.) ) mmz = 2.;
+		else if ( mmz > 1. ) mmz = 1.;
+		else mmz = .5;
+		CVar.FindCVar('swwm_mm_zoom').SetFloat(mmz);
 		if ( !e.IsSaveGame ) return;
+		// save version checker
 		checktic = gametic+5;
 		let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
 		let svd = SWWMSaveVerData(ti.Next());

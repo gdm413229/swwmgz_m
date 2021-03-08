@@ -79,7 +79,46 @@ Class FrispyCornGesture : SWWMItemGesture
 		Stop;
 	}
 }
-Class SayaBeanGesture : SWWMItemGesture {}
+Class SayaBeanGesture : SWWMItemGesture
+{
+	action void A_Squish1()
+	{
+		A_StartSound("squeak",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+	}
+	action void A_Squish2()
+	{
+		let realbean = SayaBean(FindInventory("SayaBean"));
+		if ( realbean && !realbean.callout && !Random[Gesture](0,3) )
+		{
+			for ( int i=0; i<AllActorClasses.size(); i++ )
+			{
+				if ( AllActorClasses[i].GetClassName() != "HDoomPlayer" ) continue;
+				A_StartSound("saya/pervert",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+				realbean.callout = true;
+				return;
+			}
+		}
+		A_StartSound("saya/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+	}
+
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJ 4;
+		XZW1 KL 3;
+		XZW1 M 2 A_Squish1();
+		XZW1 N 2 A_Squish2();
+		XZW1 O 3;
+		XZW1 PQRS 4;
+		XZW1 T 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 UVWX 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class DemoPlushGesture : SWWMItemGesture {}
 Class KirinCummiesGesture : SWWMItemGesture {}
 Class MilkBreadsGesture : SWWMItemGesture {}

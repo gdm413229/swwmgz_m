@@ -106,6 +106,20 @@ Class SWWMWeapon : Weapon abstract
 		return false;
 	}
 
+	override int, int CheckAddToSlots()
+	{
+		if ( (GetReplacement(GetClass()) == GetClass()) && !bPowered_Up )
+		{
+			if ( swwm_singlefirst && SisterWeaponType )
+			{
+				let sw = GetDefaultByType(SisterWeaponType);
+				return sw.SlotNumber, int(sw.SlotPriority*65536);
+			}
+			return SlotNumber, int(SlotPriority*65536);
+		}
+		return -1, 0;
+	}
+
 	// subtracts given ammo from price, drops excess
 	virtual bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
 	{

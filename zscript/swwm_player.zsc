@@ -8,6 +8,7 @@ Class Demolitionist : PlayerPawn
 	bool sendtoground;
 	bool key_reentrant;
 	bool bInDefaultInventory;
+	bool oldsinglefirst;
 
 	int lastdamage;
 	transient int lastdamagetic;
@@ -414,6 +415,7 @@ Class Demolitionist : PlayerPawn
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
+		oldsinglefirst = swwm_singlefirst;	// super already sets up the slots, so save the cvar value now
 		mystats = SWWMStats.Find(player);
 		lastground = true;
 	}
@@ -742,6 +744,10 @@ Class Demolitionist : PlayerPawn
 			let sc = Inventory(Spawn("SayaCollar"));
 			sc.AttachToOwner(self);
 		}
+		// this is why we need mod cvar callbacks
+		if ( swwm_singlefirst != oldsinglefirst )
+			WeaponSlots.SetupWeaponSlots(self);
+		oldsinglefirst = swwm_singlefirst;
 		// strife thing
 		if ( mystats.oldlogtext == "" )
 			mystats.oldlogtext = player.logtext;

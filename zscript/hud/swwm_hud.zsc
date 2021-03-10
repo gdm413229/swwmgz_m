@@ -1294,8 +1294,7 @@ Class SWWMStatusBar : BaseStatusBar
 					|| (l.special == Teleport_Line)) )
 					col = mm_intralevelcolor;
 				else if ( mm_displaylocks
-					&& (lock > 1) && (lock < 256)
-					&& SWWMUtility.IsValidLockNum(lock) )
+					&& (lock > 0) && (lock < 256) )
 				{
 					let lcol = SWWMUtility.GetLockColor(lock);
 					if ( lcol ) col = lcol;

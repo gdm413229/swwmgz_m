@@ -1718,7 +1718,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( CPlayer.ReadyWeapon.Ammo2 ) astr2 = String.Format("%d",CPlayer.ReadyWeapon.Ammo2.Amount);
 			if ( CPlayer.ReadyWeapon.Ammo1 ) astr1 = String.Format("%d",CPlayer.ReadyWeapon.Ammo1.Amount);
 			maxlen = max(astr1.Length(),astr2.Length());
-			if ( CPlayer.ReadyWeapon.Ammo2 )
+			if ( CPlayer.ReadyWeapon.Ammo2 && (CPlayer.ReadyWeapon.Ammo2 != CPlayer.ReadyWeapon.Ammo1) )
 			{
 				yy -= 14;
 				Screen.DrawTexture(GenericAmmoTex[2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);

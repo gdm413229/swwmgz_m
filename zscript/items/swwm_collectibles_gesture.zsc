@@ -81,11 +81,7 @@ Class FrispyCornGesture : SWWMItemGesture
 }
 Class SayaBeanGesture : SWWMItemGesture
 {
-	action void A_Squish1()
-	{
-		A_StartSound("squeak",CHAN_ITEMEXTRA,CHANF_OVERLAP);
-	}
-	action void A_Squish2()
+	action void A_Squish()
 	{
 		let realbean = SayaBean(FindInventory("SayaBean"));
 		if ( realbean && !realbean.callout && !Random[Gesture](0,3) )
@@ -109,8 +105,8 @@ Class SayaBeanGesture : SWWMItemGesture
 		XZW1 CDEFGH 3;
 		XZW1 IJ 4;
 		XZW1 KL 3;
-		XZW1 M 2 A_Squish1();
-		XZW1 N 2 A_Squish2();
+		XZW1 M 2;
+		XZW1 N 2 A_Squish();
 		XZW1 O 3;
 		XZW1 PQRS 4;
 		XZW1 T 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);

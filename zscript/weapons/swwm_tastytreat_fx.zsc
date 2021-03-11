@@ -525,6 +525,12 @@ Class CandyGunProj : Actor
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
 		+FOILINVUL;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+BOUNCEONWALLS;
+		+USEBOUNCESTATE;
+		BounceFactor 0.3;
+		WallBounceFactor 0.3;
 	}
 	override void PostBeginPlay()
 	{
@@ -583,6 +589,16 @@ Class CandyGunProj : Actor
 		Spawn("CandyRing3",pos);
 		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,5000+900*special1,cvel);
 	}
+	void A_CheckBounce()
+	{
+		if ( (vel.length() > 4) && (vel.unit() dot cvel > .5) )
+		{
+			bHITOWNER = true;
+			A_StartSound("explodium/mag");
+			return;
+		}
+		ExplodeMissile();
+	}
 	States
 	{
 	Spawn:
@@ -593,6 +609,9 @@ Class CandyGunProj : Actor
 			if ( vel.length() > 0. ) cvel = vel.unit();
 		}
 		Wait;
+	Bounce:
+		XZW1 A 0 A_CheckBounce();
+		Goto Spawn;
 	Death:
 		TNT1 A 0 A_BlowUp();
 		XEX3 AAABBBCCCDDDEEEFFFGGGHHHIIIJJJKKKLLLMMMNNNOOOPPPQQQRRRSSS 1 Bright
@@ -641,6 +660,12 @@ Class CandyMagProj : Actor
 		+FORCERADIUSDMG;
 		+FORCEXYBILLBOARD;
 		+FOILINVUL;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+BOUNCEONWALLS;
+		+USEBOUNCESTATE;
+		BounceFactor 0.4;
+		WallBounceFactor 0.4;
 	}
 	override void PostBeginPlay()
 	{
@@ -699,6 +724,16 @@ Class CandyMagProj : Actor
 		Spawn("CandyRing2",pos);
 		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,1000+900*special1,cvel);
 	}
+	void A_CheckBounce()
+	{
+		if ( (vel.length() > 4) && (vel.unit() dot cvel > .5) )
+		{
+			bHITOWNER = true;
+			A_StartSound("explodium/mag");
+			return;
+		}
+		ExplodeMissile();
+	}
 	States
 	{
 	Spawn:
@@ -709,6 +744,9 @@ Class CandyMagProj : Actor
 			if ( vel.length() > 0. ) cvel = vel.unit();
 		}
 		Wait;
+	Bounce:
+		XZW1 A 0 A_CheckBounce();
+		Goto Spawn;
 	Death:
 		TNT1 A 0 A_BlowUp();
 		XEX3 AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSS 1 Bright

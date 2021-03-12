@@ -152,6 +152,7 @@ Class SWWMDamageAccumulator : Thinker
 }
 
 // prevents floors/ceilings from ever moving again, as they're "broken crushers"
+//  optional "instant" parameter is used by wall busting, no crusher malfunction animation will play
 Class SWWMCrusherBroken : Thinker
 {
 	Sector fsec, csec;
@@ -159,7 +160,7 @@ Class SWWMCrusherBroken : Thinker
 	int fphase, cphase;
 	int ftics, ctics;
 
-	static void Create( Sector f, Sector c, double diffh )
+	static void Create( Sector f, Sector c, double diffh, bool instant = false )
 	{
 		if ( !f && !c ) return;
 		let ti = ThinkerIterator.Create("SWWMCrusherBroken",STAT_USER);
@@ -167,7 +168,15 @@ Class SWWMCrusherBroken : Thinker
 		while ( cb = SWWMCrusherBroken(ti.Next()) )
 		{
 			if ( (cb.fsec == f) && (cb.csec == c) )
+			{
+				if ( instant )
+				{
+					// force it to be instant
+					if ( f ) cb.fphase = 3;
+					if ( c ) cb.cphase = 3;
+				}
 				return;	// we already have this
+			}
 			if ( cb.fsec && (cb.fsec == f) )
 			{
 				cb.Destroy();	// we override this one
@@ -186,6 +195,11 @@ Class SWWMCrusherBroken : Thinker
 		cb.diffh = diffh;
 		if ( f && f.floordata ) f.floordata.Destroy();
 		if ( c && c.ceilingdata ) c.ceilingdata.Destroy();
+		if ( instant )
+		{
+			if ( f ) cb.fphase = 3;
+			if ( c ) cb.cphase = 3;
+		}
 	}
 
 	override void Tick()

@@ -379,17 +379,8 @@ Class BusterWall : Thinker
 			if ( l.Activation&(SPAC_Use|SPAC_Impact) )
 				l.Activation &= ~(SPAC_Use|SPAC_Impact);
 		}
-		// stop all movers
-		let ti2 = ThinkerIterator.Create("SectorEffect",STAT_SECTOREFFECT);
-		SectorEffect se;
-		while ( se = SectorEffect(ti2.Next()) )
-		{
-			if ( se.GetSector() != hs ) continue;
-			se.Destroy();
-		}
-		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
-		// stop all sound sequences
-		for ( int i=1; i<=4; i++ ) hs.StopSoundSequence(i);
+		// stop movement permanently
+		SWWMCrusherBroken.Create(hp?null:hs,hp?hs:null,0.,true);
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);
@@ -407,6 +398,7 @@ Class BusterWall : Thinker
 			bust.boundsmin = (a.x,a.y,bust.cutheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,thisheight)-(1,1,1);
 		}
+		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
 		bust.SpawnDebris(true);
 		hs.SetTexture(hp,rubble);
 		hs.SetXScale(hp,1.);

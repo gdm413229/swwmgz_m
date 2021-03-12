@@ -19,6 +19,7 @@ Class Ynykron : SWWMWeapon
 	int chargestate;
 	double chargelevel;
 	bool inverted, invertreload;
+	ui int lastmode;
 
 	double ventalpha, ventfade;
 	int ventcooldown;
@@ -47,6 +48,17 @@ Class Ynykron : SWWMWeapon
 		Super.HudTick();
 		if ( !ChargeInter ) ChargeInter = DynamicValueInterpolator.Create(int(chargelevel*10),.5,1,400);
 		ChargeInter.Update(int(chargelevel*10));
+		if ( lastmode && (lastmode != inverted+1) && (Owner.player == players[consoleplayer]) )
+		{
+			let bar = SWWMStatusBar(statusbar);
+			if ( bar )
+			{
+				bar.ntagstr = StringTable.Localize(inverted?"$SWWM_YNYKRONBACKWARD":"$SWWM_YNYKRONFORWARD");
+				bar.ntagtic = level.totaltime;
+				bar.ntagcol = nametagcolor;
+			}
+		}
+		lastmode = inverted+1;
 	}
 
 	override bool ReportHUDAmmo()

@@ -92,6 +92,7 @@ Class Hellblazer : SWWMWeapon
 	bool magstate[6];	// true: rocket was spent
 	int magpos;	// current rotation
 	Class<Ammo> loadammo, nextammo;
+	ui Class<Ammo> lastammo;
 	int spinskipped;
 	HellblazerXSub pickuprockets[6];
 
@@ -176,6 +177,22 @@ Class Hellblazer : SWWMWeapon
 			}
 			break;
 		}
+	}
+
+	override void HudTick()
+	{
+		Super.HudTick();
+		if ( lastammo && (lastammo != nextammo) && (Owner.player == players[consoleplayer]) )
+		{
+			let bar = SWWMStatusBar(statusbar);
+			if ( bar )
+			{
+				bar.ntagstr = GetDefaultByType(nextammo).GetTag();
+				bar.ntagtic = level.totaltime;
+				bar.ntagcol = nametagcolor;
+			}
+		}
+		lastammo = nextammo;
 	}
 
 	override Vector3 GetTraceOffset()

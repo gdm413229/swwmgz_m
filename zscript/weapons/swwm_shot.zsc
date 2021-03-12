@@ -122,10 +122,27 @@ Class Spreadgun : SWWMWeapon
 	bool chambered;	// a shell is actually loaded
 	bool emptyup;	// next reload will keep the chamber empty
 	Class<Ammo> loadammo, nextammo;	// currently loaded shell, next shell to load
+	ui Class<Ammo> lastammo;
 	bool initialized;
 
 	transient ui TextureID WeaponBox, AmmoIcon[7], LoadedIcon[7];
 	transient ui Font TewiFont;
+
+	override void HudTick()
+	{
+		Super.HudTick();
+		if ( lastammo && (lastammo != nextammo) && (Owner.player == players[consoleplayer]) )
+		{
+			let bar = SWWMStatusBar(statusbar);
+			if ( bar )
+			{
+				bar.ntagstr = GetDefaultByType(nextammo).GetTag();
+				bar.ntagtic = level.totaltime;
+				bar.ntagcol = nametagcolor;
+			}
+		}
+		lastammo = nextammo;
+	}
 
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{

@@ -7,6 +7,7 @@ Class Eviscerator : SWWMWeapon
 	bool isfiring;
 	// barrel is extended
 	bool extended;
+	ui int lastmode;
 	// pending shell load
 	bool pendingload;
 	// has shell chambered
@@ -70,6 +71,22 @@ Class Eviscerator : SWWMWeapon
 			pendingload = false;
 			chambered = true;
 		}
+	}
+
+	override void HudTick()
+	{
+		Super.HudTick();
+		if ( lastmode && (lastmode != extended+1) && (Owner.player == players[consoleplayer]) )
+		{
+			let bar = SWWMStatusBar(statusbar);
+			if ( bar )
+			{
+				bar.ntagstr = StringTable.Localize(extended?"$SWWM_TIGHTSPREAD":"$SWWM_WIDESPREAD");
+				bar.ntagtic = level.totaltime;
+				bar.ntagcol = nametagcolor;
+			}
+		}
+		lastmode = extended+1;
 	}
 
 	action void A_StartLoad( int delay = 0 )

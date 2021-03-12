@@ -246,6 +246,7 @@ Class SilverBullet : SWWMWeapon
 {
 	bool chambered, fired;
 	bool fcbchambered, fcbloaded, fcbselected;
+	ui int lastammo;
 	int clipcount;
 	double casex, casey;
 
@@ -316,6 +317,17 @@ Class SilverBullet : SWWMWeapon
 		Super.HudTick();
 		if ( !ZoomInter ) ZoomInter = DynamicValueInterpolator.Create(int(zoomlevel*10),.5,1,20);
 		ZoomInter.Update(int(zoomlevel*10));
+		if ( lastammo && (lastammo != fcbselected+1) && (Owner.player == players[consoleplayer]) )
+		{
+			let bar = SWWMStatusBar(statusbar);
+			if ( bar )
+			{
+				bar.ntagstr = StringTable.Localize(fcbselected?"$SWWM_FCBSEL":"$SWWM_XSBSEL");
+				bar.ntagtic = level.totaltime;
+				bar.ntagcol = nametagcolor;
+			}
+		}
+		lastammo = fcbselected+1;
 	}
 
 	override bool ReportHUDAmmo()

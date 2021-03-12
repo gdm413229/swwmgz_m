@@ -1658,7 +1658,7 @@ Class SWWMUtility
 		int np = 0;
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
-			if ( !playeringame[i] || !players[i].mo ) continue;
+			if ( !playeringame[i] ) continue;
 			np++;
 		}
 		int required = np;
@@ -1671,16 +1671,32 @@ Class SWWMUtility
 			if ( multi ) required -= i.Amount;
 			else required--;
 		}
+		// check travelling inventory separately, as by default iterators don't check anything below STAT_FIRST_THINKING
+		ti = ThinkerIterator.Create(itm,Thinker.STAT_TRAVELLING);
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( multi ) required -= i.Amount;
+			else required--;
+		}
 		return (required>0);
 	}
 
 	// checks if instances of a certain item exist
 	//  skipme: optionally, ignore checking for one specific instance
 	//          (useful to check if we're the only copy of an item)
-	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null )
+	//  mapstart: this function is being called during map load, so we
+	//            should also check STAT_TRAVELLING inventory
+	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null, bool mapstart = false )
 	{
 		let ti = ThinkerIterator.Create(itm);
 		Inventory i;
+		while ( i = Inventory(ti.Next()) )
+		{
+			if ( i == skipme ) continue;
+			return true;
+		}
+		if ( !mapstart ) return false;
+		ti = ThinkerIterator.Create(itm,Thinker.STAT_TRAVELLING);
 		while ( i = Inventory(ti.Next()) )
 		{
 			if ( i == skipme ) continue;

@@ -19,17 +19,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - Rubber Duck *("Is this some kind of convoluted joke from those two?")*
-* **Additional items:**
-  - Mykradvo Artifact (but this time it's not auto-use)
-  - Puronamyka Armor (the return of this absurd protection)
-  - Additional grenades (not just Explodium Mags)
-    - Candygun Mags (because why not)
-    - Vacuum Bomb (return of this old weapon)
-    - Kinylum Shard (UnSX 3 callback)
-    - Burrow Mines (return of the Loki Mine)
-    - Shockbombs (stun is fun)
-  - Satellite Companion (lil' thing that schutt)
-  - Gate Node (actual replacement for chaos devices)
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
@@ -37,12 +26,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)
-* **"Advanced" Item Sense *(detect activatable walls)***
 * **DLC Gameset:**
   - Tetris
   - Pong
   - Snake
-  - ... maybe other small games
   - **[Doom]** Demo Land Adventure (platformer with shooty gameplay)
   - **[Heretic]** Interstellar Demolitionist (a somewhat simple vertical SHMUP, kinda Touhou styled)
   - **[Hexen]** Demolition Quest (a JRPG, kinda like early FF / BoF)

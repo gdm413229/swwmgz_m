@@ -53,15 +53,13 @@ Class RefresherRegen : Powerup
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		if ( Owner && (Owner.health > 0) && !((EffectTics-5)%175) )
-		{
-			if ( Owner.GiveBody(int(Strength),500) )
-			{
-				SWWMScoreObj.Spawn(int(Strength),Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-				SWWMHandler.DoFlash(Owner,Color(32,224,128,255),10);
-				Owner.A_StartSound("powerup/refresher",CHAN_ITEM,CHANF_LOCAL,.4);
-			}
-		}
+		if ( !Owner || (Owner.health <= 0) || ((EffectTics-5)%175) ) return;
+		if ( !Owner.GiveBody(int(Strength),500) ) return;
+		SWWMScoreObj.Spawn(int(Strength),Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+		SWWMHandler.DoFlash(Owner,Color(32,224,128,255),10);
+		Owner.A_StartSound("powerup/refresher",CHAN_ITEM,CHANF_LOCAL,.4);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 0.99;
 	}
 }
 
@@ -191,6 +189,8 @@ Class RefresherItem : SWWMHealth
 		if ( p ) p.EffectTics += p.default.EffectTics;
 		else Owner.GiveInventory("RefresherRegen",1);
 		SWWMHandler.DoFlash(Owner,Color(80,224,128,255),20);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 0.95;
 	}
 	override bool Use( bool pickup )
 	{

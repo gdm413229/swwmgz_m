@@ -210,8 +210,7 @@ Class Hellblazer : SWWMWeapon
 		A_AlertMonsters(swwm_uncapalert?0:bAlt?400:1200);
 		int qstr = bAlt?4:5;
 		A_QuakeEx(qstr,qstr,qstr,bAlt?4:12,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.12*qstr);
-		A_ZoomFactor(bAlt?.96:.93,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(bAlt?.96:.93);
 		A_PlayerFire();
 		invoker.clipcount = max(0,invoker.clipcount-1);
 		invoker.magstate[invoker.magpos] = true;

@@ -91,8 +91,7 @@ Class Sparkster : SWWMWeapon
 			// spark
 			A_StartSound("biospark/fire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.7);
 			A_QuakeEx(2,2,2,5,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2);
-			A_ZoomFactor(.96,ZOOM_INSTANT);
-			A_ZoomFactor(1.);
+			A_BumpFOV(.96);
 			A_SWWMFlash();
 			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
 			A_AlertMonsters(swwm_uncapalert?0:5000);
@@ -112,8 +111,7 @@ Class Sparkster : SWWMWeapon
 			// beam
 			A_StartSound("biospark/altfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:.8);
 			A_QuakeEx(3,3,3,5,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.3);
-			A_ZoomFactor(.95,ZOOM_INSTANT);
-			A_ZoomFactor(1.);
+			A_BumpFOV(.95);
 			A_SWWMFlash();
 			SWWMHandler.DoFlash(self,Color(64,192,255,96),3);
 			A_AlertMonsters(swwm_uncapalert?0:4000);
@@ -133,8 +131,7 @@ Class Sparkster : SWWMWeapon
 			// big spark
 			A_StartSound("biospark/thirdfire",CHAN_WEAPON,CHANF_OVERLAP,attenuation:1.5);
 			A_QuakeEx(5,5,5,10,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.6);
-			A_ZoomFactor(.94,ZOOM_INSTANT);
-			A_ZoomFactor(1.);
+			A_BumpFOV(.94);
 			A_AlertMonsters(swwm_uncapalert?0:1200);
 			A_PlayerFire();
 			SWWMUtility.DoKnockback(self,-x,2500.);

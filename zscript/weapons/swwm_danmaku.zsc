@@ -107,8 +107,7 @@ Class Eviscerator : SWWMWeapon
 		invoker.isfiring = true;
 		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_QuakeEx(6,6,6,3,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.5);
-		A_ZoomFactor(.94,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(.94);
 		A_SWWMFlash();
 		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(64,255,224,96),3);
@@ -178,8 +177,7 @@ Class Eviscerator : SWWMWeapon
 		A_StartSound("eviscerator/altfire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_StartSound("eviscerator/fire",CHAN_WEAPON,CHANF_OVERLAP);
 		A_QuakeEx(4,4,4,5,0,10,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.9);
-		A_ZoomFactor(.91,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(.91);
 		A_SWWMFlash();
 		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(16,255,224,96),3);

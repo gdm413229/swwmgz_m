@@ -458,8 +458,7 @@ Class Wallbuster : SWWMWeapon
 		int qk = min(9,1+howmany/5);
 		int ql = min(25,6+howmany/2);
 		A_QuakeEx(qk,qk,qk,ql,0,8,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:qk*.15);
-		A_ZoomFactor(1.-qk*.04,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(1.-qk*.04);
 		A_AlertMonsters(swwm_uncapalert?0:alertness);
 		A_PlayerFire();
 		if ( redflashstr > 0 )

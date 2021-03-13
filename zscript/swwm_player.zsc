@@ -50,6 +50,7 @@ Class Demolitionist : PlayerPawn
 	transient int revivefail;
 
 	transient int bumptic;
+	transient double lastbump;
 
 	Actor selflight;
 	Actor oldencroached;
@@ -591,6 +592,44 @@ Class Demolitionist : PlayerPawn
 			A_SoundVolume(CHAN_AMBEXTRA,(players[consoleplayer].Camera==self)?1.:0.);
 		lastunder = curunder;
 	}
+	override void CheckFOV()
+	{
+		if ( !player ) return;
+		float desired = player.desiredfov;
+		// adjust fov from weapon (abs due to special use of negative
+		// to prevent it from scaling look sensitivity)
+		if ( (player.playerstate != PST_DEAD) && player.readyweapon
+			&& player.readyweapon.fovscale )
+			desired *= abs(player.readyweapon.fovscale);
+		// additional fov bump from various effects
+		// akin to the old A_ZoomFactor trick, but not limited to weapons and can stack
+		if ( lastbump <= 0. ) lastbump = 1.;
+		if ( lastbump != 1. )
+		{
+			player.fov *= lastbump;
+			lastbump = 1.;
+		}
+		// adjust fov from dashing
+		double spd = vel.length();
+		if ( spd > 10. )
+		{
+			Vector3 facedir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
+			if ( spd > 0. )
+			{
+				double rel = max(0,vel.unit() dot facedir);
+				desired *= 1.+clamp(rel*(spd-10.),-80.,80.)*.002;
+			}
+		}
+		if ( player.fov == desired ) return;
+		// interpolate towards desired fov
+		if ( abs(player.fov-desired) < .1 ) player.fov = desired;
+		else
+		{
+			float zoom = max(.1,abs(player.fov-desired)*.35);
+			if ( player.fov > desired ) player.fov -= zoom;
+			else player.fov += zoom;
+		}
+	}
 	override Vector2 BobWeapon( double ticfrac )
 	{
 		// non-mod weapons bob normally
@@ -962,6 +1001,7 @@ Class Demolitionist : PlayerPawn
 				A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				a.A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 				bumptic = gametic+int(20+spd/4.);
+				lastbump *= .8;
 				if ( (diff.z < a.height) && (lastvelz >= -25) && (a.bDONTTHRUST || a.bACTLIKEBRIDGE || (a.Mass >= maxmass) || (!a.bSHOOTABLE && !a.bPUSHABLE && (a.Health > 0))) && a.bSOLID && (dir dot dirto > .65) )
 				{
 					if ( bumped ) continue;
@@ -1077,6 +1117,7 @@ Class Demolitionist : PlayerPawn
 						bumped = true;
 						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 						bumptic = gametic+int(20+spd/4.);
+						lastbump *= .8;
 						A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 						A_AlertMonsters(swwm_uncapalert?0:800);
 						vel *= .2;
@@ -1170,6 +1211,7 @@ Class Demolitionist : PlayerPawn
 					bumped = true;
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 					bumptic = gametic+int(25+spd/4.);
+					lastbump *= .8;
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 					A_AlertMonsters(swwm_uncapalert?0:800);
 					vel *= .2;

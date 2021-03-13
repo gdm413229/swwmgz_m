@@ -407,8 +407,7 @@ Class Spreadgun : SWWMWeapon
 			A_StartSound(sounds[i],CHAN_WEAPON,CHANF_OVERLAP,attenuation:.6);
 			A_AlertMonsters(swwm_uncapalert?0:louds[i]);
 			A_QuakeEx(quakes[i],quakes[i],quakes[i],9,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.2*quakes[i]);
-			A_ZoomFactor(1.-quakes[i]*.04,ZOOM_INSTANT);
-			A_ZoomFactor(1.);
+			A_BumpFOV(1.-quakes[i]*.04);
 			A_PlayerFire();
 			SWWMHandler.DoFlash(self,cols[i],5);
 			Vector3 x, y, z;

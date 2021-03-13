@@ -120,6 +120,12 @@ Class SWWMWeapon : Weapon abstract
 		return -1, 0;
 	}
 
+	action void A_BumpFOV( double factor )
+	{
+		if ( !(self is 'Demolitionist') ) return;
+		Demolitionist(self).lastbump *= factor;
+	}
+
 	// subtracts given ammo from price, drops excess
 	virtual bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
 	{

@@ -108,8 +108,7 @@ Class Ynykron : SWWMWeapon
 		}
 		else A_AlertMonsters();	// full range alert
 		A_QuakeEx(9,9,9,4,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:2.5);
-		A_ZoomFactor(.7,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(.7);
 		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(120,255,255,255),30);
 		A_Overlay(PSP_WEAPON+1,"FireSmoke");

@@ -65,6 +65,8 @@ Class GrilledCheeseSandwich : Inventory
 		let s = Owner.FindInventory("GrilledCheeseSafeguard");
 		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
 		else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= .87;
 	}
 	override bool Use( bool pickup )
 	{
@@ -272,6 +274,8 @@ Class GhostPower : PowerInvisibility
 		Super.InitEffect();
 		if ( !Owner ) return;
 		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.04;
 		DoEffect();
 	}
 	override void EndEffect()
@@ -281,6 +285,8 @@ Class GhostPower : PowerInvisibility
 		Owner.bNOTARGET = false;
 		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA);
 		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.02;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GHOSTARTI"));
 	}
 
@@ -375,7 +381,12 @@ Class GhostArtifact : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
-		if ( g ) g.EffectTics += g.default.EffectTics;
+		if ( g )
+		{
+			g.EffectTics += g.default.EffectTics;
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 1.04;
+		}
 		else Owner.GiveInventory("GhostPower",1);
 		return true;
 	}
@@ -468,6 +479,8 @@ Class GravityPower : Powerup
 		DoEffect();
 		if ( Owner.pos.z <= Owner.floorz )
 			Owner.vel.z = 1;
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.04;
 	}
 	override void EndEffect()
 	{
@@ -480,6 +493,8 @@ Class GravityPower : Powerup
 			if ( Owner.pos.z > Owner.floorz ) Owner.player.centering = true;
 		}
 		Owner.A_StartSound("powerup/gravityend",CHAN_ITEMEXTRA);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.02;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GRAVITYS"));
 	}
 
@@ -515,7 +530,12 @@ Class GravitySuppressor : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let g = GravityPower(Owner.FindInventory("GravityPower"));
-		if ( g ) g.EffectTics += g.default.EffectTics;
+		if ( g )
+		{
+			g.EffectTics += g.default.EffectTics;
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 1.04;
+		}
 		else Owner.GiveInventory("GravityPower",1);
 		return true;
 	}
@@ -654,6 +674,8 @@ Class InvinciballPower : Powerup
 		l.master = self;
 		lastpulse = max(lastpulse,gametic+35);
 		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.1;
 	}
 
 	override void DoEffect()
@@ -671,6 +693,8 @@ Class InvinciballPower : Powerup
 		if ( !Owner ) return;
 		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA);
 		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.05;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_INVINCIBALL"));
 	}
 
@@ -712,6 +736,8 @@ Class InvinciballPower : Powerup
 				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP);
 				lasteffect = level.maptime;
 				lastpulse = max(lastpulse,gametic+20);
+				if ( Owner is 'Demolitionist' )
+					Demolitionist(Owner).lastbump *= 1.05;
 			}
 		}
 	}
@@ -748,6 +774,8 @@ Class FuckingInvinciball : Inventory
 			i.EffectTics += i.default.EffectTics;
 			i.lastpulse = max(i.lastpulse,gametic+35);
 			SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 1.1;
 		}
 		else Owner.GiveInventory("InvinciballPower",1);
 		return true;
@@ -900,6 +928,7 @@ Class RagekitPower : Powerup
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
 		lastpulse = max(lastpulse,gametic+35);
+		Demolitionist(Owner).lastbump *= .95;
 		l = Spawn("RagekitLight",Owner.pos);
 		l.target = Owner;
 		l.master = self;
@@ -922,6 +951,7 @@ Class RagekitPower : Powerup
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 			lastpulse = max(lastpulse,gametic+10);
+			Demolitionist(Owner).lastbump *= .98;
 		}
 	}
 
@@ -933,6 +963,7 @@ Class RagekitPower : Powerup
 		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_AlertMonsters(2000);
+		Demolitionist(Owner).lastbump *= .9;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_RAGEKIT"));
 	}
 
@@ -972,6 +1003,7 @@ Class RagekitPower : Powerup
 		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
 		lasteffect = level.maptime;
 		lastpulse = max(lastpulse,gametic+35);
+		Demolitionist(Owner).lastbump *= .9;
 	}
 
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags )
@@ -1025,6 +1057,7 @@ Class Ragekit : Inventory
 			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
 			Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 			r.lastpulse = max(r.lastpulse,gametic+35);
+			Demolitionist(Owner).lastbump *= .95;
 		}
 		else Owner.GiveInventory("RagekitPower",1);
 		return true;
@@ -1093,6 +1126,8 @@ Class Omnisight : Inventory
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 1.1;
 			level.allmap = true;
 		}
 		// spread to all players
@@ -1109,6 +1144,8 @@ Class Omnisight : Inventory
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
+			if ( players[i].mo is 'Demolitionist' )
+				Demolitionist(players[i].mo).lastbump *= 1.1;
 		}
 		// not used up, must be kept for the targetting features to work
 		return false;
@@ -1932,12 +1969,16 @@ Class BarrierPower : PowerIronFeet
 		l = Spawn("BarrierLight",Owner.pos);
 		l.target = Owner;
 		l.master = self;
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 0.95;
 	}
 	override void EndEffect()
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
 		Owner.A_StartSound("powerup/barrierend",CHAN_ITEMEXTRA);
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 0.95;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_BARRIER"));
 	}
 
@@ -1963,7 +2004,12 @@ Class EBarrier : Inventory
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		let b = BarrierPower(Owner.FindInventory("BarrierPower"));
-		if ( b ) b.EffectTics += b.default.EffectTics;
+		if ( b )
+		{
+			b.EffectTics += b.default.EffectTics;
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 0.95;
+		}
 		else Owner.GiveInventory("BarrierPower",1);
 		return true;
 	}

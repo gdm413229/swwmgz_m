@@ -593,8 +593,7 @@ Class SilverBullet : SWWMWeapon
 		int str = invoker.fcbchambered?7:8;
 		A_QuakeEx(str,str,str,10,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:str/4.);
 		double basezoom = invoker.zoomed?clamp(invoker.zoomlevel,1.,16.):1.;
-		A_ZoomFactor(basezoom*(invoker.fcbchambered?.8:.76),ZOOM_INSTANT);
-		A_ZoomFactor(basezoom);
+		A_BumpFOV(invoker.fcbchambered?.8:.76);
 		A_PlayerFire();
 		SWWMHandler.DoFlash(self,Color(110,255,192,80),8);
 		Vector3 x, y, z;

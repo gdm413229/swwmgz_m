@@ -41,8 +41,7 @@ Class PusherWeapon : SWWMWeapon
 		invoker.chargelevel = clamp(invoker.chargelevel+FRandom[Pusher](-.04,.08),.3,1.);
 		A_QuakeEx(1,1,1,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 		A_WeaponOffset(FRandom[Pusher](-1,1)*2,32+FRandom[Pusher](-1,1)*2);
-		A_ZoomFactor(1.01,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(1.01);
 		A_Recoil(-cos(pitch));
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -118,8 +117,7 @@ Class PusherWeapon : SWWMWeapon
 			A_StartSound("pusher/motorend",CHAN_WEAPONEXTRA,CHANF_DEFAULT,pitch:1.5);
 		A_StartSound("pusher/stop",CHAN_WEAPON,CHANF_OVERLAP);
 		A_StartSound("pusher/altfire",CHAN_WEAPON,CHANF_OVERLAP);
-		A_ZoomFactor(1.+invoker.chargelevel*.2,ZOOM_INSTANT);
-		A_ZoomFactor(1.);
+		A_BumpFOV(1.+invoker.chargelevel*.2);
 		A_Recoil(-(2.+4.*invoker.chargelevel)*cos(pitch));
 		A_QuakeEx(2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),2+int(invoker.chargelevel*2),3+int(invoker.chargelevel*6),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.3+invoker.chargelevel*.7);
 		A_WeaponOffset(0,32);

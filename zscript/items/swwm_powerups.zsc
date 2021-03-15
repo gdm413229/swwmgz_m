@@ -61,12 +61,12 @@ Class GrilledCheeseSandwich : Inventory
 		SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
 		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.2;
 		if ( !extrasafe ) return;
 		let s = Owner.FindInventory("GrilledCheeseSafeguard");
 		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
 		else Powerup(s).EffectTics = Powerup(s).default.EffectTics;
-		if ( Owner is 'Demolitionist' )
-			Demolitionist(Owner).lastbump *= .87;
 	}
 	override bool Use( bool pickup )
 	{

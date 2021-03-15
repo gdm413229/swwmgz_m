@@ -2502,7 +2502,7 @@ Class DemolitionistMenu : GenericMenu
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.,StringTable.Localize("$SWWM_UNIT_LITER"));
 			statlist.Push(str);
-			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),stats.topspeed*32000./(3600*GameTicRate),StringTable.Localize("$SWWM_UNIT_KPH"));
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),(stats.topspeed*3600.*GameTicRate)/32000.,StringTable.Localize("$SWWM_UNIT_KPH"));
 			statlist.Push(str);
 			thour = (stats.airtime/(3600*GameTicRate));
 			tmin = (stats.airtime/(60*GameTicRate))%60;

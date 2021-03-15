@@ -360,6 +360,7 @@ extend Class SWWMWeapon
 			if ( raging ) A_StartSound(bloodless?"pusher/althit":"pusher/altmeat",CHAN_WEAPON,CHANF_OVERLAP);
 			else A_StartSound((hitsound!="")?hitsound:bloodless?"demolitionist/punch":"demolitionist/punchf",CHAN_WEAPON,CHANF_OVERLAP);
 			A_AlertMonsters(swwm_uncapalert?0:300);
+			A_BumpFOV(.96);
 			return true;
 		}
 		return false;
@@ -437,6 +438,7 @@ extend Class SWWMWeapon
 		}
 		int quakin = raging?4:1;
 		A_QuakeEx(quakin,quakin,quakin,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.12*quakin);
+		A_BumpFOV(.98);
 		A_StartSound(raging?"pusher/althit":(hitsound!="")?hitsound:"demolitionist/punch",CHAN_WEAPON,CHANF_OVERLAP);
 		A_AlertMonsters(swwm_uncapalert?0:100);
 		if ( raging ) raging.DoHitFX();

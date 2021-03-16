@@ -13,7 +13,7 @@ Class Demolitionist : PlayerPawn
 	int lastdamage;
 	transient int lastdamagetic;
 	bool lastground;
-	int lastgroundtic;
+	int lastgroundtic, lastairtic;
 	double lastvelz, prevvelz;
 	double ssup;
 
@@ -28,8 +28,7 @@ Class Demolitionist : PlayerPawn
 	double guideangle, guidepitch, guideroll;
 
 	// for weapon bobbing stuff
-	bool bumpdown;
-	double bumpvelz, bumppitch;
+	Array<double> bumpvelz, bumppitch;
 	double oldangle, oldpitch;
 	double oldlagangle, oldlagpitch, oldlagready;
 	Vector3 oldlagvel;
@@ -423,7 +422,7 @@ Class Demolitionist : PlayerPawn
 	void A_Dash()
 	{
 		vel += dashdir*dashboost;
-		player.vel = vel.xy;
+		player.vel *= 0.;
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
@@ -440,7 +439,7 @@ Class Demolitionist : PlayerPawn
 	void A_BoostUp( bool initial = false )
 	{
 		vel += (0,0,1)*dashboost;
-		player.vel = vel.xy;
+		player.vel *= 0.;
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
@@ -612,7 +611,7 @@ Class Demolitionist : PlayerPawn
 		}
 		// adjust fov from dashing
 		double spd = vel.length();
-		if ( spd > 10. )
+		if ( InStateSequence(CurState,FindState("Dash")) && (spd > 10.) )
 		{
 			Vector3 facedir = (cos(angle)*cos(pitch),sin(angle)*cos(pitch),sin(-pitch));
 			if ( spd > 0. )
@@ -852,19 +851,22 @@ Class Demolitionist : PlayerPawn
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) )
 		{
 			// bump down weapon
-			bumpdown = true;
-			bumpvelz = -lastvelz;
-			bumppitch = min(-lastvelz/10.,20);
+			bumpvelz.Push(-lastvelz);
+			double bpitch = min(-lastvelz/10.,20);
 			if ( lastvelz < -25 )
 			{
 				let s = Spawn("DemolitionistShockwave",pos);
 				s.target = self;
 				s.special1 = int(-lastvelz);
-				A_Stop();
 				A_AlertMonsters(swwm_uncapalert?0:2500);
-				bumppitch = min(bumppitch+30,60);
+				bpitch = min(bpitch+30,60);
 				lastbump *= 1.3;
-				ReactionTime = 17;
+				if ( FindInventory("RagekitPower") ) ReactionTime = 4;
+				else
+				{
+					A_Stop();
+					ReactionTime = 17;
+				}
 				if ( player == players[consoleplayer] )
 				{
 					A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -873,8 +875,8 @@ Class Demolitionist : PlayerPawn
 				}
 				mystats.stompcount++;
 			}
-			double newp = min(90,pitch+bumppitch);
-			bumppitch = newp-pitch;
+			double newp = min(90,pitch+bpitch);
+			bumppitch.Push(newp-pitch);
 			A_SetPitch(newp,SPF_INTERPOLATE);
 			if ( lastvelz < -10 )
 				A_StartSound("demolitionist/runstop",CHAN_FOOTSTEP,CHANF_OVERLAP);
@@ -949,13 +951,19 @@ Class Demolitionist : PlayerPawn
 				}
 			}
 		}
-		if ( bumpdown )
+		for ( int i=0; i<bumpvelz.Size(); i++ )
 		{
-			lagvel.z += bumpvelz*.2;
-			A_SetPitch(pitch-bumppitch/5.,SPF_INTERPOLATE);
-			bumpvelz *= .8;
-			bumppitch *= .8;
-			if ( (bumpvelz < double.epsilon) && (bumppitch < double.epsilon) ) bumpdown = false;
+			lagvel.z += bumpvelz[i]*.2;
+			bumpvelz[i] *= .8;
+			if ( abs(bumpvelz[i]) > double.epsilon ) continue;
+			bumpvelz.Delete(i--);
+		}
+		for ( int i=0; i<bumppitch.Size(); i++ )
+		{
+			A_SetPitch(pitch-bumppitch[i]/5.,SPF_INTERPOLATE);
+			bumppitch[i] *= .8;
+			if ( abs(bumppitch[i]) > double.epsilon ) continue;
+			bumppitch.Delete(i--);
 		}
 		lastground = player.onground;
 		lastvelz = prevvelz;
@@ -971,7 +979,7 @@ Class Demolitionist : PlayerPawn
 		if ( ((dashboost <= 0) || !(isdashing || (isboosting && player.cmd.buttons&BT_JUMP))) && IsActorPlayingSound(CHAN_JETPACK,"demolitionist/jet") )
 			A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 		PainChance = isdashing?0:255;
-		if ( isdashing || (vel.length() > 25) )
+		if ( isdashing || (vel.length() > 30) )
 		{
 			Actor a;
 			if ( isdashing && (dashboost > 0.) )
@@ -1002,8 +1010,7 @@ Class Demolitionist : PlayerPawn
 				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
 				Vector3 dirto = diff.unit();
-				Vector3 otherdir = (a.vel.length()>0.)?a.vel.unit():-dirto;
-				if ( (dir dot dirto < .1) || (dir dot otherdir > .35) ) continue;
+				if ( dir dot dirto < .1 ) continue;
 				if ( (diff.z <= -a.height) && (lastvelz < -25) ) continue;
 				if ( (diff.z <= -a.height) && !isdashing ) continue;
 				// don't bump bridges if hit at a specific angle
@@ -1373,6 +1380,7 @@ Class Demolitionist : PlayerPawn
 		if ( !player || (player.mo != self) || (player.cheats&(CF_FROZEN|CF_TOTALLYFROZEN)) )
 		{
 			dashboost = 0.;
+			player.vel *= 0.;
 			if ( IsActorPlayingSound(CHAN_JETPACK,"demolitionist/jet") )
 				A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 			Super.MovePlayer();
@@ -1454,7 +1462,7 @@ Class Demolitionist : PlayerPawn
 			else if ( player.onground && !bNOGRAVITY && (waterlevel < 2) )
 			{
 				// quickly decelerate if we're not holding movement keys
-				if ( !(player.cmd.forwardmove|player.cmd.sidemove) ) vel *= .97;
+				if ( !(player.cmd.forwardmove|player.cmd.sidemove) ) vel *= .95;
 			}
 			if ( abs(roll) > 0. ) A_SetRoll(roll+clamp(deltaangle(roll,0),-3.,3.),SPF_INTERPOLATE);
 		}
@@ -1485,6 +1493,7 @@ Class Demolitionist : PlayerPawn
 			}
 		}
 		if ( player.onground ) lastgroundtic = level.maptime;
+		else lastairtic = level.maptime;
 		if ( !(player.cheats & CF_PREDICTING) && !(player.cmd.forwardmove|player.cmd.sidemove) )
 			PlayIdle();
 		Vector3 dodge = (0,0,0), x, y, z;
@@ -1509,12 +1518,16 @@ Class Demolitionist : PlayerPawn
 				player.cheats &= ~CF_REVERTPLEASE;
 				player.camera = player.mo;
 			}
+			vel += dashdir*dashboost;
 			vel.z += clamp(-vel.z*.4,0.,30.);
 			player.jumptics = -1;
 			SetStateLabel("Dash");
 			A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
 			lastbump *= .95;
 			mystats.dashcount++;
+			double newp = min(90.,pitch+5.);
+			bumppitch.Push(newp-pitch);
+			A_SetPitch(newp,SPF_INTERPOLATE);
 		}
 	}
 	override void CheckJump()
@@ -1649,14 +1662,35 @@ Class Demolitionist : PlayerPawn
 					lastbump *= .95;
 					mystats.boostcount++;
 					last_boost = level.maptime+1;
+					double newp = min(90.,pitch+3.);
+					bumppitch.Push(newp-pitch);
+					A_SetPitch(newp,SPF_INTERPOLATE);
 				}
 				else
 				{
 					dashboost = 0.;
-					if ( vel.z < 10. )
-						vel.z += jumpvelz*1.25;
-					if ( !walljump && !wallclimb )
-						vel.xy += RotateVector((player.cmd.forwardmove,0),angle)/3000.;
+					double bpitch = clamp((vel.length()-10)/5.,0.,20.);
+					double newp = min(90.,pitch+bpitch);
+					bumppitch.Push(newp-pitch);
+					A_SetPitch(newp,SPF_INTERPOLATE);
+					// bunnyhop time
+					if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) && !walljump && !wallclimb )
+					{
+						// bhop, z vel relative to vel size
+						if ( vel.z < 25. )	// don't ramp up too hard
+							vel.z += jumpvelz*(1.2+vel.length()*.01);
+						// accelerate
+						vel.xy += RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle)/2400.;
+					}
+					else
+					{
+						// first jump
+						if ( vel.z < 10. )	// don't ramp up too hard
+							vel.z += (walljump||wallclimb||(player.cmd.buttons&BT_RUN))?(jumpvelz*1.25):jumpvelz;	// higher jump if running or wall jumping
+						// long jump if running
+						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
+							vel.xy += RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle)/1200.;
+					}
 				}
 				SetStateLabel("Jump");
 			}
@@ -2208,7 +2242,7 @@ Class Demolitionist : PlayerPawn
 			A_StartSound("demolitionist/run",CHAN_FOOTSTEP,CHANF_OVERLAP,vol);
 			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
-			vel.xy += RotateVector((player.cmd.forwardmove,0),angle)/2000.;
+			vel.xy += RotateVector((player.cmd.forwardmove,-player.cmd.sidemove),angle)/2000.;
 		}
 		else
 		{

@@ -55,6 +55,8 @@ Class DemolitionistMenu : GenericMenu
 	SWWMStats stats;
 	Array<String> statlist;
 	Array<MonsterKill> sorted_mstats; // sorted by killcount
+	Array<LevelStat> filtered_lstats; // filtered if necessary + entry for current map
+	LevelStat curlstat;
 	// inventory lists
 	Array<Inventory> invlist;
 	// lore stuff
@@ -620,7 +622,7 @@ Class DemolitionistMenu : GenericMenu
 				else if ( sel1 == STAT_KILLS )
 					cnt = sorted_mstats.Size();
 				else if ( sel1 == STAT_LEVEL )
-					cnt = stats.lstats.Size();
+					cnt = filtered_lstats.Size();
 				if ( (cnt > 22) && (sel0 < cnt-22) )
 				{
 					MenuSound("menu/demoscroll");
@@ -1588,7 +1590,7 @@ Class DemolitionistMenu : GenericMenu
 				int cnt = 0;
 				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
 				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
-				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = filtered_lstats.Size();
 				if ( cnt <= 28 ) return res;	// no scrollbar
 				// calculate offset
 				int szr = cnt-28;
@@ -1800,7 +1802,7 @@ Class DemolitionistMenu : GenericMenu
 				int cnt = 0;
 				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
 				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
-				else if ( sel1 == STAT_LEVEL ) cnt = stats.lstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = filtered_lstats.Size();
 				if ( cnt <= 22 ) return res;	// no scrollbar
 				// calculate offset
 				int szr = cnt-22;
@@ -2437,12 +2439,20 @@ Class DemolitionistMenu : GenericMenu
 		else if ( tabs[curtab] == TAB_TRADING )
 		{
 			// build player list
+			int oldnplayers = playerlist.Size();
 			playerlist.Clear();
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
 				if ( !playeringame[i] || (i == consoleplayer) ) continue;
 				if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
 				playerlist.Push(i);
+			}
+			if ( (playerlist.Size() != oldnplayers) && sub && (sel0 != -1) )
+			{
+				// go back, the player list changed
+				MenuSound("menu/democlose");
+				sub = false;
+				ofs0 = sel0 = 0;
 			}
 			// build inventory list if open
 			if ( sub && (sel0 != -1) )
@@ -2562,6 +2572,37 @@ Class DemolitionistMenu : GenericMenu
 			if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
 			else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
 			statlist.Push(str);
+		}
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_LEVEL) )
+		{
+			filtered_lstats.Clear();
+			bool shouldfilter = swwm_uniqstats;
+			for ( int i=0; i<stats.lstats.Size(); i++ )
+			{
+				for ( int j=0; j<filtered_lstats.Size(); j++ )
+				{
+					if ( !shouldfilter || ((filtered_lstats[j].mapname != stats.lstats[i].mapname) && (filtered_lstats[j].mapname != level.mapname)) ) continue;
+					filtered_lstats.Delete(j);
+					j--;
+				}
+				filtered_lstats.Push(stats.lstats[i]);
+			}
+			if ( !curlstat ) curlstat = new("LevelStat");
+			curlstat.hub = !!(level.clusterflags&level.CLUSTER_HUB);
+			curlstat.levelname = level.levelname;
+			int iof = curlstat.levelname.IndexOf(" - by: ");
+			if ( iof != -1 ) curlstat.levelname.Truncate(iof);
+			curlstat.mapname = level.mapname;
+			curlstat.kcount = level.killed_monsters;
+			curlstat.ktotal = level.total_monsters;
+			curlstat.icount = level.found_items;
+			curlstat.itotal = level.total_items;
+			curlstat.scount = level.found_secrets;
+			curlstat.stotal = level.total_secrets;
+			curlstat.time = level.maptime;
+			curlstat.par = level.partime;
+			curlstat.suck = level.sucktime;
+			filtered_lstats.Push(curlstat);
 		}
 		// ui->play transaction checks
 		for ( int i=0; i<checklist.Size(); i++ )
@@ -2940,7 +2981,7 @@ Class DemolitionistMenu : GenericMenu
 			{
 				xx += 9;
 				yy = 23;
-				int cnt = stats.lstats.Size();
+				int cnt = filtered_lstats.Size();
 				if ( cnt <= 0 )
 				{
 					str = StringTable.Localize("$SWWM_NOSTAT");
@@ -2954,44 +2995,45 @@ Class DemolitionistMenu : GenericMenu
 				for ( int i=0; i<4; i++ ) maxlen[i] = 0;
 				for ( int i=0; i<cnt; i++ )
 				{
-					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
+					int sec = Thinker.Tics2Seconds(filtered_lstats[i].time);
 					str = String.Format("T %02d:%02d:%02d",sec/3600,(sec%3600)/60,sec%60);
 					len[0] = fnt2.StringWidth(str);
 					if ( len[0] > maxlen[0] ) maxlen[0] = len[0];
-					str = String.Format("S %d/%d",stats.lstats[i].scount,stats.lstats[i].stotal);
+					str = String.Format("S %d/%d",filtered_lstats[i].scount,filtered_lstats[i].stotal);
 					len[1] = fnt2.StringWidth(str);
 					if ( len[1] > maxlen[1] ) maxlen[1] = len[1];
-					str = String.Format("I %d/%d",stats.lstats[i].icount,stats.lstats[i].itotal);
+					str = String.Format("I %d/%d",filtered_lstats[i].icount,filtered_lstats[i].itotal);
 					len[2] = fnt2.StringWidth(str);
 					if ( len[2] > maxlen[2] ) maxlen[2] = len[2];
-					str = String.Format("K %d/%d",stats.lstats[i].kcount,stats.lstats[i].ktotal);
+					str = String.Format("K %d/%d",filtered_lstats[i].kcount,filtered_lstats[i].ktotal);
 					len[3] = fnt2.StringWidth(str);
 					if ( len[3] > maxlen[3] ) maxlen[3] = len[3];
 				}
 				for ( int i=ofs; i<cnt; i++ )
 				{
 					if ( yy >= 370 ) break;
-					str = stats.lstats[i].hub?stats.lstats[i].levelname:String.Format("%s - %s",stats.lstats[i].mapname.MakeUpper(),stats.lstats[i].levelname);
+					str = filtered_lstats[i].hub?filtered_lstats[i].levelname:String.Format("%s - %s",filtered_lstats[i].mapname.MakeUpper(),filtered_lstats[i].levelname);
+					if ( filtered_lstats[i] == curlstat ) str = "\cd▸\c- "..str;
 					bool smallname = fnt.StringWidth(str)>(620-(xx+maxlen[3]+maxlen[2]+maxlen[1]+maxlen[0]+24));
 					if ( smallname ) yy += 2;
 					Screen.DrawText(smallname?fnt2:fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					if ( !smallname ) yy += 2;
 					int ox = ((cnt>22)?623:631);
-					int sec = Thinker.Tics2Seconds(stats.lstats[i].time);
+					int sec = Thinker.Tics2Seconds(filtered_lstats[i].time);
 					str = String.Format("%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
-					Screen.DrawText(fnt2,((stats.lstats[i].suck>0)&&(sec>=(stats.lstats[i].suck*3600)))?Font.CR_RED:(sec<=stats.lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,((filtered_lstats[i].suck>0)&&(sec>=(filtered_lstats[i].suck*3600)))?Font.CR_RED:(sec<=filtered_lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[0],origin.y+yy,"T",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[0]+8;
-					str = String.Format("%d\cu/\c-%d",stats.lstats[i].scount,stats.lstats[i].stotal);
-					Screen.DrawText(fnt2,(stats.lstats[i].scount>=stats.lstats[i].stotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].scount,filtered_lstats[i].stotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].scount>=filtered_lstats[i].stotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[1],origin.y+yy,"S",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[1]+8;
-					str = String.Format("%d\cu/\c-%d",stats.lstats[i].icount,stats.lstats[i].itotal);
-					Screen.DrawText(fnt2,(stats.lstats[i].icount>=stats.lstats[i].itotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].icount,filtered_lstats[i].itotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].icount>=filtered_lstats[i].itotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[2],origin.y+yy,"I",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					ox -= maxlen[2]+8;
-					str = String.Format("%d\cu/\c-%d",stats.lstats[i].kcount,stats.lstats[i].ktotal);
-					Screen.DrawText(fnt2,(stats.lstats[i].kcount>=stats.lstats[i].ktotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].kcount,filtered_lstats[i].ktotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].kcount>=filtered_lstats[i].ktotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[3],origin.y+yy,"K",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					yy += 14;
 				}

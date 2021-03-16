@@ -44,6 +44,7 @@ Additional features:
  - **Keychain:** A lil' something to bring some extra good luck charms with you.
  - **Pocket Hammerspace™ containers:** These will store and deploy items on demand, along with keeping hold of any keys you find. The capacity for ammo storage can be increased by finding **Hammerspace™ Embiggener** modules.
  - **Forx JetBurst™ Impulsors:** Can be used for quick dashes in any direction, or even for short bursts of flight.
+ - **Impact Absorption Boots:** Will negate any and all fall damage, and also allow extra boosts of speed to chained jumps (i.e.: bunnyhopping).
  - **Targetting Array:** Tracks nearby foes and provides basic information on their health. Compatible with **Omnisight™** mapping modules for tracking key items and nearby exits. Can also highlight nearby pickups by holding a dedicated button.
  - **Akari Labs CuteEmotion™ Display:** Equipped onto your visor to show a wide range of predefined facial expressions in order to convey simple emotions to others.
  - **Akari Labs LoudBoi™ Voicebox:** Allows you to 🇪 🇲 🇮 🇹. Easily moddable to allow alternate voicepack add-ons. Note that the default voice is in Japanese, but subtitles will be provided when needed.

@@ -102,7 +102,7 @@ Class Demolitionist : PlayerPawn
 		+DONTCORPSE;
 	}
 	// oof
-	clearscope Vector2 NormalizedMove()
+	Vector2 NormalizedMove()
 	{
 		if ( !(player.cmd.forwardmove|player.cmd.sidemove) )
 			return (0,0);
@@ -110,6 +110,12 @@ Class Demolitionist : PlayerPawn
 		double maxmag = max(abs(mvec.x),abs(mvec.y));
 		mvec /= mvec.length();
 		return mvec*maxmag;
+	}
+	double TweakSpeed()
+	{
+		double fact = (player.cmd.buttons&BT_RUN)?ForwardMove2:ForwardMove1;
+		for ( Inventory i=Inv; i; i=i.Inv ) fact *= i.GetSpeedFactor();
+		return fact;
 	}
 	// oh yay, more cheat modification
 	override void CheatGive( String name, int amount )
@@ -1370,7 +1376,7 @@ Class Demolitionist : PlayerPawn
 			player.cmd.upmove = 0;
 		if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) )
 		{
-			double fs = TweakSpeeds(1.,0.);
+			double fs = TweakSpeed();
 			Vector3 x, y, z;
 			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 			Vector3 accel;
@@ -1439,7 +1445,7 @@ Class Demolitionist : PlayerPawn
 				guideroll = guidepitch = roll = pitch = 0.;
 				player.centering = false;
 			}
-			double fs = TweakSpeeds(1.,0.);
+			double fs = TweakSpeed();
 			double jcmove = 0.;
 			if ( player.cmd.buttons&BT_JUMP ) jcmove += 4096.;
 			if ( player.cmd.buttons&BT_CROUCH ) jcmove -= 4096.;
@@ -1474,10 +1480,8 @@ Class Demolitionist : PlayerPawn
 			player.onground = (pos.z<=floorz)||bOnMobj||bMBFBouncer||(player.cheats&CF_NOCLIP2);
 			if ( player.cmd.forwardmove|player.cmd.sidemove )
 			{
-				double forwardmove, sidemove;
 				double bobfactor;
 				double friction, movefactor;
-				double fm, sm;
 				[friction, movefactor] = GetFriction();
 				bobfactor = (friction<ORIG_FRICTION)?movefactor:ORIG_FRICTION_FACTOR;
 				if ( !player.onground && !bNoGravity && !waterlevel )
@@ -1488,33 +1492,28 @@ Class Demolitionist : PlayerPawn
 				}
 				// use normalized movement vector, no SR40 (not that we need it with how fast we can run)
 				Vector2 nmove = NormalizedMove();
-				fm = nmove.x;
-				sm = -nmove.y;
-				[fm, sm] = TweakSpeeds(fm,sm);
-				fm *= Speed/256.;
-				sm *= Speed/256.;
-				if ( !(player.cmd.buttons&BT_RUN) ) bobfactor *= .5;
+				nmove *= TweakSpeed();
+				nmove *= Speed/256.;
 				// When crouching, speed and bobbing have to be reduced
 				if ( CanCrouch() && (player.crouchfactor != 1) )
 				{
-					fm *= player.crouchfactor;
-					sm *= player.crouchfactor;
+					nmove *= player.crouchfactor;
 					bobfactor *= player.crouchfactor;
 				}
-				forwardmove = fm*movefactor;
-				sidemove = sm*movefactor;
-				if ( forwardmove )
+				nmove *= movefactor;
+				if ( (waterlevel || bNOGRAVITY) && !player.GetClassicFlight() )
 				{
-					Bob(Angle,player.cmd.forwardmove*bobfactor/256.,true);
-					ForwardThrust(forwardmove,Angle);
+					double zpush = nmove.x*sin(pitch);
+					if ( waterlevel && (waterlevel < 2) && (zpush < 0) ) zpush = 0;
+					vel.z -= zpush;
+					vel.xy += RotateVector(nmove,angle)*cos(pitch);
+					player.vel += RotateVector(nmove,angle)*bobfactor*cos(pitch)*16.;
 				}
-				if ( sidemove )
-				{
-					let a = Angle-90;
-					Bob(a,player.cmd.sidemove*bobfactor/256.,false);
-					Thrust(sidemove,a);
+				else
+				{	vel.xy += RotateVector(nmove,angle);
+					player.vel += RotateVector(nmove,angle)*bobfactor*16.;
 				}
-				if ( !(player.cheats&CF_PREDICTING) && (forwardmove || sidemove) )
+				if ( !(player.cheats&CF_PREDICTING) && (nmove.length() > 0.) )
 					PlayRunning();
 				if ( player.cheats&CF_REVERTPLEASE )
 				{
@@ -1525,7 +1524,7 @@ Class Demolitionist : PlayerPawn
 			// override air control because we REALLY need the extra mobility
 			if ( !player.onground && !bNOGRAVITY && (waterlevel < 2) )
 			{
-				double fs = TweakSpeeds(1.,0.);
+				double fs = TweakSpeed();
 				if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
 				Vector3 accel = (RotateVector(NormalizedMove(),angle),0);
 				accel *= fs/512.;
@@ -1751,7 +1750,7 @@ Class Demolitionist : PlayerPawn
 						if ( vel.z < 25. )	// don't ramp up too hard
 							vel.z += jumpvelz*(1.2+vel.length()*.01);
 						// accelerate
-						vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeeds(1.,0.);
+						vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
 					}
 					else
 					{
@@ -1766,7 +1765,7 @@ Class Demolitionist : PlayerPawn
 						}
 						// long jump if running
 						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
-							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeeds(1.,0.);
+							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();
 					}
 				}
 				SetStateLabel("Jump");
@@ -2319,13 +2318,14 @@ Class Demolitionist : PlayerPawn
 			A_StartSound("demolitionist/run",CHAN_FOOTSTEP,CHANF_OVERLAP,vol);
 			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
-			vel.xy += (RotateVector(NormalizedMove(),angle)/2000.)*TweakSpeeds(1.,0.);
+			vel.xy += (RotateVector(NormalizedMove(),angle)/3600.)*TweakSpeed();
 		}
 		else
 		{
 			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.5);
 			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
 			b.A_CheckTerrain();
+			vel.xy += (RotateVector(NormalizedMove(),angle)/4800.)*TweakSpeed();
 		}
 	}
 	override bool Used( Actor user )

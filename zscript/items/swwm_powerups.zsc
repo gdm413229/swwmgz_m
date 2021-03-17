@@ -2125,15 +2125,16 @@ Class MykradvoTendril : Actor
 			for ( int i=0; i<t.hitlist.Size(); i++ )
 			{
 				if ( t.hitlist[i].hitactor.IsFriend(target) || SWWMUtility.IsCivilian(t.hitlist[i].hitactor) ) continue;
-				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x+(0,0,.5),50000);
 				if ( (t.hitlist[i].hitactor == tracer) && bMISSILEMORE ) bMISSILEEVENMORE = true;	// we split
-				t.hitlist[i].hitactor.DamageMobj(self,target,max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0)),'Plasma',DMG_THRUSTLESS);
+				int dmg = t.hitlist[i].hitactor.bBOSS?(GetMissileDamage(0,0)*4):max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0));
+				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x+(0,0,.5),((t.hitlist[i].hitactor.Health-dmg)<=0)?60000:8000);
+				t.hitlist[i].hitactor.DamageMobj(self,target,dmg,'Plasma',DMG_THRUSTLESS);
 				if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Mykradvo](0,3) )
 					t.hitlist[i].hitactor.Howl();
 			}
 		}
 		invoker.nextpos = level.Vec3Offset(pos,x*speed);
-		if ( !bSTANDSTILL && (!tracer || !tracer.bSHOOTABLE || (tracer.Health <= 0)) )
+		if ( !bSTANDSTILL && (!tracer || !tracer.bSHOOTABLE || (tracer.Health <= 0) || (tracer.bBOSS && !bMISSILEMORE)) )
 		{
 			ReactionTime--;
 			if ( ReactionTime <= 0 )
@@ -2152,7 +2153,7 @@ Class MykradvoTendril : Actor
 			if ( dist > 1 )
 			{
 				dirto /= dist;
-				dir = (dir+dirto*(clamp(1.-(dist/3000.),.2,1.)**1.5)).unit();
+				dir = (dir+dirto*(clamp(1.-(dist/4000.),.25,1.)**1.5)).unit();
 			}
 			// early split
 			if ( dist < speed ) bMISSILEEVENMORE = true;
@@ -2176,7 +2177,8 @@ Class MykradvoTendril : Actor
 				r.pitch = asin(-sdir.z);
 				r.target = target;
 				r.tracer = tracer;
-				r.ReactionTime += Random[ExploS](0,20);
+				if ( tracer && tracer.bBOSS ) r.ReactionTime -= Random[ExploS](5,15);
+				else r.ReactionTime += Random[ExploS](0,20);
 			}
 			return;
 		}
@@ -2304,7 +2306,7 @@ Class MykradvoSmallTendril : MykradvoTendril
 	Default
 	{
 		Speed 16;
-		DamageFunction 20;
+		DamageFunction 10;
 		ReactionTime 20;
 		-MISSILEMORE;
 	}

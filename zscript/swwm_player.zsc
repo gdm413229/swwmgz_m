@@ -748,7 +748,7 @@ Class Demolitionist : PlayerPawn
 			if ( !t || !(t is 'Inventory') || !t.bSPECIAL || t.bINVISIBLE || Inventory(t).Owner || !SWWMUtility.SphereIntersect(t,pos,500) )
 				continue;
 			Vector3 bpos = (0,0,16);
-			if ( t.bFLOATBOB ) bpos.z += BobSin(t.FloatBobPhase)*t.FloatBobStrength;
+			if ( t.bFLOATBOB ) bpos.z += t.GetBobOffset();
 			double alph = clamp((500.-Distance3D(t))/500.,0.,1.);
 			Color pcol = "Gold";
 			if ( Inventory(t).PickupFlash is 'SWWMPickupFlash' )

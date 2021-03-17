@@ -183,6 +183,10 @@ Class GrilledCheeseSandwich : Inventory
 		other.Inv = Inv;
 		Inv = saved;
 	}
+	override void PostTeleport( Vector3 destpos, double destangle, int flags )
+	{
+		// TODO "teleported bread" achievement
+	}
 
 	Default
 	{
@@ -1958,7 +1962,7 @@ Class BarrierPower : PowerIronFeet
 	override void AbsorbDamage( int damage, Name damageType, out int newdamage )
 	{
 		// negate elemental damage
-		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Electric') || (damageType == 'Wind') || (damageType == 'Water') || (damageType == 'Corroded') || (damageType == 'Lava') )
+		if ( (damageType == 'Fire') || (damageType == 'Ice') || (damageType == 'Slime') || (damageType == 'Electric') || (damageType == 'Plasma') || (damageType == 'Radiation') || (damageType == 'Wind') || (damageType == 'Water') || (damageType == 'Corroded') || (damageType == 'Lava') )
 			newdamage = 0;
 	}
 
@@ -2064,4 +2068,743 @@ Class EBarrier : Inventory
 
 Class EBarrierX : GhostArtifactX
 {
+}
+
+Class TendrilTracer : LineTracer
+{
+	Actor ignore;
+	Array<Line> ShootThroughList;
+	Array<HitListEntry> HitList;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignore ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				hitlist.Push(ent);
+			}
+			return TRACE_Skip;
+		}
+		else if ( Results.HitType == TRACE_HitWall )
+		{
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Skip;
+	}
+}
+
+// main heatseeker
+Class MykradvoTendril : Actor
+{
+	Vector3 nextpos, nextdir;
+
+	action void A_Trace()
+	{
+		tics = bMISSILEMORE?2:1;
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		if ( !bSTANDSTILL )
+		{
+			let t = new("TendrilTracer");
+			t.ignore = target;
+			t.hitlist.Clear();
+			t.ShootThroughList.Clear();
+			t.Trace(pos,CurSector,x,speed,0);
+			for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			{
+				t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+				t.ShootThroughList[i].Activate(target,0,SPAC_Impact);
+			}
+			for ( int i=0; i<t.hitlist.Size(); i++ )
+			{
+				if ( t.hitlist[i].hitactor.IsFriend(target) || SWWMUtility.IsCivilian(t.hitlist[i].hitactor) ) continue;
+				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x+(0,0,.5),50000);
+				if ( (t.hitlist[i].hitactor == tracer) && bMISSILEMORE ) bMISSILEEVENMORE = true;	// we split
+				t.hitlist[i].hitactor.DamageMobj(self,target,max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0)),'Plasma',DMG_THRUSTLESS);
+				if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Mykradvo](0,3) )
+					t.hitlist[i].hitactor.Howl();
+			}
+		}
+		invoker.nextpos = level.Vec3Offset(pos,x*speed);
+		if ( !bSTANDSTILL && (!tracer || !tracer.bSHOOTABLE || (tracer.Health <= 0)) )
+		{
+			ReactionTime--;
+			if ( ReactionTime <= 0 )
+			{
+				bAMBUSH = true;
+				return;
+			}
+		}
+		double a = FRandom[Mykradvo](0,360), s = FRandom[Mykradvo](0.,bSTANDSTILL?3.:bMISSILEMORE?.75:1.5);
+		Vector3 dir = (x+cos(a)*y*s+sin(a)*z*s).unit();
+		if ( tracer )
+		{
+			Vector3 destofs = bMISSILEMORE?tracer.Vec3Offset(0,0,tracer.Height/2.):tracer.Vec3Offset(FRandom[Mykradvo](-1.2,1.2)*tracer.Radius,FRandom[Mykradvo](-1.2,1.2)*tracer.Radius,FRandom[Mykradvo](-.1,1.1)*tracer.height);
+			Vector3 dirto = level.Vec3Diff(invoker.nextpos,destofs);
+			double dist = dirto.length();
+			if ( dist > 1 )
+			{
+				dirto /= dist;
+				dir = (dir+dirto*(clamp(1.-(dist/3000.),.2,1.)**1.5)).unit();
+			}
+			// early split
+			if ( dist < speed ) bMISSILEEVENMORE = true;
+		}
+		invoker.nextdir = dir;
+	}
+	action void A_Spread()
+	{
+		if ( bMISSILEMORE && bMISSILEEVENMORE )
+		{
+			// spread into sub-tendrils
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+			int ntendies = clamp(tracer.default.health/400,2,10);
+			for ( int i=0; i<ntendies; i++ )
+			{
+				let r = Spawn("MykradvoSmallTendril",invoker.nextpos);
+				double a = FRandom[Mykradvo](0,360), s = FRandom[Mykradvo](0.,1.);
+				Vector3 sdir = (x+y*cos(a)*s+z*sin(a)*s).unit();
+				r.angle = atan2(sdir.y,sdir.x);
+				r.pitch = asin(-sdir.z);
+				r.target = target;
+				r.tracer = tracer;
+				r.ReactionTime += Random[ExploS](0,20);
+			}
+			return;
+		}
+		if ( bAMBUSH || (bSTANDSTILL && (special1 > ReactionTime)) )
+		{
+			if ( !bSTANDSTILL )
+			{
+				int numpt = bMISSILEMORE?9:3;
+				Vector3 x, y, z;
+				[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+				for ( int i=0; i<numpt; i++ )
+				{
+					double a = FRandom[ExploS](0,360), s = FRandom[ExploS](0,1.);
+					Vector3 sdir = (x+cos(a)*y*s+sin(a)*z*s).unit();
+					let r = Spawn("MykradvoSmallNullTendril",invoker.nextpos);
+					r.angle = atan2(sdir.y,sdir.x);
+					r.pitch = asin(-sdir.z);
+					r.target = target;
+					if ( bMISSILEMORE ) r.ReactionTime += Random[ExploS](0,4);
+					else r.ReactionTime -= Random[ExploS](0,4);
+				}
+			}
+			return;
+		}
+		let b = Spawn(GetClass(),invoker.nextpos);
+		b.angle = atan2(invoker.nextdir.y,invoker.nextdir.x);
+		b.pitch = asin(-invoker.nextdir.z);
+		b.target = target;
+		b.tracer = tracer;
+		b.special1 = special1+1;
+		b.special2 = special2;
+		b.ReactionTime = ReactionTime;
+		if ( !bSTANDSTILL && !((special1+special2)%4) && !Random[Mykradvo](0,4) )
+			A_StartSound(bMISSILEMORE?"mykradvo/arc":"mykradvo/smallarc",CHAN_WEAPON,attenuation:(bMISSILEMORE?.5:1.5),pitch:FRandom[Mykradvo](.75,1.25));
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		if ( !special1 ) special2 = Random[Mykradvo](0,8);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		A_FadeOut(bMISSILEMORE?.05:bSTANDSTILL?.2:.1);
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	Default
+	{
+		Obituary "$O_MYKRADVO";
+		RenderStyle "Add";
+		DamageFunction 100;
+		ReactionTime 8;
+		Speed 64;
+		Radius .1;
+		Height 0;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+NOTELEPORT;
+		+FOILINVUL;
+		+NOINTERACTION;
+		+MISSILEMORE;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 0 Bright;
+		XZW1 A 1 Bright A_Trace();
+		XZW1 A 1 Bright
+		{
+			A_Spread();
+			return FindState("Fade")+Random[Mykradvo](0,11)*2;
+		}
+		Stop;
+	Fade:
+		#### # 20 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 F -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 G -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 H -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 I -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 J -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 K -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 L -1 Bright;
+		Stop;
+		#### # 20 Bright;
+		XZW1 M -1 Bright;
+		Stop;
+	}
+}
+
+// sub seekers
+Class MykradvoSmallTendril : MykradvoTendril
+{
+	Default
+	{
+		Speed 16;
+		DamageFunction 20;
+		ReactionTime 20;
+		-MISSILEMORE;
+	}
+	States
+	{
+	Fade:
+		#### # 10 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 F -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 G -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 H -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 I -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 J -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 K -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 L -1 Bright;
+		Stop;
+		#### # 10 Bright;
+		XZW1 M -1 Bright;
+		Stop;
+	}
+}
+
+// non-hurting non-seekers
+Class MykradvoSmallNullTendril : MykradvoSmallTendril
+{
+	Default
+	{
+		Speed 8;
+		ReactionTime 6;
+		+STANDSTILL;
+	}
+	States
+	{
+	Fade:
+		#### # 5 Bright;
+		XZW1 B -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 C -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 D -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 E -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 F -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 G -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 H -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 I -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 J -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 K -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 L -1 Bright;
+		Stop;
+		#### # 5 Bright;
+		XZW1 M -1 Bright;
+		Stop;
+	}
+}
+
+Class MykradvoBurstLight : PaletteLight
+{
+	Default
+	{
+		Tag "Purple";
+		ReactionTime 60;
+		Args 0,0,0,400;
+	}
+}
+
+// 'splode
+Class MykradvoBurst : Actor
+{
+	Array<Actor> targets;
+	int nstep;
+
+	Default
+	{
+		RenderStyle "Add";
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+FORCEXYBILLBOARD;
+		+NOTELEPORT;
+		+NOINTERACTION;
+		Scale 1.4;
+	}
+	void FlashPlayer( int str, double rad )
+	{
+		if ( !SWWMUtility.InPlayerFOV(players[consoleplayer],self,rad) ) return;
+		let mo = players[consoleplayer].Camera;
+		double dist = Distance3D(mo);
+		str = int(str*(1.-(dist/rad)));
+		SWWMHandler.DoFlash(mo,Color(str,250,240,255),5);
+		SWWMHandler.DoFlash(mo,Color(str,128,0,255),15);
+	}
+	override void PostBeginPlay()
+	{
+		nstep = clamp(targets.Size()/10,1,5);
+		A_AlertMonsters(swwm_uncapalert?0:8000);
+		A_QuakeEx(9,9,9,80,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:1000,rollintensity:2.);
+		A_StartSound("powerup/mykradvo",CHAN_BODY,CHANF_DEFAULT,1.,.25);
+		A_StartSound("powerup/mykradvo",CHAN_VOICE,CHANF_DEFAULT,1.,.25);
+		FlashPlayer(100,1500);
+		int numpt = Random[ExploS](20,30);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.25,8);
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(1,1,1)*Random[ExploS](128,160)+Color(28,0,31));
+			s.A_SetRenderStyle(.4,STYLE_AddShaded);
+			s.special1 = Random[ExploS](1,5);
+			s.scale *= 2.;
+		}
+		numpt = Random[ExploS](8,12);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			let s = Spawn("MykradvoSmallNullTendril",pos);
+			s.angle = ang;
+			s.pitch = pt;
+			s.target = target;
+			s.ReactionTime += Random[ExploS](0,8);
+		}
+		Spawn("MykradvoBurstLight",pos);
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( (special1++)%3 )
+		{
+			if ( targets.Size() > 0 )
+			{
+				int numpt = Random[ExploS](2,4);
+				for ( int j=0; j<numpt; j++ )
+				{
+					Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.25,8);
+					let s = Spawn("SWWMHalfSmoke",pos);
+					s.vel = pvel;
+					s.SetShade(Color(1,1,1)*Random[ExploS](128,160)+Color(28,0,31));
+					s.A_SetRenderStyle(.4,STYLE_AddShaded);
+					s.special1 = Random[ExploS](1,5);
+					s.scale *= 2.;
+				}
+				numpt = Random[ExploS](1,2);
+				for ( int j=0; j<numpt; j++ )
+				{
+					double ang = FRandom[ExploS](0,360);
+					double pt = FRandom[ExploS](-90,90);
+					let s = Spawn("MykradvoSmallNullTendril",pos);
+					s.angle = ang;
+					s.pitch = pt;
+					s.target = target;
+					s.ReactionTime += Random[ExploS](0,8);
+				}
+			}
+			for ( int i=0; i<nstep; i++ )
+			{
+				if ( targets.Size() <= 0 ) break;
+				let targ = targets[0];
+				if ( targ && targ.bSHOOTABLE && (targ.Health > 0) )
+				{
+					let t = Spawn("MykradvoTendril",pos);
+					t.angle = t.AngleTo(targ);
+					t.pitch = SWWMUtility.PitchTo(t,targ,.5);
+					t.target = target;
+					t.tracer = targ;
+				}
+				else i--;
+				targets.Delete(0);
+			}
+		}
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	States
+	{
+	Spawn:
+		XEX4 ABCDEFGHIJKLMNOPQRSTUVWXYZ[\ 2 Bright;
+		TNT1 A 1 A_JumpIf(!IsActorPlayingSound(CHAN_VOICE)&&!(invoker.targets.Size()),1);
+		Wait;
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+Class Mykradvo : Inventory
+{
+	Mixin SWWMAutoUseFix;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+
+	Actor ringa[2];
+
+	Array<Actor> targets;
+
+	// quicksort (targets)
+	private bool CmpDist( Actor ref, Vector3 a, Vector3 b )
+	{
+		double dista = level.Vec3Diff(ref.pos,a).length();
+		double distb = level.Vec3Diff(ref.pos,b).length();
+		return (dista < distb);
+	}
+	private int partition_targets( Array<Actor> a, int l, int h, Actor ref )
+	{
+		Actor pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpDist(ref,a[j].pos,pv.pos) )
+			{
+				i++;
+				Actor tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Actor tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_targets( Array<Actor> a, int l, int h, Actor ref )
+	{
+		if ( l >= h ) return;
+		int p = partition_targets(a,l,h,ref);
+		qsort_targets(a,l,p-1,ref);
+		qsort_targets(a,p+1,h,ref);
+	}
+
+	bool FindTargets( Actor t )
+	{
+		targets.Clear();
+		// search all actively hostile enemies within 50m
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a=Actor(ti.Next()) )
+		{
+			// is a shootable, live monster
+			if ( !a.bISMONSTER || !a.bSHOOTABLE || a.bDORMANT || (a.Health <= 0) ) continue;
+			// is hostile
+			if ( !a.IsHostile(t) || SWWMUtility.IsCivilian(a) ) continue;
+			// is visible or targetting us
+			if ( (a.target != t) && !t.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+				continue;
+			// is within 100m of the owner
+			if ( !SWWMUtility.SphereIntersect(a,t.pos,3200) )
+				continue;
+			targets.Push(a);
+		}
+		// sorted, so the closest take priority
+		qsort_targets(targets,0,targets.Size()-1,t);
+		return (targets.Size() > 0);
+	}
+
+	override bool Use( bool pickup )
+	{
+		if ( pickup && !deathmatch ) return false;
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		Vector3 spawnpos = Owner.Vec3Angle(15,Owner.angle,Owner.Height*.7);
+		if ( !FindTargets(Owner) )
+		{
+			int numpt = Random[ExploS](8,12);
+			let f = Spawn("SWWMPurplePickupFlash",spawnpos-(0,0,16));
+			f.Scale *= .5;
+			for ( int i=0; i<numpt; i++ )
+			{
+				double ang = FRandom[ExploS](0,360);
+				double pt = FRandom[ExploS](-90,90);
+				let s = Spawn("MykradvoSmallNullTendril",spawnpos+(cos(ang)*cos(pt),sin(ang)+cos(pt),-sin(pt))*FRandom[Mykradvo](2,4));
+				s.angle = ang;
+				s.pitch = pt;
+				s.ReactionTime += Random[ExploS](0,8);
+			}
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= 0.98;
+			Owner.A_QuakeEx(1,1,1,4,0,8,"",QF_RELATIVE|QF_SCALEDOWN);
+			// don't consume on failure
+			Amount++;
+			return true;
+		}
+		let p = Spawn("MykradvoBurst",spawnpos);
+		p.target = Owner;
+		MykradvoBurst(p).targets.Move(targets);
+		targets.Clear();
+		if ( Owner is 'Demolitionist' )
+			Demolitionist(Owner).lastbump *= 1.2;
+		return true;
+	}
+
+	action void A_Zap()
+	{
+		int numpt = Random[ExploS](2,4);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			let s = Spawn("MykradvoSmallNullTendril",pos+(0,0,16+GetBobOffset())+(cos(ang)*cos(pt),sin(ang)+cos(pt),-sin(pt))*FRandom[Mykradvo](4,8));
+			s.angle = ang;
+			s.pitch = pt;
+			s.ReactionTime += Random[ExploS](-2,2);
+		}
+		A_StartSound("mykradvo/smallarc",CHAN_WEAPON);
+		A_SetTics(Random[Mykradvo](10,50));
+	}
+
+	override bool ShouldSpawn()
+	{
+		return !deathmatch;
+	}
+
+	override bool CanPickup( Actor toucher )
+	{
+		// in DM, we can't be picked up unless we can be used
+		if ( deathmatch && !FindTargets(toucher) )
+			return false;
+		return Super.CanPickup(toucher);
+	}
+
+	override void Travelled()
+	{
+		Super.Travelled();
+		if ( !tracer )
+		{
+			tracer = Spawn("MykradvoX",pos);
+			tracer.angle = angle;
+			tracer.target = self;
+			tracer.FloatBobPhase = FloatBobPhase;
+		}
+		for ( int i=0; i<2; i++ )
+		{
+			if ( ringa[i] ) continue;
+			ringa[i] = Spawn("MykradvoX2",pos);
+			ringa[i].angle = angle;
+			ringa[i].target = self;
+			ringa[i].FloatBobPhase = FloatBobPhase;
+			ringa[i].special1 = -1+2*i;
+			ringa[i].special2 = -2+4*i;
+			ringa[i].frame = i;
+		}
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		tracer = Spawn("MykradvoX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
+		for ( int i=0; i<2; i++ )
+		{
+			ringa[i] = Spawn("MykradvoX2",pos);
+			ringa[i].angle = angle;
+			ringa[i].target = self;
+			ringa[i].FloatBobPhase = FloatBobPhase;
+			ringa[i].special1 = -1+2*i;
+			ringa[i].special2 = -2+4*i;
+			ringa[i].frame = i;
+		}
+	}
+
+	Default
+	{
+		Tag "$T_MYKRADVO";
+		Stamina 1200000;
+		Inventory.Icon "graphics/HUD/Icons/I_Mykradvo.png";
+		Inventory.PickupSound "misc/p_pkup";
+		Inventory.UseSound "mykradvo/arc";
+		Inventory.PickupMessage "$T_MYKRADVO";
+		Inventory.MaxAmount 5;
+		Inventory.InterHubAmount 5;
+		Inventory.PickupFlash "SWWMPurplePickupFlash";
+		+INVENTORY.ALWAYSPICKUP;
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.INVBAR;
+		+COUNTITEM;
+		+INVENTORY.BIGPOWERUP;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Radius 10;
+		Height 24;
+	}
+	States
+	{
+	Spawn:
+		XZW0 A 10 A_Zap();
+		Wait;
+	}
+}
+
+Class MykradvoX : GhostArtifactX
+{
+	Default
+	{
+		Scale .16;
+		+FORCEXYBILLBOARD;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_StartSound("powerup/mykradvoamb",CHAN_VOICE,CHANF_LOOP);
+	}
+	override void Tick()
+	{
+		if ( !target )
+		{
+			Destroy();
+			return;
+		}
+		prev = target.prev+(0,0,16);
+		vel = target.vel;
+		if ( (target.pos != pos+(0,0,16)) || (target.vel != (0,0,0)) ) SetOrigin(target.pos+(0,0,16)+vel,true);
+		if ( angle != target.angle ) A_SetAngle(target.angle,SPF_INTERPOLATE);
+		FloatBobPhase = target.FloatBobPhase;
+		A_SetScale(.16+.01*sin(GetAge()*4));
+		if ( !bsprite ) bsprite = GetSpriteIndex('XZW0');
+		bInvisible = target.bInvisible||(target.sprite!=bsprite);
+		SetState(SpawnState+bInvisible);
+		A_SoundVolume(CHAN_VOICE,bInvisible?0.:1.);
+	}
+	States
+	{
+	Spawn:
+		MKRV A -1 Bright;
+		TNT1 A -1;
+		Stop;
+	}
+}
+
+Class MykradvoX2 : GhostArtifactX
+{
+	Default
+	{
+		+ROLLSPRITE;
+	}
+	override void Tick()
+	{
+		if ( !target )
+		{
+			Destroy();
+			return;
+		}
+		prev = target.prev+(0,0,16+special2);
+		vel = target.vel;
+		if ( (target.pos != pos+(0,0,16+special2)) || (target.vel != (0,0,0)) ) SetOrigin(target.pos+(0,0,16+special2)+vel,true);
+		if ( angle != target.angle ) A_SetAngle(target.angle,SPF_INTERPOLATE);
+		A_SetPitch(sin(GetAge()*special1*8)*5,SPF_INTERPOLATE);
+		A_SetRoll(cos(GetAge()*special1*8)*5,SPF_INTERPOLATE);
+		FloatBobPhase = target.FloatBobPhase;
+		A_SetScale(1.+.05*cos(GetAge()*4)*special1);
+		if ( !bsprite ) bsprite = GetSpriteIndex('XZW0');
+		bInvisible = target.bInvisible||(target.sprite!=bsprite);
+		SetState(SpawnState+bInvisible);
+	}
+	States
+	{
+	Spawn:
+		XZW1 # -1 Bright;
+		TNT1 # -1;
+		Stop;
+	}
 }

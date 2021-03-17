@@ -1638,6 +1638,8 @@ Class SWWMUtility
 			return true;
 		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') )
 			return true;
+		if ( target is 'Mykradvo' )
+			return true;
 		if ( target is 'PuzzleItem' )
 			return true;
 		return false;
@@ -1686,16 +1688,18 @@ Class SWWMUtility
 	//          (useful to check if we're the only copy of an item)
 	//  mapstart: this function is being called during map load, so we
 	//            should also check STAT_TRAVELLING inventory
-	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null, bool mapstart = false )
+	//  worldonly: only checks for items that are placed in the world
+	static bool ItemExists( Class<Inventory> itm, Inventory skipme = null, bool mapstart = false, bool worldonly = false )
 	{
 		let ti = ThinkerIterator.Create(itm);
 		Inventory i;
 		while ( i = Inventory(ti.Next()) )
 		{
 			if ( i == skipme ) continue;
+			if ( worldonly && i.Owner ) continue;
 			return true;
 		}
-		if ( !mapstart ) return false;
+		if ( worldonly || !mapstart ) return false;
 		ti = ThinkerIterator.Create(itm,Thinker.STAT_TRAVELLING);
 		while ( i = Inventory(ti.Next()) )
 		{

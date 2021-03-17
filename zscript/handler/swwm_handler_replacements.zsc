@@ -517,11 +517,11 @@ extend Class SWWMHandler
 		else if ( (e.Replacee is 'Medikit') || (e.Replacee is 'ArtiHealth') ) e.Replacement = 'CubeHealthItem';
 		else if ( (e.Replacee is 'Soulsphere') || (e.Replacee is 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';
 		else if ( (e.Replacee is 'Megasphere') || (e.Replacee is 'ArtiEgg') || (e.Replacee is 'ArtiBoostArmor') ) e.Replacement = 'GrilledCheeseSandwich';
-		else if ( (e.Replacee is 'Blursphere') || (e.Replacee is 'ArtiInvisibility') ) e.Replacement = 'GhostArtifact';
+		else if ( (e.Replacee is 'Blursphere') || (e.Replacee is 'ArtiInvisibility') ) e.Replacement = (deathmatch||Random[Replacements](0,2)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'GhostArtifact':'Mykradvo';
 		else if ( e.Replacee is 'Radsuit' ) e.Replacement = 'EBarrier';
 		else if ( (e.Replacee is 'ArtiFly') ) e.Replacement = 'GravitySuppressor';
-		else if ( (e.Replacee is 'InvulnerabilitySphere') || (e.Replacee is 'ArtiInvulnerability') || (e.Replacee is 'ArtiInvulnerability2') ) e.Replacement = 'FuckingInvinciball';
-		else if ( (e.Replacee is 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = 'Ragekit';
+		else if ( (e.Replacee is 'InvulnerabilitySphere') || (e.Replacee is 'ArtiInvulnerability') || (e.Replacee is 'ArtiInvulnerability2') ) e.Replacement = (deathmatch||Random[Replacements](0,3)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'FuckingInvinciball':'Mykradvo';
+		else if ( (e.Replacee is 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = (deathmatch||Random[Replacements](0,2)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'Ragekit':'Mykradvo';
 		else if ( (e.Replacee is 'AllMap') || (e.Replacee is 'SuperMap') ) e.Replacement = 'Omnisight';
 		else if ( (e.Replacee is 'Infrared') || (e.Replacee is 'ArtiTorch') ) e.Replacement = 'SWWMLamp';
 		else if ( (e.Replacee is 'GreenArmor') || (e.Replacee is 'SilverShield') || (e.Replacee is 'PlatinumHelm') || (e.Replacee is 'AmuletOfWarding') ) e.Replacement = 'BlastSuitItem';

@@ -401,6 +401,13 @@ A floating lamp companion, may attract moths. The moths will disperse and attack
 
 Reveals the entire layout of the map and shows key locations in the HUD. Also allows you to highlight pickups through walls when holding the **Item Sense** button.
 
+### Mykradvo Artifact ~ May randomly replace Ghost Artifact, Ragekit or Invinciball
+![](docimg/mykradvo.png)
+
+When used, bursts into plasma tendrils that will seek all hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
+
+Has a chance to spawn in place of other items, but only one may spawn per map.
+
 ## The Collectibles
 ![](docimg/chancebox.png)
 

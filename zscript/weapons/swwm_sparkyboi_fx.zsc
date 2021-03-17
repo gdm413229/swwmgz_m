@@ -260,7 +260,7 @@ Class BigBiospark : Actor
 			if ( !t || !t.bSHOOTABLE ) continue;
 			if ( SWWMUtility.SphereIntersect(t,pos,40) )
 			{
-				t.DamageMobj(self,target,4+special1,'Electric');
+				t.DamageMobj(self,target,4+special1,'Plasma');
 				if ( t.bISMONSTER && !Random[Sparkster](0,3) )
 					t.Howl();
 				Health--;
@@ -383,7 +383,7 @@ Class BigBiospark : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electric";
+		DamageType "Plasma";
 		RenderStyle "Add";
 		Health 1200;
 		Radius 2;
@@ -428,7 +428,7 @@ Class BiosparkBall : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electric";
+		DamageType "Plasma";
 		RenderStyle "Add";
 		Radius 3;
 		Height 6;
@@ -693,7 +693,7 @@ Class BiosparkBeamImpact : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electric";
+		DamageType "Plasma";
 		RenderStyle "Add";
 		Radius .1;
 		Height 0;
@@ -833,7 +833,7 @@ Class BiosparkComboImpactSub : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electric";
+		DamageType "Plasma";
 		RenderStyle "Add";
 		Scale 1.4;
 		Alpha .4;
@@ -879,7 +879,7 @@ Class BiosparkComboImpact : Actor
 	Default
 	{
 		Obituary "$O_SPARKSTER";
-		DamageType "Electric";
+		DamageType "Plasma";
 		RenderStyle "Add";
 		Scale 2.;
 		Radius .1;
@@ -1131,7 +1131,7 @@ Class BiosparkBeam : Actor
 			else
 			{
 				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,15000);
-				t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electric',DMG_THRUSTLESS);
+				t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Plasma',DMG_THRUSTLESS);
 				if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Sparkster](0,3) )
 					t.hitlist[i].hitactor.Howl();
 			}
@@ -1283,7 +1283,7 @@ Class BiosparkBeam : Actor
 			else
 			{
 				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,t.hitlist[i].x,15000);
-				t.hitlist[i].hitactor.DamageMobj(self,target,int(GetMissileDamage(0,0)*alpha),'Electric',DMG_THRUSTLESS);
+				t.hitlist[i].hitactor.DamageMobj(self,target,int(GetMissileDamage(0,0)*alpha),'Plasma',DMG_THRUSTLESS);
 				if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Sparkster](0,3) )
 					t.hitlist[i].hitactor.Howl();
 			}
@@ -1473,7 +1473,7 @@ Class BiosparkArc : Actor
 		for ( int i=0; i<t.hitlist.Size(); i++ )
 		{
 			SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x,GetMissileDamage(0,0)*1000);
-			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Electric',DMG_THRUSTLESS);
+			t.hitlist[i].hitactor.DamageMobj(self,target,GetMissileDamage(0,0),'Plasma',DMG_THRUSTLESS);
 			if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Sparkster](0,3) )
 				t.hitlist[i].hitactor.Howl();
 		}
@@ -1553,11 +1553,11 @@ Class BiosparkArc : Actor
 		Vector3 tdir = level.Vec3Diff(pos,invoker.nextpos);
 		if ( (extra > 1) && !Random[Sparkster](0,3) )
 		{
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 			for ( int i=0; i<2; i++ )
 			{
 				let r = Spawn("BiosparkArc",level.Vec3Offset(pos,tdir*FRandom[Sparkster](0,1)));
-				Vector3 x, y, z;
-				[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 				double a = FRandom[Sparkster](0,360), s = FRandom[Sparkster](0.,1.);
 				Vector3 sdir = (x+y*cos(a)*s+z*sin(a)*s).unit();
 				r.angle = atan2(sdir.y,sdir.x);

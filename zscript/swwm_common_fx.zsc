@@ -1227,7 +1227,7 @@ Class SWWMShadow : Actor
 			alpha = 1.-min(1.,.006*abs(target.pos.z-pos.z));
 			alpha *= target.alpha;
 			double relz = target.pos.z-pos.z;
-			if ( target.bFLOATBOB ) relz += BobSin(target.FloatBobPhase)*target.FloatBobStrength;
+			if ( target.bFLOATBOB ) relz += target.GetBobOffset();
 			double bscale = (target.radius/16.)*(1.-min(1.,.003*relz));
 			// hax
 			if ( target is 'CompanionLamp' ) bscale *= 2.;

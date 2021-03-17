@@ -331,7 +331,7 @@ Class DemolitionistMenu : GenericMenu
 		tabs.Push(TAB_INVENTORY);
 		tabs.Push(TAB_KEYS);
 		tabs.Push(TAB_LIBRARY);
-		tabs.Push(TAB_STORE);
+		if ( !deathmatch ) tabs.Push(TAB_STORE);
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] || (i == consoleplayer) ) continue;

@@ -4,18 +4,28 @@ vec4 ProcessTexel()
 {
 	vec2 p = 2.*(vTexCoord.st-.5);
 	float a = atan(p.y,p.x);
+	float a2 = atan(p.y,abs(p.x));
 	float r = length(p);
 	// noise burst
 	vec2 ccoord = vec2(.1/r-.06*timer+.5*r,a/pi+.04*timer);
-	vec3 nz = texture(warptex,ccoord).rgb;
+	vec2 ccoord2 = vec2(ccoord.x,a2/pi+.04*timer);
+	vec3 nz = textureGrad(warptex,ccoord,dFdx(ccoord2),dFdy(ccoord2)).rgb;
 	ccoord = vec2(.4/r-.08*timer+1.4*r,a/pi-.04*timer);
-	nz += texture(warptex,ccoord).rgb;
+	ccoord2 = vec2(ccoord.x,a2/pi-.04*timer);
+	nz += textureGrad(warptex,ccoord,dFdx(ccoord2),dFdy(ccoord2)).rgb;
 	nz = clamp((nz-1.)*.5,-1.,1.);
 	nz *= abs(2.*r-1.);
 	// shimmering flare
-	vec3 flr = vec3(1.-r*2.)+vec3(.6,.3,.4)*texture(snoisetex,vec2(2.*a/pi-timer*.05,0.)).r
-		+vec3(.1,.2,.9)*texture(snoisetex,vec2(3.*a/pi+timer*.07,0.)).g
-		+vec3(.4,.7,.3)*texture(snoisetex,vec2(a/pi-timer*.09,0.)).b;
+	vec3 flr = vec3(1.-r*2.);
+	ccoord = vec2(2.*a/pi-timer*.05,0.);
+	ccoord2 = vec2(2.*a2/pi-timer*.05,0.);
+	flr += vec3(.6,.3,.4)*textureGrad(snoisetex,ccoord,dFdx(ccoord2),dFdy(ccoord2)).r;
+	ccoord = vec2(3.*a/pi+timer*.07,0.);
+	ccoord2 = vec2(3.*a2/pi+timer*.07,0.);
+	flr += vec3(.1,.2,.9)*textureGrad(snoisetex,ccoord,dFdx(ccoord2),dFdy(ccoord2)).g;
+	ccoord = vec2(a/pi-timer*.09,0.);
+	ccoord2 = vec2(a2/pi-timer*.09,0.);
+	flr += vec3(.4,.7,.3)*textureGrad(snoisetex,ccoord,dFdx(ccoord2),dFdy(ccoord2)).b;
 	// readjust flare
 	flr = pow(max(flr,0.),vec3(.5));
 	// distort by flare

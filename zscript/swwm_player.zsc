@@ -1573,9 +1573,16 @@ Class Demolitionist : PlayerPawn
 		if ( fm ) dodge += (fm>0)?X:-X;
 		if ( sm ) dodge += (sm>0)?Y:-Y;
 		if ( player.cmd.buttons&BT_CROUCH ) dodge = (0,0,-1);	// death from above
-		if ( dodge == (0,0,0) ) dodge.xy = RotateVector((1,0),angle);
-		if ( !level.IsJumpingAllowed() ) dodge.z = min(0,dodge.z);
-		if ( player.onground ) dodge.z = max(0,dodge.z);
+		if ( dodge == (0,0,0) )
+		{
+			if ( !player.onground || bNOGRAVITY || (waterlevel > 2) || (player.cheats&CF_NOCLIP2) ) dodge = X;
+			else dodge.xy = RotateVector((1,0),angle);
+		}
+		if ( player.onground && !bNOGRAVITY && (waterlevel < 2) && !(player.cheats&CF_NOCLIP2) )
+		{
+			dodge.z = max(0,dodge.z);
+			if ( !level.IsJumpingAllowed() ) dodge.z = min(0,dodge.z);
+		}
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed() || (player.cmd.buttons&BT_CROUCH)) && (gamestate == GS_LEVEL) )
 		{
 			dashdir = dodge.unit();

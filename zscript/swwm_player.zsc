@@ -141,6 +141,20 @@ Class Demolitionist : PlayerPawn
 		}
 		if ( giveall || (name ~== "ammo") )
 		{
+			// first we must build an array of all valid weapons, this saves time instead of doing recursive loops
+			Array<Class<Weapon> > validweapons;
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type2 = (class<Weapon>)(AllActorClasses[i]);
+				if ( !type2 ) continue;
+				let rep = GetReplacement(type2);
+				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+				readonly<Weapon> weap = GetDefaultByType(type2);
+				if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+				let ready = weap.FindState("Ready");
+				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				validweapons.Push(type2);
+			}
 			// Find every unique type of ammo. Give it to the player if
 			// he doesn't have it already, and set each to its maximum.
 			for ( int i=0; i<AllActorClasses.Size(); i++ )
@@ -150,17 +164,10 @@ Class Demolitionist : PlayerPawn
 					continue;
 				// Only give if it's for a valid weapon, unless using "give everything"
 				bool isvalid = false;
-				for ( int j=0; j<AllActorClasses.Size(); j++ )
+				for ( int j=0; j<validweapons.Size(); j++ )
 				{
-					let type2 = (class<Weapon>)(AllActorClasses[j]);
-					if ( !type2 ) continue;
-					let rep = GetReplacement(type2);
-					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
-					readonly<Weapon> weap = GetDefaultByType(type2);
-					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
-					let ready = weap.FindState("Ready");
-					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
-					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
+					readonly<Weapon> weap = GetDefaultByType(validweapons[j]);
+					if ( (validweapons[j] is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
 					{
 						isvalid = true;
 						break;

@@ -62,6 +62,20 @@ Class AmmoFabricator : Inventory abstract
 
 	bool FabricateAmmo()
 	{
+		// first we must build an array of all valid weapons, this saves time instead of doing recursive loops
+		Array<Class<Weapon> > validweapons;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let type2 = (class<Weapon>)(AllActorClasses[i]);
+			if ( !type2 ) continue;
+			let rep = GetReplacement(type2);
+			if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+			readonly<Weapon> weap = GetDefaultByType(type2);
+			if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+			let ready = weap.FindState("Ready");
+			if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+			validweapons.Push(type2);
+		}
 		Array<Class<Ammo> > available;
 		// populate ammo production list
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
@@ -75,17 +89,10 @@ Class AmmoFabricator : Inventory abstract
 			if ( (def.Stamina <= 0) || (def.Stamina > maxunitprice) ) continue;
 			// only ammo for weapons that are valid (can be used)
 			bool isvalid = false;
-			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			for ( int j=0; j<validweapons.Size(); j++ )
 			{
-				let type = (class<Weapon>)(AllActorClasses[j]);
-				if ( !type ) continue;
-				let rep = GetReplacement(type);
-				if ( (rep != type) && !(rep is "DehackedPickup") ) continue;
-				readonly<Weapon> weap = GetDefaultByType(type);
-				if ( !Owner.player || !Owner.player.weapons.LocateWeapon(type) || weap.bCheatNotWeapon ) continue;
-				let ready = weap.FindState("Ready");
-				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
-				if ( (type is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(a) )
+				readonly<Weapon> weap = GetDefaultByType(validweapons[j]);
+				if ( (validweapons[j] is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(a) )
 				{
 					isvalid = true;
 					break;
@@ -261,23 +268,30 @@ Class HammerspaceEmbiggener : Inventory
 		if ( !traded ) other.A_StartSound("powerup/embiggener",CHAN_ITEMEXTRA);
 		// Find every unique type of ammoitem. Give it to the player if
 		// he doesn't have it already, and increase its maximum capacity.
+		// first we must build an array of all valid weapons, this saves time instead of doing recursive loops
+		Array<Class<Weapon> > validweapons;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let type2 = (class<Weapon>)(AllActorClasses[i]);
+			if ( !type2 ) continue;
+			let rep = GetReplacement(type2);
+			if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
+			readonly<Weapon> weap = GetDefaultByType(type2);
+			if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+			let ready = weap.FindState("Ready");
+			if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+			validweapons.Push(type2);
+		}
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
 			let type = (class<Ammo>)(AllActorClasses[i]);
 			if ( !type || (type.GetParentClass() != 'Ammo') ) continue;
 			// check that it's for a valid weapon
 			bool isvalid = false;
-			for ( int j=0; j<AllActorClasses.Size(); j++ )
+			for ( int j=0; j<validweapons.Size(); j++ )
 			{
-				let type2 = (class<Weapon>)(AllActorClasses[j]);
-				if ( !type2 ) continue;
-				let rep = GetReplacement(type2);
-				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
-				readonly<Weapon> weap = GetDefaultByType(type2);
-				if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
-				let ready = weap.FindState("Ready");
-				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
-				if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
+				readonly<Weapon> weap = GetDefaultByType(validweapons[j]);
+				if ( (validweapons[j] is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(type) )
 				{
 					isvalid = true;
 					break;
@@ -465,7 +479,8 @@ Class HammerspaceEmbiggener : Inventory
 	States
 	{
 	Spawn:
-		XZW1 A -1 NoDelay A_MergeEmbiggeners();
+		XZW1 A 0;
+		XZW1 A -1 A_MergeEmbiggeners();
 		Stop;
 	}
 }
@@ -488,11 +503,12 @@ Class BulkHammerspaceEmbiggener : HammerspaceEmbiggener
 	States
 	{
 	Spawn:
-		XZW1 A -1 NoDelay
+		XZW1 A 0;
+		XZW1 A -1
 		{
 			A_MergeEmbiggeners();
 			if ( bDestroyed ) return ResolveState(null);
-			if ( Amount > 1 ) return SpawnState+min(4,Amount/2);
+			if ( Amount > 1 ) return SpawnState+1+min(4,Amount/2);
 			return ResolveState(null);
 		}
 		XZW1 BCDE -1;

@@ -70,7 +70,7 @@ Class SWWMStatusBar : BaseStatusBar
 
 	// minimap colors (thats a lot of 'em)
 	int mm_colorset;
-	Color mm_backcolor, mm_cdwallcolor, mm_efwallcolor, mm_fdwallcolor, mm_gridcolor, mm_interlevelcolor, mm_intralevelcolor, mm_lockedcolor, mm_notseencolor, mm_portalcolor, mm_secretsectorcolor, mm_secretwallcolor, mm_specialwallcolor, mm_thingcolor, mm_thingcolor_citem, mm_thingcolor_friend, mm_thingcolor_item, mm_thingcolor_monster, mm_thingcolor_ncmonster, mm_thingcolor_shootable, mm_thingcolor_vipitem, mm_tswallcolor, mm_unexploredsecretcolor, mm_wallcolor, mm_xhaircolor, mm_yourcolor;
+	Color mm_backcolor, mm_cdwallcolor, mm_efwallcolor, mm_fdwallcolor, mm_gridcolor, mm_interlevelcolor, mm_intralevelcolor, mm_lockedcolor, mm_notseencolor, mm_portalcolor, mm_secretsectorcolor, mm_secretwallcolor, mm_specialwallcolor, mm_thingcolor, mm_thingcolor_citem, mm_thingcolor_friend, mm_thingcolor_item, mm_thingcolor_monster, mm_thingcolor_ncmonster, mm_thingcolor_shootable, mm_thingcolor_vipitem, mm_thingcolor_missile, mm_tswallcolor, mm_unexploredsecretcolor, mm_wallcolor, mm_xhaircolor, mm_yourcolor;
 	bool mm_displaylocks;
 
 	// if playing in Japanese, returns an alternate font of the same height
@@ -877,6 +877,7 @@ Class SWWMStatusBar : BaseStatusBar
 			mm_thingcolor_ncmonster = am_thingcolor_ncmonster;
 			mm_thingcolor_shootable = am_thingcolor;
 			mm_thingcolor_vipitem = am_unexploredsecretcolor;
+			mm_thingcolor_missile = am_specialwallcolor;
 			mm_tswallcolor = am_tswallcolor;
 			mm_unexploredsecretcolor = am_unexploredsecretcolor;
 			mm_wallcolor = am_wallcolor;
@@ -907,6 +908,7 @@ Class SWWMStatusBar : BaseStatusBar
 			mm_thingcolor_ncmonster = "74 fc 6c";
 			mm_thingcolor_shootable = "74 fc 6c";
 			mm_thingcolor_vipitem = "74 fc 6c";
+			mm_thingcolor_missile = "74 fc 6c";
 			mm_tswallcolor = "80 80 80";
 			mm_unexploredsecretcolor = 0;
 			mm_wallcolor = "fc 00 00";
@@ -937,6 +939,7 @@ Class SWWMStatusBar : BaseStatusBar
 			mm_thingcolor_ncmonster = "fc 00 00";
 			mm_thingcolor_shootable = "bb 3b 00";
 			mm_thingcolor_vipitem = "db ab 00";
+			mm_thingcolor_missile = "bb 3b 00";
 			mm_tswallcolor = "77 73 73";
 			mm_unexploredsecretcolor = 0;
 			mm_wallcolor = "c7 ce ce";
@@ -967,6 +970,7 @@ Class SWWMStatusBar : BaseStatusBar
 			mm_thingcolor_ncmonster = "ec ec ec";
 			mm_thingcolor_shootable = "ec ec ec";
 			mm_thingcolor_vipitem = "ec ec ec";
+			mm_thingcolor_missile = "ec ec ec";
 			mm_tswallcolor = "58 5d 56";
 			mm_unexploredsecretcolor = 0;
 			mm_wallcolor = "4b 32 10";
@@ -997,6 +1001,7 @@ Class SWWMStatusBar : BaseStatusBar
 			mm_thingcolor_ncmonster = swwm_mm_thingcolor_ncmonster;
 			mm_thingcolor_shootable = swwm_mm_thingcolor_shootable;
 			mm_thingcolor_vipitem = swwm_mm_thingcolor_vipitem;
+			mm_thingcolor_missile = swwm_mm_thingcolor_missile;
 			mm_tswallcolor = swwm_mm_tswallcolor;
 			mm_unexploredsecretcolor = swwm_mm_unexploredsecretcolor;
 			mm_wallcolor = swwm_mm_wallcolor;
@@ -1334,6 +1339,7 @@ Class SWWMStatusBar : BaseStatusBar
 		Sector csec = players[consoleplayer].Camera.CurSector;
 		for ( SWWMSimpleTracker t=hnd.strackers; t; t=t.next )
 		{
+			if ( !swwm_mm_missiles && t.ismissile ) continue;
 			Color col = mm_thingcolor;
 			bool isitem = false;
 			bool plainactor = false;
@@ -1345,46 +1351,30 @@ Class SWWMStatusBar : BaseStatusBar
 				pos = t.target.prev.xy*(1.-FracTic)+t.target.pos.xy*FracTic;
 				angle = t.target.angle;
 				radius = t.target.radius;
-				if ( t.isitem )
-				{
-					if ( SWWMUtility.IsVipItem(t.target) ) col = mm_thingcolor_vipitem;
-					else if ( SWWMUtility.IsScoreItem(t.target) ) col = mm_thingcolor_citem;
-					else col = mm_thingcolor_item;
-					isitem = true;
-				}
-				else if ( t.target.player ) col = t.target.player.GetColor();
-				else if ( t.target.bFRIENDLY ) col = mm_thingcolor_friend;
-				else if ( t.target.bCOUNTKILL ) col = mm_thingcolor_monster;
-				else if ( t.target.bISMONSTER ) col = mm_thingcolor_ncmonster;
-				else
-				{
-					if ( SWWMUtility.IsVipItem(t.target) ) col = mm_thingcolor_vipitem;	// chanceboxes
-					else if ( t.target.bSHOOTABLE ) col = mm_thingcolor_shootable;
-					plainactor = true;
-				}
 			}
 			else
 			{
 				pos = t.pos.xy;
 				angle = t.angle;
 				radius = t.radius;
-				if ( t.isitem )
-				{
-					if ( t.vipitem ) col = mm_thingcolor_vipitem;
-					else if ( t.countitem ) col = mm_thingcolor_citem;
-					else col = mm_thingcolor_item;
-					isitem = true;
-				}
-				if ( t.isplayer ) col = t.playercol;
-				else if ( t.friendly ) col = mm_thingcolor_friend;
-				else if ( t.countkill ) col = mm_thingcolor_monster;
-				else if ( t.ismonster ) col = mm_thingcolor_ncmonster;
-				else
-				{
-					if ( t.vipitem ) col = mm_thingcolor_vipitem;	// chanceboxes
-					else if ( t.shootable ) col = mm_thingcolor_shootable;
-					plainactor = true;
-				}
+			}
+			if ( t.isitem )
+			{
+				if ( t.vipitem ) col = mm_thingcolor_vipitem;
+				else if ( t.countitem ) col = mm_thingcolor_citem;
+				else col = mm_thingcolor_item;
+				isitem = true;
+			}
+			else if ( t.isplayer ) col = t.playercol;
+			else if ( t.friendly ) col = mm_thingcolor_friend;
+			else if ( t.countkill ) col = mm_thingcolor_monster;
+			else if ( t.ismonster ) col = mm_thingcolor_ncmonster;
+			else if ( t.ismissile ) col = mm_thingcolor_missile;
+			else
+			{
+				if ( t.vipitem ) col = mm_thingcolor_vipitem;	// chanceboxes
+				else if ( t.shootable ) col = mm_thingcolor_shootable;
+				plainactor = true;
 			}
 			int mtime = 35;
 			if ( thesight && !t.expired && t.target ) mtime += 105;

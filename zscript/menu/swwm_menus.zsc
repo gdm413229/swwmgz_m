@@ -217,13 +217,17 @@ Class SWWMMainMenu : ListMenu
 // skill/episode menu hack
 Class SWWMBigMenuHack : ListMenu
 {
+	bool longlist;	// more than 10 entries, scrolls
+	int ofs;
+	Font markfont;
+
 	override void Init( Menu parent, ListMenuDescriptor desc )
 	{
 		Super.Init(parent,desc);
-		// replace text/patch items with our own
 		for ( int i=0; i<mDesc.mItems.Size(); i++ )
 		{
 			let itm = mDesc.mItems[i];
+			// replace text/patch items with our own
 			if ( itm.GetClass() == 'ListMenuItemTextItem' )
 			{
 				let ti = ListMenuItemTextItem(itm);
@@ -247,6 +251,100 @@ Class SWWMBigMenuHack : ListMenu
 				pi.Destroy();
 			}
 		}
+		// realign everything to be vertically centered
+		int ntext = 0;
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			let itm = mDesc.mItems[i];
+			if ( (itm.GetClass() == 'ListMenuItemSWWMTextItemM') || (itm.GetClass() == 'ListMenuItemSWWMPatchItemM') )
+				ntext++;
+		}
+		if ( ntext > 7 )
+		{
+			longlist = true;
+			ntext = 7;
+			markfont = Font.GetFont('TewiShaded');
+		}
+		double theight = ntext*32+56;
+		int h = mDesc.DisplayHeight();
+		if ( h == -1 ) h = 200;
+		double oy = int((h-theight)/2);
+		// apply offsets
+		for ( int i=0, j=0; i<mDesc.mItems.Size(); i++ )
+		{
+			let itm = mDesc.mItems[i];
+			if ( (itm.GetClass() == 'ListMenuItemSWWMTextItemM') || (itm.GetClass() == 'ListMenuItemSWWMPatchItemM') )
+			{
+				itm.OffsetPositionY(oy+56);	// offset from static text header
+				itm.OffsetPositionY(32*(j++));	// offset from other entries
+			}
+			else
+			{
+				// GROSS HACK statictext will for whatever reason INCREASE in offset every time Init is called
+				if ( itm.GetClass() == 'ListMenuItemSWWMStaticTextM' )
+					itm.OffsetPositionY(-itm.GetY());
+				itm.OffsetPositionY(oy);
+			}
+		}
+	}
+
+	override void Ticker()
+	{
+		Super.Ticker();
+		// update selection offset
+		if ( longlist ) ofs = clamp(mDesc.mSelectedItem-4,0,mDesc.mItems.Size()-8);
+	}
+
+	override void Drawer()
+	{
+		if ( !longlist )
+		{
+			Super.Drawer();
+			return;
+		}
+		// LOTS OF HACK
+		int w = mDesc.DisplayWidth();
+		int h = mDesc.DisplayHeight();
+		bool isclean = false;
+		if ( w == -1 )
+		{
+			w = 320;
+			h = 200;
+			isclean = true;
+		}
+		int mofs = (h-280)/2;
+		if ( ofs > 0 )
+		{
+			String str = "⌃ ⌃ ⌃";
+			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+40,str,DTA_Clean,true);
+			else Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+40,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+		}
+		if ( ofs < (mDesc.mItems.Size()-8) )
+		{
+			String str = "⌄ ⌄ ⌄";
+			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_Clean,true);
+			else Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+		}
+		for( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			if ( !mDesc.mItems[i].mEnabled ) continue;
+			bool offsetme = false;
+			if ( (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMTextItemM') || (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMPatchItemM') )
+			{
+				if ( (i <= ofs) || (i > ofs+7) )
+					continue;
+				offsetme = true;
+			}
+			if ( offsetme ) mDesc.mItems[i].OffsetPositionY(-ofs*32);
+			mDesc.mItems[i].Draw((mDesc.mSelectedItem==i),mDesc);
+			if ( offsetme ) mDesc.mItems[i].OffsetPositionY(ofs*32);
+		}
+		if ( (mDesc.mSelectedItem >= 0) && (mDesc.mSelectedItem < mDesc.mItems.Size()) )
+		{
+			if ( !menuDelegate.DrawSelector(mDesc) )
+				mDesc.mItems[mDesc.mSelectedItem].DrawSelector(mDesc.mSelectOfsX,mDesc.mSelectOfsY-ofs*32,mDesc.mSelector,mDesc);
+		}
+		Menu.Drawer();
 	}
 }
 
@@ -281,12 +379,12 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			double x = (320-mFont.StringWidth(text))/2;
-			Screen.DrawText(mFont,mColor,x,abs(mYpos),text,(mYpos<0)?DTA_CleanTop:DTA_Clean,true);
+			Screen.DrawText(mFont,mColor,x,mYpos,text,DTA_Clean,true);
 		}
 		else
 		{
 			double x = (w-mFont.StringWidth(text))/2;
-			Screen.DrawText(mFont,mColor,x,abs(mYpos),text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+			Screen.DrawText(mFont,mColor,x,mYpos,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
 	}
 }
@@ -329,35 +427,63 @@ Class SWWMMessageBox : MessageBoxMenu
 	override void Init( Menu parent, String message, int messagemode, bool playsound, Name cmd, voidptr native_handler )
 	{
 		Super.Init(parent,message,messagemode,playsound,cmd,native_handler);
-		arrowFont = textFont = NewSmallFont;
 		destWidth = CleanWidth;
 		destHeight = CleanHeight;
-		selector = "▸";
-		int mr1 = destWidth/2+10+textFont.StringWidth(Stringtable.Localize("$TXT_YES"));
-		int mr2 = destWidth/2+10+textFont.StringWidth(Stringtable.Localize("$TXT_NO"));
-		mMouseRight = max(mr1,mr2);
-		mMessage = textFont.BreakLines(Stringtable.Localize(message),int(300/NotifyFontScale));
+		mMessage = newsmallfont.BreakLines(Stringtable.Localize(message),int(300/NotifyFontScale));
 	}
 
 	override void Drawer()
 	{
-		let fontheight = int(textFont.GetHeight()*NotifyFontScale);
+		let fontheight = int(newsmallfont.GetHeight()*NotifyFontScale);
 		double y = destHeight/2;
 		int c = mMessage.Count();
 		y -= c*fontHeight/2;
 		for ( int i=0; i<c; i++ )
 		{
-			Screen.DrawText(textFont,OptionMenuSettings.mFontColorValue,destWidth/2-int(mMessage.StringWidth(i)*NotifyFontScale)/2,y,mMessage.StringAt(i),DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
+			Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorValue,destWidth/2-int(mMessage.StringWidth(i)*NotifyFontScale)/2,y,mMessage.StringAt(i),DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
 			y += fontheight;
 		}
 		if ( mMessageMode != 0 ) return;
 		y += fontheight;
 		mMouseY = int(y);
-		Screen.DrawText(textFont,messageSelection==0?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,destWidth/2,y,Stringtable.Localize("$TXT_YES"), DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
-		Screen.DrawText(textFont,messageSelection==1?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,destWidth/2,y+fontheight, Stringtable.Localize("$TXT_NO"),DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
-		if ( messageSelection < 0 ) return;
-		if ( (MenuTime()%8) < 6 )
-			Screen.DrawText(arrowFont,OptionMenuSettings.mFontColorSelection,destWidth/2-11,y+fontheight*messageSelection,selector,DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
+		String stryes = Stringtable.Localize("$TXT_YES");
+		String strno = Stringtable.Localize("$TXT_NO");
+		Screen.DrawText(newsmallfont,messageSelection==0?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-newsmallfont.StringWidth(stryes))/2,y,stryes, DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
+		Screen.DrawText(newsmallfont,messageSelection==1?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-newsmallfont.StringWidth(strno))/2,y+fontheight,strno,DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
+		if ( (messageSelection < 0) || ((MenuTime()%8) >= 4) ) return;
+		Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorSelection,(destWidth-newsmallfont.StringWidth(messageSelection?strno:stryes))/2-16,y+fontheight*messageSelection,"►",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
+		Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorSelection,(destWidth+newsmallfont.StringWidth(messageSelection?strno:stryes))/2+8,y+fontheight*messageSelection,"◄",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
+	}
+
+	override bool MouseEvent( int type, int x, int y )
+	{
+		if ( mMessageMode == 1 )
+		{
+			if ( type == MOUSE_Click )
+				return MenuEvent(MKEY_Enter,true);
+			return false;
+		}
+		else
+		{
+			int sel = -1;
+			int fh = newsmallfont.GetHeight()+1;
+			// convert x/y from screen to virtual coordinates, according to CleanX/Yfac use in DrawTexture
+			x = x*destWidth/screen.GetWidth();
+			y = y*destHeight/screen.GetHeight();
+			if ( (y >= mMouseY) && (y < mMouseY+2*fh) )
+			{
+				sel = (y >= mMouseY+fh);
+				// are we actually selecting the text?
+				String txt = sel?Stringtable.Localize("$TXT_NO"):Stringtable.Localize("$TXT_YES");
+				int txtln = newsmallfont.StringWidth(txt);
+				int minx = (destWidth-txtln)/2;
+				if ( (x < (destWidth-txtln)/2) && (x > (destWidth+txtln)/2) )
+					sel = -1;
+			}
+			messageSelection = sel;
+			if ( type == MOUSE_Release ) return MenuEvent(MKEY_Enter,true);
+			return true;
+		}
 	}
 }
 

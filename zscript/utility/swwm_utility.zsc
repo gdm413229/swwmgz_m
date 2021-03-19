@@ -1782,8 +1782,8 @@ Class SWWMUtility
 	}
 	static Class<Inventory> PickHereticSlot3()	// also used for Doom 1
 	{
-		//return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
-		return PickPair('Spreadgun','Wallbuster',2);
+		if ( level.maptime ) return PickSWWMSlot3();	// always slot 3 after map start, prevents shotgun guys from dropping wallbusters
+		return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
 	}
 }
 

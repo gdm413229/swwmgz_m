@@ -180,6 +180,21 @@ extend Class SWWMHandler
 		}
 	}
 
+	private bool SuppressMultiItem( WorldEvent e )
+	{
+		// quick checks
+		if ( !G_SkillPropertyInt(SKILLP_SpawnMulti) || multiplayer || (dmflags2&(1<<29)) )	// wow there's no dmflags constants defined in zscript???
+			return false;
+		// is it coop inventory? suppress it
+		if ( (e.Thing.spawnflags&(MTF_COOPERATIVE|MTF_DEATHMATCH)) && !(e.Thing.spawnflags&MTF_SINGLE) && (e.Thing is 'Inventory') )
+		{
+			e.Thing.ClearCounters();
+			e.Thing.Destroy();
+			return true;
+		}
+		return false;
+	}
+
 	override void WorldThingDestroyed( WorldEvent e )
 	{
 		if ( !e.Thing.default.bSHOOTABLE || !e.Thing.default.bMISSILE )
@@ -192,6 +207,8 @@ extend Class SWWMHandler
 
 	override void WorldThingSpawned( WorldEvent e )
 	{
+		if ( SuppressMultiItem(e) )
+			return;
 		IWantDieSpawn(e);
 		if ( (e.Thing is 'TeleportDest') || (e.Thing is 'BossTarget') )
 		{

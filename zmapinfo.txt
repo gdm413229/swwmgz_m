@@ -99,6 +99,7 @@ Skill chill
 	AutoUseHealth
 	DamageFactor = 0.5
 	EasyBossBrain
+	SlowMonsters
 	SpawnFilter = baby
 	ACSReturn = 0
 	Name = "$SWWM_SKCHILL"
@@ -122,14 +123,28 @@ Skill hard
 	ACSReturn = 3
 	Name = "$SWWM_SKHARD"
 }
+Skill hardcore
+{
+	DisableCheats
+	FastMonsters
+	HealthFactor = 1.5
+	DamageFactor = 1.5
+	Aggressiveness = 0.25
+	SpawnFilter = nightmare
+	SpawnMulti
+	ACSReturn = 4
+	Name = "$SWWM_SKHARDCORE"
+	MustConfirm = "$SWWM_SKHARDCORECONFIRM"
+}
 Skill lunatic
 {
-	FastMonsters
 	DisableCheats
 	Aggressiveness = 1.0
 	SpawnFilter = nightmare
 	SpawnMulti
 	TotalInfighting
+	InstantReaction
+	NoPain
 	ACSReturn = 4
 	Name = "$SWWM_SKLUNATIC"
 	MustConfirm = "$SWWM_SKLUNATICCONFIRM"

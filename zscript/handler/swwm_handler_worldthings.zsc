@@ -197,7 +197,7 @@ extend Class SWWMHandler
 
 	override void WorldThingDestroyed( WorldEvent e )
 	{
-		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e Thing is 'Inventory') )
+		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e.Thing is 'Inventory') )
 			return;
 		// remove from suckables
 		int pos = suckableactors.Find(e.Thing);

@@ -2596,7 +2596,7 @@ Class Mykradvo : Inventory
 			// is visible and is within 100m
 			if ( ((a.target == t) && SWWMUtility.SphereIntersect(a,t.pos,160))
 				|| (t.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) && SWWMUtility.SphereIntersect(a,t.pos,3200)) )
-				targets.Push(t);
+				targets.Push(a);
 		}
 		// sorted, so the closest take priority
 		qsort_targets(targets,0,targets.Size()-1,t);

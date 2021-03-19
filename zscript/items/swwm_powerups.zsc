@@ -2591,10 +2591,10 @@ Class Mykradvo : Inventory
 			if ( !a.bISMONSTER || !a.bSHOOTABLE || a.bDORMANT || (a.Health <= 0) ) continue;
 			// skip non-hostiles
 			if ( !a.IsHostile(t) || SWWMUtility.IsCivilian(a) ) continue;
-			// is targetting us and is within 5m
+			// is targetting us and is within 10m
 			// or
 			// is visible and is within 100m
-			if ( ((a.target == t) && SWWMUtility.SphereIntersect(a,t.pos,160))
+			if ( ((a.target == t) && SWWMUtility.SphereIntersect(a,t.pos,320))
 				|| (t.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) && SWWMUtility.SphereIntersect(a,t.pos,3200)) )
 				targets.Push(a);
 		}

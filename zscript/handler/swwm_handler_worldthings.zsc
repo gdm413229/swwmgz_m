@@ -197,7 +197,7 @@ extend Class SWWMHandler
 
 	override void WorldThingDestroyed( WorldEvent e )
 	{
-		if ( !e.Thing.default.bSHOOTABLE || !e.Thing.default.bMISSILE )
+		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e Thing is 'Inventory') )
 			return;
 		// remove from suckables
 		int pos = suckableactors.Find(e.Thing);
@@ -343,7 +343,7 @@ extend Class SWWMHandler
 				SWWMShadow.Track(e.Thing);
 		}
 		// Ynykron vortex optimization (faster than a thinker iterator)
-		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE )
+		if ( e.Thing.bSHOOTABLE || e.Thing.bMISSILE || (e.Thing is 'Inventory') )
 			SuckableActors.Push(e.Thing);
 		// vanilla blood color changes
 		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )

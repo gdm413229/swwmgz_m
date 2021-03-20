@@ -337,7 +337,7 @@ extend Class SWWMHandler
 		SWWMCombatTracker trk;
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
 			trk = SWWMCombatTracker.Spawn(e.Thing);
-		if ( !(e.Thing is 'LampMoth') && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || e.Thing.bCORPSE || (e.Thing is 'Inventory') || (e.Thing is 'CompanionLamp')) )
+		if ( !(e.Thing is 'LampMoth') && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER || (e.Thing is 'Inventory') || (e.Thing is 'CompanionLamp')) )
 		{
 			if ( (swwm_shadows == 2) || ((swwm_shadows == 1) && ((e.Thing is 'Demolitionist') || (e.Thing.SpawnState.sprite == e.Thing.GetSpriteIndex('XZW1')))) )
 				SWWMShadow.Track(e.Thing);

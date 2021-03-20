@@ -64,8 +64,9 @@ Class SWWMStats : Thinker
 		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
 		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
 		if ( which is 'DualExplodiumGun' ) which = 'ExplodiumGun';	// don't credit sister weapon
+		if ( inflictor.FindInventory("ParriedBuff") ) which = 'DoomWeapon';	// gross hack
 		// properly credit some projectiles to their respective gun
-		if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
+		else if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
 		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';
 		else if ( (inflictor is 'ExplodiumMagArm') || (inflictor is 'ExplodiumMagProj') || (inflictor is 'ExplodiumBulletImpact') ) which = 'ExplodiumGun';
 		else if ( (inflictor is 'DragonBreathArm') || ((inflictor is 'SaltImpact') && !inflictor.Args[0]) || ((inflictor is 'SaltBeam') && !inflictor.Args[1]) || (inflictor is 'CorrodeDebuff') || (inflictor is 'CorrosiveFlechette') || ((inflictor is 'TheBall') && !inflictor.special1) || (inflictor is 'GoldenImpact') || (inflictor is 'GoldenSubImpact') || (inflictor is 'GoldenSubSubImpact') ) which = 'Spreadgun';

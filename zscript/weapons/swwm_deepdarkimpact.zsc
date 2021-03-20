@@ -147,8 +147,8 @@ Class DeepImpact : SWWMWeapon
 				dir = (x+y*cos(j)*i+z*sin(j)*i).unit();
 				t.hitlist.Clear();
 				t.hitdist.Clear();
-				t.Trace(origin,level.PointInSector(origin.xy),dir,150-i*120,0);
-				SWWMBulletTrail.DoTrail(self,origin,dir,150-i*120,0);
+				t.Trace(origin,level.PointInSector(origin.xy),dir,250-i*150,0);
+				SWWMBulletTrail.DoTrail(self,origin,dir,250-i*150,0);
 				for ( int i=0; i<t.hitlist.Size(); i++ )
 				{
 					int inl = -1;
@@ -191,7 +191,7 @@ Class DeepImpact : SWWMWeapon
 					else hitnormal = t.Results.HitSector.ceilingplane.Normal;
 					wnorm += (hitnormal*.2-dir)/max(50.,t.Results.Distance);
 				}
-				if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(5*(1.-clamp(t.Results.Distance/150.,0.,1.))),self,t.Results.HitVector,t.Results.HitPos.z);
+				if ( swwm_omnibust ) BusterWall.Bust(t.Results,int(5*(1.-clamp(t.Results.Distance/250.,0.,1.))),self,t.Results.HitVector,t.Results.HitPos.z);
 			}
 			rings += 5;
 		}
@@ -205,7 +205,7 @@ Class DeepImpact : SWWMWeapon
 		{
 			Vector3 avgdir = list[i].avgdir/list[i].nhits;
 			double avgdist = list[i].avgdist/list[i].nhits;
-			double dmg = 5000.*(1.-clamp(avgdist/200.,0.,1.));
+			double dmg = 5000.*(1.-clamp(avgdist/250.,0.,1.));
 			SWWMUtility.DoKnockback(list[i].a,avgdir,dmg*35.);
 			list[i].a.DamageMobj(invoker,self,int(dmg/350.),'Push',DMG_THRUSTLESS);
 		}
@@ -213,18 +213,24 @@ Class DeepImpact : SWWMWeapon
 		Actor m;
 		while ( m = Actor(ti.Next()) )
 		{
-			if ( !m.bMISSILE ) continue;
-			double rdist = level.Vec3Diff(origin,m.pos).length();
-			Vector3 rdir = level.Vec3Diff(origin,m.pos).unit();
-			if ( LineTrace(atan2(rdir.y,rdir.x),rdist,asin(-rdir.z),TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y) || (rdist > 150) || (rdir dot x < .35) ) continue;
+			if ( !(m.bMISSILE && !m.IsZeroDamage() && (m.target != self)) ) continue;
+			Vector3 rdir = level.Vec3Diff(origin,m.pos);
+			double rdist = rdir.length();
+			if ( rdist <= 0. ) continue;
+			rdir /= rdist;
+			if ( LineTrace(atan2(rdir.y,rdir.x),rdist,asin(-rdir.z),TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y) || (rdist > 250) || (rdir dot x < .75) ) continue;
 			m.speed = m.vel.length();
 			m.vel = m.speed*1.5*(-m.vel.unit()*.4+rdir).unit();
 			Vector3 ndir = m.vel.unit();
 			m.angle = atan2(ndir.y,ndir.x);
 			m.pitch = asin(-ndir.z);
-			if ( m.target == self ) continue;
 			if ( m.bSEEKERMISSILE ) m.tracer = m.target;
 			m.target = self;
+			if ( !m.FindInventory("ParriedBuff") )
+			{
+				let pb = Inventory(Spawn("ParriedBuff"));
+				pb.AttachToOwner(m);
+			}
 		}
 		int numpt = Random[Impact](7,12);
 		for ( int i=0; i<numpt; i++ )
@@ -320,13 +326,13 @@ Class DeepImpact : SWWMWeapon
 		XZW2 A 1 A_DryFire();
 		XZW2 QR 2;
 		XZW2 TU 3;
-		XZW2 A 4;
+		XZW2 A 2;
 		Goto Ready;
 	Fire:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<=0,"DryFire");
 		XZW2 A 1 A_Air();
 		XZW2 QR 2;
-		XZW2 STUA 3;
+		XZW2 STU 3;
 		Goto Ready;
 	AltFire:
 		XZW2 A 0 A_JumpIf(invoker.ClipCount<100,"Reload");

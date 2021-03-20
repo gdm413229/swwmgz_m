@@ -22,6 +22,7 @@ Class Demolitionist : PlayerPawn
 	SWWMStats mystats;
 	int cairtime;
 	bool hasteleported;
+	bool hasrevived;
 
 	int lastmpain;
 
@@ -1328,6 +1329,41 @@ Class Demolitionist : PlayerPawn
 			}
 		}
 	}
+	private void CheckBreakCrusher()
+	{
+		double gaph = (ceilingz-floorz);
+		if ( gaph > height*.6 ) return;
+		// the smaller the gap, the more likely the crusher will snap
+		if ( Random[Demolitionist](0,3) && (FRandom[Demolitionist](0,gaph/height) > .1) ) return;
+		double diffh = 8.+(default.height-gaph);	// how much the crusher will have to "snap" after breaking
+		let ceil = ceilingsector;
+		let flor = floorsector;
+		let ceilse = ceil.ceilingdata;
+		let florse = flor.floordata;
+		if ( ceilse && florse )
+		{
+			// snap both planes
+			let q = Spawn("BustedQuake",(ceil.centerspot.x,ceil.centerspot.y,ceil.ceilingplane.ZAtPoint(ceil.centerspot)));
+			q.special1 = 6;
+			q = Spawn("BustedQuake",(flor.centerspot.x,flor.centerspot.y,flor.floorplane.ZAtPoint(flor.centerspot)));
+			q.special1 = 6;
+			SWWMCrusherBroken.Create(flor,ceil,diffh/2.);
+		}
+		else if ( ceilse )
+		{
+			// snap ceiling
+			let q = Spawn("BustedQuake",(ceil.centerspot.x,ceil.centerspot.y,ceil.ceilingplane.ZAtPoint(ceil.centerspot)));
+			q.special1 = 10;
+			SWWMCrusherBroken.Create(null,ceil,diffh);
+		}
+		else if ( florse )
+		{
+			// snap floor
+			let q = Spawn("BustedQuake",(flor.centerspot.x,flor.centerspot.y,flor.floorplane.ZAtPoint(flor.centerspot)));
+			q.special1 = 10;
+			SWWMCrusherBroken.Create(flor,null,diffh);
+		}
+	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
 		// we still have to ENSURE ENTIRELY that this gets nullified (TELEFRAG_DAMAGE overrides damage factors somehow)
@@ -1338,6 +1374,9 @@ Class Demolitionist : PlayerPawn
 			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 			if ( hnd ) hnd.tookdamage[PlayerNumber()] = true;
 		}
+		// check if we can break any active crushers
+		if ( (mod == 'Crush') && !inflictor && !source )
+			CheckBreakCrusher();
 		// no damage whatsoever
 		if ( scriptedinvul )
 			return 0;
@@ -1832,8 +1871,9 @@ Class Demolitionist : PlayerPawn
 			else if ( (player.cmd.buttons&BT_ATTACK) && (deadtimer > 120) && swwm_revive )
 			{
 				// reboot (if possible)
-				if ( !FindInventory("ReviveCooldown") )
+				if ( !FindInventory("ReviveCooldown") && (((swwm_revivecooldown >= 0) && (G_SkillPropertyInt(SKILLP_ACSReturn) < 4)) || !hasrevived) )
 				{
+					hasrevived = true;
 					player.Resurrect();
 					player.damagecount = 0;
 					player.bonuscount = 0;
@@ -1857,7 +1897,7 @@ Class Demolitionist : PlayerPawn
 					SWWMHandler.DoFlash(self,Color(255,128,192,255),30);
 					SWWMScoreObj.Spawn(default.health,Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Height/2),ST_Health);
 					if ( special1 > 2 ) special1 = 0;
-					if ( swwm_revivecooldown > 0 )
+					if ( (swwm_revivecooldown > 0) && (G_SkillPropertyInt(SKILLP_ACSReturn) < 4) )
 						GiveInventory("ReviveCooldown",1);
 				}
 				else if ( level.maptime > revivefail )
@@ -2429,6 +2469,7 @@ Class Demolitionist : PlayerPawn
 		dashfuel = default.dashfuel;
 		last_boost = 0;
 		last_kick = 0;
+		hasrevived = false;
 		// cancel dash/boost
 		A_StopSound(CHAN_JETPACK);
 		fuelcooldown = 0.;

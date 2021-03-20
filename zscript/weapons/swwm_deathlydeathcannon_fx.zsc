@@ -1,5 +1,47 @@
 // Ynykron projectiles and effects
 
+// there was an enemy here, but it's gone now
+Class AshenRemains : Actor
+{
+	override void Tick()
+	{
+		double fz = CurSector.floorplane.ZAtPoint(pos.xy);
+		if ( fz != pos.z ) SetOrigin((pos.x,pos.y,fz),true);
+		if ( isFrozen() ) return;
+		special1++;
+		if ( special1 > 350 ) A_FadeOut(0.01);
+	}
+	override void PostBeginPlay()
+	{
+		if ( (waterlevel > 0) || GetFloorTerrain().isliquid )
+		{
+			Destroy();
+			return;
+		}
+		double fz = CurSector.floorplane.ZAtPoint(pos.xy);
+		SetZ(fz);
+		prev.z = fz;
+		SWWMUtility.SetToSlope(self,FRandom[Ynykron](0,360));
+	}
+	default
+	{
+		RenderStyle "Shaded";
+		StencilColor "000000";
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
 // cheap way to let players know they just got fucking erased from existence
 Class PlayerGone : PlayerChunk
 {
@@ -360,7 +402,15 @@ Class YnykronImpact : Actor
 		{
 			// voodoo dolls just get erased (how convenient)
 			// otherwise instantly vaporize the fucker
-			if ( tracer.player && (tracer.player.mo != tracer) ) tracer.Destroy();
+			if ( tracer.player && (tracer.player.mo != tracer) )
+			{
+				if ( tracer.pos.z < (tracer.floorz+64) )
+				{
+					let r = Spawn("AshenRemains",tracer.pos);
+					r.scale *= tracer.radius/16.;
+				}
+				tracer.Destroy();
+			}
 			else if ( tracer.CountInv("GrilledCheeseSandwich") > 0 )
 			{
 				// force use the sandwich
@@ -381,6 +431,11 @@ Class YnykronImpact : Actor
 					tracer.bINVISIBLE = true;
 					tracer.A_ChangeLinkFlags(true);		// remove from blockmap, should guarantee archviles not raising this
 					IDontFeelSoGood.DeletThis(tracer);	// ensures corpse is deleted too
+				}
+				if ( tracer.pos.z < (tracer.floorz+64) )
+				{
+					let r = Spawn("AshenRemains",tracer.pos);
+					r.scale *= tracer.radius/16.;
 				}
 			}
 		}

@@ -71,43 +71,7 @@ Class AlmasteelPlating : Inventory
 		// 80% reduction for explosions
 		if ( flags&DMG_EXPLOSION ) newdamage = newdamage/5;
 		// 50% reduction for crushing
-		if ( damageType == 'Crush' )
-		{
-			newdamage = newdamage/2;
-			// additionally, check if we can break any active crushers
-			double gaph = (Owner.ceilingz-Owner.floorz);
-			if ( gaph > Owner.height*.6 ) return;
-			// the smaller the gap, the more likely the crusher will snap
-			if ( Random[Demolitionist](0,3) && (FRandom[Demolitionist](0,gaph/Owner.height) > .1) ) return;
-			double diffh = 8.+(Owner.default.height-gaph);	// how much the crusher will have to "snap" after breaking
-			let ceil = Owner.ceilingsector;
-			let flor = Owner.floorsector;
-			let ceilse = ceil.ceilingdata;
-			let florse = flor.floordata;
-			if ( ceilse && florse )
-			{
-				// snap both planes
-				let q = Spawn("BustedQuake",(ceil.centerspot.x,ceil.centerspot.y,ceil.ceilingplane.ZAtPoint(ceil.centerspot)));
-				q.special1 = 6;
-				q = Spawn("BustedQuake",(flor.centerspot.x,flor.centerspot.y,flor.floorplane.ZAtPoint(flor.centerspot)));
-				q.special1 = 6;
-				SWWMCrusherBroken.Create(flor,ceil,diffh/2.);
-			}
-			else if ( ceilse )
-			{
-				// snap ceiling
-				let q = Spawn("BustedQuake",(ceil.centerspot.x,ceil.centerspot.y,ceil.ceilingplane.ZAtPoint(ceil.centerspot)));
-				q.special1 = 10;
-				SWWMCrusherBroken.Create(null,ceil,diffh);
-			}
-			else if ( florse )
-			{
-				// snap floor
-				let q = Spawn("BustedQuake",(flor.centerspot.x,flor.centerspot.y,flor.floorplane.ZAtPoint(flor.centerspot)));
-				q.special1 = 10;
-				SWWMCrusherBroken.Create(flor,null,diffh);
-			}
-		}
+		if ( damageType == 'Crush' ) newdamage = newdamage/2;
 	}
 	override bool HandlePickup( Inventory item )
 	{
@@ -142,7 +106,7 @@ Class ReviveCooldown : Powerup
 	Default
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Revive.png";
-		Powerup.Duration -30;
+		Powerup.Duration -60;
 	}
 
 	override void Tick()
@@ -156,7 +120,7 @@ Class ReviveCooldown : Powerup
 	{
 		Super.InitEffect();
 		// adjust the duration
-		EffectTics = max(0,swwm_revivecooldown)*GameTicRate;
+		EffectTics = clamp(swwm_revivecooldown*60,0,300)*GameTicRate;
 	}
 	override void EndEffect()
 	{

@@ -348,6 +348,7 @@ Class LoveHeart : Actor
 		//A_RemoveLight('LOVELIGHT');
 		CheckSplash(40);
 		A_QuakeEx(2,2,2,8,0,300,"",QF_RELATIVE|QF_SCALEDOWN);
+		A_SprayDecal("HeartyGlow",64);
 		A_StartSound("bestsound",CHAN_VOICE);
 		Spawn("LoveHeartBurstLight",pos);
 		int numpt = Random[ExploS](10,15);

@@ -1036,8 +1036,8 @@ Class Demolitionist : PlayerPawn
 			{
 				a = bi.Thing;
 				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS || a.bCORPSE ) continue;
-				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*spd,8,16) ) continue;
-				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*(spd+radius),8) ) continue;
+				if ( (a.pos.z <= a.floorz) && (a.height <= MaxStepHeight) ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);
 				Vector3 dirto = diff.unit();
 				if ( dir dot dirto < .1 ) continue;

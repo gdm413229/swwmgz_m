@@ -120,7 +120,7 @@ Class ReviveCooldown : Powerup
 	{
 		Super.InitEffect();
 		// adjust the duration
-		EffectTics = clamp(swwm_revivecooldown*60,0,300)*GameTicRate;
+		EffectTics = max(0,swwm_revivecooldown)*GameTicRate;
 	}
 	override void EndEffect()
 	{

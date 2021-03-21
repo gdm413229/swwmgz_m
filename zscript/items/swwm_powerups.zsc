@@ -2123,7 +2123,7 @@ Class MykradvoTendril : Actor
 			}
 			for ( int i=0; i<t.hitlist.Size(); i++ )
 			{
-				if ( t.hitlist[i].hitactor.IsFriend(target) || SWWMUtility.IsCivilian(t.hitlist[i].hitactor) ) continue;
+				if ( t.hitlist[i].hitactor.IsFriend(target) ) continue;
 				if ( (t.hitlist[i].hitactor == tracer) && bMISSILEMORE ) bMISSILEEVENMORE = true;	// we split
 				int dmg = t.hitlist[i].hitactor.bBOSS?(GetMissileDamage(0,0)*4):max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0));
 				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x+(0,0,.5),((t.hitlist[i].hitactor.Health-dmg)<=0)?60000:8000);
@@ -2589,7 +2589,7 @@ Class Mykradvo : Inventory
 			// must be an active, shootable live monster
 			if ( !a.bISMONSTER || !a.bSHOOTABLE || a.bDORMANT || (a.Health <= 0) ) continue;
 			// skip non-hostiles
-			if ( !a.IsHostile(t) || SWWMUtility.IsCivilian(a) ) continue;
+			if ( a.IsFriend(t) ) continue;
 			// is targetting us and is within 10m
 			// or
 			// is visible and is within 100m

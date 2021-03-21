@@ -45,7 +45,7 @@ Class SWWMHandler : EventHandler
 	{
 		LangRefresh();
 		QueueMaintenance();
-		if ( !(gameinfo.gametype&GAME_STRIFE) && !mnotify && (level.maptime >= 5) )
+		if ( !mnotify && (level.maptime >= 5) )
 		{
 			mnotify = true;
 			let ti = ThinkerIterator.Create("SWWMStats",Thinker.STAT_STATIC);

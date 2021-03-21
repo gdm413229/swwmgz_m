@@ -360,39 +360,6 @@ Class SWWMUtility
 		return SWWMCachedLockInfo.GetLockColor(l);
 	}
 
-	// wheeeeeeee, let's play a game of "who is who"
-	static clearscope bool IsCivilian( Actor a )
-	{
-		if ( a is 'Beggar' )
-		{
-			if ( (a.level.mapname ~== "MAP32") && (a is 'Beggar1') )
-				return false;	// Prisoner (sorry but we have to)
-			return true;
-		}
-		if ( a is 'Peasant' )
-		{
-			// exclude certain key NPCs
-			if ( (a.level.mapname ~== "MAP01") && (a is 'Peasant9') )
-				return false;	// Beldin (sorry but we have to)
-			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant22') )
-				return false;	// Mourel (fuck that guy)
-			if ( (a.level.mapname ~== "MAP02") && (a is 'Peasant4') )
-				return false;	// Harris (also fuck that guy)
-			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant5') )
-				return false;	// Derwin (fat bastard)
-			if ( (a.level.mapname ~== "MAP04") && (a is 'Peasant7') )
-				return false;	// Ketrick (THIS IS GARBAGE)
-			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant7') )
-				return false;	// Montag (gimme the damn key)
-			if ( (a.level.mapname ~== "MAP05") && (a is 'Peasant8') )
-				return false;	// Wolenick (gimme a hand)
-			if ( (a.level.mapname ~== "MAP33") && (a is 'Peasant5') )
-				return false;	// Harris (also fuck that guy)
-			return true;
-		}
-		return false;
-	}
-
 	// Thanks to ZZYZX and Nash
 	static play void SetToSlopeSpecific( Actor a, double dang, SecPlane plane, bool flipnorm )
 	{
@@ -1782,8 +1749,7 @@ Class SWWMUtility
 	}
 	static Class<Inventory> PickSWWMSlot0()
 	{
-		/*if ( gameinfo.GameType&GAME_Strife ) return 'GrandLance';
-		return PickPair('Ynykron','GrandLance');*/
+		//return PickPair('Ynykron','GrandLance');
 		return 'Ynykron';
 	}
 	static Class<Inventory> PickDoomSlot6()

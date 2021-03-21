@@ -16,43 +16,40 @@ extend Class SWWMHandler
 		SWWMStats s;
 		while ( s = SWWMStats(ti.Next()) )
 		{
-			if ( !(gameinfo.gametype&GAME_STRIFE) )
+			int clust = 0;
+			bool secret = false;
+			if ( SWWMUtility.IsEviternity() )
 			{
-				int clust = 0;
-				bool secret = false;
-				if ( SWWMUtility.IsEviternity() )
+				// we have to do some heavy lifting here because episodes don't match clusters
+				if ( level.levelnum <= 5 ) clust = 1;
+				else if ( level.levelnum <= 10 ) clust = 2;
+				else if ( level.levelnum <= 15 ) clust = 3;
+				else if ( level.levelnum <= 20 ) clust = 4;
+				else if ( level.levelnum <= 25 ) clust = 5;
+				else if ( level.levelnum <= 30 ) clust = 6;
+				else if ( level.levelnum <= 32 )
 				{
-					// we have to do some heavy lifting here because episodes don't match clusters
-					if ( level.levelnum <= 5 ) clust = 1;
-					else if ( level.levelnum <= 10 ) clust = 2;
-					else if ( level.levelnum <= 15 ) clust = 3;
-					else if ( level.levelnum <= 20 ) clust = 4;
-					else if ( level.levelnum <= 25 ) clust = 5;
-					else if ( level.levelnum <= 30 ) clust = 6;
-					else if ( level.levelnum <= 32 )
-					{
-						secret = true;
-						if ( level.levelnum <= 31 ) clust = 7;
-						else clust = 8;
-					}
+					secret = true;
+					if ( level.levelnum <= 31 ) clust = 7;
+					else clust = 8;
 				}
-				else
-				{
-					if ( (gameinfo.gametype&GAME_DOOM) && ((level.cluster == 9) || (level.cluster == 10)) )
-						secret = true;
-					clust = level.cluster;
-				}
-				int csiz = s.clustervisit.Size();
-				if ( csiz == 0 )
-				{
-					s.clustervisit.Push(clust);
-					s.secretdone.Push(secret);
-				}
-				else if ( s.clustervisit[csiz-1] != clust )
-				{
-					s.clustervisit.Push(clust);
-					s.secretdone.Push(secret|s.secretdone[csiz-1]);
-				}
+			}
+			else
+			{
+				if ( (gameinfo.gametype&GAME_DOOM) && ((level.cluster == 9) || (level.cluster == 10)) )
+					secret = true;
+				clust = level.cluster;
+			}
+			int csiz = s.clustervisit.Size();
+			if ( csiz == 0 )
+			{
+				s.clustervisit.Push(clust);
+				s.secretdone.Push(secret);
+			}
+			else if ( s.clustervisit[csiz-1] != clust )
+			{
+				s.clustervisit.Push(clust);
+				s.secretdone.Push(secret|s.secretdone[csiz-1]);
 			}
 			s.AddLevelStats();
 			s.lastcluster = level.cluster;

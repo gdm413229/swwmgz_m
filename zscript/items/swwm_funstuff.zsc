@@ -724,7 +724,7 @@ Class Chancebox : Actor
 			// no candidates? just burst into treats
 			if ( Random[Chancebox](0,1) )
 			{
-				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":(Random[Chancebox](0,1)||(gameinfo.gametype&GAME_Strife))?"GrilledCheeseSandwich":"YnykronAmmo",pos);
+				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":Random[Chancebox](0,1)?"GrilledCheeseSandwich":"YnykronAmmo",pos);
 				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);

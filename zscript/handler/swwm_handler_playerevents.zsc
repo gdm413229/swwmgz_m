@@ -72,19 +72,14 @@ extend Class SWWMHandler
 			l.DirectAdd("Gods");
 			l.DirectAdd("SUSAN");
 		}
-		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
+		if ( gameinfo.gametype&GAME_Raven )
 		{
 			l.DirectAdd("Parthoris");
 			l.DirectAdd("SerpentRiders");
 			l.DirectAdd("Sidhe");
 		}
-		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
+		if ( gameinfo.gametype&GAME_Hexen )
 			l.DirectAdd("Cronos");
-		if ( gameinfo.gametype&GAME_Strife )
-		{
-			l.DirectAdd("TheOrder");
-			l.DirectAdd("TheFront");
-		}
 		// starting weapons (if owned)
 		if ( p.mo.FindInventory('DeepImpact') )
 			l.DirectAdd("DeepImpact");

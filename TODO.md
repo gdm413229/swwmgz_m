@@ -17,9 +17,5 @@
 
 **Very extra things for the future:**
 
- - Strife support
-   - Rewrite all the game's dialogue
-   - Rewrite all the shop systems and other things
-   - Rewrite the cutscenes
  - Saya and Ibuki companion add-ons (potentially a Kirin companion too)
- - Modelled Monster/Decoration replacers for all IWADs done in the style of the mod (will be very time consuming)
+ - Modeled Monster/Decoration replacers for all IWADs done in the style of the mod (will be very time consuming)

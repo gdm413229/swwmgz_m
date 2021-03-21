@@ -26,6 +26,16 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)
+* **Additional gestures + gesture menu**
+  - Dab (loud and bassy, alerts monsters)
+  - Airhorn (unlimited range A_AlertMonsters, to unbreak vanilla teleport closets)
+  - Clap
+  - The Finger
+  - A Magic Trick (yes, it's THAT one)
+  - Thumbs Down
+  - Horns
+  - Picture Perfect (takes a screenshot with hud disabled and a cute frame around it)
+  - Giggle
 * **DLC Gameset:**
   - Tetris
   - Pong
@@ -43,7 +53,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Saya
   - Kirin
 * **Japanese localization???**
-* **Strife support, with rewritten dialogue**
 * **Monster/decoration replacements add-on**
 * **Hardcore Mode side mod**
   - Featuring Demolitionist on Maidbot frame

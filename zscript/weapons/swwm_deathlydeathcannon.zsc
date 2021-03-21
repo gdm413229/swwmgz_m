@@ -433,18 +433,9 @@ Class Ynykron : SWWMWeapon
 		XZW3 EFGHI 2;
 		XZW2 A 0
 		{
-			if ( gameinfo.gametype&GAME_Strife )
-			{
-				A_StartSound("ynykron/locked",CHAN_WEAPON,CHANF_OVERLAP);
-				if ( player == players[consoleplayer] )
-					Console.Printf(StringTable.Localize("$SWWM_YNYKRONLOCKED"));
-			}
-			else
-			{
-				invoker.chargestate = CS_CHARGING;
-				invoker.ventcooldown = Random[Ynykron](6,15);
-				A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,.01,2.);
-			}
+			invoker.chargestate = CS_CHARGING;
+			invoker.ventcooldown = Random[Ynykron](6,15);
+			A_StartSound("ynykron/ready",CHAN_WEAPONEXTRA2,CHANF_LOOP,.01,2.);
 		}
 		Goto Ready;
 	Reload:

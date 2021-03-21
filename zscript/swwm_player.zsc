@@ -308,8 +308,6 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Weapon>)(AllActorClasses[i]);
 				if ( !type || (type == "Weapon") ) continue;
-				// no Ynykron in Strife
-				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') ) continue;
 				// Don't give already owned weapons
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
@@ -333,7 +331,7 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) && (type is 'AmmoFabricator') ) continue;	// no fabricators before hexen
+				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators before hexen
 				// Don't give maxed items
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
@@ -813,14 +811,6 @@ Class Demolitionist : PlayerPawn
 		if ( swwm_singlefirst != oldsinglefirst )
 			WeaponSlots.SetupWeaponSlots(self);
 		oldsinglefirst = swwm_singlefirst;
-		// strife thing
-		if ( mystats.oldlogtext == "" )
-			mystats.oldlogtext = player.logtext;
-		else if ( player.logtext != mystats.oldlogtext )
-		{
-			mystats.questbacklog.Push(mystats.oldlogtext);
-			mystats.oldlogtext = player.logtext;
-		}
 		// overheal fading
 		if ( !isFrozen() && !(player.cheats&CF_TOTALLYFROZEN) )
 		{

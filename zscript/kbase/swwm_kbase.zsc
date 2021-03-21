@@ -246,13 +246,6 @@ Class DemolitionistMenu : GenericMenu
 				missionbacklog.Push(xstr);
 			}
 		}
-		else if ( gameinfo.gametype&GAME_Strife )
-		{
-			missionstr = players[consoleplayer].logtext;	// just show the quest log
-			int csiz = stats.questbacklog.Size();
-			for ( int i=csiz-1; i>=0; i-- )
-				missionbacklog.Push(stats.questbacklog[i]);
-		}
 		else missionstr = "$SWWM_MISSION_NONE";
 		if ( gameinfo.gametype&GAME_Heretic )
 		{
@@ -282,17 +275,6 @@ Class DemolitionistMenu : GenericMenu
 				c_hour = 10;
 				c_minute = 28;
 			}
-		}
-		else if ( gameinfo.gametype&GAME_Strife )
-		{
-			// September 13th 2173, 11:26 JST
-			// Epoch: 6425490360
-			c_year = 2173;
-			c_month = 7;
-			c_day = 12;
-			c_hour = 11;
-			c_minute = 26;
-			c_tz = "JST";
 		}
 		else if ( SWWMUtility.IsEviternity() )
 		{
@@ -2270,8 +2252,6 @@ Class DemolitionistMenu : GenericMenu
 				if ( !type ) continue;
 				// no collectibles
 				if ( type is 'SWWMCollectible' ) continue;
-				// no Ynykron in strife (unless selling)
-				if ( (gameinfo.gametype&GAME_Strife) && (type is 'Ynykron') && !sub ) continue;
 				// can't sell candygun spares
 				if ( sub && (type is 'CandyGunSpares') ) continue;
 				let cur = players[consoleplayer].mo.FindInventory(type);
@@ -3473,7 +3453,7 @@ Class DemolitionistMenu : GenericMenu
 		}
 		else if ( tabs[curtab] == TAB_SECRET )
 		{
-			if ( gameinfo.gametype&(GAME_Strife|GAME_Hexen) )
+			if ( gameinfo.gametype&GAME_Hexen )
 			{
 				Screen.DrawTexture(Drawing[2],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				str = StringTable.Localize("$SWWM_KIRINPOEM");

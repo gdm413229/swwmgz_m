@@ -111,7 +111,7 @@ extend Class SWWMHandler
 		{
 			if ( !lastcombat || (gametic > lastcombat+40) )
 			{
-				if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.DamageSource)) )
+				if ( e.Thing.IsFriend(e.DamageSource) )
 					lastcombat = AddOneliner("friendhit",1,10);
 				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.DamageSource.bBOSS?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("gethit",1,15);
@@ -122,7 +122,7 @@ extend Class SWWMHandler
 		if ( (e.DamageSource == players[consoleplayer].mo) && (e.Thing.bISMONSTER || e.Thing.player || (e.Thing is 'ScriptedMarine')) && (e.Thing.Health > 0) )
 		{
 			// make sure it's not a moth, because otherwise they won't shut up about accidentally hurting them (it happens a lot)
-			if ( (e.Thing.IsFriend(e.DamageSource) || SWWMUtility.IsCivilian(e.Thing)) && !(e.Thing is 'LampMoth') )
+			if ( e.Thing.IsFriend(e.DamageSource) && !(e.Thing is 'LampMoth') )
 			{
 				if ( !lastcombat || (gametic > lastcombat+40) )
 					lastcombat = AddOneliner("hitfriend",1,10);
@@ -150,7 +150,7 @@ extend Class SWWMHandler
 			highesttic = gametic;
 			if ( !lastcombat || (gametic > lastcombat+40) )
 			{
-				if ( e.Thing.IsFriend(src) || SWWMUtility.IsCivilian(e.Thing) )
+				if ( e.Thing.IsFriend(src) )
 					lastcombat = AddOneliner("friendkill",1,5);
 				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.Thing.bBOSS?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("scorekill",1,15);

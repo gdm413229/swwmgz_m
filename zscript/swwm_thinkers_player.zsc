@@ -41,9 +41,6 @@ Class SWWMStats : Thinker
 	// these two are used for mission updates
 	Array<int> clustervisit;
 	Array<bool> secretdone;
-	// [Strife] preserve previous mission logs
-	String oldlogtext;
-	Array<String> questbacklog;
 	// hackaround for stuff getting lost
 	Array<Class<SWWMCollectible> > ownedcollectibles;
 	// for pistol start info (to avoid it within hubs)
@@ -360,23 +357,18 @@ Class SWWMLoreLibrary : Thinker
 	static bool PreVerify( String ref )
 	{
 		// restrictions
-		if ( !(gameinfo.gametype&(GAME_Raven|GAME_Strife)) )
+		if ( !(gameinfo.gametype&GAME_Raven) )
 		{
 			if ( ref ~== "Parthoris" ) return true;
 			if ( ref ~== "Sidhe" ) return true;
 			if ( ref ~== "SerpentRiders" ) return true;
 		}
-		if ( !(gameinfo.gametype&(GAME_Hexen|GAME_Strife)) )
+		if ( !(gameinfo.gametype&GAME_Hexen) )
 		{
 			if ( ref ~== "Cronos" ) return true;
 			if ( ref ~== "Kirin" ) return true;	// not met
 			if ( ref ~== "Fabricator" ) return true;	// not yet introduced
 			if ( ref ~== "Administrators" ) return true;	// not met
-		}
-		if ( !(gameinfo.gametype&GAME_Strife) )
-		{
-			if ( ref ~== "TheOrder" ) return true;
-			if ( ref ~== "TheFront" ) return true;
 		}
 		// check if entry is for a collectible
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
@@ -421,14 +413,7 @@ Class SWWMLoreLibrary : Thinker
 		String text = String.Format("SWWM_LORETXT_%s",ref);
 		String assoc = String.Format("SWWM_LOREREL_%s",ref);
 		// redirects
-		if ( gameinfo.gametype&GAME_Strife )
-		{
-			if ( text ~== "SWWM_LORETXT_KIRIN" )
-				text = "SWWM_LORETXT_KIRIN2";	// married alakir
-			else if ( text ~== "SWWM_LORETXT_SERPENTRIDERS" )
-				text = "SWWM_LORETXT_SERPENTRIDERS3";	// all riders gone
-		}
-		if ( gameinfo.gametype&(GAME_Hexen|GAME_Strife) )
+		if ( gameinfo.gametype&GAME_Hexen )
 		{
 			if ( text ~== "SWWM_LORETXT_SAYA" )
 				text = "SWWM_LORETXT_SAYA3";	// married kirin
@@ -457,7 +442,7 @@ Class SWWMLoreLibrary : Thinker
 			else if ( text ~== "SWWM_LORETXT_GODS" )
 				text = "SWWM_LORETXT_GODS2";	// beyond gods
 		}
-		if ( gameinfo.gametype&(GAME_Raven|GAME_Strife) )
+		if ( gameinfo.gametype&GAME_Raven )
 		{
 			if ( text ~== "SWWM_LORETXT_SAYA" )
 				text = "SWWM_LORETXT_SAYA2";	// dating demo

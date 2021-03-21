@@ -354,7 +354,7 @@ Class BusterWall : Thinker
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("ASHWALL",TexMan.Type_Any);
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("LOOSERCK",TexMan.Type_Any);
 		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("WASTE03",TexMan.Type_Any);
-		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("SCHWAL01",TexMan.Type_Any);	// Strife has a dedicated "destroyed wall" texture, nice
+		if ( !rubble.IsValid() ) rubble = TexMan.CheckForTexture("-noflat-",TexMan.Type_Any);	// an unfortunate fallback should none of those exist
 		// activate all shoot/use specials (not locked) associated with this sector's two-sided lines
 		for ( int i=0; i<hs.Lines.Size(); i++ )
 		{

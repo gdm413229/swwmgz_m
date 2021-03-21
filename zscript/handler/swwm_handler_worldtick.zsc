@@ -95,12 +95,6 @@ extend Class SWWMHandler
 			if ( (a.Health <= 0) || a.bKILLED || a.bCORPSE ) continue;
 			// ignore friends
 			if ( a.IsFriend(players[consoleplayer].mo) ) continue;
-			// [Strife] ignore if not in combat
-			if ( (gameinfo.gametype&GAME_Strife) && !a.bINCOMBAT && !a.bJUSTATTACKED ) continue;
-			// [Strife] ignore certain classes
-			if ( (a is 'RatBuddy') || (a is 'Peasant') || (a is 'Beggar') ) continue;
-			// [Strife] ignore Oracle's spectre while it's inactive
-			if ( (a is 'AlienSpectre3') && a.InStateSequence(a.CurState,a.FindState("Spawn")) ) continue;
 			// ignore if not targetted or player can't see it
 			if ( (a.target != players[consoleplayer].mo)
 				|| !SWWMUtility.InPlayerFOV(players[consoleplayer],a) ) continue;

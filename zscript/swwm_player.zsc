@@ -501,7 +501,7 @@ Class Demolitionist : PlayerPawn
 			SWWMItemSense.Spawn(self,i);
 		}
 	}
-	void CheckNaziRemove()
+	void CheckDefaceTexture()
 	{
 		if ( player.usedown )
 			return;
@@ -510,7 +510,7 @@ Class Demolitionist : PlayerPawn
 		if ( d.HitType == TRACE_HitNone ) return;
 		bool remove;
 		TextureID replacewith;
-		[remove, replacewith] = SWWMUtility.NaziTexRemover(d.HitTexture);
+		[remove, replacewith] = SWWMUtility.DefaceTexture(d.HitTexture);
 		if ( !remove ) return;
 		player.usedown = true;
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
@@ -711,7 +711,7 @@ Class Demolitionist : PlayerPawn
 		if ( player && (player.mo == self) && (player.playerstate != PST_DEAD) && (player.cmd.buttons&BT_USE) )
 		{
 			if ( !player.usedown ) lastuse = gametic;
-			CheckNaziRemove();
+			CheckDefaceTexture();
 		}
 		Super.PlayerThink();
 		if ( (gametic == lastuse) && IsActorPlayingSound(CHAN_VOICE,"*usefail") )

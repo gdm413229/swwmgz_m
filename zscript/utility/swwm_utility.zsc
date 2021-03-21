@@ -1567,15 +1567,31 @@ Class SWWMUtility
 		return false;
 	}
 
-	static bool, TextureID NaziTexRemover( TextureID checkme )
+	static bool, TextureID DefaceTexture( TextureID checkme )
 	{
 		String tn = TexMan.GetName(checkme);
-		if ( (tn ~== "ZZWOLF2") || (tn ~== "ZZWOLF3") || (tn ~== "ZZWOLF4") )
-			return true, TexMan.CheckForTexture("ZZWOLF1",TexMan.Type_Any);
-		if ( (tn ~== "ZZWOLF6") || (tn ~== "ZZWOLF7") )
-			return true, TexMan.CheckForTexture("ZZWOLF5",TexMan.Type_Any);
-		if ( (tn ~== "ZZWOLF12") || (tn ~== "ZZWOLF13") )
-			return true, TexMan.CheckForTexture("ZZWOLF11",TexMan.Type_Any);
+		if ( (tn ~== "MARBFAC2") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_MARBFAC2.png",TexMan.Type_Any);
+		if ( (tn ~== "MARBFAC3") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_MARBFAC3.png",TexMan.Type_Any);
+		if ( (tn ~== "MARBFAC4") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_MARBFAC4.png",TexMan.Type_Any);
+		if ( (tn ~== "MARBFACE") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_MARBFACE.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF2") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF2.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF3") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF3.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF4") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF4.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF6") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF6.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF7") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF7.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF12") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF12.png",TexMan.Type_Any);
+		if ( (tn ~== "ZZWOLF13") )
+			return true, TexMan.CheckForTexture("textures/deface/defaced_ZZWOLF13.png",TexMan.Type_Any);
 		return false, checkme;
 	}
 

@@ -220,7 +220,7 @@ Class LoveHeart : Actor
 		A_AttachLight('LOVELIGHT',DynamicLight.PointLight,Color(255,176,208),80,80,DYNAMICLIGHT.LF_ATTENUATE);
 		special2 = 25;
 	}
-	void CheckNaziRemove()
+	void CheckDefaceTexture()
 	{
 		TextureID HitTexture;
 		Line HitLine;
@@ -291,7 +291,7 @@ Class LoveHeart : Actor
 		}
 		bool remove;
 		TextureID replacewith;
-		[remove, replacewith] = SWWMUtility.NaziTexRemover(HitTexture);
+		[remove, replacewith] = SWWMUtility.DefaceTexture(HitTexture);
 		if ( !remove ) return;
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		if ( HitLine )
@@ -325,7 +325,7 @@ Class LoveHeart : Actor
 	}
 	action void A_HeartBurst()
 	{
-		invoker.CheckNaziRemove();
+		invoker.CheckDefaceTexture();
 		// use line
 		if ( BlockingLine )
 		{

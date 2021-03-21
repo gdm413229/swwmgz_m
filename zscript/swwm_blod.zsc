@@ -244,6 +244,7 @@ Class mkBloodDrop : Actor
 					}
 					master.tracer = self;
 				}
+				bMISSILE = false;
 				dead = true;
 				if ( d.Hit3DFloor )
 				{
@@ -275,6 +276,7 @@ Class mkBloodDrop : Actor
 				// hit the ceiling
 				SetOrigin(d.HitLocation-(0,0,1),true);
 				A_StartSound("misc/blooddrop",volume:.1);
+				bMISSILE = false;
 				dead = true;
 				onceiling = true;
 				if ( d.Hit3DFloor )

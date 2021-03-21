@@ -72,6 +72,8 @@ Class AlmasteelPlating : Inventory
 		if ( flags&DMG_EXPLOSION ) newdamage = newdamage/5;
 		// 50% reduction for crushing
 		if ( damageType == 'Crush' ) newdamage = newdamage/2;
+		// 66% reduction for Telebrium corrosion
+		if ( damageType == 'Corroded' ) newdamage = newdamage/3;
 	}
 	override bool HandlePickup( Inventory item )
 	{

@@ -19,6 +19,7 @@ Class SWWMStaticHandler : StaticEventHandler
 	String mpver[MAXPLAYERS];
 	int checktic;
 	ui bool mpsent, checked;
+	int maptime;
 
 	override void NewGame()
 	{
@@ -33,8 +34,14 @@ Class SWWMStaticHandler : StaticEventHandler
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
 	}
 
+	override void WorldTick()
+	{
+		maptime++;
+	}
+
 	override void WorldLoaded( WorldEvent e )
 	{
+		maptime = 0;
 		if ( e.IsSavegame || e.IsReopen )
 		{
 			// restore underwater sounds for players
@@ -134,12 +141,28 @@ Class SWWMStaticHandler : StaticEventHandler
 			if ( verstr != StringTable.Localize("$SWWM_SHORTVER") )
 				mptaint[e.Player] = true;
 		}
+		else if ( e.Name.Left(16) ~== "swwmachievement." )
+		{
+			let c = Actor.Spawn("PartyTime",players[e.Args[0]].mo.pos);
+			c.bSTANDSTILL = true;
+			if ( e.Args[0] == consoleplayer )
+			{
+				S_StartSound("misc/achievement",CHAN_ITEM,CHANF_UI|CHANF_OVERLAP);
+				S_StartSound("misc/achievement2",CHAN_VOICE,CHANF_UI|CHANF_OVERLAP);
+			}
+			else
+			{
+				Console.Printf(String.Format(StringTable.Localize("$SWWM_CHEEVOREM"),players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(16))));
+				c.A_StartSound("misc/achievement",CHAN_ITEM,CHANF_OVERLAP);
+				c.A_StartSound("misc/achievement2",CHAN_ITEM,CHANF_OVERLAP);
+			}
+		}
 	}
 
 	override void PostUiTick()
 	{
-		// TODO achievement update code would go in here
 		if ( gamestate != GS_LEVEL ) return;
+		CheckAllAchievements();
 		if ( !mpsent )
 		{
 			EventHandler.SendNetworkEvent("swwmversion."..StringTable.Localize("$SWWM_SHORTVER"));
@@ -215,6 +238,7 @@ Class SWWMStaticHandler : StaticEventHandler
 			wasinmap = false;
 			if ( timer == 1 )
 			{
+				if ( swwm_achievement_abort < 1 ) CVar.FindCVar('swwm_achievement_abort').SetInt(1);
 				Console.Printf("\cfOopsie Woopsie!\c-");
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
 				if ( hnd && hnd.detected )

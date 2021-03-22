@@ -21,7 +21,7 @@ extend Class SWWMHandler
 		if ( iwantdie == -1 ) iwantdie = (G_SkillName() == StringTable.Localize("$SWWM_SKLUNATIC"));
 		if ( iwantdie )
 		{
-			if ( e.Thing.bMISSILE && !e.Thing.FindInventory("DontDuplicate") && !e.Thing.IsZeroDamage() && (e.Thing.target && e.Thing.target.bISMONSTER && !e.Thing.target.player) )
+			if ( SWWMUtility.ValidProjectile(e.Thing) && !e.Thing.FindInventory("DontDuplicate") && (e.Thing.target && e.Thing.target.bISMONSTER && !e.Thing.target.player) )
 			{
 				e.Thing.speed *= 2;
 				e.Thing.vel *= 2;

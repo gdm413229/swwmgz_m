@@ -1,0 +1,566 @@
+// achievement tracking
+
+// constants for finetuning them numbers
+const SA_GCSANDWICH = 40;
+const SA_GHOST = 30;
+const SA_ALLITEMS = 75;
+const SA_CONGA = 25;
+const SA_EXPLOGUN = 5;
+const SA_GRAVITY = 20;
+const SA_FLIGHT = 1000;
+const SA_PAR = 25;
+const SA_GOLDEN = 24;
+const SA_GIB = 500;
+const SA_BARRIER = 30;
+const SA_BOSSDASH = 20;
+const SA_SNEEZE = 50;
+const SA_FUEL = 200;
+const SA_SLAYER = 40;
+const SA_STOMP = 50;
+const SA_THRUWALL = 30;
+const SA_LEAD = 1500;
+const SA_LOVE = 50;
+const SA_BUTTS = 100;
+const SA_PLUSH = 20;
+const SA_BUSTIN = 40;
+const SA_MOTH = 60;
+const SA_BRAKE = 30;
+const SA_RAGE = 40;
+const SA_PARRY = 100;
+const SA_ALLKILLS = 100;
+const SA_ALLSECRETS = 50;
+const SA_REFLECT = 50;
+const SA_WAVE = 20;
+const SA_FRIEND = 60;
+const SA_SHOCK = 50;
+const SA_BALLS = 30;
+const SA_REFRESH = 40;
+const SA_STEP = 60;
+const SA_SUNNY = 30;
+const SA_THICC = 80;
+const SA_SLEMG = 100;
+const SA_JUMP = 100;
+const SA_EZKILL = 200;
+const SA_ROAST = 30;
+const SA_DAB = 60;
+const SA_HND = 6;
+const SA_GEPGUN = 50;
+const SA_PENE = 20;
+const SA_ACID = 200;
+const SA_SANIC = 800;
+const SA_BUNE = 150;
+const SA_BONK = 300;
+const SA_ANOM = 40;
+
+// achievement unlock tracking
+extend Class SWWMStaticHandler
+{
+	ui int lastachievementnotify;	// prevent overlap
+
+	private ui bool CheckAchievement( Name ac, String acname, int acnum, Name acprog )
+	{
+		let ev = CVar.FindCVar(ac);
+		int val = ev.GetInt();
+		// manually check progress
+		if ( acprog != 'None' )
+		{
+			int prog = CVar.FindCVar(acprog).GetInt();
+			int maxval = acnum;
+			// special cases
+			if ( ac == 'swwm_achievement_allcoll' )
+			{
+				int nc = 0;
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+					if ( !c || (c == 'SWWMCollectible') ) continue;
+					nc++;
+				}
+				maxval = nc;
+			}
+			else if ( ac == 'swwm_achievement_dakka' ) maxval = 60;
+			else if ( ac == 'swwm_achievement_dosh' ) maxval = 1000000000;
+			else if ( ac == 'swwm_achievement_mega' ) maxval = 1000000;
+			if ( val && (prog < maxval) )
+			{
+				ev.SetInt(0);
+				val = 0;
+			}
+			else if ( !val && (prog >= maxval) )
+			{
+				ev.SetInt(1);
+				val = 1;
+			}
+		}
+		if ( (val == 1) && (gametic > lastachievementnotify) )
+		{
+			ev.SetInt(2);
+			EventHandler.SendNetworkEvent("swwmachievement."..acname.."_TAG",consoleplayer);
+			let notif = new("SWWMAchievementNotification").Init(acname,acnum);
+			StatusBar.AttachMessage(notif,-3478);
+			lastachievementnotify = gametic+200;
+		}
+		return (val > 0);
+	}
+
+	private ui void CheckAllAchievements()
+	{
+		// don't check constantly
+		if ( (maptime < 105) || (maptime%35) ) return;
+		// cvar assigned
+		static const Name vars[] =
+		{
+			'swwm_achievement_gcsandwich',
+			'swwm_achievement_hdoom',
+			'swwm_achievement_onestanding',
+			'swwm_achievement_oopsie',
+			'swwm_achievement_ghost',
+			'swwm_achievement_clonk',
+			'swwm_achievement_allitems',
+			'swwm_achievement_conga',
+			'swwm_achievement_explogun',
+			'swwm_achievement_gravity',
+			'swwm_achievement_flight',
+			'swwm_achievement_cliffyb',
+			'swwm_achievement_par',
+			'swwm_achievement_oneguy',
+			'swwm_achievement_golden',
+			'swwm_achievement_gib',
+			'swwm_achievement_barrier',
+			'swwm_achievement_bossdash',
+			'swwm_achievement_sneeze',
+			'swwm_achievement_fuel',
+			'swwm_achievement_slayer',
+			'swwm_achievement_broccolidoccoli',
+			'swwm_achievement_dime',
+			'swwm_achievement_stomp',
+			'swwm_achievement_cheat',
+			'swwm_achievement_god',
+			'swwm_achievement_thruwall',
+			'swwm_achievement_mashiro',
+			'swwm_achievement_lead',
+			'swwm_achievement_love',
+			'swwm_achievement_butts',
+			'swwm_achievement_plush',
+			'swwm_achievement_bustin',
+			'swwm_achievement_moth',
+			'swwm_achievement_iwad',
+			'swwm_achievement_brake',
+			'swwm_achievement_rage',
+			'swwm_achievement_abort',
+			'swwm_achievement_parry',
+			'swwm_achievement_allkills',
+			'swwm_achievement_allsecrets',
+			'swwm_achievement_reflect',
+			'swwm_achievement_sekiro',
+			'swwm_achievement_wave',
+			'swwm_achievement_friend',
+			'swwm_achievement_shock',
+			'swwm_achievement_balls',
+			'swwm_achievement_refresh',
+			'swwm_achievement_step',
+			'swwm_achievement_sunny',
+			'swwm_achievement_thicc',
+			'swwm_achievement_allcoll',
+			'swwm_achievement_slemg',
+			'swwm_achievement_dosh',
+			'swwm_achievement_jump',
+			'swwm_achievement_ezkill',
+			'swwm_achievement_ligma',
+			'swwm_achievement_yeet',
+			'swwm_achievement_mbf',
+			'swwm_achievement_lightning',
+			'swwm_achievement_dakka',
+			'swwm_achievement_roast',
+			'swwm_achievement_dab',
+			'swwm_achievement_hnd',
+			'swwm_achievement_gepgun',
+			'swwm_achievement_fuller',
+			'swwm_achievement_pene',
+			'swwm_achievement_acid',
+			'swwm_achievement_salt',
+			'swwm_achievement_mega',
+			'swwm_achievement_sanic',
+			'swwm_achievement_tele',
+			'swwm_achievement_bune',
+			'swwm_achievement_bonk',
+			'swwm_achievement_anom',
+			'swwm_achievement_anone',
+			'swwm_achievement_tetris',
+			'swwm_achievement_pong',
+			'swwm_achievement_snake',
+			'swwm_achievement_smb',
+			'swwm_achievement_tyrian',
+			'swwm_achievement_bof'
+		};
+		// localized name
+		static const String names[] =
+		{
+			"$SWWM_ACHIEVEMENT_GCSANDWICH",
+			"$SWWM_ACHIEVEMENT_HDOOM",
+			"$SWWM_ACHIEVEMENT_ONESTANDING",
+			"$SWWM_ACHIEVEMENT_OOPSIE",
+			"$SWWM_ACHIEVEMENT_GHOST",
+			"$SWWM_ACHIEVEMENT_CLONK",
+			"$SWWM_ACHIEVEMENT_ALLITEMS",
+			"$SWWM_ACHIEVEMENT_CONGA",
+			"$SWWM_ACHIEVEMENT_EXPLOGUN",
+			"$SWWM_ACHIEVEMENT_GRAVITY",
+			"$SWWM_ACHIEVEMENT_FLIGHT",
+			"$SWWM_ACHIEVEMENT_CLIFFYB",
+			"$SWWM_ACHIEVEMENT_PAR",
+			"$SWWM_ACHIEVEMENT_ONEGUY",
+			"$SWWM_ACHIEVEMENT_GOLDEN",
+			"$SWWM_ACHIEVEMENT_GIB",
+			"$SWWM_ACHIEVEMENT_BARRIER",
+			"$SWWM_ACHIEVEMENT_BOSSDASH",
+			"$SWWM_ACHIEVEMENT_SNEEZE",
+			"$SWWM_ACHIEVEMENT_FUEL",
+			"$SWWM_ACHIEVEMENT_SLAYER",
+			"$SWWM_ACHIEVEMENT_BROCCOLIDOCCOLI",
+			"$SWWM_ACHIEVEMENT_DIME",
+			"$SWWM_ACHIEVEMENT_STOMP",
+			"$SWWM_ACHIEVEMENT_CHEAT",
+			"$SWWM_ACHIEVEMENT_GOD",
+			"$SWWM_ACHIEVEMENT_THRUWALL",
+			"$SWWM_ACHIEVEMENT_MASHIRO",
+			"$SWWM_ACHIEVEMENT_LEAD",
+			"$SWWM_ACHIEVEMENT_LOVE",
+			"$SWWM_ACHIEVEMENT_BUTTS",
+			"$SWWM_ACHIEVEMENT_PLUSH",
+			"$SWWM_ACHIEVEMENT_BUSTIN",
+			"$SWWM_ACHIEVEMENT_MOTH",
+			"$SWWM_ACHIEVEMENT_IWAD",
+			"$SWWM_ACHIEVEMENT_BRAKE",
+			"$SWWM_ACHIEVEMENT_RAGE",
+			"$SWWM_ACHIEVEMENT_ABORT",
+			"$SWWM_ACHIEVEMENT_PARRY",
+			"$SWWM_ACHIEVEMENT_ALLKILLS",
+			"$SWWM_ACHIEVEMENT_ALLSECRETS",
+			"$SWWM_ACHIEVEMENT_REFLECT",
+			"$SWWM_ACHIEVEMENT_SEKIRO",
+			"$SWWM_ACHIEVEMENT_WAVE",
+			"$SWWM_ACHIEVEMENT_FRIEND",
+			"$SWWM_ACHIEVEMENT_SHOCK",
+			"$SWWM_ACHIEVEMENT_BALLS",
+			"$SWWM_ACHIEVEMENT_REFRESH",
+			"$SWWM_ACHIEVEMENT_STEP",
+			"$SWWM_ACHIEVEMENT_SUNNY",
+			"$SWWM_ACHIEVEMENT_THICC",
+			"$SWWM_ACHIEVEMENT_ALLCOLL",
+			"$SWWM_ACHIEVEMENT_SLEMG",
+			"$SWWM_ACHIEVEMENT_DOSH",
+			"$SWWM_ACHIEVEMENT_JUMP",
+			"$SWWM_ACHIEVEMENT_EZKILL",
+			"$SWWM_ACHIEVEMENT_LIGMA",
+			"$SWWM_ACHIEVEMENT_YEET",
+			"$SWWM_ACHIEVEMENT_MBF",
+			"$SWWM_ACHIEVEMENT_LIGHTNING",
+			"$SWWM_ACHIEVEMENT_DAKKA",
+			"$SWWM_ACHIEVEMENT_ROAST",
+			"$SWWM_ACHIEVEMENT_DAB",
+			"$SWWM_ACHIEVEMENT_HND",
+			"$SWWM_ACHIEVEMENT_GEPGUN",
+			"$SWWM_ACHIEVEMENT_FULLER",
+			"$SWWM_ACHIEVEMENT_PENE",
+			"$SWWM_ACHIEVEMENT_ACID",
+			"$SWWM_ACHIEVEMENT_SALT",
+			"$SWWM_ACHIEVEMENT_MEGA",
+			"$SWWM_ACHIEVEMENT_SANIC",
+			"$SWWM_ACHIEVEMENT_TELE",
+			"$SWWM_ACHIEVEMENT_BUNE",
+			"$SWWM_ACHIEVEMENT_BONK",
+			"$SWWM_ACHIEVEMENT_ANOM",
+			"$SWWM_ACHIEVEMENT_ANONE",
+			"$SWWM_ACHIEVEMENT_TETRIS",
+			"$SWWM_ACHIEVEMENT_PONG",
+			"$SWWM_ACHIEVEMENT_SNAKE",
+			"$SWWM_ACHIEVEMENT_SMB",
+			"$SWWM_ACHIEVEMENT_TYRIAN",
+			"$SWWM_ACHIEVEMENT_BOF"
+		};
+		// has number in txt
+		static const int number[] =
+		{
+			SA_GCSANDWICH,
+			0,	// HDOOM
+			0,	// ONESTANDING
+			0,	// OOPSIE
+			SA_GHOST,
+			0,	// CLONK
+			SA_ALLITEMS,
+			SA_CONGA,
+			SA_EXPLOGUN,
+			SA_GRAVITY,
+			SA_FLIGHT,
+			0,	// CLIFFYB
+			SA_PAR,
+			0,	// ONEGUY
+			SA_GOLDEN,
+			SA_GIB,
+			SA_BARRIER,
+			SA_BOSSDASH,
+			SA_SNEEZE,
+			SA_FUEL,
+			SA_SLAYER,
+			0,	// BROCCOLIDOCCOLI
+			0,	// DIME
+			SA_STOMP,
+			0,	// CHEAT
+			0,	// GOD
+			SA_THRUWALL,
+			0,	// MASHIRO
+			SA_LEAD,
+			SA_LOVE,
+			SA_BUTTS,
+			SA_PLUSH,
+			SA_BUSTIN,
+			SA_MOTH,
+			0,	// IWAD
+			SA_BRAKE,
+			SA_RAGE,
+			0,	// ABORT
+			SA_PARRY,
+			SA_ALLKILLS,
+			SA_ALLSECRETS,
+			SA_REFLECT,
+			0,	// SEKIRO
+			SA_WAVE,
+			SA_FRIEND,
+			SA_SHOCK,
+			SA_BALLS,
+			SA_REFRESH,
+			SA_STEP,
+			SA_SUNNY,
+			SA_THICC,
+			0,	// ALLCOLL
+			SA_SLEMG,
+			0,	// DOSH
+			SA_JUMP,
+			SA_EZKILL,
+			0,	// LIGMA
+			0,	// YEET
+			0,	// MBF
+			0,	// LIGHTNING
+			0,	// DAKKA
+			SA_ROAST,
+			SA_DAB,
+			SA_HND,
+			SA_GEPGUN,
+			0,	// FULLER
+			SA_PENE,
+			SA_ACID,
+			0,	// SALT
+			0,	// MEGA
+			SA_SANIC,
+			0,	// TELE
+			SA_BUNE,
+			SA_BONK,
+			SA_ANOM,
+			0,	// ANONE
+			0,	// TETRIS
+			0,	// PONG
+			0,	// SNAKE
+			0,	// SMB
+			0,	// TYRIAN
+			0	// BOF
+		};
+		// is ignored (hide away achievements that can't be done yet)
+		static const bool ignoreme[] =
+		{
+			false,	// GCSANDWICH
+			false,	// HDOOM
+			false,	// ONESTANDING
+			false,	// OOPSIE
+			false,	// GHOST
+			false,	// CLONK
+			false,	// ALLITEMS
+			false,	// CONGA
+			false,	// EXPLOGUN
+			false,	// GRAVITY
+			false,	// FLIGHT
+			false,	// CLIFFYB
+			false,	// PAR
+			false,	// ONEGUY
+			false,	// GOLDEN
+			false,	// GIB
+			false,	// BARRIER
+			false,	// BOSSDASH
+			false,	// SNEEZE
+			false,	// FUEL
+			false,	// SLAYER
+			false,	// BROCCOLIDOCCOLI
+			false,	// DIME
+			false,	// STOMP
+			false,	// CHEAT
+			false,	// GOD
+			false,	// THRUWALL
+			true,	// MASHIRO
+			false,	// LEAD
+			false,	// LOVE
+			false,	// BUTTS
+			false,	// PLUSH
+			false,	// BUSTIN
+			false,	// MOTH
+			false,	// IWAD
+			false,	// BRAKE
+			false,	// RAGE
+			false,	// ABORT
+			false,	// PARRY
+			false,	// ALLKILLS
+			false,	// ALLSECRETS
+			false,	// REFLECT
+			false,	// SEKIRO
+			false,	// WAVE
+			false,	// FRIEND
+			false,	// SHOCK
+			false,	// BALLS
+			false,	// REFRESH
+			false,	// STEP
+			false,	// SUNNY
+			false,	// THICC
+			false,	// ALLCOLL
+			false,	// SLEMG
+			false,	// DOSH
+			false,	// JUMP
+			false,	// EZKILL
+			false,	// LIGMA
+			false,	// YEET
+			false,	// MBF
+			true,	// LIGHTNING
+			true,	// DAKKA
+			true,	// ROAST
+			true,	// DAB
+			true,	// HND
+			true,	// GEPGUN
+			true,	// FULLER
+			true,	// PENE
+			false,	// ACID
+			false,	// SALT
+			false,	// MEGA
+			false,	// SANIC
+			false,	// TELE
+			false,	// BUNE
+			false,	// BONK
+			false,	// ANOM
+			false,	// ANONE
+			true,	// TETRIS
+			true,	// PONG
+			true,	// SNAKE
+			true,	// SMB
+			true,	// TYRIAN
+			true	// BOF
+		};
+		// progress tracking cvar (if any)
+		static const Name pvar[] =
+		{
+			'swwm_progress_gcsandwich',	// GCSANDWICH
+			'None',	// HDOOM
+			'None',	// ONESTANDING
+			'None',	// OOPSIE
+			'swwm_progress_ghost',	// GHOST
+			'None',	// CLONK
+			'swwm_progress_allitems',	// ALLITEMS
+			'swwm_progress_conga',	// CONGA
+			'swwm_progress_explogun',	// EXPLOGUN
+			'swwm_progress_gravity',	// GRAVITY
+			'swwm_progress_flight',	// FLIGHT
+			'None',	// CLIFFYB
+			'swwm_progress_par',	// PAR
+			'None',	// ONEGUY
+			'swwm_progress_golden',	// GOLDEN
+			'swwm_progress_gib',	// GIB
+			'swwm_progress_barrier',	// BARRIER
+			'swwm_progress_bossdash',	// BOSSDASH
+			'swwm_progress_sneeze',	// SNEEZE
+			'swwm_progress_fuel',	// FUEL
+			'swwm_progress_slayer',	// SLAYER
+			'None',	// BROCCOLIDOCCOLI
+			'None',	// DIME
+			'swwm_progress_stomp',	// STOMP
+			'None',	// CHEAT
+			'None',	// GOD
+			'swwm_progress_thruwall',	// THRUWALL
+			'None',	// MASHIRO
+			'swwm_progress_lead',	// LEAD
+			'swwm_progress_love',	// LOVE
+			'swwm_progress_butts',	// BUTTS
+			'swwm_progress_plush',	// PLUSH
+			'swwm_progress_bustin',	// BUSTIN
+			'swwm_progress_moth',	// MOTH
+			'None',	// IWAD
+			'swwm_progress_brake',	// BRAKE
+			'swwm_progress_rage',	// RAGE
+			'None',	// ABORT
+			'swwm_progress_parry',	// PARRY
+			'swwm_progress_allkills',	// ALLKILLS
+			'swwm_progress_allsecrets',	// ALLSECRETS
+			'swwm_progress_reflect',	// REFLECT
+			'None',	// SEKIRO
+			'swwm_progress_wave',	// WAVE
+			'swwm_progress_friend',	// FRIEND
+			'swwm_progress_shock',	// SHOCK
+			'swwm_progress_balls',	// BALLS
+			'swwm_progress_refresh',	// REFRESH
+			'swwm_progress_step',	// STEP
+			'swwm_progress_sunny',	// SUNNY
+			'swwm_progress_thicc',	// THICC
+			'swwm_progress_allcoll',	// ALLCOLL
+			'swwm_progress_slemg',	// SLEMG
+			'swwm_progress_dosh',	// DOSH
+			'swwm_progress_jump',	// JUMP
+			'swwm_progress_ezkill',	// EZKILL
+			'None',	// LIGMA
+			'None',	// YEET
+			'None',	// MBF
+			'None',	// LIGHTNING
+			'swwm_progress_dakka',	// DAKKA
+			'swwm_progress_roast',	// ROAST
+			'swwm_progress_dab',	// DAB
+			'swwm_progress_hnd',	// HND
+			'swwm_progress_gepgun',	// GEPGUN
+			'None',	// FULLER
+			'swwm_progress_pene',	// PENE
+			'swwm_progress_acid',	// ACID
+			'None',	// SALT
+			'swwm_progress_mega',	// MEGA
+			'swwm_progress_sanic',	// SANIC
+			'None',	// TELE
+			'swwm_progress_bune',	// BUNE
+			'swwm_progress_bonk',	// BONK
+			'swwm_progress_anom',	// ANOM
+			'None',	// ANONE
+			'None',	// TETRIS
+			'None',	// PONG
+			'None',	// SNAKE
+			'None',	// SMB
+			'None',	// TYRIAN
+			'None'	// BOF
+		};
+		bool alldone = true;
+		for ( int i=0; i<vars.Size(); i++ )
+		{
+			if ( ignoreme[i] ) continue;
+			if ( !CheckAchievement(vars[i],names[i],number[i],pvar[i]) )
+				alldone = false;
+		}
+		let ev = CVar.FindCVar('swwm_achievement_everything');
+		int val = ev.GetInt();
+		// not done!
+		if ( !alldone )
+		{
+			if ( val != 0 ) ev.SetInt(0);
+			return;
+		}
+		// all done!
+		if ( val == 0 ) ev.SetInt(1);
+		else if ( (val == 1) && (gametic > lastachievementnotify) )
+		{
+			ev.SetInt(2);
+			EventHandler.SendNetworkEvent("swwmachievement.$SWWM_ACHIEVEMENT_EVERYTHING_TAG",consoleplayer);
+			let notif = new("SWWMAchievementNotification").Init("$SWWM_ACHIEVEMENT_EVERYTHING");
+			StatusBar.AttachMessage(notif,-3478);
+			lastachievementnotify = gametic+200;
+		}
+	}
+}

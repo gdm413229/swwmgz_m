@@ -709,7 +709,7 @@ Class Chancebox : Actor
 			if ( !c || (c == 'SWWMCollectible') ) continue;
 			let def = GetDefaultByType(c);
 			// check that we can collect it in this IWAD
-			if ( !(gameinfo.gametype&def.avail) ) continue;
+			if ( !def.ValidGame() ) continue;
 			candidates.Push(c);
 		}
 		let ti = ThinkerIterator.Create("SWWMCollectible");
@@ -898,7 +898,7 @@ Class Chancebox : Actor
 				if ( !c || (c == 'SWWMCollectible') ) continue;
 				let def = GetDefaultByType(c);
 				// check that we can collect it in this IWAD
-				if ( !(gameinfo.gametype&def.avail) ) continue;
+				if ( !def.ValidGame() ) continue;
 				tcol++;
 			}
 			int alldudchance = 5-(4*col)/tcol;	// chance for all boxes to be duds (no collectibles)

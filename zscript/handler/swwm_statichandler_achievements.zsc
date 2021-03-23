@@ -74,6 +74,9 @@ extend Class SWWMStaticHandler
 				{
 					let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
 					if ( !c || (c == 'SWWMCollectible') ) continue;
+					let def = GetDefaultByType(c);
+					// check that we can collect it in this IWAD
+					if ( !def.ValidGame() ) continue;
 					nc++;
 				}
 				maxval = nc;

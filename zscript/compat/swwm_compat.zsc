@@ -20,7 +20,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 
 	protected void Apply( Name checksum, String mapname )
 	{
-		int numcol = 6;
+		int numcol = SWWMUtility.IsEviternity()?7:6;
 		int ncellsa = 0, ncellsb = 0;
 		int nbackpack = 0;
 		switch ( checksum )

@@ -100,6 +100,8 @@ Class DemolitionistMenu : GenericMenu
 	bool isrclick;
 	// somehow Drawer can be called while closing prematurely, which is big bollocks
 	bool isclosing;
+	// to save on calls
+	bool nrftl, eviternity, hexdd;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )
@@ -151,13 +153,14 @@ Class DemolitionistMenu : GenericMenu
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		// mission text
-		bool nrftl = false;
-		bool hexdd = false;
+		nrftl = false;
+		eviternity = false;
+		hexdd = false;
 		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
 		{
 			int clus = level.cluster;
 			if ( clus == 11 ) nrftl = true;
-			bool eviternity = SWWMUtility.IsEviternity();
+			eviternity = SWWMUtility.IsEviternity();
 			if ( eviternity )
 			{
 				// we have to do some heavy lifting here because episodes don't match clusters
@@ -285,7 +288,7 @@ Class DemolitionistMenu : GenericMenu
 				c_minute = 28;
 			}
 		}
-		else if ( SWWMUtility.IsEviternity() )
+		else if ( eviternity )
 		{
 			// June 10th 2150, 20:09 +09
 			// (June 10th 2150, 20:09 JST)
@@ -804,6 +807,9 @@ Class DemolitionistMenu : GenericMenu
 				{
 					let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
 					if ( !c || (c == 'SWWMCollectible') ) continue;
+					let def = GetDefaultByType(c);
+					// check that we can collect it in this IWAD
+					if ( !def.ValidGame() ) continue;
 					nc++;
 				}
 				ac.maxval = nc;

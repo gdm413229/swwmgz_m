@@ -378,7 +378,7 @@ Class SWWMLoreLibrary : Thinker
 			if ( !c || (c == 'SWWMCollectible') ) continue;
 			let def = GetDefaultByType(c);
 			// skip if we match and it's not for this game
-			if ( (c.GetClassName() == ref) && !(gameinfo.gametype&def.avail) )
+			if ( (c.GetClassName() == ref) && !def.ValidGame() )
 				return true;
 		}
 		ref = ref.MakeUpper();
@@ -416,55 +416,66 @@ Class SWWMLoreLibrary : Thinker
 		// redirects
 		if ( gameinfo.gametype&GAME_Hexen )
 		{
-			if ( text ~== "SWWM_LORETXT_SAYA" )
-				text = "SWWM_LORETXT_SAYA3";	// married kirin
+			if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
+				text = "SWWM_LORETXT_AKARIPROJECT3";	// mentions kirin
 			else if ( text ~== "SWWM_LORETXT_ANARUKON" )
 				text = "SWWM_LORETXT_ANARUKON2";	// comments from miyamoto-xanai wedding
-			else if ( text ~== "SWWM_LORETXT_HELL" )
-				text = "SWWM_LORETXT_HELL3";	// met father nostros during the wedding
-			else if ( text ~== "SWWM_LORETXT_NANA" )
-				text = "SWWM_LORETXT_NANA3";	// stuff that happened at the wedding
 			else if ( text ~== "SWWM_LORETXT_GHOULHUNT" )
 				text = "SWWM_LORETXT_GHOULHUNT2";	// met anthon anderken during the wedding
+			else if ( text ~== "SWWM_LORETXT_GODS" )
+				text = "SWWM_LORETXT_GODS2";	// beyond gods
+			else if ( text ~== "SWWM_LORETXT_HELL" )
+				text = "SWWM_LORETXT_HELL4";	// met father nostros during the wedding
+			else if ( text ~== "SWWM_LORETXT_NANA" )
+				text = "SWWM_LORETXT_NANA3";	// stuff that happened at the wedding
 			else if ( text ~== "SWWM_LORETXT_RAGEKIT" )
 				text = "SWWM_LORETXT_RAGEKIT2";	// kirin's reactions to demo using this item
 			else if ( text ~== "SWWM_LORETXT_SANKAIDERIHA" )
 				text = "SWWM_LORETXT_SANKAIDERIHA2";	// comments about kirin
+			else if ( text ~== "SWWM_LORETXT_SAYA" )
+				text = "SWWM_LORETXT_SAYA3";	// married kirin
 			else if ( text ~== "SWWM_LORETXT_SERPENTRIDERS" )
 				text = "SWWM_LORETXT_SERPENTRIDERS2";	// defeated d'sparil
 			else if ( text ~== "SWWM_LORETXT_XANIMEN" )
 				text = "SWWM_LORETXT_XANIMEN2";	// footnote about nuoma
-			else if ( text ~== "SWWM_LORETXT_ZANAVETH2" )
-				text = "SWWM_LORETXT_ZANAVETH22";	// met at wedding
 			else if ( text ~== "SWWM_LORETXT_YNYKRON" )
 				text = "SWWM_LORETXT_YNYKRON2";	// confirmed to harm (but not kill) gods
-			else if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
-				text = "SWWM_LORETXT_AKARIPROJECT3";	// mentions kirin
-			else if ( text ~== "SWWM_LORETXT_GODS" )
-				text = "SWWM_LORETXT_GODS2";	// beyond gods
+			else if ( text ~== "SWWM_LORETXT_ZANAVETH2" )
+				text = "SWWM_LORETXT_ZANAVETH22";	// met at wedding
 		}
 		if ( gameinfo.gametype&GAME_Raven )
 		{
-			if ( text ~== "SWWM_LORETXT_SAYA" )
-				text = "SWWM_LORETXT_SAYA2";	// dating demo
-			else if ( text ~== "SWWM_LORETXT_AKARILABS" )
+			if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
+				text = "SWWM_LORETXT_AKARIPROJECT2";	// fiction becomes reality
+			else if ( text ~== "SWWM_LORETXT_DOOMGUY" )
+				text = "SWWM_LORETXT_DOOMGUY3";	// he gone
+			else if ( text ~== "SWWM_LORETXT_HELL" )
+				text = "SWWM_LORETXT_HELL3";	// invasion was a thing of the past
+			else if ( text ~== "SWWM_LORETXT_UAC" )
+				text = "SWWM_LORETXT_UAC3";	// events of doom 64 and more
+		}
+		if ( (gameinfo.gametype&GAME_Raven) || SWWMUtility.IsEviternity() )
+		{
+			if ( text ~== "SWWM_LORETXT_AKARILABS" )
 				text = "SWWM_LORETXT_AKARILABS2";	// demo won, akari project announced
+			else if ( text ~== "SWWM_LORETXT_BIGSHOT" )
+				text = "SWWM_LORETXT_BIGSHOT2";	// predictions about crimes_m
 			else if ( text ~== "SWWM_LORETXT_DEMOLITIONIST" )
 				text = "SWWM_LORETXT_DEMOLITIONIST2";	// demo rewarded with maidbot frame
 			else if ( text ~== "SWWM_LORETXT_DOOMGUY" )
-				text = "SWWM_LORETXT_DOOMGUY2";	// he gone
-			else if ( text ~== "SWWM_LORETXT_UAC" )
-				text = "SWWM_LORETXT_UAC2";	// uac "reformed"
+				text = "SWWM_LORETXT_DOOMGUY2";	// decommissioned
+			else if ( text ~== "SWWM_LORETXT_GENERICCUBE" )
+				text = "SWWM_LORETXT_GENERICCUBE2";	// info from mykka
 			else if ( text ~== "SWWM_LORETXT_HELL" )
-				text = "SWWM_LORETXT_HELL2";	// invasion was a thing of the past
+				text = "SWWM_LORETXT_HELL2";	// events of tnt/plutonia
 			else if ( text ~== "SWWM_LORETXT_NANA" )
 				text = "SWWM_LORETXT_NANA2";	// demo met nana
+			else if ( text ~== "SWWM_LORETXT_SAYA" )
+				text = "SWWM_LORETXT_SAYA2";	// dating demo
+			else if ( text ~== "SWWM_LORETXT_UAC" )
+				text = "SWWM_LORETXT_UAC2";	// uac "reformed"
 			else if ( text ~== "SWWM_LORETXT_ZANAVETH3" )
 				text = "SWWM_LORETXT_ZANAVETH32";	// iagb happened
-			else if ( text ~== "SWWM_LORETXT_BIGSHOT" )
-				text = "SWWM_LORETXT_BIGSHOT2";	// predictions about crimes_m
-			else if ( text ~== "SWWM_LORETXT_AKARIPROJECT" )
-				text = "SWWM_LORETXT_AKARIPROJECT2";	// fiction becomes reality
 		}
 		// check if existing
 		for ( int i=0; i<ent.Size(); i++ )

@@ -367,7 +367,7 @@ Class Demolitionist : PlayerPawn
 				if ( !type || (type == 'SWWMCollectible') ) continue;
 				let def = GetDefaultByType(type);
 				// check that we can collect it in this IWAD
-				if ( !(gameinfo.gametype&def.avail) ) continue;
+				if ( !def.ValidGame() ) continue;
 				let item = Inventory(Spawn(AllActorClasses[i]));
 				SWWMCollectible(item).propagated = true;	// no score or anims
 				if ( !item.CallTryPickup(self) ) item.Destroy();

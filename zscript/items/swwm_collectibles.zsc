@@ -14,9 +14,10 @@ Class SWWMCollectible : Inventory abstract
 	// minimum gametype requirements
 	enum EAvailability
 	{
-		AVAIL_Hexen = GAME_Hexen,
-		AVAIL_Heretic = AVAIL_Hexen|GAME_Heretic,
-		AVAIL_All = AVAIL_Heretic|GAME_DoomChex
+		AVAIL_Hexen,
+		AVAIL_Heretic,
+		AVAIL_Eviternity,
+		AVAIL_All
 	};
 
 	Default
@@ -36,17 +37,24 @@ Class SWWMCollectible : Inventory abstract
 		Radius 8;
 		Height 24;
 	}
+	bool ValidGame() const
+	{
+		if ( avail == AVAIL_All ) return true;
+		if ( (avail == AVAIL_Eviternity) && ((gameinfo.gametype&GAME_Raven) || SWWMUtility.IsEviternity()) ) return true;
+		if ( (avail == AVAIL_Heretic) && (gameinfo.gametype&GAME_Raven) ) return true;
+		if ( (avail == AVAIL_Hexen) && (gameinfo.gametype&GAME_Hexen) ) return true;
+		return false;
+	}
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
 		// delet ourselves if wrong iwad
-		if ( !(gameinfo.gametype&avail) )
-			Destroy();
+		if ( !ValidGame() ) Destroy();
 	}
 	override bool CanPickup( Actor toucher )
 	{
 		// no pickup if wrong iwad
-		if ( !(gameinfo.gametype&avail) ) return false;
+		if ( !ValidGame() ) return false;
 		return Super.CanPickup(toucher);
 	}
 	override string PickupMessage()
@@ -174,14 +182,14 @@ Class SayaBean : SWWMCollectible
 		Height 23;
 	}
 }
-// Heretic
+// Eviternity / Heretic
 Class DemoPlush : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_DEMOPLUSH";
 		Inventory.PickupMessage "$T_DEMOPLUSH";
-		SWWMCollectible.Availability AVAIL_Heretic;
+		SWWMCollectible.Availability AVAIL_Eviternity;
 		SWWMCollectible.GestureWeapon "DemoPlushGesture";
 		Stamina 6000;
 		Radius 12;

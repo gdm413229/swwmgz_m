@@ -546,14 +546,18 @@ Class HellblazerRavager : HellblazerMissile
 
 Class HellblazerWarhead : HellblazerMissile
 {
+	int nkill;
+
 	void A_BlazerWarheadExplode()
 	{
+		nkill = 0;
 		bForceXYBillboard = true;
 		bRollSprite = false;
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("WumboRocketBlast",150);
 		A_SetScale(7.);
-		SWWMUtility.DoExplosion(self,1500,600000,400,200);
+		int nhit;
+		[nhit, nkill] = SWWMUtility.DoExplosion(self,1500,600000,400,200,DE_COUNTENEMIES);
 		A_NoGravity();
 		A_QuakeEx(9,9,9,150,0,12000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:4000,rollIntensity:2.);
 		A_StopSound(CHAN_BODY);
@@ -594,7 +598,11 @@ Class HellblazerWarhead : HellblazerMissile
 	void A_WarheadSub()
 	{
 		if ( special1 < 40 )
-			SWWMUtility.DoExplosion(self,320-special1*8,600000-special1*12000,200+special1*30);
+		{
+			int nhit, nkil;
+			[nhit, nkil] = SWWMUtility.DoExplosion(self,320-special1*8,600000-special1*12000,200+special1*30,flags:DE_COUNTENEMIES);
+			nkill += nkil;
+		}
 		special1++;
 		if ( (special1 <= 30) && !(special1%2) )
 		{
@@ -643,6 +651,7 @@ Class HellblazerWarhead : HellblazerMissile
 				c.angle = ang;
 				c.pitch = pt;
 				c.target = target;
+				c.master = self;
 			}
 		}
 	}
@@ -658,9 +667,13 @@ Class HellblazerWarhead : HellblazerMissile
 		TNT1 A 1
 		{
 			A_WarheadSub();
-			A_FadeOut(.05);
+			if ( special1 >= 40 )
+			{
+				if ( target ) SWWMUtility.AchievementProgress('swwm_progress_slayer',invoker.nkill,target.player);
+				Destroy();
+			}
 		}
-		Stop;
+		Wait;
 	}
 }
 
@@ -1221,7 +1234,9 @@ Class HellblazerWarheadArm : Actor
 		TNT1 A 1
 		{
 			Spawn("HellblazerWarheadTrail",pos);
-			SWWMUtility.DoExplosion(self,20+reactiontime*4,3000+500*reactiontime,120+4*reactiontime);
+			int nhit, nkill;
+			[nhit, nkill] = SWWMUtility.DoExplosion(self,20+reactiontime*4,3000+500*reactiontime,120+4*reactiontime,flags:DE_COUNTENEMIES);
+			if ( HellblazerWarhead(master) ) HellblazerWarhead(master).nkill += nkill;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;

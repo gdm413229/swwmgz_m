@@ -206,10 +206,10 @@ Class SWWMAchievementNotification : HUDMessageBase
 		else hs.x = swwm_hudscale;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		double alpha = (tics<fadeintics)?(tics/fadeintics):(tics<(fadeintics+holdtics))?1.:(1.-(tics-(fadeintics+holdtics))/fadeouttics);
-		Vector2 pos = (int(ss.x-232)/2,(ss.y-(margin+36))+int(margin+40)*(1.-alpha));
+		Vector2 pos = (int(ss.x-256)/2,(ss.y-(margin+36))+int(margin+40)*(1.-alpha));
 		String loctag = StringTable.Localize(tag);
 		String loctxt = num?String.Format(StringTable.Localize(txt),num):StringTable.Localize(txt);
-		BrokenLines l = fnt2.BreakLines(loctxt,176);
+		BrokenLines l = fnt2.BreakLines(loctxt,200);
 		int th = 14+(9*l.Count());
 		Screen.DrawTexture(frame,false,pos.x,pos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		if ( icon.IsValid() ) Screen.DrawTexture(icon,false,pos.x+2,pos.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
@@ -218,7 +218,7 @@ Class SWWMAchievementNotification : HUDMessageBase
 		yy += 14;
 		for ( int i=0; i<l.Count(); i++ )
 		{
-			Screen.DrawText(fnt2,Font.CR_WHITE,pos.x+46,pos.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
+			Screen.DrawText(fnt2,Font.CR_WHITE,pos.x+44,pos.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			yy += 9;
 		}
 	}

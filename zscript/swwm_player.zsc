@@ -5,6 +5,7 @@ Class Demolitionist : PlayerPawn
 	Vector3 dashdir;
 	double dashfuel, dashboost;
 	int dashcooldown, boostcooldown, fuelcooldown;
+	bool fullfuel;
 	bool sendtoground;
 	bool key_reentrant;
 	bool bInDefaultInventory;
@@ -55,6 +56,7 @@ Class Demolitionist : PlayerPawn
 	Actor selflight;
 	Actor oldencroached;
 	Vector3 oldencroachedpos;
+	int encroachtics;
 
 	Vector3 pretelepos;
 
@@ -63,6 +65,7 @@ Class Demolitionist : PlayerPawn
 
 	int healcooldown, healtimer, oldhealth;
 	bool scriptedinvul;
+	bool hitactivate;
 
 	transient int lastuse, failcounter, failcooldown;
 
@@ -445,24 +448,28 @@ Class Demolitionist : PlayerPawn
 	}
 	void A_Dash()
 	{
-		vel += dashdir*dashboost;
+		vel += dashdir*dashboost*clamp(dashfuel/20.,0.,1.);
 		player.vel *= 0.;
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
 		{
 			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:800);
-			dashboost *= (player.cmd.buttons&BT_USER2)?.9:.1;
+			if ( !(player.cmd.buttons&BT_USER2) ) dashboost *= .1;
 		}
-		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
+		double fueluse = (dashfuel-max(0.,dashfuel-dashboost))/60.;
+		SWWMUtility.AchievementProgressIncDouble('swwm_progress_fuel',fueluse,player);
+		mystats.fuelusage += fueluse;
 		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
 		fuelcooldown = max(30,fuelcooldown);
+		if ( (dashfuel <= 0.) && fullfuel )
+			SWWMUtility.AchievementProgressInc('swwm_progress_brake',1,player);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
 			SetStateLabel("DashEnd");
 	}
 	void A_BoostUp( bool initial = false )
 	{
-		vel += (0,0,1)*dashboost;
+		vel += (0,0,1)*dashboost*clamp(dashfuel/10.,0,1.);
 		player.vel *= 0.;
 		if ( dashboost < .2 ) dashboost = 0.;
 		else
@@ -471,7 +478,9 @@ Class Demolitionist : PlayerPawn
 			dashboost *= (player.cmd.buttons&BT_JUMP)?.95:.4;
 			last_boost = level.maptime+1;
 		}
-		mystats.fuelusage += dashfuel-max(0.,dashfuel-dashboost);
+		double fueluse = (dashfuel-max(0.,dashfuel-dashboost))/60.;
+		SWWMUtility.AchievementProgressIncDouble('swwm_progress_fuel',fueluse,player);
+		mystats.fuelusage += fueluse;
 		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		if ( ((dashfuel <= 0.) || (dashboost <= 0.)) )
 		{
@@ -863,6 +872,8 @@ Class Demolitionist : PlayerPawn
 		CheckUnderwaterAmb();
 		if ( player.cmd.buttons&BT_USER3 ) SenseItems();
 		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
+		if ( vel.length() > ((3600*GameTicRate)/32000.) )
+			SWWMUtility.AchievementProgress('swwm_progress_sanic',int((vel.length()*3600*GameTicRate)/32000.),player);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) )
 		{
@@ -942,7 +953,11 @@ Class Demolitionist : PlayerPawn
 					SetOrigin(newp,true);
 					if ( !TestMobjLocation() ) SetOrigin(oldp,true);
 				}
+				encroachtics++;
+				if ( !(encroachtics%GameTicRate) )
+					SWWMUtility.AchievementProgress('swwm_progress_step',encroachtics/GameTicRate,player);
 			}
+			else encroachtics = 0;
 			oldencroached = encroached;
 			oldencroachedpos = encroached.pos;
 		}
@@ -952,6 +967,7 @@ Class Demolitionist : PlayerPawn
 			// make sure we're not getting launched because an enemy just died under our feet, because that can cause some issues
 			if ( oldencroached && (dashboost <= 0.) && (lastvelz >= -25) && (!oldencroached.bISMONSTER || (oldencroached.Health > 0)) ) vel += oldencroached.vel+level.Vec3Diff(oldencroachedpos,oldencroached.pos);
 			oldencroached = null;
+			encroachtics = 0;
 		}
 		if ( encroached && encroached.bSHOOTABLE && !encroached.bNODAMAGE && (lastvelz <= 0) && !(encroached is 'Demolitionist') )
 		{
@@ -965,7 +981,7 @@ Class Demolitionist : PlayerPawn
 					ps.target = self;
 					ps.special1 = realdmg;
 				}
-				if ( !encroached.bNOBLOOD && !encroached.bINVULNERABLE )
+				if ( encroached && !encroached.bNOBLOOD && !encroached.bINVULNERABLE )
 				{
 					encroached.TraceBleed(realdmg,self);
 					encroached.SpawnBlood(pos,angle,realdmg);
@@ -1046,6 +1062,7 @@ Class Demolitionist : PlayerPawn
 					else if ( diff.y < -(a.Radius+Radius) ) bnorm = (0,1,0);
 					if ( dir dot bnorm > -.6 ) continue;
 				}
+				if ( !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 				// large monsters will stop the player (unless hit from above if we're going at ground pound speed)
 				A_QuakeEx(4,4,4,10,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 				A_AlertMonsters(swwm_uncapalert?0:800);
@@ -1057,6 +1074,7 @@ Class Demolitionist : PlayerPawn
 				{
 					if ( bumped ) continue;
 					bumped = true;
+					SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 					vel *= .2;
 					vel -= dir*(10+(spd*30/mass));
@@ -1166,6 +1184,7 @@ Class Demolitionist : PlayerPawn
 					{
 						// headbump
 						bumped = true;
+						SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
 						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 						bumptic = gametic+int(20+spd/4.);
 						lastbump *= .8;
@@ -1260,6 +1279,7 @@ Class Demolitionist : PlayerPawn
 					}
 					// wallbump
 					bumped = true;
+					SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 					bumptic = gametic+int(25+spd/4.);
 					lastbump *= .8;
@@ -1281,7 +1301,11 @@ Class Demolitionist : PlayerPawn
 					// activate it
 					int locknum = SWWMUtility.GetLineLock(BlockingLine);
 					if ( !locknum || CheckKeys(locknum,false,true) )
+					{
+						hitactivate = true;
 						BlockingLine.Activate(self,lside,SPAC_Use);
+						hitactivate = false;
+					}
 					BlockingLine.Activate(self,lside,SPAC_Impact);
 					break;
 				}
@@ -1391,6 +1415,8 @@ Class Demolitionist : PlayerPawn
 			A_DemoPain();
 		}
 		PainChance = oldpchance;
+		if ( (Health <= 0) && (source == self) && (flags&DMG_EXPLOSION) )
+			SWWMUtility.MarkAchievement('swwm_achievement_dime',player);
 		return realdmg;
 	}
 	override void CalcHeight()
@@ -1621,6 +1647,7 @@ Class Demolitionist : PlayerPawn
 		}
 		if ( (dodge.length() > 0) && (dashcooldown <= 0) && (dashfuel > 20.) && player.cmd.buttons&BT_USER2 && (player.onground || level.IsJumpingAllowed() || (player.cmd.buttons&BT_CROUCH)) && (gamestate == GS_LEVEL) )
 		{
+			fullfuel = (dashfuel >= default.dashfuel);
 			dashdir = dodge.unit();
 			dashcooldown = 10;
 			dashboost = 20.;
@@ -1759,6 +1786,7 @@ Class Demolitionist : PlayerPawn
 					{
 						A_StartSound("demolitionist/kick",CHAN_FOOTSTEP,CHANF_OVERLAP);
 						last_kick = level.maptime+1;
+						SWWMUtility.AchievementProgressInc('swwm_progress_jump',1,player);
 					}
 				}
 				bOnMobj = false;
@@ -1789,6 +1817,7 @@ Class Demolitionist : PlayerPawn
 					// bunnyhop time
 					if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) && !walljump && !wallclimb )
 					{
+						SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
 						// bhop, z vel relative to vel size
 						if ( vel.z < 25. )	// don't ramp up too hard
 							vel.z += jumpvelz*(1.2+vel.length()*.01);
@@ -1863,6 +1892,7 @@ Class Demolitionist : PlayerPawn
 				// reboot (if possible)
 				if ( !FindInventory("ReviveCooldown") && (((swwm_revivecooldown >= 0) && (G_SkillPropertyInt(SKILLP_ACSReturn) < 4)) || !hasrevived) )
 				{
+					if ( hasrevived ) SWWMUtility.MarkAchievement('swwm_achievement_sekiro',player);
 					hasrevived = true;
 					player.Resurrect();
 					player.damagecount = 0;
@@ -2265,6 +2295,7 @@ Class Demolitionist : PlayerPawn
 			if ( hnd ) hnd.allsecrets = true;
 			score = 1000;
 			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
+			SWWMUtility.AchievementProgressInc('swwm_progress_allsecrets',1,player);
 		}
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);

@@ -142,6 +142,8 @@ nosave color swwm_mm_yourcolor = "80 ff 00";
 
 server noarchive bool swwm_iseriouslywanttoplaythiswithbd = false;	// self-explanatory
 
+nosave int swwm_playtime = 0;	// total playtime in seconds
+
 // cross-session achievement cvars (0: locked, 1: unlocked, 2: notified)
 nosave int swwm_achievement_gcsandwich = 0;
 nosave int swwm_achievement_hdoom = 0;
@@ -226,6 +228,7 @@ nosave int swwm_achievement_snake = 0;
 nosave int swwm_achievement_smb = 0;
 nosave int swwm_achievement_tyrian = 0;
 nosave int swwm_achievement_bof = 0;
+nosave int swwm_achievement_wantdie = 0;
 // cross-session progress cvars
 nosave int swwm_progress_gcsandwich = 0;
 nosave int swwm_progress_ghost = 0;
@@ -240,7 +243,7 @@ nosave int swwm_progress_gib = 0;
 nosave int swwm_progress_barrier = 0;
 nosave int swwm_progress_bossdash = 0;
 nosave int swwm_progress_sneeze = 0;
-nosave int swwm_progress_fuel = 0;
+nosave float swwm_progress_fuel = 0;	// this one has to be a double
 nosave int swwm_progress_slayer = 0;
 nosave int swwm_progress_stomp = 0;
 nosave int swwm_progress_thruwall = 0;
@@ -257,7 +260,6 @@ nosave int swwm_progress_parry = 0;
 nosave int swwm_progress_allkills = 0;
 nosave int swwm_progress_allsecrets = 0;
 nosave int swwm_progress_reflect = 0;
-nosave int swwm_progress_wave = 0;
 nosave int swwm_progress_friend = 0;
 nosave int swwm_progress_shock = 0;
 nosave int swwm_progress_balls = 0;

@@ -437,7 +437,8 @@ Class DemolitionistMenu : GenericMenu
 			'swwm_achievement_snake',
 			'swwm_achievement_smb',
 			'swwm_achievement_tyrian',
-			'swwm_achievement_bof'
+			'swwm_achievement_bof',
+			'swwm_achievement_wantdie'
 		};
 		// localized name
 		static const String names[] =
@@ -524,7 +525,8 @@ Class DemolitionistMenu : GenericMenu
 			"$SWWM_ACHIEVEMENT_SNAKE",
 			"$SWWM_ACHIEVEMENT_SMB",
 			"$SWWM_ACHIEVEMENT_TYRIAN",
-			"$SWWM_ACHIEVEMENT_BOF"
+			"$SWWM_ACHIEVEMENT_BOF",
+			"$SWWM_ACHIEVEMENT_WANTDIE"
 		};
 		// has number in txt
 		static const int number[] =
@@ -572,7 +574,7 @@ Class DemolitionistMenu : GenericMenu
 			SA_ALLSECRETS,
 			SA_REFLECT,
 			0,	// SEKIRO
-			SA_WAVE,
+			0,	// WAVE
 			SA_FRIEND,
 			SA_SHOCK,
 			SA_BALLS,
@@ -611,7 +613,8 @@ Class DemolitionistMenu : GenericMenu
 			0,	// SNAKE
 			0,	// SMB
 			0,	// TYRIAN
-			0	// BOF
+			0,	// BOF
+			0	// WANTDIE
 		};
 		// is ignored (hide away achievements that can't be done yet)
 		static const bool ignoreme[] =
@@ -698,94 +701,96 @@ Class DemolitionistMenu : GenericMenu
 			true,	// SNAKE
 			true,	// SMB
 			true,	// TYRIAN
-			true	// BOF
+			true,	// BOF
+			false	// WANTDIE
 		};
 		// progress tracking cvar (if any)
 		static const Name pvar[] =
 		{
-			'swwm_progress_gcsandwich',	// GCSANDWICH
+			'swwm_progress_gcsandwich',
 			'None',	// HDOOM
 			'None',	// ONESTANDING
 			'None',	// OOPSIE
-			'swwm_progress_ghost',	// GHOST
+			'swwm_progress_ghost',
 			'None',	// CLONK
-			'swwm_progress_allitems',	// ALLITEMS
-			'swwm_progress_conga',	// CONGA
-			'swwm_progress_explogun',	// EXPLOGUN
-			'swwm_progress_gravity',	// GRAVITY
-			'swwm_progress_flight',	// FLIGHT
+			'swwm_progress_allitems',
+			'swwm_progress_conga',
+			'swwm_progress_explogun',
+			'swwm_progress_gravity',
+			'swwm_progress_flight',
 			'None',	// CLIFFYB
-			'swwm_progress_par',	// PAR
+			'swwm_progress_par',
 			'None',	// ONEGUY
-			'swwm_progress_golden',	// GOLDEN
-			'swwm_progress_gib',	// GIB
-			'swwm_progress_barrier',	// BARRIER
-			'swwm_progress_bossdash',	// BOSSDASH
-			'swwm_progress_sneeze',	// SNEEZE
-			'swwm_progress_fuel',	// FUEL
-			'swwm_progress_slayer',	// SLAYER
+			'swwm_progress_golden',
+			'swwm_progress_gib',
+			'swwm_progress_barrier',
+			'swwm_progress_bossdash',
+			'swwm_progress_sneeze',
+			'swwm_progress_fuel',
+			'swwm_progress_slayer',
 			'None',	// BROCCOLIDOCCOLI
 			'None',	// DIME
-			'swwm_progress_stomp',	// STOMP
+			'swwm_progress_stomp',
 			'None',	// CHEAT
 			'None',	// GOD
-			'swwm_progress_thruwall',	// THRUWALL
+			'swwm_progress_thruwall',
 			'None',	// MASHIRO
-			'swwm_progress_lead',	// LEAD
-			'swwm_progress_love',	// LOVE
-			'swwm_progress_butts',	// BUTTS
-			'swwm_progress_plush',	// PLUSH
-			'swwm_progress_bustin',	// BUSTIN
-			'swwm_progress_moth',	// MOTH
-			'None',	// IWAD
-			'swwm_progress_brake',	// BRAKE
-			'swwm_progress_rage',	// RAGE
+			'swwm_progress_lead',
+			'swwm_progress_love',
+			'swwm_progress_butts',
+			'swwm_progress_plush',
+			'swwm_progress_bustin',
+			'swwm_progress_moth',
+			'swwm_progress_iwad',
+			'swwm_progress_brake',
+			'swwm_progress_rage',
 			'None',	// ABORT
-			'swwm_progress_parry',	// PARRY
-			'swwm_progress_allkills',	// ALLKILLS
-			'swwm_progress_allsecrets',	// ALLSECRETS
-			'swwm_progress_reflect',	// REFLECT
+			'swwm_progress_parry',
+			'swwm_progress_allkills',
+			'swwm_progress_allsecrets',
+			'swwm_progress_reflect',
 			'None',	// SEKIRO
-			'swwm_progress_wave',	// WAVE
-			'swwm_progress_friend',	// FRIEND
-			'swwm_progress_shock',	// SHOCK
-			'swwm_progress_balls',	// BALLS
-			'swwm_progress_refresh',	// REFRESH
-			'swwm_progress_step',	// STEP
-			'swwm_progress_sunny',	// SUNNY
-			'swwm_progress_thicc',	// THICC
+			'None',	// WAVE
+			'swwm_progress_friend',
+			'swwm_progress_shock',
+			'swwm_progress_balls',
+			'swwm_progress_refresh',
+			'swwm_progress_step',
+			'swwm_progress_sunny',
+			'swwm_progress_thicc',
 			'None',	// EVERYTHING
-			'swwm_progress_allcoll',	// ALLCOLL
-			'swwm_progress_slemg',	// SLEMG
-			'swwm_progress_dosh',	// DOSH
-			'swwm_progress_jump',	// JUMP
-			'swwm_progress_ezkill',	// EZKILL
+			'swwm_progress_allcoll',
+			'swwm_progress_slemg',
+			'swwm_progress_dosh',
+			'swwm_progress_jump',
+			'swwm_progress_ezkill',
 			'None',	// LIGMA
 			'None',	// YEET
 			'None',	// MBF
 			'None',	// LIGHTNING
-			'swwm_progress_dakka',	// DAKKA
-			'swwm_progress_roast',	// ROAST
-			'swwm_progress_dab',	// DAB
-			'swwm_progress_hnd',	// HND
-			'swwm_progress_gepgun',	// GEPGUN
+			'swwm_progress_dakka',
+			'swwm_progress_roast',
+			'swwm_progress_dab',
+			'swwm_progress_hnd',
+			'swwm_progress_gepgun',
 			'None',	// FULLER
-			'swwm_progress_pene',	// PENE
-			'swwm_progress_acid',	// ACID
+			'swwm_progress_pene',
+			'swwm_progress_acid',
 			'None',	// SALT
-			'swwm_progress_mega',	// MEGA
-			'swwm_progress_sanic',	// SANIC
+			'swwm_progress_mega',
+			'swwm_progress_sanic',
 			'None',	// TELE
-			'swwm_progress_bune',	// BUNE
-			'swwm_progress_bonk',	// BONK
-			'swwm_progress_anom',	// ANOM
+			'swwm_progress_bune',
+			'swwm_progress_bonk',
+			'swwm_progress_anom',
 			'None',	// ANONE
 			'None',	// TETRIS
 			'None',	// PONG
 			'None',	// SNAKE
 			'None',	// SMB
 			'None',	// TYRIAN
-			'None'	// BOF
+			'None',	// BOF
+			'None'	// WANTDIE
 		};
 		achievements.Clear();
 		for ( int i=0; i<vars.Size(); i++ )
@@ -817,6 +822,7 @@ Class DemolitionistMenu : GenericMenu
 			else if ( vars[i] == 'swwm_achievement_dakka' ) ac.maxval = 60;
 			else if ( vars[i] == 'swwm_achievement_dosh' ) ac.maxval = 1000000000;
 			else if ( vars[i] == 'swwm_achievement_mega' ) ac.maxval = 1000000;
+			else if ( vars[i] == 'swwm_achievement_iwad' ) ac.maxval = 7;
 			achievements.Push(ac);
 		}
 		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/AchievementUnknown.png",TexMan.Type_Any);
@@ -2662,13 +2668,33 @@ Class DemolitionistMenu : GenericMenu
 		double afactor = adone?1.:0., bfactor = bdone?1.:0.;
 		if ( a.progress )
 		{
-			int cur = min(a.progress.GetInt(),a.maxval);
-			afactor = cur/double(a.maxval);
+			int val = a.progress.GetInt();
+			int mval = a.maxval;
+			if ( a.tag == "$SWWM_ACHIEVEMENT_IWAD_TAG" )
+			{
+				// special case
+				mval = 3;
+				int bits = val;
+				val = 0;
+				for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
+			}
+			int cur = min(val,mval);
+			afactor = cur/double(mval);
 		}
 		if ( b.progress )
 		{
-			int cur = min(b.progress.GetInt(),b.maxval);
-			bfactor = cur/double(b.maxval);
+			int val = b.progress.GetInt();
+			int mval = b.maxval;
+			if ( b.tag == "$SWWM_ACHIEVEMENT_IWAD_TAG" )
+			{
+				// special case
+				mval = 3;
+				int bits = val;
+				val = 0;
+				for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
+			}
+			int cur = min(val,mval);
+			bfactor = cur/double(mval);
 		}
 		if ( adone && bdone )
 		{
@@ -3054,7 +3080,7 @@ Class DemolitionistMenu : GenericMenu
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
 			statlist.Push(str);
-			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage/60.,StringTable.Localize("$SWWM_UNIT_LITER"));
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage,StringTable.Localize("$SWWM_UNIT_LITER"));
 			statlist.Push(str);
 			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),(stats.topspeed*3600.*GameTicRate)/32000.,StringTable.Localize("$SWWM_UNIT_KPH"));
 			statlist.Push(str);
@@ -3614,17 +3640,28 @@ Class DemolitionistMenu : GenericMenu
 					// progress bar
 					if ( a.progress )
 					{
-						if ( completed ) str = SWWMUtility.BlockBar(a.maxval,a.maxval,barsz,Font.CR_GOLD,Font.CR_BLACK);
-						else str = SWWMUtility.BlockBar(a.progress.GetInt(),a.maxval,barsz,Font.CR_DARKGRAY,Font.CR_BLACK);
+						int val = a.progress.GetInt();
+						int mval = a.maxval;
+						if ( a.tag == "$SWWM_ACHIEVEMENT_IWAD_TAG" )
+						{
+							// special case
+							mval = 3;
+							int bits = val;
+							val = 0;
+							for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
+						}
+						val = clamp(val,0,mval);
+						if ( completed ) str = SWWMUtility.BlockBar(mval,mval,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
+						else str = SWWMUtility.BlockBar(val,mval,barsz,Font.CR_DARKGRAY,Font.CR_BLACK);
 						Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy+34,str,DTA_Spacing,-5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
-						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.progress.GetInt()),SWWMUtility.ThousandsNum(a.maxval));
+						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(mval),SWWMUtility.ThousandsNum(mval));
+						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(mval));
 						int ox = (barsz-MiniwiFont.StringWidth(str))/2;
-						Screen.DrawText(MiniwiFont,Font.CR_WHITE,origin.x+xx+ox,origin.y+yy+38,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						Screen.DrawText(MiniwiFont,completed?Font.CR_GREEN:hasprogress?Font.CR_WHITE:Font.CR_DARKGRAY,origin.x+xx+ox,origin.y+yy+37,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					}
 					else
 					{
-						str = SWWMUtility.BlockBar(completed,1,barsz,Font.CR_GOLD,Font.CR_BLACK);
+						str = SWWMUtility.BlockBar(completed,1,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
 						Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy+34,str,DTA_Spacing,-5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					}
 					// the text itself

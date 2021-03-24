@@ -199,6 +199,7 @@ Class ParryField : Actor
 				critsnd = true;
 			}
 			if ( s ) s.parries++;
+			SWWMUtility.AchievementProgressInc('swwm_progress_parry',1,master.player);
 		}
 		if ( --special1 <= 0 ) Destroy();
 	}
@@ -390,7 +391,10 @@ extend Class SWWMWeapon
 			{
 				int locknum = SWWMUtility.GetLineLock(ut.uses[i].hitline);
 				if ( !locknum || CheckKeys(locknum,false,true) )
+				{
+					SWWMUtility.AchievementProgressInc('swwm_progress_slemg',1,player);
 					ut.uses[i].hitline.RemoteActivate(self,ut.uses[i].hitside,SPAC_Use,ut.uses[i].pos);
+				}
 				if ( !(ut.uses[i].hitline.activation&SPAC_UseThrough) ) break;
 			}
 		}

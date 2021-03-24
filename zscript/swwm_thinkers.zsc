@@ -81,7 +81,7 @@ Class SWWMDamageAccumulator : Thinker
 	{
 		Super.Tick();
 		// so many damn safeguards in this
-		if ( !victim )
+		if ( !victim || (victim.Health <= 0) )
 		{
 			Destroy();
 			return;
@@ -395,4 +395,43 @@ Class SWWMCorpseCleaner : Thinker
 			a.Destroy();
 		}
 	}
+}
+
+Class SWWMFlyTracker : Thinker
+{
+	Actor tracked, instigator;
+	Vector3 startpos;
+	int gracepd;
+
+	static void Track( Actor b, Actor whomst )
+	{
+		if ( !b || !whomst ) return;
+		let ti = ThinkerIterator.Create("SWWMFlyTracker",STAT_USER);
+		SWWMFlyTracker ffd;
+		while ( ffd = SWWMFlyTracker(ti.Next()) )
+		{
+			if ( ffd.tracked != b ) continue;
+			ffd.instigator = whomst;
+			return;
+		}
+		ffd = new("SWWMFlyTracker");
+		ffd.ChangeStatNum(STAT_USER);
+		ffd.tracked = b;
+		ffd.instigator = whomst;
+		ffd.startpos = b.pos;
+	}
+
+	override void Tick()
+	{
+		if ( !tracked || tracked.bFLOAT || tracked.bNOGRAVITY || (tracked.waterlevel > 1) || (tracked.pos.z <= tracked.floorz) || !tracked.TestMobjZ(false) )
+		{
+			gracepd++;
+			if ( gracepd < 10 ) return;
+			if ( instigator ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(level.Vec3Diff(startpos,tracked.pos).length()),instigator.player);
+			Destroy();
+			return;
+		}
+		gracepd = 0;
+	}
+
 }

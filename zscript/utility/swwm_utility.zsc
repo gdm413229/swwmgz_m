@@ -9,6 +9,8 @@ enum EDoExplosionFlags
 	DE_NOTMISSILE = 16,	// instigator is the source itself (normally it'd be its target pointer)
 	DE_EXTRAZTHRUST = 32,	// applies a higher Z thrust to enemies on ground
 	DE_HOWL = 64,		// 25% chance for hit enemies to howl
+	DE_COUNTENEMIES = 128,	// only count hits for hostiles
+	DE_COUNTSTEALTH = 256,	// only count hits for inactive monsters
 };
 
 Class SWWMUtility
@@ -899,13 +901,15 @@ Class SWWMUtility
 				if ( (flags&DE_BLAST) && a.bCANBLAST && !a.bDONTBLAST ) a.bBLASTED = true;
 			}
 			// hit it
-			nhit++;
+			bool inactive = (!a.player&&!a.target);
+			bool hostile = (Instigator&&a.IsHostile(Instigator)&&(a.bISMONSTER||a.player));
+			if ( (!(flags&DE_COUNTENEMIES) || hostile) && (!(flags&DE_COUNTSTEALTH) || inactive) ) nhit++;
 			int dmg = int(Damage*damagescale);
 			if ( dmg <= 0 ) continue;	// no harm
 			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
 			if ( a && !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
-			if ( (flags&DE_HOWL) && a && a.bISMONSTER && !Random[DoBlast](0,3) ) a.Howl();
-			if ( !a || (a.Health <= 0) ) nkill++;
+			if ( (flags&DE_HOWL) && a && (a.Health > 0) && a.bISMONSTER && !Random[DoBlast](0,3) ) a.Howl();
+			if ( (!a || (a.Health <= 0)) && (!(flags&DE_COUNTENEMIES) || hostile) && (!(flags&DE_COUNTSTEALTH) || inactive) ) nkill++;
 		}
 		return nhit, nkill;
 	}
@@ -1623,6 +1627,47 @@ Class SWWMUtility
 		if ( (tn ~== "ZZWOLF13") )
 			return true, TexMan.CheckForTexture("defaced_ZZWOLF13",TexMan.Type_Any);
 		return false, checkme;
+	}
+
+	// achievement helpers
+	static clearscope void MarkAchievement( Name mvar, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(mvar);
+		if ( !cv ) return;
+		if ( cv.GetInt() < 1 ) cv.SetInt(1);
+	}
+	static clearscope void AchievementProgress( Name pvar, int val, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(max(cval,val));
+	}
+	static clearscope void AchievementProgressInc( Name pvar, int inc, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(cval+inc);
+	}
+	static clearscope void AchievementProgressIncDouble( Name pvar, double inc, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		double cval = cv.GetFloat();
+		cv.SetFloat(cval+inc);
+	}
+	static clearscope void AchievementProgressOr( Name pvar, int val, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(cval|val);
 	}
 
 	// full reset of inventory (excluding collectibles, and optionally resetting the score)

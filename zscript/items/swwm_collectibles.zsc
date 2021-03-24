@@ -80,6 +80,26 @@ Class SWWMCollectible : Inventory abstract
 	override void AttachToOwner( Actor other )
 	{
 		Super.AttachToOwner(other);
+		// count how many we have, set progress accordingly
+		int nc = 0, tnc = 0, cnc = 0;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+			if ( !c || (c == 'SWWMCollectible') ) continue;
+			let def = GetDefaultByType(c);
+			tnc++;
+			// check that we can collect it in this IWAD
+			if ( !def.ValidGame() ) continue;
+			nc++;
+		}
+		for ( Inventory i=other.inv; i; i=i.inv )
+		{
+			if ( i is 'SWWMCollectible' )
+				cnc++;
+		}
+		// force progress to be "total collectibles" so this doesn't get unset on other IWADs that may have more
+		if ( cnc == nc ) SWWMUtility.AchievementProgress('swwm_progress_allcoll',tnc,other.player);
+		else SWWMUtility.AchievementProgress('swwm_progress_allcoll',cnc,other.player);
 		// we're only attaching to the other players
 		if ( propagated )
 			return;

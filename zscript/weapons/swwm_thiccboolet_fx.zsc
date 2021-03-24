@@ -55,7 +55,14 @@ Class SilverAirRip : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,40,2000,40,ignoreme:target);
+		int nhit, nkill;
+		[nhit, nkill] = SWWMUtility.DoExplosion(self,40,2000,40,flags:DE_COUNTENEMIES,ignoreme:target);
+		if ( SilverBullet(master) )
+		{
+			Silverbullet(master).nkills += nkill;
+			SWWMUtility.AchievementProgress('swwm_progress_conga',Silverbullet(master).nkills,target.player);
+			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc('swwm_progress_thruwall',nkill,target.player);
+		}
 		Destroy();
 	}
 }
@@ -100,7 +107,14 @@ Class SilverImpact : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		SWWMUtility.DoExplosion(self,100,8000,100,20);
+		int nhit, nkill;
+		[nhit, nkill] = SWWMUtility.DoExplosion(self,100,8000,100,20,DE_COUNTENEMIES);
+		if ( SilverBullet(master) )
+		{
+			Silverbullet(master).nkills += nkill;
+			SWWMUtility.AchievementProgress('swwm_progress_conga',Silverbullet(master).nkills,target.player);
+			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc('swwm_progress_thruwall',nkill,target.player);
+		}
 		A_AlertMonsters(swwm_uncapalert?0:2500);
 		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);
 		if ( special1 )

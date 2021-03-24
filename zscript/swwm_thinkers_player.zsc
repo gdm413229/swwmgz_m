@@ -43,6 +43,7 @@ Class SWWMStats : Thinker
 	Array<bool> secretdone;
 	// hackaround for stuff getting lost
 	Array<Class<SWWMCollectible> > ownedcollectibles;
+	int plushuses;
 	// for pistol start info (to avoid it within hubs)
 	int lastcluster;
 
@@ -61,7 +62,7 @@ Class SWWMStats : Thinker
 		Class<Weapon> which = myplayer.ReadyWeapon?myplayer.ReadyWeapon.GetClass():null;
 		if ( inflictor is 'Weapon' ) which = Weapon(inflictor).GetClass();
 		if ( which is 'DualExplodiumGun' ) which = 'ExplodiumGun';	// don't credit sister weapon
-		if ( inflictor.FindInventory("ParriedBuff") ) which = 'DoomWeapon';	// gross hack
+		if ( inflictor && inflictor.FindInventory("ParriedBuff") ) which = 'DoomWeapon';	// gross hack
 		// properly credit some projectiles to their respective gun
 		else if ( inflictor is 'AirBullet' ) which = 'DeepImpact';
 		else if ( inflictor is 'PusherProjectile' ) which = 'PusherWeapon';
@@ -200,6 +201,14 @@ Class SWWMCredits : Thinker
 {
 	PlayerInfo myplayer;
 	int credits, hcredits;
+	bool cheated;
+
+	static void HasCheated( PlayerInfo p )
+	{
+		let c = Find(p);
+		if ( !c ) return;
+		c.cheated = true;
+	}
 
 	static void Give( PlayerInfo p, int amount, int hamount = 0 )
 	{
@@ -220,6 +229,9 @@ Class SWWMCredits : Thinker
 			s.hiscore = c.credits;
 			s.hhiscore = c.hcredits;
 		}
+		if ( c.cheated ) return;
+		if ( c.hcredits > 0 ) SWWMUtility.AchievementProgress('swwm_progress_dosh',1000000000,p);
+		else SWWMUtility.AchievementProgress('swwm_progress_dosh',c.credits,p);
 	}
 
 	static clearscope bool CanTake( PlayerInfo p, int amount, int hamount = 0 )

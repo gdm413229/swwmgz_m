@@ -9,6 +9,8 @@ Class ExplodiumGun : SWWMWeapon
 	double casex, casey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
+	transient Actor deadeye_tgt;
+	transient int deadeye_cnt;
 
 	Property ClipCount : ClipCount;
 
@@ -110,6 +112,17 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
+			if ( invoker.deadeye_tgt && (d.HitActor != invoker.deadeye_tgt) )
+			{
+				invoker.deadeye_tgt = null;
+				invoker.deadeye_cnt = 0;
+			}
+			else
+			{
+				invoker.deadeye_tgt = d.HitActor;
+				invoker.deadeye_cnt++;
+				SWWMUtility.AchievementProgress('swwm_progress_explogun',invoker.deadeye_cnt,player);
+			}
 			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 20;
@@ -131,33 +144,38 @@ Class ExplodiumGun : SWWMWeapon
 			b.pitch = asin(d.HitDir.z);
 			b.target = self;
 		}
-		else if ( d.HitType != TRACE_HitNone )
+		else
 		{
-			Vector3 hitnormal = -d.HitDir;
-			if ( d.HitType == TRACE_HitFloor )
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			if ( d.HitType != TRACE_HitNone )
 			{
-				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
-				else hitnormal = d.HitSector.floorplane.Normal;
+				Vector3 hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
+				p.angle = atan2(hitnormal.y,hitnormal.x);
+				p.pitch = asin(-hitnormal.z);
+				if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+				let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
+				b.angle = atan2(hitnormal.y,hitnormal.x);
+				b.pitch = asin(-hitnormal.z);
+				b.target = self;
+				if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 			}
-			else if ( d.HitType == TRACE_HitCeiling )
-			{
-				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
-				else hitnormal = d.HitSector.ceilingplane.Normal;
-			}
-			else if ( d.HitType == TRACE_HitWall )
-			{
-				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
-				if ( !d.LineSide ) hitnormal *= -1;
-			}
-			let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
-			p.angle = atan2(hitnormal.y,hitnormal.x);
-			p.pitch = asin(-hitnormal.z);
-			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
-			let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
-			b.angle = atan2(hitnormal.y,hitnormal.x);
-			b.pitch = asin(-hitnormal.z);
-			b.target = self;
-			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
 		for ( int i=0; i<6; i++ )
 		{
@@ -283,7 +301,12 @@ Class ExplodiumGun : SWWMWeapon
 		XZW1 A -1;
 		Stop;
 	Select:
-		XZW2 B 2 A_FullRaise();
+		XZW2 B 2
+		{
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			A_FullRaise();
+		}
 		XZW2 CDEFGH 2;
 		Goto Ready;
 	Ready:
@@ -348,6 +371,8 @@ Class ExplodiumGun : SWWMWeapon
 	Reload:
 		XZW2 A 1
 		{
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
 			if ( invoker.clipcount >= invoker.default.clipcount ) return ResolveState("CheckBullet");
 			A_PlayerReload();
 			if ( invoker.clipcount <= 0 ) return ResolveState("ReloadEmpty");
@@ -455,6 +480,8 @@ Class DualExplodiumGun : SWWMWeapon
 	double casex, casey, lcasex, lcasey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
+	transient Actor deadeye_tgt;
+	transient int deadeye_cnt;
 
 	Property ClipCount : ClipCount;
 
@@ -552,6 +579,17 @@ Class DualExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
+			if ( invoker.deadeye_tgt && (d.HitActor != invoker.deadeye_tgt) )
+			{
+				invoker.deadeye_tgt = null;
+				invoker.deadeye_cnt = 0;
+			}
+			else
+			{
+				invoker.deadeye_tgt = d.HitActor;
+				invoker.deadeye_cnt++;
+				SWWMUtility.AchievementProgress('swwm_progress_explogun',invoker.deadeye_cnt,player);
+			}
 			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 20;
@@ -573,33 +611,38 @@ Class DualExplodiumGun : SWWMWeapon
 			b.pitch = asin(d.HitDir.z);
 			b.target = self;
 		}
-		else if ( d.HitType != TRACE_HitNone )
+		else
 		{
-			Vector3 hitnormal = -d.HitDir;
-			if ( d.HitType == TRACE_HitFloor )
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			if ( d.HitType != TRACE_HitNone )
 			{
-				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
-				else hitnormal = d.HitSector.floorplane.Normal;
+				Vector3 hitnormal = -d.HitDir;
+				if ( d.HitType == TRACE_HitFloor )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+					else hitnormal = d.HitSector.floorplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitCeiling )
+				{
+					if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+					else hitnormal = d.HitSector.ceilingplane.Normal;
+				}
+				else if ( d.HitType == TRACE_HitWall )
+				{
+					hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+					if ( !d.LineSide ) hitnormal *= -1;
+				}
+				let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
+				p.angle = atan2(hitnormal.y,hitnormal.x);
+				p.pitch = asin(-hitnormal.z);
+				if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+				let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
+				b.angle = atan2(hitnormal.y,hitnormal.x);
+				b.pitch = asin(-hitnormal.z);
+				b.target = self;
+				if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 			}
-			else if ( d.HitType == TRACE_HitCeiling )
-			{
-				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
-				else hitnormal = d.HitSector.ceilingplane.Normal;
-			}
-			else if ( d.HitType == TRACE_HitWall )
-			{
-				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
-				if ( !d.LineSide ) hitnormal *= -1;
-			}
-			let p = Spawn("SWWMBulletImpact",d.HitLocation+hitnormal*0.01);
-			p.angle = atan2(hitnormal.y,hitnormal.x);
-			p.pitch = asin(-hitnormal.z);
-			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
-			let b = Spawn("ExplodiumBulletImpact",d.HitLocation+hitnormal*4.);
-			b.angle = atan2(hitnormal.y,hitnormal.x);
-			b.pitch = asin(-hitnormal.z);
-			b.target = self;
-			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
 		for ( int i=0; i<6; i++ )
 		{
@@ -674,7 +717,12 @@ Class DualExplodiumGun : SWWMWeapon
 	States
 	{
 	Select:
-		XZW2 B 2 A_FullRaise();
+		XZW2 B 2
+		{
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			A_FullRaise();
+		}
 		XZW2 C 2;
 		XZW2 D 2 { player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftSelect")); }
 		XZW2 EFGHAA 2;
@@ -789,7 +837,12 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWB A 1;
 		Goto LeftReady;
 	Reload:
-		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
+		XZW2 A 9
+		{
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower"));
+		}
 		XZW2 A 1
 		{
 			A_PlayerReload();
@@ -845,7 +898,12 @@ Class DualExplodiumGun : SWWMWeapon
 		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
 		Goto Ready;
 	LeftReload:
-		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+		XZWB A 9
+		{
+			invoker.deadeye_tgt = null;
+			invoker.deadeye_cnt = 0;
+			player.SetPSPrite(PSP_WEAPON,ResolveState("Lower"));
+		}
 		XZWB A 1
 		{
 			A_PlayerReload();

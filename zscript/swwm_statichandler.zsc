@@ -51,6 +51,13 @@ Class SWWMStaticHandler : StaticEventHandler
 				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
 			}
 		}
+		if ( players[consoleplayer].mo )
+		{
+			// recheck progress on collectibles
+			int nc = 0;
+			for ( Inventory i=players[consoleplayer].mo.inv; i; i=i.inv ) if ( i is 'SWWMCollectible' ) nc++;
+			if ( !swwm_achievement_allcoll ) CVar.FindCVar('swwm_progress_allcoll').SetInt(nc);
+		}
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
 		// force a reset of the minimap zoom in case it's set beyond safe levels
 		double mmz = swwm_mm_zoom;
@@ -93,6 +100,13 @@ Class SWWMStaticHandler : StaticEventHandler
 		Font.GetFont('TewiShaded');
 		Font.GetFont('TewiShadedInverse');
 		Font.GetFont('SWWMBigFont');
+		// iwad progress
+		if ( gameinfo.gametype&GAME_Doom )
+			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',1,players[consoleplayer]);
+		else if ( gameinfo.gametype&GAME_Heretic )
+			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',2,players[consoleplayer]);
+		else if ( gameinfo.gametype&GAME_Hexen )
+			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',4,players[consoleplayer]);
 	}
 
 	override void ConsoleProcess( ConsoleEvent e )
@@ -117,6 +131,34 @@ Class SWWMStaticHandler : StaticEventHandler
 		{
 			for ( int i=0; i<mmvars.Size(); i++ )
 				CVar.FindCVar(mmvars[i]).ResetToDefault();
+		}
+		else if ( e.Name ~== "swwmgetplaytime" )
+		{
+			int val = swwm_playtime;
+			int sec = (val%60);
+			int min = ((val/60)%60);
+			int hour = ((val/3600)%24);
+			int day = val/86400;
+			String str = "";
+			if ( day ) str.AppendFormat("%d days",day);
+			if ( hour )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d hours",hour);
+			}
+			if ( min )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d minutes",min);
+			}
+			if ( sec )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d seconds",sec);
+			}
+			if ( str == "" ) Console.Printf("No Data");
+			else Console.Printf(str);
+			return;
 		}
 	}
 
@@ -161,6 +203,12 @@ Class SWWMStaticHandler : StaticEventHandler
 
 	override void PostUiTick()
 	{
+		if ( (gametic > 0) && !(gametic%GameTicRate) )
+		{
+			let pt = CVar.FindCVar('swwm_playtime');
+			int ct = pt.GetInt();
+			pt.SetInt(ct+1);
+		}
 		if ( gamestate != GS_LEVEL ) return;
 		CheckAllAchievements();
 		if ( !mpsent )

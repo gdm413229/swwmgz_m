@@ -100,11 +100,19 @@ Class SayaBeanGesture : SWWMItemGesture
 		}
 		A_StartSound("saya/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 	}
+	action void A_UsePlush()
+	{
+		if ( !Demolitionist(self) ) return;
+		let s = Demolitionist(self).mystats;
+		if ( !s ) return;
+		s.plushuses++;
+		SWWMUtility.AchievementProgress('swwm_progress_plush',s.plushuses,player);
+	}
 
 	States
 	{
 	Fire:
-		XZW1 A 3;
+		XZW1 A 3 A_UsePlush();
 		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW1 CDEFGH 3;
 		XZW1 IJ 4;

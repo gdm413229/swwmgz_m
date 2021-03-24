@@ -56,6 +56,25 @@ Class SWWMGesture : SWWMWeapon
 		if ( !psp ) return;
 		if ( (Owner.Health <= 0) && (psp.CurState != ResolveState("Deselect")) )
 			Owner.player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
+		// check if we're waving at a dying enemy
+		if ( (psp.frame >= 3) && (psp.frame <= 12) && (psp.sprite == GetSpriteIndex('XZW1')) )
+			CheckWave();
+	}
+
+	private void CheckWave()
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		for ( int i=0; i<hnd.suckableactors.Size(); i++ )
+		{
+			let a = hnd.suckableactors[i];
+			if ( !a || (a.Health > 0) || (a.tics == -1) || !(a.bISMONSTER || a.player) || !a.IsHostile(Owner) ) continue;
+			// check if we can see it
+			if ( !SWWMUtility.InPlayerFOV(Owner.player,a) ) continue;
+			// someone's dying
+			SWWMUtility.MarkAchievement('swwm_achievement_wave',Owner.player);
+			break;
+		}
 	}
 
 	static SWWMGesture SetGesture( PlayerPawn mo, int which )
@@ -232,6 +251,7 @@ Class SWWMGesture : SWWMWeapon
 				{
 					let s = Demolitionist(self).mystats;
 					if ( s ) s.befriend++;
+					SWWMUtility.AchievementProgressInc('swwm_progress_friend',1,player);
 				}
 				t.bFRIENDLY = true;
 				if ( deathmatch )

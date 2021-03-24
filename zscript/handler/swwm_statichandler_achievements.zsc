@@ -1,56 +1,55 @@
 // achievement tracking
 
 // constants for finetuning them numbers
-const SA_GCSANDWICH = 40;
-const SA_GHOST = 30;
-const SA_ALLITEMS = 75;
-const SA_CONGA = 25;
-const SA_EXPLOGUN = 5;
-const SA_GRAVITY = 20;
-const SA_FLIGHT = 1000;
-const SA_PAR = 25;
+const SA_GCSANDWICH = 25;
+const SA_GHOST = 25;
+const SA_ALLITEMS = 30;
+const SA_CONGA = 15;
+const SA_EXPLOGUN = 7;
+const SA_GRAVITY = 25;
+const SA_FLIGHT = 2000;
+const SA_PAR = 30;
 const SA_GOLDEN = 24;
 const SA_GIB = 500;
-const SA_BARRIER = 30;
-const SA_BOSSDASH = 20;
-const SA_SNEEZE = 50;
-const SA_FUEL = 200;
+const SA_BARRIER = 25;
+const SA_BOSSDASH = 10;
+const SA_SNEEZE = 20;
+const SA_FUEL = 400;
 const SA_SLAYER = 40;
 const SA_STOMP = 50;
-const SA_THRUWALL = 30;
+const SA_THRUWALL = 25;
 const SA_LEAD = 1500;
-const SA_LOVE = 50;
+const SA_LOVE = 20;
 const SA_BUTTS = 100;
 const SA_PLUSH = 20;
 const SA_BUSTIN = 40;
-const SA_MOTH = 60;
-const SA_BRAKE = 30;
-const SA_RAGE = 40;
+const SA_MOTH = 50;
+const SA_BRAKE = 20;
+const SA_RAGE = 25;
 const SA_PARRY = 100;
-const SA_ALLKILLS = 100;
-const SA_ALLSECRETS = 50;
-const SA_REFLECT = 50;
-const SA_WAVE = 20;
-const SA_FRIEND = 60;
-const SA_SHOCK = 50;
-const SA_BALLS = 30;
-const SA_REFRESH = 40;
+const SA_ALLKILLS = 30;
+const SA_ALLSECRETS = 30;
+const SA_REFLECT = 20;
+const SA_FRIEND = 30;
+const SA_SHOCK = 30;
+const SA_BALLS = 10;
+const SA_REFRESH = 25;
 const SA_STEP = 60;
-const SA_SUNNY = 30;
+const SA_SUNNY = 25;
 const SA_THICC = 80;
-const SA_SLEMG = 100;
-const SA_JUMP = 100;
-const SA_EZKILL = 200;
+const SA_SLEMG = 50;
+const SA_JUMP = 80;
+const SA_EZKILL = 100;
 const SA_ROAST = 30;
-const SA_DAB = 60;
+const SA_DAB = 100;
 const SA_HND = 6;
-const SA_GEPGUN = 50;
+const SA_GEPGUN = 30;
 const SA_PENE = 20;
-const SA_ACID = 200;
+const SA_ACID = 100;
 const SA_SANIC = 800;
 const SA_BUNE = 150;
 const SA_BONK = 300;
-const SA_ANOM = 40;
+const SA_ANOM = 25;
 
 // achievement unlock tracking
 extend Class SWWMStaticHandler
@@ -84,6 +83,7 @@ extend Class SWWMStaticHandler
 			else if ( ac == 'swwm_achievement_dakka' ) maxval = 60;
 			else if ( ac == 'swwm_achievement_dosh' ) maxval = 1000000000;
 			else if ( ac == 'swwm_achievement_mega' ) maxval = 1000000;
+			else if ( ac == 'swwm_achievement_iwad' ) maxval = 7;
 			if ( val && (prog < maxval) )
 			{
 				ev.SetInt(0);
@@ -194,7 +194,8 @@ extend Class SWWMStaticHandler
 			'swwm_achievement_snake',
 			'swwm_achievement_smb',
 			'swwm_achievement_tyrian',
-			'swwm_achievement_bof'
+			'swwm_achievement_bof',
+			'swwm_achievement_wantdie'
 		};
 		// localized name
 		static const String names[] =
@@ -280,7 +281,8 @@ extend Class SWWMStaticHandler
 			"$SWWM_ACHIEVEMENT_SNAKE",
 			"$SWWM_ACHIEVEMENT_SMB",
 			"$SWWM_ACHIEVEMENT_TYRIAN",
-			"$SWWM_ACHIEVEMENT_BOF"
+			"$SWWM_ACHIEVEMENT_BOF",
+			"$SWWM_ACHIEVEMENT_WANTDIE"
 		};
 		// has number in txt
 		static const int number[] =
@@ -328,7 +330,7 @@ extend Class SWWMStaticHandler
 			SA_ALLSECRETS,
 			SA_REFLECT,
 			0,	// SEKIRO
-			SA_WAVE,
+			0,	// WAVE
 			SA_FRIEND,
 			SA_SHOCK,
 			SA_BALLS,
@@ -366,7 +368,8 @@ extend Class SWWMStaticHandler
 			0,	// SNAKE
 			0,	// SMB
 			0,	// TYRIAN
-			0	// BOF
+			0,	// BOF
+			0	// WANTDIE
 		};
 		// is ignored (hide away achievements that can't be done yet)
 		static const bool ignoreme[] =
@@ -452,93 +455,95 @@ extend Class SWWMStaticHandler
 			true,	// SNAKE
 			true,	// SMB
 			true,	// TYRIAN
-			true	// BOF
+			true,	// BOF
+			false	// WANTDIE
 		};
 		// progress tracking cvar (if any)
 		static const Name pvar[] =
 		{
-			'swwm_progress_gcsandwich',	// GCSANDWICH
+			'swwm_progress_gcsandwich',
 			'None',	// HDOOM
 			'None',	// ONESTANDING
 			'None',	// OOPSIE
-			'swwm_progress_ghost',	// GHOST
+			'swwm_progress_ghost',
 			'None',	// CLONK
-			'swwm_progress_allitems',	// ALLITEMS
-			'swwm_progress_conga',	// CONGA
-			'swwm_progress_explogun',	// EXPLOGUN
-			'swwm_progress_gravity',	// GRAVITY
-			'swwm_progress_flight',	// FLIGHT
+			'swwm_progress_allitems',
+			'swwm_progress_conga',
+			'swwm_progress_explogun',
+			'swwm_progress_gravity',
+			'swwm_progress_flight',
 			'None',	// CLIFFYB
-			'swwm_progress_par',	// PAR
+			'swwm_progress_par',
 			'None',	// ONEGUY
-			'swwm_progress_golden',	// GOLDEN
-			'swwm_progress_gib',	// GIB
-			'swwm_progress_barrier',	// BARRIER
-			'swwm_progress_bossdash',	// BOSSDASH
-			'swwm_progress_sneeze',	// SNEEZE
-			'swwm_progress_fuel',	// FUEL
-			'swwm_progress_slayer',	// SLAYER
+			'swwm_progress_golden',
+			'swwm_progress_gib',
+			'swwm_progress_barrier',
+			'swwm_progress_bossdash',
+			'swwm_progress_sneeze',
+			'swwm_progress_fuel',
+			'swwm_progress_slayer',
 			'None',	// BROCCOLIDOCCOLI
 			'None',	// DIME
-			'swwm_progress_stomp',	// STOMP
+			'swwm_progress_stomp',
 			'None',	// CHEAT
 			'None',	// GOD
-			'swwm_progress_thruwall',	// THRUWALL
+			'swwm_progress_thruwall',
 			'None',	// MASHIRO
-			'swwm_progress_lead',	// LEAD
-			'swwm_progress_love',	// LOVE
-			'swwm_progress_butts',	// BUTTS
-			'swwm_progress_plush',	// PLUSH
-			'swwm_progress_bustin',	// BUSTIN
-			'swwm_progress_moth',	// MOTH
-			'None',	// IWAD
+			'swwm_progress_lead',
+			'swwm_progress_love',
+			'swwm_progress_butts',
+			'swwm_progress_plush',
+			'swwm_progress_bustin',
+			'swwm_progress_moth',
+			'swwm_progress_iwad',
 			'swwm_progress_brake',	// BRAKE
-			'swwm_progress_rage',	// RAGE
+			'swwm_progress_rage',
 			'None',	// ABORT
-			'swwm_progress_parry',	// PARRY
-			'swwm_progress_allkills',	// ALLKILLS
-			'swwm_progress_allsecrets',	// ALLSECRETS
-			'swwm_progress_reflect',	// REFLECT
+			'swwm_progress_parry',
+			'swwm_progress_allkills',
+			'swwm_progress_allsecrets',
+			'swwm_progress_reflect',
 			'None',	// SEKIRO
-			'swwm_progress_wave',	// WAVE
-			'swwm_progress_friend',	// FRIEND
-			'swwm_progress_shock',	// SHOCK
-			'swwm_progress_balls',	// BALLS
-			'swwm_progress_refresh',	// REFRESH
-			'swwm_progress_step',	// STEP
-			'swwm_progress_sunny',	// SUNNY
-			'swwm_progress_thicc',	// THICC
-			'swwm_progress_allcoll',	// ALLCOLL
-			'swwm_progress_slemg',	// SLEMG
-			'swwm_progress_dosh',	// DOSH
-			'swwm_progress_jump',	// JUMP
-			'swwm_progress_ezkill',	// EZKILL
+			'None',	// WAVE
+			'swwm_progress_friend',
+			'swwm_progress_shock',
+			'swwm_progress_balls',
+			'swwm_progress_refresh',
+			'swwm_progress_step',
+			'swwm_progress_sunny',
+			'swwm_progress_thicc',
+			'swwm_progress_allcoll',
+			'swwm_progress_slemg',
+			'swwm_progress_dosh',
+			'swwm_progress_jump',
+			'swwm_progress_ezkill',
 			'None',	// LIGMA
 			'None',	// YEET
 			'None',	// MBF
 			'None',	// LIGHTNING
-			'swwm_progress_dakka',	// DAKKA
-			'swwm_progress_roast',	// ROAST
-			'swwm_progress_dab',	// DAB
-			'swwm_progress_hnd',	// HND
-			'swwm_progress_gepgun',	// GEPGUN
+			'swwm_progress_dakka',
+			'swwm_progress_roast',
+			'swwm_progress_dab',
+			'swwm_progress_hnd',
+			'swwm_progress_gepgun',
 			'None',	// FULLER
-			'swwm_progress_pene',	// PENE
-			'swwm_progress_acid',	// ACID
+			'swwm_progress_pene',
+			'swwm_progress_acid',
 			'None',	// SALT
-			'swwm_progress_mega',	// MEGA
-			'swwm_progress_sanic',	// SANIC
+			'swwm_progress_mega',
+			'swwm_progress_sanic',
 			'None',	// TELE
-			'swwm_progress_bune',	// BUNE
-			'swwm_progress_bonk',	// BONK
-			'swwm_progress_anom',	// ANOM
+			'swwm_progress_bune',
+			'swwm_progress_bonk',
+			'swwm_progress_anom',
 			'None',	// ANONE
 			'None',	// TETRIS
 			'None',	// PONG
 			'None',	// SNAKE
 			'None',	// SMB
 			'None',	// TYRIAN
-			'None'	// BOF
+			'None',	// BOF
+			'None'	// WANTDIE
 		};
 		bool alldone = true;
 		for ( int i=0; i<vars.Size(); i++ )

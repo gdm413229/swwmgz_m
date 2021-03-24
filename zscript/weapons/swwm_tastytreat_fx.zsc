@@ -56,6 +56,7 @@ Class HitListEntry
 	Actor hitactor;
 	Vector3 hitlocation, x;
 	int hitdamage;
+	bool pastwall;	// used by silver bullet
 }
 
 Class CandyBeamTracer : LineTracer
@@ -536,6 +537,26 @@ Class CandyGunProj : Actor
 	}
 	void A_BlowUp()
 	{
+		bool bossbrains = false;
+		for ( Actor a=CurSector.thinglist; a; a=a.snext )
+		{
+			if ( a is 'BossBrain' )
+			{
+				let ti = ThinkerIterator.Create('BossEye');
+				if ( ti.Next() )
+				{
+					bossbrains = true;
+					break;
+				}
+			}
+			else if ( a is 'BossEye' )
+			{
+				bossbrains = true;
+				break;
+			}
+		}
+		if ( bossbrains && target )
+			SWWMUtility.MarkAchievement('swwm_achievement_yeet',target.player);
 		angle = atan2(cvel.y,cvel.x);
 		pitch = asin(-cvel.z);
 		bNOGRAVITY = true;

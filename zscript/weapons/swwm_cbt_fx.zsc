@@ -343,6 +343,7 @@ Class BusterWall : Thinker
 		{
 			let s = SWWMStats.Find(Instigator.player);
 			if ( s ) s.busts++;
+			SWWMUtility.AchievementProgressInc('swwm_progress_bustin',1,Instigator.player);
 		}
 		bust.busted = true;
 		bust.busttics = 0;

@@ -421,6 +421,7 @@ Class Wallbuster : SWWMWeapon
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		int alertness = 0;
 		// second pass, play the fire effects
+		int salts = 0;
 		for ( int i=0; i<num; i++ )
 		{
 			// get physical index
@@ -446,12 +447,17 @@ Class Wallbuster : SWWMWeapon
 			A_StartSound(sounds[which],CHAN_WEAPON,CHANF_OVERLAP,1./(howmany**rfact),.6-howmany*.004,1.-howmany*.015);
 			if ( which == 0 ) redflashstr = max(120,redflashstr+10);
 			else if ( which == 1 ) redflashstr = max(90,redflashstr+8);
-			else if ( which == 2 ) blueflashstr = max(160,blueflashstr+10);
+			else if ( which == 2 )
+			{
+				blueflashstr = max(160,blueflashstr+10);
+				salts++;
+			}
 			else if ( which == 3 ) redflashstr = max(60,redflashstr+6);
 			A_CBTFlash(flashes[which],i);
 			if ( alertness > louds[which] ) alertness += louds[which]/4;
 			else alertness += louds[which];
 		}
+		if ( salts >= 25 ) SWWMUtility.MarkAchievement('swwm_achievement_salt',player);
 		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));
 		else if ( howmany < 15 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireFive"));
 		else player.SetPsprite(PSP_WEAPON,ResolveState("FireTwentyFive"));

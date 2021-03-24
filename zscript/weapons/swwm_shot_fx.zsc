@@ -780,6 +780,7 @@ Class CorrodeDebuff : Inventory
 		// forcibly update
 		wasalive = true;
 		cnt = -1;
+		if ( instigator ) SWWMUtility.AchievementProgressInc('swwm_progress_acid',1,instigator.player);
 	}
 	override void DoEffect()
 	{
@@ -1186,6 +1187,7 @@ Class TheBall : Actor
 				s.vel = pvel;
 			}
 			crit = true;
+			if ( target ) SWWMUtility.AchievementProgressInc('swwm_progress_balls',1,target.player);
 		}
 		SWWMUtility.DoKnockback(victim,vel.unit(),slamforce);
 		bool bleeds = (victim && !victim.bINVULNERABLE && !victim.bNOBLOOD && !victim.bDORMANT && is_schutt);
@@ -1215,6 +1217,8 @@ Class TheBall : Actor
 		}
 		if ( crit )
 			SWWMUtility.DoExplosion(self,dmg/2,25000,150,80,ignoreme:target);
+		if ( crit && victim && (victim.Health <= 0) && victim.bBOSS && target )
+			SWWMUtility.MarkAchievement('swwm_achievement_clonk',target.player);
 		// only rip shootables
 		if ( (slamforce > girth) && is_schutt )
 		{

@@ -211,6 +211,7 @@ Class DeepImpact : SWWMWeapon
 		}
 		let ti = ThinkerIterator.Create("Actor");
 		Actor m;
+		let s = Demolitionist(self).mystats;
 		while ( m = Actor(ti.Next()) )
 		{
 			if ( !(SWWMUtility.ValidProjectile(m) && (m.target != self)) ) continue;
@@ -231,6 +232,8 @@ Class DeepImpact : SWWMWeapon
 				let pb = Inventory(Spawn("ParriedBuff"));
 				pb.AttachToOwner(m);
 			}
+			if ( s ) s.parries++;
+			SWWMUtility.AchievementProgressInc('swwm_progress_parry',1,player);
 		}
 		int numpt = Random[Impact](7,12);
 		for ( int i=0; i<numpt; i++ )

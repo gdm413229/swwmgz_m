@@ -419,10 +419,20 @@ Class YnykronImpact : Actor
 				gc.DoTheThing(true);
 				gc.Amount--;
 			}
-			else if ( !tracer.FindInventory("GrilledCheeseSafeguard") ) tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+			else if ( !tracer.FindInventory("GrilledCheeseSafeguard") )
+			{
+				tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+				if ( target && tracer && (tracer.Health > 0) )
+					SWWMUtility.MarkAchievement('swwm_achievement_god',target.player);
+			}
 			if ( tracer && (tracer.Health <= 0) )
 			{
-				if ( tracer.player ) PlayerGone.FeckOff(tracer);
+				if ( tracer.player )
+				{
+					if ( tracer == target )
+						SWWMUtility.MarkAchievement('swwm_achievement_oopsie',tracer.player);
+					PlayerGone.FeckOff(tracer);
+				}
 				if ( tracer.FindState("YnykronDeath",true) )
 					tracer.SetStateLabel("YnykronDeath");	// dedicated state
 				else
@@ -437,6 +447,10 @@ Class YnykronImpact : Actor
 					let r = Spawn("AshenRemains",tracer.pos);
 					r.scale *= tracer.radius/16.;
 				}
+				if ( (tracer.bIsMonster || tracer.player) && tracer.IsHostile(target) && YnykronShot(master) )
+					YnykronShot(master).enemykills++;
+				if ( target && tracer.FindInventory("EndgameBossMarker") )
+					SWWMUtility.MarkAchievement('swwm_achievement_ligma',target.player);
 			}
 		}
 		if ( YnykronShot(master) )
@@ -499,7 +513,10 @@ Class YnykronImpact : Actor
 			dirto /= dist;
 			int trad = int(max(t.radius,t.height));
 			if ( t && YnykronShot(master) )
+			{
 				YnykronShot(master).hitlist.Push(t);
+				if ( t.bBOSS ) YnykronShot(master).hitboss = true;
+			}
 			// spawn blast that will propagate
 			let b = Spawn("YnykronDelayedImpact",t.pos);
 			Vector3 ofs = level.Vec3Diff(t.pos,level.Vec3Offset(pos,dirto*min(rad,dist)));
@@ -666,7 +683,10 @@ Class YnykronBeam : Actor
 				continue;
 			int trad = int(max(t.hitlist[i].hitactor.radius,t.hitlist[i].hitactor.height));
 			if ( t.hitlist[i].hitactor && YnykronShot(master) )
+			{
 				YnykronShot(master).hitlist.Push(t.hitlist[i].hitactor);
+				if ( t.hitlist[i].hitactor.bBOSS ) YnykronShot(master).hitboss = true;
+			}
 			// spawn blast that will propagate
 			let b = Spawn("YnykronImpact",t.hitlist[i].hitlocation);
 			b.tracer = t.HitList[i].hitactor;
@@ -763,7 +783,10 @@ Class YnykronBeam : Actor
 					continue;
 				int trad = int(max(it.hitlist[i].hitactor.radius,it.hitlist[i].hitactor.height));
 				if ( it.hitlist[i].hitactor && YnykronShot(master) )
+				{
 					YnykronShot(master).hitlist.Push(it.hitlist[i].hitactor);
+					if ( it.hitlist[i].hitactor.bBOSS ) YnykronShot(master).hitboss = true;
+				}
 				// spawn blast that will propagate
 				let b = Spawn("YnykronImpact",it.hitlist[i].hitlocation);
 				b.tracer = it.hitlist[i].hitactor;
@@ -1040,6 +1063,8 @@ Class YnykronImpactRing : Actor
 Class YnykronShot : Actor
 {
 	Array<Actor> hitlist;
+	bool hitboss;
+	int enemykills;
 	int beamcount;
 	int blastcount;
 	int lastimpact;
@@ -1115,13 +1140,19 @@ Class YnykronShot : Actor
 			}
 		}
 		// wait until we're no longer needed and all effects are over
-		if ( IsActorPlayingSound(CHAN_VOICE) || (beamcount > 0) || (blastcount > 0) )
-		{
-			special1 = min(special1,50);
+		if ( (beamcount > 0) || (blastcount > 0) )
 			return;
+		if ( target && enemykills )
+		{
+			if ( (enemykills == 1) && !hitboss )
+				SWWMUtility.MarkAchievement('swwm_achievement_oneguy',target.player);
+			SWWMUtility.AchievementProgress('swwm_progress_ezkill',enemykills,target.player);
+			enemykills = 0;
 		}
-		// we're done here, but wait for a while just in case
-		if ( special1 > 350 ) Destroy();
+		if ( IsActorPlayingSound(CHAN_VOICE) )
+			return;
+		// we're done here
+		Destroy();
 	}
 }
 
@@ -2395,10 +2426,20 @@ Class YnykronSingularity : Actor
 						gc.DoTheThing(true);
 						gc.Amount--;
 					}
-					else if ( !a.FindInventory("GrilledCheeseSafeguard") ) a.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+					else if ( !a.FindInventory("GrilledCheeseSafeguard") )
+					{
+						a.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
+						if ( target && a && (a.Health > 0) )
+							SWWMUtility.MarkAchievement('swwm_achievement_god',target.player);
+					}
 					if ( a && (a.Health <= 0) )
 					{
-						if ( a.player ) PlayerGone.FeckOff(a);
+						if ( a.player )
+						{
+							if ( a == target )
+								SWWMUtility.MarkAchievement('swwm_achievement_oopsie',a.player);
+							PlayerGone.FeckOff(a);
+						}
 						if ( a.FindState("YnykronAltDeath",true) )
 							a.SetStateLabel("YnykronAltDeath");	// dedicated state
 						else
@@ -2408,6 +2449,8 @@ Class YnykronSingularity : Actor
 							a.A_ChangeLinkFlags(false);	// remove from blockmap, should guarantee archviles not raising this
 							IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
 						}
+						if ( target && a.FindInventory("EndgameBossMarker") )
+							SWWMUtility.MarkAchievement('swwm_achievement_ligma',target.player);
 					}
 					if ( !a || (a.Health <= 0) )
 						specialf2 += min(100.,capmass*.6); // partial absorption

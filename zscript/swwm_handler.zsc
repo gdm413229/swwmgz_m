@@ -110,9 +110,10 @@ Class SWWMHandler : EventHandler
 		if ( !(e.ActivationType&SPAC_Use) ) return;
 		if ( !e.Thing || !e.Thing.player ) return;
 		let w = SWWMWeapon(e.Thing.player.ReadyWeapon);
-		if ( !w || !w.wallponch ) return;
+		if ( (!w || !w.wallponch) && (!(e.Thing is 'Demolitionist') || !Demolitionist(e.Thing).hitactivate) ) return;
 		let s = SWWMStats.Find(e.Thing.player);
 		if ( s ) s.wponch++;
+		SWWMUtility.AchievementProgressInc('swwm_progress_slemg',1,e.Thing.player);
 	}
 
 	// stuff for hud

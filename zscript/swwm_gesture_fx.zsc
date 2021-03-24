@@ -462,6 +462,7 @@ Class HeadpatTracker : Actor
 			patter.player.cheats |= CF_TOTALLYFROZEN;
 			Demolitionist(patter).scriptedinvul = true;
 			target.bDORMANT = true;
+			if ( SWWMUtility.IdentifyingDog(target) ) SWWMUtility.MarkAchievement('swwm_achievement_mbf',user.player);
 			return true;
 		}
 		return false;

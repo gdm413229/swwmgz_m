@@ -101,6 +101,7 @@ extend Class SWWMHandler
 				s.AddDamageDealt(e.Damage);
 				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
 			}
+			SWWMFlyTracker.Track(e.Thing,e.DamageSource);
 		}
 	}
 
@@ -155,6 +156,25 @@ extend Class SWWMHandler
 				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.Thing.bBOSS?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("scorekill",1,15);
 			}
+		}
+		// achievement stuff
+		if ( e.Thing.IsHostile(src) )
+		{
+			if ( e.Thing.bBOSS && ((e.DamageType == 'Dash') || (e.DamageType == 'Buttslam')) )
+				SWWMUtility.AchievementProgressInc('swwm_progress_bossdash',1,src.player);
+			if ( e.DamageType == 'Push' )
+				SWWMUtility.AchievementProgressInc('swwm_progress_sneeze',1,src.player);
+			else if ( e.DamageType == 'Buttslam' )
+				SWWMUtility.AchievementProgressInc('swwm_progress_butts',1,src.player);
+			else if ( e.DamageType == 'Jump' )
+				SWWMUtility.AchievementProgressInc('swwm_progress_stomp',1,src.player);
+			else if ( e.DamageType == 'GroundPound' )
+				SWWMUtility.AchievementProgressInc('swwm_progress_thicc',1,src.player);
+			else if ( (e.DamageType == 'Love') && !(e.Thing is 'WolfensteinSS') )
+				SWWMUtility.AchievementProgressInc('swwm_progress_love',1,src.player);
+			if ( e.Inflictor && e.Inflictor.FindInventory('ParriedBuff') )
+				SWWMUtility.AchievementProgressInc('swwm_progress_reflect',1,src.player);
+			SWWMUtility.AchievementProgressInc('swwm_progress_mega',1,src.player);
 		}
 		// no credits unless it's a counted kill or marine (that isn't friendly)
 		if ( e.Thing.IsFriend(src) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine')) )
@@ -236,6 +256,7 @@ extend Class SWWMHandler
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_OVERKILL");
 				scr.xcnt = ++ofs;
 			}
+			SWWMUtility.AchievementProgressInc('swwm_progress_gib',1,src.player);
 		}
 		score = int(score*(1.+.5*min(multilevel[pnum],16)));
 		if ( (multilevel[pnum] > 0) && scr )
@@ -281,6 +302,7 @@ extend Class SWWMHandler
 			SWWMCredits.Give(src.player,1000);
 			Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),src.player.GetUserName(),1000);
 			SWWMScoreObj.Spawn(1000,src.Vec3Offset(0,0,src.Height/2));
+			SWWMUtility.AchievementProgressInc('swwm_progress_allkills',1,src.player);
 		}
 	}
 

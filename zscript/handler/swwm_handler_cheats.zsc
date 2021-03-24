@@ -19,6 +19,7 @@ extend Class SWWMHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
 			}
+			SWWMCredits.HasCheated(players[e.Args[0]]);
 			SWWMCredits.Give(players[e.Args[0]],1000000000);
 			SWWMScoreObj.Spawn(1000000000,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
 		}
@@ -341,6 +342,7 @@ extend Class SWWMHandler
 				if ( kstr != cht[i].Left(kstr.length()) ) continue;
 				matchany = true;
 				if ( kstr != cht[i] ) continue;
+				if ( i > 4 ) SWWMUtility.MarkAchievement('swwm_achievement_cheat',players[consoleplayer]);
 				if ( SWWMUtility.CheatsDisabled(consoleplayer) )
 				{
 					kfail = true;

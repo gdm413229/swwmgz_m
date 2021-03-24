@@ -1127,6 +1127,7 @@ Class BiosparkBeam : Actor
 					s.Args[0] = t.hitlist[i].hitactor.target.special1;
 				}
 				t.hitlist[i].hitactor.target.Destroy();
+				if ( target ) SWWMUtility.AchievementProgressInc('swwm_progress_shock',1,target.player);
 			}
 			else
 			{

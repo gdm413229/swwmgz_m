@@ -9,6 +9,8 @@ extend Class SWWMHandler
 	// for minimap
 	Array<int> ffsectors;
 
+	Array<Key> mapkeys;
+
 	// level end stats
 	override void WorldUnloaded( WorldEvent e )
 	{
@@ -70,6 +72,21 @@ extend Class SWWMHandler
 				players[i].mo.GiveInventory("InventoryWipeToken",1);
 			}
 		}
+		// did we complete this map without collecting any of its keys? (doesn't work for hubs)
+		if ( (mapkeys.Size() > 0) && !(level.clusterflags&LevelLocals.CLUSTER_HUB) )
+		{
+			bool collected = false;
+			for ( int i=0; i<mapkeys.Size(); i++ )
+			{
+				if ( !mapkeys[i].Owner || !mapkeys[i].Owner.player ) continue;
+				collected = true;
+				break;
+			}
+			if ( !collected ) SWWMUtility.MarkAchievement('swwm_achievement_cliffyb',players[consoleplayer]);
+		}
+		// beat the par time?
+		if ( level.partime && (Thinker.Tics2Seconds(level.maptime) <= level.partime) )
+			SWWMUtility.AchievementProgressInc('swwm_progress_par',1,players[consoleplayer]);
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )
@@ -249,5 +266,13 @@ extend Class SWWMHandler
 		}
 		// spawn loot
 		Chancebox.SpawnChanceboxes();
+		// list map keys
+		let ti = ThinkerIterator.Create("Key");
+		Key k;
+		while ( k = Key(ti.Next()) )
+		{
+			if ( k.Owner ) continue;
+			mapkeys.Push(k);
+		}
 	}
 }

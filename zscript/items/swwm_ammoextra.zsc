@@ -151,6 +151,52 @@ Class AmmoFabricator : Inventory abstract
 		return given;
 	}
 
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !Owner || !bAUTOACTIVATE ) return;
+		bool shouldautouse = false;
+		if ( swwm_enforceautouseammo == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautouseammo == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autouseammo',Owner.player).GetBool();
+		if ( !shouldautouse ) return;
+		// fabricators of lower tiers, for priority checking
+		Array<AmmoFabricator> others;
+		for ( Inventory i=Owner.inv; i; i=i.inv )
+		{
+			if ( !(i is 'AmmoFabricator') || (i == self) || !i.bAUTOACTIVATE || (AmmoFabricator(i).maxunitprice >= maxunitprice) ) continue;
+			others.Push(AmmoFabricator(i));
+		}
+		// check if owner lacks ammo, autouse if we can afford its unit price
+		bool used = false;
+		Actor o = Owner;
+		for ( Inventory i=o.inv; i; i=i.inv )
+		{
+			if ( !(i is 'Ammo') || (i.Amount > (i.MaxAmount/3)) || (i.Stamina <= 0) || (i.Stamina > maxunitprice) ) continue;
+			// ignore if there's a cheaper fabricator than us that can afford it ("wait our turn", basically)
+			bool lowprio = false;
+			for ( int j=0; j<others.Size(); j++ )
+			{
+				if ( i.Stamina > others[j].maxunitprice ) continue;
+				lowprio = true;
+				break;
+			}
+			if ( lowprio ) continue;
+			// hit it
+			while ( (Amount > 0) && FabricateAmmo() )
+			{
+				used = true;
+				Amount--;
+			}
+			if ( Amount <= 0 )
+			{
+				DepleteOrDestroy();
+				break;
+			}
+		}
+		if ( used && (o.player == players[consoleplayer]) ) o.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+	}
+
 	override bool Use( bool pickup )
 	{
 		bool shouldautouse = false;

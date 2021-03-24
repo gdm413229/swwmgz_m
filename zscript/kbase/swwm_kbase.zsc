@@ -510,9 +510,9 @@ Class DemolitionistMenu : GenericMenu
 			if ( tabs[curtab] == TAB_HELP )
 			{
 				String kstr;
-				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
-				else kstr = mkey[0];
-				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				if ( self.mkey[1] != "" ) kstr = self.mkey[0].."/"..self.mkey[1];
+				else kstr = self.mkey[0];
+				String str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -2154,7 +2154,7 @@ Class DemolitionistMenu : GenericMenu
 		double afactor = adone?1.:0., bfactor = bdone?1.:0.;
 		if ( a.progress )
 		{
-			int cur = clamp(a.progress.GetInt(),0,a.maval);
+			int cur = clamp(a.progress.GetInt(),0,a.maxval);
 			afactor = cur/double(a.maxval);
 		}
 		if ( b.progress )

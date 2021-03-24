@@ -14,10 +14,10 @@ Class SWWMCollectible : Inventory abstract
 	// minimum gametype requirements
 	enum EAvailability
 	{
-		AVAIL_Hexen,
+		AVAIL_None,
+		AVAIL_All,
 		AVAIL_Heretic,
-		AVAIL_Eviternity,
-		AVAIL_All
+		AVAIL_Hexen
 	};
 
 	Default
@@ -39,8 +39,8 @@ Class SWWMCollectible : Inventory abstract
 	}
 	bool ValidGame() const
 	{
+		if ( avail == AVAIL_None ) return false;
 		if ( avail == AVAIL_All ) return true;
-		if ( (avail == AVAIL_Eviternity) && ((gameinfo.gametype&GAME_Raven) || SWWMUtility.IsEviternity()) ) return true;
 		if ( (avail == AVAIL_Heretic) && (gameinfo.gametype&GAME_Raven) ) return true;
 		if ( (avail == AVAIL_Hexen) && (gameinfo.gametype&GAME_Hexen) ) return true;
 		return false;
@@ -198,18 +198,84 @@ Class SayaBean : SWWMCollectible
 		Height 23;
 	}
 }
-// Eviternity / Heretic
+Class MothPlushy : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_MOTHPLUSH";
+		Inventory.PickupMessage "$T_MOTHPLUSH";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "MothPlushyGesture";
+		Stamina 7000;
+	}
+}
+Class AA12Model : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_AA12";
+		Inventory.PickupMessage "$T_AA12";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "AA12ModelGesture";
+		Stamina 10000;
+	}
+}
+Class CactusHege : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_HEGE";
+		Inventory.PickupMessage "$T_HEGE";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "CactusHegeGesture";
+		Stamina 3000;
+	}
+}
+Class TastyHoagie : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_HOAGIE";
+		Inventory.PickupMessage "$T_HOAGIE";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "TastyHoagieGesture";
+		Stamina 2000;
+	}
+}
+// Heretic
 Class DemoPlush : SWWMCollectible
 {
 	Default
 	{
 		Tag "$T_DEMOPLUSH";
 		Inventory.PickupMessage "$T_DEMOPLUSH";
-		SWWMCollectible.Availability AVAIL_Eviternity;
+		SWWMCollectible.Availability AVAIL_Heretic;
 		SWWMCollectible.GestureWeapon "DemoPlushGesture";
 		Stamina 6000;
 		Radius 12;
 		Height 36;
+	}
+}
+Class Manarokou : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_MANAROKOU";
+		Inventory.PickupMessage "$T_MANAROKOU";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "ManarokouGesture";
+		Stamina 9000;
+	}
+}
+Class LithiumNovel : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_LITHIUM";
+		Inventory.PickupMessage "$T_LITHIUM";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "LithiumNovelGesture";
+		Stamina 2000;
 	}
 }
 // Hexen
@@ -263,5 +329,16 @@ Class KirinPlush : SWWMCollectible
 		Stamina 8000;
 		Radius 14;
 		Height 37;
+	}
+}
+Class RubberDuck : SWWMCollectible
+{
+	Default
+	{
+		Tag "$T_DUCKIE";
+		Inventory.PickupMessage "$T_DUCKIE";
+		SWWMCollectible.Availability AVAIL_None;
+		SWWMCollectible.GestureWeapon "RubberDuckGesture";
+		Stamina 700;
 	}
 }

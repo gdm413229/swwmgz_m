@@ -509,17 +509,10 @@ Class DemolitionistMenu : GenericMenu
 		case MKEY_DOWN:
 			if ( tabs[curtab] == TAB_HELP )
 			{
-				String str = StringTable.Localize("$SWWM_HELPTXT");
-				for ( int i=0; i<MAXPLAYERS; i++ )
-				{
-					if ( !playeringame[i] || (i == consoleplayer) ) continue;
-					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
-					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
-					break;
-				}
-				let bar = SWWMStatusBar(StatusBar);
-				if ( bar && (bar.FullHistory.Size() > 0) )
-					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
+				String kstr;
+				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
+				else kstr = mkey[0];
+				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
@@ -1528,21 +1521,10 @@ Class DemolitionistMenu : GenericMenu
 			else if ( (tabs[curtab] == TAB_HELP) && !isrclick )
 			{
 				// are we clicking where the scrollbar should be?
-				if ( mpos.x < 632 ) return res;
 				String kstr;
 				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
 				else kstr = mkey[0];
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
-				for ( int i=0; i<MAXPLAYERS; i++ )
-				{
-					if ( !playeringame[i] || (i == consoleplayer) ) continue;
-					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
-					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
-					break;
-				}
-				let bar = SWWMStatusBar(StatusBar);
-				if ( bar && (bar.FullHistory.Size() > 0) )
-					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -1777,16 +1759,6 @@ Class DemolitionistMenu : GenericMenu
 				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
 				String kstr = bindings.NameKeys(k1,k2);
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
-				for ( int i=0; i<MAXPLAYERS; i++ )
-				{
-					if ( !playeringame[i] || (i == consoleplayer) ) continue;
-					if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
-					str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
-					break;
-				}
-				let bar = SWWMStatusBar(StatusBar);
-				if ( bar && (bar.FullHistory.Size() > 0) )
-					str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 				BrokenLines l = fnt.BreakLines(str,629);
 				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 				else return res;	// no scrollbar
@@ -2182,33 +2154,13 @@ Class DemolitionistMenu : GenericMenu
 		double afactor = adone?1.:0., bfactor = bdone?1.:0.;
 		if ( a.progress )
 		{
-			int val = a.progress.GetInt();
-			int mval = a.maxval;
-			if ( a.basename == "iwad" )
-			{
-				// special case
-				mval = 3;
-				int bits = val;
-				val = 0;
-				for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
-			}
-			int cur = min(val,mval);
-			afactor = cur/double(mval);
+			int cur = clamp(a.progress.GetInt(),0,a.maval);
+			afactor = cur/double(a.maxval);
 		}
 		if ( b.progress )
 		{
-			int val = b.progress.GetInt();
-			int mval = b.maxval;
-			if ( b.basename == "iwad" )
-			{
-				// special case
-				mval = 3;
-				int bits = val;
-				val = 0;
-				for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
-			}
-			int cur = min(val,mval);
-			bfactor = cur/double(mval);
+			int cur = clamp(b.progress.GetInt(),0,b.maxval);
+			bfactor = cur/double(b.maxval);
 		}
 		if ( adone && bdone )
 		{
@@ -3156,21 +3108,12 @@ Class DemolitionistMenu : GenericMenu
 					if ( a.progress )
 					{
 						int val = a.progress.GetInt();
-						int mval = a.maxval;
-						if ( a.basename == "iwad" )
-						{
-							// special case
-							mval = 3;
-							int bits = val;
-							val = 0;
-							for ( int i=0; i<3; i++ ) if ( bits&(1<<i) ) val++;
-						}
-						val = clamp(val,0,mval);
-						if ( completed ) str = SWWMUtility.BlockBar(mval,mval,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
-						else str = SWWMUtility.BlockBar(val,mval,barsz,Font.CR_DARKGRAY,Font.CR_BLACK);
+						val = clamp(val,0,a.maxval);
+						if ( completed ) str = SWWMUtility.BlockBar(a.maxval,a.maxval,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
+						else str = SWWMUtility.BlockBar(val,a.maxval,barsz,Font.CR_DARKGRAY,Font.CR_BLACK);
 						Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy+34,str,DTA_Spacing,-5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(mval),SWWMUtility.ThousandsNum(mval));
-						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(mval));
+						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
+						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(a.maxval));
 						int ox = (barsz-MiniwiFont.StringWidth(str))/2;
 						Screen.DrawText(MiniwiFont,completed?Font.CR_GREEN:hasprogress?Font.CR_WHITE:Font.CR_DARKGRAY,origin.x+xx+ox,origin.y+yy+37,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					}
@@ -3654,16 +3597,6 @@ Class DemolitionistMenu : GenericMenu
 			if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
 			else kstr = mkey[0];
 			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
-			for ( int i=0; i<MAXPLAYERS; i++ )
-			{
-				if ( !playeringame[i] || (i == consoleplayer) ) continue;
-				if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
-				str = str..StringTable.Localize("$SWWM_HELPTXT_TRADING");
-				break;
-			}
-			let bar = SWWMStatusBar(StatusBar);
-			if ( bar && (bar.FullHistory.Size() > 0) )
-				str = str..StringTable.Localize("$SWWM_HELPTXT_CHAT");
 			BrokenLines l = fnt.BreakLines(str,629);
 			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
 			xx = 6;

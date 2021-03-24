@@ -321,9 +321,11 @@ Class DemolitionistSelfLight : Actor
 			else tagcolor = Color(255,32,48,24);
 		}
 		bool curactive = activelight();
-		// have to re-attach it repeatedly to update the pitch (wow great thanks)
-		if ( curactive )
-			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(112,144,176),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,15,60,target.pitch);
+		// setting the pitch to a value outside [-90,90] makes it auto-update to the actor's own pitch
+		// this is undocumented and it's very great and nice and fine that such a thing had to be found out purely by chance
+		// how very wonderful /s
+		if ( curactive && !oldactive )
+			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,Color(112,144,176),200,0,DynamicLight.LF_DONTLIGHTSELF|DynamicLight.LF_ATTENUATE|DynamicLight.LF_SPOT,(5,0,target.player?(target.player.viewz-target.pos.z):(target.height*.93)),0,15,60,180);
 		else if ( !curactive && oldactive )
 			target.A_AttachLight('DemoSelfLight',DynamicLight.PointLight,0,0,0);
 		oldactive = curactive;

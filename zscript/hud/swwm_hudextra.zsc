@@ -166,14 +166,12 @@ Class SWWMAchievementNotification : HUDMessageBase
 	double tics, holdtics, fadeintics, fadeouttics;
 	transient Font tewifont, mplusfont, miniwifont, k6x8font;
 
-	SWWMAchievementNotification Init( String bname, int bnum = 0 )
+	SWWMAchievementNotification Init( String bname, TextureID icon, int bnum = 0 )
 	{
-		tag = bname.."_TAG";
-		txt = bname.."_TXT";
+		tag = "$SWWM_ACHIEVEMENT_"..bname.."_TAG";
+		txt = "$SWWM_ACHIEVEMENT_"..bname.."_TXT";
 		num = bnum;
-		icon = TexMan.CheckForTexture(StringTable.Localize(bname.."_PIC"),TexMan.Type_Any);
-		// fallback icon
-		if ( !icon.IsValid() ) icon = TexMan.CheckForTexture("graphics/Achievements/AchievementNone.png",TexMan.Type_Any);
+		self.icon = icon;
 		frame = TexMan.CheckForTexture("graphics/HUD/AchievementNotification.png",TexMan.Type_Any);
 		holdtics = 150;
 		fadeintics = 20;

@@ -90,6 +90,9 @@ extend Class SWWMHandler
 		// one standing?
 		if ( (level.total_monsters-level.killed_monsters) == 1 )
 			SWWMUtility.MarkAchievement('swwm_achievement_onestanding',players[consoleplayer]);
+		// nice?
+		if ( players[consoleplayer].Health == 69 )
+			SWWMUtility.MarkAchievement('swwm_achievement_nice',players[consoleplayer]);
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )

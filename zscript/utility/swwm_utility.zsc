@@ -13,8 +13,121 @@ enum EDoExplosionFlags
 	DE_COUNTSTEALTH = 256,	// only count hits for inactive monsters
 };
 
+Class SWWMAchievement
+{
+	String basename;
+	transient CVar state, progress;
+	TextureID icon;
+	int maxval;
+	bool hasformat;
+}
+
 Class SWWMUtility
 {
+	// loaded from a file, neater than having a bunch of static arrays
+	//  filter: excludes unobtained achievements if swwm_filterachievements is 2
+	//          also excludes the "everything" achievement unless unlocked
+	static clearscope void LoadAchievements( out Array<SWWMAchievement> achievements, bool filter = false )
+	{
+		achievements.Clear();
+		let lmp = Wads.FindLump("achievements.lst");
+		if ( lmp == -1 ) ThrowAbortException("'achievements.lst' not found");
+		String dat = Wads.ReadLump(lmp);
+		Array<String> list;
+		dat.Split(list,"\n");
+		bool hide = (filter&&(swwm_filterachievements==2));
+		for ( int i=0; i<list.Size(); i++ )
+		{
+			if ( (list[i].Length() == 0) || (list[i].Left(1) == "#") || (list[i].Left(1) == "") )
+				continue;
+			Array<String> ln;
+			list[i].Split(ln,",",0);
+			let ac = new("SWWMAchievement");
+			ac.basename = ln[0];
+			ac.maxval = ln[1].ToInt();
+			ac.hasformat = (ln[2]~=="yes");
+			ac.state = CVar.FindCVar("swwm_achievement_"..ac.basename);
+			// if filtering, always hide the full completion achievement until it's unlocked
+			if ( filter && (ac.basename == "everything") && (ac.state.GetInt() <= 0) )
+			{
+				ac.Destroy();
+				continue;
+			}
+			if ( !ac.state ) ThrowAbortException("could not find cvar 'swwm_achievement_"..ac.basename.."'");
+			if ( ac.maxval )
+			{
+				ac.progress = CVar.FindCVar("swwm_progress_"..ac.basename);
+				if ( !ac.progress ) ThrowAbortException("could not find cvar 'swwm_progress_"..ac.basename.."'");
+				// special case for maxval
+				if ( ac.basename == "allcoll" )
+				{
+					int nc = 0;
+					for ( int i=0; i<AllActorClasses.Size(); i++ )
+					{
+						let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+						if ( !c || (c == 'SWWMCollectible') ) continue;
+						let def = GetDefaultByType(c);
+						// check that we can collect it in this IWAD
+						if ( !def.ValidGame() ) continue;
+						nc++;
+					}
+					ac.maxval = nc;
+				}
+			}
+			else ac.progress = null;
+			ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
+			// fallback icon if one is not found
+			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/AchievementNone.png",TexMan.Type_Any);
+			// hide away achievements at 0%
+			if ( hide && (ac.state.GetInt() <= 0) && (!ac.progress || (ac.progress.GetInt() <= 0)) )
+			{
+				ac.Destroy();
+				continue;
+			}
+			achievements.Push(ac);
+		}
+	}
+	// achievement helpers
+	static clearscope void MarkAchievement( Name mvar, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(mvar);
+		if ( !cv ) return;
+		if ( cv.GetInt() < 1 ) cv.SetInt(1);
+	}
+	static clearscope void AchievementProgress( Name pvar, int val, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(max(cval,val));
+	}
+	static clearscope void AchievementProgressInc( Name pvar, int inc, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(cval+inc);
+	}
+	static clearscope void AchievementProgressIncDouble( Name pvar, double inc, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		double cval = cv.GetFloat();
+		cv.SetFloat(cval+inc);
+	}
+	static clearscope void AchievementProgressOr( Name pvar, int val, PlayerInfo p = null )
+	{
+		if ( !p || (p != players[consoleplayer]) ) return;
+		let cv = CVar.FindCVar(pvar);
+		if ( !cv ) return;
+		int cval = cv.GetInt();
+		cv.SetInt(cval|val);
+	}
+
 	// thanks zscript
 	static clearscope double fract( double a )
 	{
@@ -1627,47 +1740,6 @@ Class SWWMUtility
 		if ( (tn ~== "ZZWOLF13") )
 			return true, TexMan.CheckForTexture("defaced_ZZWOLF13",TexMan.Type_Any);
 		return false, checkme;
-	}
-
-	// achievement helpers
-	static clearscope void MarkAchievement( Name mvar, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(mvar);
-		if ( !cv ) return;
-		if ( cv.GetInt() < 1 ) cv.SetInt(1);
-	}
-	static clearscope void AchievementProgress( Name pvar, int val, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
-		int cval = cv.GetInt();
-		cv.SetInt(max(cval,val));
-	}
-	static clearscope void AchievementProgressInc( Name pvar, int inc, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
-		int cval = cv.GetInt();
-		cv.SetInt(cval+inc);
-	}
-	static clearscope void AchievementProgressIncDouble( Name pvar, double inc, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
-		double cval = cv.GetFloat();
-		cv.SetFloat(cval+inc);
-	}
-	static clearscope void AchievementProgressOr( Name pvar, int val, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
-		int cval = cv.GetInt();
-		cv.SetInt(cval|val);
 	}
 
 	// full reset of inventory (excluding collectibles, and optionally resetting the score)

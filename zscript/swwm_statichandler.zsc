@@ -20,6 +20,7 @@ Class SWWMStaticHandler : StaticEventHandler
 	int checktic;
 	ui bool mpsent, checked;
 	int maptime;
+	bool unloading;
 
 	override void NewGame()
 	{
@@ -32,6 +33,7 @@ Class SWWMStaticHandler : StaticEventHandler
 	override void WorldUnloaded( WorldEvent e )
 	{
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
+		unloading = true;
 	}
 
 	override void WorldTick()
@@ -41,6 +43,7 @@ Class SWWMStaticHandler : StaticEventHandler
 
 	override void WorldLoaded( WorldEvent e )
 	{
+		unloading = false;
 		maptime = 0;
 		if ( e.IsSavegame || e.IsReopen )
 		{
@@ -53,10 +56,19 @@ Class SWWMStaticHandler : StaticEventHandler
 		}
 		if ( players[consoleplayer].mo )
 		{
-			// recheck progress on collectibles
-			int nc = 0;
-			for ( Inventory i=players[consoleplayer].mo.inv; i; i=i.inv ) if ( i is 'SWWMCollectible' ) nc++;
-			if ( !swwm_achievement_allcoll ) CVar.FindCVar('swwm_progress_allcoll').SetInt(nc);
+			// recheck progress on some per-session achievements
+			if ( swwm_achievement_allcoll <= 0 )
+			{
+				int nc = 0;
+				for ( Inventory i=players[consoleplayer].mo.inv; i; i=i.inv ) if ( i is 'SWWMCollectible' ) nc++;
+				CVar.FindCVar('swwm_progress_allcoll').SetInt(nc);
+			}
+			if ( swwm_achievement_plush <= 0 )
+			{
+				let s = SWWMStats.Find(players[consoleplayer]);
+				if ( s ) CVar.FindCVar('swwm_progress_plush').SetInt(s.plushuses);
+				else CVar.FindCVar('swwm_progress_plush').SetInt(0);
+			}
 		}
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
 		// force a reset of the minimap zoom in case it's set beyond safe levels
@@ -189,14 +201,14 @@ Class SWWMStaticHandler : StaticEventHandler
 			c.bSTANDSTILL = true;
 			if ( e.Args[0] == consoleplayer )
 			{
-				S_StartSound("misc/achievement",CHAN_ITEM,CHANF_UI|CHANF_OVERLAP);
-				S_StartSound("misc/achievement2",CHAN_VOICE,CHANF_UI|CHANF_OVERLAP);
+				c.A_StartSound("misc/achievement",CHAN_ITEM,CHANF_UI|CHANF_OVERLAP,attenuation:0.);
+				c.A_StartSound("misc/achievement2",CHAN_VOICE,CHANF_UI|CHANF_OVERLAP,attenuation:0.);
 			}
 			else
 			{
 				Console.Printf(String.Format(StringTable.Localize("$SWWM_CHEEVOREM"),players[e.Args[0]].GetUserName(),StringTable.Localize(e.Name.Mid(16))));
-				c.A_StartSound("misc/achievement",CHAN_ITEM,CHANF_OVERLAP);
-				c.A_StartSound("misc/achievement2",CHAN_ITEM,CHANF_OVERLAP);
+				c.A_StartSound("misc/achievement",CHAN_ITEM,CHANF_UI|CHANF_OVERLAP);
+				c.A_StartSound("misc/achievement2",CHAN_ITEM,CHANF_UI|CHANF_OVERLAP);
 			}
 		}
 	}

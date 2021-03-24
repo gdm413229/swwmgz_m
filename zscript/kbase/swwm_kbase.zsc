@@ -747,11 +747,9 @@ Class DemolitionistMenu : GenericMenu
 		{
 			if ( ignoreme[i] ) continue;
 			let ac = new("MenuAchievement");
-			ac.tag = names[i].."_TAG";
-			ac.txt = names[i].."_TXT";
-			ac.icon = TexMan.CheckForTexture(StringTable.Localize(names[i].."_PIC"),TexMan.Type_Any);
-			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/AchievementNone.png",TexMan.Type_Any);
 			ac.state = CVar.FindCVar(vars[i]);
+			if ( (names[i] == "$SWWM_ACHIEVEMENT_EVERYTHING") && !ac.state.GetInt() )
+				continue;	// this one must remain hidden until obtained
 			ac.progress = (pvar[i]!='None')?CVar.FindCVar(pvar[i]):null;
 			ac.maxval = ac.num = number[i];
 			// special cases
@@ -773,6 +771,13 @@ Class DemolitionistMenu : GenericMenu
 			else if ( vars[i] == 'swwm_achievement_dosh' ) ac.maxval = 1000000000;
 			else if ( vars[i] == 'swwm_achievement_mega' ) ac.maxval = 1000000;
 			else if ( vars[i] == 'swwm_achievement_iwad' ) ac.maxval = 7;
+			ac.tag = names[i].."_TAG";
+			ac.txt = names[i].."_TXT";
+			ac.icon = TexMan.CheckForTexture(StringTable.Localize(names[i].."_PIC"),TexMan.Type_Any);
+			TextureID invalid;
+			invalid.SetInvalid();
+			if ( ac.icon == invalid )
+				ac.icon = TexMan.CheckForTexture("graphics/Achievements/AchievementNone.png",TexMan.Type_Any);
 			achievements.Push(ac);
 		}
 		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/AchievementUnknown.png",TexMan.Type_Any);

@@ -400,7 +400,7 @@ Class SWWMCorpseCleaner : Thinker
 Class SWWMFlyTracker : Thinker
 {
 	Actor tracked, instigator;
-	Vector3 startpos;
+	Vector3 startpos, curpos;
 	int gracepd;
 
 	static void Track( Actor b, Actor whomst )
@@ -418,7 +418,7 @@ Class SWWMFlyTracker : Thinker
 		ffd.ChangeStatNum(STAT_USER);
 		ffd.tracked = b;
 		ffd.instigator = whomst;
-		ffd.startpos = b.pos;
+		ffd.curpos = ffd.startpos = b.pos;
 	}
 
 	override void Tick()
@@ -427,11 +427,12 @@ Class SWWMFlyTracker : Thinker
 		{
 			gracepd++;
 			if ( gracepd < 10 ) return;
-			if ( instigator ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(level.Vec3Diff(startpos,tracked.pos).length()),instigator.player);
+			if ( instigator ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(level.Vec3Diff(startpos,curpos).length()),instigator.player);
 			Destroy();
 			return;
 		}
 		gracepd = 0;
+		curpos = tracked.pos;
 	}
 
 }

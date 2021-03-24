@@ -420,11 +420,7 @@ Class YnykronImpact : Actor
 				gc.Amount--;
 			}
 			else if ( !tracer.FindInventory("GrilledCheeseSafeguard") )
-			{
 				tracer.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-				if ( target && tracer && (tracer.Health > 0) )
-					SWWMUtility.MarkAchievement('swwm_achievement_god',target.player);
-			}
 			if ( tracer && (tracer.Health <= 0) )
 			{
 				if ( tracer.player )
@@ -2427,11 +2423,7 @@ Class YnykronSingularity : Actor
 						gc.Amount--;
 					}
 					else if ( !a.FindInventory("GrilledCheeseSafeguard") )
-					{
 						a.DamageMobj(self,target,int.max,'Ynykron',DMG_FORCED|DMG_THRUSTLESS);
-						if ( target && a && (a.Health > 0) )
-							SWWMUtility.MarkAchievement('swwm_achievement_god',target.player);
-					}
 					if ( a && (a.Health <= 0) )
 					{
 						if ( a.player )

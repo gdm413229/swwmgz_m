@@ -87,6 +87,9 @@ extend Class SWWMHandler
 		// beat the par time?
 		if ( level.partime && (Thinker.Tics2Seconds(level.maptime) <= level.partime) )
 			SWWMUtility.AchievementProgressInc('swwm_progress_par',1,players[consoleplayer]);
+		// one standing?
+		if ( (level.total_monsters-level.killed_monsters) == 1 )
+			SWWMUtility.MarkAchievement('swwm_achievement_onestanding',players[consoleplayer]);
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )

@@ -5,7 +5,6 @@ const SA_GCSANDWICH = 25;
 const SA_GHOST = 25;
 const SA_ALLITEMS = 30;
 const SA_CONGA = 15;
-const SA_EXPLOGUN = 7;
 const SA_GRAVITY = 25;
 const SA_FLIGHT = 2000;
 const SA_PAR = 30;
@@ -114,14 +113,12 @@ extend Class SWWMStaticHandler
 		static const Name vars[] =
 		{
 			'swwm_achievement_gcsandwich',
-			'swwm_achievement_hdoom',
 			'swwm_achievement_onestanding',
 			'swwm_achievement_oopsie',
 			'swwm_achievement_ghost',
 			'swwm_achievement_clonk',
 			'swwm_achievement_allitems',
 			'swwm_achievement_conga',
-			'swwm_achievement_explogun',
 			'swwm_achievement_gravity',
 			'swwm_achievement_flight',
 			'swwm_achievement_cliffyb',
@@ -134,11 +131,9 @@ extend Class SWWMStaticHandler
 			'swwm_achievement_sneeze',
 			'swwm_achievement_fuel',
 			'swwm_achievement_slayer',
-			'swwm_achievement_broccolidoccoli',
 			'swwm_achievement_dime',
 			'swwm_achievement_stomp',
 			'swwm_achievement_cheat',
-			'swwm_achievement_god',
 			'swwm_achievement_thruwall',
 			'swwm_achievement_mashiro',
 			'swwm_achievement_lead',
@@ -189,26 +184,18 @@ extend Class SWWMStaticHandler
 			'swwm_achievement_bonk',
 			'swwm_achievement_anom',
 			'swwm_achievement_anone',
-			'swwm_achievement_tetris',
-			'swwm_achievement_pong',
-			'swwm_achievement_snake',
-			'swwm_achievement_smb',
-			'swwm_achievement_tyrian',
-			'swwm_achievement_bof',
 			'swwm_achievement_wantdie'
 		};
 		// localized name
 		static const String names[] =
 		{
 			"$SWWM_ACHIEVEMENT_GCSANDWICH",
-			"$SWWM_ACHIEVEMENT_HDOOM",
 			"$SWWM_ACHIEVEMENT_ONESTANDING",
 			"$SWWM_ACHIEVEMENT_OOPSIE",
 			"$SWWM_ACHIEVEMENT_GHOST",
 			"$SWWM_ACHIEVEMENT_CLONK",
 			"$SWWM_ACHIEVEMENT_ALLITEMS",
 			"$SWWM_ACHIEVEMENT_CONGA",
-			"$SWWM_ACHIEVEMENT_EXPLOGUN",
 			"$SWWM_ACHIEVEMENT_GRAVITY",
 			"$SWWM_ACHIEVEMENT_FLIGHT",
 			"$SWWM_ACHIEVEMENT_CLIFFYB",
@@ -221,11 +208,9 @@ extend Class SWWMStaticHandler
 			"$SWWM_ACHIEVEMENT_SNEEZE",
 			"$SWWM_ACHIEVEMENT_FUEL",
 			"$SWWM_ACHIEVEMENT_SLAYER",
-			"$SWWM_ACHIEVEMENT_BROCCOLIDOCCOLI",
 			"$SWWM_ACHIEVEMENT_DIME",
 			"$SWWM_ACHIEVEMENT_STOMP",
 			"$SWWM_ACHIEVEMENT_CHEAT",
-			"$SWWM_ACHIEVEMENT_GOD",
 			"$SWWM_ACHIEVEMENT_THRUWALL",
 			"$SWWM_ACHIEVEMENT_MASHIRO",
 			"$SWWM_ACHIEVEMENT_LEAD",
@@ -276,26 +261,18 @@ extend Class SWWMStaticHandler
 			"$SWWM_ACHIEVEMENT_BONK",
 			"$SWWM_ACHIEVEMENT_ANOM",
 			"$SWWM_ACHIEVEMENT_ANONE",
-			"$SWWM_ACHIEVEMENT_TETRIS",
-			"$SWWM_ACHIEVEMENT_PONG",
-			"$SWWM_ACHIEVEMENT_SNAKE",
-			"$SWWM_ACHIEVEMENT_SMB",
-			"$SWWM_ACHIEVEMENT_TYRIAN",
-			"$SWWM_ACHIEVEMENT_BOF",
 			"$SWWM_ACHIEVEMENT_WANTDIE"
 		};
 		// has number in txt
 		static const int number[] =
 		{
 			SA_GCSANDWICH,
-			0,	// HDOOM
 			0,	// ONESTANDING
 			0,	// OOPSIE
 			SA_GHOST,
 			0,	// CLONK
 			SA_ALLITEMS,
 			SA_CONGA,
-			SA_EXPLOGUN,
 			SA_GRAVITY,
 			SA_FLIGHT,
 			0,	// CLIFFYB
@@ -308,11 +285,9 @@ extend Class SWWMStaticHandler
 			SA_SNEEZE,
 			SA_FUEL,
 			SA_SLAYER,
-			0,	// BROCCOLIDOCCOLI
 			0,	// DIME
 			SA_STOMP,
 			0,	// CHEAT
-			0,	// GOD
 			SA_THRUWALL,
 			0,	// MASHIRO
 			SA_LEAD,
@@ -363,26 +338,18 @@ extend Class SWWMStaticHandler
 			SA_BONK,
 			SA_ANOM,
 			0,	// ANONE
-			0,	// TETRIS
-			0,	// PONG
-			0,	// SNAKE
-			0,	// SMB
-			0,	// TYRIAN
-			0,	// BOF
 			0	// WANTDIE
 		};
 		// is ignored (hide away achievements that can't be done yet)
 		static const bool ignoreme[] =
 		{
 			false,	// GCSANDWICH
-			false,	// HDOOM
 			false,	// ONESTANDING
 			false,	// OOPSIE
 			false,	// GHOST
 			false,	// CLONK
 			false,	// ALLITEMS
 			false,	// CONGA
-			false,	// EXPLOGUN
 			false,	// GRAVITY
 			false,	// FLIGHT
 			false,	// CLIFFYB
@@ -395,11 +362,9 @@ extend Class SWWMStaticHandler
 			false,	// SNEEZE
 			false,	// FUEL
 			false,	// SLAYER
-			false,	// BROCCOLIDOCCOLI
 			false,	// DIME
 			false,	// STOMP
 			false,	// CHEAT
-			false,	// GOD
 			false,	// THRUWALL
 			true,	// MASHIRO
 			false,	// LEAD
@@ -450,26 +415,18 @@ extend Class SWWMStaticHandler
 			false,	// BONK
 			false,	// ANOM
 			false,	// ANONE
-			true,	// TETRIS
-			true,	// PONG
-			true,	// SNAKE
-			true,	// SMB
-			true,	// TYRIAN
-			true,	// BOF
 			false	// WANTDIE
 		};
 		// progress tracking cvar (if any)
 		static const Name pvar[] =
 		{
 			'swwm_progress_gcsandwich',
-			'None',	// HDOOM
 			'None',	// ONESTANDING
 			'None',	// OOPSIE
 			'swwm_progress_ghost',
 			'None',	// CLONK
 			'swwm_progress_allitems',
 			'swwm_progress_conga',
-			'swwm_progress_explogun',
 			'swwm_progress_gravity',
 			'swwm_progress_flight',
 			'None',	// CLIFFYB
@@ -482,11 +439,9 @@ extend Class SWWMStaticHandler
 			'swwm_progress_sneeze',
 			'swwm_progress_fuel',
 			'swwm_progress_slayer',
-			'None',	// BROCCOLIDOCCOLI
 			'None',	// DIME
 			'swwm_progress_stomp',
 			'None',	// CHEAT
-			'None',	// GOD
 			'swwm_progress_thruwall',
 			'None',	// MASHIRO
 			'swwm_progress_lead',
@@ -537,12 +492,6 @@ extend Class SWWMStaticHandler
 			'swwm_progress_bonk',
 			'swwm_progress_anom',
 			'None',	// ANONE
-			'None',	// TETRIS
-			'None',	// PONG
-			'None',	// SNAKE
-			'None',	// SMB
-			'None',	// TYRIAN
-			'None',	// BOF
 			'None'	// WANTDIE
 		};
 		bool alldone = true;

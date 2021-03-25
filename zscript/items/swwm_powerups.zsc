@@ -266,6 +266,56 @@ Class GhostSnd : Actor
 	}
 }
 
+Class GhostTarget : Actor
+{
+	bool diedie;
+
+	Default
+	{
+		+SPECTRAL;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+SHOOTABLE;
+		+NONSHOOTABLE;
+		+NOTELEPORT;
+		+NODAMAGE;
+		+NOBLOOD;
+		+CANTSEEK;
+		+SHADOW;	// so they can barely aim
+		Radius .1;
+		Height 56;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		if ( diedie ) A_FadeOut(.02);
+		let bt = BlockThingsIterator.Create(self,300);
+		while ( bt.Next() )
+		{
+			let t = bt.Thing;
+			if ( !t || !t.bIsMonster || t.player || !t.IsHostile(master) || (t.target != self) ) continue;
+			if ( SWWMUtility.BoxIntersect(self,t,pad:16) )
+			{
+				// they found out, there's no one here
+				diedie = true;
+				break;
+			}
+		}
+		// player made noise or is visible again
+		if ( !master || (LastHeard == master) || !master.FindInventory("GhostPower") )
+		{
+			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+			if ( hnd ) for ( int i=0; i<hnd.suckableactors.Size(); i++ )
+			{
+				let a = hnd.suckableactors[i];
+				if ( !a || !a.bISMONSTER || a.player || !a.IsHostile(master) || (a.Health <= 0) ) continue;
+				if ( a.target == self ) a.target = master;
+			}
+			Destroy();
+		}
+	}
+}
+
 Class GhostPower : PowerInvisibility
 {
 	Actor snd;
@@ -278,7 +328,9 @@ Class GhostPower : PowerInvisibility
 		Powerup.Mode "Translucent";
 		Powerup.Color "F0 E0 FF", 0.1;
 		+INVENTORY.ADDITIVETIME;
+		+CANTSEEK;
 	}
+
 
 	override void InitEffect()
 	{
@@ -293,7 +345,6 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.bNOTARGET = false;
 		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA);
 		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
 		if ( Owner is 'Demolitionist' )
@@ -305,7 +356,25 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.DoEffect();
 		if ( !Owner ) return;
-		Owner.bNOTARGET = true;
+		// are any enemies targetting us? if so, make them focus on a fake target located where we currently are standing
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		Actor gt = null;
+		if ( hnd ) for ( int i=0; i<hnd.suckableactors.Size(); i++ )
+		{
+			let a = hnd.suckableactors[i];
+			if ( !a || !a.bISMONSTER || a.player || !a.IsHostile(Owner) || (a.Health <= 0) ) continue;
+			// make them forget the ghost if we make noise
+			if ( (a.LastHeard == Owner) && (a.target is 'GhostTarget') && (a.target.master == Owner) )
+			{
+				a.target = Owner;
+				continue;
+			}
+			if ( a.target != Owner ) continue;
+			if ( !gt ) gt = Spawn("GhostTarget",Owner.pos);
+			a.target = gt;
+			a.LastHeard = gt;
+			gt.master = Owner;
+		}
 		if ( !snd ) snd = Spawn("GhostSnd",Owner.pos);
 		snd.target = Owner;
 		snd.master = self;

@@ -118,7 +118,8 @@ extend Class SWWMHandler
 				enteredcombat = true;
 			}
 		}
-		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) )
+		// be smart, demo-chan, don't shout if you're invisible, or you'll make it worse
+		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) && !players[consoleplayer].mo.FindInventory("GhostPower") )
 			lastcombat = AddOneliner("fightstart",1,10);
 	}
 
@@ -228,6 +229,8 @@ extend Class SWWMHandler
 				continue;
 			if ( a == players[consoleplayer].Camera )
 				continue;
+			if ( a is 'GhostTarget' )
+				continue;
 			if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
 				continue;
 			if ( !thesight && !(a.IsFriend(players[consoleplayer].mo) && !(a.player && (a.player.mo != a))) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
@@ -269,6 +272,8 @@ extend Class SWWMHandler
 					if ( max(abs(rv.x)-a.radius,abs(rv.y)-a.radius) > viewdist )
 						continue;
 					if ( a == players[consoleplayer].Camera )
+						continue;
+					if ( a is 'GhostTarget' )
 						continue;
 					if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
 						continue;

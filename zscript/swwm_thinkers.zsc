@@ -423,11 +423,11 @@ Class SWWMFlyTracker : Thinker
 
 	override void Tick()
 	{
+		if ( instigator && instigator.player ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(level.Vec3Diff(startpos,curpos).length()),instigator.player);
 		if ( !tracked || tracked.bFLOAT || tracked.bNOGRAVITY || (tracked.waterlevel > 1) || (tracked.pos.z <= tracked.floorz) || !tracked.TestMobjZ(false) )
 		{
 			gracepd++;
 			if ( gracepd < 10 ) return;
-			if ( instigator ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(level.Vec3Diff(startpos,curpos).length()),instigator.player);
 			Destroy();
 			return;
 		}

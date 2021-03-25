@@ -1553,7 +1553,7 @@ Class Demolitionist : PlayerPawn
 				{
 					// [RH] allow very limited movement if not on ground.
 					movefactor *= level.aircontrol;
-					bobfactor*= level.aircontrol;
+					bobfactor *= level.aircontrol;
 				}
 				// use normalized movement vector, no SR40 (not that we need it with how fast we can run)
 				Vector2 nmove = NormalizedMove();
@@ -1681,26 +1681,6 @@ Class Demolitionist : PlayerPawn
 		Actor jumpactor = null;
 		for ( int i=-4; i<int(height*.8); i++ )
 		{
-			if ( !wallclimb )
-			{
-				for ( int k=0; k<30; k+=10 )
-				{
-					for ( int j=-1; j<=1; j+=2 )
-					{
-						double ang = angle+k*j;
-						wallclimb = LineTrace(ang,Radius+12,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,i,data:d);
-						if ( wallclimb )
-						{
-							jumpactor = d.HitActor;
-							walldir = (walldir*.7+(cos(ang),sin(ang))*.3);
-							break;
-						}
-					}
-					if ( wallclimb ) break;
-				}
-				if ( wallclimb ) break;
-			}
-			if ( wallclimb ) break;
 			if ( !walljump )
 			{
 				for ( int k=0; k<60; k+=10 )
@@ -1721,6 +1701,57 @@ Class Demolitionist : PlayerPawn
 				if ( walljump ) break;
 			}
 			if ( walljump ) break;
+			if ( !wallclimb )
+			{
+				for ( int k=0; k<30; k+=10 )
+				{
+					for ( int j=-1; j<=1; j+=2 )
+					{
+						double ang = angle+k*j;
+						wallclimb = LineTrace(ang,Radius+12,0,TRF_NOSKY|TRF_THRUHITSCAN|TRF_BLOCKSELF|TRF_SOLIDACTORS,i,data:d);
+						if ( wallclimb )
+						{
+							// double-check that it's climbable
+							if ( d.HitType == TRACE_HitWall )
+							{
+								if ( !d.HitLine.sidedef[1] )	// nope
+								{
+									wallclimb = false;
+									walljump = true;
+									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
+									break;
+								}
+								double backfloorz = d.HitLine.sidedef[!d.LineSide].sector.floorplane.ZAtPoint(d.HitLocation.xy);
+								double backceilz = d.HitLine.sidedef[!d.LineSide].sector.ceilingplane.ZAtPoint(d.HitLocation.xy);
+								if ( ((backceilz-backfloorz) < Height) || ((pos.z+Height+32) < backfloorz) )	// nope
+								{
+									wallclimb = false;
+									walljump = true;
+									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
+									break;
+								}
+							}
+							else if ( d.HitType == TRACE_HitActor )
+							{
+								if ( ((d.HitActor.ceilingz-d.HitActor.pos.z+d.HitActor.Height) < Height) || ((pos.z+Height+32) < (d.HitActor.pos.z+d.HitActor.Height)) )	// nope
+								{
+									wallclimb = false;
+									walljump = true;
+									jumpactor = d.HitActor;
+									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
+									break;
+								}
+							}
+							jumpactor = d.HitActor;
+							walldir = (walldir*.7+(cos(ang),sin(ang))*.3);
+							break;
+						}
+					}
+					if ( wallclimb ) break;
+				}
+				if ( wallclimb ) break;
+			}
+			if ( wallclimb ) break;
 		}
 		if ( (player.cmd.buttons&BT_JUMP) && (gamestate == GS_LEVEL) )
 		{
@@ -1770,10 +1801,10 @@ Class Demolitionist : PlayerPawn
 					{
 						if ( vel.z < 10. )
 							vel.z += jumpvelz+clamp(-pvelz*.8,0.,30.);
-						vel.xy -= walldir*5*Speed;
+						vel.xy += walldir*10*Speed;
 						lastbump *= .97;
 					}
-					if ( jumpactor && jumpactor.bSHOOTABLE )
+					if ( walljump && jumpactor && jumpactor.bSHOOTABLE )
 					{
 						SWWMUtility.DoKnockback(jumpactor,(-walldir,0),12000);
 						int dmg = jumpactor.DamageMobj(self,self,10,'Jump');
@@ -1787,7 +1818,7 @@ Class Demolitionist : PlayerPawn
 					}
 					if ( walljump || wallclimb )
 					{
-						A_StartSound("demolitionist/kick",CHAN_FOOTSTEP,CHANF_OVERLAP);
+						A_StartSound(walljump?"demolitionist/kick":"demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
 						if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
 						last_kick = level.maptime+1;
 						SWWMUtility.AchievementProgressInc('swwm_progress_jump',1,player);
@@ -1835,13 +1866,7 @@ Class Demolitionist : PlayerPawn
 					{
 						// first jump
 						if ( vel.z < 10. )	// don't ramp up too hard
-						{
-							// multiplier factors
-							double mult = (player.cmd.buttons&BT_RUN)?1.25:1.;
-							if ( walljump ) mult *= 1.25;
-							if ( wallclimb ) mult *= 1.35;
-							vel.z += jumpvelz*mult;
-						}
+							vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
 						// long jump if running
 						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
 							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();

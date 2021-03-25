@@ -1116,9 +1116,9 @@ Class SWWMUtility
 	}
 
 	// the stupidest thing ever, it's called BlockingLine but it's not always blocking us
-	static bool BlockingLineIsBlocking( Actor a, int blockflags = Line.ML_BLOCKEVERYTHING )
+	static play bool BlockingLineIsBlocking( Actor a, int blockflags = Line.ML_BLOCKEVERYTHING, Line testline = null )
 	{
-		Line l = a.BlockingLine;
+		Line l = testline?testline:a.BlockingLine;
 		// not blocked
 		if ( !l ) return false;
 		// one-sided always blocking
@@ -1132,6 +1132,25 @@ Class SWWMUtility
 			bceil = l.backsector.ceilingplane.ZAtPoint(a.pos.xy);
 		if ( (min(a.pos.z+a.height,a.ceilingz) > min(aceil,bceil)) || (max(a.pos.z,a.floorz) < max(afloor,bfloor)) )
 			return true;
+		// solid 3d floor bounds hit?
+		for ( int i=0; i<l.frontsector.Get3DFloorCount(); i++ )
+		{
+			F3DFloor ff = l.frontsector.Get3DFloor(i);
+			if ( !(ff.flags&(F3DFloor.FF_EXISTS|F3DFloor.FF_SOLID)) ) continue;
+			double floor = ff.top.ZAtPoint(a.pos.xy);
+			double ceil = ff.bottom.ZAtPoint(a.pos.xy);
+			if ( (a.pos.z+a.height > ceil) && (a.pos.z < floor) )
+				return true;
+		}
+		for ( int i=0; i<l.backsector.Get3DFloorCount(); i++ )
+		{
+			F3DFloor ff = l.backsector.Get3DFloor(i);
+			if ( !(ff.flags&(F3DFloor.FF_EXISTS|F3DFloor.FF_SOLID)) ) continue;
+			double floor = ff.top.ZAtPoint(a.pos.xy);
+			double ceil = ff.bottom.ZAtPoint(a.pos.xy);
+			if ( (a.pos.z+a.height > ceil) && (a.pos.z < floor) )
+				return true;
+		}
 		return false;
 	}
 

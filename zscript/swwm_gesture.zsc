@@ -251,6 +251,7 @@ Class SWWMGesture : SWWMWeapon
 				{
 					let s = Demolitionist(self).mystats;
 					if ( s ) s.befriend++;
+					if ( SWWMUtility.IdentifyingCaco(t) || SWWMUtility.IdentifyingDrug(t) || SWWMUtility.IdentifyingDoubleBoi(t) )
 					SWWMUtility.AchievementProgressInc('swwm_progress_friend',1,player);
 				}
 				t.bFRIENDLY = true;

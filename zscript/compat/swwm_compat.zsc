@@ -192,8 +192,8 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			// remove excess backpacks (there's 10 of them for fuck's sake)
 			for ( int i=0; i<GetThingCount(); i++ )
 			{
-				if ( GetThingID(i) != 8 ) continue;
-				if ( nbackpack ) SetThingID(i,0);
+				if ( GetThingEdNum(i) != 8 ) continue;
+				if ( nbackpack ) SetThingEdNum(i,0);
 				nbackpack++;
 			}
 			break;

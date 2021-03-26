@@ -202,6 +202,7 @@ Class SWWMAchievementNotification : HUDMessageBase
 		Vector2 hs;
 		if ( swwm_hudscale <= 0 ) hs = StatusBar.GetHUDScale();
 		else hs.x = swwm_hudscale;
+		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
 		double alpha = (tics<fadeintics)?(tics/fadeintics):(tics<(fadeintics+holdtics))?1.:(1.-(tics-(fadeintics+holdtics))/fadeouttics);
 		Vector2 pos = (int(ss.x-256)/2,(ss.y-(margin+36))+int(margin+40)*(1.-alpha));

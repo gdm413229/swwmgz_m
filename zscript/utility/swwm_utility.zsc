@@ -92,14 +92,22 @@ Class SWWMUtility
 	{
 		if ( !p || (p != players[consoleplayer]) ) return;
 		let cv = CVar.FindCVar(mvar);
-		if ( !cv ) return;
+		if ( !cv )
+		{
+			if ( developer >= 2 ) Console.Printf("MarkAchievement: CVar '"..mvar.."' not found");
+			return;
+		}
 		if ( cv.GetInt() < 1 ) cv.SetInt(1);
 	}
 	static clearscope void AchievementProgress( Name pvar, int val, PlayerInfo p = null )
 	{
 		if ( !p || (p != players[consoleplayer]) ) return;
 		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
+		if ( !cv )
+		{
+			if ( developer >= 2 ) Console.Printf("AchievementProgress: CVar '"..pvar.."' not found");
+			return;
+		}
 		int cval = cv.GetInt();
 		if ( val <= cval ) return;
 		cv.SetInt(val);
@@ -108,7 +116,11 @@ Class SWWMUtility
 	{
 		if ( !p || (p != players[consoleplayer]) ) return;
 		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
+		if ( !cv )
+		{
+			if ( developer >= 2 ) Console.Printf("AchievementProgressInc: CVar '"..pvar.."' not found");
+			return;
+		}
 		int cval = cv.GetInt();
 		cv.SetInt(cval+inc);
 	}
@@ -116,7 +128,11 @@ Class SWWMUtility
 	{
 		if ( !p || (p != players[consoleplayer]) ) return;
 		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
+		if ( !cv )
+		{
+			if ( developer >= 2 ) Console.Printf("AchievementProgressIncDouble: CVar '"..pvar.."' not found");
+			return;
+		}
 		double cval = cv.GetFloat();
 		cv.SetFloat(cval+inc);
 	}

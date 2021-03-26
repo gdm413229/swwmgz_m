@@ -101,7 +101,8 @@ Class SWWMUtility
 		let cv = CVar.FindCVar(pvar);
 		if ( !cv ) return;
 		int cval = cv.GetInt();
-		cv.SetInt(max(cval,val));
+		if ( val <= cval ) return;
+		cv.SetInt(val);
 	}
 	static clearscope void AchievementProgressInc( Name pvar, int inc, PlayerInfo p = null )
 	{
@@ -118,14 +119,6 @@ Class SWWMUtility
 		if ( !cv ) return;
 		double cval = cv.GetFloat();
 		cv.SetFloat(cval+inc);
-	}
-	static clearscope void AchievementProgressOr( Name pvar, int val, PlayerInfo p = null )
-	{
-		if ( !p || (p != players[consoleplayer]) ) return;
-		let cv = CVar.FindCVar(pvar);
-		if ( !cv ) return;
-		int cval = cv.GetInt();
-		cv.SetInt(cval|val);
 	}
 
 	// thanks zscript

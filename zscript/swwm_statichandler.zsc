@@ -112,13 +112,6 @@ Class SWWMStaticHandler : StaticEventHandler
 		Font.GetFont('TewiShaded');
 		Font.GetFont('TewiShadedInverse');
 		Font.GetFont('SWWMBigFont');
-		// iwad progress
-		if ( gameinfo.gametype&GAME_Doom )
-			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',1,players[consoleplayer]);
-		else if ( gameinfo.gametype&GAME_Heretic )
-			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',2,players[consoleplayer]);
-		else if ( gameinfo.gametype&GAME_Hexen )
-			SWWMUtility.AchievementProgressOr('swwm_progress_iwad',4,players[consoleplayer]);
 	}
 
 	override void ConsoleProcess( ConsoleEvent e )

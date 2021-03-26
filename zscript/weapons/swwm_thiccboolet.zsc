@@ -31,6 +31,7 @@ Class SilverBulletTracer : SpreadSlugTracer
 	bool pastwall, fullstop;
 	Array<WallPenetrate> WallPenetrateList;
 	Vector3 exitpoint;
+	transient Array<F3DFloor> ffloors;	// needs to be done like this because HAHA SCOPE
 
 	override ETraceStatus TraceCallback()
 	{
@@ -93,11 +94,24 @@ Class SilverBulletTracer : SpreadSlugTracer
 				if ( (Results.Tier == TIER_Middle) && Results.HitLine.sidedef[1] && !(Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
 					return TRACE_Skip;
 			}
-			for ( int i=1; i<int(penetration/12); i++ )
+			for ( int i=1; i<int(penetration/8); i++ )
 			{
 				Vector3 ofs = Results.HitPos+Results.HitVector*i;
 				if ( level.IsPointInLevel(ofs) )
 				{
+					// double-check if we're piercing through a 3D floor (yes this is a thing that happens, oh boy)
+					Sector s = level.PointInSector(ofs.xy);
+					bool stop3d = false;
+					for ( int j=0; j<ffloors.Size(); j++ )
+					{
+						if ( ffloors[j].target != s ) continue;
+						double minz = ffloors[j].bottom.ZAtPoint(ofs.xy);
+						double maxz = ffloors[j].top.ZAtPoint(ofs.xy);
+						if ( (ofs.z < minz) || (ofs.z > maxz) ) continue;
+						stop3d = true;
+						break;
+					}
+					if ( stop3d ) continue;
 					let wp = new("WallPenetrate");
 					wp.hittype = Results.HitType;
 					wp.hitline = Results.HitLine;
@@ -125,35 +139,33 @@ Class SilverBulletTracer : SpreadSlugTracer
 					penetration = max(0,penetration-i*4);
 					// trace backwards to find exit surface
 					let at = new("AuxiliarySilverBulletTracer");
-					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,TRACE_NoSky);
-					if ( at.Results.HitType != TRACE_HitNone )
+					at.Trace(ofs,level.PointInSector(ofs.xy),-Results.HitVector,2.,0);
+					let wp2 = new("WallPenetrate");
+					wp2.hittype = at.Results.HitType;
+					wp2.hitline = at.Results.HitLine;
+					wp2.hitside = at.Results.Side;
+					wp2.hittier = at.Results.Tier;
+					wp2.hitsector = at.Results.HitSector;
+					wp2.hitffloor = at.Results.ffloor;
+					wp2.hitside = at.Results.Side;
+					wp2.hitpos = at.Results.HitPos;
+					wp2.hitdir = at.Results.HitVector;
+					wp2.bustdir = -at.Results.HitVector;
+					wp2.penetration = int(penetration);
+					if ( at.Results.HitType == TRACE_HitWall )
 					{
-						let wp2 = new("WallPenetrate");
-						wp2.hittype = at.Results.HitType;
-						wp2.hitline = at.Results.HitLine;
-						wp2.hitside = at.Results.Side;
-						wp2.hittier = at.Results.Tier;
-						wp2.hitsector = at.Results.HitSector;
-						wp2.hitffloor = at.Results.ffloor;
-						wp2.hitside = at.Results.Side;
-						wp2.hitpos = at.Results.HitPos;
-						wp2.hitdir = at.Results.HitVector;
-						wp2.bustdir = -at.Results.HitVector;
-						wp2.penetration = int(penetration);
-						if ( at.Results.HitType == TRACE_HitWall )
-						{
-							wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
-							if ( !at.Results.Side ) wp2.hitnormal *= -1;
-							if ( at.Results.HitLine.sidedef[1] )
-								ShootThroughList.Push(at.Results.HitLine);
-						}
-						else if ( at.Results.HitType == TRACE_HitCeiling )
-							wp2.hitnormal = at.Results.HitSector.ceilingplane.Normal;
-						else if ( at.Results.HitType == TRACE_HitFloor )
-							wp2.hitnormal = at.Results.HitSector.floorplane.Normal;
-						wp2.pastwall = pastwall;
-						WallPenetrateList.Push(wp2);
+						wp2.hitnormal = (-at.Results.HitLine.delta.y,at.Results.HitLine.delta.x,0).unit();
+						if ( !at.Results.Side ) wp2.hitnormal *= -1;
+						if ( at.Results.HitLine.sidedef[1] )
+							ShootThroughList.Push(at.Results.HitLine);
 					}
+					else if ( at.Results.HitType == TRACE_HitCeiling )
+						wp2.hitnormal = at.Results.HitSector.ceilingplane.Normal;
+					else if ( at.Results.HitType == TRACE_HitFloor )
+						wp2.hitnormal = at.Results.HitSector.floorplane.Normal;
+					else wp2.hitnormal = wp2.hitdir;
+					wp2.pastwall = pastwall;
+					WallPenetrateList.Push(wp2);
 					fullstop = false;
 					exitpoint = ofs;
 					return TRACE_Stop;
@@ -650,6 +662,17 @@ Class SilverBullet : SWWMWeapon
 			sst.shootthroughlist.Clear();
 			sst.waterhitlist.Clear();
 			sst.wallpenetratelist.Clear();
+			sst.ffloors.Clear();
+			for ( int i=0; i<level.Sectors.Size(); i++ )
+			{
+				Sector s = level.Sectors[i];
+				for ( int j=0; j<s.Get3DFloorCount(); j++ )
+				{
+					F3DFloor ff = s.Get3DFloor(j);
+					if ( ff.flags&(F3DFloor.FF_EXISTS|F3DFloor.FF_SOLID) )
+						sst.ffloors.Push(ff);
+				}
+			}
 			sst.pastwall = false;
 			sst.fullstop = false;
 			Vector3 norigin = origin;

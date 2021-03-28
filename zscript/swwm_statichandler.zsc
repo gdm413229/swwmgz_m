@@ -112,6 +112,24 @@ Class SWWMStaticHandler : StaticEventHandler
 		Font.GetFont('TewiShaded');
 		Font.GetFont('TewiShadedInverse');
 		Font.GetFont('SWWMBigFont');
+		// fix voice type cvar
+		int lmp;
+		Array<String> types;
+		for ( lmp = Wads.FindLump("swwmvoicepack.txt"); lmp > 0; lmp = Wads.FindLump("swwmvoicepack.txt",lmp+1) )
+		{
+			Array<String> lst;
+			lst.Clear();
+			String dat = Wads.ReadLump(lmp);
+			dat.Split(lst,"\n",0);
+			for ( int i=0; i<lst.Size(); i++ )
+			{
+				if ( (lst[i].Length() <= 0) || (lst[i].GetNextCodePoint(0) == 0) || (lst[i].Left(1) == "\n") || (lst[i].Left(1) == "#") ) continue;
+				types.Push(lst[i]);
+			}
+		}
+		let cv = CVar.FindCVar('swwm_voicetype');
+		if ( types.Find(cv.GetString()) >= types.Size() )
+			cv.SetString("default");
 	}
 
 	override void ConsoleProcess( ConsoleEvent e )

@@ -387,6 +387,7 @@ Class Demolitionist : PlayerPawn
 	}
 	override String GetObituary( Actor victim, Actor inflictor, Name mod, bool playerattack )
 	{
+		if ( inflictor && inflictor.FindInventory("ParriedBuff") ) return StringTable.Localize("$O_PARRY");
 		if ( mod == 'Jump' ) return StringTable.Localize("$O_JUMP");
 		if ( mod == 'Dash' ) return StringTable.Localize("$O_DASH");
 		if ( mod == 'Buttslam' ) return StringTable.Localize("$O_BUTT");

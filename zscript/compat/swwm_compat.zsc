@@ -1,7 +1,6 @@
 // level compatibility scripts
-// sometimes shit breaks because of old and wrong scripting
-// usually stuff that uses CheckInventory to look for keys, instead of, y'know,
-// using ACS_LockedExecute
+// sometimes shit breaks, or certain changes are needed for balance or to mesh
+// with the mod's mechanics better, this is here for that
 
 Class SWWMLevelCompatibility : LevelPostProcessor
 {
@@ -26,22 +25,6 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		{
 		case 'none':
 			return;
-		// ZPack E1M2
-		case 'BA13454A41D931685B6A4B28E6946B6B':
-			// script uses checkinventory for red key
-			SetLineSpecial(225,ACS_LockedExecuteDoor,-Int('ZPACK_E1M2_SCRIPT6'),0,0,0,1);
-			SetLineSpecial(228,ACS_LockedExecuteDoor,-Int('ZPACK_E1M2_SCRIPT6'),0,0,0,1);
-			break;
-		// ZPack E3M2
-		case '17BD38E0B2FB8E760885FE46325DFF3A':
-			// script uses checkinventory for red skull
-			SetLineSpecial(5913,ACS_LockedExecute,-Int('ZPACK_E3M2_SCRIPT9'),0,0,0,4);
-			break;
-		// ZPack E3M8
-		case '13C5952A04014122271F50134DB4521F':
-			// script uses checkinventory for yellow skull
-			SetLineSpecial(22610,ACS_LockedExecute,-Int('ZPACK_E3M8_SCRIPT15'),0,0,0,6);
-			break;
 		// okuplok
 		case 'F7F353146676920238935A8D0D1B6E8E':
 			// add 7 more backpacks on top of existing one, for a full embiggening
@@ -62,6 +45,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			OffsetSectorPlane(155,1,-80.);
 			SetLineSpecial(652,ACS_Execute,-Int('NERVE_EXITOPEN'));
 			break;
+		// INTER-EPISODE PROGRESSION STUFF
 		// Doom E1M8
 		case '97079958C7E89C1908890730B8B9FEB7':
 			// 1.1-1.2
@@ -157,6 +141,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				}
 			}
 			break;
+		// EQUINOX: various boss brain setups that could be cheesed with the Ynykron or silver bullet
 		// Equinox MAP04
 		case 'E66BCCFAD7AC40EFB21E2A19131E1522':
 			EquinoxBossBrainHandle(2406,27);
@@ -175,6 +160,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		case '3805A661D5C4523AFF7BF86991071043':
 			EquinoxBossBrainHandle(4106,60);
 			break;
+		// DOOM VACATION: this wad is weird
 		// Doom Vacation MAP01 (1.4)
 		case 'F286BABF0D152259CD6B996E8920CA70':
 		// Doom Vacation MAP01 (1.5)

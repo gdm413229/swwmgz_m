@@ -1808,6 +1808,18 @@ Class SWWMUtility
 		victim.DamageMobj(null,null,victim.Health,'EndLevel',DMG_FORCED|DMG_THRUSTLESS);
 	}
 
+	// for Equinox
+	static play void SpawnVanillaBossBrain( int tid )
+	{
+		let ai = Level.CreateActorIterator(tid);
+		Actor a;
+		while ( a = ai.Next() )
+		{
+			let bb = a.Spawn("BossBrain",a.pos,NO_REPLACE);
+			bb.angle = a.angle;
+		}
+	}
+
 	// checks if we're playing in doom 1
 	// this is used so we can sometimes replace the shotgun with a SSG slot weapon
 	static bool IsDoomOne()

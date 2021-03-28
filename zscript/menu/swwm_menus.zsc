@@ -277,6 +277,7 @@ Class SWWMBigMenuHack : ListMenu
 			{
 				itm.OffsetPositionY(oy+56);	// offset from static text header
 				itm.OffsetPositionY(32*(j++));	// offset from other entries
+				ListMenuItemSelectable(itm).mHeight = 32;	// also need to set the height so mouse selection works
 			}
 			else
 			{
@@ -325,7 +326,7 @@ Class SWWMBigMenuHack : ListMenu
 			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_Clean,true);
 			else Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
-		for( int i=0; i<mDesc.mItems.Size(); i++ )
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
 		{
 			if ( !mDesc.mItems[i].mEnabled ) continue;
 			bool offsetme = false;
@@ -345,6 +346,41 @@ Class SWWMBigMenuHack : ListMenu
 				mDesc.mItems[mDesc.mSelectedItem].DrawSelector(mDesc.mSelectOfsX,mDesc.mSelectOfsY-ofs*32,mDesc.mSelector,mDesc);
 		}
 		Menu.Drawer();
+	}
+
+	// mouse input is also a hack
+	override bool MouseEvent( int type, int x, int y )
+	{
+		// set offsets
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			if ( !mDesc.mItems[i].mEnabled ) continue;
+			bool offsetme = false;
+			if ( (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMTextItemM') || (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMPatchItemM') )
+			{
+				if ( (i <= ofs) || (i > ofs+7) )
+					continue;
+				offsetme = true;
+			}
+			if ( offsetme ) mDesc.mItems[i].OffsetPositionY(-ofs*32);
+			else mDesc.mItems[i].OffsetPositionY(-65536);
+		}
+		bool res = Super.MouseEvent(type,x,y);
+		// unset offsets
+		for ( int i=0; i<mDesc.mItems.Size(); i++ )
+		{
+			if ( !mDesc.mItems[i].mEnabled ) continue;
+			bool offsetme = false;
+			if ( (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMTextItemM') || (mDesc.mItems[i].GetClass() == 'ListMenuItemSWWMPatchItemM') )
+			{
+				if ( (i <= ofs) || (i > ofs+7) )
+					continue;
+				offsetme = true;
+			}
+			if ( offsetme ) mDesc.mItems[i].OffsetPositionY(ofs*32);
+			else mDesc.mItems[i].OffsetPositionY(65536);
+		}
+		return res;
 	}
 }
 
@@ -588,7 +624,6 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
 	}
-
 }
 
 // for compat with non-text episodes

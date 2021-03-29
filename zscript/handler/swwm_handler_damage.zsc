@@ -1,5 +1,7 @@
 // WorldThingDamaged and friends
 
+Class DeepImpactOnlyToken : Inventory {}
+
 extend Class SWWMHandler
 {
 	bool tookdamage[MAXPLAYERS];
@@ -102,6 +104,20 @@ extend Class SWWMHandler
 				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
 			}
 			SWWMFlyTracker.Track(e.Thing,e.DamageSource);
+			if ( e.Thing.bBOSS )
+			{
+				let tk = e.Thing.FindInventory("DeepImpactOnlyToken");
+				if ( !tk )
+				{
+					tk = Inventory(Actor.Spawn("DeepImpactOnlyToken"));
+					tk.AttachToOwner(e.Thing);
+					tk.special1 = 0;
+				}
+				Inventory pb;
+				if ( (tk.special1 != -1) && ((e.DamageType == 'Push') || (e.Inflictor && (pb = e.Inflictor.FindInventory("ParriedBuff")) && pb.bAMBUSH)) )
+					tk.special1 = 1;
+				else tk.special1 = -1;
+			}
 		}
 	}
 
@@ -174,6 +190,9 @@ extend Class SWWMHandler
 				SWWMUtility.AchievementProgressInc('swwm_progress_love',1,src.player);
 			if ( e.Inflictor && e.Inflictor.FindInventory('ParriedBuff') )
 				SWWMUtility.AchievementProgressInc('swwm_progress_reflect',1,src.player);
+			Inventory tk;
+			if ( (tk = e.Thing.FindInventory("DeepImpactOnlyToken")) && (tk.special1 == 1) )
+				SWWMUtility.MarkAchievement('swwm_achievement_shame',src.player);
 			SWWMUtility.AchievementProgressInc('swwm_progress_mega',1,src.player);
 		}
 		// no credits unless it's a counted kill or marine (that isn't friendly)

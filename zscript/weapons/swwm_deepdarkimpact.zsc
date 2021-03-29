@@ -221,7 +221,7 @@ Class DeepImpact : SWWMWeapon
 			rdir /= rdist;
 			if ( LineTrace(atan2(rdir.y,rdir.x),rdist,asin(-rdir.z),TRF_THRUACTORS|TRF_ABSPOSITION,origin.z,origin.x,origin.y) || (rdist > 250) || (rdir dot x < .75) ) continue;
 			m.speed = m.vel.length();
-			m.vel = m.speed*1.5*(-m.vel.unit()*.4+rdir).unit();
+			m.vel = m.speed*1.5*(-m.vel.unit()*.3+rdir+x*.2).unit();
 			Vector3 ndir = m.vel.unit();
 			m.angle = atan2(ndir.y,ndir.x);
 			m.pitch = asin(-ndir.z);
@@ -231,6 +231,7 @@ Class DeepImpact : SWWMWeapon
 			{
 				let pb = Inventory(Spawn("ParriedBuff"));
 				pb.AttachToOwner(m);
+				pb.bAMBUSH = true;
 			}
 			if ( s ) s.parries++;
 			SWWMUtility.AchievementProgressInc('swwm_progress_parry',1,player);

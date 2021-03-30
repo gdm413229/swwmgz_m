@@ -32,8 +32,11 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Clap
   - The Finger
   - Thumbs Down
-  - Horns
   - Giggle
+  - Heart
+  - Shrug
+  - Beckon
+  - Facepalm
 * **DLC Gameset:**
   - Tetris
   - Pong
@@ -52,7 +55,9 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Kirin
 * **Japanese localization???**
 * **Monster/decoration replacements add-on**
-* **Photo Mode**
+* **Photo Mode** 
+  - Dedicated poses
+  - Stickers
 * **Hardcore Mode side mod**
   - Featuring Demolitionist on Maidbot frame
   - More complex game mechanics

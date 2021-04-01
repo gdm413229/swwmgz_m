@@ -66,6 +66,7 @@ Class Demolitionist : PlayerPawn
 	int healcooldown, healtimer, oldhealth;
 	bool scriptedinvul;
 	bool hitactivate;
+	Actor froggy;
 
 	transient int lastuse, failcounter, failcooldown;
 
@@ -720,6 +721,8 @@ Class Demolitionist : PlayerPawn
 		{
 			if ( !player.usedown ) lastuse = gametic;
 			CheckDefaceTexture();
+			if ( !player.usedown && froggy )
+				player.usedown = froggy.Used(self);
 		}
 		Super.PlayerThink();
 		if ( (gametic == lastuse) && IsActorPlayingSound(CHAN_VOICE,"*usefail") )

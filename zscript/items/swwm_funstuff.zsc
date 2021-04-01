@@ -24,8 +24,9 @@ Class FroggyChair : Actor
 		if ( !carrier ) return;
 		SWWMLoreLibrary.Add(carrier.player,"FroggyChair");
 		carrier.A_StartSound("demolitionist/handsup",CHAN_ITEM,CHANF_OVERLAP);
+		if ( carrier is 'Demolitionist' ) Demolitionist(carrier).froggy = self;
 		A_SetRenderStyle(.5,STYLE_Translucent);
-		A_SetSize(32,32);	// easier to deselect
+		A_SetSize(default.radius,32);	// full body blocks
 		carried = true;
 		bSOLID = false;
 		bNOGRAVITY = true;
@@ -36,6 +37,7 @@ Class FroggyChair : Actor
 	private void EndCarry()
 	{
 		if ( master ) master.A_StartSound("demolitionist/handsdown",CHAN_ITEM,CHANF_OVERLAP);
+		if ( master is 'Demolitionist' ) Demolitionist(master).froggy = null;
 		A_SetRenderStyle(1.,STYLE_Normal);
 		A_SetSize(default.radius,default.height);
 		carried = false;
@@ -87,8 +89,9 @@ Class FroggyChair : Actor
 		if ( carried )
 		{
 			if ( user != master ) return false;
-			if ( TestMobjLocation() && level.IsPointInLevel(pos) )
-				EndCarry();
+			A_SetSize(default.radius,default.height);
+			if ( TestMobjLocation() && level.IsPointInLevel(pos) ) EndCarry();
+			else A_SetSize(default.radius,32);
 		}
 		else
 		{
@@ -139,7 +142,7 @@ Class FroggyChair : Actor
 				else dirto /= lento;
 				vel = (dirto+(0,0,.1))*vsize*.3;
 				Spawn("SWWMItemFog",pos);
-				other.DamageMobj(self,tracer,int(10*vsize),'Melee',DMG_THRUSTLESS);
+				other.DamageMobj(self,tracer,int(2.5*vsize),'Melee',DMG_THRUSTLESS);
 				A_StartSound("squeak",CHAN_WEAPON);
 				return false;
 			}

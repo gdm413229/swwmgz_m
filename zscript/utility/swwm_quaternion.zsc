@@ -1,8 +1,27 @@
 /*
    Quaternion math helper class.
-   (C)2018 Marisa Kirisame, UnSX Team.
-   Released under the GNU Lesser General Public License version 3 (or later).
-   See https://www.gnu.org/licenses/lgpl-3.0.txt for its terms.
+   Provides only the bare minimum needed to implement 6DOF functionality. For a
+   more extensive implementation, please refer to Gutamatics.
+
+   Copyright (c)2018-2021 Marisa Kirisame, UnSX Team
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to
+   deal in the Software without restriction, including without limitation the
+   rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+   sell copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+   IN THE SOFTWARE.
 */
 
 Class swwm_Quat
@@ -89,9 +108,8 @@ Class swwm_Quat
 		return pitch, yaw, roll;
 	}
 
-	swwm_Quat qmul( swwm_Quat q )
+	swwm_Quat qmul( swwm_Quat q ) const
 	{
-		return swwm_Quat.create(w*q.w-x*q.x-y*q.y-z*q.z,w*q.x+x*q.w+y*q.z-z
-			*q.y,w*q.y+y*q.w+z*q.x-x*q.z,w*q.z+z*q.w+x*q.y-y*q.x);
+		return swwm_Quat.create(w*q.w-x*q.x-y*q.y-z*q.z,w*q.x+x*q.w+y*q.z-z*q.y,w*q.y+y*q.w+z*q.x-x*q.z,w*q.z+z*q.w+x*q.y-y*q.x);
 	}
 }

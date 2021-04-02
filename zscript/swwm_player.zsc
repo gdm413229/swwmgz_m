@@ -1317,8 +1317,8 @@ Class Demolitionist : PlayerPawn
 					break;
 				}
 			}
-			// check for slope boosting
-			if ( (pos.z <= floorz) && (spd > 0) )
+			// check for slope boosting (only if dashing)
+			if ( (pos.z <= floorz) && (spd > 0) && isdashing )
 			{
 				F3DFloor ff;
 				for ( int i=0; i<FloorSector.Get3DFloorCount(); i++ )
@@ -1494,11 +1494,11 @@ Class Demolitionist : PlayerPawn
 			if ( player.centering || !swwm_fly6dof ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
 			if ( swwm_fly6dof )
 			{
-				swwm_Quat orient = swwm_Quat.create_euler(pitch,angle,roll);
-				swwm_Quat angles = swwm_Quat.create_euler(guidepitch,guideangle,guideroll);
-				orient = orient.qmul(angles);
+				swwm_Quaternion orient = swwm_Quaternion.createFromAngles(angle,pitch,roll);
+				swwm_Quaternion angles = swwm_Quaternion.createFromAngles(guideangle,guidepitch,guideroll);
+				orient = orient.multiplyQuat(angles);
 				double npitch, nangle, nroll;
-				[npitch, nangle, nroll] = orient.to_euler();
+				[nangle, npitch, nroll] = orient.toAngles();
 				A_SetAngle(nangle,SPF_INTERPOLATE);
 				A_SetPitch(npitch,SPF_INTERPOLATE);
 				A_SetRoll(nroll,SPF_INTERPOLATE);
@@ -1681,6 +1681,7 @@ Class Demolitionist : PlayerPawn
 		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
 		Vector2 walldir = (cos(angle),sin(angle));
 		bool walljump = false, wallclimb = false;
+		double climbvelz = 0.;
 		FLineTraceData d;
 		Actor jumpactor = null;
 		for ( int i=-4; i<int(height*.8); i++ )
@@ -1718,15 +1719,18 @@ Class Demolitionist : PlayerPawn
 							// double-check that it's climbable
 							if ( d.HitType == TRACE_HitWall )
 							{
-								if ( !d.HitLine.sidedef[1] )	// nope
+								if ( !d.HitLine.sidedef[1] || !!(d.HitLine.flags&(Line.ML_BLOCKING|Line.ML_BLOCKEVERYTHING|Line.ML_BLOCK_PLAYERS)) )	// nope
 								{
 									wallclimb = false;
 									walljump = true;
 									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
 									break;
 								}
-								double backfloorz = d.HitLine.sidedef[!d.LineSide].sector.floorplane.ZAtPoint(d.HitLocation.xy);
-								double backceilz = d.HitLine.sidedef[!d.LineSide].sector.ceilingplane.ZAtPoint(d.HitLocation.xy);
+								Sector s = d.HitLine.sidedef[!d.LineSide].sector;
+								double backfloorz = s.floorplane.ZAtPoint(d.HitLocation.xy);
+								double backceilz = s.ceilingplane.ZAtPoint(d.HitLocation.xy);
+								// cling to 3D floor if hit
+								if ( d.Hit3DFloor ) backfloorz = d.Hit3DFloor.top.ZAtPoint(d.HitLocation.xy);
 								if ( ((backceilz-backfloorz) < Height) || ((pos.z+Height+32) < backfloorz) )	// nope
 								{
 									wallclimb = false;
@@ -1734,6 +1738,7 @@ Class Demolitionist : PlayerPawn
 									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
 									break;
 								}
+								climbvelz = 1.5*sqrt(max(1.,backfloorz-pos.z));
 							}
 							else if ( d.HitType == TRACE_HitActor )
 							{
@@ -1745,6 +1750,7 @@ Class Demolitionist : PlayerPawn
 									walldir = -(walldir*.7+(cos(ang),sin(ang))*.3);
 									break;
 								}
+								climbvelz = 1.5*sqrt(max(1.,(d.HitActor.pos.z+d.HitActor.Height)-pos.z));
 							}
 							jumpactor = d.HitActor;
 							walldir = (walldir*.7+(cos(ang),sin(ang))*.3);
@@ -1797,14 +1803,14 @@ Class Demolitionist : PlayerPawn
 					if ( walljump )
 					{
 						if ( vel.z < 10. )
-							vel.z += jumpvelz+clamp(-pvelz*.6,0.,30.);
+							vel.z += 2.*jumpvelz+clamp(-pvelz*.6,0.,30.);
 						vel.xy += walldir*20*Speed;
 						lastbump *= .95;
 					}
 					else if ( wallclimb )
 					{
 						if ( vel.z < 10. )
-							vel.z += jumpvelz+clamp(-pvelz*.8,0.,30.);
+							vel.z += climbvelz+clamp(-pvelz*.95,0.,30.);
 						vel.xy += walldir*10*Speed;
 						lastbump *= .97;
 					}
@@ -1857,23 +1863,26 @@ Class Demolitionist : PlayerPawn
 					bumppitch.Push(newp-pitch);
 					A_SetPitch(newp,SPF_INTERPOLATE);
 					// bunnyhop time
-					if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) && !walljump && !wallclimb )
+					if ( !walljump && !wallclimb )
 					{
-						SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
-						// bhop, z vel relative to vel size
-						if ( vel.z < 25. )	// don't ramp up too hard
-							vel.z += jumpvelz*(1.2+vel.length()*.01);
-						// accelerate
-						vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
-					}
-					else
-					{
-						// first jump
-						if ( vel.z < 10. )	// don't ramp up too hard
-							vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
-						// long jump if running
-						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
-							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();
+						if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) )
+						{
+							SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
+							// bhop, z vel relative to vel size
+							if ( vel.z < 25. )	// don't ramp up too hard
+								vel.z += jumpvelz*(1.2+vel.length()*.01);
+							// accelerate
+							vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
+						}
+						else
+						{
+							// first jump
+							if ( vel.z < 10. )	// don't ramp up too hard
+								vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
+							// long jump if running
+							if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
+								(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();
+						}
 					}
 				}
 				SetStateLabel("Jump");

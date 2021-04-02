@@ -43,12 +43,8 @@ Class SWWMStatusBar : BaseStatusBar
 	// shared from renderunderlay, needed for proper interpolation of some things
 	Vector3 viewpos, viewrot;
 
-	// libeye stuff
-	swwmLe__ProjScreen proj;
-	swwmLe__GLScreen gl_proj;
-	swwmLe__SWScreen sw_proj;
-	swwmLe__Viewport viewport;
-	bool can_project;
+	// projection data cache
+	SWWMProjectionData projdata;
 
 	DynamicValueInterpolator HealthInter, ScoreInter, ScoreInter2, FuelInter, DashInter;
 
@@ -222,21 +218,6 @@ Class SWWMStatusBar : BaseStatusBar
 		return true;
 	}
 
-	void PrepareProjection()
-	{
-		switch ( vid_rendermode )
-		{
-		case 0:
-		case 1:
-			proj = sw_proj;
-			break;
-		default:
-			proj = gl_proj;
-			break;
-		}
-		can_project = proj;
-	}
-
 	private bool CmpTarget( SWWMCombatTracker a, SWWMCombatTracker b )
 	{
 		if ( !a || !b ) return true;
@@ -384,7 +365,7 @@ Class SWWMStatusBar : BaseStatusBar
 	override void Tick()
 	{
 		Super.Tick();
-		PrepareProjection();
+		SWWMUtility.PrepareProjData(projdata,ViewPos,ViewRot.x,ViewRot.y,ViewRot.z,players[consoleplayer].fov);
 		int maxtargetnum = max(0,swwm_maxtargets);
 		int maxscorenum = max(0,swwm_maxscorenums);
 		int maxdamnum = max(0,swwm_maxdamnums);
@@ -447,9 +428,10 @@ Class SWWMStatusBar : BaseStatusBar
 				// ignore points clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,poi.pos);
 				if ( viewvec dot tdir < 0 ) continue;
-				proj.ProjectWorldPos(viewpos+tdir);
-				proj.ProjectToNormal();
-				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,viewpos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+				if ( !SWWMUtility.TestScreenBounds(projdata,vpos) ) continue;
 				intpoints[i++] = poi;
 			}
 			// squeeze if some were discarded
@@ -478,9 +460,10 @@ Class SWWMStatusBar : BaseStatusBar
 				// ignore trackers clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,trk.pos);
 				if ( viewvec dot tdir < 0 ) continue;
-				proj.ProjectWorldPos(viewpos+tdir);
-				proj.ProjectToNormal();
-				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,viewpos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+				if ( !SWWMUtility.TestScreenBounds(projdata,vpos) ) continue;
 				trackers[i++] = trk;
 			}
 			// squeeze if some were discarded
@@ -513,9 +496,10 @@ Class SWWMStatusBar : BaseStatusBar
 				// ignore numbers clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,scr.pos);
 				if ( viewvec dot tdir < 0 ) continue;
-				proj.ProjectWorldPos(viewpos+tdir);
-				proj.ProjectToNormal();
-				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,viewpos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+				if ( !SWWMUtility.TestScreenBounds(projdata,vpos) ) continue;
 				scoreobjs[i++] = scr;
 			}
 		}
@@ -526,9 +510,10 @@ Class SWWMStatusBar : BaseStatusBar
 				// ignore numbers clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,scr.pos);
 				if ( viewvec dot tdir < 0 ) continue;
-				proj.ProjectWorldPos(viewpos+tdir);
-				proj.ProjectToNormal();
-				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,viewpos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+				if ( !SWWMUtility.TestScreenBounds(projdata,vpos) ) continue;
 				scoreobjs[i++] = scr;
 			}
 		}
@@ -546,13 +531,14 @@ Class SWWMStatusBar : BaseStatusBar
 			i = 0;
 			for ( SWWMItemSense s=demo.itemsense; s; s=s.next )
 			{
+				if ( !thesight && (level.maptime > s.updated+35) ) continue;
 				// ignore points clearly outside of player view
 				Vector3 tdir = level.Vec3Diff(viewpos,s.pos);
 				if ( viewvec dot tdir < 0 ) continue;
-				proj.ProjectWorldPos(viewpos+tdir);
-				proj.ProjectToNormal();
-				if ( !proj.IsInFront() || !proj.IsInScreen() ) continue;
-				if ( !thesight && (level.maptime > s.updated+35) ) continue;
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,viewpos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+				if ( !SWWMUtility.TestScreenBounds(projdata,vpos) ) continue;
 				senseitems[i++] = s;
 			}
 			// squeeze if some were discarded
@@ -643,9 +629,6 @@ Class SWWMStatusBar : BaseStatusBar
 		ScoreInter2 = DynamicValueInterpolator.Create(0,.1,1,999999999);
 		FuelInter = DynamicValueInterpolator.Create(120,.5,1,100);
 		DashInter = DynamicValueInterpolator.Create(120,.5,1,40);
-		gl_proj = new("swwmLe__GLScreen");
-		sw_proj = new("swwmLe__SWScreen");
-		PrepareProjection();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		PrevFrame = MSTime();
 	}
@@ -661,12 +644,9 @@ Class SWWMStatusBar : BaseStatusBar
 	{
 		// don't draw when dead or with automap open
 		if ( (CPlayer.health <= 0) || automapactive ) return;
-		viewport.FromHud();
-		proj.CacheResolution();
-		proj.CacheFov(players[consoleplayer].fov);
-		proj.Reorient(ViewPos,ViewRot);
-		proj.BeginProjection();
-		Vector3 vdir = (cos(ViewRot.x)*cos(ViewRot.y),sin(ViewRot.x)*cos(ViewRot.y),-sin(ViewRot.y));
+		SWWMUtility.PrepareProjData(projdata,ViewPos,ViewRot.x,ViewRot.y,ViewRot.z,players[consoleplayer].fov);
+		int cliptop = projdata.viewy, clipbottom = projdata.viewy+projdata.viewh,
+			clipleft = projdata.viewx, clipright = projdata.viewx+projdata.vieww;
 		bool thesight = !!CPlayer.mo.FindInventory("Omnisight");
 		// points of interest
 		String tag;
@@ -676,11 +656,10 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				let poi = intpoints[i];
 				if ( !poi ) continue;
-				Vector3 tdir = Level.Vec3Diff(ViewPos,poi.pos);
-				proj.ProjectWorldPos(ViewPos+tdir);
-				Vector2 npos = proj.ProjectToNormal();
-				if ( !proj.IsInFront() ) continue;
-				Vector2 vpos = viewport.SceneToWindow(npos);
+				Vector3 tdir = level.Vec3Diff(ViewPos,poi.pos);
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,ViewPos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 				if ( poi.type == INT_Key ) tag = String.Format("\cf%s\c-",poi.keytag);
 				else if ( poi.type == INT_Exit )
 				{
@@ -693,9 +672,9 @@ Class SWWMStatusBar : BaseStatusBar
 					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 				}
 				Font fnt = LangFont(mMiniwiFont);
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y-hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y-hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y+hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y+hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 		}
 		// sensed items
@@ -706,19 +685,18 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				let s = senseitems[i];
 				if ( !s || !s.item ) continue;
-				Vector3 tdir = Level.Vec3Diff(ViewPos,s.pos);
-				proj.ProjectWorldPos(ViewPos+tdir);
-				Vector2 npos = proj.ProjectToNormal();
-				if ( !proj.IsInFront() ) continue;
-				Vector2 vpos = viewport.SceneToWindow(npos);
+				Vector3 tdir = level.Vec3Diff(ViewPos,s.pos);
+				Vector3 ndc = SWWMUtility.ProjectPoint(projdata,ViewPos+tdir);
+				if ( ndc.z >= 1. ) continue;
+				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 				Font fnt = LangFont(mMiniwiFont);
 				int mtime = thesight?70:35;
 				double alph = clamp(((s.updated+mtime)-level.maptime)/35.,0.,1.);
 				alph *= clamp(1.5-1.5*(tdir.length()/(thesight?1200.:800.)),0.,1.);
 				tag = s.tag;
-				Screen.DrawText(fnt,s.vipitem?Font.CR_PURPLE:s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,s.vipitem?Font.CR_PURPLE:s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
-				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 		}
 		// targetting array
@@ -726,11 +704,9 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			let targ = trackers[i];
 			if ( !targ ) continue;
-			Vector3 tdir = Level.Vec3Diff(ViewPos,targ.prevpos*(1.-fractic)+targ.pos*fractic);
-			proj.ProjectWorldPos(ViewPos+tdir);
-			Vector2 npos = proj.ProjectToNormal();
-			if ( !proj.IsInFront() ) continue;
-			Vector2 vpos = viewport.SceneToWindow(npos);
+			Vector3 ndc = SWWMUtility.ProjectPoint(projdata,ViewPos+level.Vec3Diff(ViewPos,targ.prevpos*(1.-fractic)+targ.pos*fractic));
+			if ( ndc.z >= 1. ) continue;
+			Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 			tag = targ.mytag;
 			if ( tag != "" )
 			{
@@ -752,30 +728,30 @@ Class SWWMStatusBar : BaseStatusBar
 			barpos.y -= 16.;
 			Font fnt = LangFont(swwm_bigtags?mTewiFont:mMiniwiFont);
 			if ( swwm_targettags || targ.myplayer && (tag != "") )
-				Screen.DrawText(fnt,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,Font.CR_WHITE,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			double ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*10);
 			double hw = (min(ht,targ.maxhealth)*50.)/targ.maxhealth;
 			if ( targ.mytarget && (targ.mytarget.bInvulnerable || (targ.myplayer && (targ.myplayer.cheats&(CF_GODMODE|CF_GODMODE2))) || targ.mytarget.FindInventory("InvinciballPower")) )
 			{
-				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
+				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 				continue;
 			}
-			Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
+			Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			if ( ht > targ.maxhealth )
 			{
 				hw = (min(ht-targ.maxhealth,targ.maxhealth)*50.)/targ.maxhealth;
-				Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
+				Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 			if ( ht > targ.maxhealth*2 )
 			{
 				hw = (min(ht-targ.maxhealth*2,targ.maxhealth*3)*50.)/(targ.maxhealth*3);
-				Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
+				Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 			if ( ht > targ.maxhealth*5 )
 			{
 				hw = (min(ht-targ.maxhealth*5,targ.maxhealth*5)*50.)/(targ.maxhealth*5);
-				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw);
+				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 		}
 		// floating kill scores and others
@@ -783,11 +759,9 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			let snum = scoreobjs[i];
 			if ( !snum ) continue;
-			Vector3 tdir = Level.Vec3Diff(ViewPos,snum.pos);
-			proj.ProjectWorldPos(ViewPos+tdir);
-			Vector2 npos = proj.ProjectToNormal();
-			if ( !proj.IsInFront() ) continue;
-			Vector2 vpos = viewport.SceneToWindow(npos);
+			Vector3 ndc = SWWMUtility.ProjectPoint(projdata,ViewPos+level.Vec3Diff(ViewPos,snum.pos));
+			if ( ndc.z >= 1. ) continue;
+			Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 			tag = String.Format("%+d",snum.score);
 			double alph = clamp((snum.lifespan+fractic)/35.,0.,1.);
 			Vector2 fo = (0,0);
@@ -820,7 +794,7 @@ Class SWWMStatusBar : BaseStatusBar
 			Font fnt = mMiniwiFont.mFont;
 			Vector2 hs0 = isscore?hss:hsn;
 			Vector2 ss0 = isscore?sss:ssn;
-			Screen.DrawText(fnt,snum.tcolor,(vpos.x-hs0.x*(fo.x+fnt.StringWidth(tag)/2.))/hs0.x,(vpos.y-hs0.y*(fo.y+(fnt.GetHeight()/2.)))/hs0.y,tag,DTA_VirtualWidthF,ss0.x,DTA_VirtualHeightF,ss0.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+			Screen.DrawText(fnt,snum.tcolor,(vpos.x-hs0.x*(fo.x+fnt.StringWidth(tag)/2.))/hs0.x,(vpos.y-hs0.y*(fo.y+(fnt.GetHeight()/2.)))/hs0.y,tag,DTA_VirtualWidthF,ss0.x,DTA_VirtualHeightF,ss0.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			// extra strings (if available)
 			if ( !swwm_scorebonus ) continue;
 			fo.y += fnt.GetHeight();
@@ -830,7 +804,7 @@ Class SWWMStatusBar : BaseStatusBar
 				tag = snum.xstr[i];
 				if ( snum.xscore[i] == int.max ) tag.AppendFormat(" MAX");
 				else if ( snum.xscore[i] > 0 ) tag.AppendFormat(" x%d",snum.xscore[i]);
-				Screen.DrawText(fnt,snum.xtcolor[i],(vpos.x-hss.x*(fo.x+fnt.StringWidth(tag)/2.))/hss.x,(vpos.y-hss.y*(fo.y+(fnt.GetHeight()/2.)))/hss.y,tag,DTA_VirtualWidthF,sss.x,DTA_VirtualHeightF,sss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+				Screen.DrawText(fnt,snum.xtcolor[i],(vpos.x-hss.x*(fo.x+fnt.StringWidth(tag)/2.))/hss.x,(vpos.y-hss.y*(fo.y+(fnt.GetHeight()/2.)))/hss.y,tag,DTA_VirtualWidthF,sss.x,DTA_VirtualHeightF,sss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 				fo.y += fnt.GetHeight();
 			}
 		}

@@ -22,6 +22,12 @@ Class SWWMAchievement
 	bool hasformat;
 }
 
+Struct SWWMProjectionData
+{
+	swwm_Matrix wtc;
+	int viewx, viewy, vieww, viewh;
+}
+
 Class SWWMUtility
 {
 	// loaded from a file, neater than having a bunch of static arrays
@@ -135,6 +141,48 @@ Class SWWMUtility
 		}
 		double cval = cv.GetFloat();
 		cv.SetFloat(cval+inc);
+	}
+
+	// gutamatics caching
+	static void PrepareProjData( out SWWMProjectionData d, Vector3 viewpos, double angle, double pitch, double roll, double fov )
+	{
+		double aspect = Screen.GetAspectRatio();
+		// vertical fov
+		double fovratio = (aspect>=1.3)?1.333333:aspect;
+		double fovy = 2.*atan(tan(clamp(fov,5,170)/2.)/fovratio);
+		// world→clip matrix
+		swwm_Matrix view = swwm_Matrix.view(viewpos,angle,pitch,roll);
+		swwm_Matrix perp = swwm_Matrix.perspective(fovy,aspect,5,65535);
+		d.wtc = perp.multiplyMatrix(view);
+		// screen coord data
+		int sblocks = CVar.FindCVar('screenblocks').GetInt();
+		int viewx, viewy, vieww, viewh;
+		[viewx, viewy, vieww, viewh] = Screen.GetViewWindow();
+		int sh = Screen.GetHeight();
+		int h = sh;
+		if ( sblocks < 10 ) h = (sblocks*sh/10)&~7;
+		int bottom = sh-(h+viewy-((h-viewh)/2));
+		d.viewx = viewx;
+		d.viewy = sh-bottom-h;
+		d.vieww = vieww;
+		d.viewh = h;
+	}
+
+	static Vector3 ProjectPoint( SWWMProjectionData d, Vector3 worldpos )
+	{
+		return d.wtc.multiplyVector3(worldpos).asVector3();
+	}
+
+	static Vector2 NDCToViewport( SWWMProjectionData d, Vector3 ndc )
+	{
+		return (d.viewx,d.viewy)+(((ndc.x+1)*d.vieww)/2,((-ndc.y+1)*d.viewh)/2);
+	}
+
+	// checks if a point is inside the viewport
+	static bool TestScreenBounds( SWWMProjectionData d, Vector2 vpos )
+	{
+		return ((vpos.x == clamp(vpos.x,d.viewx,d.viewx+d.vieww))
+			&& (vpos.y == clamp(vpos.y,d.viewy,d.viewy+d.viewh)));
 	}
 
 	// thanks zscript

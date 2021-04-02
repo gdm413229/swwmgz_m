@@ -61,18 +61,12 @@ extend Class SWWMWeapon
 		if ( crosshairforce ) return;
 		let sb = SWWMStatusBar(StatusBar);
 		if ( !sb ) return;
-		sb.viewport.FromHud();
-		sb.proj.CacheResolution();
-		sb.proj.CacheFov(players[consoleplayer].fov);
-		sb.proj.OrientForRenderUnderlay(e);
-		sb.proj.BeginProjection();
+		SWWMUtility.PrepareProjData(sb.projdata,e.ViewPos,e.ViewAngle,e.ViewPitch,e.ViewRoll,players[consoleplayer].fov);
 		Vector3 tdir = level.Vec3Diff(e.ViewPos,cpos);
 		// project
-		sb.proj.ProjectWorldPos(e.ViewPos+tdir);
-		Vector2 vpos;
-		if ( !sb.proj.IsInFront() ) return;
-		Vector2 npos = sb.proj.ProjectToNormal();
-		vpos = sb.viewport.SceneToWindow(npos);
+		Vector3 ndc = SWWMUtility.ProjectPoint(sb.projdata,e.ViewPos+tdir);
+		if ( ndc.z >= 1. ) return;
+		Vector2 vpos = SWWMUtility.NDCToViewport(sb.projdata,ndc);
 		double frametime = (MSTime()-prevms)/1000.;
 		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
 		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;

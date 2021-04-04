@@ -10,6 +10,7 @@ extend Class SWWMHandler
 
 	override void WorldThingRevived( WorldEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		// reattach combat tracker
 		if ( !swwm_notrack && (e.Thing.bSHOOTABLE || e.Thing.bISMONSTER) && !(e.Thing is 'LampMoth') && !(e.Thing is 'CompanionLamp') )
 			SWWMCombatTracker.Spawn(e.Thing);
@@ -21,7 +22,11 @@ extend Class SWWMHandler
 			let hp = Actor.Spawn("HeadpatTracker",e.Thing.pos);
 			hp.target = e.Thing;
 		}
-		if ( !(e.Thing is 'PlayerPawn') ) return;
+		if ( !(e.Thing is 'PlayerPawn') )
+		{
+			if ( profiling ) worldthingrevived_ms += MSTime()-curms;
+			return;
+		}
 		// reset some vars
 		if ( e.Thing.playernumber() != -1 )
 		{
@@ -33,6 +38,7 @@ extend Class SWWMHandler
 		// reset uptime since player had just died
 		SWWMStats s = SWWMStats.Find(e.Thing.player);
 		if ( s ) s.lastspawn = level.totaltime;
+		if ( profiling ) worldthingrevived_ms += MSTime()-curms;
 	}
 
 	private bool HexenMap40()
@@ -67,6 +73,7 @@ extend Class SWWMHandler
 
 	override void WorldThingDied( WorldEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
 		{
 			// make sure we can't farm drops from revivable enemies
@@ -118,7 +125,11 @@ extend Class SWWMHandler
 		// force insert gib animations on some vanilla Doom monsters
 		int gibhealth = e.Thing.GetGibHealth();
 		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
-		if ( !gotgibbed ) return;
+		if ( !gotgibbed )
+		{
+			if ( profiling ) worldthingdied_ms += MSTime()-curms;
+			return;
+		}
 		if ( (e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") )
 			ExtraGibDeaths.GibThis(e.Thing,"DemonXDeath");
 		else if ( e.Thing.GetClass() == "HellKnight" )
@@ -131,6 +142,7 @@ extend Class SWWMHandler
 			ExtraGibDeaths.GibThis(e.Thing,"BonerXDeath");
 		else if ( e.Thing.GetClass() == "Archvile" )
 			ExtraGibDeaths.GibThis(e.Thing,"VileXDeath");
+		if ( profiling ) worldthingdied_ms += MSTime()-curms;
 	}
 
 	private void DoKeyTagFix( Actor a )
@@ -197,18 +209,31 @@ extend Class SWWMHandler
 
 	override void WorldThingDestroyed( WorldEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e.Thing is 'Inventory') )
+		{
+			if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
 			return;
+		}
 		// remove from suckables
 		int pos = suckableactors.Find(e.Thing);
-		if ( pos >= suckableactors.Size() ) return;
+		if ( pos >= suckableactors.Size() )
+		{
+			if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
+			return;
+		}
 		suckableactors.Delete(pos);
+		if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
 	}
 
 	override void WorldThingSpawned( WorldEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		if ( SuppressMultiItem(e) )
+		{
+			if ( profiling ) worldthingspawned_ms += MSTime()-curms;
 			return;
+		}
 		IWantDieSpawn(e);
 		if ( (e.Thing is 'TeleportDest') || (e.Thing is 'BossTarget') )
 		{
@@ -373,5 +398,6 @@ extend Class SWWMHandler
 			trk.maxhealth = trk.lasthealth = e.Thing.Health;
 			trk.intp.Reset(trk.lasthealth);
 		}
+		if ( profiling ) worldthingspawned_ms += MSTime()-curms;
 	}
 }

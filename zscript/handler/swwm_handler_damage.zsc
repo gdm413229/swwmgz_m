@@ -327,9 +327,14 @@ extend Class SWWMHandler
 
 	override void WorldThingDamaged( WorldEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		if ( e.Damage > 0 ) DoDamageHandling(e);
 		if ( e.DamageSource && (e.DamageSource != e.Thing) ) DoCombatHit(e);
-		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse ) return;
+		if ( (e.Thing.Health > 0) || e.Thing.bKilled || e.Thing.bCorpse )
+		{
+			if ( profiling ) worldthingdamaged_ms += MSTime()-curms;
+			return;
+		}
 		DoGibThing(e);
 		// romero hax
 		if ( (e.Thing is 'BossBrain') && (e.DamageType == 'Telefrag') )
@@ -337,7 +342,12 @@ extend Class SWWMHandler
 		// voodoo doll telefragging barrel hax (eviternity death exits)
 		if ( (e.Thing is 'ExplosiveBarrel') && (e.DamageType == 'Telefrag') && e.DamageSource.player && (e.DamageSource.player.mo != e.DamageSource) )
 			e.DamageSource.DamageMobj(null,null,Actor.TELEFRAG_DAMAGE,'EndLevel');
-		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') ) return;
+		if ( !e.Thing.player && !e.Thing.bIsMonster && !e.Thing.bCountKill && !(e.Thing is 'ScriptedMarine') )
+		{
+			if ( profiling ) worldthingdamaged_ms += MSTime()-curms;
+			return;
+		}
 		DoKillScoring(e);
+		if ( profiling ) worldthingdamaged_ms += MSTime()-curms;
 	}
 }

@@ -152,7 +152,7 @@ extend Class SWWMHandler
 				while ( a = Actor(ti.Next()) )
 				{
 					if ( (!a.bSHOOTABLE && !a.bISMONSTER) || (a is 'LampMoth') || (a is 'CompanionLamp') ) continue;
-					let trk = SWWMCombatTracker.Spawn(a);
+					let trk = SWWMCombatTracker.Spawn(a,true);
 					if ( !a.player ) trk.maxhealth = max(a.health,a.GetSpawnHealth());
 				}
 				n = (trackers_cnt-n);
@@ -189,58 +189,79 @@ extend Class SWWMHandler
 			}
 			// dump the values of all mod RNGs (might help someday to track down what desyncs)
 			Console.Printf("\cxSWWM GZ RNG dump for player %d (\c-%s\cx):\c-",consoleplayer,players[consoleplayer].GetUserName());
-			Console.Printf("bdscreen: %d",Random2[bdscreen]());
-			Console.Printf("Blood: %d",Random2[Blood]());
-			Console.Printf("Boolet: %d",Random2[Boolet]());
-			Console.Printf("BrainExplode: %d",Random2[BrainExplode]());
-			Console.Printf("Bundle: %d",Random2[Bundle]());
-			Console.Printf("Candy: %d",Random2[Candy]());
-			Console.Printf("Chancebox: %d",Random2[Chancebox]());
-			Console.Printf("ClientSparkles: %d",Random2[ClientSparkles]());
-			Console.Printf("Corrode: %d",Random2[Corrode]());
-			Console.Printf("DemoLines: %d",Random2[DemoLines]());
-			Console.Printf("DoBlast: %d",Random2[DoBlast]());
-			Console.Printf("Eviscerator: %d",Random2[Eviscerator]());
-			Console.Printf("Explodium: %d",Random2[Explodium]());
-			Console.Printf("Explos: %d",Random2[Explos]());
-			Console.Printf("ExtraMissiles: %d",Random2[ExtraMissiles]());
-			Console.Printf("FInTheChat: %d",Random2[FInTheChat]());
-			Console.Printf("FlameT: %d",Random2[FlameT]());
-			Console.Printf("Flicker: %d",Random2[Flicker]());
-			Console.Printf("FunTags: %d",Random2[FunTags]());
-			Console.Printf("Gesture: %d",Random2[Gesture]());
-			Console.Printf("Gibs: %d",Random2[Gibs]());
-			Console.Printf("GoldDrop: %d",Random2[GoldDrop]());
-			Console.Printf("Goldy: %d",Random2[Goldy]());
-			Console.Printf("GunFlash: %d",Random2[GunFlash]());
-			Console.Printf("hdscreen: %d",Random2[hdscreen]());
-			Console.Printf("Hellblazer: %d",Random2[Hellblazer]());
-			Console.Printf("HudStuff: %d",Random2[HudStuff]());
-			Console.Printf("Impact: %d",Random2[Impact]());
-			Console.Printf("InterArt: %d",Random2[InterArt]());
-			Console.Printf("Invinciball: %d",Random2[Invinciball]());
-			Console.Printf("Junk: %d",Random2[Junk]());
-			Console.Printf("Moth: %d",Random2[Moth]());
-			Console.Printf("Nugget: %d",Random2[Nugget]());
-			Console.Printf("Parry: %d",Random2[Parry]());
-			Console.Printf("Ponch: %d",Random2[Ponch]());
-			Console.Printf("Puff: %d",Random2[Puff]());
-			Console.Printf("Pusher: %d",Random2[Pusher]());
-			Console.Printf("Rage: %d",Random2[Rage]());
-			Console.Printf("Replacements: %d",Random2[Replacements]());
-			Console.Printf("ScoreBits: %d",Random2[ScoreBits]());
-			Console.Printf("ShellDrop: %d",Random2[ShellDrop]());
-			Console.Printf("Shivers: %d",Random2[Shivers]());
-			Console.Printf("Silverbullet: %d",Random2[Silverbullet]());
-			Console.Printf("SpareShells: %d",Random2[SpareShells]());
-			Console.Printf("Sparkster: %d",Random2[Sparkster]());
-			Console.Printf("Spread: %d",Random2[Spread]());
-			Console.Printf("Spreadgun: %d",Random2[Spreadgun]());
-			Console.Printf("TUID: %d",Random2[TUID]());
-			Console.Printf("UIStuff %d",Random2[UIStuff]());
-			Console.Printf("Wallbuster: %d",Random2[Wallbuster]());
-			Console.Printf("WallbusterMenu: %d",Random2[WallbusterMenu]());
-			Console.Printf("Ynykron: %d",Random2[Ynykron]());
+			Console.Printf("bdscreen:       %08x",Random2[bdscreen]());
+			Console.Printf("Blood:          %08x",Random2[Blood]());
+			Console.Printf("Boolet:         %08x",Random2[Boolet]());
+			Console.Printf("BrainExplode:   %08x",Random2[BrainExplode]());
+			Console.Printf("Bundle:         %08x",Random2[Bundle]());
+			Console.Printf("Candy:          %08x",Random2[Candy]());
+			Console.Printf("Chancebox:      %08x",Random2[Chancebox]());
+			Console.Printf("ClientSparkles: %08x",Random2[ClientSparkles]());
+			Console.Printf("Corrode:        %08x",Random2[Corrode]());
+			Console.Printf("DemoLines:      %08x",Random2[DemoLines]());
+			Console.Printf("DoBlast:        %08x",Random2[DoBlast]());
+			Console.Printf("Eviscerator:    %08x",Random2[Eviscerator]());
+			Console.Printf("Explodium:      %08x",Random2[Explodium]());
+			Console.Printf("ExploS:         %08x",Random2[ExploS]());
+			Console.Printf("ExtraMissiles:  %08x",Random2[ExtraMissiles]());
+			Console.Printf("FInTheChat:     %08x",Random2[FInTheChat]());
+			Console.Printf("FlameT:         %08x",Random2[FlameT]());
+			Console.Printf("Flicker:        %08x",Random2[Flicker]());
+			Console.Printf("FunTags:        %08x",Random2[FunTags]());
+			Console.Printf("Gesture:        %08x",Random2[Gesture]());
+			Console.Printf("Gibs:           %08x",Random2[Gibs]());
+			Console.Printf("GoldDrop:       %08x",Random2[GoldDrop]());
+			Console.Printf("Goldy:          %08x",Random2[Goldy]());
+			Console.Printf("GunFlash:       %08x",Random2[GunFlash]());
+			Console.Printf("hdscreen:       %08x",Random2[hdscreen]());
+			Console.Printf("Hellblazer:     %08x",Random2[Hellblazer]());
+			Console.Printf("HudStuff:       %08x",Random2[HudStuff]());
+			Console.Printf("Impact:         %08x",Random2[Impact]());
+			Console.Printf("InterArt:       %08x",Random2[InterArt]());
+			Console.Printf("Invinciball:    %08x",Random2[Invinciball]());
+			Console.Printf("Junk:           %08x",Random2[Junk]());
+			Console.Printf("Moth:           %08x",Random2[Moth]());
+			Console.Printf("Nugget:         %08x",Random2[Nugget]());
+			Console.Printf("Parry:          %08x",Random2[Parry]());
+			Console.Printf("Ponch:          %08x",Random2[Ponch]());
+			Console.Printf("Puff:           %08x",Random2[Puff]());
+			Console.Printf("Pusher:         %08x",Random2[Pusher]());
+			Console.Printf("Rage:           %08x",Random2[Rage]());
+			Console.Printf("Replacements:   %08x",Random2[Replacements]());
+			Console.Printf("ScoreBits:      %08x",Random2[ScoreBits]());
+			Console.Printf("ShellDrop:      %08x",Random2[ShellDrop]());
+			Console.Printf("Shivers:        %08x",Random2[Shivers]());
+			Console.Printf("Silverbullet:   %08x",Random2[Silverbullet]());
+			Console.Printf("SpareShells:    %08x",Random2[SpareShells]());
+			Console.Printf("Sparkster:      %08x",Random2[Sparkster]());
+			Console.Printf("Spread:         %08x",Random2[Spread]());
+			Console.Printf("Spreadgun:      %08x",Random2[Spreadgun]());
+			Console.Printf("TUID:           %08x",Random2[TUID]());
+			Console.Printf("UIStuff:        %08x",Random2[UIStuff]());
+			Console.Printf("Wallbuster:     %08x",Random2[Wallbuster]());
+			Console.Printf("WallbusterMenu: %08x",Random2[WallbusterMenu]());
+			Console.Printf("Ynykron:        %08x",Random2[Ynykron]());
+			return;
+		}
+		else if ( e.Name ~== "swwmprofilehandler" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			bprofiletics = profiletics = (e.Args[0]<=0)?10:e.Args[0];
+			profiling = true;
+			worldtick_ms = 0;
+			worldthingspawned_ms = 0;
+			worldthingdestroyed_ms = 0;
+			worldthingdied_ms = 0;
+			worldthingdamaged_ms = 0;
+			worldthingrevived_ms = 0;
+			checkreplacement_ms = 0;
+			checkreplacee_ms = 0;
+			Console.Printf("Gathering data for %d tic(s)...",bprofiletics);
 			return;
 		}
 		if ( e.IsManual ) return;

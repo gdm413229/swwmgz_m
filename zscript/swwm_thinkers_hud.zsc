@@ -292,12 +292,14 @@ Class SWWMCombatTracker : Thinker
 		else mytag = "";
 	}
 
-	static SWWMCombatTracker Spawn( Actor target )
+	static SWWMCombatTracker Spawn( Actor target, bool update = false )
 	{
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return null;
+		// NOTE: These are only ever called once a thing spawns, so we don't need to "check" if entries already exist
+		// this check will only be performed in "update mode", i.e. when called from the swwmupdatetrackers netevent
 		SWWMCombatTracker t;
-		for ( t=hnd.trackers; t; t=t.next )
+		if ( update ) for ( t=hnd.trackers; t; t=t.next )
 		{
 			if ( t.mytarget != target ) continue;
 			return t;

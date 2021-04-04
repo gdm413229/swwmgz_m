@@ -57,6 +57,7 @@ Class SWWMStatusBar : BaseStatusBar
 	int midtic, midtype;
 
 	bool koraxhack;
+	int ignoremsg;
 
 	double minimapzoom, oldminimapzoom;
 	// minimap constants
@@ -172,6 +173,18 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override bool ProcessNotify( EPrintLevel printlevel, String outline )
 	{
+		if ( ignoremsg )
+		{
+			ignoremsg--;
+			return true;
+		}
+		if ( outline.Left(21) == "SWWMHandler profiling" )
+			return true;
+		if ( outline.left(18) == "\cxSWWM GZ RNG dump" )
+		{
+			ignoremsg = 51;
+			return true;
+		}
 		if ( koraxhack )
 		{
 			// treat as chat message

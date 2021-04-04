@@ -269,12 +269,18 @@ extend Class SWWMHandler
 
 	override void CheckReplacee( ReplacedEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		if ( e.Replacement is 'DSparilHax' )
 			e.Replacee = 'Sorcerer2';
 		// drla stuff, needed so boss deaths work
-		if ( !hasdrlamonsters ) return;
+		if ( !hasdrlamonsters )
+		{
+			if ( profiling ) checkreplacee_ms += MSTime()-curms;
+			return;
+		}
 		let rep = GetDRLAReplacee(e.Replacement);
 		if ( rep ) e.Replacee = rep;
+		if ( profiling ) checkreplacee_ms += MSTime()-curms;
 	}
 
 	private Class<Actor> GetDRLAReplacement( Class<Actor> a )
@@ -542,8 +548,13 @@ extend Class SWWMHandler
 
 	override void CheckReplacement( ReplaceEvent e )
 	{
+		if ( profiling ) curms = MSTime();
 		// respect final replacements
-		if ( e.IsFinal ) return;
+		if ( e.IsFinal )
+		{
+			if ( profiling ) checkreplacement_ms += MSTime()-curms;
+			return;
+		}
 		// shell types (sorted by rarity
 		static const Class<Actor> redpool[] = {"RedShell","RedShell2","RedShell4"};
 		static const Class<Actor> greenpool[] = {"GreenShell","GreenShell2","GreenShell4"};
@@ -559,6 +570,7 @@ extend Class SWWMHandler
 			{
 				e.Replacement = rep;
 				e.IsFinal = true;
+				if ( profiling ) checkreplacement_ms += MSTime()-curms;
 				return;
 			}
 		}
@@ -576,7 +588,11 @@ extend Class SWWMHandler
 				// keep checking until we hit a loop, just in case
 				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
 			}
-			if ( dehackery ) return;
+			if ( dehackery )
+			{
+				if ( profiling ) checkreplacement_ms += MSTime()-curms;
+				return;
+			}
 			e.Replacement = 'SWWMHangingKeen';
 		}
 		else if ( (e.Replacee is 'BossBrain') && (!e.Replacement || (e.Replacement == 'BossBrain')) )
@@ -589,13 +605,20 @@ extend Class SWWMHandler
 				// keep checking until we hit a loop, just in case
 				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
 			}
-			if ( dehackery ) return;
+			if ( dehackery )
+			{
+				if ( profiling ) checkreplacement_ms += MSTime()-curms;
+				return;
+			}
 			e.Replacement = 'SWWMBossBrain';
 		}
 		else if ( e.Replacee is 'RedCard' )
 		{
 			if ( level.GetChecksum() ~== "3805A661D5C4523AFF7BF86991071043" )
+			{
+				if ( profiling ) checkreplacement_ms += MSTime()-curms;
 				return;	// don't replace red key in Equinox MAP13
+			}
 			e.Replacement = 'SWWMRedCard';
 		}
 		else if ( e.Replacee is 'BlueCard' ) e.Replacement = 'SWWMBlueCard';
@@ -795,9 +818,14 @@ extend Class SWWMHandler
 		else if ( (e.Replacee is 'BlueArmor') || (e.Replacee is 'EnchantedShield') || (e.Replacee is 'MeshArmor') || (e.Replacee is 'FalconShield') ) e.Replacement = 'WarArmorItem';
 		else if ( (e.Replacee is 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'ChanceboxSpawner';
 		else if ( e.Replacee is 'ArtiTeleport' ) e.Replacement = (gameinfo.GameType&GAME_Hexen)?'ChanceboxSpawner':'SWWMNothing';
-		else return;
+		else
+		{
+			if ( profiling ) checkreplacement_ms += MSTime()-curms;
+			return;
+		}
 		// this last part is kind of ugly, but it works
 		// guarantees that OUR replacements are all final
 		e.IsFinal = true;
+		if ( profiling ) checkreplacement_ms += MSTime()-curms;
 	}
 }

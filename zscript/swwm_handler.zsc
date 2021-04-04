@@ -24,8 +24,20 @@ Class SWWMHandler : EventHandler
 	// for checkreplacement
 	bool hasdrlamonsters;
 
+	// profiling data
+	bool profiling;
+	int bprofiletics, profiletics;	// how many tics to aggregate data for
+	uint worldtick_ms;
+	uint worldthingspawned_ms, worldthingdestroyed_ms,
+		worldthingdied_ms, worldthingdamaged_ms,
+		worldthingrevived_ms;
+	uint checkreplacement_ms, checkreplacee_ms;
+	uint curms;
+
 	override void OnRegister()
 	{
+		profiling = true;
+		bprofiletics = profiletics = 35;
 		// oneliner RNG must be relative to consoleplayer
 		SetRandomSeed[DemoLines](Random[DemoLines]()+consoleplayer+MSTime());
 		// "uninitialize" some vars
@@ -43,6 +55,7 @@ Class SWWMHandler : EventHandler
 
 	override void WorldTick()
 	{
+		if ( profiling ) curms = MSTime();
 		LangRefresh();
 		QueueMaintenance();
 		if ( !mnotify && (level.maptime >= 5) )
@@ -79,6 +92,36 @@ Class SWWMHandler : EventHandler
 		OneHundredPercentCheck();
 		SimpleTracking();
 		VanillaBossTick();
+		if ( profiling )
+		{
+			worldtick_ms += MSTime()-curms;
+			Console.Printf("%d...",profiletics);
+			profiletics--;
+			if ( profiletics <= 0 )
+			{
+				profiling = false;
+				Console.Printf("Done!");
+				Console.Printf("SWWMHandler profiling info for "..bprofiletics.." tic(s):\n"
+					" event               | total  | avg\n"
+					"---------------------|--------|--------\n"
+					" WorldTick           | %-6d | %g\n"
+					" WorldThingSpawned   | %-6d | %g\n"
+					" WorldThingDestroyed | %-6d | %g\n"
+					" WorldThingDied      | %-6d | %g\n"
+					" WorldThingDamaged   | %-6d | %g\n"
+					" WorldThingRevived   | %-6d | %g\n"
+					" CheckReplacement    | %-6d | %g\n"
+					" CheckReplacee       | %-6d | %g",
+						worldtick_ms,double(worldtick_ms)/bprofiletics,
+						worldthingspawned_ms,double(worldthingspawned_ms)/bprofiletics,
+						worldthingdestroyed_ms,double(worldthingdestroyed_ms)/bprofiletics,
+						worldthingdied_ms,double(worldthingdied_ms)/bprofiletics,
+						worldthingdamaged_ms,double(worldthingdamaged_ms)/bprofiletics,
+						worldthingrevived_ms,double(worldthingrevived_ms)/bprofiletics,
+						checkreplacement_ms,double(checkreplacement_ms)/bprofiletics,
+						checkreplacee_ms,double(checkreplacee_ms)/bprofiletics);
+			}
+		}
 	}
 
 	override void PostUiTick()

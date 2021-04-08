@@ -18,6 +18,10 @@ Class FroggyChair : Actor
 		+NOBLOOD;
 		+INTERPOLATEANGLES;
 		+FORCEPAIN;
+		+CANPASS;
+		+NOBLOCKMONST;
+		+MOVEWITHSECTOR;
+		+SLIDESONWALLS;
 	}
 	private void BeginCarry( Actor carrier )
 	{
@@ -728,12 +732,12 @@ Class Chancebox : Actor
 			// no candidates? just burst into treats
 			if ( Random[Chancebox](0,1) )
 			{
-				let a = Spawn(!Random[Chancebox](0,2)?"GoldShell":Random[Chancebox](0,1)?"GrilledCheeseSandwich":"YnykronAmmo",pos);
+				let a = Spawn((!Random[Chancebox](0,2)&&SWWMUtility.ItemExists("Spreadgun"))?"GoldShell":(Random[Chancebox](0,1)&&SWWMUtility.ItemExists("Ynykron"))?"YnykronAmmo":"GrilledCheeseSandwich",pos);
 				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);
 			}
-			else if ( !Random[Chancebox](0,2) )
+			else if ( !Random[Chancebox](0,2) && SWWMUtility.ItemExists("CandyGun") )
 			{
 				for ( int i=0; i<=6; i++ )
 				{
@@ -744,7 +748,7 @@ Class Chancebox : Actor
 					if ( i > 0 ) a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](1,2);
 				}
 			}
-			else if ( !Random[Chancebox](0,2) )
+			else if ( !Random[Chancebox](0,2) && SWWMUtility.ItemExists("SilverBullet") )
 			{
 				for ( int i=0; i<3; i++ )
 				{
@@ -763,7 +767,7 @@ Class Chancebox : Actor
 					a.vel.xy = (cos(i*60),sin(i*60))*FRandom[Chancebox](3,4);
 				}
 			}
-			else if ( Random[Chancebox](0,1) )
+			else if ( Random[Chancebox](0,1) && SWWMUtility.ItemExists("Hellblazer") )
 			{
 				let a = Spawn("HellblazerWarheads",pos);
 				a.bDROPPED = false;
@@ -794,7 +798,7 @@ Class Chancebox : Actor
 					a.vel.xy = (cos(i*45),sin(i*45))*FRandom[Chancebox](5,6);
 				}
 			}
-			else if ( Random[Chancebox](0,1) )
+			else if ( Random[Chancebox](0,1) && SWWMUtility.ItemExists("Spreadgun") )
 			{
 				let a = Spawn("BlackShell",pos);
 				a.bDROPPED = false;
@@ -802,7 +806,7 @@ Class Chancebox : Actor
 				a.vel.z = FRandom[Chancebox](2,4);
 				for ( int i=0; i<3; i++ )
 				{
-					a = Spawn("BlueShell",pos);
+					a = Spawn("WhiteShell",pos);
 					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
@@ -810,7 +814,7 @@ Class Chancebox : Actor
 				}
 				for ( int i=0; i<8; i++ )
 				{
-					a = Spawn((i%2)?"WhiteShell":"PurpleShell",pos);
+					a = Spawn((i%2)?"PurpleShell":"BlueShell",pos);
 					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,4);
@@ -827,13 +831,14 @@ Class Chancebox : Actor
 			}
 			else if ( Random[Chancebox](0,1) )
 			{
+				Class<Actor> which = Random[Chancebox](1,0)?"HealthNuggetItem":"ArmorNuggetItem";
 				for ( int i=0; i<20; i++ )
 				{
-					let a = Spawn("HealthNuggetItem",pos);
+					let a = Spawn(which,pos);
 					a.bDROPPED = false;
 					a.bNOGRAVITY = false;
 					a.vel.z = FRandom[Chancebox](2,8);
-					a.vel.xy = (cos(i*3.6),sin(i*3.6))*FRandom[Chancebox](1,8);
+					a.vel.xy = (cos(i*18),sin(i*18))*FRandom[Chancebox](1,8);
 				}
 			}
 			else

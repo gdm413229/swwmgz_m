@@ -19,6 +19,15 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Heretic] Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - [Heretic] Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - [Hexen] Rubber Duck *("Is this some kind of convoluted joke from those two?")*
+* **More achievements:**
+  - [Doom] Heck No *(Instakill 10 Archviles)*
+  - Kaboom *(Kill 30 enemies with planted Explodium Mags)*
+  - OH YEAH *(Bust through 20 doors)*
+  - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
+  - Pacifist *(Finish a map without killing anything)*
+  - Untouchable *(Finish a map without taking damage)*
+  - Under Pressure *(Break a crusher)*
+  - The Longest Journey *(Walk a total of 1000km)*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**

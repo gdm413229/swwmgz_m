@@ -335,7 +335,12 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
-				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;	// no fabricators before hexen
+				// no fabricators before hexen
+				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
+				// no barriers outside doom
+				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
+				// no gravity outside raven
+				if ( !(gameinfo.gametype&GAME_RAVEN) && (type is 'GravitySuppressor') ) continue;
 				// Don't give maxed items
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;

@@ -48,6 +48,12 @@ Class SWWMUtility
 				continue;
 			Array<String> ln;
 			list[i].Split(ln,",",0);
+			// game filtering
+			if ( !(gameinfo.gametype&GAME_DOOM) && (ln[3] ~== "doom") ) continue;
+			else if ( !(gameinfo.gametype&GAME_HERETIC) && (ln[3] ~== "heretic") ) continue;
+			else if ( !(gameinfo.gametype&GAME_HEXEN) && (ln[3] ~== "hexen") ) continue;
+			else if ( !(gameinfo.gametype&GAME_RAVEN) && (ln[3] ~== "raven") ) continue;
+			else if ( !(gameinfo.gametype&(GAME_DOOM|GAME_HERETIC)) && (ln[3] ~== "nothexen") ) continue;
 			let ac = new("SWWMAchievement");
 			ac.basename = ln[0];
 			ac.maxval = ln[1].ToInt();

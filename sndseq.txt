@@ -1,0 +1,30 @@
+:Wolf3DDoorOpen
+	play wolf3d/dooropen
+	nostopcutoff
+end
+
+:Wolf3DDoorClose
+	play wolf3d/doorclose
+	nostopcutoff
+end
+
+:Wolf3DPushwall
+	play wolf3d/pushwall
+	nostopcutoff
+end
+
+[DoorWolf3D
+	Door 632
+	0 Wolf3DDoorOpen
+	1 Wolf3DDoorClose
+	2 Wolf3DDoorOpen
+	3 Wolf3DDoorClose
+]
+
+[PushwallWolf3D
+	Door 633
+	0 Wolf3DPushwall
+	1 Wolf3DPushwall
+	2 Wolf3DPushwall
+	3 Wolf3DPushwall
+]

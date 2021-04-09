@@ -294,7 +294,7 @@ Class GhostTarget : Actor
 		{
 			let t = bt.Thing;
 			if ( !t || !t.bIsMonster || t.player || !t.IsHostile(master) || (t.target != self) ) continue;
-			if ( SWWMUtility.BoxIntersect(self,t,pad:16) )
+			if ( SWWMUtility.BoxIntersect(self,t,pad:16) || t.CheckMeleeRange() )
 			{
 				// they found out, there's no one here
 				diedie = true;
@@ -370,7 +370,11 @@ Class GhostPower : PowerInvisibility
 				continue;
 			}
 			if ( a.target != Owner ) continue;
-			if ( !gt ) gt = Spawn("GhostTarget",Owner.pos);
+			if ( !gt )
+			{
+				gt = Spawn("GhostTarget",Owner.pos);
+				if ( Owner.bFRIENDLY || Owner.player ) gt.bFRIENDLY = true;
+			}
 			a.target = gt;
 			a.LastHeard = gt;
 			gt.master = Owner;

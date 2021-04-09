@@ -854,13 +854,21 @@ Class SWWMUtility
 			basetag = "BOSSBRAIN";
 			break;
 		case 'WolfensteinSS':
+		case 'SWWMSS':
 			basetag = "WOLFSS";
 			break;
 		case 'SWWMHangingKeen':
 			basetag = "KEEN";
 			break;
 		case 'MBFHelperDog':
+		case 'SWWMDog':
 			basetag = "DOG";
+			break;
+		case 'SWWMGuard':
+			basetag = "WOLFGUARD";
+			break;
+		case 'SWWMHans':
+			basetag = "WOLFHANS";
 			break;
 		// Heretic
 		case 'Chicken':
@@ -1144,9 +1152,9 @@ Class SWWMUtility
 	static clearscope bool IdentifyingDog( Actor a )
 	{
 		if ( a is 'MBFHelperDog' ) return true;
-		// reminder that mark is a terrible person
-		if ( a.GetClassName() == 'GermanDog' ) return true;
-		if ( a.GetClassName() == '64HellHound' ) return true;
+		if ( a is 'SWWMDog' ) return true;
+		if ( a.GetClassName() == 'GermanDog' ) return true;	// brote dote
+		if ( a.GetClassName() == '64HellHound' ) return true;	// brote dote 64
 		if ( a.GetClassName() == 'AbyssDemon2' ) return true;	// CH
 		if ( a.GetClassName() == 'WHOLETTHEDOGSOUT' ) return true;	// CH
 		// more dogs will be added as found

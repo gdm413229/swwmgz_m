@@ -28,6 +28,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Untouchable *(Finish a map without taking damage)*
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*
+  - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**

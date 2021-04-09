@@ -186,7 +186,7 @@ extend Class SWWMHandler
 				SWWMUtility.AchievementProgressInc('swwm_progress_stomp',1,src.player);
 			else if ( e.DamageType == 'GroundPound' )
 				SWWMUtility.AchievementProgressInc('swwm_progress_thicc',1,src.player);
-			else if ( (e.DamageType == 'Love') && !(e.Thing is 'WolfensteinSS') )
+			else if ( (e.DamageType == 'Love') && !(e.Thing is 'WolfensteinSS') && (e.Thing.Species != 'WolfensteinSS') )
 				SWWMUtility.AchievementProgressInc('swwm_progress_love',1,src.player);
 			if ( e.Inflictor && e.Inflictor.FindInventory('ParriedBuff') )
 				SWWMUtility.AchievementProgressInc('swwm_progress_reflect',1,src.player);
@@ -238,7 +238,7 @@ extend Class SWWMHandler
 			{
 				scr.xscore[ofs] = 0;
 				scr.xtcolor[ofs] = Font.FindFontColor('BlushPink');
-				scr.xstr[ofs] = StringTable.Localize((e.Thing is 'WolfensteinSS')?"$SWWM_LOVED_ALT":"$SWWM_LOVED");
+				scr.xstr[ofs] = StringTable.Localize(((e.Thing is 'WolfensteinSS')||(e.Thing.Species=='WolfensteinSS'))?"$SWWM_LOVED_ALT":"$SWWM_LOVED");
 				scr.xcnt = ++ofs;
 			}
 		}

@@ -526,7 +526,8 @@ Class Demolitionist : PlayerPawn
 		TextureID replacewith;
 		[remove, replacewith] = SWWMUtility.DefaceTexture(d.HitTexture);
 		if ( !remove ) return;
-		player.usedown = true;
+		if ( (d.HitType != TRACE_HitWall) || !d.HitLine.special || !(d.HitLine.activation&SPAC_Use) )
+			player.usedown = true;
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		lastbump *= .97;
 		if ( d.HitType == TRACE_HitWall )

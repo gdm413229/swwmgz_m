@@ -21,6 +21,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 	{
 		int ncellsa = 0, ncellsb = 0;
 		int nbackpack = 0;
+		bool wolfmap31 = false;
 		switch ( checksum )
 		{
 		case 'none':
@@ -181,6 +182,58 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				if ( GetThingEdNum(i) != 8 ) continue;
 				if ( nbackpack ) SetThingEdNum(i,0);
 				nbackpack++;
+			}
+			break;
+		// Doom 2 MAP31
+		case '0BB515B79E0A6C42C4846C4E6F5F1D73':
+		case '3FF94E27423F91C1585B3396F0C03459':
+		case 'F2235342F1591B59154022E1DAF3EB2F':
+		case '3FF94E27423F91C1585B3396F0C03459':
+			wolfmap31 = true;
+		// Doom 2 MAP32
+		case '34A8DB0B341A32267CB461D8C219DF0A':
+		case 'AA4CA3FC891D13821ACCABD836E29EB5':
+		case '9AA7780B46EC4471F630572798943D71':
+			// sound sequence handling
+			for ( int i=0; i<level.Lines.Size(); i++ )
+			{
+				Line l = level.Lines[i];
+				if ( !l.backsector ) continue;
+				TextureID t;
+				bool wolfdoor = false;
+				for ( int k=0; k<3; k++ )
+				{
+					t = l.sidedef[0].GetTexture(k);
+					if ( t.IsValid() && ((TexMan.GetName(t) == "ZDOORF1") || (TexMan.GetName(t) == "ZDOORB1") || (TexMan.GetName(t) == "ZELDOOR")) )
+					{
+						wolfdoor = true;
+						break;
+					}
+				}
+				if ( !wolfdoor && l.sidedef[1] ) for ( int k=0; k<3; k++ )
+				{
+					t = l.sidedef[1].GetTexture(k);
+					if ( t.IsValid() && ((TexMan.GetName(t) == "ZDOORF1") || (TexMan.GetName(t) == "ZDOORB1") || (TexMan.GetName(t) == "ZELDOOR")) )
+					{
+						wolfdoor = true;
+						break;
+					}
+				}
+				if ( wolfdoor )
+					l.backsector.SeqName = 'DoorWolf3D';
+				else if ( (l.special == Door_Open) || (l.special == Door_Raise) )
+					l.backsector.SeqName = 'PushwallWolf3D';
+			}
+			// enemy replacements
+			for ( int i=0; i<GetThingCount(); i++ )
+			{
+				int ednum = GetThingEdNum(i);
+				if ( (ednum == 84) || (ednum == 3004) )
+					SetThingEdNum(i,wolfmap31?4206990:4206992);	// guard / ss
+				else if ( ednum == 3002 )
+					SetThingEdNum(i,4206993);	// dog
+				else if ( ednum == 16 )
+					SetThingEdNum(i,4206991);	// hans grosse
 			}
 			break;
 		// Kinsie's Test Map

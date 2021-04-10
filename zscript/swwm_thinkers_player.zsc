@@ -201,16 +201,8 @@ Class SWWMCredits : Thinker
 {
 	PlayerInfo myplayer;
 	int credits, hcredits;
-	bool cheated;
 
-	static void HasCheated( PlayerInfo p )
-	{
-		let c = Find(p);
-		if ( !c ) return;
-		c.cheated = true;
-	}
-
-	static void Give( PlayerInfo p, int amount, int hamount = 0 )
+	static void Give( PlayerInfo p, int amount, int hamount = 0, bool cheat = false )
 	{
 		let c = Find(p);
 		if ( !c ) return;
@@ -229,9 +221,11 @@ Class SWWMCredits : Thinker
 			s.hiscore = c.credits;
 			s.hhiscore = c.hcredits;
 		}
-		if ( c.cheated ) return;
-		if ( c.hcredits > 0 ) SWWMUtility.AchievementProgress('swwm_progress_dosh',1000000000,p);
-		else SWWMUtility.AchievementProgress('swwm_progress_dosh',c.credits,p);
+		if ( cheat ) return;
+		int curamt = swwm_progress_dosh;
+		if ( (hamount > 0) || (curamt+amount < curamt) || (curamt+amount >= 1000000000) )
+			SWWMUtility.AchievementProgress('swwm_progress_dosh',1000000000,p);
+		else SWWMUtility.AchievementProgress('swwm_progress_dosh',curamt+amount,p);
 	}
 
 	static clearscope bool CanTake( PlayerInfo p, int amount, int hamount = 0 )

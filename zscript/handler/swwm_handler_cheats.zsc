@@ -19,8 +19,7 @@ extend Class SWWMHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/emone",CHAN_VOICE,CHANF_UI);
 			}
-			SWWMCredits.HasCheated(players[e.Args[0]]);
-			SWWMCredits.Give(players[e.Args[0]],1000000000);
+			SWWMCredits.Give(players[e.Args[0]],0,1,true);
 			SWWMScoreObj.Spawn(1000000000,players[e.Args[0]].mo.Vec3Offset(0,0,players[e.Args[0]].mo.Height/2));
 		}
 		else if ( e.Name ~== "swwmlorecheat" )

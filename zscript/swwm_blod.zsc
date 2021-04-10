@@ -258,6 +258,7 @@ Class mkBloodDrop : Actor
 				}
 				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
 				frame = Random[Blood](5,8);
+				vel *= 0;
 				return;
 			}
 			if ( (d.HitType == TRACE_HitCeiling) || (pos.z >= ceilingz) )
@@ -291,6 +292,7 @@ Class mkBloodDrop : Actor
 				}
 				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360),true);
 				frame = Random[Blood](5,8);
+				vel *= 0;
 				return;
 			}
 			if ( d.HitType == TRACE_HitWall )

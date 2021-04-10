@@ -1,0 +1,116 @@
+// ported and optimized from old debug test mod
+
+extend Class SWWMHandler
+{
+	ui SWWMProjectionData projdata;
+
+	private ui void DrawWorldLine( RenderEvent e, Vector3 apos, Vector3 bpos, Color col )
+	{
+		Vector3 a = SWWMUtility.ProjectPoint(projdata,e.viewpos+level.Vec3Diff(e.viewpos,apos)),
+			b = SWWMUtility.ProjectPoint(projdata,e.viewpos+level.Vec3Diff(e.viewpos,bpos));
+		if ( (a.z > 1.) && (b.z > 1.) ) return;
+		if ( (a.z == -double.infinity) || (b.z == -double.infinity) ) return;	// how the fuck???
+		double da, db, s;
+		Vector3 p;
+		da = a dot (0.,0.,-1.)-1.;
+		db = b dot (0.,0.,-1.)-1.;
+		if ( da-db != 0. )
+		{
+			s = da/(da-db);
+			p = (a.x+s*(b.x-a.x),a.y+s*(b.y-a.y),a.z+s*(b.z-a.z));
+			if ( a.z > 1. ) a = p;
+			if ( b.z > 1. ) b = p;
+		}
+		Vector2 va = SWWMUtility.NDCToViewport(projdata,a);
+		Vector2 vb = SWWMUtility.NDCToViewport(projdata,b);
+		Screen.DrawLine(int(va.x),int(va.y),int(vb.x),int(vb.y),col);
+	}
+
+	private ui void DrawWorldCircle( RenderEvent e, Vector3 pos, double radius, Color col )
+	{
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(e.viewpitch,e.viewangle,e.viewroll);
+		Vector3 ndc[64];
+		for ( int i=0; i<64; i++ )
+		{
+			Vector3 wpos = e.viewpos+level.Vec3Diff(e.viewpos,level.Vec3Offset(pos,y*cos(i*5.625)*radius+z*sin(i*5.625)*radius));
+			ndc[i] = SWWMUtility.ProjectPoint(projdata,wpos);
+		}
+		for ( int i=0; i<64; i++ )
+		{
+			Vector3 a = ndc[i], b = ndc[(i+1)%64];
+			if ( (a.z > 1.) && (b.z > 1.) ) continue;
+			if ( (a.z == -double.infinity) || (b.z == -double.infinity) ) continue;	// how the fuck???
+			double da, db, s;
+			Vector3 p;
+			da = a dot (0.,0.,-1.)-1.;
+			db = b dot (0.,0.,-1.)-1.;
+			if ( da-db != 0. )
+			{
+				s = da/(da-db);
+				p = (a.x+s*(b.x-a.x),a.y+s*(b.y-a.y),a.z+s*(b.z-a.z));
+				if ( a.z > 1. ) a = p;
+				if ( b.z > 1. ) b = p;
+			}
+			Vector2 va = SWWMUtility.NDCToViewport(projdata,a);
+			Vector2 vb = SWWMUtility.NDCToViewport(projdata,b);
+			Screen.DrawLine(int(va.x),int(va.y),int(vb.x),int(vb.y),col);
+		}
+	}
+
+	private ui void DrawActor( RenderEvent e, Actor a )
+	{
+		Vector3 pos = a.prev*(1.-e.FracTic)+a.pos*e.FracTic;
+		if ( a is 'DynamicLight' ) DrawWorldCircle(e,pos,a.args[3]*2,Color(a.args[0],a.args[1],a.args[2]));
+		if ( (a.radius > 0.) && (a.height > 0.) )
+		{
+			Vector3 b1, b2;
+			b1 = pos-(a.radius,a.radius,0);
+			b2 = pos+(a.radius,a.radius,a.height);
+			DrawWorldLine(e,(b1.x,b1.y,b1.z),(b1.x,b2.y,b1.z),"White");
+			DrawWorldLine(e,(b1.x,b2.y,b1.z),(b2.x,b2.y,b1.z),"White");
+			DrawWorldLine(e,(b2.x,b2.y,b1.z),(b2.x,b1.y,b1.z),"White");
+			DrawWorldLine(e,(b2.x,b1.y,b1.z),(b1.x,b1.y,b1.z),"White");
+			DrawWorldLine(e,(b1.x,b1.y,b2.z),(b1.x,b2.y,b2.z),"White");
+			DrawWorldLine(e,(b1.x,b2.y,b2.z),(b2.x,b2.y,b2.z),"White");
+			DrawWorldLine(e,(b2.x,b2.y,b2.z),(b2.x,b1.y,b2.z),"White");
+			DrawWorldLine(e,(b2.x,b1.y,b2.z),(b1.x,b1.y,b2.z),"White");
+			DrawWorldLine(e,(b1.x,b1.y,b1.z),(b1.x,b1.y,b2.z),"White");
+			DrawWorldLine(e,(b2.x,b1.y,b1.z),(b2.x,b1.y,b2.z),"White");
+			DrawWorldLine(e,(b1.x,b2.y,b1.z),(b1.x,b2.y,b2.z),"White");
+			DrawWorldLine(e,(b2.x,b2.y,b1.z),(b2.x,b2.y,b2.z),"White");
+		}
+		Vector3 x, y, z;
+		[x, y, z] = swwm_CoordUtil.GetAxes(a.pitch,a.angle,a.roll);
+		DrawWorldLine(e,pos,pos+x*16,"Red");
+		DrawWorldLine(e,pos,pos+y*16,"Green");
+		DrawWorldLine(e,pos,pos+z*16,"Blue");
+		if ( a.vel != (0,0,0) ) DrawWorldLine(e,pos,pos+a.vel*GameTicRate,"Yellow");
+		if ( a.target ) DrawWorldLine(e,pos,a.target.prev*(1.-e.FracTic)+a.target.pos*e.FracTic,"Gold");
+		if ( a.tracer ) DrawWorldLine(e,pos,a.tracer.prev*(1.-e.FracTic)+a.tracer.pos*e.FracTic,"Orange");
+		if ( a.master ) DrawWorldLine(e,pos,a.master.prev*(1.-e.FracTic)+a.master.pos*e.FracTic,"Purple");
+		Vector3 ndc = SWWMUtility.ProjectPoint(projdata,e.viewpos+level.Vec3Diff(e.viewpos,pos+(0,0,a.Height/2)));
+		if ( ndc.z > 1. ) return;
+		Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
+		String tag = a.player?a.player.GetUserName():a.GetTag();
+		Screen.DrawText(NewSmallFont,Font.CR_UNTRANSLATED,vpos.x-NewSmallFont.StringWidth(tag)/2,vpos.y-NewSmallFont.GetHeight()/2,tag);
+	}
+
+	private ui void DrawDebug( RenderEvent e )
+	{
+		if ( !swwm_debugview ) return;
+		// prepare projection data, we're going to need this
+		SWWMUtility.PrepareProjData(projdata,e.ViewPos,e.ViewAngle,e.ViewPitch,e.ViewRoll,players[consoleplayer].fov);
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( a == players[consoleplayer].Camera ) continue;
+			if ( a.bINVISIBLE && !(a is 'DynamicLight') ) continue;
+			if ( (a is 'Inventory') && Inventory(a).Owner ) continue;
+			if ( a is 'SWWMShadow' ) continue;
+			if ( a.Distance3DSquared(e.Camera) > 1000000 ) continue;
+			DrawActor(e,a);
+		}
+	}
+}

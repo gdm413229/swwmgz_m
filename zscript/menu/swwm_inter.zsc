@@ -76,15 +76,19 @@ Class SWWMStatScreen : StatusScreen abstract
 			whichart = ents[Random[InterArt](0,ents.Size()-1)];
 			pdata.lastart.Push(whichart);
 		}
-		if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
-		double ar = Screen.GetAspectRatio();
-		Vector2 tsize = TexMan.GetScaledSize(bgtex);
-		double sar = tsize.x/tsize.y;
-		Vector2 vsize;
-		if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
-		else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
-		else vsize = tsize;
-		Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		double ar = Screen.GetAspectRatio(), sar;
+		Vector2 tsize, vsize;
+		if ( whichart ) Screen.Clear(0,0,Screen.GetWidth(),Screen.GetHeight(),"Black");
+		else
+		{
+			if ( !bgtex ) bgtex = TexMan.CheckForTexture("graphics/InterBG.png",TexMan.Type_MiscPatch);
+			tsize = TexMan.GetScaledSize(bgtex);
+			sar = tsize.x/tsize.y;
+			if ( sar > ar ) vsize = (tsize.y*ar,tsize.y);
+			else if ( sar < ar ) vsize = (tsize.x,tsize.x/ar);
+			else vsize = tsize;
+			Screen.DrawTexture(bgtex,false,(vsize.x-tsize.x)/2,(vsize.y-tsize.y)/2,DTA_VirtualWidthF,vsize.x,DTA_VirtualHeightF,vsize.y,DTA_KeepRatio,true);
+		}
 		Font fnt = LangFont(TewiFont);
 		// background pics
 		if ( whichart )

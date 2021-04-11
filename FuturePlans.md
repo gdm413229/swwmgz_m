@@ -20,15 +20,45 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Heretic] Lithium - Volume One *(A work of art, one of the finest graphic novels)*
   - [Hexen] Rubber Duck *("Is this some kind of convoluted joke from those two?")*
 * **More achievements:**
-  - [Doom] Heck No *(Instakill 10 Archviles)*
+  - Piece of Candy *(Collect 1000 nuggets)*
   - Kaboom *(Kill 30 enemies with planted Explodium Mags)*
-  - OH YEAH *(Bust through 20 doors)*
-  - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - Pacifist *(Finish a map without killing anything)*
   - Untouchable *(Finish a map without taking damage)*
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*
+  - [Doom] Graffiti Master *(Doodle mustaches on 20 demon faces)*
+  - [Doom] Heck No *(Instakill 10 Archviles)*
+  - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
+  - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
+  - [Doom] Encoding Disaster *(Stare closely at FIREBLU for 30 seconds)*
+  - [Doom] Dynamic Duo *(Defeat the Bruiser Brothers)*
+  - [Doom] Protip *(Defeat the Tyrant of Babel)*
+  - [Doom] All Brain *(Defeat the Spider Mastermind)*
+  - [Doom] More Brain *(Defeat the Spider Sibling)*
+  - [Doom] Final Cleanup *(Complete Baphomet's Challenge)*
+  - [Doom] Simply Dead *(Defeat the Demonic Biomech Squad)*
+  - [Doom] Titan's Fall *(Defeat the Icon of Sin)*
+  - [Doom] Shot Until Dead *(Defeat the Last Tyrant)*
+  - [Doom] Evil Eternal *(Defeat the Archangelus)*
+  - [Doom] A Gazebo Most Insane *(Conquer the Sundered Realms)*
+  - [Heretic] Crazy Heads *(Defeat the Iron Liches)*
+  - [Heretic] A Load of Bull *(Defeat the Maulotaur Servants)*
+  - [Heretic] Abracadabra I Win *(Defeat D'Sparil)*
+  - [Heretic] What's So Funny? *(Defeat the Iron Liches... again)*
+  - [Heretic] Big Mooscles *(Defeat the Maulotaur Servants... again)*
+  - [Hexen] It Just Works *(Defeat the Death Wyvern)*
+  - [Hexen] Magic Shmagic *(Defeat the Heresiarch)*
+  - [Hexen] You Again? *(Defeat another Heresiarch)*
+  - [Hexen] Domination *(Defeat Zedek)*
+  - [Hexen] Excommunication *(Defeat Traductus)*
+  - [Hexen] I Hate Puzzles *(Defeat Menelkir)*
+  - [Hexen] Worship This *(Defeat Korax)*
+  - [Hexen] Another One *(Defeat yet another Heresiarch)*
+  - [Hexen] And Another One *(Defeat... yup, one more Heresiarch)*
+  - [Hexen] Finally *(Defeat the last Heresiarch)*
+  - [Hexen] Didn't I Kick Your Ass Before? *(Defeat the Deathkings)*
+* **Official Sunder support *(when the WAD is complete)***
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
@@ -40,7 +70,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Dab (loud and bassy, alerts monsters)
   - Airhorn (unlimited range A_AlertMonsters, to unbreak vanilla teleport closets)
   - Clap
-  - The Finger
+  - The Bird
   - Thumbs Down
   - Giggle
   - Heart
@@ -58,6 +88,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Ibuki companion add-on**
 * **Saya companion add-on**
 * **Kirin companion add-on *(Hexen-exclusive)***
+* **Ibuki, Saya and Kirin playerclasses *(that'll be interesting)***
 * **Original English Voice Acting:**
   - Demolitionist
   - Ibuki

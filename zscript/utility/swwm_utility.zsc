@@ -89,7 +89,7 @@ Class SWWMUtility
 			else ac.progress = null;
 			ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
 			// fallback icon if one is not found
-			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/AchievementNone.png",TexMan.Type_Any);
+			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
 			// hide away achievements at 0%
 			if ( hide && (ac.state.GetInt() <= 0) && (!ac.progress || (ac.progress.GetInt() <= 0)) )
 			{

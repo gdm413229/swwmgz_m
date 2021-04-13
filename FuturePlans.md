@@ -31,7 +31,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
   - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
-  - [Doom] Encoding Disaster *(Stare closely at FIREBLU for 30 seconds)*
+  - [Doom] Encoding Destroyer *(Stare closely at FIREBLU for 30 seconds)*
   - [Doom] Dynamic Duo *(Defeat the Bruiser Brothers)*
   - [Doom] Protip *(Defeat the Tyrant of Babel)*
   - [Doom] All Brain *(Defeat the Spider Mastermind)*
@@ -47,6 +47,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Heretic] Abracadabra I Win *(Defeat D'Sparil)*
   - [Heretic] What's So Funny? *(Defeat the Iron Liches... again)*
   - [Heretic] Big Mooscles *(Defeat the Maulotaur Servants... again)*
+  - [Hexen] Even Kirin is Upset *(Solve 20 "puzzles")*
   - [Hexen] It Just Works *(Defeat the Death Wyvern)*
   - [Hexen] Magic Shmagic *(Defeat the Heresiarch)*
   - [Hexen] You Again? *(Defeat another Heresiarch)*

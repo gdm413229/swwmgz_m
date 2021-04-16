@@ -1561,9 +1561,9 @@ Class Demolitionist : PlayerPawn
 				bobfactor = (friction<ORIG_FRICTION)?movefactor:ORIG_FRICTION_FACTOR;
 				if ( !player.onground && !bNoGravity && !waterlevel )
 				{
-					// [RH] allow very limited movement if not on ground.
-					movefactor *= level.aircontrol;
-					bobfactor *= level.aircontrol;
+					// no air control here, done afterwards
+					movefactor *= 0.;
+					bobfactor *= 0.;
 				}
 				// use normalized movement vector, no SR40 (not that we need it with how fast we can run)
 				Vector2 nmove = NormalizedMove();
@@ -1588,6 +1588,19 @@ Class Demolitionist : PlayerPawn
 				{	vel.xy += RotateVector(nmove,angle);
 					player.vel += RotateVector(nmove,angle)*bobfactor*16.;
 				}
+				// override air control because we REALLY need the extra mobility
+				if ( !player.onground && !bNOGRAVITY && !waterlevel )
+				{
+					nmove = NormalizedMove();
+					double fs = TweakSpeed();
+					if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
+					Vector3 accel = (RotateVector(nmove,angle),0);
+					accel *= fs/512.;
+					double spd = vel.length();
+					double maxspd = fs*15.;
+					if ( spd > maxspd ) vel = (vel+accel/GameTicRate).unit()*spd;
+					else vel = vel+accel/GameTicRate;
+				}
 				if ( !(player.cheats&CF_PREDICTING) && (nmove.length() > 0.) )
 					PlayRunning();
 				if ( player.cheats&CF_REVERTPLEASE )
@@ -1596,18 +1609,7 @@ Class Demolitionist : PlayerPawn
 					player.camera = player.mo;
 				}
 			}
-			// override air control because we REALLY need the extra mobility
-			if ( !player.onground && !bNOGRAVITY && (waterlevel < 2) )
-			{
-				double fs = TweakSpeed();
-				if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
-				Vector3 accel = (RotateVector(NormalizedMove(),angle),0);
-				accel *= fs/512.;
-				double spd = vel.length();
-				if ( spd > 10. ) vel = (vel+accel/GameTicRate).unit()*spd;
-				else vel = vel+accel/GameTicRate;
-			}
-			else vel *= .95; // quickly decelerate if we're not holding movement keys
+			else if ( player.onground ) vel *= .95; // quickly decelerate if we're not holding movement keys
 			if ( abs(roll) > 0. ) A_SetRoll(roll+clamp(deltaangle(roll,0),-3.,3.),SPF_INTERPOLATE);
 		}
 		guideangle *= .9;
@@ -1685,6 +1687,7 @@ Class Demolitionist : PlayerPawn
 	override void CheckJump()
 	{
 		if ( InStateSequence(CurState,FindState("Dash")) ) return;	// do not
+		if ( !(player.cmd.buttons&BT_JUMP) || (gamestate != GS_LEVEL) ) return;
 		Vector2 walldir = (cos(angle),sin(angle));
 		bool walljump = false, wallclimb = false;
 		double climbvelz = 0.;
@@ -1769,132 +1772,129 @@ Class Demolitionist : PlayerPawn
 			}
 			if ( wallclimb ) break;
 		}
-		if ( (player.cmd.buttons&BT_JUMP) && (gamestate == GS_LEVEL) )
+		// cooldown before we can do these, avoids accidental walljumps off ledges we just fell off from
+		if ( level.maptime < (lastgroundtic+4) )
 		{
-			// cooldown before we can do these, avoids accidental walljumps off ledges we just fell off from
-			if ( level.maptime < (lastgroundtic+4) )
-			{
-				walljump = false;
-				wallclimb = false;
-				jumpactor = null;
-			}
-			if ( player.crouchoffset ) player.crouching = 1;
-			else if ( waterlevel >= 2 ) vel.z = 4*Speed;
-			else if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) ) return;
-			else if ( bNoGravity ) vel.z = 3;
-			else if ( level.IsJumpingAllowed()
-				&& ((player.onground && (player.jumptics == 0))
-				|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
-			{
-				if ( !player.onground && (((walljump || wallclimb) && (level.maptime < last_kick+8)) || (!(walljump || wallclimb) && (level.maptime < last_boost+8))) )
-					return;
-				double jumpvelz = JumpZ*35./GameTicRate;
-				double jumpfac = 0;
-				for ( let p=Inv; p; p=p.Inv )
-				{
-					let pp = PowerHighJump(p);
-					if ( pp )
-					{
-						double f = pp.Strength;
-						if ( f > jumpfac ) jumpfac = f;
-					}
-				}
-				if ( jumpfac > 0 ) jumpvelz *= jumpfac;
-				bool raging = FindInventory("RagekitPower");
-				if ( raging ) jumpvelz *= 2.;
-				double pvelz = vel.z;
-				if ( !player.onground && !(player.cheats&CF_PREDICTING) )
-				{
-					// check for wall stuff
-					if ( walljump )
-					{
-						if ( vel.z < 10. )
-							vel.z += 2.*jumpvelz+clamp(-pvelz*.6,0.,30.);
-						vel.xy += walldir*20*Speed;
-						lastbump *= .95;
-					}
-					else if ( wallclimb )
-					{
-						if ( vel.z < 10. )
-							vel.z += climbvelz+clamp(-pvelz*.95,0.,30.);
-						vel.xy += walldir*10*Speed;
-						lastbump *= .97;
-					}
-					if ( walljump && jumpactor && jumpactor.bSHOOTABLE )
-					{
-						SWWMUtility.DoKnockback(jumpactor,(-walldir,0),12000);
-						int dmg = jumpactor.DamageMobj(self,self,10,'Jump');
-						if ( raging )
-						{
-							let ps = Spawn("BigPunchSplash",pos);
-							ps.damagetype = 'Jump';
-							ps.target = self;
-							ps.special1 = dmg;
-						}
-					}
-					if ( walljump || wallclimb )
-					{
-						A_StartSound(walljump?"demolitionist/kick":"demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
-						if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
-						last_kick = level.maptime+1;
-						SWWMUtility.AchievementProgressInc('swwm_progress_jump',1,player);
-					}
-				}
-				bOnMobj = false;
-				player.jumpTics = -1;
-				if ( !(player.cheats&CF_PREDICTING) )
-				{
-					A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
-					if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
-				}
-				if ( (dashfuel > 10.) && !player.onground && !walljump && !wallclimb )
-				{
-					dashboost = 3.;
-					boostcooldown = 20;
-					if ( vel.z < 10. )
-						vel.z += jumpvelz+clamp(-pvelz*.4,0.,30.);
-					A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
-					lastbump *= .95;
-					mystats.boostcount++;
-					last_boost = level.maptime+1;
-					double newp = min(90.,pitch+3.);
-					bumppitch.Push(newp-pitch);
-					A_SetPitch(newp,SPF_INTERPOLATE);
-				}
-				else
-				{
-					dashboost = 0.;
-					double bpitch = clamp((vel.length()-10)/5.,0.,20.);
-					double newp = min(90.,pitch+bpitch);
-					bumppitch.Push(newp-pitch);
-					A_SetPitch(newp,SPF_INTERPOLATE);
-					// bunnyhop time
-					if ( !walljump && !wallclimb )
-					{
-						if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) )
-						{
-							SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
-							// bhop, z vel relative to vel size
-							if ( vel.z < 25. )	// don't ramp up too hard
-								vel.z += jumpvelz*(1.2+vel.length()*.01);
-							// accelerate
-							vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
-						}
-						else
-						{
-							// first jump
-							if ( vel.z < 10. )	// don't ramp up too hard
-								vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
-							// long jump if running
-							if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
-								(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();
-						}
-					}
-				}
-				SetStateLabel("Jump");
-			}
-			last_jump_held = level.maptime+1;
+			walljump = false;
+			wallclimb = false;
+			jumpactor = null;
 		}
+		if ( player.crouchoffset ) player.crouching = 1;
+		else if ( waterlevel >= 2 ) vel.z = 4*Speed;
+		else if ( (waterlevel < 2) && bFly && !bFlyCheat && !(player.cheats&CF_NOCLIP2) ) return;
+		else if ( bNoGravity ) vel.z = 3;
+		else if ( level.IsJumpingAllowed()
+			&& ((player.onground && (player.jumptics == 0))
+			|| (!player.onground && (level.maptime > last_jump_held) && (((dashfuel > 10.) && (boostcooldown <= 0)) || walljump || wallclimb))) )
+		{
+			if ( !player.onground && (((walljump || wallclimb) && (level.maptime < last_kick+8)) || (!(walljump || wallclimb) && (level.maptime < last_boost+8))) )
+				return;
+			double jumpvelz = JumpZ*35./GameTicRate;
+			double jumpfac = 0;
+			for ( let p=Inv; p; p=p.Inv )
+			{
+				let pp = PowerHighJump(p);
+				if ( pp )
+				{
+					double f = pp.Strength;
+					if ( f > jumpfac ) jumpfac = f;
+				}
+			}
+			if ( jumpfac > 0 ) jumpvelz *= jumpfac;
+			bool raging = FindInventory("RagekitPower");
+			if ( raging ) jumpvelz *= 2.;
+			double pvelz = vel.z;
+			if ( !player.onground && !(player.cheats&CF_PREDICTING) )
+			{
+				// check for wall stuff
+				if ( walljump )
+				{
+					if ( vel.z < 10. )
+						vel.z += 2.*jumpvelz+clamp(-pvelz*.6,0.,30.);
+					vel.xy += walldir*20*Speed;
+					lastbump *= .95;
+				}
+				else if ( wallclimb )
+				{
+					if ( vel.z < 10. )
+						vel.z += climbvelz+clamp(-pvelz*.95,0.,30.);
+					vel.xy += walldir*10*Speed;
+					lastbump *= .97;
+				}
+				if ( walljump && jumpactor && jumpactor.bSHOOTABLE )
+				{
+					SWWMUtility.DoKnockback(jumpactor,(-walldir,0),12000);
+					int dmg = jumpactor.DamageMobj(self,self,10,'Jump');
+					if ( raging )
+					{
+						let ps = Spawn("BigPunchSplash",pos);
+						ps.damagetype = 'Jump';
+						ps.target = self;
+						ps.special1 = dmg;
+					}
+				}
+				if ( walljump || wallclimb )
+				{
+					A_StartSound(walljump?"demolitionist/kick":"demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
+					if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
+					last_kick = level.maptime+1;
+					SWWMUtility.AchievementProgressInc('swwm_progress_jump',1,player);
+				}
+			}
+			bOnMobj = false;
+			player.jumpTics = -1;
+			if ( !(player.cheats&CF_PREDICTING) )
+			{
+				A_StartSound("demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
+				if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
+			}
+			if ( (dashfuel > 10.) && !player.onground && !walljump && !wallclimb )
+			{
+				dashboost = 3.;
+				boostcooldown = 20;
+				if ( vel.z < 10. )
+					vel.z += jumpvelz+clamp(-pvelz*.4,0.,30.);
+				A_StartSound("demolitionist/jet",CHAN_JETPACK,CHANF_LOOP);
+				lastbump *= .95;
+				mystats.boostcount++;
+				last_boost = level.maptime+1;
+				double newp = min(90.,pitch+3.);
+				bumppitch.Push(newp-pitch);
+				A_SetPitch(newp,SPF_INTERPOLATE);
+			}
+			else
+			{
+				dashboost = 0.;
+				double bpitch = clamp((vel.length()-10)/5.,0.,20.);
+				double newp = min(90.,pitch+bpitch);
+				bumppitch.Push(newp-pitch);
+				A_SetPitch(newp,SPF_INTERPOLATE);
+				// bunnyhop time
+				if ( !walljump && !wallclimb )
+				{
+					if ( (player.cmd.buttons&BT_RUN) && (level.maptime < (lastairtic+10)) )
+					{
+						SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
+						// bhop, z vel relative to vel size
+						if ( vel.z < 25. )	// don't ramp up too hard
+							vel.z += jumpvelz*(1.2+vel.length()*.01);
+						// accelerate
+						vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
+					}
+					else
+					{
+						// first jump
+						if ( vel.z < 10. )	// don't ramp up too hard
+							vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
+						// long jump if running
+						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
+							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();
+					}
+				}
+			}
+			SetStateLabel("Jump");
+		}
+		last_jump_held = level.maptime+1;
 	}
 	override void DeathThink()
 	{

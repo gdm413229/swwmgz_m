@@ -1015,13 +1015,37 @@ Class SilverBullet : SWWMWeapon
 	Cock:
 		XZW2 A 0
 		{
-			if ( invoker.zoomed )
-			{
-				invoker.dezoomstate = invoker.fcbloaded?ResolveState("DoCock2"):ResolveState("DoCock");
-				return ResolveState("UnZoom");
-			}
+			if ( invoker.zoomed ) return ResolveState("ZoomCock");
 			return invoker.fcbloaded?ResolveState("DoCock2"):ResolveState("DoCock");
 		}
+	ZoomCock:
+		TNT1 A 12 A_StartSound("silverbullet/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
+		TNT1 A 10
+		{
+			A_StartSound("silverbullet/boltopen",CHAN_WEAPON,CHANF_OVERLAP);
+			if ( invoker.chambered )
+			{
+				int layer = PSP_WEAPON+2;
+				while ( player.FindPSprite(layer) ) layer++;
+				if ( invoker.fired )
+				{
+					if ( invoker.fcbchambered ) A_Overlay(layer,"ZoomCasing2");
+					else A_Overlay(layer,"ZoomCasing");
+				}
+				else
+				{
+					if ( invoker.fcbchambered ) A_Overlay(layer,"ZoomBullet2");
+					else A_Overlay(layer,"ZoomBullet");
+				}
+			}
+			invoker.fired = false;
+			invoker.chambered = (invoker.clipcount>0);
+			if ( invoker.clipcount > 0 ) invoker.fcbchambered = invoker.fcbloaded;
+			invoker.clipcount = max(0,invoker.clipcount-1);
+		}
+		TNT1 A 2 A_StartSound("silverbullet/boltclose",CHAN_WEAPON,CHANF_OVERLAP);
+		TNT1 A 20 A_StartSound("silverbullet/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
+		Goto ZoomReady;
 	DoCock:
 		XZW2 A 2 A_StartSound("silverbullet/meleestart",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW2 XYZ 2;
@@ -1086,6 +1110,22 @@ Class SilverBullet : SWWMWeapon
 		XZW9 I 2 A_StartSound("silverbullet/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW9 JKLMNOPQR 2;
 		Goto Ready2;
+	ZoomCasing:
+		TNT1 A 14;
+		TNT1 A 0 A_DropCasing();
+		Stop;
+	ZoomCasing2:
+		TNT1 A 14;
+		TNT1 A 0 A_DropCasing(true);
+		Stop;
+	ZoomBullet:
+		TNT1 A 14;
+		TNT1 A 0 A_DropBullet();
+		Stop;
+	ZoomBullet2:
+		TNT1 A 14;
+		TNT1 A 0 A_DropBullet(true);
+		Stop;
 	Casing:
 		XZW7 D 2
 		{

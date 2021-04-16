@@ -181,7 +181,29 @@ Class SWWMStaticHandler : StaticEventHandler
 			}
 			if ( str == "" ) Console.Printf("No Data");
 			else Console.Printf(str);
-			return;
+		}
+		else if ( e.Name ~== "swwmresetachievements" )
+		{
+			if ( achievements.Size() <= 0 )
+				SWWMUtility.LoadAchievements(achievements);
+			for ( int i=0; i<achievements.Size(); i++ )
+			{
+				achievements[i].state.SetInt(0);
+				if ( achievements[i].progress )
+					achievements[i].progress.SetInt(0);
+			}
+		}
+		else if ( e.Name ~== "swwmdumpachievements" )
+		{
+			if ( achievements.Size() <= 0 )
+				SWWMUtility.LoadAchievements(achievements);
+			for ( int i=0; i<achievements.Size(); i++ )
+				Console.Printf("swwm_achievement_"..achievements[i].basename.."="..achievements[i].state.GetString());
+			for ( int i=0; i<achievements.Size(); i++ )
+			{
+				if ( !achievements[i].progress ) continue;
+				Console.Printf("swwm_progress_"..achievements[i].basename.."="..achievements[i].progress.GetString());
+			}
 		}
 	}
 

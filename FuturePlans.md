@@ -27,7 +27,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*
   - [Doom] Graffiti Master *(Doodle mustaches on 20 demon faces)*
-  - [Doom] Heck No *(Instakill 10 Archviles)*
   - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
   - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
@@ -57,13 +56,21 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Hexen] Worship This *(Defeat Korax)*
   - [Hexen] Another One *(Defeat yet another Heresiarch)*
   - [Hexen] And Another One *(Defeat... yup, one more Heresiarch)*
-  - [Hexen] Finally *(Defeat the last Heresiarch)*
+  - [Hexen] The Last One *(Defeat the last Heresiarch)*
   - [Hexen] Didn't I Kick Your Ass Before? *(Defeat the Deathkings)*
 * **Official Sunder support *(when the WAD is complete)***
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Crouch sliding *(+ proper crouch dashing)***
+* **More items:**
+  - [Heretic/Hexen] Safety Tether *(original)*
+  - Angel of Death *(Total Destruction / SWWM Platinum Ep2)*
+  - Black Matter Armor *(SWWM / UnSX 3)*
+* **Additional grenades *(replaces clips)*:**
+  - Cyrus POW Grenades *(UnSX 4)*
+  - Z-Bomb *(UnSX 3)*
+  - Dr. Locke's Burrow Bombs *(SWWM Platinum Ep2 / UnSX 5)*
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)

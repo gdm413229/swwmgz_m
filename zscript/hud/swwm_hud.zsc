@@ -687,7 +687,7 @@ Class SWWMStatusBar : BaseStatusBar
 						if ( l && l.isValid() ) tag = String.Format("\cx%s:\c- %s\c-",StringTable.Localize("$SWWM_SEXIT"),l.LookupLevelName());
 						else */tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
 					}
-					else if ( (poi.trackedline.special == Exit_Normal) || ((poi.trackedline.special == ACS_Execute) && (l.Args[0] == -Int('E1M8_KNOCKOUT'))) )
+					else if ( (poi.trackedline.special == Exit_Normal) || ((poi.trackedline.special == ACS_Execute) && (poi.trackedline.Args[0] == -Int('E1M8_KNOCKOUT'))) )
 					{
 						// NOT YET IMPLEMENTED
 						/*LevelInfo l = LevelInfo.FindLevelInfo(level.nextmap);
@@ -701,7 +701,7 @@ Class SWWMStatusBar : BaseStatusBar
 						if ( l && l.isValid() ) tag = String.Format("\cy%s\c-%s\c-",StringTable.Localize("$SWWM_EXIT"),l.LookupLevelName());
 						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 					}
-					else if ( ((l.special == ACS_Execute) || (l.special == ACS_ExecuteAlways)) && (l.Args[0] == -Int('MapFadeOut')) )
+					else if ( ((poi.trackedline.special == ACS_Execute) || (poi.trackedline.special == ACS_ExecuteAlways)) && (poi.trackedline.Args[0] == -Int('MapFadeOut')) )
 					{
 						// NOT YET IMPLEMENTED
 						/*LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[2]);

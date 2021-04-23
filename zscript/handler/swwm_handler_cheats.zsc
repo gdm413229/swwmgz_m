@@ -6,6 +6,7 @@ extend Class SWWMHandler
 	transient ui String kstr, klingerstr;
 	transient ui bool kfail;
 	transient ui int rss;
+	ui bool nostalgic;
 
 	private void CheatEvent( ConsoleEvent e )
 	{
@@ -341,7 +342,12 @@ extend Class SWWMHandler
 				if ( kstr != cht[i].Left(kstr.length()) ) continue;
 				matchany = true;
 				if ( kstr != cht[i] ) continue;
-				if ( i > 4 ) SWWMUtility.MarkAchievement('swwm_achievement_cheat',players[consoleplayer]);
+				if ( (i > 4) && !nostalgic )
+				{
+					let m = new("SWWMSecretZanavethMessage").Init();
+					StatusBar.AttachMessage(m,-1232);
+					nostalgic = true;
+				}
 				if ( SWWMUtility.CheatsDisabled(consoleplayer) )
 				{
 					kfail = true;

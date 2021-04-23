@@ -222,3 +222,218 @@ Class SWWMAchievementNotification : HUDMessageBase
 		}
 	}
 }
+
+// Secret dialogue
+Class SWWMSecretZanavethMessage : HUDMessageBase
+{
+	TextureID MessageBox, BG, Avatar, Blink[2], Talk[5], Noiz[4];
+	transient Font fnt;
+	transient BrokenLines l;
+	int seqnum, delay, charcnt, blinktics, talktics, talkframe;
+	int rss;
+	int fadein, fadeout;
+	Vector2 ss, hs, origin;
+
+	private int GetRandom()
+	{
+		return (rss = (rss<<1)*35447+(rss/87));
+	}
+
+	SWWMSecretZanavethMessage Init()
+	{
+		MessageBox = TexMan.CheckForTexture("graphics/HUD/ZnvMessageBox.png",TexMan.Type_Any);
+		BG = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarBG.png",TexMan.Type_Any);
+		Avatar = TexMan.CheckForTexture("graphics/HUD/ZnvAvatar.png",TexMan.Type_Any);
+		for ( int i=0; i<2; i++ )
+			Blink[i] = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarBlink"..i..".png",TexMan.Type_Any);
+		for ( int i=0; i<5; i++ )
+			Talk[i] = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarTalk"..i..".png",TexMan.Type_Any);
+		for ( int i=0; i<4; i++ )
+			Noiz[i] = TexMan.CheckForTexture("graphics/HUD/ZnvStatic"..i..".png",TexMan.Type_Any);
+		seqnum = -1;
+		delay = 80;
+		charcnt = 0;
+		blinktics = 30;
+		talktics = 0;
+		talkframe = -1;
+		rss = 1232;
+		return self;
+	}
+
+	private void SetText()
+	{
+		String txt;
+		if ( seqnum == 2 )
+		{
+			// replace with number of years since 2010
+			int nyears = SystemTime.Format("%Y",SystemTime.Now()).ToInt()-2010;
+			txt = String.Format(StringTable.Localize("$SWWM_ZNVTXT"..seqnum),nyears);
+		}
+		else txt = StringTable.Localize("$SWWM_ZNVTXT"..seqnum);
+		l = fnt.BreakLines(txt,220);
+	}
+
+	private void DrawText()
+	{
+		if ( !fnt ) fnt = Font.GetFont('TewiShaded');
+		if ( !l ) SetText();
+		int cur = charcnt;
+		Vector2 pos = origin+(47,2);
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			if ( cur <= 0 ) break;
+			String part = l.StringAt(i).Left(cur);
+			Screen.DrawText(fnt,Font.CR_WHITE,pos.x,pos.y,part,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			pos.y += 13;
+			cur -= l.StringAt(i).Length();
+		}
+	}
+
+	private void DrawAvatar()
+	{
+		int blinkframe = -1;
+		switch ( blinktics )
+		{
+		case -1:
+		case -3:
+			blinkframe = 0;
+			break;
+		case -2:
+			blinkframe = 1;
+			break;
+		}
+		Screen.DrawTexture(BG,false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawTexture(Avatar,false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( (seqnum > 0) && (seqnum < 6) )
+		{
+			if ( blinkframe >= 0 ) Screen.DrawTexture(Blink[blinkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( talkframe >= 0 ) Screen.DrawTexture(Talk[talkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		}
+		Screen.DrawTexture(Noiz[(gametic/2)%4],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Multiply);
+	}
+
+	private int TotalLength()
+	{
+		if ( !l ) SetText();
+		int len = 0;
+		for ( int i=0; i<l.Count(); i++ )
+			len += l.StringAt(i).Length();
+		return len;
+	}
+
+	private String GetChar( int pos )
+	{
+		if ( !l ) SetText();
+		int cur = pos;
+		for ( int i=0; i<l.Count(); i++ )
+		{
+			int len = l.StringAt(i).Length();
+			if ( cur < len )
+				return l.StringAt(i).Mid(cur,1);
+			cur -= len;
+		}
+		return "";
+	}
+
+	private void AdvanceText()
+	{
+		String notalk = " \t\n,;:.-!?";
+		String punctuation = ",;:.";
+		if ( charcnt >= TotalLength() )
+		{
+			seqnum++;
+			charcnt = 0;
+			if ( seqnum > 5 ) S_StartSound("misc/chat",CHAN_VOICE,CHANF_UI,1.,0.);
+			else SetText();
+			return;
+		}
+		String ch = GetChar(charcnt);
+		// skip over color escapes
+		if ( ch == "\c" )
+		{
+			ch = GetChar(++charcnt);
+			if ( ch == "[" ) while ( (ch = GetChar(++charcnt)) != "]" );
+			charcnt++;
+			ch = GetChar(charcnt);
+		}
+		// speech
+		if ( notalk.IndexOf(ch) == -1 )
+		{
+			S_StartSound("misc/voice",CHAN_VOICE,CHANF_UI,.6,ATTN_NONE);
+			talktics = 5;
+		}
+		// delay relative to stuff
+		delay = 1;
+		int idx = punctuation.IndexOf(ch);
+		if ( idx >= 0 ) delay += (idx*2)+1;
+		charcnt++;
+		if ( charcnt >= TotalLength() ) delay += 90;
+	}
+
+	override bool Tick()
+	{
+		if ( seqnum < 0 )
+		{
+			delay--;
+			if ( delay <= 0 )
+			{
+				S_StartSound("misc/chat",CHAN_VOICE,CHANF_UI,1.,0.);
+				seqnum++;
+			}
+			return false;
+		}
+		if ( blinktics <= 0 )
+		{
+			blinktics--;
+			if ( blinktics < -3 ) blinktics = (abs(GetRandom())%10)?(60+abs(GetRandom())%30):6;
+		}
+		else blinktics--;
+		if ( talktics > 0 )
+		{
+			if ( !(gametic%3) ) talkframe = (talkframe==-1)?(abs(GetRandom())%5):-1;
+			talktics--;
+		}
+		else talkframe = -1;
+		if ( seqnum > 6 ) return true;
+		if ( seqnum == 0 )
+		{
+			fadein++;
+			if ( fadein > 15 )
+			{
+				delay = 30;
+				seqnum++;
+			}
+			return false;
+		}
+		if ( seqnum == 6 )
+		{
+			fadeout++;
+			if ( fadeout > 30 ) seqnum++;
+			return false;
+		}
+		if ( delay > 0 )
+		{
+			delay--;
+			return false;
+		}
+		AdvanceText();
+		return false;
+	}
+
+	override void Draw( int bottom, int visibility )
+	{
+		if ( (seqnum < 0) || (seqnum > 6) ) return;
+		double alph = 1.;
+		if ( seqnum == 0 ) alph = fadein/15.;
+		else if ( seqnum == 6 ) alph = 1.-fadeout/30.;
+		if ( swwm_hudscale <= 0 ) hs = StatusBar.GetHUDScale();
+		else hs.x = swwm_hudscale;
+		hs.y = hs.x;
+		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
+		origin = (int(ss.x-270)/2,swwm_hudmargin+60);
+		Screen.DrawTexture(MessageBox,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
+		if ( (seqnum < 1) || (seqnum > 5) ) return;
+		DrawAvatar();
+		DrawText();
+	}
+}

@@ -331,7 +331,6 @@ Class SWWMStaticHandler : StaticEventHandler
 			wasinmap = false;
 			if ( timer == 1 )
 			{
-				if ( swwm_achievement_abort < 1 ) CVar.FindCVar('swwm_achievement_abort').SetInt(1);
 				Console.Printf("\cfOopsie Woopsie!\c-");
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
 				if ( hnd && hnd.detected )

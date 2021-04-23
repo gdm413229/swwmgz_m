@@ -1,15 +1,15 @@
 ~~**Swimming in Jizz:**~~
 
- - This is where I make all the stuff before beta.
- - It's been over nine months already, still a shorter dev time than my previous projects.
+ - ~~This is where I make all the stuff before beta.~~
+ - ~~It's been over nine months already, still a shorter dev time than my previous projects.~~
 
 **Icarus pls play:**
 
- - Beta release.
- - Finetuning the basics, rebalances, etc.
- - See if I can add those damn swimming anims.
+ - ~~Beta release.~~
+ - ~~Finetuning the basics, rebalances, etc.~~
+ - ~~See if I can add those damn swimming anims.~~
  - Beg more artists for intermission fanart.
- - Stuff to maybe add during this stage: Explodium Guns akimbo, Quick grenade.
+ - ~~Stuff to maybe add during this stage: Explodium Guns akimbo, Quick grenade.~~
  - Collectibles. Froggy Chair was only the beginning.
 
 **Cutie Robutt Adventures:**

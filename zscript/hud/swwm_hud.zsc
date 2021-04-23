@@ -681,8 +681,33 @@ Class SWWMStatusBar : BaseStatusBar
 						|| ((poi.trackedline.special == Exit_Normal) && (level.nextmap.Left(6) == "enDSeQ")) )
 						tag = String.Format("\cg%s\c-",StringTable.Localize("$SWWM_EEXIT"));
 					else if ( poi.trackedline.special == Exit_Secret )
-						tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
-					else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+					{
+						// NOT YET IMPLEMENTED
+						/*LevelInfo l = LevelInfo.FindLevelInfo(level.nextsecretmap);
+						if ( l && l.isValid() ) tag = String.Format("\cx%s:\c- %s\c-",StringTable.Localize("$SWWM_SEXIT"),l.LookupLevelName());
+						else */tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
+					}
+					else if ( (poi.trackedline.special == Exit_Normal) || ((poi.trackedline.special == ACS_Execute) && (l.Args[0] == -Int('E1M8_KNOCKOUT'))) )
+					{
+						// NOT YET IMPLEMENTED
+						/*LevelInfo l = LevelInfo.FindLevelInfo(level.nextmap);
+						if ( l && l.isValid() ) tag = String.Format("\cy%s:\c- %s\c-",StringTable.Localize("$SWWM_NEXIT"),l.LookupLevelName());
+						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+					}
+					else if ( poi.trackedline.special == Teleport_NewMap )
+					{
+						// NOT YET IMPLEMENTED
+						/*LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[0]);
+						if ( l && l.isValid() ) tag = String.Format("\cy%s\c-%s\c-",StringTable.Localize("$SWWM_EXIT"),l.LookupLevelName());
+						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+					}
+					else if ( ((l.special == ACS_Execute) || (l.special == ACS_ExecuteAlways)) && (l.Args[0] == -Int('MapFadeOut')) )
+					{
+						// NOT YET IMPLEMENTED
+						/*LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[2]);
+						if ( (level.levelnum != 1) && l && l.isValid() ) tag = String.Format("\cy%s\c-%s\c-",StringTable.Localize("$SWWM_EXIT"),l.LookupLevelName());
+						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+					}
 				}
 				Font fnt = LangFont(mMiniwiFont);
 				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsi.x*fnt.StringWidth(tag)/2.)/hsi.x,(vpos.y-hsi.y*fnt.GetHeight()/2.)/hsi.y,tag,DTA_VirtualWidthF,ssi.x,DTA_VirtualHeightF,ssi.y,DTA_KeepRatio,true,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);

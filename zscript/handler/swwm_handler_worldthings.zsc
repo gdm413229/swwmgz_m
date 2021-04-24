@@ -8,6 +8,9 @@ extend Class SWWMHandler
 	// attempt to optimize Ynykron singularity suction
 	Array<Actor> suckableactors;
 
+	// for displaying beam-type projectiles
+	Array<Actor> beams;
+
 	override void WorldThingRevived( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
@@ -210,19 +213,19 @@ extend Class SWWMHandler
 	override void WorldThingDestroyed( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
-		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e.Thing is 'Inventory') )
+		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e.Thing is 'Inventory') && !SWWMUtility.IsBeamProj(e.Thing) )
 		{
 			if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
 			return;
 		}
 		// remove from suckables
 		int pos = suckableactors.Find(e.Thing);
-		if ( pos >= suckableactors.Size() )
-		{
-			if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
-			return;
-		}
-		suckableactors.Delete(pos);
+		if ( pos < suckableactors.Size() )
+			suckableactors.Delete(pos);
+		// remove from beams
+		pos = beams.Find(e.Thing);
+		if ( pos < beams.Size() )
+			beams.Delete(pos);
 		if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
 	}
 
@@ -370,6 +373,8 @@ extend Class SWWMHandler
 		// Ynykron vortex optimization (faster than a thinker iterator)
 		if ( e.Thing.bSHOOTABLE || SWWMUtility.ValidProjectile(e.Thing) || (e.Thing is 'Inventory') )
 			SuckableActors.Push(e.Thing);
+		else if ( SWWMUtility.IsBeamProj(e.Thing) )
+			Beams.Push(e.Thing);
 		// vanilla blood color changes
 		if ( (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "Bishop") || (e.Thing.GetClass() == "Korax") )
 		{

@@ -95,14 +95,14 @@ Class CandyBeam : Actor
 {
 	Vector3 nextpos, nextdir;
 
-	action void A_Trace( double dist = 16. )
+	action void A_Trace()
 	{
 		let t = new("CandyBeamTracer");
 		t.hitlist.Clear();
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		t.ShootThroughList.Clear();
-		t.Trace(pos,CurSector,x,dist,0);
+		t.Trace(pos,CurSector,x,speed,0);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
@@ -135,7 +135,7 @@ Class CandyBeam : Actor
 		}
 		else
 		{
-			t.Results.HitPos = level.Vec3Offset(pos,x*dist);
+			t.Results.HitPos = level.Vec3Offset(pos,x*speed);
 			normal *= 0;
 		}
 		double a = FRandom[Candy](0,360), s = FRandom[Candy](0.,.8);
@@ -189,6 +189,7 @@ Class CandyBeam : Actor
 		ReactionTime 12;
 		Radius 0.1;
 		Height 0;
+		Speed 16;
 		+NOGRAVITY;
 		+NOCLIP;
 		+DONTSPLASH;
@@ -293,12 +294,13 @@ Class TinyCandyBeam : CandyBeam
 	{
 		ReactionTime 12;
 		DamageFunction 20;
+		Speed 8;
 	}
 	States
 	{
 	Spawn:
 		XZW1 A 1 Bright;
-		XZW1 A 1 Bright A_Trace(8);
+		XZW1 A 1 Bright A_Trace();
 		XZW1 A 1 Bright A_Spread("TinyCandyPop","SWWMSmallSmoke");
 		XZW1 A 1 Bright A_FadeOut(.15);
 		Wait;

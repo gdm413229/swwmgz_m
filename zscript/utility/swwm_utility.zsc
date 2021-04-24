@@ -1164,6 +1164,20 @@ Class SWWMUtility
 		return false;
 	}
 
+	// Is this a beam projectile? (speed = length)
+	static play bool IsBeamProj( Actor a )
+	{
+		if ( a is 'SaltBeam' ) return true;
+		if ( a is 'BiosparkBeam' ) return true;
+		if ( a is 'BiosparkArc' ) return true;
+		if ( a is 'CandyBeam' ) return true;
+		if ( a is 'YnykronBeam' ) return true;
+		if ( a is 'YnykronLightningArc' ) return true;
+		if ( a is 'YnykronAltBeam' ) return true;
+		if ( a is 'MykradvoTendril' ) return true;
+		return false;
+	}
+
 	static clearscope bool IdentifyingDog( Actor a )
 	{
 		if ( a is 'MBFHelperDog' ) return true;

@@ -450,6 +450,7 @@ Class SaltBeam : Actor
 		Radius 0.1;
 		Height 0;
 		Stamina 9;
+		Speed 32;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -474,7 +475,7 @@ Class SaltBeam : Actor
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		let t = new("SaltTracer");
 		t.ignore = target;
-		t.Trace(pos,cursector,x,32,TRACE_HitSky);
+		t.Trace(pos,cursector,x,speed,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
@@ -536,7 +537,7 @@ Class SaltBeam : Actor
 		}
 		else if ( (args[0] > 20) && !Random[Spreadgun](0,800/args[0]) )
 		{
-			let i = Spawn("SaltImpact",level.Vec3Offset(pos,x*32));
+			let i = Spawn("SaltImpact",level.Vec3Offset(pos,x*speed));
 			i.angle = atan2(x.y,x.x);
 			i.pitch = asin(-x.z);
 			i.target = target;
@@ -547,8 +548,8 @@ Class SaltBeam : Actor
 		}
 		// next beam
 		if ( !(special2%4) && !Random[Spreadgun](0,Stamina) )
-			Spawn("SaltLight",level.Vec3Offset(pos,x*16));
-		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*32));
+			Spawn("SaltLight",level.Vec3Offset(pos,x*speed/2));
+		let next = Spawn("SaltBeam",level.Vec3Offset(pos,x*speed));
 		double a = FRandom[Spreadgun](0,360), s = FRandom[Spreadgun](0,.06);
 		Vector3 dir = (x+y*cos(a)*s+z*sin(a)*s).unit();
 		next.angle = atan2(dir.y,dir.x);
@@ -572,7 +573,7 @@ Class SaltBeam : Actor
 		if ( isFrozen() ) return;
 		A_FadeOut(.04);
 		if ( Random[Spreadgun](-2,args[2]/10) == 0 )
-			SWWMUtility.DoExplosion(self,5+Accuracy,5000,32,flags:DE_HOWL,ignoreme:target);
+			SWWMUtility.DoExplosion(self,5+Accuracy,5000,speed,flags:DE_HOWL,ignoreme:target);
 		if ( ((special2%4) || args[2]) && !special1 ) SpreadOut();
 		args[2]++;
 		if ( !CheckNoDelay() || (tics == -1) ) return;

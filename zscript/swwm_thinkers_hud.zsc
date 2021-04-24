@@ -486,6 +486,7 @@ Class SWWMSimpleTracker : Thinker
 	bool vipitem;
 	bool expired;
 	bool ismissile;
+	bool isbeam;
 	int lastupdate;
 	ui double smoothalpha;	// smoothened alpha, for ui
 	SWWMSimpleTracker prev, next;
@@ -493,7 +494,8 @@ Class SWWMSimpleTracker : Thinker
 	void Update()
 	{
 		if ( !target ) return;
-		radius = target.radius;
+		isbeam = SWWMUtility.IsBeamProj(target);
+		radius = isbeam?(target.speed*cos(target.pitch)):target.radius;
 		angle = target.angle;
 		pos = target.pos;
 		isplayer = target.player;
@@ -502,7 +504,7 @@ Class SWWMSimpleTracker : Thinker
 		friendly = target.IsFriend(players[consoleplayer].mo);
 		countkill = target.bCOUNTKILL;
 		shootable = target.default.bSHOOTABLE;
-		ismissile = target.default.bMISSILE;
+		ismissile = isbeam||target.default.bMISSILE;
 		isitem = (target is 'Inventory');
 		countitem = SWWMUtility.IsScoreItem(target);
 		vipitem = SWWMUtility.IsVipItem(target);
@@ -545,7 +547,7 @@ Class SWWMSimpleTracker : Thinker
 					lastupdate += 70;
 			}
 		}
-		else if ( ismissile )
+		else if ( ismissile && !isbeam )
 			expired = !target.bMISSILE;
 		else if ( target.default.bSHOOTABLE )
 			expired = (target.Health<=0);

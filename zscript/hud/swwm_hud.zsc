@@ -1362,7 +1362,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				pos = t.target.prev.xy*(1.-FracTic)+t.target.pos.xy*FracTic;
 				angle = t.target.angle;
-				radius = t.target.radius;
+				radius = t.isbeam?(t.target.speed*cos(t.target.pitch)):t.target.radius;
 			}
 			else
 			{
@@ -1408,7 +1408,14 @@ Class SWWMStatusBar : BaseStatusBar
 				continue;
 			Vector2 tv[4];
 			int nidx;
-			if ( isitem )
+			if ( t.isbeam )
+			{
+				// oriented line
+				nidx = 2;
+				tv[0] = rv;
+				tv[1] = rv+Actor.RotateVector((radius,0),angle);
+			}
+			else if ( isitem )
 			{
 				// rhombus
 				nidx = 4;
@@ -1460,6 +1467,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( drawn )
 			{
 				double alph = clamp(((t.lastupdate+mtime)-level.maptime)/35.,0.,1.);
+				if ( t.isbeam ) alph *= t.target?(t.target.alpha/t.target.default.alpha):0.;
 				double theta = clamp(5.*FrameTime,0.,1.);
 				t.smoothalpha = t.smoothalpha*(1.-theta)+alph*theta;
 			}

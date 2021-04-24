@@ -653,7 +653,7 @@ Class YnykronBeam : Actor
 		t.ShootThroughList.Clear();
 		t.WaterHitList.Clear();
 		t.HitList.Clear();
-		t.Trace(pos,cursector,x,128,TRACE_HitSky);
+		t.Trace(pos,cursector,x,speed,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
@@ -731,7 +731,7 @@ Class YnykronBeam : Actor
 			// find exit point
 			int maxdist = (25600-special1);
 			int i;
-			for ( i=128; i<maxdist; i++ )
+			for ( i=int(speed); i<maxdist; i++ )
 			{
 				Vector3 ofs = level.Vec3Offset(pos,x*i);
 				if ( !level.IsPointInLevel(ofs) ) continue;
@@ -797,15 +797,15 @@ Class YnykronBeam : Actor
 			nospread = true;
 			return;
 		}
-		if ( ((special1%256) < 128) && !Random[Ynykron](0,20) )
-			Spawn("YnykronBeamLight",level.Vec3Offset(pos,x*64));
+		if ( ((special1%256) < speed) && !Random[Ynykron](0,20) )
+			Spawn("YnykronBeamLight",level.Vec3Offset(pos,x*speed/2));
 		if ( special1 >= 25600 )
 		{
 			// end of the line, dissipate
 			int numpt = Random[Ynykron](4,8);
 			for ( int i=0; i<numpt; i++ )
 			{
-				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*128));
+				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*speed));
 				b.Scale *= FRandom[Ynykron](.6,1.8);
 				b.special1 = Random[Ynykron](1,2);
 				b.A_SetRenderStyle(.3,STYLE_AddShaded);
@@ -822,13 +822,13 @@ Class YnykronBeam : Actor
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		// propagate
-		let next = Spawn("YnykronBeam",level.Vec3Offset(pos,x*128));
+		let next = Spawn("YnykronBeam",level.Vec3Offset(pos,x*speed));
 		next.angle = atan2(x.y,x.x);
 		next.pitch = asin(-x.z);
 		next.roll = roll;
 		next.target = target;
 		next.master = master;
-		next.special1 = special1+128;
+		next.special1 = special1+int(speed);
 		next.SetStateLabel("TrailSpawn");
 	}
 	override void PostBeginPlay()
@@ -867,6 +867,7 @@ Class YnykronBeam : Actor
 		Radius .1;
 		Height 0;
 		Alpha .4;
+		Speed 128;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NOCLIP;
@@ -2645,7 +2646,7 @@ Class YnykronAltBeam : Actor
 		t.ignore = target;
 		t.ShootThroughList.Clear();
 		t.WaterHitList.Clear();
-		t.Trace(pos,cursector,x,64,TRACE_HitSky);
+		t.Trace(pos,cursector,x,speed,TRACE_HitSky);
 		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
 		{
 			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
@@ -2704,7 +2705,7 @@ Class YnykronAltBeam : Actor
 			int numpt = Random[Ynykron](16,24);
 			for ( int i=0; i<numpt; i++ )
 			{
-				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*64));
+				let b = Spawn("SWWMSmoke",level.Vec3Offset(pos,x*speed));
 				b.Scale *= FRandom[Ynykron](.6,1.8);
 				b.special1 = Random[Ynykron](1,2);
 				b.A_SetRenderStyle(.3,STYLE_Subtract);
@@ -2720,13 +2721,13 @@ Class YnykronAltBeam : Actor
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		// propagate
-		let next = Spawn("YnykronAltBeam",level.Vec3Offset(pos,x*64));
+		let next = Spawn("YnykronAltBeam",level.Vec3Offset(pos,x*speed));
 		next.angle = atan2(x.y,x.x);
 		next.pitch = asin(-x.z);
 		next.roll = roll;
 		next.target = target;
 		next.master = master;
-		next.special1 = special1+64;
+		next.special1 = special1+int(speed);
 		next.SetStateLabel("TrailSpawn");
 	}
 	override void PostBeginPlay()
@@ -2756,6 +2757,7 @@ Class YnykronAltBeam : Actor
 		Radius .1;
 		Height 0;
 		Alpha .4;
+		Speed 64;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NOCLIP;

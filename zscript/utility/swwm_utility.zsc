@@ -1037,7 +1037,7 @@ Class SWWMUtility
 		if ( !(flags&DE_NOSPLASH) ) Source.CheckSplash(ExplosionRadius);
 		double brange = 1./(ExplosionRadius-FullDamageRadius);
 		Actor Instigator = (flags&DE_NOTMISSILE)?Source:Source.target;
-		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius*2);	// test with doubled radius, just to be sure
+		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
 		int nhit = 0, nkill = 0;
 		while ( bi.Next() )
 		{

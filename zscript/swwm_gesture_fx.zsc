@@ -242,7 +242,11 @@ Class LoveHeart : Actor
 				else if ( min(ceilingz,pos.z+height) > cl ) LinePart = 2;
 				else LinePart = 1;
 			}
-			else LinePart = 1;	// always middle
+			else
+			{
+				LinePart = 1;	// always middle
+				LineSide = 0;
+			}
 			if ( Blocking3DFloor )
 			{
 				for ( int i=0; i<BlockingLine.backsector.Get3DFloorCount(); i++ )

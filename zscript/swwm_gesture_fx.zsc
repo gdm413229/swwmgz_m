@@ -249,9 +249,10 @@ Class LoveHeart : Actor
 			}
 			if ( Blocking3DFloor )
 			{
-				for ( int i=0; i<BlockingLine.backsector.Get3DFloorCount(); i++ )
+				Sector sec = LineSide?BlockingLine.frontsector:BlockingLine.backsector;
+				for ( int i=0; i<sec.Get3DFloorCount(); i++ )
 				{
-					F3DFloor ff = BlockingLine.backsector.Get3DFloor(i);
+					F3DFloor ff = sec.Get3DFloor(i);
 					if ( ff.model != Blocking3DFloor ) continue;
 					Hit3DFloor = ff;
 					break;

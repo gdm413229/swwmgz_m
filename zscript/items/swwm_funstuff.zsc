@@ -163,6 +163,134 @@ Class FroggyChair : Actor
 	}
 }
 
+// a flag
+Class SWWMFlag : Actor
+{
+	int seq;
+
+	override bool Used( Actor user )
+	{
+		seq = (seq+1)%4;
+		switch ( seq )
+		{
+		case 0:
+			SetStateLabel("Spawn");
+			break;
+		case 1:
+			SetStateLabel("FlagPride");
+			break;
+		case 2:
+			SetStateLabel("FlagTrans");
+			break;
+		case 3:
+			SetStateLabel("FlagEnby");
+			break;
+		}
+		A_StartSound("bestsound",CHAN_BODY,CHANF_OVERLAP);
+		return true;
+	}
+	Default
+	{
+		+SOLID;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		Radius 2;
+		Height 104;
+	}
+	States
+	{
+	Spawn:
+		XZW1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZW2 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZW3 ABCDEFGH 2;
+		Loop;
+	FlagPride:
+		XZW3 IJKLMNOPQRSTUVWXYZ 2;
+		XZW4 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZW5 ABCDEFGHIJKLMNOP 2;
+		Loop;
+	FlagTrans:
+		XZW5 QRSTUVWXYZ 2;
+		XZW6 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZW7 ABCDEFGHIJKLMNOPQRSTUVWX 2;
+		Loop;
+	FlagEnby:
+		XZW7 YZ 2;
+		XZW8 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZW9 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2;
+		XZWA ABCDEF 2;
+		Loop;
+	}
+}
+
+// oof
+Class SWWMGasCloudSpawner : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( !(special1%5) )
+		{
+			Vector3 x, y, z;
+			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+			let c = Spawn("SWWMGasCloud",level.Vec3Offset(pos,x*(20+special1*12)));
+			c.target = target;
+			c.specialf1 = 1+special1/10.;
+		}
+		special1++;
+		if ( special1 > 20 ) Destroy();
+	}
+}
+
+Class SWWMGasCloud : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		for ( int i=0; i<2; i++ )
+		{
+			let e = Spawn("SWWMFart",level.Vec3Offset(pos,specialf1*(FRandom[ExploS](-20,20),FRandom[ExploS](-20,20),FRandom[ExploS](-20,20))));
+			e.target = target;
+			e.scale *= specialf1;
+		}
+		SWWMUtility.DoExplosion(self,Random[ExploS](2,6),0,60*specialf1,40,DE_NOBLEED|DE_NOSPLASH|DE_THRUWALLS|DE_HOWL,'Gas',target);
+		special1++;
+		if ( special1 >= 90 ) Destroy();
+	}
+}
+
+Class SWWMFart : SWWMHalfSmoke
+{
+	Default
+	{
+		RenderStyle "Add";
+		Alpha .1;
+	}
+	States
+	{
+	Spawn:
+		FRT1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 2 Bright;
+		FRT2 ABCDEFGHI 2 Bright;
+		Stop;
+	}
+}
+
 // yay!
 Class FancyConfetti : Actor
 {

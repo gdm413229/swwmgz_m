@@ -367,7 +367,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		int idx = punctuation.IndexOf(ch);
 		if ( idx >= 0 ) delay += (idx*2)+1;
 		charcnt++;
-		if ( charcnt >= TotalLength() ) delay += 90;
+		if ( charcnt >= TotalLength() ) delay += (seqnum==5)?90:40;
 	}
 
 	override bool Tick()

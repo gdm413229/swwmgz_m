@@ -177,9 +177,19 @@ extend Class SWWMHandler
 		{
 			if ( consoleplayer == e.Args[0] )
 			{
-				Console.Printf("\cyThere are no flags here.\c-");
-				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+				Console.Printf("\cyLet your flag stand proud, Demolitionist.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 			}
+			let mo = players[e.Args[0]].mo;
+			Actor f = Actor(ThinkerIterator.Create("SWWMFlag").Next());
+			if ( !f ) f = mo.Spawn("SWWMFlag");
+			Vector2 spos = mo.Vec2Offset(cos(mo.angle)*40.,sin(mo.angle)*40.);
+			Sector sat = level.PointInSector(spos);
+			double sz = sat.NextLowestFloorAt(spos.x,spos.y,mo.player.viewz-32.);
+			f.SetOrigin((spos.x,spos.y,sz),false);
+			f.A_SetAngle(mo.angle);
+			f.Spawn("SWWMItemFog",f.pos);
+			f.A_StartSound("bestsound",CHAN_ITEMEXTRA);
 		}
 		else if ( e.Name ~== "swwmballcheat" )
 		{
@@ -231,19 +241,30 @@ extend Class SWWMHandler
 		}
 		else if ( e.Name ~== "swwmfartcheat" )
 		{
+			let mo = players[e.Args[0]].mo;
 			if ( consoleplayer == e.Args[0] )
 			{
-				Console.Printf("\cyI'd rather not reimplement that one.\c-");
-				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+				Console.Printf("\cyI regret implementing this.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/omgfart",CHAN_VOICE,CHANF_UI);
 			}
+			else mo.A_StartSound("misc/omgfart",CHAN_VOICE,CHANF_OVERLAP,1.,.5);
+			let f = mo.Spawn("SWWMGasCloudSpawner",mo.Vec3Angle(mo.radius*.5,mo.angle-180,mo.Height*.4));
+			f.target = mo;
+			f.angle = mo.angle+180;
+			f.pitch = -mo.pitch;
 		}
 		else if ( e.Name ~== "swwmsupercheat" )
 		{
 			if ( consoleplayer == e.Args[0] )
 			{
-				Console.Printf("\cyNo, you're the Demolitionist.\c-");
-				S_StartSound("misc/nocheat",CHAN_ITEM,CHANF_UI);
+				Console.Printf("\cyNo, you're the Demolitionist. But with this thing, you'll also be invincible.\c-");
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("misc/p_pkup",CHAN_VOICE,CHANF_UI);
 			}
+			let i = InvinciballPower(players[e.Args[0]].mo.FindInventory("InvinciballPower"));
+			if ( i ) i.EffectTics += i.default.EffectTics;
+			else players[e.Args[0]].mo.GiveInventory("InvinciballPower",1);
 		}
 		else if ( e.Name ~== "swwmstonecheat" )
 		{
@@ -342,11 +363,11 @@ extend Class SWWMHandler
 				if ( kstr != cht[i].Left(kstr.length()) ) continue;
 				matchany = true;
 				if ( kstr != cht[i] ) continue;
-				if ( (i > 4) && !nostalgic )
+				if ( (i > 4) && !swwm_oldcheat )
 				{
 					let m = new("SWWMSecretZanavethMessage").Init();
 					StatusBar.AttachMessage(m,-1232);
-					nostalgic = true;
+					CVar.FindCVar('swwm_oldcheat').SetBool(true);
 				}
 				if ( SWWMUtility.CheatsDisabled(consoleplayer) )
 				{

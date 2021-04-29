@@ -16,7 +16,7 @@ enum EDoExplosionFlags
 Class SWWMAchievement
 {
 	String basename;
-	transient CVar state, progress;
+	transient CVar state, progress, date;
 	TextureID icon;
 	int maxval;
 	bool hasformat;
@@ -57,7 +57,6 @@ Class SWWMUtility
 			let ac = new("SWWMAchievement");
 			ac.basename = ln[0];
 			ac.maxval = ln[1].ToInt();
-			ac.hasformat = (ln[2]~=="yes");
 			ac.state = CVar.FindCVar("swwm_achievement_"..ac.basename);
 			// if filtering, always hide the full completion achievement until it's unlocked
 			if ( filter && (ac.basename == "everything") && (ac.state.GetInt() <= 0) )
@@ -87,15 +86,17 @@ Class SWWMUtility
 				}
 			}
 			else ac.progress = null;
-			ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
-			// fallback icon if one is not found
-			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
 			// hide away achievements at 0%
 			if ( hide && (ac.state.GetInt() <= 0) && (!ac.progress || (ac.progress.GetInt() <= 0)) )
 			{
 				ac.Destroy();
 				continue;
 			}
+			ac.hasformat = (ln[2]~=="yes");
+			ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
+			// fallback icon if one is not found
+			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
+			ac.date = CVar.FindCVar("swwm_unlockdate_"..ac.basename);
 			achievements.Push(ac);
 		}
 	}

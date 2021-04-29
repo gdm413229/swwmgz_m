@@ -205,11 +205,7 @@ Class SWWMStaticHandler : StaticEventHandler
 				Console.Printf("swwm_progress_"..achievements[i].basename.."="..achievements[i].progress.GetString());
 			}
 		}
-	}
-
-	override void NetworkProcess( ConsoleEvent e )
-	{
-		if ( e.Name ~== "swwmgetversion" )
+		else if ( e.Name ~== "swwmgetversion" )
 		{
 			let ti = ThinkerIterator.Create("SWWMSaveVerData",Thinker.STAT_STATIC);
 			let svd = SWWMSaveVerData(ti.Next());
@@ -217,8 +213,11 @@ Class SWWMStaticHandler : StaticEventHandler
 			else Console.Printf("\cg(no version data)\c-");
 			if ( tainted ) Console.Printf("\cgversion mismatched\c-");
 			else Console.Printf("\cdversion not mismatched\c-");
-			return;
 		}
+	}
+
+	override void NetworkProcess( ConsoleEvent e )
+	{
 		if ( e.IsManual ) return;
 		if ( e.Name.Left(12) ~== "swwmversion." )
 		{

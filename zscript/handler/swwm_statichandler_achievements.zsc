@@ -27,6 +27,7 @@ extend Class SWWMStaticHandler
 		if ( (val == 1) && (gametic > lastachievementnotify) )
 		{
 			a.state.SetInt(2);
+			a.date.SetInt(SystemTime.Now());
 			EventHandler.SendNetworkEvent("swwmachievement."..a.basename,consoleplayer);
 			let notif = new("SWWMAchievementNotification").Init(a.basename,a.icon,a.hasformat?a.maxval:0);
 			StatusBar.AttachMessage(notif,-3478);

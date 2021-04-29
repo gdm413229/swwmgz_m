@@ -112,6 +112,66 @@ Class OptionMenuItemSWWMVoiceOption : OptionMenuItemOptionBase
 	}
 }
 
+Class OptionMenuItemSWWMPlayTime : OptionMenuItem
+{
+	CVar mCVar;
+	bool dformat;	// switch between short form and long form time display
+
+	OptionMenuItemSWWMPlayTime Init( String label, Name command )
+	{
+		Super.Init(label,command);
+		return self;
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		if ( (mkey == Menu.MKEY_Left) || (mkey == Menu.MKEY_Right) || (mkey == Menu.MKEY_Enter) )
+			dformat = !dformat;
+		else return Super.MenuEvent(mkey,fromcontroller);
+		Menu.MenuSound("menu/change");
+		return true;
+	}
+
+	override int Draw( OptionMenuDescriptor desc, int y, int indent, bool selected )
+	{
+		drawLabel(indent,y,selected?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor);
+		int val = swwm_playtime;
+		int sec = (val%60);
+		int min = ((val/60)%60);
+		int hour = ((val/3600)%24);
+		int day = val/86400;
+		String str = "";
+		if ( dformat )
+		{
+			if ( day ) str.AppendFormat("%d %s",day,StringTable.Localize("$SWWM_TIME_DAYS"));
+			if ( hour )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d %s",hour,StringTable.Localize("$SWWM_TIME_HOURS"));
+			}
+			if ( min )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d %s",min,StringTable.Localize("$SWWM_TIME_MINUTES"));
+			}
+			if ( sec )
+			{
+				if ( str != "" ) str = str..", ";
+				str.AppendFormat("%d %s",sec,StringTable.Localize("$SWWM_TIME_SECONDS"));
+			}
+			if ( str == "" ) str.AppendFormat("0 %s",StringTable.Localize("$SWWM_TIME_SECONDS"));
+		}
+		else
+		{
+			if ( day ) str = String.Format("%d:%02d:%02d:%02d",day,hour,min,sec);
+			else if ( hour ) str = String.Format("%d:%02d:%02d",hour,min,sec);
+			else str = String.Format("%d:%02d",min,sec);
+		}
+		drawValue(indent,y,OptionMenuSettings.mFontColorValue,str);
+		return indent;
+	}
+}
+
 // option menu /w tooltips
 Class SWWMOptionMenu : OptionMenu
 {

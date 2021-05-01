@@ -3106,10 +3106,10 @@ Class DemolitionistMenu : GenericMenu
 					let a = achievements[i];
 					bool completed = !!a.state.GetInt();
 					bool hasprogress = (a.progress && a.progress.GetInt());
-					Screen.DrawTexture((!completed&&!hasprogress&&obscure)?AchievementUnknown:a.icon,false,origin.x+xx+1,origin.y+yy+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_FillColor,(!completed&&!hasprogress&&obscure)?Color(8,8,8):Color(16,16,16));
+					Screen.DrawTexture(AchievementUnknown,false,origin.x+xx+1,origin.y+yy+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_FillColor,(!completed&&!hasprogress&&obscure)?Color(8,8,8):Color(16,16,16));
 					Screen.DrawTexture((!completed&&!hasprogress&&obscure)?AchievementUnknown:a.icon,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Desaturate,(!completed)*255,DTA_ColorOverlay,completed?Color(0,0,0,0):(hasprogress||!obscure)?Color(96,0,0,0):Color(192,0,0,0));
 					// progress bar
-					if ( a.progress )
+					if ( a.progress && (!obscure || hasprogress) )
 					{
 						int val = a.progress.GetInt();
 						val = clamp(val,0,a.maxval);
@@ -3119,7 +3119,7 @@ Class DemolitionistMenu : GenericMenu
 						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
 						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(a.maxval));
 						int ox = (barsz-MiniwiFont.StringWidth(str))/2;
-						Screen.DrawText(MiniwiFont,completed?Font.CR_GREEN:hasprogress?Font.CR_WHITE:Font.CR_DARKGRAY,origin.x+xx+ox,origin.y+yy+37,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						Screen.DrawText(MiniwiFont,completed?Font.CR_GREEN:Font.CR_WHITE,origin.x+xx+ox,origin.y+yy+37,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					}
 					else
 					{

@@ -1,0 +1,152 @@
+// dedicated achievement browser
+
+Class SWWMAchievementMenu : GenericMenu
+{
+	// since this is a unique menu, we don't need a descriptor,
+	// so put everything in here
+	TextureID AchievementUnknown, SelectBox, BaseBox;
+	bool ShouldObscure;
+	Array<SWWMAchievement> mItems;
+	String mTitle;
+	int mSelected;
+	int mBaseY;	// Y position achievement boxes are being drawn at
+			// needed to tune mouse selection
+
+	override void Init( Menu parent )
+	{
+		Super.Init(parent);
+		mTitle = StringTable.Localize("$SWWM_ATITLE");
+		mSelected = 0;
+		SWWMUtility.LoadAchievements(mItems,true);
+		ShouldObscure = (swwm_filterachievements==1);
+		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/HiddenAchievement.png",TexMan.Type_Any);
+		SelectBox = TexMan.CheckForTexture("graphics/Achievements/SelectAchievement.png",TexMan.Type_Any);
+		BaseBox = TexMan.CheckForTexture("graphics/Achievements/NoAchievement.png",TexMan.Type_Any);
+	}
+
+	int DrawCaption()
+	{
+		// let the delegate do all the work
+		let fnt = menuDelegate.PickFont(BigFont);
+		if ( fnt && (mTitle.Length() > 0) )
+			return menuDelegate.DrawCaption(mtitle,fnt,0,true);
+		return 0;
+	}
+
+	void DrawTooltip( int y )
+	{
+		// detailed achievement information
+		let a = mItems[mSelected];
+		bool completed = !!a.state.GetInt();
+		bool hasprogress = (a.progress && a.progress.GetInt());
+		String str = StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TAG");
+		if ( !completed && !hasprogress && ShouldObscure ) SWWMUtility.ObscureText(str,gametic/3);
+		int xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
+		int yy = y;
+		if ( !a.progress || (ShouldObscure && !hasprogress) ) yy += ((newsmallfont.GetHeight()+2)*CleanYFac_1)/2;
+		Screen.DrawText(newsmallfont,completed?Font.CR_GREEN:Font.CR_DARKGRAY,xx,yy,str,DTA_CleanNoMove_1,true);
+		yy += (newsmallfont.GetHeight()+2)*CleanYFac_1;
+		str = a.hasformat?String.Format(StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT"),a.maxval):StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT");
+		if ( !completed && !hasprogress && ShouldObscure ) SWWMUtility.ObscureText(str,(gametic/3)+1);
+		xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
+		Screen.DrawText(newsmallfont,completed?Font.CR_WHITE:Font.CR_BLACK,xx,yy,str,DTA_CleanNoMove_1,true);
+		if ( a.progress && (!ShouldObscure || hasprogress) )
+		{
+			yy += (newsmallfont.GetHeight()+2)*CleanYFac_1;
+			int val = a.progress.GetInt();
+			val = clamp(val,0,a.maxval);
+			if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
+			else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(a.maxval));
+			xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
+			Screen.DrawText(newsmallfont,completed?Font.CR_GREEN:Font.CR_DARKGRAY,xx,yy,str,DTA_CleanNoMove_1,true);
+		}
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		int prevsel = mSelected;
+		switch( mkey )
+		{
+		case MKEY_Up:
+			if ( mSelected >= 12 ) mSelected -= 12;
+			break;
+		case MKEY_Down:
+			if ( mSelected < (mItems.Size()-12) ) mSelected += 12;
+			break;
+		case MKEY_Left:
+			if ( (mSelected%12) > 0 ) mSelected--;
+			break;
+		case MKEY_Right:
+			if ( ((mSelected%12) < 11) && (mSelected < mItems.Size()-1) ) mSelected++;
+			break;
+		default:
+			return Super.MenuEvent(mkey,fromcontroller);
+		}
+		if ( mSelected != prevsel ) MenuSound("menu/cursor");
+		return true;
+	}
+
+	override bool MouseEvent( int type, int mx, int my )
+	{
+		bool res = Super.MouseEvent(type,mx,my);
+		if ( type == MOUSE_Click )
+		{
+			int xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+			int yy = mBaseY;
+			for ( int i=0; i<mItems.Size(); i++ )
+			{
+				int left = xx+4*CleanXFac_1;
+				int top = yy+4*CleanXFac_1;
+				int right = left+32*CleanXFac_1;
+				int bottom = top+32*CleanXFac_1;
+				if ( (mx >= left) && (mx < right) && (my >= top) && (my < bottom) )
+				{
+					if ( i != mSelected ) MenuSound("menu/cursor");
+					mSelected = i;
+					return res;
+				}
+				xx += 40*CleanXFac_1;
+				if ( !((i+1)%12) )
+				{
+					xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+					yy += 40*CleanYFac_1;
+				}
+			}
+		}
+		return res;
+	}
+
+	override void Drawer()
+	{
+		Super.Drawer();
+		int y = DrawCaption()+10*CleanYFac_1;
+		DrawTooltip(y);
+		int xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+		int yy = y+60*CleanYFac_1;
+		mBaseY = yy;
+		int i;
+		for ( i=0; i<mItems.Size(); i++ )
+		{
+			let a = mItems[i];
+			bool completed = !!a.state.GetInt();
+			bool hasprogress = (a.progress && a.progress.GetInt());
+			Screen.DrawTexture(BaseBox,false,xx+5*CleanXFac_1,yy+5*CleanYFac_1,DTA_CleanNoMove_1,true,DTA_FillColor,(!completed&&!hasprogress&&ShouldObscure)?Color(8,8,8):Color(16,16,16));
+			Screen.DrawTexture((!completed&&!hasprogress&&ShouldObscure)?AchievementUnknown:a.icon,false,xx+4*CleanXFac_1,yy+4*CleanYFac_1,DTA_CleanNoMove_1,true,DTA_Desaturate,(!completed)*255,DTA_ColorOverlay,completed?Color(0,0,0,0):(hasprogress||!ShouldObscure)?Color(96,0,0,0):Color(192,0,0,0));
+			if ( mSelected == i )
+				Screen.DrawTexture(SelectBox,false,xx,yy,DTA_CleanNoMove_1,true);
+			xx += 40*CleanXFac_1;
+			if ( !((i+1)%12) )
+			{
+				xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+				yy += 40*CleanYFac_1;
+			}
+		}
+		while ( i%12 )
+		{
+			Screen.DrawTexture(BaseBox,false,xx+5*CleanXFac_1,yy+5*CleanYFac_1,DTA_CleanNoMove_1,true,DTA_FillColor,Color(8,8,8));
+			Screen.DrawTexture(BaseBox,false,xx+4*CleanXFac_1,yy+4*CleanYFac_1,DTA_CleanNoMove_1,true);
+			xx += 40*CleanXFac_1;
+			i++;
+		}
+	}
+}

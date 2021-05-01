@@ -71,6 +71,11 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Cyrus POW Grenades *(UnSX 4)*
   - Z-Bomb *(UnSX 3)*
   - Dr. Locke's Burrow Bombs *(SWWM Platinum Ep2 / UnSX 5)*
+* **Additional ammo types:**
+  - Green shell - Dyratin charge *(Plasma slug)*
+  - Orange shell - Micro-grenade *(What it says on the tin)*
+  - Blue rocket - Hellblazer Torturer *(Nail bomb)*
+  - White rocket - Hellblazer Subjugator *(Stun bomb)*
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)

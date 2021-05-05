@@ -1,12 +1,14 @@
 **Finishing touches before release:**
 
  - Collectibles
- - Achievements
 
 **Extra things after release:**
 
  - DLC weaponset
  - Additional collectibles not added due to time constraints
+ - Additional achievements
+ - Switchable grenade types
+ - Extra shell/rocket types
  - "White Lady" rare Lämp spawn
  - More intermission art (shamefully e-begging on Twitter as usual orz)
  - Extra localizations (including Japanese)
@@ -18,4 +20,5 @@
 **Very extra things for the future:**
 
  - Saya and Ibuki companion add-ons (potentially a Kirin companion too)
+ - Possibly also playable versions of them, for coop
  - Modeled Monster/Decoration replacers for all IWADs done in the style of the mod (will be very time consuming)

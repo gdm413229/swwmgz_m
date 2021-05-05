@@ -32,6 +32,7 @@ extend Class SWWMHandler
 		MAP_HE3M8,
 		MAP_DMAP07,
 		MAP_DMAP30,
+		MAP_DLVL08,
 		MAP_HMAP12,
 		MAP_HMAP23_HMAP27_HMAP48_HMAP55,
 		MAP_HMAP36,
@@ -67,6 +68,8 @@ extend Class SWWMHandler
 			return MAP_DMAP07;
 		if ( mapsum ~== "5EECD88F4491F516D590CE4BBF45F532" )
 			return MAP_DMAP30;
+		if ( mapsum ~== "7EB864A03948C3F918F9223B2D1F8911" )
+			return MAP_DLVL08;
 		if ( (mapsum ~== "89C4CD26EF05E2577B10CAFE56226662")
 			|| (mapsum ~== "441BF111747671066A10A146C03EEFC4")
 			|| (mapsum ~== "55E321849F3699655D7E062C90682F63") )
@@ -170,6 +173,16 @@ extend Class SWWMHandler
 			if ( e.Thing is 'BossEye' )
 				bossviewactor = e.Thing;
 			bosstag = "$BT_IOS";
+		}
+		else if ( bossmap == MAP_DLVL08 )
+		{
+			if ( e.Thing is 'Cyberdemon' )
+			{
+				bossactors.Push(e.Thing);
+				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
+				if ( trk ) trk.bBOSS = true;
+			}
+			bosstag = "$BT_CYBIE2";
 		}
 		else if ( bossmap == MAP_HE1M8_HE4M8 )
 		{

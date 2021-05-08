@@ -579,6 +579,8 @@ Class SWWMGesture : SWWMWeapon
 	NoGesture:
 		XZW1 A -1 A_FinishGesture();
 		Stop;
+	SoftDeselect:	// needed for item gestures so the weapon select sound doesn't get eaten up (dunno why)
+		XZW1 A 1;
 	Deselect:
 		XZW1 A -1 A_FullLower();
 		Stop;
@@ -659,7 +661,7 @@ Class SWWMItemGesture : SWWMWeapon abstract
 		// switch to old weapon
 		player.ReadyWeapon = gest;
 		player.PendingWeapon = gest.formerweapon;
-		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Deselect"));
+		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("SoftDeselect"));
 		invoker.gotused = true;
 	}
 

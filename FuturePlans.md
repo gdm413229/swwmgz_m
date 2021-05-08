@@ -26,13 +26,14 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Untouchable *(Finish a map without taking damage)*
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*
+  - Mishe Trickery *(Successfully input a cheat code)*
   - [Doom] Graffiti Master *(Doodle mustaches on 20 demon faces)*
   - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
   - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
   - [Doom] Encoding Destroyer *(Stare closely at FIREBLU for 30 seconds)*
   - [Doom] Dynamic Duo *(Defeat the Bruiser Brothers)*
-  - [Doom] Protip *(Defeat the Tyrant of Babel)*
+  - [Doom] Huge Guts *(Defeat the Tyrant of Babel)*
   - [Doom] All Brain *(Defeat the Spider Mastermind)*
   - [Doom] More Brain *(Defeat the Spider Sibling)*
   - [Doom] Final Cleanup *(Complete Baphomet's Challenge)*
@@ -62,11 +63,13 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
 * **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
+* **Customized cluster text stuff if that ever gets scriptified**
 * **Crouch sliding *(+ proper crouch dashing)***
 * **More items:**
   - [Heretic/Hexen] Safety Tether *(original)*
   - Angel of Death *(Total Destruction / SWWM Platinum Ep2)*
   - Black Matter Armor *(SWWM / UnSX 3)*
+  - Satellite *(Total Destruction)*
 * **Additional grenades *(replaces clips)*:**
   - Cyrus POW Grenades *(UnSX 4)*
   - Z-Bomb *(UnSX 3)*
@@ -112,10 +115,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Kirin
 * **Japanese localization???**
 * **Monster/decoration replacements add-on**
-* **Photo Mode** 
+* **Photo Mode**
   - Dedicated poses
   - Stickers
-* **Hardcore Mode side mod**
+* **Hardcore Mode**
   - Featuring Demolitionist on Maidbot frame
   - More complex game mechanics
   - Manual Hammerspace management

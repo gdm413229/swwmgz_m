@@ -26,6 +26,9 @@ Class SWWMScoreObj : Thinker
 
 	static SWWMScoreObj Spawn( int score, Vector3 pos, int type = ST_Score, Actor acc = null, int tcolor = -1 )
 	{
+		// early checks
+		if ( (type == ST_SCORE) && !swwm_scorenums ) return null;
+		else if ( (type > ST_SCORE) && !swwm_healthnums ) return null;
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		if ( !hnd ) return null;
 		let o = new("SWWMScoreObj");

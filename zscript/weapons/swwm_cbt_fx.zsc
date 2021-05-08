@@ -14,8 +14,16 @@ Class BustedQuake : Actor
 	}
 	override void PostBeginPlay()
 	{
-		if ( special1 < 3 ) A_StartSound("wallbuster/smallbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.32),1./max(1.,special1*.35),1.-special1*.05);
-		else A_StartSound("wallbuster/bigbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.16),1./max(1.,special1*.35),1.-special1*.03);
+		if ( (special1 < 3) || (special1 > 6) )
+		{
+			A_StartSound("wallbuster/smallbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.32),1./max(1.,special1*.35),1.-special1*.05);
+			A_StartSound("wallbuster/smallbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.32),1./max(1.,special1*.35),1.-special1*.05);
+		}
+		if ( special1 >= 3 )
+		{
+			A_StartSound("wallbuster/bigbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.35),1./max(1.,special1*.35),1.-special1*.01);
+			A_StartSound("wallbuster/bigbust",CHAN_VOICE,CHANF_OVERLAP,min(1.,special1*.35),1./max(1.,special1*.35),1.-special1*.01);
+		}
 		A_QuakeEx(special1,special1,special1,20+special1*5,0,300+special1*90,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:special1*.1);
 		A_AlertMonsters(swwm_uncapalert?0:2500);
 	}
@@ -42,7 +50,7 @@ Class BusterWall : Thinker
 	int hitplane;
 	bool busted;
 	Vector3 bustdir;
-	int busttics, delay;
+	int busttics, delay, bustmax;
 	double cutheight;
 	// cached
 	Vector3 boundsmin, boundsmax, step;
@@ -52,7 +60,7 @@ Class BusterWall : Thinker
 		if ( busted )
 		{
 			busttics++;
-			if ( busttics > 12 )
+			if ( busttics > bustmax )
 			{
 				Destroy();
 				return;
@@ -85,24 +93,24 @@ Class BusterWall : Thinker
 			if ( level.PointInSector(spot.xy) != hitsector ) continue;
 			spot += (FRandom[Wallbuster](-step.x,step.x),FRandom[Wallbuster](-step.y,step.y),FRandom[Wallbuster](-step.z,step.z));
 			if ( !level.IsPointInLevel(spot) ) continue;
-			if ( (initial || !(busttics%3)) && !Random[Wallbuster](0,2) )
+			if ( (initial || !(busttics%2)) && !Random[Wallbuster](0,1) )
 			{
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](-2.,8.);
-				let s = Actor.Spawn("SWWMSmoke",spot);
+				let s = Actor.Spawn("SWWMHalfSmoke",spot);
 				s.vel = pvel;
 				s.scale *= 2.5;
 				s.special1 = Random[Wallbuster](3,8);
 				s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
 			}
-			if ( (!initial && (busttics%2)) || (busttics > 4) ) continue;
-			int numpt = Random[Wallbuster](0,3);
+			if ( (!initial && (busttics%3)) || (busttics > (bustmax/2)) ) continue;
+			int numpt = Random[Wallbuster](-4,1);
 			for ( int i=0; i<numpt; i++ )
 			{
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](9.,24.);
 				let s = Actor.Spawn("SWWMSpark",spot);
 				s.vel = pvel;
 			}
-			numpt = Random[Wallbuster](1,2);
+			numpt = Random[Wallbuster](0,2);
 			for ( int i=0; i<numpt; i++ )
 			{
 				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6))).unit()*FRandom[Wallbuster](2.,16.);
@@ -347,6 +355,7 @@ Class BusterWall : Thinker
 		}
 		bust.busted = true;
 		bust.busttics = 0;
+		bust.bustmax = min(30,int(12+girthitude**.1));
 		// shush
 		hs.flags |= Sector.SECF_SILENTMOVE;
 		// filler texture

@@ -131,7 +131,24 @@ Class MothPlushyGesture : SWWMItemGesture {}
 Class AA12ModelGesture : SWWMItemGesture {}
 Class CactusHegeGesture : SWWMItemGesture {}
 Class TastyHoagieGesture : SWWMItemGesture {}
-Class DemoPlushGesture : SWWMItemGesture {}
+Class DemoPlushGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFG 3;
+		XZW1 HI 4;
+		XZW1 JKL 2;
+		XZW1 MNO 4;
+		XZW1 PQ 3;
+		XZW1 R 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 STUVWX 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class ManarokouGesture : SWWMItemGesture {}
 Class LithiumNovelGesture : SWWMItemGesture {}
 Class KirinCummiesGesture : SWWMItemGesture {}

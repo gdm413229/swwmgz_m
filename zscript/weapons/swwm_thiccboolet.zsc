@@ -828,11 +828,11 @@ Class SilverBullet : SWWMWeapon
 		else if ( !invoker.fcbselected && ((invoker.Ammo2.Amount > 0) || (CountInv("SilverBullets2") > 0)) )
 			invoker.fcbselected = (ifempty&&((invoker.Ammo1.Amount>0)||(CountInv("SilverBullets")>0)))?false:true;
 		if ( oldsel != invoker.fcbselected ) A_StartSound("misc/invchange",CHAN_WEAPONEXTRA,CHANF_UI|CHANF_LOCAL);
-		A_WeaponReady(WRF_NOFIRE);
+		A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
 	}
 	action void A_AltHold()
 	{
-		A_WeaponReady(WRF_NOFIRE);
+		A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
 		// tap fire to unload round
 		if ( player.cmd.buttons&BT_ATTACK )
 		{

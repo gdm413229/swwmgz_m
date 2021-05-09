@@ -62,7 +62,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Official Sunder support *(when the WAD is complete)***
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Replace all hitscan with *"light projectiles"***
-* **Leaning and a lot of other stuff involving ViewAngles and ViewPos**
 * **Customized cluster text stuff if that ever gets scriptified**
 * **Crouch sliding *(+ proper crouch dashing)***
 * **More items:**
@@ -70,23 +69,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Angel of Death *(Total Destruction / SWWM Platinum Ep2)*
   - Black Matter Armor *(SWWM / UnSX 3)*
   - Satellite *(Total Destruction)*
-* **Additional grenades *(replaces clips)*:**
-  - Cyrus POW Grenades *(UnSX 4)*
-  - Z-Bomb *(UnSX 3)*
-  - Dr. Locke's Burrow Bombs *(SWWM Platinum Ep2 / UnSX 5)*
-  - Vacuum Bomb *(SWWM Platinum)*
-  - Cryptek Blast Charge *(Ultra Suite)*
-  - U-Bomb *(UnSX 4)*
-* **Additional ammo types:**
-  - Yellow shell - Dyratin charge *(Plasma slug)*
-  - Pink shell - Micro-grenade *(What it says on the tin)*
-  - Blue rocket - Hellblazer Torturer *(Nail bomb)*
-  - White rocket - Hellblazer Subjugator *(Stun bomb)*
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)
 * **Additional gestures + gesture menu**
-  - Dab (loud and bassy, alerts monsters)
   - Airhorn (unlimited range A_AlertMonsters, to unbreak vanilla teleport closets)
   - Clap
   - The Bird
@@ -95,7 +81,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Heart
   - Shrug
   - Beckon
-  - Facepalm
 * **DLC Gameset:**
   - Tetris
   - Pong

@@ -761,12 +761,12 @@ Class Spreadgun : SWWMWeapon
 		}
 		if ( invoker.nextammo != types[next] ) A_StartSound("misc/invchange",CHAN_WEAPONEXTRA,CHANF_UI|CHANF_LOCAL);
 		invoker.nextammo = types[next];
-		A_WeaponReady(WRF_NOFIRE);
+		A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
 	}
 
 	action void A_AltHold()
 	{
-		A_WeaponReady(WRF_NOFIRE);
+		A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
 		// tap fire to unload round
 		if ( invoker.chambered && (player.cmd.buttons&BT_ATTACK) )
 		{

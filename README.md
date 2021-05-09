@@ -172,9 +172,9 @@ Little bundles of fun (in hot lead form) found either as single units (sometimes
 
 Another signature weapon of the **SWWM** series. This time in its third and far more improved revision.
 
-**Primary fire:** Shoot a hot flaming rocket straight ahead.
+**Primary fire:** Shoot a hot flaming rocket straight ahead. Hold to load up to 2 additional rockets, then release for burst fire.
 
-**Secondary fire:** Lob the rocket as a grenade that will bounce around.
+**Secondary fire:** Lob the rocket as a grenade that will bounce around. Hold to load up to 2 additional grenades, then release for burst fire.
 
 **Tertiary fire (Zoom):** Change the ammo type, there are four options (see ammo section below).
 

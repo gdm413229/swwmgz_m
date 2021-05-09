@@ -236,6 +236,8 @@ Class HellblazerFlare : Actor
 Class HellblazerMissile : Actor
 {
 	int deto;
+	Actor seektarget;
+	Vector3 InitialDir, Acceleration;
 
 	Default
 	{
@@ -281,10 +283,36 @@ Class HellblazerMissile : Actor
 				let t = Spawn("HellblazerTrail",level.Vec3Offset(pos,-vel.unit()*i+traildir*3));
 				t.vel = traildir*4.;
 			}
+			if ( InitialDir.length() < double.epsilon ) InitialDir = vel.unit();
+			vel += Acceleration/GameTicRate;
+			Vector3 dir = vel.unit();
+			if ( vel.length() > 50. ) vel = dir*50.;
 		}
 		if ( deto > 1 )
 		{
 			ExplodeMissile();
+			return;
+		}
+		if ( seektarget )
+		{
+			// seek tracer
+			if ( SWWMUtility.SphereIntersect(seektarget,level.Vec3Offset(pos,vel),bNOGRAVITY?50:90) )
+			{
+				deto++;
+				tracer = seektarget;
+				return;
+			}
+			if ( bNOGRAVITY )
+			{
+				Vector3 SeekingDir = level.Vec3Diff(pos,seektarget.Vec3Offset(0,0,seektarget.height/2)).unit();
+				if ( SeekingDir dot InitialDir > -1 )
+				{
+					double MagnitudeVel = Vel.length();
+					SeekingDir = (SeekingDir*.25*MagnitudeVel+Vel).unit();
+					Vel = MagnitudeVel*SeekingDir;
+					Acceleration = 25*SeekingDir;
+				}
+			}
 			return;
 		}
 		// proximity check
@@ -781,6 +809,16 @@ Mixin Class HellblazerGrenade
 		rollvel = FRandom[Hellblazer](-16,16);
 		anglevel = FRandom[Hellblazer](-16,16);
 		pitchvel = FRandom[Hellblazer](-16,16);
+		// steer towards seek target
+		if ( seektarget )
+		{
+			Vector3 dirto = level.Vec3Diff(pos,seektarget.Vec3Offset(0,0,seektarget.Height/2));
+			dirto /= dirto.length();
+			dirto.z += .1;
+			double spd = vel.length();
+			vel /= spd;
+			vel = (vel*.3+dirto*.7)*spd;
+		}
 	}
 	States
 	{
@@ -950,7 +988,7 @@ Class HellblazerClusterMini : HellblazerMissile2
 		if ( !whomst ) return;
 		Vector3 dirto = level.Vec3Diff(pos,whomst.Vec3Offset(0,0,whomst.Height/2));
 		dirto /= dirto.length();
-		dirto.z += .3;
+		dirto.z += .1;
 		double spd = vel.length();
 		vel /= spd;
 		vel = (vel*.3+dirto*.7)*spd;

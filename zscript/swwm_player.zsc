@@ -15,7 +15,7 @@ Class Demolitionist : PlayerPawn
 	transient int lastdamagetic;
 	bool lastground;
 	int lastgroundtic, lastairtic;
-	double lastvelz, prevvelz;
+	double lastvelz, prevvelz, landvelz;
 	double ssup;
 
 	transient CVar myvoice;
@@ -1015,6 +1015,9 @@ Class Demolitionist : PlayerPawn
 			if ( abs(bumppitch[i]) > double.epsilon ) continue;
 			bumppitch.Delete(i--);
 		}
+		if ( player.onground && !lastground ) landvelz = lastvelz;
+		else if ( !player.onground && lastground ) landvelz = 0;
+		else if ( player.onground && lastground ) landvelz *= .9;
 		lastground = player.onground;
 		lastvelz = prevvelz;
 		prevvelz = vel.z;
@@ -1877,7 +1880,11 @@ Class Demolitionist : PlayerPawn
 						SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
 						// bhop, z vel relative to vel size
 						if ( vel.z < 25. )	// don't ramp up too hard
+						{
 							vel.z += jumpvelz*(1.2+vel.length()*.01);
+							// add part of last landing z velocity too
+							vel.z += max(0,-landvelz*(raging?.45:.35));
+						}
 						// accelerate
 						vel.xy += (RotateVector(NormalizedMove(),angle)/2400.)*(1.+vel.length()*.025)*TweakSpeed();
 					}
@@ -1885,7 +1892,11 @@ Class Demolitionist : PlayerPawn
 					{
 						// first jump
 						if ( vel.z < 10. )	// don't ramp up too hard
+						{
 							vel.z += jumpvelz*((player.cmd.buttons&BT_RUN)?1.25:1.);
+							// add part of last landing z velocity too
+							vel.z += max(0,-landvelz*(raging?.35:.25));
+						}
 						// long jump if running
 						if ( !walljump && !wallclimb && (player.cmd.buttons&BT_RUN) )
 							(vel.xy += RotateVector(NormalizedMove(),angle)/1500.)*(raging?2.:1.)*TweakSpeed();

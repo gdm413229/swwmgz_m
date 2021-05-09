@@ -39,8 +39,8 @@ int main( void )
 	//   NETNOTCH.data    : 4x16, I8 (64 bytes)
 	uint8_t pal[48] = {0};
 	uint8_t startup[4][38400] = {{0}};
-	uint8_t notch[184] = {{0}};
-	uint8_t netnotch[32] = {{0}};
+	uint8_t notch[184] = {0};
+	uint8_t netnotch[32] = {0};
 	uint8_t blk[8] = {0};
 	FILE *fout = fopen("STARTUP.dat","wb");
 	FILE *fin = fopen("STARTUP.data.pal","rb");

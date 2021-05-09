@@ -1,0 +1,10 @@
+- Damn thing breaks HARD with non-bitmap fonts, something wonky af with the
+  glyph offsets, will have to investigate further.
+- Obviously this doesn't work well with proportional fonts, those would need a
+  different format where each glyph is a separate graphic with its own offsets
+  and stuff.
+- Doesn't handle unicode blocks beyond the basic multilingual plane, might
+  actually be an issue with freetype itself, or the fonts I use, though I CAN
+  see that the glyphs are there if I use a character map program.
+- Vertical shift has to be specified manually for some fonts that have some
+  sort of built-in offset, I have yet to figure a way to automate this.

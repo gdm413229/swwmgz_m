@@ -167,8 +167,10 @@ Class FroggyChair : Actor
 Class SWWMFlag : Actor
 {
 	int seq;
+	int holdtime;
+	bool carried;
 
-	override bool Used( Actor user )
+	void ChangeFlag()
 	{
 		seq = (seq+1)%4;
 		switch ( seq )
@@ -187,6 +189,77 @@ Class SWWMFlag : Actor
 			break;
 		}
 		A_StartSound("bestsound",CHAN_BODY,CHANF_OVERLAP);
+	}
+	void BeginCarry()
+	{
+		master.A_StartSound("demolitionist/handsup",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetScale(.5);
+		A_SetRenderStyle(.5,STYLE_Translucent);
+		carried = true;
+		bSOLID = false;
+		bNOGRAVITY = true;
+		vel *= 0.;
+	}
+	void UpdateCarry()
+	{
+		prev = pos;
+		Vector3 tomove = master.Vec2OffsetZ(cos(master.angle)*40.,sin(master.angle)*40.,master.player.viewz-32.);
+		Vector3 dirto = level.Vec3Diff(pos,tomove);
+		double intp = clamp(dirto.length()*.01,.3,.7);
+		SetOrigin(level.Vec3Offset(pos,dirto*intp),true);
+		double magvel = dirto.length();
+		dirto /= magvel;
+		vel = dirto*min(50,magvel);
+		double angleto = deltaangle(angle,master.AngleTo(self));
+		A_SetAngle(angle+angleto*.3,SPF_INTERPOLATE);
+	}
+	void EndCarry()
+	{
+		if ( master ) master.A_StartSound("demolitionist/handsdown",CHAN_ITEM,CHANF_OVERLAP);
+		A_SetScale(1.);
+		A_SetRenderStyle(1.,STYLE_Normal);
+		carried = false;
+		bSOLID = true;
+		bNOGRAVITY = false;
+		vel *= 0.;
+	}
+	override void Tick()
+	{
+		if ( master && (master.Health > 0) && master.player && master.player.usedown )
+		{
+			if ( carried ) UpdateCarry();
+			else if ( master.Distance2D(self) <= PlayerPawn(master).UseRange )
+			{
+				holdtime++;
+				if ( holdtime >= 15 ) BeginCarry();
+			}
+		}
+		else if ( holdtime > 0 )
+		{
+			if ( holdtime < 15 ) ChangeFlag();
+			if ( carried ) EndCarry();
+			master = null;
+			holdtime = 0;
+		}
+		if ( !carried )
+		{
+			Super.Tick();
+			return;
+		}
+		// no need to care about everything when carried
+		if ( !CheckNoDelay() || (tics == -1) ) return;
+		if ( tics > 0 ) tics--;
+		while ( !tics )
+		{
+			if ( !SetState(CurState.NextState) )
+				return;
+		}
+	}
+	override bool Used( Actor user )
+	{
+		if ( carried ) return false;
+		master = user;
+		holdtime = 1;
 		return true;
 	}
 	Default

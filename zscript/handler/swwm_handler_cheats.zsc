@@ -6,6 +6,7 @@ extend Class SWWMHandler
 	transient ui String kstr, klingerstr;
 	transient ui bool kfail;
 	transient ui int rss;
+	transient ui Font kfnt;
 	ui bool nostalgic;
 
 	private void CheatEvent( ConsoleEvent e )
@@ -438,19 +439,19 @@ extend Class SWWMHandler
 		double shine = clamp((klinger-(gametic+e.fractic+40))/20.,0.,1.);
 		int col = (kcode>4)?0:(kfail)?2:1;
 		int tlen = chstr.CodePointCount();
-		let fnt = newsmallfont;
-		int width = fnt.StringWidth(chstr)+(tlen-1);
+		if ( !kfnt ) kfnt = Font.GetFont('TewiShadedOutline');
+		int width = (kfnt.StringWidth(chstr)+2*(tlen-1))*2;
 		int xx = int((ss.x-width)/2.);
-		int yy = int((ss.y-newsmallfont.GetHeight())/2.);
+		int yy = int((ss.y-kfnt.GetHeight())/2.);
 		rss = (kcode>4)?gametic:klinger;
 		for ( int i=0, pos=0; i<tlen; i++ )
 		{
 			int ch;
 			[ch, pos] = chstr.GetNextCodePoint(pos);
-			if ( col == 0 ) Screen.DrawChar(fnt,Font.CR_DARKGRAY,xx+RandomShiver(),yy+RandomShiver(),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			else if ( col == 1 ) Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ColorOverlay,Color(int(shine*255),255,255,255));
-			else if ( col == 2 ) Screen.DrawChar(fnt,Font.CR_RED,xx,yy+RandomFall()*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-			xx += newsmallfont.GetCharWidth(ch)+1;
+			if ( col == 0 ) Screen.DrawChar(kfnt,Font.CR_DARKGRAY,xx+RandomShiver(),yy+RandomShiver(),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.);
+			else if ( col == 1 ) Screen.DrawChar(kfnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.,DTA_Alpha,alph,DTA_ColorOverlay,Color(int(shine*255),255,255,255));
+			else if ( col == 2 ) Screen.DrawChar(kfnt,Font.CR_RED,xx,yy+RandomFall()*(1.-alph),ch,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.,DTA_Alpha,alph);
+			xx += kfnt.GetCharWidth(ch)*2;
 		}
 	}
 }

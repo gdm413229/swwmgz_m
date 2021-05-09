@@ -2162,22 +2162,15 @@ Class DemolitionistMenu : GenericMenu
 			int cur = clamp(b.progress.GetInt(),0,b.maxval);
 			bfactor = cur/double(b.maxval);
 		}
-		if ( adone && bdone )
-		{
-			// alphabetic sort
-			String tag1 = StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TAG"),
-				tag2 = StringTable.Localize("$SWWM_ACHIEVEMENT_"..b.basename.."_TAG");
-			return tag1 > tag2;
-		}
+		// sort by base index
+		if ( adone && bdone ) return a.baseindex > b.baseindex;
 		if ( !adone && !bdone )
 		{
 			// progress sort?
 			if ( afactor != bfactor )
 				return afactor < bfactor;
-			// alphabetic sort
-			String tag1 = StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TAG"),
-				tag2 = StringTable.Localize("$SWWM_ACHIEVEMENT_"..b.basename.."_TAG");
-			return tag1 > tag2;
+			// sort by base index
+			return a.baseindex > b.baseindex;
 		}
 		// state sort
 		return bdone;

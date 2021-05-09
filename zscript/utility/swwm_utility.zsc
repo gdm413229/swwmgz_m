@@ -15,6 +15,7 @@ enum EDoExplosionFlags
 
 Class SWWMAchievement
 {
+	int baseindex;	// order of the achievement in the list
 	String basename;
 	transient CVar state, progress;
 	TextureID icon;
@@ -38,65 +39,74 @@ Class SWWMUtility
 		achievements.Clear();
 		let lmp = Wads.FindLump("achievements.lst");
 		if ( lmp == -1 ) ThrowAbortException("'achievements.lst' not found");
-		String dat = Wads.ReadLump(lmp);
-		Array<String> list;
-		dat.Split(list,"\n");
+		String dat;
+		Array<String> list, ln;
 		bool hide = (filter&&(swwm_filterachievements==2));
-		for ( int i=0; i<list.Size(); i++ )
+		int bidx = 0;
+		while ( lmp != -1 )
 		{
-			if ( (list[i].Length() == 0) || (list[i].Left(1) == "#") || (list[i].Left(1) == "") )
-				continue;
-			Array<String> ln;
-			list[i].Split(ln,",",0);
-			// game filtering
-			if ( !(gameinfo.gametype&GAME_DOOM) && (ln[3] ~== "doom") ) continue;
-			else if ( !(gameinfo.gametype&GAME_HERETIC) && (ln[3] ~== "heretic") ) continue;
-			else if ( !(gameinfo.gametype&GAME_HEXEN) && (ln[3] ~== "hexen") ) continue;
-			else if ( !(gameinfo.gametype&GAME_RAVEN) && (ln[3] ~== "raven") ) continue;
-			else if ( !(gameinfo.gametype&(GAME_DOOM|GAME_HERETIC)) && (ln[3] ~== "nothexen") ) continue;
-			let ac = new("SWWMAchievement");
-			ac.basename = ln[0];
-			ac.maxval = ln[1].ToInt();
-			ac.state = CVar.FindCVar("swwm_achievement_"..ac.basename);
-			// if filtering, always hide the full completion achievement until it's unlocked
-			if ( filter && (ac.basename == "everything") && (ac.state.GetInt() <= 0) )
+			dat = Wads.ReadLump(lmp);
+			list.Clear();
+			dat.Split(list,"\n");
+			for ( int i=0; i<list.Size(); i++ )
 			{
-				ac.Destroy();
-				continue;
-			}
-			if ( !ac.state ) ThrowAbortException("could not find cvar 'swwm_achievement_"..ac.basename.."'");
-			if ( ac.maxval )
-			{
-				ac.progress = CVar.FindCVar("swwm_progress_"..ac.basename);
-				if ( !ac.progress ) ThrowAbortException("could not find cvar 'swwm_progress_"..ac.basename.."'");
-				// special case for maxval
-				if ( ac.basename == "allcoll" )
+				if ( (list[i].Length() == 0) || (list[i].Left(1) == "#") || (list[i].Left(1) == "") )
+					continue;
+				ln.Clear();
+				list[i].Split(ln,",",0);
+				// game filtering
+				if ( !(gameinfo.gametype&GAME_DOOM) && (ln[3] ~== "doom") ) continue;
+				else if ( !(gameinfo.gametype&GAME_HERETIC) && (ln[3] ~== "heretic") ) continue;
+				else if ( !(gameinfo.gametype&GAME_HEXEN) && (ln[3] ~== "hexen") ) continue;
+				else if ( !(gameinfo.gametype&GAME_RAVEN) && (ln[3] ~== "raven") ) continue;
+				else if ( !(gameinfo.gametype&(GAME_DOOM|GAME_HERETIC)) && (ln[3] ~== "nothexen") ) continue;
+				let ac = new("SWWMAchievement");
+				ac.baseindex = bidx;
+				ac.basename = ln[0];
+				ac.maxval = ln[1].ToInt();
+				ac.state = CVar.FindCVar("swwm_achievement_"..ac.basename);
+				// if filtering, always hide the full completion achievement until it's unlocked
+				if ( filter && (ac.basename == "everything") && (ac.state.GetInt() <= 0) )
 				{
-					int nc = 0;
-					for ( int i=0; i<AllActorClasses.Size(); i++ )
-					{
-						let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
-						if ( !c || (c == 'SWWMCollectible') ) continue;
-						let def = GetDefaultByType(c);
-						// check that we can collect it in this IWAD
-						if ( !def.ValidGame() ) continue;
-						nc++;
-					}
-					ac.maxval = nc;
+					ac.Destroy();
+					continue;
 				}
+				if ( !ac.state ) ThrowAbortException("could not find cvar 'swwm_achievement_"..ac.basename.."'");
+				if ( ac.maxval )
+				{
+					ac.progress = CVar.FindCVar("swwm_progress_"..ac.basename);
+					if ( !ac.progress ) ThrowAbortException("could not find cvar 'swwm_progress_"..ac.basename.."'");
+					// special case for maxval
+					if ( ac.basename == "allcoll" )
+					{
+						int nc = 0;
+						for ( int i=0; i<AllActorClasses.Size(); i++ )
+						{
+							let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+							if ( !c || (c == 'SWWMCollectible') ) continue;
+							let def = GetDefaultByType(c);
+							// check that we can collect it in this IWAD
+							if ( !def.ValidGame() ) continue;
+							nc++;
+						}
+						ac.maxval = nc;
+					}
+				}
+				else ac.progress = null;
+				// hide away achievements at 0%
+				if ( hide && (ac.state.GetInt() <= 0) && (!ac.progress || (ac.progress.GetInt() <= 0)) )
+				{
+					ac.Destroy();
+					continue;
+				}
+				ac.hasformat = (ln[2]~=="yes");
+				ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
+				// fallback icon if one is not found
+				if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
+				achievements.Push(ac);
+				bidx++;
 			}
-			else ac.progress = null;
-			// hide away achievements at 0%
-			if ( hide && (ac.state.GetInt() <= 0) && (!ac.progress || (ac.progress.GetInt() <= 0)) )
-			{
-				ac.Destroy();
-				continue;
-			}
-			ac.hasformat = (ln[2]~=="yes");
-			ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
-			// fallback icon if one is not found
-			if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
-			achievements.Push(ac);
+			lmp = Wads.FindLump("achievements.lst",lmp+1);
 		}
 	}
 	// achievement helpers

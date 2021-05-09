@@ -452,7 +452,7 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 	{
 		Super.Init(x,y);
 		mText = text;
-		mFont = desc.mFont;
+		mFont = (language~=="jp")?Font.GetFont('MPlusShadedOutline'):desc.mFont;
 		mColor = (color>=0)?color:desc.mFontColor;
 	}
 
@@ -460,7 +460,7 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 	{
 		Super.Init(x,y);
 		mText = text;
-		mFont = font;
+		mFont = (language~=="jp")?Font.GetFont('MPlusShadedOutline'):font;
 		mColor = color;
 	}
 
@@ -525,32 +525,40 @@ Class SWWMMessageBox : MessageBoxMenu
 	override void Init( Menu parent, String message, int messagemode, bool playsound, Name cmd, voidptr native_handler )
 	{
 		Super.Init(parent,message,messagemode,playsound,cmd,native_handler);
-		destWidth = CleanWidth;
-		destHeight = CleanHeight;
-		mMessage = newsmallfont.BreakLines(Stringtable.Localize(message),int(300/NotifyFontScale));
+		destWidth = CleanWidth_1;
+		destHeight = CleanHeight_1;
+		textfont = (language~=="jp")?Font.GetFont('MPlusShadedOutline'):Font.GetFont('TewiShadedOutline');
+		mMessage = textfont.BreakLines(Stringtable.Localize(message),200);
 	}
 
 	override void Drawer()
 	{
-		let fontheight = int(newsmallfont.GetHeight()*NotifyFontScale);
+		let fontheight = textfont.GetHeight()-2;
 		double y = destHeight/2;
 		int c = mMessage.Count();
-		y -= c*fontHeight/2;
+		int theight = 0;
 		for ( int i=0; i<c; i++ )
 		{
-			Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorValue,destWidth/2-int(mMessage.StringWidth(i)*NotifyFontScale)/2,y,mMessage.StringAt(i),DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
-			y += fontheight;
+			int scl = ((i==c-1)||(mMessage.StringWidth(i)==0))?2:3;
+			theight += fontheight*scl;
+		}
+		y -= theight/2;
+		for ( int i=0; i<c; i++ )
+		{
+			double scl = ((i==c-1)||(mMessage.StringWidth(i)==0))?2.:3.;
+			Screen.DrawText(textfont,OptionMenuSettings.mFontColorValue,destWidth/2-mMessage.StringWidth(i)*(scl/2.),y,mMessage.StringAt(i),DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,scl,DTA_ScaleY,scl);
+			y += fontheight*scl;
 		}
 		if ( mMessageMode != 0 ) return;
 		y += fontheight;
 		mMouseY = int(y);
 		String stryes = Stringtable.Localize("$TXT_YES");
 		String strno = Stringtable.Localize("$TXT_NO");
-		Screen.DrawText(newsmallfont,messageSelection==0?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-newsmallfont.StringWidth(stryes))/2,y,stryes, DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
-		Screen.DrawText(newsmallfont,messageSelection==1?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-newsmallfont.StringWidth(strno))/2,y+fontheight,strno,DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,NotifyFontScale,DTA_ScaleY,NotifyFontScale);
+		Screen.DrawText(textfont,messageSelection==0?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-2*textfont.StringWidth(stryes))/2,y,stryes, DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.);
+		Screen.DrawText(textfont,messageSelection==1?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor,(destWidth-2*textfont.StringWidth(strno))/2,y+fontheight*2,strno,DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.);
 		if ( (messageSelection < 0) || ((MenuTime()%8) >= 4) ) return;
-		Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorSelection,(destWidth-newsmallfont.StringWidth(messageSelection?strno:stryes))/2-16,y+fontheight*messageSelection,"►",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
-		Screen.DrawText(newsmallfont,OptionMenuSettings.mFontColorSelection,(destWidth+newsmallfont.StringWidth(messageSelection?strno:stryes))/2+8,y+fontheight*messageSelection,"◄",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true);
+		Screen.DrawText(textfont,OptionMenuSettings.mFontColorSelection,(destWidth-2*textfont.StringWidth(messageSelection?strno:stryes))/2-24,y+fontheight*2*messageSelection,"►",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.);
+		Screen.DrawText(textfont,OptionMenuSettings.mFontColorSelection,(destWidth+2*textfont.StringWidth(messageSelection?strno:stryes))/2+8,y+fontheight*2*messageSelection,"◄",DTA_VirtualWidth,destWidth,DTA_VirtualHeight,destHeight,DTA_KeepRatio,true,DTA_ScaleX,2.,DTA_ScaleY,2.);
 	}
 
 	override bool MouseEvent( int type, int x, int y )
@@ -564,7 +572,7 @@ Class SWWMMessageBox : MessageBoxMenu
 		else
 		{
 			int sel = -1;
-			int fh = newsmallfont.GetHeight()+1;
+			int fh = (textfont.GetHeight()-2)*2;
 			// convert x/y from screen to virtual coordinates, according to CleanX/Yfac use in DrawTexture
 			x = x*destWidth/screen.GetWidth();
 			y = y*destHeight/screen.GetHeight();
@@ -573,9 +581,9 @@ Class SWWMMessageBox : MessageBoxMenu
 				sel = (y >= mMouseY+fh);
 				// are we actually selecting the text?
 				String txt = sel?Stringtable.Localize("$TXT_NO"):Stringtable.Localize("$TXT_YES");
-				int txtln = newsmallfont.StringWidth(txt);
-				int minx = (destWidth-txtln)/2;
-				if ( (x < (destWidth-txtln)/2) && (x > (destWidth+txtln)/2) )
+				int txtln = textfont.StringWidth(txt);
+				int minx = (destWidth-txtln);
+				if ( (x < (destWidth-txtln)) && (x > (destWidth+txtln)) )
 					sel = -1;
 			}
 			messageSelection = sel;
@@ -611,7 +619,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(desc.mXpos,desc.mYpos,desc.mLinespacing,child,param);
 		mText = text;
-		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShaded');
+		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShadedOutline');
 		else mFont = desc.mFont;
 		mColor = desc.mFontColor;
 		mColorSelected = desc.mFontcolor2;
@@ -622,7 +630,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(x,y,height,child,param);
 		mText = text;
-		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShaded');
+		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShadedOutline');
 		else mFont = font;
 		mColor = color;
 		mColorSelected = color2;
@@ -661,7 +669,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 					[ch, pos] = text.GetNextCodePoint(pos);
 					double yy = y+4*sin(32*i+8*Menu.MenuTime())*CleanYFac;
 					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_ScaleX,3.*CleanXFac,DTA_ScaleY,3.*CleanYFac);
-					xx += (mFont.GetCharWidth(ch)-1)*3*CleanXFac;	// account for menu font kerning
+					xx += (mFont.GetCharWidth(ch)-2)*3*CleanXFac;	// account for menu font kerning
 				}
 			}
 			else
@@ -672,7 +680,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 					[ch, pos] = text.GetNextCodePoint(pos);
 					double yy = y+4*sin(32*i+8*Menu.MenuTime());
 					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
-					xx += (mFont.GetCharWidth(ch)-1)*3;	// account for menu font kerning
+					xx += (mFont.GetCharWidth(ch)-2)*3;	// account for menu font kerning
 				}
 			}
 		}
@@ -804,6 +812,7 @@ Class OptionMenuItemScaleSliderFix : OptionMenuItemScaleSlider
 Class SWWMMenuDelegate : DoomMenuDelegate
 {
 	transient Font TewiFont, MPlusFont;
+	transient Font TewiFont2, MPlusFont2;
 
 	override int DrawCaption( String title, Font fnt, int y, bool drawit )
 	{
@@ -811,10 +820,10 @@ Class SWWMMenuDelegate : DoomMenuDelegate
 		// somehow it doesn't get overriden when using PickFont()
 		// most likely because of pointer poopery
 		// could we get a function for fetching a font's name, graf?
-		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
-		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
-		if ( language ~== "jp" ) fnt = MPlusFont;
-		else fnt = TewiFont;
+		if ( !TewiFont2 ) TewiFont2 = Font.GetFont('TewiShadedOutline');
+		if ( !MPlusFont2 ) MPlusFont2 = Font.GetFont('MPlusShadedOutline');
+		if ( language ~== "jp" ) fnt = MPlusFont2;
+		else fnt = TewiFont2;
 		if ( drawit ) Screen.DrawText(fnt,OptionMenuSettings.mTitleColor,(CleanWidth_1-fnt.StringWidth(title)*3)/2,10,title, DTA_VirtualWidth,CleanWidth_1,DTA_VirtualHeight,CleanHeight_1,DTA_KeepRatio,true,DTA_ScaleX,3.,DTA_ScaleY,3.);
 		return (y+fnt.GetHeight()*3)*CleanYfac_1;	// return is spacing in screen pixels.
 	}
@@ -824,12 +833,17 @@ Class SWWMMenuDelegate : DoomMenuDelegate
 	{
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		if ( !MPlusFont ) MPlusFont = Font.GetFont('MPlusShaded');
-		if ( (fnt == SmallFont) || (fnt == SmallFont2) || (fnt == AlternativeSmallFont) || (fnt == NewSmallFont)
-			|| (fnt == BigFont) || (fnt == AlternativeBigFont) || (fnt == OriginalBigFont) || (fnt == IntermissionFont)
-			|| !fnt )
+		if ( !TewiFont2 ) TewiFont2 = Font.GetFont('TewiShadedOutline');
+		if ( !MPlusFont2 ) MPlusFont2 = Font.GetFont('MPlusShadedOutline');
+		if ( (fnt == SmallFont) || (fnt == SmallFont2) || (fnt == AlternativeSmallFont) || (fnt == NewSmallFont) || !fnt )
 		{
 			if ( language ~== "jp" ) return MPlusFont;
 			return TewiFont;
+		}
+		if ( (fnt == BigFont) || (fnt == AlternativeBigFont) || (fnt == OriginalBigFont) || (fnt == IntermissionFont) )
+		{
+			if ( language ~== "jp" ) return MPlusFont2;
+			return TewiFont2;
 		}
 		return fnt;
 	}

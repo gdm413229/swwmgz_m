@@ -109,7 +109,7 @@ Class SWWMCreditsMenu : GenericMenu
 	String sdev, sassets, smusic, sfanart, slocal, spatrons, sthanks;
 	Array<SWWMCreditsEntry> cdev, cassets, cmusic, cfanart, clocal, cpatrons, cthanks;
 	String oldlang;
-	transient Font sfnt;
+	transient Font sfnt, bfnt;
 	Vector2 ss;
 	double hs;
 	int logow, logoh;
@@ -129,6 +129,7 @@ Class SWWMCreditsMenu : GenericMenu
 	{
 		String curlang = language;
 		if ( !sfnt || (curlang != oldlang) ) sfnt = (curlang ~== "jp")?Font.GetFont('MPlusShaded'):Font.GetFont('TewiShaded');
+		if ( !bfnt || (curlang != oldlang) ) bfnt = (curlang ~== "jp")?Font.GetFont('MPlusShadedOutline'):Font.GetFont('TewiShadedOutline');
 		oldlang = curlang;
 	}
 	void UpdateSize()
@@ -214,7 +215,7 @@ Class SWWMCreditsMenu : GenericMenu
 		spos = ss.y-logoh;
 		// calc total height
 		theight = logoh;
-		theight += 7*(SECTION_PAD+sfnt.GetHeight()*3);
+		theight += 7*(SECTION_PAD+bfnt.GetHeight()*3);
 		for ( int i=0; i<cdev.Size(); i++ )
 		{
 			theight += ENTRY_PAD;
@@ -275,9 +276,9 @@ Class SWWMCreditsMenu : GenericMenu
 	{
 		// don't draw if we're offscreen, saves time
 		y += SECTION_SHIFT;
-		if ( (y+sfnt.GetHeight()*3 < 0) || (y > ss.y) ) return sfnt.GetHeight()*3;
-		Screen.DrawText(sfnt,Font.CR_BLUE,x-sfnt.StringWidth(txt)*1.5,y,txt,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ScaleX,3.,DTA_ScaleY,3.);
-		return sfnt.GetHeight()*3;
+		if ( (y+bfnt.GetHeight()*3 < 0) || (y > ss.y) ) return bfnt.GetHeight()*3;
+		Screen.DrawText(bfnt,Font.CR_BLUE,x-bfnt.StringWidth(txt)*1.5,y,txt,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ScaleX,3.,DTA_ScaleY,3.);
+		return bfnt.GetHeight()*3;
 	}
 	override void Drawer()
 	{

@@ -16,7 +16,7 @@ Class OnFireLight : DynamicLight
 		Args[0] = clamp(of.Amount*4,0,255);
 		Args[1] = clamp(of.Amount*2,0,160);
 		Args[2] = clamp(of.Amount/2,0,24);
-		Args[3] = int(max(of.victim.default.radius,of.victim.default.height)*(of.victim.scale.x+of.victim.scale.y)*1.2+40+clamp(of.amount/5,0,120));
+		Args[3] = int(max(of.victim.radius,of.victim.height)*(of.victim.scale.x+of.victim.scale.y)*1.2+40+clamp(of.amount/5,0,120));
 		SetOrigin(of.Victim.Vec3Offset(0,0,of.Victim.Height/2),true);
 	}
 }

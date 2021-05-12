@@ -67,8 +67,9 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **More items:**
   - [Heretic/Hexen] Safety Tether *(original)*
   - Angel of Death *(Total Destruction / SWWM Platinum Ep2)*
-  - Black Matter Armor *(SWWM / UnSX 3)*
+  - Black Matter Armor *(UnSX 3 / SWWM)*
   - Satellite *(Total Destruction)*
+  - Devastation Sigil *(SWWM Gold)*
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)

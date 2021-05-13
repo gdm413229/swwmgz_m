@@ -381,19 +381,23 @@ extend Class SWWMWeapon
 			SWWMUtility.DoKnockback(hits[i].a,hits[i].dir+(0,0,.2),dmg*2000);
 			// lol oops
 			if ( !hits[i].a.bDORMANT ) hits[i].a.DaggerAlert(self);
+			if ( !hits[i].a.bNOBLOOD && !hits[i].a.bDORMANT && (raging || !hits[i].a.bINVULNERABLE) ) blooded = true;
+			else bloodless = true;
 			int newdmg = hits[i].a.DamageMobj(invoker,self,dmg,'Melee',flg,atan2(hits[i].dir.y,hits[i].dir.x));
-			if ( hits[i].a.player ) hits[i].a.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
-			if ( !hits[i].a.bNOBLOOD && !hits[i].a.bDORMANT && (raging || !hits[i].a.bINVULNERABLE) )
+			// things can instantly cease to exist after taking damage (wow)
+			if ( hits[i].a )
 			{
-				hits[i].a.TraceBleed(newdmg,invoker);
-				hits[i].a.SpawnBlood(hits[i].pos,atan2(hits[i].dir.y,hits[i].dir.x)+180,newdmg);
-				blooded = true;
-			}
-			else
-			{
-				let p = Spawn(raging?"BigPunchImpact":"PunchImpact",hits[i].pos);
-				p.angle = atan2(hits[i].dir.y,hits[i].dir.x);
-				bloodless = true;
+				if ( hits[i].a.player ) hits[i].a.A_QuakeEx(quakin,quakin,quakin,6,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.125*quakin);
+				if ( !hits[i].a.bNOBLOOD && !hits[i].a.bDORMANT && (raging || !hits[i].a.bINVULNERABLE) )
+				{
+					hits[i].a.TraceBleed(newdmg,invoker);
+					hits[i].a.SpawnBlood(hits[i].pos,atan2(hits[i].dir.y,hits[i].dir.x)+180,newdmg);
+				}
+				else
+				{
+					let p = Spawn(raging?"BigPunchImpact":"PunchImpact",hits[i].pos);
+					p.angle = atan2(hits[i].dir.y,hits[i].dir.x);
+				}
 			}
 			if ( raging )
 			{

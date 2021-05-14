@@ -1,10 +1,11 @@
 /*
 	mkstartup.c : Makes a Hexen startup screen from provided images.
 	Requires all the files to be in the same folder it's executed in.
-	(C)2020 Marisa Kirisame, UnSX Team.
-	Released under the MIT license:
+	I didn't bother adding any checks so if this thing catches on fire it's
+	your own damn fault. Add them yourself if you want, this tool was made
+	for personal use anyway.
 
-	Copyright (c) 2020 Marisa Kirisame
+	Copyright (c) 2020-2021 Marisa Kirisame, UnSX Team
 
 	Permission is hereby granted, free of charge, to any person obtaining
 	a copy of this software and associated documentation files (the

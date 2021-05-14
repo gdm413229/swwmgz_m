@@ -2,10 +2,8 @@
 	mkfontblock.c : Make font pngs for gzdoom, in an ugly cheap way.
 	This code is a mess but I keep it here so people know how much I had
 	to suffer to get this done.
-	(C)2020 Marisa Kirisame, UnSX Team.
-	Released under the MIT license:
 
-	Copyright (c) 2020 Marisa Kirisame
+	Copyright (c) 2020-2021 Marisa Kirisame, UnSX Team
 
 	Permission is hereby granted, free of charge, to any person obtaining
 	a copy of this software and associated documentation files (the
@@ -113,8 +111,8 @@ int draw_glyph( FT_Bitmap *bmp, uint8_t v, uint32_t px, uint32_t py, uint8_t ox,
 		if ( v == 255 )
 		{
 			float a = (j+oy-upshift)/(float)h;
-			if ( gradient == 1 ) rv = lerpg(1.-a);
-			else if ( gradient == 2 ) rv = lerpg(a);
+			if ( (gradient&3) == 1 ) rv = lerpg(1.-a);
+			else if ( (gradient&3) == 2 ) rv = lerpg(a);
 		}
 		for ( i=0; i<bmp->width; i++ )
 		{
@@ -143,7 +141,7 @@ int main( int argc, char **argv )
 	if ( argc < 4 )
 	{
 		fprintf(stderr,"usage: mkfontblock <font name> <pxsize> <wxh>"
-			" <unicode block (hex)> [gradient type]\n");
+			" <unicode block (hex)> [gradient type] [upshift]\n");
 		return 1;
 	}
 	if ( FT_Init_FreeType(&ftlib) )
@@ -173,9 +171,26 @@ int main( int argc, char **argv )
 			FT_Render_Glyph(fnt->glyph,FT_RENDER_MODE_NORMAL);
 			int xx = x*w;
 			int yy = y*h-upshift;
-			// draw drop shadow first
-			draw_glyph(&fnt->glyph->bitmap,0,xx+1,yy+1,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
-			int valid = draw_glyph(&fnt->glyph->bitmap,255,xx,yy,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+			int valid;
+			if ( gradient&4 )
+			{
+				// draw outline first
+				draw_glyph(&fnt->glyph->bitmap,0,xx,yy,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx+1,yy,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx+2,yy,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx,yy+1,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx+2,yy+1,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx,yy+2,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx+1,yy+2,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				draw_glyph(&fnt->glyph->bitmap,0,xx+2,yy+2,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				valid = draw_glyph(&fnt->glyph->bitmap,255,xx+1,yy+1,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+			}
+			else
+			{
+				// draw drop shadow first
+				draw_glyph(&fnt->glyph->bitmap,0,xx+1,yy+1,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+				valid = draw_glyph(&fnt->glyph->bitmap,255,xx,yy,fnt->glyph->bitmap_left,pxsiz-fnt->glyph->bitmap_top);
+			}
 			if ( !validrow ) validrow = valid;
 		}
 		x++;

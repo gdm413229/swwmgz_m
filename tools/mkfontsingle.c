@@ -2,10 +2,8 @@
 	mkfontsingle.c : Make font pngs for gzdoom, in an ugly cheap way.
 	This code is a mess but I keep it here so people know how much I had
 	to suffer to get this done.
-	(C)2020 Marisa Kirisame, UnSX Team.
-	Released under the MIT license:
 
-	Copyright (c) 2020 Marisa Kirisame
+	Copyright (c) 2020-2021 Marisa Kirisame, UnSX Team
 
 	Permission is hereby granted, free of charge, to any person obtaining
 	a copy of this software and associated documentation files (the

@@ -255,12 +255,56 @@ Class SWWMOptionMenu : OptionMenu
 }
 
 // main menu w/ version info
-Class SWWMMainMenu : ListMenu
+Class SWWMCleanMenu : ListMenu
 {
-	transient Font TewiFont;
+	override bool MouseEvent( int type, int x, int y )
+	{
+		if ( mDesc.DisplayWidth() != ListMenuDescriptor.CleanScale )
+			return Super.MouseEvent(type,x,y);
+		int sel = -1;
+		double sx, sy;
+		// this menu uses the OTHER clean scale
+		x = ((x-(screen.GetWidth()/2))/CleanXfac_1)+160;
+		y = ((y-(screen.GetHeight()/2))/CleanYfac_1)+100;
+		if ( mFocusControl != NULL )
+		{
+			mFocusControl.MouseEvent(type,x,y);
+			return true;
+		}
+		else if ( ((mDesc.mWLeft <= 0) || (x > mDesc.mWLeft)) && ((mDesc.mWRight <= 0) || (x < mDesc.mWRight)) )
+		{
+			for( int i=0;i<mDesc.mItems.Size(); i++ )
+			{
+				if ( !mDesc.mItems[i].CheckCoordinate(x,y) )
+					continue;
+				mDesc.mSelectedItem = i;
+				mDesc.mItems[i].MouseEvent(type,x,y);
+				return true;
+			}
+		}
+		mDesc.mSelectedItem = -1;
+		return Menu.MouseEvent(type,x,y);
+	}
+}
+
+Class SWWMMainMenu : SWWMCleanMenu
+{
+	Font TewiFont;
+	TextureID demotex;
+	double demopos;
+	transient uint prevms;
 
 	override void Drawer()
 	{
+		double frametime = (MSTime()-prevms)/1000.;
+		if ( !demotex )
+		{
+			demotex = TexMan.CheckForTexture("graphics/M_DEMOLITIONIST.png",TexMan.Type_Any);
+			demopos = 100;
+		}
+		double theta = clamp(3.*frametime,0.,1.); // naive, but whatever
+		if ( prevms ) demopos = demopos*(1.-theta);
+		Screen.DrawTexture(demotex,false,(demopos-160)*CleanXFac_1+(Screen.GetWidth()*.5),(Screen.GetHeight()-400*CleanYFac_1)/2 + sin(gametic*GameTicRate*.1)*CleanYFac_1*8,DTA_CleanNoMove_1,true,DTA_Alpha,clamp(1.-(demopos/100),0.,1.));
 		Super.Drawer();
 		int xx, yy;
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
@@ -271,11 +315,12 @@ Class SWWMMainMenu : ListMenu
 		yy = CleanHeight_1-height;
 		Screen.Dim("Black",.75,int(xx*CleanXFac_1),int(yy*CleanYFac_1),int(width*CleanXFac_1),int(height*CleanYFac_1));
 		Screen.DrawText(TewiFont,Font.CR_GOLD,(xx+4)*CleanXFac_1,(yy+2)*CleanYFac_1,str,DTA_CleanNoMove_1,true);
+		prevms = MSTime();
 	}
 }
 
 // skill/episode menu hack
-Class SWWMBigMenuHack : ListMenu
+Class SWWMBigMenuHack : SWWMCleanMenu
 {
 	const BIGMENUSPACING = 36;
 
@@ -473,11 +518,9 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			double x = (320-mFont.StringWidth(text)*3)/2;
-			// due to specifics of how DTA_Clean works we can't combine with with DTA_ScaleX/Y
-			// so we have to set the scaling manually
-			x = (x-160)*CleanXFac+(Screen.GetWidth()*.5);
-			double y = (mYpos-100)*CleanYFac+(Screen.GetHeight()*.5);
-			Screen.DrawText(mFont,mColor,x,y,text,DTA_ScaleX,3.*CleanXFac,DTA_ScaleY,3.*CleanYFac);
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			double y = (mYpos-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			Screen.DrawText(mFont,mColor,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
 		else
 		{
@@ -509,7 +552,10 @@ class ListMenuItemSWWMLogo : ListMenuItem
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			x = (320-vs.x)/2;
-			Screen.DrawTexture(mTexture,false,x,-48,DTA_Clean,true);
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			double y = -48;
+			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			Screen.DrawTexture(mTexture,false,x,y,DTA_CleanNoMove_1,true);
 		}
 		else
 		{
@@ -661,15 +707,15 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			{
 				// due to specifics of how DTA_Clean works we can't combine with with DTA_ScaleX/Y
 				// so we have to set the scaling manually
-				xx = (xx-160)*CleanXFac+(Screen.GetWidth()*.5);
-				y = (y-100)*CleanYFac+(Screen.GetHeight()*.5);
+				xx = (xx-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+				y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
 				for ( int i=0, pos=0; i<tlen; i++ )
 				{
 					int ch;
 					[ch, pos] = text.GetNextCodePoint(pos);
 					double yy = y+4*sin(32*i+8*Menu.MenuTime())*CleanYFac;
-					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_ScaleX,3.*CleanXFac,DTA_ScaleY,3.*CleanYFac);
-					xx += (mFont.GetCharWidth(ch)-2)*3*CleanXFac;	// account for menu font kerning
+					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
+					xx += (mFont.GetCharWidth(ch)-2)*3*CleanXFac_1;	// account for menu font kerning
 				}
 			}
 			else
@@ -688,9 +734,9 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		{
 			// due to specifics of how DTA_Clean works we can't combine with with DTA_ScaleX/Y
 			// so we have to set the scaling manually
-			x = (x-160)*CleanXFac+(Screen.GetWidth()*.5);
-			y = (y-100)*CleanYFac+(Screen.GetHeight()*.5);
-			Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_ScaleX,3.*CleanXFac,DTA_ScaleY,3.*CleanYFac);
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
 		else Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
 	}
@@ -703,10 +749,15 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		double y = mYpos+mHeight/2;
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
+			xofs *= CleanXFac_1;
+			yofs *= CleanYFac_1;
 			double x = (320-GetWidth())/2;
-			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_CleanNoMove_1,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
 			x = (320+GetWidth())/2;
-			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_Clean,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_CleanNoMove_1,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
 		else
 		{

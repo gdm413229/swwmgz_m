@@ -1009,7 +1009,7 @@ Class SWWMUtility
 	}
 
 	// Apply full 3D knockback in a specific direction, useful for hitscan
-	static play void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer )
+	static play void DoKnockback( Actor Victim, Vector3 HitDirection, double MomentumTransfer, bool ExtraZThrust = false )
 	{
 		if ( !Victim )
 			return;
@@ -1021,7 +1021,7 @@ Class SWWMUtility
 			return;
 		Vector3 Momentum = HitDirection*MomentumTransfer;
 		if ( (Victim.pos.z <= Victim.floorz) || !Victim.TestMobjZ() )
-			Momentum.z = max(Momentum.z,.1*Momentum.length());
+			Momentum.z = max(Momentum.z,(ExtraZThrust?.4:.1)*Momentum.length());
 		Momentum /= GameTicRate*max(50,Victim.Mass);
 		Victim.vel += Momentum;
 	}

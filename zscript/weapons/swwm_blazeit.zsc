@@ -711,9 +711,12 @@ Class Hellblazer : SWWMWeapon
 			}
 			if ( player.cmd.buttons&BT_ATTACK )
 			{
-				if ( (player.cmd.buttons&BT_ALTATTACK) || (invoker.clipcount < 2) )
-					return A_JumpByAmmoType("PreFire_1","PreFire_2","PreFire_3","PreFire_4","Ready_G");
 				invoker.preloadcnt++;
+				if ( (player.cmd.buttons&BT_ALTATTACK) || ((invoker.clipcount < 2) && (invoker.preloadcnt >= 10)) )
+				{
+					invoker.preloadcnt = 0;
+					return A_JumpByAmmoType("PreFire_1","PreFire_2","PreFire_3","PreFire_4","Ready_G");
+				}
 				if ( invoker.preloadcnt >= 10 )
 				{
 					invoker.preloadcnt = 0;
@@ -781,9 +784,12 @@ Class Hellblazer : SWWMWeapon
 			}
 			if ( player.cmd.buttons&BT_ALTATTACK )
 			{
-				if ( (player.cmd.buttons&BT_ATTACK) || (invoker.clipcount < 2) )
-					return A_JumpByAmmoType("PreAltFire_1","PreAltFire_2","PreAltFire_3","PreAltFire_4","Ready_G");
 				invoker.preloadcnt++;
+				if ( (player.cmd.buttons&BT_ATTACK) || ((invoker.clipcount < 2) || (invoker.preloadcnt >= 10)) )
+				{
+					invoker.preloadcnt = 0;
+					return A_JumpByAmmoType("PreAltFire_1","PreAltFire_2","PreAltFire_3","PreAltFire_4","Ready_G");
+				}
 				if ( invoker.preloadcnt >= 10 )
 				{
 					invoker.preloadcnt = 0;
@@ -927,6 +933,7 @@ Class Hellblazer : SWWMWeapon
 		XZW2 A 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZW2 A 1
 		{
@@ -948,6 +955,7 @@ Class Hellblazer : SWWMWeapon
 		XZW6 V 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZW6 V 1
 		{
@@ -969,6 +977,7 @@ Class Hellblazer : SWWMWeapon
 		XZWB T 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZWB T 1
 		{
@@ -990,6 +999,7 @@ Class Hellblazer : SWWMWeapon
 		XZWG R 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZWG R 1
 		{
@@ -1011,6 +1021,7 @@ Class Hellblazer : SWWMWeapon
 		XZW2 A 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZW2 A 1
 		{
@@ -1032,6 +1043,7 @@ Class Hellblazer : SWWMWeapon
 		XZW6 V 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZW6 V 1
 		{
@@ -1053,6 +1065,7 @@ Class Hellblazer : SWWMWeapon
 		XZWB T 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZWB T 1
 		{
@@ -1074,6 +1087,7 @@ Class Hellblazer : SWWMWeapon
 		XZWG R 0
 		{
 			invoker.seekcnt = 0;
+			A_StartSound("hellblazer/hold",CHAN_WEAPON,CHANF_OVERLAP);
 		}
 		XZWG R 1
 		{
@@ -1343,7 +1357,7 @@ Class Hellblazer : SWWMWeapon
 		XZWQ KLM 2;
 		XZWQ N 2 A_Parry(9);
 		XZWQ OP 1;
-		XZWQ Q 1 A_Melee(75,"demolitionist/whitl",1.05,1.2);
+		XZWQ Q 1 A_Melee(75,"demolitionist/whitl",1.05,1.2,1.2);
 		XZWQ RSTUV 2;
 		XZWQ W 2 A_StartSound("hellblazer/meleeend",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWQ XYZ 2;

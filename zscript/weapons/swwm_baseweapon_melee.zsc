@@ -315,7 +315,7 @@ extend Class SWWMWeapon
 			GiveInventory("ParryDamageChecker",1);	// need this so parried projectiles deal extra damage
 	}
 	// multi-hit cone rather than the usual one-hit arc, more fun
-	private action bool TryMelee( double spread, int dmg, String hitsound = "", double rangemul = 1. )
+	private action bool TryMelee( double spread, int dmg, String hitsound = "", double rangemul = 1., double kickmul = 1. )
 	{
 		Vector3 x, y, z, dir;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -324,7 +324,7 @@ extend Class SWWMWeapon
 		hits.Clear();
 		FLineTraceData d;
 		int rings = 1;
-		double step = spread/10.;
+		double step = spread/20.;
 		double range = 1.5*DEFMELEERANGE*rangemul;
 		bool raging = CountInv("RagekitPower");
 		for ( double i=0; i<spread; i+=step )
@@ -378,7 +378,7 @@ extend Class SWWMWeapon
 		for ( int i=0; i<hits.Size(); i++ )
 		{
 			diff += deltaangle(self.angle,AngleTo(hits[i].a));
-			SWWMUtility.DoKnockback(hits[i].a,hits[i].dir+(0,0,.2),dmg*2000);
+			SWWMUtility.DoKnockback(hits[i].a,hits[i].dir,dmg*2000*kickmul);
 			// lol oops
 			if ( !hits[i].a.bDORMANT ) hits[i].a.DaggerAlert(self);
 			if ( !hits[i].a.bNOBLOOD && !hits[i].a.bDORMANT && (raging || !hits[i].a.bINVULNERABLE) ) blooded = true;
@@ -425,7 +425,7 @@ extend Class SWWMWeapon
 		A_BumpFOV(.96);
 		return true;
 	}
-	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1., double spreadmul = 1. )
+	action void A_Melee( int dmg = 40, String hitsound = "", double rangemul = 1., double spreadmul = 1., double kickmul = 1. )
 	{
 		let raging = RagekitPower(FindInventory("RagekitPower"));
 		if ( raging ) rangemul += .2;
@@ -457,7 +457,7 @@ extend Class SWWMWeapon
 		invoker.wallponch = false;
 		// check for shootables
 		SWWMBulletTrail.DoTrail(self,origin,dir,DEFMELEERANGE*rangemul,0);
-		if ( TryMelee((raging?.3:.2)*spreadmul,dmg,hitsound,rangemul) )
+		if ( TryMelee((raging?.3:.2)*spreadmul,dmg,hitsound,rangemul,kickmul) )
 			return;
 		// check for walls instead
 		FTranslatedLineTarget t;

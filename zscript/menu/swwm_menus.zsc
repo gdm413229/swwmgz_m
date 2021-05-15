@@ -300,11 +300,12 @@ Class SWWMMainMenu : SWWMCleanMenu
 		if ( !demotex )
 		{
 			demotex = TexMan.CheckForTexture("graphics/M_DEMOLITIONIST.png",TexMan.Type_Any);
-			demopos = 100;
+			demopos = 120;
 		}
-		double theta = clamp(3.*frametime,0.,1.); // naive, but whatever
-		if ( prevms ) demopos = demopos*(1.-theta);
-		Screen.DrawTexture(demotex,false,(demopos-160)*CleanXFac_1+(Screen.GetWidth()*.5),(Screen.GetHeight()-400*CleanYFac_1)/2 + sin(gametic*GameTicRate*.1)*CleanYFac_1*8,DTA_CleanNoMove_1,true,DTA_Alpha,clamp(1.-(demopos/100),0.,1.));
+		double theta = clamp(2.*frametime,0.,1.); // naive, but whatever
+		if ( prevms ) demopos = demopos*(1.-theta)-40*theta;
+		double alph = clamp(1.-(demopos/100),0.,1.);
+		Screen.DrawTexture(demotex,false,(demopos-160)*CleanXFac_1+(Screen.GetWidth()*.5),(Screen.GetHeight()-400*CleanYFac_1)/2 + sin(gametic*GameTicRate*.1)*CleanYFac_1*8*(alph**2),DTA_CleanNoMove_1,true,DTA_Alpha,alph,DTA_ColorOverlay,Color(64+int(191*(1.-(alph**2))),0,0,0));
 		Super.Drawer();
 		int xx, yy;
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');

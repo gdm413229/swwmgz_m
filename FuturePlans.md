@@ -31,7 +31,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
   - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
-  - [Doom] Encoding Destroyer *(Stare closely at FIREBLU for 30 seconds)*
   - [Doom] Dynamic Duo *(Defeat the Bruiser Brothers)*
   - [Doom] Huge Guts *(Defeat the Tyrant of Babel)*
   - [Doom] All Brain *(Defeat the Spider Mastermind)*
@@ -64,12 +63,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Replace all hitscan with *"light projectiles"***
 * **Customized cluster text stuff if that ever gets scriptified**
 * **Crouch sliding *(+ proper crouch dashing)***
-* **More items:**
-  - [Heretic/Hexen] Safety Tether *(original)*
-  - Angel of Death *(Total Destruction / SWWM Platinum Ep2)*
-  - Black Matter Armor *(UnSX 3 / SWWM)*
-  - Satellite *(Total Destruction)*
-  - Devastation Sigil *(SWWM Gold)*
 * **Expand third person animations**
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)

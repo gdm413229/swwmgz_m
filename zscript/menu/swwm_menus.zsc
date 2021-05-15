@@ -491,14 +491,15 @@ Class SWWMBigMenuHack : SWWMCleanMenu
 Class ListMenuItemSWWMStaticTextM : ListMenuItem
 {
 	String mText;
-	Font mFont;
+	Font mFont, mAltFont;
 	int mColor;
 
 	void Init( ListMenuDescriptor desc, double x, double y, String text, int color = -1 )
 	{
 		Super.Init(x,y);
 		mText = text;
-		mFont = (language~=="jp")?Font.GetFont('MPlusShadedOutline'):desc.mFont;
+		mFont = desc.mFont;
+		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = (color>=0)?color:desc.mFontColor;
 	}
 
@@ -506,27 +507,29 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 	{
 		Super.Init(x,y);
 		mText = text;
-		mFont = (language~=="jp")?Font.GetFont('MPlusShadedOutline'):font;
+		mFont = font;
+		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = color;
 	}
 
 	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
 		if ( mText.Length() == 0 ) return;
+		let fnt = (language ~== "jp")?mAltFont:mFont;
 		String text = Stringtable.Localize(mText);
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
-			double x = (320-mFont.StringWidth(text)*3)/2;
+			double x = (320-fnt.StringWidth(text)*3)/2;
 			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 			double y = (mYpos-100)*CleanYFac_1+(Screen.GetHeight()*.5);
-			Screen.DrawText(mFont,mColor,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
+			Screen.DrawText(fnt,mColor,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
 		else
 		{
-			double x = (w-mFont.StringWidth(text)*3)/2;
-			Screen.DrawText(mFont,mColor,x,mYpos,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
+			double x = (w-fnt.StringWidth(text)*3)/2;
+			Screen.DrawText(fnt,mColor,x,mYpos,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
 		}
 	}
 }
@@ -644,7 +647,8 @@ Class SWWMMessageBox : MessageBoxMenu
 class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 {
 	String mText;
-	Font mFont;
+	Font mFont, mAltFont;
+	bool wantdie;
 	int mColor;
 	int mColorSelected;
 
@@ -666,8 +670,9 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(desc.mXpos,desc.mYpos,desc.mLinespacing,child,param);
 		mText = text;
-		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShadedOutline');
-		else mFont = desc.mFont;
+		wantdie = IsFullWidthText(mText);
+		mFont = desc.mFont;
+		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = desc.mFontColor;
 		mColorSelected = desc.mFontcolor2;
 		mHotkey = hotkey.GetNextCodePoint(0);
@@ -677,8 +682,9 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(x,y,height,child,param);
 		mText = text;
-		if ( (language ~== "jp") || IsFullWidthText(StringTable.Localize(mText)) ) mFont = Font.GetFont('MPlusShadedOutline');
-		else mFont = font;
+		wantdie = IsFullWidthText(mText);
+		mFont = font;
+		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = color;
 		mColorSelected = color2;
 		mHotkey = hotkey;
@@ -686,18 +692,20 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 
 	override int GetWidth()
 	{
-		return max(1,3*mFont.StringWidth(StringTable.Localize(mText)));
+		let fnt = ((language ~== "jp") || wantdie)?mAltFont:mFont;
+		return max(1,3*fnt.StringWidth(StringTable.Localize(mText)));
 	}
 
 	override void Draw( bool selected, ListMenuDescriptor desc )
 	{
+		let fnt = ((language ~== "jp") || wantdie)?mAltFont:mFont;
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
 		String text = StringTable.Localize(mText);
 		double x;
 		// centered
-		if ( w == ListMenuDescriptor.CleanScale ) x = (320-mFont.StringWidth(text)*3)/2;
-		else x = (w-mFont.StringWidth(text)*3)/2;
+		if ( w == ListMenuDescriptor.CleanScale ) x = (320-fnt.StringWidth(text)*3)/2;
+		else x = (w-fnt.StringWidth(text)*3)/2;
 		double y = mYPos-4.5; // slight baseline offset
 		if ( selected )
 		{
@@ -715,8 +723,8 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 					int ch;
 					[ch, pos] = text.GetNextCodePoint(pos);
 					double yy = y+4*sin(32*i+8*Menu.MenuTime())*CleanYFac;
-					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
-					xx += (mFont.GetCharWidth(ch)-2)*3*CleanXFac_1;	// account for menu font kerning
+					Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
+					xx += (fnt.GetCharWidth(ch)-2)*3*CleanXFac_1;	// account for menu font kerning
 				}
 			}
 			else
@@ -726,8 +734,8 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 					int ch;
 					[ch, pos] = text.GetNextCodePoint(pos);
 					double yy = y+4*sin(32*i+8*Menu.MenuTime());
-					Screen.DrawChar(mFont,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
-					xx += (mFont.GetCharWidth(ch)-2)*3;	// account for menu font kerning
+					Screen.DrawChar(fnt,Font.CR_SAPPHIRE,xx,yy,ch,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
+					xx += (fnt.GetCharWidth(ch)-2)*3;	// account for menu font kerning
 				}
 			}
 		}
@@ -737,9 +745,9 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			// so we have to set the scaling manually
 			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
-			Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
+			Screen.DrawText(fnt,Font.CR_WHITE,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
-		else Screen.DrawText(mFont,Font.CR_WHITE,x,y,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
+		else Screen.DrawText(fnt,Font.CR_WHITE,x,y,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
 	}
 
 	override void DrawSelector( double xofs, double yofs, TextureID tex, ListMenuDescriptor desc )

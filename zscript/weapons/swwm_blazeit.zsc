@@ -785,7 +785,7 @@ Class Hellblazer : SWWMWeapon
 			if ( player.cmd.buttons&BT_ALTATTACK )
 			{
 				invoker.preloadcnt++;
-				if ( (player.cmd.buttons&BT_ATTACK) || ((invoker.clipcount < 2) || (invoker.preloadcnt >= 10)) )
+				if ( (player.cmd.buttons&BT_ATTACK) || ((invoker.clipcount < 2) && (invoker.preloadcnt >= 10)) )
 				{
 					invoker.preloadcnt = 0;
 					return A_JumpByAmmoType("PreAltFire_1","PreAltFire_2","PreAltFire_3","PreAltFire_4","Ready_G");

@@ -670,7 +670,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(desc.mXpos,desc.mYpos,desc.mLinespacing,child,param);
 		mText = text;
-		wantdie = IsFullWidthText(mText);
+		wantdie = IsFullWidthText(StringTable.Localize(mText));
 		mFont = desc.mFont;
 		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = desc.mFontColor;
@@ -682,7 +682,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	{
 		Super.Init(x,y,height,child,param);
 		mText = text;
-		wantdie = IsFullWidthText(mText);
+		wantdie = IsFullWidthText(StringTable.Localize(mText));
 		mFont = font;
 		mAltFont = Font.GetFont('MPlusShadedOutline');
 		mColor = color;

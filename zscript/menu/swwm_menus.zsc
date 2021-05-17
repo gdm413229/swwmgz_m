@@ -294,14 +294,23 @@ Class SWWMMainMenu : SWWMCleanMenu
 	double demopos;
 	transient uint prevms;
 
+	override void Init( Menu parent, ListMenuDescriptor desc )
+	{
+		Super.Init(parent,desc);
+		demotex = TexMan.CheckForTexture("graphics/M_DEMOLITIONIST.png",TexMan.Type_Any);
+		demopos = 120;
+		prevms = MSTime();
+	}
+
+	override void OnReturn()
+	{
+		demopos = 120;
+		prevms = MSTime();
+	}
+
 	override void Drawer()
 	{
 		double frametime = (MSTime()-prevms)/1000.;
-		if ( !demotex )
-		{
-			demotex = TexMan.CheckForTexture("graphics/M_DEMOLITIONIST.png",TexMan.Type_Any);
-			demopos = 120;
-		}
 		double theta = clamp(2.*frametime,0.,1.); // naive, but whatever
 		if ( prevms ) demopos = demopos*(1.-theta)-40*theta;
 		double alph = clamp(1.-(demopos/100),0.,1.);
@@ -539,10 +548,10 @@ class ListMenuItemSWWMLogo : ListMenuItem
 {
 	TextureID mTexture;
 
-	void Init( ListMenuDescriptor desc, TextureID patch )
+	void Init( ListMenuDescriptor desc )
 	{
 		Super.Init(desc.mXpos,desc.mYpos);
-		mTexture = patch;
+		mTexture = TexMan.CheckForTexture("graphics/M_SWWM.png",TexMan.Type_Any);
 	}
 
 	override void Draw( bool selected, ListMenuDescriptor desc )
@@ -552,6 +561,8 @@ class ListMenuItemSWWMLogo : ListMenuItem
 		int w = desc?desc.DisplayWidth():ListMenuDescriptor.CleanScale;
 		int h = desc?desc.DisplayHeight():-1;
 		Vector2 vs = TexMan.GetScaledSize(mTexture);
+		double scl = 256./vs.x;
+		vs *= scl;
 		double x;
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
@@ -559,12 +570,12 @@ class ListMenuItemSWWMLogo : ListMenuItem
 			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 			double y = -48;
 			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
-			Screen.DrawTexture(mTexture,false,x,y,DTA_CleanNoMove_1,true);
+			Screen.DrawTexture(mTexture,false,x,y,DTA_ScaleX,CleanXFac_1*scl,DTA_ScaleY,CleanYFac_1*scl);
 		}
 		else
 		{
 			x = (w-vs.x)/2;
-			Screen.DrawTexture(mTexture,false,x,-48,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+			Screen.DrawTexture(mTexture,false,x,-48,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,scl,DTA_ScaleY,scl);
 		}
 	}
 }

@@ -1494,7 +1494,7 @@ Class Demolitionist : PlayerPawn
 			player.onground = false;
 			if ( player.turnticks )
 			{
-				player.turnticks -= 1;
+				player.turnticks--;
 				guideangle = (180./TURN180_TICKS);
 			}
 			else guideangle += .2*player.cmd.yaw*(360./65536.);

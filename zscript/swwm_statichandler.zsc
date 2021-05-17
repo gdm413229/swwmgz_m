@@ -310,8 +310,11 @@ Class SWWMStaticHandler : StaticEventHandler
 		Menu cur = Menu.GetCurrentMenu();
 		if ( cur is 'ReadThisMenu' )
 		{
+			Menu oldpt = cur.mParentMenu;
 			cur.Close();
 			Menu.SetMenu('SWWMHelpMenu');
+			cur = Menu.GetCurrentMenu();
+			if ( cur ) cur.mParentMenu = oldpt;
 		}
 		// Fancy crash effect
 		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )

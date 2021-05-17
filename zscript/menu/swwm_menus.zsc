@@ -853,12 +853,12 @@ Class OptionMenuItemScaleSliderFix : OptionMenuItemScaleSlider
 		double value = GetSliderValue();
 		if ( mkey == Menu.MKEY_Left )
 		{
-			if ( value <= 0 ) value--;
+			if ( value <= 0 ) value = -1;
 			else value = max(0,value-mStep);
 		}
 		else if ( mkey == Menu.MKEY_Right )
 		{
-			if ( value < 0 ) value++;
+			if ( value < 0 ) value = 0;
 			else value += mStep;
 		}
 		else return OptionMenuItem.MenuEvent(mkey,fromcontroller);

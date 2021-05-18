@@ -816,6 +816,33 @@ Class Wallbuster : SWWMWeapon
 		return good;
 	}
 
+	override void MarkPrecacheSounds()
+	{
+		Super.MarkPrecacheSounds();
+		MarkSound("wallbuster/select");
+		MarkSound("wallbuster/deselect");
+		MarkSound("wallbuster/dryfire");
+		MarkSound("wallbuster/spin");
+		MarkSound("wallbuster/spinbig");
+		MarkSound("wallbuster/unlock");
+		MarkSound("wallbuster/lock");
+		MarkSound("wallbuster/meleestart");
+		MarkSound("wallbuster/meleeend");
+		MarkSound("wallbuster/detach");
+		MarkSound("wallbuster/attach");
+		MarkSound("wallbuster/handspin");
+		MarkSound("wallbuster/load1");
+		MarkSound("wallbuster/load2");
+		MarkSound("wallbuster/load3");
+		MarkSound("wallbuster/load4");
+		MarkSound("wallbuster/smallbust1");
+		MarkSound("wallbuster/smallbust2");
+		MarkSound("wallbuster/smallbust3");
+		MarkSound("wallbuster/bigbust1");
+		MarkSound("wallbuster/bigbust2");
+		MarkSound("wallbuster/bigbust3");
+	}
+
 	Default
 	{
 		Tag "$T_WALLBUSTER";

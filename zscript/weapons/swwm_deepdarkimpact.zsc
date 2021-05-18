@@ -298,6 +298,25 @@ Class DeepImpact : SWWMWeapon
 		A_QuakeEx(1,1,1,2,0,1,"",QF_RELATIVE|QF_SCALEUP,rollIntensity:.05);
 	}
 
+	override void MarkPrecacheSounds()
+	{
+		Super.MarkPrecacheSounds();
+		MarkSound("deepimpact/fire");
+		MarkSound("deepimpact/charge");
+		MarkSound("deepimpact/altfire");
+		MarkSound("deepimpact/dryfire");
+		MarkSound("deepimpact/select");
+		MarkSound("deepimpact/checkout");
+		MarkSound("deepimpact/deselect");
+		MarkSound("deepimpact/bullet");
+		MarkSound("deepimpact/bullethit1");
+		MarkSound("deepimpact/bullethit2");
+		MarkSound("deepimpact/reloadbeg");
+		MarkSound("deepimpact/reloadend");
+		MarkSound("deepimpact/reload");
+		MarkSound("deepimpact/noreload");
+	}
+
 	Default
 	{
 		Tag "$T_DEEPIMPACT";

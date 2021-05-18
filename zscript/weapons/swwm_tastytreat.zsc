@@ -313,6 +313,22 @@ Class CandyGun : SWWMWeapon
 		}
 		return Super.CreateTossable(amt);
 	}
+
+	override void MarkPrecacheSounds()
+	{
+		Super.MarkPrecacheSounds();
+		MarkSound("candygun/fire1");
+		MarkSound("candygun/fire2");
+		MarkSound("candygun/fire3");
+		MarkSound("candygun/hit1");
+		MarkSound("candygun/hit2");
+		MarkSound("candygun/hit3");
+		MarkSound("candygun/maghit1");
+		MarkSound("candygun/maghit2");
+		MarkSound("candygun/gunhit1");
+		MarkSound("candygun/gunhit2");
+	}
+
 	Default
 	{
 		Tag "$T_CANDYGUN";

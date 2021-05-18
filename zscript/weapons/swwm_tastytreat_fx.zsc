@@ -2,9 +2,7 @@
 
 Class CandyCasing : SWWMCasing {}
 
-Class CandyMag : ExplodiumMag
-{
-}
+Class CandyMag : ExplodiumMag {}
 
 Class CandyLight : PaletteLight
 {
@@ -217,6 +215,8 @@ Class CandyPop : Actor
 		DamageType "Explodium";
 		RenderStyle "Add";
 		Scale 2.;
+		Radius .1;
+		Height 0.;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NODAMAGETHRUST;
@@ -358,7 +358,7 @@ Class CandyMagArm : Actor
 		+FOILINVUL;
 		Gravity 0.35;
 		BounceFactor 1.0;
-		Radius 4;
+		Radius 2;
 		Height 4;
 	}
 	override void PostBeginPlay()
@@ -416,6 +416,8 @@ Class CandyMagTrail : Actor
 		+NOINTERACTION;
 		Scale 2.4;
 		Alpha 0.7;
+		Radius .1;
+		Height 0.;
 	}
 	override void Tick()
 	{
@@ -516,7 +518,7 @@ Class CandyGunProj : Actor
 	{
 		Obituary "$O_CANDYGUN";
 		DamageType "Explodium";
-		Radius 6;
+		Radius 3;
 		Height 6;
 		Gravity 0.5;
 		Speed 30;
@@ -653,8 +655,8 @@ Class CandyMagProj : Actor
 	{
 		Obituary "$O_CANDYGUN";
 		DamageType "Explodium";
-		Radius 6;
-		Height 6;
+		Radius 2;
+		Height 4;
 		Gravity 0.5;
 		Speed 30;
 		PROJECTILE;
@@ -784,6 +786,8 @@ Class CandyBulletImpact : Actor
 		DamageType "Explodium";
 		RenderStyle "Add";
 		Scale 2.5;
+		Radius .1;
+		Height 0.;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+NODAMAGETHRUST;

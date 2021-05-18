@@ -74,8 +74,8 @@ Class SWWMSmoke : Actor
 	{
 		RenderStyle "Shaded";
 		StencilColor "FFFFFF";
-		Radius 2;
-		Height 2;
+		Radius .1;
+		Height 0;
 		Speed 1;
 		+NOBLOCKMAP;
 		+NOGRAVITY;
@@ -193,7 +193,7 @@ Class SWWMHalfSmoke : Actor
 	{
 		RenderStyle "Shaded";
 		StencilColor "FFFFFF";
-		Radius 0.1;
+		Radius .1;
 		Height 0;
 		Speed 1;
 		+NOBLOCKMAP;
@@ -279,8 +279,8 @@ Class SWWMBubble : Actor
 	Default
 	{
 		RenderStyle "Add";
-		Radius 2;
-		Height 2;
+		Radius .1;
+		Height 0;
 		+NOBLOCKMAP;
 		+NOGRAVITY;
 		+DONTSPLASH;
@@ -414,8 +414,8 @@ Class SWWMSpark : Actor
 	Default
 	{
 		RenderStyle "Add";
-		Radius 2;
-		Height 2;
+		Radius .1;
+		Height 0;
 		+NOBLOCKMAP;
 		+FORCEXYBILLBOARD;
 		+THRUACTORS;
@@ -579,8 +579,8 @@ Class SWWMChip : Actor
 
 	Default
 	{
-		Radius 1;
-		Height 1;
+		Radius .1;
+		Height 0;
 		+NOBLOCKMAP;
 		+THRUACTORS;
 		+NOTELEPORT;
@@ -781,6 +781,8 @@ Class SWWMItemFog : Actor
 	Default
 	{
 		RenderStyle "Add";
+		Radius .1;
+		Height 0;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -836,8 +838,8 @@ Class SWWMTeleportSparkle : Actor
 	{
 		RenderStyle "Add";
 		Scale 0.3;
-		Radius 0.1;
-		Height 0;
+		Radius .1;
+		Height 0.;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -1011,6 +1013,8 @@ Class SWWMPickupFlash : Actor
 	{
 		RenderStyle "Add";
 		Args 0,3,2,1;
+		Radius .1;
+		Height 0;
 		+NOGRAVITY;
 		+NOBLOCKMAP;
 		+DONTSPLASH;
@@ -1115,7 +1119,7 @@ Class InvisibleSplasher : Actor
 	{
 		Mass 100;
 		VSpeed -2;
-		Radius 2;
+		Radius 1;
 		Height 2;
 		+NOBLOCKMAP;	// needed to prevent infinite loops with some 3D floor water (yes, you read that right)
 		FloatBobPhase 0;

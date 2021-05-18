@@ -68,7 +68,7 @@ server bool swwm_resetscore = true;		// reset score back to 0 on pistol starts
 server bool swwm_notrack = false;		// disables all combat tracking (useful to speed up slaughterwads)
 server bool swwm_ynykronalert = false;		// caps ynykron alert (so it doesn't wake everyone up)
 nosave bool swwm_menupause = true;		// pause the game when demolitionist menu is open
-server noarchive bool swwm_debugblast = false;	// debug visual aid for DoExplosion
+nosave noarchive bool swwm_debugblast = false;	// debug visual aid for DoExplosion
 nosave bool swwm_funtags = false;		// replace vanilla monster names with silly ones
 server bool swwm_omnibust = false;		// TODO add wallbusting effect to all weapons
 server bool swwm_superfuel = false;		// TODO enable unlimited fuel
@@ -104,8 +104,9 @@ nosave bool swwm_itemsparkles = false;		// visual aid for low visibility items
 server bool swwm_singlefirst = false;		// single weapons are selected before dual ones, has to be a server cvar due to limitations
 nosave bool swwm_uniqstats = false;		// only list stats from the same map once, rather than for each single visit
 nosave int swwm_filterachievements = 1;		// filter for achievements at 0%: 0 - no filter, 1 - obscure text, 2 - don't show
-server noarchive bool swwm_debugview = false;	// debug visual aid for various things, such as actor collision, trajectories, relationships, etc.
+nosave noarchive bool swwm_debugview = false;	// debug visual aid for various things, such as actor collision, trajectories, relationships, etc.
 nosave noarchive bool swwm_oldcheat = false;	// set to true if you used a SWWM Platinum cheat, so the easter egg only appears once per session
+server bool swwm_selflight = true;		// player emits light
 
 // minimap settings
 nosave bool swwm_mm_enable = true;		// show a minimap below the score counter

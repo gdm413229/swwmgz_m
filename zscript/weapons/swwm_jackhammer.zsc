@@ -215,6 +215,37 @@ Class PusherWeapon : SWWMWeapon
 			player.SetPSprite(PSP_WEAPON,ResolveState("AltRelease"));
 	}
 
+	override void MarkPrecacheSounds()
+	{
+		Super.MarkPrecacheSounds();
+		MarkSound("pusher/select");
+		MarkSound("pusher/deselect");
+		MarkSound("pusher/motor");
+		MarkSound("pusher/motorend");
+		MarkSound("pusher/start");
+		MarkSound("pusher/drill");
+		MarkSound("pusher/hit1");
+		MarkSound("pusher/hit2");
+		MarkSound("pusher/hit3");
+		MarkSound("pusher/meat1");
+		MarkSound("pusher/meat2");
+		MarkSound("pusher/meat3");
+		MarkSound("pusher/end");
+		MarkSound("pusher/checkout");
+		MarkSound("pusher/pullback");
+		MarkSound("pusher/altfire1");
+		MarkSound("pusher/altfire2");
+		MarkSound("pusher/miss");
+		MarkSound("pusher/althit1");
+		MarkSound("pusher/althit2");
+		MarkSound("pusher/altmeat1");
+		MarkSound("pusher/altmeat2");
+		MarkSound("pusher/fly");
+		MarkSound("pusher/bounce1");
+		MarkSound("pusher/bounce2");
+		MarkSound("pusher/bounce3");
+	}
+
 	Default
 	{
 		Tag "$T_PUSHER";

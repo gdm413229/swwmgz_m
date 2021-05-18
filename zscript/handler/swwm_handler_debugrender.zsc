@@ -3,6 +3,7 @@
 extend Class SWWMHandler
 {
 	ui SWWMProjectionData projdata;
+	transient ui Font dbgfont;
 
 	private ui void DrawWorldLine( RenderEvent e, Vector3 apos, Vector3 bpos, Color col )
 	{
@@ -89,11 +90,15 @@ extend Class SWWMHandler
 		if ( a.target ) DrawWorldLine(e,pos,a.target.prev*(1.-e.FracTic)+a.target.pos*e.FracTic,"Gold");
 		if ( a.tracer ) DrawWorldLine(e,pos,a.tracer.prev*(1.-e.FracTic)+a.tracer.pos*e.FracTic,"Orange");
 		if ( a.master ) DrawWorldLine(e,pos,a.master.prev*(1.-e.FracTic)+a.master.pos*e.FracTic,"Purple");
-		Vector3 ndc = SWWMUtility.ProjectPoint(projdata,e.viewpos+level.Vec3Diff(e.viewpos,pos+(0,0,a.Height/2)));
+		double hdiff = a.Height/2;
+		if ( a.bFLOATBOB ) hdiff += a.GetBobOffset();
+		Vector3 ndc = SWWMUtility.ProjectPoint(projdata,e.viewpos+level.Vec3Diff(e.viewpos,pos+(0,0,hdiff)));
 		if ( ndc.z > 1. ) return;
 		Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 		String tag = a.player?a.player.GetUserName():a.GetTag();
-		Screen.DrawText(NewSmallFont,Font.CR_UNTRANSLATED,vpos.x-NewSmallFont.StringWidth(tag)/2,vpos.y-NewSmallFont.GetHeight()/2,tag);
+		if ( tag == a.GetClassName() ) SWWMUtility.BeautifyClassName(tag);
+		if ( !dbgfont ) dbgfont = Font.GetFont('TewiShadedOutline');
+		Screen.DrawText(dbgfont,Font.CR_RED,vpos.x-dbgfont.StringWidth(tag)/2,vpos.y-NewSmallFont.GetHeight()/2,tag);
 	}
 
 	private ui void DrawDebug( RenderEvent e )
@@ -108,7 +113,7 @@ extend Class SWWMHandler
 			if ( a == players[consoleplayer].Camera ) continue;
 			if ( a.bINVISIBLE && !(a is 'DynamicLight') ) continue;
 			if ( (a is 'Inventory') && Inventory(a).Owner ) continue;
-			if ( a is 'SWWMShadow' ) continue;
+			if ( (a is 'SWWMShadow') || (a is 'GhostArtifactX') || (a is 'DemolitionistSelfLight') ) continue;
 			if ( a.Distance3DSquared(e.Camera) > 1000000 ) continue;
 			DrawActor(e,a);
 		}

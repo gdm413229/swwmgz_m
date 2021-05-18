@@ -88,27 +88,19 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		// Doom E3M8
 		case 'EF128313112110ED6C1549AF96AF26C9':
 			level.nextsecretmap = level.nextmap;	// so the handler can detect this
-			// NOT YET IMPLEMENTED
-			/*if ( LevelInfo.MapExists("E4M1") ) level.nextmap = "E4M1";
-			else if ( LevelInfo.MapExists("MAP01") ) level.nextmap = "MAP01";*/
-			if ( Wads.FindLump("M_EPI4",0,1) != -1 ) level.nextmap = "E4M1";
-			else if ( Wads.FindLump("M_HELL",0,1) != -1 ) level.nextmap = "MAP01";
+			if ( LevelInfo.MapExists("E4M1") ) level.nextmap = "E4M1";
+			else if ( LevelInfo.MapExists("MAP01") ) level.nextmap = "MAP01";
 			break;
 		// Doom E4M8
 		case '2DC939E508AB8EB68AF79D5B60568711':
 			level.nextsecretmap = level.nextmap;	// so the handler can detect this
-			// NOT YET IMPLEMENTED
-			/*if ( LevelInfo.MapExists("E5M1") ) level.nextmap = "E5M1";
-			else if ( LevelInfo.MapExists("MAP01") ) level.nextmap = "MAP01";*/
-			if ( Wads.FindLump("M_EPI5",0,1) != -1 ) level.nextmap = "E5M1";
-			else if ( Wads.FindLump("M_HELL",0,1) != -1 ) level.nextmap = "MAP01";
+			if ( LevelInfo.MapExists("E5M1") ) level.nextmap = "E5M1";
+			else if ( LevelInfo.MapExists("MAP01") ) level.nextmap = "MAP01";
 			break;
 		// SIGIL E5M8
 		case '6EAD80DA1F30B4B3546FA294EEF9F87C':
 			level.nextsecretmap = level.nextmap;	// so the handler can detect this
-			// NOT YET IMPLEMENTED
-			/*if ( LevelInfo.MapExists("MAP01") )  level.nextmap = "MAP01";*/
-			if ( Wads.FindLump("M_HELL",0,1) != -1 ) level.nextmap = "MAP01";
+			if ( LevelInfo.MapExists("MAP01") )  level.nextmap = "MAP01";
 			break;
 		// Heretic E1M8
 		case '27639D04F8090D57A47D354992435893':
@@ -123,9 +115,7 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		// Heretic E3M8
 		case '4719C2C71EF28F52310B889DD5A9778B':
 			level.nextsecretmap = level.nextmap;	// so the handler can detect this
-			// NOT YET IMPLEMENTED
-			/*if ( LevelInfo.MapExists("E4M1") ) level.nextmap = "E4M1";*/
-			if ( Wads.FindLump("EXTENDED",0,1) != -1 ) level.nextmap = "E4M1";
+			if ( LevelInfo.MapExists("E4M1") ) level.nextmap = "E4M1";
 			break;
 		// Heretic E4M8
 		case '30D1480A6D4F3A3153739D4CCF659C4E':

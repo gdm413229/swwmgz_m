@@ -172,11 +172,13 @@ Little bundles of fun (in hot lead form) found either as single units (sometimes
 
 Another signature weapon of the **SWWM** series. This time in its third and far more improved revision.
 
-**Primary fire:** Shoot a hot flaming rocket straight ahead. Hold to load up to 2 additional rockets, then release for burst fire.
+**Primary fire:** Shoot a hot flaming rocket straight ahead. Hold to load up to 2 additional rockets, then release for burst fire. You can tap the secondary fire button at any time to cancel the preload and go straight to holding.
 
-**Secondary fire:** Lob the rocket as a grenade that will bounce around. Hold to load up to 2 additional grenades, then release for burst fire.
+**Secondary fire:** Lob the rocket as a grenade that will bounce around. Hold to load up to 2 additional grenades, then release for burst fire. You can tap the primary fire button at any time to cancel the preload and go straight to holding.
 
-**Tertiary fire (Zoom):** Change the ammo type, there are four options (see ammo section below).
+**Tertiary fire (Zoom):** Change the ammo type, there are four options (see ammo section below). While holding rockets, tap to select seek targets.
+
+**Reload:** Obviously does what you'd expect. If you're holding rockets and have targets locked on, tap to clear.
 
 This thing is more explosive than it looks, so if you're reading this, Icarus, ***DO NOT*** use it at close range.
 
@@ -201,7 +203,7 @@ A relic from the olden days of **UnSX**. A potent energy weapon that uses what's
 
 **Tertiary fire (Zoom):** Deploy a capsule that releases a massive sphere of pure energy, which will track down any hostile targets. It will rip through everything and even bounce off surfaces, but it has a rather limited lifespan.
 
-**Reload:** If all energy is depleted, loads in another charge, otherwise, if there's one Biospark Unit already connected, a second one will be attached, allowing for 8 shots instead of 4.
+**Reload:** If all energy is depleted, loads in another charge, otherwise, if there's one Biospark Unit already connected, a second one will be attached, allowing for 8 shots instead of 4, at the cost of stability and potential self-damage.
 
 If the beam hits either of the other energy blobs, they will detonate with highly amplified damage and range. Note that it is possible to alternate between primary and secondary modes while rapid firing, making this combo just a matter of precise timing.
 
@@ -237,14 +239,12 @@ In the world, they may pop up as spare bullets or full mags. Each five bullets p
 ### 1.150 FCB Bullets ~ Replaces Cells, Runes
 ![](docimg/fcbbullet.png)
 
-
 The more directly explosive counterpart of the **XSB**. Personally baptized by **Blackmann Arms** CEO **Hermann E. Ischer** himself as ***"Fat Chode Bombs"***, these **High-Explosive Squash Head** rounds will blast through walls on impact, hitting anything standing behind them, and in some cases, tearing down the wall itself too.
 
 Same spawn conditions as the standard bullets.
 
 ### Candy Gun (slot 9) ~ Replaces BFG9000, Firemace, Bloodscourge (stub)
 ![](docimg/candygun.png)
-
 
 Coming from an old unreleased weapon mini-mod, the **Candy Gun** is like an **Explodium Gun** on steroids (or more specifically, on strawberry candy and pop rocks).
 
@@ -503,7 +503,7 @@ In **Doom** and **Heretic**, collected keys will be displayed below the score bo
 
 When the **Automap** is open, the map name and stats will also be shown here.
 
-Optionally, a minimap can be shown below the score box too. This works mostly like the radar did in **SWWM Z**, but it has the added benefit of also showing map geometry. Colors are taken from GZDoom's own custom automap settings.
+Optionally, a minimap can be shown below the score box too. This works mostly like the radar did in **SWWM Z**, but it has the added benefit of also showing map geometry. Has its own configurable color scheme, but it can also be set to inherit these from GZDoom's own custom automap settings, or various vanilla presets.
 
 ### Bottom left corner
 
@@ -511,7 +511,7 @@ Your health and fuel, along with an inventory box, and all active armors and pow
 
 ### Bottom border
 
-Voice acting subtitles and pickup messages. Repeated pickups will have a multiplier suffix added. Total messages shown are also configurable.
+Voice acting subtitles and pickup messages. Repeated pickups will have a multiplier suffix added. Total messages shown are also configurable. Achievement popups might also show here sporadically (yup, the mod has those).
 
 ### Bottom right corner
 

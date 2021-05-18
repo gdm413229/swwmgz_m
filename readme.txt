@@ -157,10 +157,13 @@ your inventory directly.
 Slot 6. Rocket launcher.
 We've seen its predecessors before, but now it's time for the new cool kid, the
 long-awaited Mk3 model of this marriage between demonic and human technology.
-Primary fire shoots the rocket.
-Secondary fire launches it as a bouncing grenade.
-Tertiary fire cycles ammo types for next reload.
-Reload does what you'd expect.
+Primary fire shoots the rocket. You can hold it to preload a couple more for a
+burst attack. Tapping the opposite button while doing so will stop the preload.
+Secondary fire launches it as a bouncing grenade. Same deal.
+Tertiary fire cycles ammo types for next reload. But if you're holding in some
+rockets, it will instead select targets for seeking.
+Reload does what you'd expect. But when holding rockets, it clears any selected
+seek targets. That's pretty much all.
 
 2.1.8. Biospark Carbine
 
@@ -204,6 +207,10 @@ chain reactions too. Really good for massive hordes.
 Secondary fire will flip the ammo box around. Don't do this, you don't want to
 see what happens when you charge and fire it later. Don't say I didn't warn
 you (you won't be able to, you'll be dead by then).
+If you spotted a certain detail in the docs of the cancelled SWWM Z, you may
+have noticed that the "Mortal Cannon" and "Ynykron" were separate weapons
+there. Well, let's just say that funky lore reasons™ have merged both of them
+together.
 
 2.2. Powerups
 - - - - - - -
@@ -214,7 +221,8 @@ Very much needed little things here.
 
 The ultimate meal. Full 1000 health and full armor to boot. If you'd rather
 keep it preserved nice and warm in your inventory, it might autoactivate to
-prevent your untimely death, too.
+prevent your untimely death, too. Note that you can't eat one again until
+you're back at 500 health or lower.
 
 2.2.2. Elemental Coating
 
@@ -224,11 +232,14 @@ through dangerous environmental hazards safely.
 
 2.2.3. Ghost Artifact
 
-Invisibility, basically. Have fun distracting enemies with it.
+Invisibility, basically. Have fun distracting enemies with it as they
+fruitlessly try to attack literally nothing at the last spot they heard you.
 
 2.2.4. Ragekit
 
 It makes you angry, and also stronger and faster, but especially angry.
+Eight times the melee damage, two times the fast, four times the damage
+resistance... but boy are you going to scream.
 
 2.2.5. Gravity Suppressor
 

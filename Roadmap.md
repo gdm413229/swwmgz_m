@@ -19,8 +19,9 @@
 
 **Extra Funtimes:**
 
- - DLC weapons.
- - DLC minigames.
+ - Extra Collectibles and Achievements.
+ - DLC weaponset.
+ - DLC minigame set.
 
 **LODS OF LORE:**
 
@@ -30,7 +31,19 @@
 **Funny Fellas:**
 
  - Monster/decoration replacement packs. All of it modeled and tweaked to fit the style and theme of the mod. Expect enhanced enemy behavior, not gonna keep it "vanilla".
- - Porting weapons to Hideous Destructor as a meme.
+ - Porting weapons to Hideous Destructor as a meme:
+   - Explodium Gun
+   - Wallbuster
+   - Biospark Carbine
+   - Silver Bullet JET
+
+**A Vast New World (2.0):**
+
+ - Hardcore mode.
+ - DLC weaponset 2.
+ - DLC itemset.
+ - Ibuki, Saya and Kirin companions / player classes.
+ - Official mapset.
 
 **At this point I'm just making shit up:**
 

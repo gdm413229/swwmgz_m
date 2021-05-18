@@ -67,12 +67,10 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - 4-directional movement variants
   - Height-dependent headpats (current animation was designed for dogs on same floor)
 * **Additional gestures + gesture menu**
-  - Airhorn (unlimited range A_AlertMonsters, to unbreak vanilla teleport closets)
   - Clap
   - The Bird
   - Thumbs Down
   - Giggle
-  - Heart
   - Shrug
   - Beckon
 * **DLC Gameset:**

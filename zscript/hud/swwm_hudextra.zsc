@@ -271,6 +271,17 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		}
 		else txt = StringTable.Localize("$SWWM_ZNVTXT"..seqnum);
 		l = fnt.BreakLines(txt,220);
+		// append to the player's chat log
+		let bar = SWWMStatusBar(StatusBar);
+		if ( bar )
+		{
+			let l = new("MsgLine");
+			l.str = "\chZanaveth\c-: "..txt;
+			l.tic = level.totaltime;
+			l.rep = 1;
+			l.type = PRINT_CHAT;
+			bar.FullHistory.Push(l);
+		}
 	}
 
 	private void DrawText()

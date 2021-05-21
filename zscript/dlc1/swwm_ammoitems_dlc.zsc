@@ -14,11 +14,12 @@ Class SMW05Ammo : Ammo
 		Inventory.Icon "graphics/HUD/Icons/A_SMW05Ammo.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 60;
-		Ammo.BackpackAmount 6;
+		Ammo.BackpackAmount 3;
 		Ammo.BackpackMaxAmount 150;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 20;
 	}
 	States
 	{
@@ -93,9 +94,10 @@ Class SheenAmmo : Ammo
 		Inventory.MaxAmount 600;
 		Ammo.BackpackAmount 50;
 		Ammo.BackpackMaxAmount 1200;
-		Ammo.DropAmount 20;
+		Ammo.DropAmount 10;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 35;
 	}
 	States
 	{
@@ -148,6 +150,7 @@ Class QuadravolAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 45;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -204,6 +207,7 @@ Class DarkCanister : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 60;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -237,6 +241,7 @@ Class EMPCore : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 80;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -336,6 +341,7 @@ Class RayAmmo : Ammo
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 90;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
@@ -371,6 +377,7 @@ Class RayBattery : Ammo
 		+INVENTORY.IGNORESKILL;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Accuracy 90;
 	}
 	override void ModifyDropAmount( int dropamount )
 	{

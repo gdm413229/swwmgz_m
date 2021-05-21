@@ -108,6 +108,7 @@ Class Hellblazer : SWWMWeapon
 
 	override void RenderUnderlay( RenderEvent e )
 	{
+		Super.RenderUnderlay(e);
 		static const Class<Ammo> types[] = {"HellblazerMissiles","HellblazerCrackshots","HellblazerRavagers","HellblazerWarheads"};
 		if ( !LockIcon[0] )
 		{

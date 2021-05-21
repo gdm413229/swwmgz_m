@@ -23,6 +23,8 @@ Mixin Class SWWMAmmo
 	{
 		if ( swwm_enemydrops >= 0 )
 		{
+			// random chance to not drop
+			if ( Random[DropChance](1,100) <= Accuracy ) return true;
 			if ( Amount == default.Amount ) return false;
 			// subdivide
 			Owner = dropper; // needed for positioning to work
@@ -255,6 +257,8 @@ Class MagAmmo : Inventory abstract
 	{
 		if ( swwm_enemydrops >= 0 )
 		{
+			// random chance to not drop
+			if ( Random[DropChance](1,100) <= Accuracy ) return true;
 			if ( Amount == default.Amount ) return false;
 			// subdivide
 			Owner = dropper; // needed for positioning to work
@@ -372,6 +376,6 @@ Mixin Class SWWMShellAmmo
 	override void ModifyDropAmount( int dropamount )
 	{
 		Super.ModifyDropAmount(dropamount);
-		Amount = max(1,Amount+Random[ShellDrop](-2,1));
+		Amount = Random[ShellDrop](1,clamp(dropamount,1,4));
 	}
 }

@@ -556,12 +556,11 @@ extend Class SWWMHandler
 			return;
 		}
 		// shell types (sorted by rarity
-		static const Class<Actor> redpool[] = {"RedShell","RedShell2","RedShell4"};
-		static const Class<Actor> greenpool[] = {"GreenShell","GreenShell2","GreenShell4"};
-		static const Class<Actor> whitepool[] = {"WhiteShell","WhiteShell2"};
-		static const Class<Actor> purplepool[] = {"PurpleShell","PurpleShell2","PurpleShell4"};
-		static const Class<Actor> bluepool[] = {"BlueShell","BlueShell2","BlueShell4"};
-		static const Class<Actor> blackpool[] = {"BlackShell","BlackShell2"};
+		static const Class<Actor> redpool[] = {'RedShell','RedShell2','RedShell4'};
+		static const Class<Actor> greenpool[] = {'GreenShell','GreenShell2','GreenShell4'};
+		static const Class<Actor> whitepool[] = {'WhiteShell','WhiteShell2'};
+		static const Class<Actor> purplepool[] = {'PurpleShell','PurpleShell2','PurpleShell4'};
+		static const Class<Actor> bluepool[] = {'BlueShell','BlueShell2','BlueShell4'};
 		// DRLA Monsters stuff
 		if ( hasdrlamonsters )
 		{
@@ -651,74 +650,72 @@ extend Class SWWMHandler
 		else if ( (e.Replacee is 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
 		{
 			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BigAmmo';
-			else */switch( Random[Replacements](0,14) )
+			else */switch( Random[Replacements](0,20) )
 			{
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacements](1,2)];
-				break;
 			case 3:
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacements](1,2)];
+				e.Replacement = redpool[Random[Replacements](1,2)];
 				break;
 			case 6:
 			case 7:
 			case 8:
-				e.Replacement = whitepool[Random[Replacements](0,1)];
-				break;
 			case 9:
 			case 10:
-			case 11:
-				e.Replacement = purplepool[Random[Replacements](0,2)];
+				e.Replacement = greenpool[Random[Replacements](1,2)];
 				break;
+			case 11:
 			case 12:
 			case 13:
+			case 14:
+				e.Replacement = purplepool[Random[Replacements](0,2)];
+				break;
+			case 15:
+			case 16:
+			case 17:
 				e.Replacement = bluepool[Random[Replacements](0,2)];
 				break;
-			case 14:
-				e.Replacement = blackpool[Random[Replacements](0,1)];
+			case 18:
+			case 19:
+				e.Replacement = whitepool[Random[Replacements](0,1)];
+				break;
+			case 20:
+				e.Replacement = 'BlackShell';
 				break;
 			}
 		}
 		else if ( (e.Replacee is 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
 			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BundleSpawn';
-			else */switch( Random[Replacements](0,13) )
+			else */switch( Random[Replacements](0,9) )
 			{
 			case 0:
 			case 1:
 			case 2:
-				e.Replacement = redpool[Random[Replacements](0,1)];
-				break;
 			case 3:
+				e.Replacement = redpool[0];
+				break;
 			case 4:
 			case 5:
-				e.Replacement = greenpool[Random[Replacements](0,1)];
-				break;
 			case 6:
+				e.Replacement = greenpool[0];
+				break;
 			case 7:
-				e.Replacement = whitepool[0];
-				break;
 			case 8:
+				e.Replacement = purplepool[0];
+				break;
 			case 9:
-			case 10:
-				e.Replacement = purplepool[Random[Replacements](0,1)];
-				break;
-			case 11:
-			case 12:
-				e.Replacement = bluepool[Random[Replacements](0,1)];
-				break;
-			case 13:
-				e.Replacement = blackpool[0];
+				e.Replacement = bluepool[0];
 				break;
 			}
 		}
 		else if ( e.Replacee is 'ClipBox' )
 		{
 			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenSmallAmmo':'SheenBigAmmo';
-			else */e.Replacement = Random[Replacements](0,4)?'EvisceratorShell':Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+			else */e.Replacement = Random[Replacements](0,5)?'EvisceratorShell':Random[Replacements](0,9)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
 		}
 		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = /*(e.Replacee is 'GoldWandHefty')?'SheenSmallAmmo':'SheenTinyAmmo'*/'SWWMNothing';
 		else if ( e.Replacee is 'BlasterHefty' )

@@ -668,9 +668,7 @@ Class DualExplodiumGun : SWWMWeapon
 
 	override bool CheckAmmo( int firemode, bool autoswitch, bool requireammo, int ammocount )
 	{
-		if ( (firemode == PrimaryFire) || (firemode == AltFire) )
-			return (SisterWeapon&&(SisterWeapon.Amount > 1));
-		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
+		return (SisterWeapon&&(SisterWeapon.Amount > 1));
 	}
 
 	override bool ReportHUDAmmo()

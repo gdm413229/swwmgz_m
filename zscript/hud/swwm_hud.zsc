@@ -683,31 +683,27 @@ Class SWWMStatusBar : BaseStatusBar
 						tag = String.Format("\cg%s\c-",StringTable.Localize("$SWWM_EEXIT"));
 					else if ( poi.trackedline.special == Exit_Secret )
 					{
-						// NOT YET IMPLEMENTED
-						/*LevelInfo l = LevelInfo.FindLevelInfo(level.nextsecretmap);
+						LevelInfo l = LevelInfo.FindLevelInfo(level.nextsecretmap);
 						if ( l && l.isValid() ) tag = String.Format("\cx%s:\c- %s\c-",StringTable.Localize("$SWWM_SEXIT"),l.LookupLevelName());
-						else */tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
+						else tag = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_SEXIT"));
 					}
 					else if ( (poi.trackedline.special == Exit_Normal) || ((poi.trackedline.special == ACS_Execute) && (poi.trackedline.Args[0] == -Int('E1M8_KNOCKOUT'))) )
 					{
-						// NOT YET IMPLEMENTED
-						/*LevelInfo l = LevelInfo.FindLevelInfo(level.nextmap);
+						LevelInfo l = LevelInfo.FindLevelInfo(level.nextmap);
 						if ( l && l.isValid() ) tag = String.Format("\cy%s:\c- %s\c-",StringTable.Localize("$SWWM_NEXIT"),l.LookupLevelName());
-						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+						else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 					}
 					else if ( poi.trackedline.special == Teleport_NewMap )
 					{
-						// NOT YET IMPLEMENTED
-						/*LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[0]);
+						LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[0]);
 						if ( l && l.isValid() ) tag = String.Format("\cy%s\c-%s\c-",StringTable.Localize("$SWWM_EXIT"),l.LookupLevelName());
-						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+						else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 					}
 					else if ( ((poi.trackedline.special == ACS_Execute) || (poi.trackedline.special == ACS_ExecuteAlways)) && (poi.trackedline.Args[0] == -Int('MapFadeOut')) )
 					{
-						// NOT YET IMPLEMENTED
-						/*LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[2]);
+						LevelInfo l = LevelInfo.FindLevelByNum(poi.trackedline.Args[2]);
 						if ( (level.levelnum != 1) && l && l.isValid() ) tag = String.Format("\cy%s\c-%s\c-",StringTable.Localize("$SWWM_EXIT"),l.LookupLevelName());
-						else */tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
+						else tag = String.Format("\cy%s\c-",StringTable.Localize("$SWWM_NEXIT"));
 					}
 				}
 				Font fnt = LangFont(mMiniwiFont);

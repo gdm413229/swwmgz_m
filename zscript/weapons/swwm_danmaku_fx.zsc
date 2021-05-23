@@ -145,8 +145,8 @@ Class EvisceratorChunk : Actor
 	Default
 	{
 		Obituary "$O_EVISCERATOR";
-		Radius 1;
-		Height 2;
+		Radius 2;
+		Height 4;
 		Speed 50;
 		DamageFunction int(clamp((vel.length()-8)*.2+max(0,1.-lifetime)*2.,0,15));
 		DamageType 'shot';
@@ -236,7 +236,7 @@ Class EvisceratorChunk : Actor
 
 	void A_HandleBounce()
 	{
-		Vector3 HitNormal = -vel.unit();
+		Vector3 HitNormal = (0,0,0);
 		F3DFloor ff;
 		if ( BlockingFloor )
 		{
@@ -275,6 +275,7 @@ Class EvisceratorChunk : Actor
 			Vector3 diff = level.Vec3Diff(BlockingMobj.Vec3Offset(0,0,BlockingMobj.Height/2),pos);
 			HitNormal = diff.unit();
 		}
+		else if ( vel.length() > 0. ) HitNormal = vel.unit();
 		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,GetMissileDamage(0,0),oldvel.unit());
 		// undo the bounce, we need to hook in our own
 		vel = oldvel;
@@ -288,8 +289,8 @@ Class EvisceratorChunk : Actor
 		if ( (vel.length() > 20) && !Random[Eviscerator](0,2) )
 		{
 			let l = Spawn("ChunkImpact",pos);
-			l.angle = atan2(HitNormal.y,HitNormal.x);
-			l.pitch = asin(-HitNormal.z);
+			l.angle = atan2(RealHitNormal.y,RealHitNormal.x);
+			l.pitch = asin(-RealHitNormal.z);
 			A_StartSound("eviscerator/hith",CHAN_WEAPON,CHANF_OVERLAP,.5);
 		}
 		A_Gravity();

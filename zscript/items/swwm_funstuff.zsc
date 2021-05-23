@@ -716,6 +716,12 @@ Class ChanceboxSpawner : Actor
 {
 	override void PostBeginPlay()
 	{
+		if ( deathmatch )
+		{
+			// not in DM
+			Destroy();
+			return;
+		}
 		int numbox = 0;
 		let ti = ThinkerIterator.Create("ChanceboxSpawner");
 		while ( ti.Next() ) numbox++;

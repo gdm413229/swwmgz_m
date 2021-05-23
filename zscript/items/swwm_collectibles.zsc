@@ -46,17 +46,11 @@ Class SWWMCollectible : Inventory abstract
 		if ( (avail == AVAIL_Hexen) && (gameinfo.gametype&GAME_Hexen) ) return true;
 		return false;
 	}
-	override void PostBeginPlay()
+	override bool ShouldSpawn()
 	{
-		Super.PostBeginPlay();
-		// delet ourselves if wrong iwad
-		if ( !ValidGame() ) Destroy();
-	}
-	override bool CanPickup( Actor toucher )
-	{
-		// no pickup if wrong iwad
-		if ( !ValidGame() ) return false;
-		return Super.CanPickup(toucher);
+		// don't spawn in-game if on deathmatch or the wrong IWAD
+		if ( deathmatch || !ValidGame() ) return false;
+		return true;
 	}
 	override string PickupMessage()
 	{

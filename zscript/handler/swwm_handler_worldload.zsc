@@ -271,7 +271,7 @@ extend Class SWWMHandler
 			SWWMInterest.Spawn(lpos,theline:l);
 		}
 		// spawn loot
-		Chancebox.SpawnChanceboxes();
+		if ( !deathmatch ) Chancebox.SpawnChanceboxes();
 		// list map keys
 		let ti = ThinkerIterator.Create("Key");
 		Key k;

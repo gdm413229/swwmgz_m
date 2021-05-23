@@ -206,8 +206,16 @@ Class SWWMItemSense : Thinker
 		let i = new("SWWMItemSense");
 		i.ChangeStatNum(STAT_USER);
 		i.item = item;
-		i.scoreitem = SWWMUtility.IsScoreItem(item);
-		i.vipitem = SWWMUtility.IsVipItem(item);
+		if ( item is 'SWWMRespawnTimer' )
+		{
+			i.scoreitem = SWWMUtility.IsScoreItem(item.tracer);
+			i.vipitem = SWWMUtility.IsVipItem(item.tracer);
+		}
+		else
+		{
+			i.scoreitem = SWWMUtility.IsScoreItem(item);
+			i.vipitem = SWWMUtility.IsVipItem(item);
+		}
 		i.parent = parent;
 		i.updated = level.maptime+35;
 		i.UpdateTag();
@@ -221,15 +229,22 @@ Class SWWMItemSense : Thinker
 
 	void UpdateTag()
 	{
-		if ( !item ) return;
+		let i = item;
+		if ( i is 'SWWMRespawnTimer' ) i = i.tracer;
+		if ( !i ) return;
 		// certain ammo types use the pickup message as it's amount-aware
-		if ( (item is 'RedShell') || (item is 'GreenShell')
-			|| (item is 'WhiteShell') || (item is 'BlueShell')
-			|| (item is 'BlackShell') || (item is 'PurpleShell')
-			|| (item is 'GoldShell') || (item is 'SMW05Ammo')
-			|| (item is 'SheenAmmo') )
-			tag = Inventory(item).PickupMessage();
-		else tag = item.GetTag();
+		if ( (i is 'RedShell') || (i is 'GreenShell')
+			|| (i is 'WhiteShell') || (i is 'BlueShell')
+			|| (i is 'BlackShell') || (i is 'PurpleShell')
+			|| (i is 'GoldShell') || (i is 'EvisceratorShell')
+			|| (i is 'HellblazerMissiles')
+			|| (i is 'HellblazerCrackshots')
+			|| (i is 'HellblazerRavagers')
+			|| (i is 'HellblazerWarheads')
+			|| (i is 'SMW05Ammo')
+			|| (i is 'SheenAmmo') )
+			tag = Inventory(i).PickupMessage();
+		else tag = i.GetTag();
 	}
 
 	override void OnDestroy()

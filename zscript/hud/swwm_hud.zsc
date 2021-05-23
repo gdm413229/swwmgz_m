@@ -732,6 +732,11 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,s.vipitem?Font.CR_PURPLE:s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 				tag = String.Format("\cu(%s\cu)\c-",FormatDist(tdir.length()));
 				Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				if ( s.item is 'SWWMRespawnTimer' )
+				{
+					tag = String.Format(StringTable.Localize("$SWWM_TRESPAWN"),s.item.special2/GameTicRate);
+					Screen.DrawText(fnt,Font.CR_WHITE,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y+hsd.y*fnt.GetHeight()*2)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				}
 			}
 		}
 		// targetting array
@@ -1570,6 +1575,7 @@ Class SWWMStatusBar : BaseStatusBar
 			yy += 3;
 		}
 		// draw key icons
+		if ( deathmatch ) return;
 		Vector2 keypos = (ss.x-(margin+2),yy);
 		int colc = 0;
 		double colh = 0;

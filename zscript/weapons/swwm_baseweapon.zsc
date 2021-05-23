@@ -2,6 +2,7 @@
 Class SWWMWeapon : Weapon abstract
 {
 	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMRespawn;
 
 	bool wasused;
 	private int SWeaponFlags;
@@ -205,6 +206,12 @@ Class SWWMWeapon : Weapon abstract
 			return true;
 		}
 		return Super.HandlePickup(item);
+	}
+	override bool ShouldStay()
+	{
+		// SWWM weapons never stay unless explicitly stated
+		if ( !bDROPPED && (deathmatch || alwaysapplydmflags) && sv_weaponstay ) return true;
+		return false;
 	}
 	override void AttachToOwner( Actor other )
 	{

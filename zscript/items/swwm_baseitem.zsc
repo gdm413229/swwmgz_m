@@ -86,3 +86,86 @@ Mixin Class SWWMOverlapPickupSound
 		toucher.A_StartSound(PickupSound,CHAN_ITEM,flags,1.,atten);
 	}
 }
+
+Class SWWMRespawnTimer : Actor
+{
+	default
+	{
+		+NOGRAVITY;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		Radius .1;
+		Height 0.;
+		Args 0,3,2;
+	}
+	override void PostBeginPlay()
+	{
+		args[3] = Random[ExploS](0,30);
+		if ( !Inventory(tracer) || !Inventory(tracer).PickupFlash ) return;
+		// copy pickup flash color
+		let fog = GetDefaultByType(Inventory(tracer).PickupFlash);
+		for ( int i=0; i<3; i++ ) args[i] = fog.args[i+1];
+	}
+	override void Tick()
+	{
+		if ( !tracer || !tracer.InStateSequence(tracer.CurState,tracer.FindState("HideDoomish")) )
+		{
+			Destroy();
+			return;
+		}
+		special2 = tracer.tics;
+		if ( isFrozen() ) return;
+		double str = 1.-special2/double(special1);
+		int freq = int(clamp(30*(1.-str),3,30));
+		if ( (level.maptime+args[3])%freq ) return;
+		int numpt = int(Random[ExploS](0,10)*str);
+		for ( int i=0; i<numpt; i++ )
+		{
+			double ang = FRandom[ExploS](0,360);
+			double pt = FRandom[ExploS](-90,90);
+			A_SpawnParticle(Color(args[0]*85,args[1]*85,args[2]*85),SPF_FULLBRIGHT,Random[ExploS](30,60),FRandom[ExploS](1.,2.),0,0,0,16,FRandom[ExploS](-.8,.8),FRandom[ExploS](-.8,.8),FRandom[ExploS](-.8,.8),0,0,0,FRandom[ExploS](.45,.9)*str,-1,FRandom[ExploS](-.04,-.02)*str);
+		}
+	}
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+		Stop;
+	}
+}
+
+Mixin Class SWWMRespawn
+{
+	override void Hide()
+	{
+		bSPECIAL = false;
+		bNOGRAVITY = true;
+		bINVISIBLE = true;
+		SetState(FindState("HideDoomish"));
+		tics = 1050;
+		if ( (self is 'Ammo') || (self is 'MagAmmo') )
+			tics -= 350;
+		if ( self.bBIGPOWERUP || SWWMUtility.IsVIPItem(self) )
+			tics += 1050;
+		if ( RespawnTics != 0 ) tics = RespawnTics;
+		if ( ShouldRespawn() )
+		{
+			Vector3 oldpos = pos;
+			A_RestoreSpecialPosition();
+			let t = Spawn("SWWMRespawnTimer",pos);
+			t.tracer = self;
+			t.special1 = tics;
+			t.A_SetSize(radius,height);
+			SetOrigin(oldpos,false);
+		}
+	}
+	override bool ShouldRespawn()
+	{
+		// always respawn in DM
+		if ( deathmatch && !bNEVERRESPAWN ) return true;
+		if ( (bBigPowerup || SWWMUtility.IsVIPItem(self)) && !sv_respawnsuper ) return false;
+		if ( bNEVERRESPAWN ) return false;
+		return (sv_itemrespawn||bALWAYSRESPAWN);
+	}
+}

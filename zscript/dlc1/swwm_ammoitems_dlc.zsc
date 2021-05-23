@@ -6,6 +6,7 @@ Class SMW05Ammo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -46,6 +47,7 @@ Class SMW05BundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -72,6 +74,7 @@ Class SheenAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	override string PickupMessage()
 	{
@@ -136,6 +139,7 @@ Class QuadravolAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -183,6 +187,7 @@ Class QuadravolAmmoBundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -193,6 +198,7 @@ Class DarkCanister : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -274,6 +280,7 @@ Class EMPCoreBundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -317,6 +324,7 @@ Class RayBoltBundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -327,6 +335,7 @@ Class RayAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -361,6 +370,7 @@ Class RayBattery : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -418,6 +428,7 @@ Class GrandAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{

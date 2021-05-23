@@ -41,7 +41,7 @@ Class SWWMKey : Key abstract
 
 	override bool Use( bool pickup )
 	{
-		if ( Owner.player && !propagated )
+		if ( Owner.player && !propagated && !deathmatch )
 		{
 			if ( pickup && CVar.GetCVar('swwm_collectanimkey',Owner.player).GetBool() )
 				SWWMGesture.SetSpecialGesture(Owner.player.mo,gesture);

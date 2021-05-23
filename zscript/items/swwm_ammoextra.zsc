@@ -6,6 +6,7 @@ Class AmmoFabricator : Inventory abstract
 {
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	int budget, pertype, maxunitprice;
 
@@ -307,6 +308,7 @@ Class HammerspaceEmbiggener : Inventory
 {
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	override Inventory CreateCopy( Actor other )
 	{

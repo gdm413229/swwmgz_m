@@ -507,7 +507,7 @@ Class Demolitionist : PlayerPawn
 		while ( bt.Next() )
 		{
 			let i = bt.Thing;
-			if ( !i || (!(i is 'Inventory') && !(i is 'Chancebox')) ) continue;
+			if ( !i || (!(i is 'Inventory') && !(i is 'Chancebox') && !(i is 'SWWMRespawnTimer')) ) continue;
 			if ( (i is 'Inventory') && (i.bINVISIBLE || !i.bSPECIAL || Inventory(i).Owner) ) continue;
 			if ( (i is 'Chancebox') && (i.CurState != i.SpawnState) ) continue;
 			if ( !SWWMUtility.SphereIntersect(i,pos,800) ) continue;

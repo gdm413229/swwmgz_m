@@ -8,6 +8,7 @@ Class RedShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -55,6 +56,7 @@ Class GreenShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -102,6 +104,7 @@ Class WhiteShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -148,6 +151,7 @@ Class BlueShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -195,6 +199,7 @@ Class BlackShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -242,6 +247,7 @@ Class PurpleShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -323,6 +329,7 @@ Class GoldShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	action void A_GoldShellTrail()
 	{
@@ -379,6 +386,7 @@ Class EvisceratorShell : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -439,6 +447,7 @@ Class EvisceratorTrioSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -453,6 +462,7 @@ Class HellblazerMissiles : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -511,6 +521,7 @@ Class HellblazerMissileTrioSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -521,6 +532,7 @@ Class HellblazerCrackshots : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -568,6 +580,7 @@ Class HellblazerRavagers : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -615,6 +628,7 @@ Class HellblazerWarheads : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -666,6 +680,7 @@ Class SparkUnit : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -706,6 +721,7 @@ Class SilverBulletAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -753,6 +769,7 @@ Class SilverBulletAmmo2 : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -858,6 +875,7 @@ Class SilverBulletsBundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -880,6 +898,7 @@ Class SilverBullets2BundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -894,6 +913,7 @@ Class CandyGunAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{
@@ -976,6 +996,7 @@ Class CandyGunBulletsBundleSpawn : Actor
 				a.bCOUNTSECRET = true;
 				level.total_secrets++;
 			}
+			a.bDROPPED = bDROPPED;
 		}
 		Destroy();
 	}
@@ -1023,6 +1044,7 @@ Class YnykronAmmo : Ammo
 	Mixin SWWMAmmo;
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
 
 	Default
 	{

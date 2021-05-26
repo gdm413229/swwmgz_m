@@ -20,11 +20,6 @@ enum ESWWMGZChannels
 const FallbackTag = "AWESOME IT'S PENIS"; // used on tag processing, please don't mind the actual string used)
 const MaxBouncePerTic = 40;	// maximum simultaneous bounces in one tic for a lightweight actor before we consider it's stuck
 
-// fixup for 4.5 compat, will be removed once a new version lands
-// SKILLP_SpawnMulti is not defined in zscript, so it has to be declared here
-// (somehow this hackaround doesn't break anything in devbuilds)
-const SKILLP_SpawnMulti = SKILLP_PlayerRespawn+1;
-
 // basic "does nothing" actor, used to remove stuff in CheckReplacement
 Class SWWMNothing : Actor
 {

@@ -42,19 +42,21 @@ extend Class SWWMHandler
 					secret = true;
 				clust = level.cluster;
 			}
-			int csiz = s.clustervisit.Size();
-			if ( csiz == 0 )
+			// avoid cluster zero (ignores test maps and such)
+			if ( clust != 0 )
 			{
-				s.clustervisit.Push(clust);
-				s.secretdone.Push(secret);
+				int csiz = s.clustervisit.Size();
+				if ( csiz == 0 )
+				{
+					s.secretdone.Push(secret);
+				}
+				else if ( s.clustervisit[csiz-1] != clust )
+				{
+					s.secretdone.Push(secret|s.secretdone[csiz-1]);
+				}
+				s.AddLevelStats();
+				s.lastcluster = level.cluster;
 			}
-			else if ( s.clustervisit[csiz-1] != clust )
-			{
-				s.clustervisit.Push(clust);
-				s.secretdone.Push(secret|s.secretdone[csiz-1]);
-			}
-			s.AddLevelStats();
-			s.lastcluster = level.cluster;
 		}
 		// reset score on dead players (death exit™)
 		for ( int i=0; i<MAXPLAYERS; i++ )

@@ -9,7 +9,7 @@ extend Class SWWMHandler
 	// for minimap
 	Array<int> ffsectors;
 
-	Array<Key> mapkeys;
+	Array<Class<Key> > mapkeys;
 
 	// level end stats
 	override void WorldUnloaded( WorldEvent e )
@@ -78,9 +78,14 @@ extend Class SWWMHandler
 			bool collected = false;
 			for ( int i=0; i<mapkeys.Size(); i++ )
 			{
-				if ( !mapkeys[i].Owner || !mapkeys[i].Owner.player ) continue;
-				collected = true;
-				break;
+				for ( int j=0; j<MAXPLAYERS; j++ )
+				{
+					if ( !playeringame[j] || !players[j].mo ) continue;
+					if ( !players[j].mo.FindInventory(mapkeys[i]) ) continue;
+					collected = true;
+					break;
+				}
+				if ( collected ) break;
 			}
 			if ( !collected ) SWWMUtility.MarkAchievement('swwm_achievement_cliffyb',players[consoleplayer]);
 		}
@@ -278,7 +283,9 @@ extend Class SWWMHandler
 		while ( k = Key(ti.Next()) )
 		{
 			if ( k.Owner ) continue;
-			mapkeys.Push(k);
+			if ( mapkeys.Find(k.GetClass()) < mapkeys.Size() )
+				continue;
+			mapkeys.Push(k.GetClass());
 		}
 	}
 }

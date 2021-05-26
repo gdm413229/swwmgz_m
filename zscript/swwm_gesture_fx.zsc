@@ -257,8 +257,11 @@ Class LoveHeart : Actor
 					Hit3DFloor = ff;
 					break;
 				}
-				if ( Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(0);
-				else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(2);
+				if ( Hit3DFloor )
+				{
+					if ( Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(0);
+					else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitTexture = HitLine.sidedef[LineSide].GetTexture(2);
+				}
 			}
 			else HitTexture = HitLine.sidedef[LineSide].GetTexture(LinePart);
 		}

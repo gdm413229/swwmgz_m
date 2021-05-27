@@ -26,7 +26,7 @@ float[](
 	3.
 );
 
-vec4 ProcessTexel()
+void SetupMaterial( inout Material mat )
 {
 	vec2 coord;
 	vec3 col = vec3(1.);
@@ -36,5 +36,5 @@ vec4 ProcessTexel()
 		col *= layers[i]*2.0*abs(fract(rnd(coord)+timer*speed[i])-0.5);
 	}
 	col += getTexel(vTexCoord.st).rgb;
-	return vec4(col,1.);
+	mat.Base = vec4(col,1.);
 }

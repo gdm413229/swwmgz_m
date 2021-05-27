@@ -1,13 +1,8 @@
-vec4 ProcessLight( vec4 color )
+void SetupMaterial( inout Material mat )
 {
-	if ( mod(timer*35.,20.) < 10. )
-		color.rgb = vec3(1.);
-	return color;
-}
-
-vec4 ProcessTexel()
-{
+	float mixfct = floor(mod(timer*35.,20.)/10.);
 	vec2 uv = vTexCoord.st*vec2(.5,1.);
-	if ( mod(timer*35.,20.) >= 10. ) uv.x += .5;
-	return getTexel(uv);
+	uv.x += mixfct*.5;
+	mat.Base = getTexel(uv);
+	mat.Bright = vec4(mix(vec3(1.),vec3(0.),mixfct),1.);
 }

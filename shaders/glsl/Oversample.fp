@@ -1,6 +1,6 @@
 // This should act as a virtual NormalNx upscaler when using texture filtering
 
-vec4 ProcessTexel()
+void SetupMaterial( inout Material mat )
 {
 	vec2 size = textureSize(tex,0);
 	vec2 pxsize = vec2(1./size.x,1./size.y);
@@ -10,5 +10,5 @@ vec4 ProcessTexel()
 	float threshold = 0.;	// this controls sharpness, kinda
 	coeff = (coeff-threshold)*1./(1.-2*threshold);
 	coeff = clamp(coeff,0.,1.);
-	return texture(tex,pos+pxsize*(coeff-fcoord));
+	mat.Base = texture(tex,pos+pxsize*(coeff-fcoord));
 }

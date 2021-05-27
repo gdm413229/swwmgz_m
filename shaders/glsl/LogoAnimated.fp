@@ -42,7 +42,7 @@ vec4 blacktoalpha( in vec4 src )
 	return dst;
 }
 
-vec4 ProcessTexel()
+void SetupMaterial( inout Material mat )
 {
 	// y'all ready for this multilayered madness?
 	vec2 uv = vTexCoord.st;
@@ -88,6 +88,6 @@ vec4 ProcessTexel()
 	if ( (px.x <= 1) || (px.x >= (sz.x-1)) || (px.y <= 1) || (px.y >= (sz.y-1)) )
 		tmp2 = vec4(0.);
 	// ding, logo's done
-	return tmp2;
+	mat.Base = tmp2;
 }
 

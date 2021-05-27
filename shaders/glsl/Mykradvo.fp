@@ -1,6 +1,6 @@
 const float pi = 3.14159265358979323846;
 
-vec4 ProcessTexel()
+void SetupMaterial( inout Material mat )
 {
 	vec2 p = 2.*(vTexCoord.st-.5);
 	float a = atan(p.y,p.x);
@@ -42,5 +42,5 @@ vec4 ProcessTexel()
 	col += flr;
 	// debug: uncomment to show bumpmap
 	//col = vec3((nz.x+.5)*.5,(nz.y+.5)*.5,1.);
-	return vec4(col,1.);
+	mat.Base = vec4(col,1.);
 }

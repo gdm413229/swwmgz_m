@@ -1,3 +1,5 @@
+// animated SWWM GZ logo
+
 #define overlay(a,b) (a<0.5)?(2.0*a*b):(1.0-(2.0*(1.0-a)*(1.0-b)))
 const float pi = 3.14159265358979323846;
 

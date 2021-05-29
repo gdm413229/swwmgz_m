@@ -1,3 +1,5 @@
+// glitched screen shader
+
 const float thr1 = 6.4;
 const float thr2 = 8.6;
 const float thr3 = 19.3;

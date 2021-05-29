@@ -1,3 +1,5 @@
+// ghost artifact refraction bubble
+
 void main()
 {
 	vec2 uv = TexCoord;

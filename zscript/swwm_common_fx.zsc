@@ -1206,6 +1206,26 @@ Class SWWMBulletTrail : LineTracer
 	}
 }
 
+// finds the first pickup-able item
+Class SWWMItemTracer : LineTracer
+{
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( (Results.HitActor is 'Inventory') && Results.HitActor.bSPECIAL ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockUse|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
 // Blob shadows
 Class SWWMShadow : Actor
 {

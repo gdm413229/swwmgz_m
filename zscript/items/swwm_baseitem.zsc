@@ -38,16 +38,23 @@ Class CrossLineFinder : LineTracer
 
 Mixin Class SWWMUseToPickup
 {
+	bool bUsePickup;
+
 	// allow pickup by use
 	override bool Used( Actor user )
 	{
+		// no use through melee
+		if ( (user.player.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(user.player.ReadyWeapon).wallponch && !swwm_meleepickup )
+			return false;
 		Vector3 itempos = Vec3Offset(0,0,Height/2),
 			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
 		// test vertical range
 		Vector3 diff = level.Vec3Diff(user.Vec3Offset(0,0,user.Height/2),Vec3Offset(0,0,Height/2));
 		double rang = user.player?PlayerPawn(user.player.mo).UseRange:(user.Height/2);
 		if ( abs(diff.z) > rang ) return false;
+		bUsePickup = true;
 		Touch(user);
+		bUsePickup = false;
 		// we got picked up
 		if ( bDestroyed || Owner || !bSPECIAL )
 		{
@@ -62,6 +69,13 @@ Mixin Class SWWMUseToPickup
 			return true;
 		}
 		return false;
+	}
+
+	override void Touch( Actor toucher )
+	{
+		if ( toucher.player && swwm_usetopickup && !bUsePickup )
+			return;
+		Super.Touch(toucher);
 	}
 }
 

@@ -5,6 +5,7 @@ Class SWWMWeapon : Weapon abstract
 	Mixin SWWMRespawn;
 
 	bool wasused;
+	bool bUsePickup;
 	private int SWeaponFlags;
 
 	Class<Ammo> dropammotype;
@@ -50,11 +51,16 @@ Class SWWMWeapon : Weapon abstract
 			}
 			return;
 		}
+		if ( toucher.player && swwm_usetopickup && !bUsePickup )
+			return;
 		Super.Touch(toucher);
 	}
 	// allow pickup by use + swap weapon support
 	override bool Used( Actor user )
 	{
+		// no use through melee
+		if ( (user.player.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(user.player.ReadyWeapon).wallponch && !swwm_meleepickup )
+			return false;
 		Vector3 itempos = Vec3Offset(0,0,Height/2),
 			userpos = user.Vec2OffsetZ(0,0,user.player.viewz);
 		// test vertical range
@@ -88,7 +94,9 @@ Class SWWMWeapon : Weapon abstract
 				user.player.PendingWeapon = WP_NOCHANGE;
 			}
 		}
+		bUsePickup = true;
 		Touch(user);
+		bUsePickup = false;
 		// we got picked up
 		if ( bDestroyed || Owner || !bSPECIAL )
 		{

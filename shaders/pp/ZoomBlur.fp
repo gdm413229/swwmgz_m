@@ -1,3 +1,5 @@
+// zoom blur effect adapted from abort_m berserk pulse
+
 void main()
 {
 	vec2 p = CenterSpot-TexCoord;

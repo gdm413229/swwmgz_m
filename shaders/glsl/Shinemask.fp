@@ -1,3 +1,5 @@
+// basic texture + masked pseudo-matcap
+
 void SetupMaterial( inout Material mat )
 {
 	vec4 base = getTexel(vTexCoord.st);

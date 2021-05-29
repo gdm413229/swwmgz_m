@@ -1,3 +1,6 @@
+// underwater overlay adapted from original Hexmas sanity effect shader
+// lava version
+
 vec2 calcdist( vec2 duv )
 {
 	vec2 uv = vec2(0.);

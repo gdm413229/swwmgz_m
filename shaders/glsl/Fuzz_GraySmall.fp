@@ -1,3 +1,7 @@
+// adapted from original "fuzz" filter devised in 2016
+// PRNG replaced with noise texture sampling to compensate for odd patterning
+// on intel hardware
+
 float rnd( in vec2 sd )
 {
 	//return cos(sd.y*3874.8674+sd.x*6783.5325)*2737.8474;

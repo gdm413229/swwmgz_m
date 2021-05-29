@@ -1,3 +1,5 @@
+// emulate keycard blink cycle on hud model
+
 void SetupMaterial( inout Material mat )
 {
 	float mixfct = floor(mod(timer*35.,20.)/10.);

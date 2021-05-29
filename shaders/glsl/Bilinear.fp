@@ -1,4 +1,5 @@
 // This should act as Bilinear filtering when texture filtering is disabled
+// the algo is pretty much public domain, so no credit given
 
 void SetupMaterial( inout Material mat )
 {

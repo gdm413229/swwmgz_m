@@ -1,3 +1,5 @@
+// barrier shimmering warp overlay
+
 void main()
 {
 	vec2 uv = TexCoord;

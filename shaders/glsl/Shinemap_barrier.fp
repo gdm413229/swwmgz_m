@@ -1,3 +1,5 @@
+// pseudo-matcap + scrolling overlay
+
 void SetupMaterial( inout Material mat )
 {
 	vec3 rnorm = normalize(vEyeNormal.xyz)*vec3(1,-1,1);

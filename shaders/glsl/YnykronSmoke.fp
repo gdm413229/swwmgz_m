@@ -1,3 +1,5 @@
+// scrolling smoke with gradient fade
+
 void SetupMaterial( inout Material mat )
 {
 	vec3 base = getTexel(vTexCoord.st).rgb;

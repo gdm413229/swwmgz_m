@@ -1,3 +1,5 @@
+// invinciball radial sharpening
+
 vec3 sharpened( vec2 uv )
 {
 	vec3 col = texture(InputTexture,uv).rgb*9.;

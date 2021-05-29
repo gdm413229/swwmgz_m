@@ -1,3 +1,5 @@
+// mykradvo center sprite
+
 const float pi = 3.14159265358979323846;
 
 void SetupMaterial( inout Material mat )

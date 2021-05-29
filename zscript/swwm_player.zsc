@@ -69,6 +69,8 @@ Class Demolitionist : PlayerPawn
 	Actor froggy;
 
 	transient int lastuse, failcounter, failcooldown;
+	transient SWWMItemTracer itrace;
+	bool meleeuse;
 
 	Property DashFuel : dashfuel;
 
@@ -559,6 +561,33 @@ Class Demolitionist : PlayerPawn
 			else d.HitSector.SetTexture(0,replacewith);
 		}
 	}
+	void CheckItemUsePickup()
+	{
+		if ( player.usedown )
+			return;
+		if ( !itrace ) itrace = new("SWWMItemTracer");
+		Vector3 x, y, z, dir;
+		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
+		Vector3 origin = Vec2OffsetZ(0,0,player.viewz);
+		Sector os = level.PointInSector(origin.xy);
+		int rings = 1;
+		Array<Actor> ignoreme;
+		ignoreme.Clear();
+		for ( double i=0; i<.2; i+=.02 )
+		{
+			for ( int j=0; j<360; j+=(360/rings) )
+			{
+				dir = (x+y*cos(j)*i+z*sin(j)*i).unit();
+				itrace.Trace(origin,os,dir,UseRange,0);
+				if ( itrace.Results.HitType != TRACE_HitActor ) continue;
+				if ( ignoreme.Find(itrace.Results.HitActor) < ignoreme.Size() ) continue;
+				player.usedown = true;	// we found an item, ignore further uses
+				if ( itrace.Results.HitActor.Used(self) ) return;
+				ignoreme.Push(itrace.Results.HitActor);
+			}
+			rings += 2;
+		}
+	}
 	void CheckUnderwaterAmb( bool restore = false )
 	{
 		Vector3 headpos = Vec3Offset(0,0,player.viewheight);
@@ -729,6 +758,8 @@ Class Demolitionist : PlayerPawn
 			CheckDefaceTexture();
 			if ( !player.usedown && froggy )
 				player.usedown = froggy.Used(self);
+			// try to "use" the item closest to the crosshair
+			CheckItemUsePickup();
 		}
 		Super.PlayerThink();
 		if ( (gametic == lastuse) && IsActorPlayingSound(CHAN_VOICE,"*usefail") )

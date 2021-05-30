@@ -140,7 +140,7 @@ Class ParryField : Actor
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			Vector3 hdir = dir;
-			if ( a.bMISSILE )
+			if ( a.bMISSILE || (a is 'HolySpirit') )	// special wraithverge handling
 			{
 				// deflect directly to target
 				if ( a.target )

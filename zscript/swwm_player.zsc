@@ -2934,7 +2934,7 @@ Class Demolitionist : PlayerPawn
 		Goto Spawn+1;
 	Jump:
 		#### # 2;
-		XZWJ ABCDEF 2;
+		XZWJ ABCDEF 2 A_JumpIf(player.onground&&!bNoGravity&&(waterlevel<3),"FallEnd");
 		Goto FallLoop;
 	Fall:
 		// start fall

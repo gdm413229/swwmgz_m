@@ -54,6 +54,13 @@ extend Class SWWMHandler
 			}
 			return;
 		}
+		else if ( e.Name ~== "swwmsetwalk" )
+		{
+			if ( (e.player == -1) || !playeringame[e.player] || !players[e.player].mo ) return;
+			let mo = Demolitionist(players[e.player].mo);
+			if ( mo ) mo.bWalking = e.Args[0];
+			return;
+		}
 		else if ( e.Name ~== "swwmfixitemcaps" )
 		{
 			// this command is only really needed when I update item max amounts mid-playthrough

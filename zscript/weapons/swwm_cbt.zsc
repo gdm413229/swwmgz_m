@@ -161,9 +161,9 @@ Class Wallbuster : SWWMWeapon
 		Vector3 ndc = SWWMUtility.ProjectPoint(sb.projdata,e.ViewPos+tdir);
 		if ( ndc.z >= 1. ) return;
 		Vector2 vpos = SWWMUtility.NDCToViewport(sb.projdata,ndc);
-		double frametime = (MSTime()-prevms)/1000.;
-		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
-		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
+		double frametime = ((gametic+e.fractic)-prevframe)/GameTicRate;
+		double theta = clamp(30.*frametime,0.,1.); // naive, but whatever
+		if ( !prevframe || (lagvpos == (0,0)) ) lagvpos = vpos;
 		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
 		for ( int i=0; i<25; i++ )
 		{
@@ -173,11 +173,11 @@ Class Wallbuster : SWWMWeapon
 			ndc = SWWMUtility.ProjectPoint(sb.projdata,e.ViewPos+tdir);
 			if ( ndc.z >= 1. ) return;
 			vpos = SWWMUtility.NDCToViewport(sb.projdata,ndc);
-			if ( !prevms || (lagvpos25[i] == (0,0)) ) lagvpos25[i] = vpos;
+			if ( !prevframe || (lagvpos25[i] == (0,0)) ) lagvpos25[i] = vpos;
 			else lagvpos25[i] = lagvpos25[i]*(1.-theta)+vpos*theta;
 			Screen.DrawTexture(ctex,false,int(lagvpos25[i].x),int(lagvpos25[i].y),DTA_DestWidthF,ts.x*sz,DTA_DestHeightF,ts.y*sz,DTA_AlphaChannel,true,DTA_FillColor,ccol25[i]);
 		}
-		prevms = MSTime();
+		prevframe = gametic+e.fractic;
 	}
 
 	ui Vector3, Color TraceForCrosshair25( int i )

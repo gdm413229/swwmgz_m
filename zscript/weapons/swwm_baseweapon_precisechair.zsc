@@ -28,7 +28,7 @@ extend Class SWWMWeapon
 	ui Vector3 cpos;
 	ui Color ccol;
 	ui Vector2 lagvpos;
-	transient ui uint prevms;
+	transient ui double prevframe;
 
 	override void DoEffect()
 	{
@@ -48,7 +48,7 @@ extend Class SWWMWeapon
 		{
 			SWWMWeapon(Owner.player.PendingWeapon).cpos = cpos;
 			SWWMWeapon(Owner.player.PendingWeapon).lagvpos = lagvpos;
-			SWWMWeapon(Owner.player.PendingWeapon).prevms = prevms;
+			SWWMWeapon(Owner.player.PendingWeapon).prevframe = prevframe;
 		}
 	}
 	// extra drawing, usually scopes
@@ -67,11 +67,11 @@ extend Class SWWMWeapon
 		Vector3 ndc = SWWMUtility.ProjectPoint(sb.projdata,e.ViewPos+tdir);
 		if ( ndc.z >= 1. ) return;
 		Vector2 vpos = SWWMUtility.NDCToViewport(sb.projdata,ndc);
-		double frametime = (MSTime()-prevms)/1000.;
-		double theta = clamp(15.*frametime,0.,1.); // naive, but whatever
-		if ( !prevms || (lagvpos == (0,0)) ) lagvpos = vpos;
+		double frametime = ((gametic+e.fractic)-prevframe)/GameTicRate;
+		double theta = clamp(30.*frametime,0.,1.); // naive, but whatever
+		if ( !prevframe || (lagvpos == (0,0)) ) lagvpos = vpos;
 		else lagvpos = lagvpos*(1.-theta)+vpos*theta;
-		prevms = MSTime();
+		prevframe = gametic+e.fractic;
 		int cnum = abs(CVar.FindCVar('crosshair').GetInt());
 		if ( !cnum ) return;
 		String tn = String.Format("XHAIR%s%d",(Screen.GetWidth()<640)?"S":"B",cnum);

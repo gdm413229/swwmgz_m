@@ -113,7 +113,7 @@ extend Class SWWMHandler
 			if ( a == players[consoleplayer].Camera ) continue;
 			if ( a.bINVISIBLE && !(a is 'DynamicLight') ) continue;
 			if ( (a is 'Inventory') && Inventory(a).Owner ) continue;
-			if ( (a is 'SWWMShadow') || (a is 'GhostArtifactX') || (a is 'DemolitionistSelfLight') ) continue;
+			if ( (a is 'SWWMShadow') || (a is 'GhostArtifactX') || (a is 'DemolitionistSelfLight') || (a is 'HeadpatTracker') ) continue;
 			if ( a.Distance3DSquared(e.Camera) > 1000000 ) continue;
 			DrawActor(e,a);
 		}

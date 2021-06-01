@@ -1237,6 +1237,8 @@ Class SWWMShadow : Actor
 		if ( other is 'SWWMShadow' ) return;
 		// no shadows for overlay actors
 		if ( other is 'GhostArtifactX' ) return;
+		// no shadows for things with zero radius
+		if ( other.radius <= 0. ) return;
 		let s = SWWMShadow(Spawn("SWWMShadow",other.pos));
 		s.target = other;
 		s.Update(true);

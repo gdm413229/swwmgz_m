@@ -104,3 +104,20 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Manual reloading and weapon maintenance
   - Alternate mobility options (no jetpack)
   - Non-instant item usage
+* **DLC Weaponset 2:**
+  - [1] Hand of Divine *(Total Madness)*
+  - [2] Protonic Cannon *(UnSX 3)*
+  - [3] Zipnic AP Mag *(UnSX)*
+  - [4] Mortal Rifle *(UnSX)*
+  - [5] Microgravity Manipulator *(Ultra Suite)*
+  - [6] Skull Launcher *(Weirdweapons)*
+  - [7] Sparkster Carbine *(UnSX)*
+  - [8] Mirkal *(SWWM Platinum Ep1)*
+  - [9] Rafan-Kos *(UnSX)*
+  - [0] Mespei Artifact *(SWWM)*
+* **DLC Itemset:**
+  - Satellite *(Total Destruction)*
+  - Safety Tether *(Original)*
+  - Devastation Sigil *(SWWM)*
+  - Black Matter Armor *(SWWM)*
+  - Angel of Death *(Total Destruction, SWWM Platinum Ep2)*

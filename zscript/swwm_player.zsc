@@ -1160,10 +1160,12 @@ Class Demolitionist : PlayerPawn
 					}
 					if ( buttslam && (!a || (a.Health <= 0)) )
 					{
-						A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
+						A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.4);
+						if ( swwm_buttsfx ) A_StartSound("demolitionist/buttslamx",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
 						Spawn("SWWMItemFog",level.Vec3Offset(pos,diff/2));
 						A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 						mystats.buttslams++;
+						lastbump *= .8;
 					}
 				}
 				if ( raging )
@@ -1223,10 +1225,12 @@ Class Demolitionist : PlayerPawn
 							busted = true;
 							if ( buttslam )
 							{
-								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
+								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.4);
+								if ( swwm_buttsfx ) A_StartSound("demolitionist/buttslamx",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
 								Spawn("SWWMItemFog",Vec3Offset(0,0,Height));
 								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 								mystats.buttslams++;
+								lastbump *= .8;
 							}
 						}
 					}
@@ -1319,10 +1323,12 @@ Class Demolitionist : PlayerPawn
 							A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 							if ( buttslam )
 							{
-								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.2);
+								A_StartSound("demolitionist/buttslam",CHAN_DAMAGE,CHANF_OVERLAP,1.,.4);
+								if ( swwm_buttsfx ) A_StartSound("demolitionist/buttslamx",CHAN_DAMAGE,CHAN_OVERLAP,1.,.2);
 								Spawn("SWWMItemFog",Vec3Offset(dir.x*radius,dir.y*radius,(tempme.Results.Tier==TIER_UPPER)?Height:(tempme.Results.Tier==TIER_LOWER)?0:(Height/2)));
 								A_QuakeEx(8,8,8,8,0,3000,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:1.);
 								mystats.buttslams++;
+								lastbump *= .8;
 							}
 							if ( raging ) continue;	// don't stop
 						}

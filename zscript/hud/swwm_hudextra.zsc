@@ -223,6 +223,34 @@ Class SWWMAchievementNotification : HUDMessageBase
 	}
 }
 
+Class SWWMSewerCount : HUDMessageBase
+{
+	int tics;
+	String str;
+
+	SWWMSewerCount Init()
+	{
+		tics = 150;
+		str = String.Format("Sewer Count: %d",swwm_sewercount);
+		return self;
+	}
+
+	override bool Tick()
+	{
+		if ( tics == 100 ) S_StartSound("misc/sewercount",CHAN_VOICE,CHANF_UI,1.,0.);
+		return (tics--<=0);
+	}
+
+	override void Draw( int bottom, int visibility )
+	{
+		if ( tics > 100 ) return;
+		double alph = clamp(tics/20.,0.,1.);
+		double x = (Screen.GetWidth()-(newsmallfont.StringWidth(str)*CleanXFac*2))/2;
+		double y = int(Screen.GetHeight()*.75)-(newsmallfont.GetHeight()*CleanYFac*2)/2;
+		Screen.DrawText(newsmallfont,Font.CR_GREEN,x,y,str,DTA_ScaleX,CleanXFac*2,DTA_ScaleY,CleanYFac*2,DTA_Alpha,alph);
+	}
+}
+
 // Secret dialogue
 Class SWWMSecretZanavethMessage : HUDMessageBase
 {

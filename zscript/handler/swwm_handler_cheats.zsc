@@ -8,6 +8,14 @@ extend Class SWWMHandler
 	transient ui int rss;
 	transient ui Font kfnt;
 	ui bool nostalgic;
+	transient int sewercnt;
+
+	private ui void CheatUITick()
+	{
+		if ( !sewercnt || (sewercnt < gametic) ) return;
+		let m = new("SWWMSewerCount").Init();
+		StatusBar.AttachMessage(m,-1111);
+	}
 
 	private void CheatEvent( ConsoleEvent e )
 	{
@@ -311,7 +319,7 @@ extend Class SWWMHandler
 			if ( consoleplayer == e.Args[0] )
 			{
 				Console.Printf("\cyLet's mop up that big mess over there.\c-");
-				S_StartSound("misc/buyinv",CHAN_ITEM,CHANF_UI);
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 			}
 			let cc = SWWMCorpseCleaner(ThinkerIterator.Create("SWWMCorpseCleaner",Thinker.STAT_USER).Next());
 			if ( !cc )
@@ -322,6 +330,51 @@ extend Class SWWMHandler
 			}
 			else cc.Init(players[e.Args[0]].mo);
 		}
+		else if ( e.Name ~== "swwmsewercountcheat" )
+		{
+			if ( consoleplayer == e.Args[0] )
+			{
+				let cv = CVar.FindCVar('swwm_sewercount');
+				int cur = max(0,cv.GetInt());
+				if ( cur == 0 ) Console.Printf("\cyIt begins.\c-");
+				else switch ( Random[HudStuff](0,9) )
+				{
+				case 0:
+					Console.Printf("\cyAnother one?\c-");
+					break;
+				case 1:
+					Console.Printf("\cyOh hi Civvie.\c-");
+					break;
+				case 2:
+					Console.Printf("\cyIt does stink.\c-");
+					break;
+				case 3:
+					Console.Printf("\cyGod, imagine the smell...\c-");
+					break;
+				case 4:
+					Console.Printf("\cyObligatory sewer level?\c-");
+					break;
+				case 5:
+					Console.Printf("\cyYup! It's another sewer.\c-");
+					break;
+				case 6:
+					Console.Printf("\cyOh boy here we go...\c-");
+					break;
+				case 7:
+					Console.Printf("\cyIt smells, boy does it smell.\c-");
+					break;
+				case 8:
+					Console.Printf("\cyPlease don't sue me, Civvie.\c-");
+					break;
+				case 9:
+					Console.Printf("\cyOnce more, from the top!\c-");
+					break;
+				}
+				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
+				cv.SetInt(cur+1);
+				sewercnt = gametic;
+			}
+		}
 	}
 
 	private ui bool CheatInput( InputEvent e )
@@ -330,7 +383,7 @@ extend Class SWWMHandler
 		String cht[] =
 		{
 			"swwmlodsofemone", "swwmdeeplore", "swwmfroggygang", "swwmforgetaboutit",
-			"swwmmisterproper",
+			"swwmmisterproper", "swwmstinky",
 			// SWWM Platinum cheats
 			"swwmimstuck",            "swwmarmojumbo",         "swwmdangimhealthy",
 			"swwmwarriorofzaemonath", "swwmpowerparp",         "swwmcannotseemyhands",
@@ -343,7 +396,7 @@ extend Class SWWMHandler
 		String cmd[] =
 		{
 			"swwmmoneycheat", "swwmlorecheat", "swwmfroggycheat", "swwmamnesiacheat",
-			"swwmjanitorcheat",
+			"swwmjanitorcheat", "swwmsewercountcheat",
 			// SWWM Platinum cheats
 			"swwmsafecheat",    "swwmweaponcheat",   "swwmhealcheat",
 			"swwmynykroncheat", "swwmgravcheat",   "swwminvischeat",
@@ -364,7 +417,7 @@ extend Class SWWMHandler
 				if ( kstr != cht[i].Left(kstr.length()) ) continue;
 				matchany = true;
 				if ( kstr != cht[i] ) continue;
-				if ( (i > 4) && !swwm_oldcheat )
+				if ( (i > 5) && !swwm_oldcheat )
 				{
 					let m = new("SWWMSecretZanavethMessage").Init();
 					StatusBar.AttachMessage(m,-1232);

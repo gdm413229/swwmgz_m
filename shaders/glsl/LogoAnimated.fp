@@ -91,5 +91,6 @@ void SetupMaterial( inout Material mat )
 		tmp2 = vec4(0.);
 	// ding, logo's done
 	mat.Base = tmp2;
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }
 

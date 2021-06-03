@@ -8,4 +8,5 @@ void SetupMaterial( inout Material mat )
 	vec3 grad = texture(bartex,vec2(0.,vTexCoord.t*5.+timer)).rgb;
 	grad *= .25;
 	mat.Base = basemap+vec4(grad,0.);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

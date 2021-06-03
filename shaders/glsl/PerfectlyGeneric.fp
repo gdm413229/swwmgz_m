@@ -3,6 +3,7 @@
 void SetupMaterial( inout Material mat )
 {
 	mat.Base = getTexel(vTexCoord.st);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }
 
 vec4 ProcessLight( Material mat, vec4 color )

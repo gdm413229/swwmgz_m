@@ -40,4 +40,5 @@ void SetupMaterial( inout Material mat )
 		col *= layers[i]*2.0*abs(fract(rnd(coord)+timer*speed[i])-0.5);
 	}
 	mat.Base = vec4(col,1.);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

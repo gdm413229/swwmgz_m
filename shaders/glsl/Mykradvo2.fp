@@ -22,4 +22,5 @@ void SetupMaterial( inout Material mat )
 	// debug: uncomment to show bumpmap
 	//col = vec3((nz.x+.5)*.5,(nz.y+.5)*.5,1.);
 	mat.Base = vec4(col,1.);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

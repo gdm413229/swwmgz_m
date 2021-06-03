@@ -41,4 +41,5 @@ void SetupMaterial( inout Material mat )
 	}
 	col += getTexel(vTexCoord.st).rgb;
 	mat.Base = vec4(col,1.);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

@@ -8,4 +8,5 @@ void SetupMaterial( inout Material mat )
 	scroll = vTexCoord.st*.9+vec2(-.2,.4)*timer;
 	smk *= texture(smoketex,scroll).x;
 	mat.Base = vec4(base*smk,1.);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

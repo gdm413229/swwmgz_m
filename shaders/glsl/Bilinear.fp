@@ -15,4 +15,5 @@ void SetupMaterial( inout Material mat )
 	vec4 pInterp_q0 = mix(p0q0,p1q0,f.x);
 	vec4 pInterp_q1 = mix(p0q1,p1q1,f.x);
 	mat.Base = mix(pInterp_q0,pInterp_q1,f.y);
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

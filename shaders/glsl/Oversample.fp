@@ -11,4 +11,5 @@ void SetupMaterial( inout Material mat )
 	coeff = (coeff-threshold)*1./(1.-2*threshold);
 	coeff = clamp(coeff,0.,1.);
 	mat.Base = texture(tex,pos+pxsize*(coeff-fcoord));
+	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }

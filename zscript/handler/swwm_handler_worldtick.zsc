@@ -50,7 +50,7 @@ extend Class SWWMHandler
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
 				int score = 10*(players[i].itemcount-lastitemcount[i]);
-				if ( (level.total_items == level.found_items) && !allitems )
+				if ( !deathmatch && (level.total_items == level.found_items) && !allitems )
 				{
 					allitems = true;
 					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),500);
@@ -125,6 +125,8 @@ extend Class SWWMHandler
 
 	private void OneHundredPercentCheck()
 	{
+		// not in DM
+		if ( !deathmatch ) return;
 		if ( !mapclear && (restartmus > 0) )
 		{
 			restartmus--;

@@ -2024,6 +2024,9 @@ Class SWWMStatusBar : BaseStatusBar
 			len = fnt.StringWidth(str);
 			xx = int((ss.x-len)/2.);
 			yy = (ss.y-fnt.GetHeight()*4)/2.;
+			// shift down if scoreboard is shown
+			if ( (deathmatch && sb_deathmatch_enable && (!teamplay || sb_teamdeathmatch_enable)) || (multiplayer && sb_cooperative_enable) )
+				yy += ss.y/3.+fnt.GetHeight();
 			Screen.DrawText(fnt,Font.CR_RED,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
 			{
@@ -2034,6 +2037,9 @@ Class SWWMStatusBar : BaseStatusBar
 				len = fnt.StringWidth(str);
 				xx = int((ss.x-len)/2.);
 				yy = ss.y/2.;
+				// shift down if scoreboard is shown
+				if ( (deathmatch && sb_deathmatch_enable && (!teamplay || sb_teamdeathmatch_enable)) || (multiplayer && sb_cooperative_enable) )
+					yy += ss.y/3.;
 				Screen.DrawText(fnt,Font.CR_WHITE,xx,yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				return (1.-dimalph);
 			}

@@ -1963,6 +1963,10 @@ Class Demolitionist : PlayerPawn
 		player.mo.CalcHeight();
 		if ( player.damagecount ) player.damagecount--;
 		if ( player.poisoncount ) player.poisoncount--;
+		// solid unless we can respawn, for safety
+		if ( multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn) )
+			bSolid = false;
+		else bSolid = true;
 		if ( player.viewheight <= 6 )
 		{
 			deadtimer++;
@@ -3129,7 +3133,7 @@ Class Demolitionist : PlayerPawn
 		XZW7 M 2
 		{
 			A_DemoScream();
-			bSOLID = true;	// we need this to avoid clipping into things
+			A_NoBlocking();
 		}
 		XZW8 GHIJK 2;
 		XZW8 L 1 A_DMFade();

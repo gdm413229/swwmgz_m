@@ -73,7 +73,8 @@ extend Class SWWMHandler
 		}
 		if ( spawnme ) SWWMScoreObj.Spawn(-e.Damage,e.Thing.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+e.Thing.Height/2),ST_Damage,e.Thing);
 		// update combat tracker for it
-		if ( !(e.Thing is 'BossBrain') )
+		// note: don't update if it's a hostile player unless hurt by you or a friend
+		if ( !(e.Thing is 'BossBrain') && (!e.Thing.player || (!e.Thing.IsFriend(players[consoleplayer].mo) && e.DamageSource && e.DamageSource.IsFriend(players[consoleplayer].mo))) )
 		{
 			for ( SWWMCombatTracker t=trackers; t; t=t.next )
 			{

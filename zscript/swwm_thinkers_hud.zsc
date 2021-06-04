@@ -343,7 +343,7 @@ Class SWWMCombatTracker : Thinker
 		t.myplayer = target.player;
 		t.next = hnd.trackers;
 		t.bBOSS = target.bBOSS;
-		t.bFRIENDLY = target.bFRIENDLY;
+		t.bFRIENDLY = target.IsFriend(players[consoleplayer].mo);
 		if ( hnd.trackers )
 		{
 			hnd.trackers.prev = t;
@@ -403,13 +403,6 @@ Class SWWMCombatTracker : Thinker
 		// don't update dormant targets
 		if ( mytarget.bDORMANT )
 			return;
-		// in deathmatch, don't update for hostile players
-		if ( deathmatch && mytarget.player && (mytarget.player.mo == mytarget) )
-		{
-			if ( teamplay && (mytarget.player.GetTeam() != players[consoleplayer].GetTeam()) )
-				return;
-			else if ( !teamplay ) return;
-		}
 		// only update height/position while alive
 		bool heightchanged = false;
 		if ( height != mytarget.height ) heightchanged = true;
@@ -456,12 +449,12 @@ Class SWWMCombatTracker : Thinker
 				Console.Printf(StringTable.Localize("$SWWM_LTFORM"),mytag);
 			}
 		}
-		bFRIENDLY = mytarget.bFRIENDLY;
+		bFRIENDLY = mytarget.IsFriend(players[consoleplayer].mo);
 		if ( mytarget.Health < lasthealth ) firsthit = true;
 		lasthealth = mytarget.Health;
 		intp.Update(lasthealth);
 		// special update conditions
-		if ( dbar )
+		if ( dbar && !mytarget.player )
 		{
 			if ( (dbar == 2) && (lasthealth >= maxhealth) )
 				return;
@@ -470,8 +463,13 @@ Class SWWMCombatTracker : Thinker
 		}
 		if ( (mytarget.bISMONSTER || mytarget.player) && !mytarget.bINVISIBLE && !mytarget.bCORPSE )
 		{
-			// players (but not voodoo dolls), always visible
-			if ( mytarget.player && (mytarget.player.mo == mytarget) ) updated = level.maptime+35;
+			// players (but not voodoo dolls), always if friendly, otherwise only update if visible
+			if ( mytarget.player && (mytarget.player.mo == mytarget) )
+			{
+				if ( mytarget.IsFriend(players[consoleplayer].mo) ) updated = level.maptime+35;
+				else if ( ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+					updated = level.maptime;
+			}
 			// friendlies within a set distance
 			else if ( mytarget.bFRIENDLY && ((mxdist <= 0) || (mytarget.Vec3To(players[consoleplayer].Camera).length() < mxdist)) && players[consoleplayer].Camera.CheckSight(mytarget,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) updated = level.maptime+35;
 			// enemies within a set distance that have us as target

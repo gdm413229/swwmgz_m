@@ -235,7 +235,7 @@ extend Class SWWMHandler
 				continue;
 			if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
 				continue;
-			if ( !thesight && !(a.IsFriend(players[consoleplayer].mo) && !(a.player && (a.player.mo != a))) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+			if ( !thesight && !(deathmatch && (a is 'Inventory') && !a.bDROPPED) && !(a.IsFriend(players[consoleplayer].mo) && !(a.player && (a.player.mo != a))) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 				continue;
 			if ( a.bKILLED || (a.Health <= 0) )
 				continue;
@@ -291,7 +291,7 @@ extend Class SWWMHandler
 						continue;
 					if ( !a.player && !a.bSOLID && !a.bSHOOTABLE && !a.bISMONSTER && !a.bFRIENDLY && !(a is 'Inventory') && !(a is 'Chancebox') )
 						continue;
-					if ( !thesight && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
+					if ( !thesight && !(deathmatch && (a is 'Inventory') && !a.bDROPPED) && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 						continue;
 					if ( a.bKILLED || (a.Health <= 0) )
 						continue;

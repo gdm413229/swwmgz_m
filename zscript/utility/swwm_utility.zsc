@@ -1170,11 +1170,12 @@ Class SWWMUtility
 		if ( a is 'CandyGunProj' ) return true;
 		if ( a is 'CandyMagProj' ) return true;
 		if ( a is 'LoveHeart' ) return true;
+		if ( a is 'SWWMLightProjectile' ) return true;
 		if ( !a.IsZeroDamage() ) return true;
 		return false;
 	}
 
-	// Is this a beam projectile? (speed = length)
+	// Is this a beam projectile? (speed == length)
 	static play bool IsBeamProj( Actor a )
 	{
 		if ( a is 'SaltBeam' ) return true;
@@ -1472,6 +1473,16 @@ Class SWWMUtility
 					continue;
 				return true;
 			}
+		}
+		return false;
+	}
+
+	static bool IsDeathkings()
+	{
+		if ( (gameinfo.gametype&GAME_HEXEN) && LevelInfo.MapExists("MAP41") )
+		{
+			let inf = LevelInfo.FindLevelInfo("MAP41");
+			if ( inf.cluster == 1 ) return true;
 		}
 		return false;
 	}

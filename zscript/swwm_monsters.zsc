@@ -263,19 +263,23 @@ Class SWWMBossBrainPain : Actor
 Class SWWMBossBrain : BossBrain
 {
 	bool eyeless;
+	bool tntdir;
 	int smallcooldown;
 
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
 		let ti = ThinkerIterator.Create("BossEye");
-		if ( ti.Next() ) eyeless = false;
+		Actor eye;
+		if ( eye = Actor(ti.Next()) ) eyeless = false;
 		else eyeless = true;
 		if ( !eyeless )
 		{
 			// proper boss
 			bCOUNTKILL = true;
 			level.total_monsters++;
+			// check if the eye is to the north of us (TNT MAP30)
+			if ( eye.pos.y > pos.y ) tntdir = true;
 		}
 	}
 
@@ -286,7 +290,7 @@ Class SWWMBossBrain : BossBrain
 			// big explosions throughout
 			for ( int x=-350; x<=350; x+=10 )
 			{
-				let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,-280,Random[BrainExplode](120,500)));
+				let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,tntdir?280:-280,Random[BrainExplode](120,500)));
 				s.tics = Random[BrainExplode](5,120);
 				s.special1 = Random[BrainExplode](0,3);
 			}
@@ -297,7 +301,7 @@ Class SWWMBossBrain : BossBrain
 		// small explosion on brain hole
 		for ( int x=-40; x<=40; x+=20 )
 		{
-			let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,-280,Random[BrainExplode](380,420)));
+			let s = Spawn("SWWMBossBrainExpl",Vec2OffsetZ(x,tntdir?280:-280,Random[BrainExplode](380,420)));
 			s.tics = Random[BrainExplode](1,10);
 			s.scale *= .5;
 		}

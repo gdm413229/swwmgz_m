@@ -230,9 +230,8 @@ Class DemolitionistMenu : GenericMenu
 		}
 		else if ( (gameinfo.gametype&GAME_Hexen) && SWWMUtility.IsKnownMap() )
 		{
-			// detect deathkings in the most amazing way imaginable
-			int mapnamenum = level.mapname.Mid(3).ToInt(10);
-			if ( mapnamenum > 40 ) hexdd = true;
+			// detect deathkings
+			hexdd = SWWMUtility.IsDeathkings();
 			String gstr = hexdd?"HEXDD":"HEXEN";
 			missionstr = String.Format("$SWWM_MISSION_%s%d",gstr,level.cluster);
 			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )

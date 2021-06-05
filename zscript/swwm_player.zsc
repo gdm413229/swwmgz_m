@@ -95,8 +95,8 @@ Class Demolitionist : PlayerPawn
 		Player.ViewHeight 52;
 		Player.AirCapacity 0;
 		Player.GruntSpeed 20;
-		Player.ForwardMove .4, 1.5;
-		Player.SideMove .4, 1.5;
+		Player.ForwardMove 1., 1.;
+		Player.SideMove 1., 1.;
 		Player.SoundClass "demolitionist";
 		DamageFactor "Drowning", 0.;
 		DamageFactor "Poison", 0.;
@@ -117,13 +117,13 @@ Class Demolitionist : PlayerPawn
 			return (0,0);
 		Vector2 mvec = (player.cmd.forwardmove,-player.cmd.sidemove/.96);
 		double maxval = max(abs(mvec.x),abs(mvec.y));
-		// sorry, we don't use that here
+		// sorry, we don't use that here specifically, that's for tweakspeed to handle
 		if ( !(player.cmd.buttons&BT_RUN) ) maxval *= 2.;
 		return mvec.unit()*maxval;
 	}
 	double TweakSpeed()
 	{
-		double fact = (player.cmd.buttons&BT_SPEED)?ForwardMove2:bWalking?(ForwardMove1*.2):ForwardMove1;
+		double fact = bWalking?.08:(player.cmd.buttons&BT_RUN)?1.25:.5;
 		for ( Inventory i=Inv; i; i=i.Inv ) fact *= i.GetSpeedFactor();
 		return fact;
 	}
@@ -930,7 +930,7 @@ Class Demolitionist : PlayerPawn
 				if ( FindInventory("RagekitPower") )
 				{
 					// stop for just a split second UNLESS bunnyhopping
-					if ( !(player.cmd.buttons&BT_SPEED) || (level.maptime >= (lastairtic+10)) )
+					if ( !(player.cmd.buttons&BT_RUN) || (level.maptime >= (lastairtic+10)) )
 						ReactionTime = 6;
 				}
 				else
@@ -1633,7 +1633,7 @@ Class Demolitionist : PlayerPawn
 					double fs = TweakSpeed();
 					if ( CanCrouch() && (player.crouchfactor != -1) ) fs *= player.crouchfactor;
 					Vector3 accel = (RotateVector(nmove,angle),0);
-					accel *= fs/512.;
+					accel *= fs/480.;
 					double spd = vel.length();
 					double maxspd = fs*15.;
 					if ( spd > maxspd ) vel = (vel+accel/GameTicRate).unit()*spd;
@@ -1917,7 +1917,7 @@ Class Demolitionist : PlayerPawn
 						// bhop, z vel relative to vel size
 						if ( vel.z < 25. )	// don't ramp up too hard
 						{
-							vel.z += jumpvelz*(((player.cmd.buttons&BT_SPEED)?1.2:.65)+vel.length()*.01);
+							vel.z += jumpvelz*(((player.cmd.buttons&BT_RUN)?1.2:.65)+vel.length()*.01);
 							// add part of last landing z velocity too
 							vel.z += max(0,-landvelz*(raging?.45:.35));
 						}
@@ -1929,7 +1929,7 @@ Class Demolitionist : PlayerPawn
 						// first jump
 						if ( vel.z < 10. )	// don't ramp up too hard
 						{
-							vel.z += jumpvelz*((player.cmd.buttons&BT_SPEED)?1.25:bWalking?.75:1.);
+							vel.z += jumpvelz*(bWalking?.75:(player.cmd.buttons&BT_RUN)?1.25:1.);
 							// add part of last landing z velocity too
 							vel.z += max(0,-landvelz*(raging?.35:.25));
 						}
@@ -2603,9 +2603,9 @@ Class Demolitionist : PlayerPawn
 	int FastCheck()
 	{
 		if ( !player ) return 1;
-		if ( player.cmd.buttons&BT_SPEED ) return 2;	// sprint
-		if ( !bWalking && (NormalizedMove().length() > 8000.) ) return 1;	// run
-		return 0;	// walk
+		if ( bWalking || (NormalizedMove().length() <= 8000.) ) return 0;	// walk
+		if ( player.cmd.buttons&BT_RUN ) return 2;	// sprint
+		return 1;	// walk
 	}
 	State A_FastJump( StateLabel walk = null, StateLabel run = null, StateLabel sprint = null )
 	{

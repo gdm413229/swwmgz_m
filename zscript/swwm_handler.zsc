@@ -23,6 +23,7 @@ Class SWWMHandler : EventHandler
 
 	// for checkreplacement
 	bool hasdrlamonsters;
+	int iskdizd;
 
 	// profiling data
 	bool profiling;
@@ -49,6 +50,8 @@ Class SWWMHandler : EventHandler
 			hasdrlamonsters = true;
 			break;
 		}
+		if ( LevelInfo.MapExists("Z1M1") && (LevelInfo.MapChecksum("Z1M1") ~== "2B7744234ED2C162AD08A3255E979F65") )
+			iskdizd = true;
 	}
 
 	override void WorldTick()

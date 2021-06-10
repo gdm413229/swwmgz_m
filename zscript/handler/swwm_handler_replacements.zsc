@@ -622,13 +622,10 @@ extend Class SWWMHandler
 		}
 		else if ( e.Replacee is 'BlueCard' ) e.Replacement = 'SWWMBlueCard';
 		else if ( e.Replacee is 'YellowCard' ) e.Replacement = 'SWWMYellowCard';
-		else if ( e.Replacee.GetClassName() == 'KDiZDSilverKey' ) e.Replacement = 'SWWMSilverCardKDiZD';
-		else if ( e.Replacee.GetClassName() == 'KDiZDGreenKey' ) e.Replacement = 'SWWMGreenCardKDiZD';
-		else if ( e.Replacee.GetClassName() == 'KDiZDOrangeKey' ) e.Replacement = 'SWWMOrangeCardKDiZD';
 		else if ( e.Replacee.GetClassName() == 'GreenCard' ) e.Replacement = 'SWWMGreenCard';
-		else if ( e.Replacee is 'RedSkull' ) e.Replacement = 'SWWMRedSkull';
-		else if ( e.Replacee is 'BlueSkull' ) e.Replacement = 'SWWMBlueSkull';
-		else if ( e.Replacee is 'YellowSkull' ) e.Replacement = 'SWWMYellowSkull';
+		else if ( e.Replacee is 'RedSkull' ) e.Replacement = iskdizd?'SWWMSilverCardKDiZD':'SWWMRedSkull';
+		else if ( e.Replacee is 'BlueSkull' ) e.Replacement = iskdizd?'SWWMGreenCardKDiZD':'SWWMBlueSkull';
+		else if ( e.Replacee is 'YellowSkull' ) e.Replacement = iskdizd?'SWWMOrangeCardKDiZD':'SWWMYellowSkull';
 		else if ( e.Replacee is 'KeyGreen' ) e.Replacement = 'SWWMKeyGreen';
 		else if ( e.Replacee is 'KeyBlue' ) e.Replacement = 'SWWMKeyBlue';
 		else if ( e.Replacee is 'KeyYellow' ) e.Replacement = 'SWWMKeyYellow';

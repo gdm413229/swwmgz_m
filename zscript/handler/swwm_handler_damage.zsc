@@ -297,7 +297,7 @@ extend Class SWWMHandler
 		{
 			int spreebonus = 10*(spreecount[pnum]);
 			// taper off after 10x (some people go really far with these, holy fuck)
-			if ( spreecount[pnum] > 10 ) spreebonus = int(spreebonus*((spreecount[pnum]/10.)**.25));
+			if ( spreecount[pnum] > 10 ) spreebonus = int(10*((spreecount[pnum]/10.)**.25));
 			score += 100+spreebonus;
 			if ( (spreecount[pnum] > 0) && scr )
 			{

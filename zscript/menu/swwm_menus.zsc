@@ -143,21 +143,21 @@ Class OptionMenuItemSWWMPlayTime : OptionMenuItem
 		String str = "";
 		if ( dformat )
 		{
-			if ( day ) str.AppendFormat("%d %s",day,StringTable.Localize("$SWWM_TIME_DAYS"));
+			if ( day ) str.AppendFormat("%d %s",day,StringTable.Localize((day!=1)?"$SWWM_TIME_DAYS":"$SWWM_TIME_DAY"));
 			if ( hour )
 			{
 				if ( str != "" ) str = str..", ";
-				str.AppendFormat("%d %s",hour,StringTable.Localize("$SWWM_TIME_HOURS"));
+				str.AppendFormat("%d %s",hour,StringTable.Localize((hour!=1)?"$SWWM_TIME_HOURS":"$SWWM_TIME_HOUR"));
 			}
 			if ( min )
 			{
 				if ( str != "" ) str = str..", ";
-				str.AppendFormat("%d %s",min,StringTable.Localize("$SWWM_TIME_MINUTES"));
+				str.AppendFormat("%d %s",min,StringTable.Localize((min!=1)?"$SWWM_TIME_MINUTES":"$SWWM_TIME_MINUTE"));
 			}
 			if ( sec )
 			{
 				if ( str != "" ) str = str..", ";
-				str.AppendFormat("%d %s",sec,StringTable.Localize("$SWWM_TIME_SECONDS"));
+				str.AppendFormat("%d %s",sec,StringTable.Localize((sec!=1)?"$SWWM_TIME_SECONDS":"$SWWM_TIME_SECOND"));
 			}
 			if ( str == "" ) str.AppendFormat("0 %s",StringTable.Localize("$SWWM_TIME_SECONDS"));
 		}

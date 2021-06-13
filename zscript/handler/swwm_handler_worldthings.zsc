@@ -145,6 +145,10 @@ extend Class SWWMHandler
 			ExtraGibDeaths.GibThis(e.Thing,"BonerXDeath");
 		else if ( e.Thing.GetClass() == "Archvile" )
 			ExtraGibDeaths.GibThis(e.Thing,"VileXDeath");
+		else if ( e.Thing.GetClass() == "Arachnotron" )
+			ExtraGibDeaths.GibThis(e.Thing,"ArachXDeath");
+		else if ( e.Thing.GetClass() == "Fatso" )
+			ExtraGibDeaths.GibThis(e.Thing,"FatsoXDeath");
 		if ( profiling ) worldthingdied_ms += MSTime()-curms;
 	}
 

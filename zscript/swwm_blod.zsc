@@ -717,6 +717,23 @@ Class ExtraGibDeaths : Actor
 		VILX DEF 5;
 		VILX G -1;
 		Stop;
+	ArachXDeath:
+		BSPX A 5;
+		BSPX A 5 A_XScream();
+		BSPX B 8 A_NoBlocking();
+		BSPX C 6;
+		BSPX DE 6 BRIGHT;
+		BSPX F 5 BRIGHT;
+		BSPX GH 4 BRIGHT;
+		BSPX I -1 A_BossDeath();
+		Stop;
+	FatsoXDeath:
+		FATX A 5;
+		FATX B 5 A_XScream();
+		FATX C 5 A_NoBlocking();
+		FATX DE 5;
+		FATX F -1 A_BossDeath();
+		Stop;
 	}
 }
 

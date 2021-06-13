@@ -18,7 +18,7 @@ extend Class SWWMHandler
 		bool gotgibbed = (!e.Thing.bDONTGIB && ((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.DamageSource && e.DamageSource.bEXTREMEDEATH) || (e.DamageType == 'Extreme') || (e.Thing.Health < gibhealth)) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH) && (!e.DamageSource || !e.DamageSource.bNOEXTREMEDEATH));
 		bool forcegibbed = false;
 		// force gib availability for some vanilla Doom monsters
-		if ( gotgibbed && ((e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "Cacodemon") || (e.Thing.GetClass() == "Revenant") || (e.Thing.GetClass() == "Archvile")) )
+		if ( gotgibbed && ((e.Thing.GetClass() == "Demon") || (e.Thing.GetClass() == "Spectre") || (e.Thing.GetClass() == "HellKnight") || (e.Thing.GetClass() == "BaronOfHell") || (e.Thing.GetClass() == "Cacodemon") || (e.Thing.GetClass() == "Revenant") || (e.Thing.GetClass() == "Archvile") || (e.Thing.GetClass() == "Fatso") || (e.Thing.GetClass() == "Arachnotron")) )
 			forcegibbed = true;
 		if ( !e.Thing.FindState("XDeath",true) && !e.Thing.FindState("Death.Extreme",true) && !forcegibbed )
 			gotgibbed = false;

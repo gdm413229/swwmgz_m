@@ -136,11 +136,11 @@ Class ParryField : Actor
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !((SWWMUtility.ValidProjectile(a) && (a.target != master)) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
+			if ( !(SWWMUtility.ValidProjectile(a) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			Vector3 hdir = dir;
-			if ( a.bMISSILE || (a is 'HolySpirit') )	// special wraithverge handling
+			if ( (a.target != master) && (a.bMISSILE || (a is 'HolySpirit')) )	// special wraithverge handling
 			{
 				// deflect directly to target
 				if ( a.target )

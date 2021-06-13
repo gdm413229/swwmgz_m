@@ -214,7 +214,7 @@ Class DeepImpact : SWWMWeapon
 		let s = Demolitionist(self).mystats;
 		while ( m = Actor(ti.Next()) )
 		{
-			if ( !(SWWMUtility.ValidProjectile(m) && (m.target != self)) ) continue;
+			if ( !SWWMUtility.ValidProjectile(m) ) continue;
 			Vector3 rdir = level.Vec3Diff(origin,m.pos);
 			double rdist = rdir.length();
 			if ( rdist <= 0. ) continue;
@@ -225,7 +225,7 @@ Class DeepImpact : SWWMWeapon
 			Vector3 ndir = m.vel.unit();
 			m.angle = atan2(ndir.y,ndir.x);
 			m.pitch = asin(-ndir.z);
-			if ( m.bSEEKERMISSILE ) m.tracer = m.target;
+			if ( m.bSEEKERMISSILE && (m.target != self) ) m.tracer = m.target;
 			m.target = self;
 			if ( !m.FindInventory("ParriedBuff") )
 			{

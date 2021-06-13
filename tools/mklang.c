@@ -101,12 +101,12 @@ processrel:
 processtxt:
 	printf(" \033[1;36mTXT\033[0m");
 	hl = 0;
-	if ( txtnum <= 1 ) fprintf(lf,"SWWM_LORETXT_%s = \"",entname);
-	else fprintf(lf,"SWWM_LORETXT_%s%d = \"",entname,txtnum);
+	if ( txtnum <= 1 ) fprintf(lf,"SWWM_LORETXT_%s =\n\"",entname);
+	else fprintf(lf,"SWWM_LORETXT_%s%d =\n\"",entname,txtnum);
 	while ( txt[txtpos] )
 	{
 		if ( txt[txtpos] == '\n' )
-			fprintf(lf,"\\n");
+			fprintf(lf,"\\n\"\n\"");
 		else if ( txt[txtpos] == '\"' )
 			fprintf(lf,"\\\"");
 		else if ( (txt[txtpos] == '*') && (txt[txtpos+1] == '*') )

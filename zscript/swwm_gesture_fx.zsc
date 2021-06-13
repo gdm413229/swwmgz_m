@@ -302,6 +302,12 @@ Class LoveHeart : Actor
 		[remove, replacewith] = SWWMUtility.DefaceTexture(HitTexture);
 		if ( !remove ) return;
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+		if ( target && target.player )
+		{
+			int scr = (TexMan.GetName(HitTexture).Left(6)~=="ZZWOLF")?200:20;
+			SWWMCredits.Give(target.player,scr);
+			if ( target.player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,pos);
+		}
 		if ( HitLine )
 		{
 			if ( Hit3DFloor )

@@ -530,6 +530,9 @@ Class Demolitionist : PlayerPawn
 			player.usedown = true;
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		lastbump *= .97;
+		int scr = (TexMan.GetName(d.HitTexture).Left(6)~=="ZZWOLF")?200:20;
+		SWWMCredits.Give(player,scr);
+		if ( player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,d.HitLocation);
 		if ( d.HitType == TRACE_HitWall )
 		{
 			if ( d.Hit3DFloor )

@@ -430,18 +430,24 @@ Class SWWMBigMenuHack : SWWMCleanMenu
 			h = 200;
 			isclean = true;
 		}
-		int mofs = (h-280)/2;
+		String str = "⌃ ⌃ ⌃";
+		int x = (w-markfont.StringWidth(str))/2;
+		int y = (h-280)/2;
+		if ( isclean )
+		{
+			x = (x-160)*CleanXFac_1+(Screen.GetWidth()/2);
+			y = (y-100)*CleanYFac_1+(Screen.GetHeight()/2);
+		}
 		if ( ofs > 0 )
 		{
-			String str = "⌃ ⌃ ⌃";
-			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+40,str,DTA_Clean,true);
-			else Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+40,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,x,y+30*CleanYFac_1,str,DTA_CleanNoMove_1,true);
+			else Screen.DrawText(markfont,Font.CR_FIRE,x,y+30,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
 		if ( ofs < (mDesc.mItems.Size()-8) )
 		{
-			String str = "⌄ ⌄ ⌄";
-			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_Clean,true);
-			else Screen.DrawText(markfont,Font.CR_FIRE,int((w-markfont.StringWidth(str))/2.),mofs+276,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
+			str = "⌄ ⌄ ⌄";
+			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,x,y+296*CleanYFac_1,str,DTA_CleanNoMove_1,true);
+			else Screen.DrawText(markfont,Font.CR_FIRE,x,y+296,str,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43);
 		}
 		for ( int i=0; i<mDesc.mItems.Size(); i++ )
 		{

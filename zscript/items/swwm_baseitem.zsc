@@ -5,9 +5,15 @@ Mixin Class SWWMAutoUseFix
 	{
 		if ( GetClass() == item.GetClass() )
 		{
-			if ( Use(true) ) Amount--;
+			if ( deathmatch && !bALWAYSPICKUP )
+			{
+				// don't allow picking up any more than just one copy in DM unless it can be auto-used
+				if ( Use(true) ) Amount--;
+				else return true;
+			}
+			else if ( Use(true) ) Amount--;
 			// sell excess if there's a price
-			if ( bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina != 0) )
+			if ( !deathmatch && bALWAYSPICKUP && (Amount+item.Amount > MaxAmount) && (Stamina != 0) )
 			{
 				int sellprice = int(abs(Stamina)*.5);
 				SWWMScoreObj.Spawn(sellprice,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2));
@@ -17,6 +23,16 @@ Mixin Class SWWMAutoUseFix
 			}
 		}
 		return Super.HandlePickup(item);
+	}
+	override bool TryPickup( in out Actor toucher )
+	{
+		if ( !deathmatch ) return Super.TryPickup(toucher);
+		// pretend to have a max amount of 0 so we can only be picked up if we can be used
+		int oldmax = MaxAmount;
+		MaxAmount = 0;
+		bool ret = Super.TryPickup(toucher);
+		MaxAmount = oldmax;
+		return ret;
 	}
 }
 

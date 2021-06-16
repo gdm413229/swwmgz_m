@@ -1280,6 +1280,11 @@ Class Omnisight : Inventory
 		}
 		return false;
 	}
+	override bool ShouldSpawn()
+	{
+		if ( deathmatch ) return false;
+		return Super.ShouldSpawn();
+	}
 	Default
 	{
 		//$Title Omnisight
@@ -1912,6 +1917,11 @@ Class SWWMLamp : Inventory
 		// don't consume on use
 		Amount++;
 		return true;
+	}
+	override bool ShouldSpawn()
+	{
+		if ( deathmatch ) return false;
+		return Super.ShouldSpawn();
 	}
 	override void DoEffect()
 	{

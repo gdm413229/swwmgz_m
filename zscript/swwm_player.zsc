@@ -428,6 +428,13 @@ Class Demolitionist : PlayerPawn
 			let cs = Inventory(Spawn('SWWMChaosSphere'));
 			cs.AttachToOwner(self);
 		}
+		// in deathmatch, we start with 8 embiggeners
+		if ( deathmatch )
+		{
+			let em = Inventory(Spawn('TradedHammerspaceEmbiggener'));
+			em.Amount = em.MaxAmount;
+			if ( !em.CallTryPickup(self) ) em.Destroy();
+		}
 		bInDefaultInventory = false;
 	}
 	override void ClearInventory()

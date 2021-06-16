@@ -556,7 +556,13 @@ Class HammerspaceEmbiggener : Inventory
 
 // used when cheating or trading, this version does not give ammo and is meant
 // only for GiveInventory, so it shouldn't be spawned in the world
-Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener {}
+Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener
+{
+	Default
+	{
+		-COUNTITEM;
+	}
+}
 
 // used to denote "merged" embiggeners, changes color based on amount
 //  green (2+)

@@ -21,7 +21,7 @@ Class CandyGun : SWWMWeapon
 			[ammoget, spareget] = CandyGun(item).PickupForAmmoAndSpares(self);
 			if ( ammoget || spareget )
 				item.bPickupGood = true;
-			if ( !spareget )
+			if ( !deathmatch && !spareget )
 			{
 				// sell excess
 				int sellprice = item.Stamina/2;

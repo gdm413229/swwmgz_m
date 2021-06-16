@@ -209,7 +209,13 @@ extend Class SWWMHandler
 		// scoring
 		int score = min(1000,int(ceil(e.Thing.GetSpawnHealth()*.05)*10));
 		// player score is always the same
-		if ( e.Thing.player ) score = 1000;
+		if ( e.Thing.player )
+		{
+			score = 1000;
+			// deathmatch frag sound
+			if ( src.player == players[consoleplayer] )
+				S_StartSound("misc/frag",CHAN_WEAPON,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1.,ATTN_NONE);
+		}
 		SWWMScoreObj scr = null;
 		if ( src.player == players[consoleplayer] )
 			scr = SWWMScoreObj.Spawn(score,e.Thing.Vec3Offset(0,0,e.Thing.Height/2));

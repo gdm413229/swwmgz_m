@@ -199,7 +199,7 @@ Class SWWMWeapon : Weapon abstract
 		{
 			if ( SWWMWeapon(item).PickupForAmmoSWWM(self) )
 				item.bPickupGood = true;
-			if ( (Amount+item.Amount > MaxAmount) && (item.Stamina > 0) )
+			if ( !deathmatch && (Amount+item.Amount > MaxAmount) && (item.Stamina > 0) )
 			{
 				// sell excess
 				int sellprice = item.Stamina/2;

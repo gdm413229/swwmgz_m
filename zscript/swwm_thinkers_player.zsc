@@ -536,7 +536,7 @@ Class SWWMLoreLibrary : Thinker
 
 	static void Add( PlayerInfo p, String ref )
 	{
-		if ( PreVerify(ref) ) return;
+		if ( deathmatch || PreVerify(ref) ) return;
 		SWWMLoreLibrary ll = Find(p);
 		if ( !ll )
 		{

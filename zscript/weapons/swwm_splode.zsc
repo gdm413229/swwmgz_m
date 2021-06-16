@@ -48,7 +48,7 @@ Class ExplodiumGun : SWWMWeapon
 			return true;
 		if ( (item.GetClass() == 'ExplodiumGun') && !item.ShouldStay() )
 		{
-			if ( (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
+			if ( !deathmatch && (Amount+item.Amount > MaxAmount) && (Stamina > 0) )
 			{
 				// sell excess
 				int sellprice = int(Stamina*.5);

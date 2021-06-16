@@ -124,6 +124,17 @@ Class SWWMStaticHandler : StaticEventHandler
 		let cv = CVar.FindCVar('swwm_voicetype');
 		if ( types.Find(cv.GetString()) >= types.Size() )
 			cv.SetString("default");
+		// warning for unsupported
+		if ( Wads.FindLump("swwmgamesupported.txt") != -1 ) return;
+		Console.Printf(
+			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\c-\n"
+			"\cx┃                     \cr[\cgWARNING\cr]                     \cx┃\c-\n"
+			"\cx┃  \chSWWM \czGZ \cjis \cfNOT\cj compatible with the loaded IWAD.  \cx┃\c-\n"
+			"\cx┃    \cjOnly \cfDoom\cj, \cfHeretic\cj and \cfHexen\cj are supported.    \cx┃\c-\n"
+			"\cx┃            \cjIssues \cfCAN\cj and \cfWILL\cj happen.            \cx┃\c-\n"
+			"\cx┃               \cr[\cgYOU ARE ON YOUR OWN\cr]               \cx┃\c-\n"
+			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\c-");
+		S_StartSound("compat/warn",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 	}
 
 	override void ConsoleProcess( ConsoleEvent e )

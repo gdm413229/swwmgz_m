@@ -338,8 +338,8 @@ Class RayBolt : MagAmmo
 		Inventory.PickupMessage "$T_RAYBOLT";
 		Inventory.Icon "graphics/HUD/Icons/A_RayBolt.png";
 		MagAmmo.ParentAmmo "RayAmmo";
-		MagAmmo.ClipSize 20;
-		Inventory.MaxAmount 25;
+		MagAmmo.ClipSize 10;
+		Inventory.MaxAmount 15;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 	}
@@ -392,9 +392,9 @@ Class RayAmmo : Ammo
 		Stamina 150000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 3;
+		Inventory.MaxAmount 5;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 6;
+		Ammo.BackpackMaxAmount 9;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -436,7 +436,6 @@ Class RayBattery : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
-		+INVENTORY.IGNORESKILL;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 90;

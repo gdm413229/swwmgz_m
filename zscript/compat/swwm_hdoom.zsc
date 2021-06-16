@@ -28,13 +28,13 @@ Class SWWMHDoomHandler : StaticEventHandler
 			return;
 		SetRandomSeed[hdscreen](Random[hdscreen]()+consoleplayer+MSTime());
 		Console.Printf(
-			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-			"\cx┃            \cfOh my, someone appears to be \cgH \ckO \cdR \cvN \chY \ct♥            \cx┃\n"
-			"\cx┃   \cfWell, all you'll be getting here is the power of headpats.   \cx┃\n"
-			"\cx┃  \cfIf you want Demo-chan to actually fuck some hot demon girls,  \cx┃\n"
-			"\cx┃      \cfjust go commission a porn artist or something, idk.       \cx┃\n"
-			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
-		SWWMUtility.MarkAchievement('swwm_achievement_hdoom',players[consoleplayer]);
+			"\cx┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\c-\n"
+			"\cx┃            \cfOh my, someone appears to be \cgH \ckO \cdR \cvN \chY \ct♥            \cx┃\c-\n"
+			"\cx┃   \cfWell, all you'll be getting here is the power of headpats.   \cx┃\c-\n"
+			"\cx┃  \cfIf you want Demo-chan to actually fuck some hot demon girls,  \cx┃\c-\n"
+			"\cx┃      \cfjust go commission a porn artist or something, idk.       \cx┃\c-\n"
+			"\cx┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\c-");
+		S_StartSound("compat/warn",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 	}
 
 	override void WorldLoaded( WorldEvent e )

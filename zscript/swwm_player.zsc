@@ -1073,6 +1073,15 @@ Class Demolitionist : PlayerPawn
 		PainChance = isdashing?0:255;
 		if ( isdashing || (vel.length() > 30) )
 		{
+			bool oldpush = bCANPUSHWALLS;
+			bool olduse = bCANUSEWALLS;
+			bool oldmcross = bACTIVATEMCROSS;
+			bool oldtele = bNOTELEPORT;
+			// needed to prevent the many TryMove calls from activating unwanted lines
+			bCANPUSHWALLS = false;
+			bCANUSEWALLS = false;
+			bACTIVATEMCROSS = false;
+			bNOTELEPORT = true;
 			Actor a;
 			if ( isdashing && (dashboost > 0.) )
 			{
@@ -1391,6 +1400,10 @@ Class Demolitionist : PlayerPawn
 			}
 			SetOrigin(oldpos,true);
 			bTHRUACTORS = oldthru;
+			bCANPUSHWALLS = oldpush;
+			bCANUSEWALLS = olduse;
+			bACTIVATEMCROSS = oldmcross;
+			bNOTELEPORT = oldtele;
 		}
 		else if ( isboosting && (dashboost > 0.) )
 		{

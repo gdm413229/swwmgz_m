@@ -236,7 +236,7 @@ extend Class SWWMHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
-		if ( SuppressMultiItem(e) )
+		if ( !e.Thing || SuppressMultiItem(e) )
 		{
 			if ( profiling ) worldthingspawned_ms += MSTime()-curms;
 			return;

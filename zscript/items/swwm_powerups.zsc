@@ -2303,7 +2303,7 @@ Class MykradvoTendril : Actor
 			// spread into sub-tendrils
 			Vector3 x, y, z;
 			[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
-			int ntendies = clamp(tracer.default.health/400,2,10);
+			int ntendies = tracer?clamp(tracer.GetSpawnHealth()/400,2,10):2;
 			for ( int i=0; i<ntendies; i++ )
 			{
 				let r = Spawn("MykradvoSmallTendril",invoker.nextpos);

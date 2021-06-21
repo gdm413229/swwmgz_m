@@ -13,7 +13,8 @@ extend Class SWWMHandler
 	bool mnotify;
 	bool allkills, allitems, allsecrets;
 	bool mapclear;
-	int mapclearagain, restartmus;
+	int mapclearagain, restartmus, startmus;
+	double musvol;
 	String lastmus;
 	int lastorder;
 	bool lastloop;
@@ -137,26 +138,37 @@ extend Class SWWMHandler
 		if ( (level.total_secrets <= 0) && (level.total_items <= 0) && (level.total_monsters <= 0) ) return;
 		if ( mapclear )
 		{
-			if ( (swwm_silencemap == 1) && (musplaying.name != "") )
+			if ( swwm_silencemap )
 			{
-				lastmus = musplaying.name;
-				lastorder = musplaying.baseorder;
-				lastloop = musplaying.loop;
-				S_ChangeMusic("",force:true);
-			}
-			else if ( (swwm_silencemap > 1) && (musplaying.name != "music/olg.ogg") )
-			{
-				lastmus = musplaying.name;
-				lastorder = musplaying.baseorder;
-				lastloop = musplaying.loop;
-				S_ChangeMusic("music/olg.ogg",force:true);
+				if ( (musplaying.name != "music/nomusic.ogg") && (musplaying.name != "music/solitary.ogg") )
+				{
+					lastmus = musplaying.name;
+					lastorder = musplaying.baseorder;
+					lastloop = musplaying.loop;
+					S_ChangeMusic((startmus>0)?"music/nomusic.ogg":"music/solitary.ogg",force:true);
+					SetMusicVolume((startmus>0)?1.:musvol);
+				}
+				if ( startmus > 0 ) startmus--;
+				else if ( startmus == 0 )
+				{
+					startmus = -1;
+					S_ChangeMusic("music/solitary.ogg",force:true);
+					SetMusicVolume(.002);
+					musvol = .002;
+				}
+				else if ( musvol < 1. )
+				{
+					musvol = clamp(musvol+.002,0.,1.);
+					SetMusicVolume(musvol);
+				}
 			}
 			if ( (level.found_secrets < level.total_secrets) || (level.found_items < level.total_items) || (level.killed_monsters < level.total_monsters) )
 			{
-				if ( swwm_silencemap > 0 )
+				if ( swwm_silencemap )
 				{
 					restartmus = 25;
-					S_ChangeMusic("",force:true);
+					S_ChangeMusic("music/nomusic.ogg",force:true);
+					SetMusicVolume(1.);
 				}
 				S_StartSound("recordscratch",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 				mapclear = false;
@@ -174,8 +186,11 @@ extend Class SWWMHandler
 		lastmus = musplaying.name;
 		lastorder = musplaying.baseorder;
 		lastloop = musplaying.loop;
-		if ( swwm_silencemap == 1 ) S_ChangeMusic("",force:true);
-		else if ( swwm_silencemap > 1 ) S_ChangeMusic("music/olg.ogg",force:true);
+		if ( swwm_silencemap )
+		{
+			S_ChangeMusic("music/nomusic.ogg",force:true);
+			startmus = 500;
+		}
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
 			if ( !playeringame[i] || !players[i].mo ) continue;

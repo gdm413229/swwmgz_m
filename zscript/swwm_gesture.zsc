@@ -175,7 +175,13 @@ Class SWWMGesture : SWWMWeapon
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
 			return;
 		}
-		player.PendingWeapon = invoker.formerweapon;
+		if ( invoker.formerweapon ) player.PendingWeapon = invoker.formerweapon;
+		else
+		{
+			player.PendingWeapon = player.mo.BestWeapon(null);
+			if ( (player.PendingWeapon is 'SWWMGesture') || (player.PendingWeapon is 'SWWMItemGesture') )
+				player.PendingWeapon = null;
+		}
 		player.SetPSprite(PSP_WEAPON,ResolveState("Deselect"));
 	}
 
@@ -699,7 +705,13 @@ Class SWWMItemGesture : SWWMWeapon abstract
 		}
 		// switch to old weapon
 		player.ReadyWeapon = gest;
-		player.PendingWeapon = gest.formerweapon;
+		if ( gest.formerweapon ) player.PendingWeapon = gest.formerweapon;
+		else
+		{
+			player.PendingWeapon = player.mo.BestWeapon(null);
+			if ( (player.PendingWeapon is 'SWWMGesture') || (player.PendingWeapon is 'SWWMItemGesture') )
+				player.PendingWeapon = null;
+		}
 		player.SetPSPrite(PSP_WEAPON,gest.ResolveState("SoftDeselect"));
 		invoker.gotused = true;
 	}

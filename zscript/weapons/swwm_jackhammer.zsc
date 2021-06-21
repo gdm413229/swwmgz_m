@@ -187,6 +187,7 @@ Class PusherWeapon : SWWMWeapon
 			player.SetPSprite(PSP_WEAPON,ResolveState("AltMiss"));
 			A_StopSound(CHAN_WEAPON);
 			A_StopSound(CHAN_WEAPONEXTRA);
+			A_StartSound("pusher/miss",CHAN_WEAPON,CHANF_OVERLAP);
 			let p = Spawn("PusherProjectile",origin);
 			p.angle = angle;
 			p.pitch = pitch;
@@ -354,16 +355,20 @@ Class PusherWeapon : SWWMWeapon
 		XZW3 QRSTUVW 1;
 		TNT1 A -1
 		{
-			let nw = player.mo.PickNextWeapon();
-			// gross hack (don't prioritize Deep Impact if we have something better than it)
-			if ( nw is 'DeepImpact' )
+			if ( player.PendingWeapon != WP_NOCHANGE )
 			{
-				player.ReadyWeapon = nw;
-				nw = player.mo.PickNextWeapon();
-				player.ReadyWeapon = invoker;
+				let nw = player.mo.PickNextWeapon();
+				// gross hack (don't prioritize Deep Impact if we have something better than it)
+				if ( nw is 'DeepImpact' )
+				{
+					player.ReadyWeapon = nw;
+					nw = player.mo.PickNextWeapon();
+					player.ReadyWeapon = invoker;
+				}
+				if ( nw != invoker ) player.PendingWeapon = nw;
 			}
-			if ( nw != invoker ) player.PendingWeapon = nw;
 			RemoveInventory(invoker);
+			invoker.Destroy();
 		}
 		Stop;
 	Reload:

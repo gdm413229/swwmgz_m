@@ -380,3 +380,25 @@ Mixin Class SWWMShellAmmo
 		Amount = Random[ShellDrop](1,clamp(dropamount,1,4));
 	}
 }
+
+// Ref class for ammo spawners, used by both on-demand replacers and bundles
+Class SWWMAmmoSpawner : Actor abstract
+{
+	virtual void SpawnAmmo() {}
+
+	override void PostBeginPlay()
+	{
+		SpawnAmmo();
+		ClearCounters();
+		Destroy();
+	}
+
+	default
+	{
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+NOTELEPORT;
+		+DONTSPLASH;
+	}
+}

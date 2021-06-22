@@ -34,26 +34,17 @@ Class SMW05Ammo : Ammo
 	}
 }
 
-Class SMW05BundleSpawn : Actor
+Class SMW05BundleSpawn : SWWMAmmoSpawner
 {
-	override void PostBeginPlay()
+	override void SpawnAmmo()
 	{
-		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,3);
 		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("SMW05Ammo",Vec3Angle(4,i*(360/bnd)));
-			a.special = special;
 			a.angle = i*(360/bnd);
-			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
-			if ( bCOUNTSECRET )
-			{
-				a.bCOUNTSECRET = true;
-				level.total_secrets++;
-			}
-			a.bDROPPED = bDROPPED;
+			SWWMUtility.TransferItemProp(self,a,true);
 		}
-		Destroy();
 	}
 }
 
@@ -201,27 +192,17 @@ Class QuadravolAmmo : Ammo
 	}
 }
 
-Class QuadravolAmmoBundleSpawn : Actor
+Class QuadravolAmmoBundleSpawn : SWWMAmmoSpawner
 {
-	override void PostBeginPlay()
+	override void SpawnAmmo()
 	{
-		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,3);
 		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("QuadravolAmmo",Vec3Angle(6,i*(360/bnd)));
-			a.special = special;
 			a.angle = i*(360/bnd);
-			a.FloatBobPhase = FloatBobPhase;
-			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
-			if ( bCOUNTSECRET )
-			{
-				a.bCOUNTSECRET = true;
-				level.total_secrets++;
-			}
-			a.bDROPPED = bDROPPED;
+			SWWMUtility.TransferItemProp(self,a,true);
 		}
-		Destroy();
 	}
 }
 
@@ -302,27 +283,17 @@ Class EMPCore : Ammo
 	}
 }
 
-Class EMPCoreBundleSpawn : Actor
+Class EMPCoreBundleSpawn : SWWMAmmoSpawner
 {
-	override void PostBeginPlay()
+	override void SpawnAmmo()
 	{
-		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,3);
 		for ( int i=0; i<3; i++ )
 		{
 			let a = Spawn("EMPCore",Vec3Angle(6,i*(360/bnd)));
-			a.special = special;
 			a.angle = i*(360/bnd);
-			a.FloatBobPhase = FloatBobPhase;
-			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
-			if ( bCOUNTSECRET )
-			{
-				a.bCOUNTSECRET = true;
-				level.total_secrets++;
-			}
-			a.bDROPPED = bDROPPED;
+			SWWMUtility.TransferItemProp(self,a,true);
 		}
-		Destroy();
 	}
 }
 
@@ -351,26 +322,17 @@ Class RayBolt : MagAmmo
 	}
 }
 
-Class RayBoltBundleSpawn : Actor
+Class RayBoltBundleSpawn : SWWMAmmoSpawner
 {
-	override void PostBeginPlay()
+	override void SpawnAmmo()
 	{
-		if ( bCOUNTSECRET ) level.total_secrets--;
 		int bnd = Random[Bundle](2,5);
 		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("RayBolt",Vec3Angle(6,i*(360/bnd)));
-			a.special = special;
 			a.angle = i*(360/bnd);
-			for ( int j=0; j<5; j++ ) a.args[j] = args[j];
-			if ( bCOUNTSECRET )
-			{
-				a.bCOUNTSECRET = true;
-				level.total_secrets++;
-			}
-			a.bDROPPED = bDROPPED;
+			SWWMUtility.TransferItemProp(self,a,true);
 		}
-		Destroy();
 	}
 }
 

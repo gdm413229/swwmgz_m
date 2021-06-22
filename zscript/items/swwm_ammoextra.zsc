@@ -500,25 +500,7 @@ Class HammerspaceEmbiggener : Inventory
 		}
 		let n = Spawn("BulkHammerspaceEmbiggener",pos);
 		Inventory(n).Amount = min(tamount,MaxAmount);
-		n.spawnpoint = spawnpoint;
-		n.spawnangle = spawnangle;
-		n.angle = angle;
-		n.pitch = pitch;
-		n.roll = roll;
-		n.special = special;
-		for ( int i=0; i<5; i++ ) n.args[i] = args[i];
-		n.special1 = special1;
-		n.special2 = special2;
-		n.spawnflags = spawnflags&~MTF_SECRET;
-		n.HandleSpawnFlags();
-		n.spawnflags = spawnflags;
-		n.bCountSecret = spawnflags&MTF_SECRET;
-		n.ChangeTid(tid);
-		n.vel = vel;
-		n.master = master;
-		n.tracer = tracer;
-		n.target = target;
-		if ( !bDROPPED ) n.bDROPPED = false;
+		SWWMUtility.TransferItemProp(self,n);
 		ClearCounters();
 		Destroy();
 	}

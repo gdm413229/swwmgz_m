@@ -555,12 +555,6 @@ extend Class SWWMHandler
 			if ( profiling ) checkreplacement_ms += MSTime()-curms;
 			return;
 		}
-		// shell types (sorted by rarity
-		static const Class<Actor> redpool[] = {'RedShell','RedShell2','RedShell4'};
-		static const Class<Actor> greenpool[] = {'GreenShell','GreenShell2','GreenShell4'};
-		static const Class<Actor> whitepool[] = {'WhiteShell','WhiteShell2'};
-		static const Class<Actor> purplepool[] = {'PurpleShell','PurpleShell2','PurpleShell4'};
-		static const Class<Actor> bluepool[] = {'BlueShell','BlueShell2','BlueShell4'};
 		// DRLA Monsters stuff
 		if ( hasdrlamonsters )
 		{
@@ -611,7 +605,7 @@ extend Class SWWMHandler
 			}
 			e.Replacement = 'SWWMBossBrain';
 		}
-		else if ( e.Replacee is 'RedCard' )
+		else if ( (e.Replacee is 'RedCard') && !(e.Replacee is 'ChexRedCard') )
 		{
 			if ( level.GetChecksum() ~== "3805A661D5C4523AFF7BF86991071043" )
 			{
@@ -620,8 +614,8 @@ extend Class SWWMHandler
 			}
 			e.Replacement = 'SWWMRedCard';
 		}
-		else if ( e.Replacee is 'BlueCard' ) e.Replacement = 'SWWMBlueCard';
-		else if ( e.Replacee is 'YellowCard' ) e.Replacement = 'SWWMYellowCard';
+		else if ( (e.Replacee is 'BlueCard') && !(e.Replacee is 'ChexBlueCard') ) e.Replacement = 'SWWMBlueCard';
+		else if ( (e.Replacee is 'YellowCard') && !(e.Replacee is 'ChexYellowCard') ) e.Replacement = 'SWWMYellowCard';
 		else if ( e.Replacee.GetClassName() == 'GreenCard' ) e.Replacement = 'SWWMGreenCard';
 		else if ( e.Replacee is 'RedSkull' ) e.Replacement = iskdizd?'SWWMSilverCardKDiZD':'SWWMRedSkull';
 		else if ( e.Replacee is 'BlueSkull' ) e.Replacement = iskdizd?'SWWMGreenCardKDiZD':'SWWMBlueSkull';
@@ -646,144 +640,49 @@ extend Class SWWMHandler
 		else if ( e.Replacee is 'MWeaponPiece1' ) e.Replacement = SWWMUtility.PickSWWMSlot0();
 		else if ( (e.Replacee is 'ShellBox') || (e.Replacee is 'CrossbowHefty') )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BigAmmo';
-			else */switch( Random[Replacements](0,20) )
-			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-				e.Replacement = redpool[Random[Replacements](1,2)];
-				break;
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-			case 10:
-				e.Replacement = greenpool[Random[Replacements](1,2)];
-				break;
-			case 11:
-			case 12:
-			case 13:
-			case 14:
-				e.Replacement = purplepool[Random[Replacements](0,2)];
-				break;
-			case 15:
-			case 16:
-			case 17:
-				e.Replacement = bluepool[Random[Replacements](0,2)];
-				break;
-			case 18:
-			case 19:
-				e.Replacement = whitepool[Random[Replacements](0,1)];
-				break;
-			case 20:
-				e.Replacement = 'BlackShell';
-				break;
-			}
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMShellAmmoBig';
+			else e.Replacement = SWWMShellAmmoBig.PickAmmo(true);
 		}
 		else if ( (e.Replacee is 'Shell') || (e.Replacee is 'CrossbowAmmo') )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BundleSpawn';
-			else */switch( Random[Replacements](0,9) )
-			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-				e.Replacement = redpool[0];
-				break;
-			case 4:
-			case 5:
-			case 6:
-				e.Replacement = greenpool[0];
-				break;
-			case 7:
-			case 8:
-				e.Replacement = purplepool[0];
-				break;
-			case 9:
-				e.Replacement = bluepool[0];
-				break;
-			}
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMShellAmmoSmall';
+			else e.Replacement = SWWMShellAmmoSmall.PickAmmo(true);
 		}
 		else if ( e.Replacee is 'ClipBox' )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenSmallAmmo':'SheenBigAmmo';
-			else */e.Replacement = Random[Replacements](0,5)?'EvisceratorShell':Random[Replacements](0,9)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMClipAmmoBig';
+			else e.Replacement = SWWMClipAmmoBig.PickAmmo(true);
 		}
-		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = /*(e.Replacee is 'GoldWandHefty')?'SheenSmallAmmo':'SheenTinyAmmo'*/'SWWMNothing';
+		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = 'SWWMNothing';
 		else if ( e.Replacee is 'BlasterHefty' )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenBigAmmo':'SheenSmallAmmo';
-			else */e.Replacement = Random[Replacements](0,6)?'EvisceratorTrioSpawn':'EvisceratorSixPack';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMBlastAmmoBig';
+			else e.Replacement = SWWMBlastAmmoBig.PickAmmo(true);
 		}
 		else if ( e.Replacee is 'BlasterAmmo' )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'SheenSmallAmmo':'SheenTinyAmmo';
-			else */e.Replacement = 'EvisceratorShell';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMBlastAmmoSmall';
+			else e.Replacement = SWWMBlastAmmoSmall.PickAmmo(true);
 		}
 		else if ( (e.Replacee is 'RocketBox') || (e.Replacee is 'PhoenixRodHefty') || (e.Replacee is 'MaceHefty') )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = Random[Replacements](0,2)?'QuadravolAmmo':'QuadravolAmmoBundleSpawn';
-			else */switch ( Random[Replacements](0,11) )
-			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				if ( Random[Replacements](0,5) ) e.Replacement = 'HellblazerMissiles';
-				else if ( Random[Replacements](0,4) ) e.Replacement = 'HellblazerMissileTrioSpawn';
-				else e.Replacement = 'HellblazerMissileMag';
-				break;
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-				if ( Random[Replacements](0,6) ) e.Replacement = 'HellblazerCrackshots';
-				else e.Replacement = 'HellblazerCrackshotMag';
-				break;
-			case 9:
-			case 10:
-				if ( Random[Replacements](0,8) ) e.Replacement = 'HellblazerRavagers';
-				else e.Replacement = 'HellblazerRavagerMag';
-				break;
-			case 11:
-				if ( Random[Replacements](0,10) ) e.Replacement = 'HellblazerWarheads';
-				else e.Replacement = 'HellblazerWarheadMag';
-				break;
-			}
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMRocketAmmoBig';
+			else e.Replacement = SWWMRocketAmmoBig.PickAmmo(true);
 		}
 		else if ( (e.Replacee is 'RocketAmmo') || (e.Replacee is 'PhoenixRodAmmo') || (e.Replacee is 'MaceAmmo') )
 		{
-			/*if ( Random[Replacements](0,1) ) e.Replacement = 'QuadravolAmmo';
-			else */e.Replacement = Random[Replacements](0,2)?'HellblazerMissiles':'HellblazerCrackshots';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMRocketAmmoSmall';
+			else e.Replacement = SWWMRocketAmmoSmall.PickAmmo(true);
 		}
 		else if ( (e.Replacee is 'CellPack') || (e.Replacee is 'SkullRodHefty') )
 		{
-			/*if ( Random[Replacements](0,1) )
-			{
-				if ( !Random[Replacements](0,2) ) e.Replacement = Random[Replacements](0,3)?'EMPCoreBundleSpawn':'EMPCore';
-				else if ( Random[Replacements](0,2) ) e.Replacement = 'RayBoltBundleSpawn';
-				else e.Replacement = 'RayAmmo';
-			}
-			else */if ( !Random[Replacements](0,2) )
-			{
-				if ( Random[Replacements](0,3) ) e.Replacement = Random[Replacements](0,2)?'SilverBulletsBundleSpawn':'SilverBullets2BundleSpawn';
-				else e.Replacement = Random[Replacements](0,2)?'SilverBulletAmmo':'SilverBulletAmmo2';
-			}
-			else if ( Random[Replacements](0,2) ) e.Replacement = 'CandyGunBulletsBundleSpawn';
-			else e.Replacement = 'CandyGunAmmo';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMCellAmmoBig';
+			else e.Replacement = SWWMCellAmmoBig.PickAmmo(true);
 		}
 		else if ( (e.Replacee is 'Cell') || (e.Replacee is 'SkullRodAmmo') )
 		{
-			if ( !Random[Replacements](0,2) ) e.Replacement = /*!Random[Replacements](0,2)?'RayBattery':*/Random[Replacements](0,2)?'HellblazerRavagers':'HellblazerWarheads';
-			else if ( Random[Replacements](0,2) ) e.Replacement = /*Random[Replacements](0,1)?'DarkCanister':*/'SparkUnit';
-			else if ( !Random[Replacements](0,3) ) e.Replacement = /*Random[Replacements](0,1)?'RayBolt':*/'CandyGunBullets';
-			else e.Replacement = /*Random[Replacements](0,1)?'EMPCore':*/Random[Replacements](0,2)?'SilverBullets':'SilverBullets2';
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMCellAmmoSmall';
+			else e.Replacement = SWWMCellAmmoSmall.PickAmmo(true);
 		}
 		else if ( e.Replacee is 'Mana1' ) e.Replacement = 'FabricatorTier1';
 		else if ( e.Replacee is 'Mana2' ) e.Replacement = 'FabricatorTier2';

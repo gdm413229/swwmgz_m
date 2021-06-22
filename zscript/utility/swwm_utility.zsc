@@ -2099,6 +2099,38 @@ Class SWWMUtility
 		if ( level.maptime ) return PickSWWMSlot3();	// always slot 3 after map start, prevents shotgun guys from dropping wallbusters
 		return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
 	}
+	// what RandomSpawner does, basically (simplified for items)
+	static play void TransferItemProp( Actor a, Actor b, bool bundlehack = false )
+	{
+		if ( bundlehack )
+		{
+			b.spawnpoint = b.pos;
+			b.spawnangle = int(b.angle);
+		}
+		else
+		{
+			b.spawnpoint = a.spawnpoint;
+			b.spawnangle = a.spawnangle;
+			b.angle = a.angle;
+			b.pitch = a.pitch;
+			b.roll = a.roll;
+		}
+		b.special = a.special;
+		b.FloatBobPhase = a.FloatBobPhase;	// important
+		for ( int i=0; i<5; i++ ) b.args[i] = a.args[i];
+		b.special1 = a.special1;
+		b.special2 = a.special2;
+		b.spawnflags = a.spawnflags&~MTF_SECRET;
+		b.HandleSpawnFlags();
+		b.spawnflags = a.spawnflags;
+		b.bCountSecret = a.spawnflags&MTF_SECRET;
+		b.ChangeTid(a.tid);
+		b.vel = b.vel;
+		b.master = b.master;
+		b.tracer = b.tracer;
+		b.target = b.target;
+		b.bDROPPED = a.bDROPPED;
+	}
 }
 
 Class RadiusDebugSphere : Actor

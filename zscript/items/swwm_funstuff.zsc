@@ -735,18 +735,8 @@ Class ChanceboxSpawner : Actor
 		}
 		let b = Spawn("Chancebox",pos);
 		// copy all our stuff
-		b.spawnangle = spawnangle;
-		b.angle = angle;
-		b.pitch = pitch;
-		b.roll = roll;
-		b.spawnpoint = spawnpoint;
-		b.special = special;
-		for ( int i=0; i<5; i++ )
-			b.Args[i] = Args[i];
-		b.spawnflags = spawnflags&~MTF_SECRET;
-		b.HandleSpawnFlags();
-		b.bCOUNTSECRET = spawnflags&MTF_SECRET;
-		b.ChangeTid(tid);
+		SWWMUtility.TransferItemProp(self,b);
+		ClearCounters();
 		Destroy();
 	}
 

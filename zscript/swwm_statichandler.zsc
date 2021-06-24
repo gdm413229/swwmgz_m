@@ -10,7 +10,7 @@ Class SWWMStaticHandler : StaticEventHandler
 {
 	// crash handler
 	ui bool wasinmap;
-	ui int timer;
+	ui int timer, msgpick;
 	// versioning
 	bool tainted;
 	String taintver;
@@ -338,7 +338,8 @@ Class SWWMStaticHandler : StaticEventHandler
 			wasinmap = false;
 			if ( timer == 1 )
 			{
-				Console.Printf("\cfOopsie Woopsie!\c-");
+				msgpick = Random[UIStuff](1,8);
+				Console.Printf("\cf%s\c-",StringTable.Localize("$CRASHMSG"..msgpick.."A"));
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
 				if ( hnd && hnd.detected )
 				{
@@ -349,14 +350,14 @@ Class SWWMStaticHandler : StaticEventHandler
 			}
 			else if ( timer == 70 )
 			{
-				Console.Printf("\cfLooks like GZDoom made a fucky wucky! owo\c-");
+				Console.Printf("\cf%s\c-",StringTable.Localize("$CRASHMSG"..msgpick.."B"));
 				S_StartSound("crash/curb",CHAN_YOUDONEFUCKEDUP,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 			}
 			else if ( timer == 140 )
 			{
 				let hnd = SWWMBrutalHandler(StaticEventHandler.Find("SWWMBrutalHandler"));
-				if ( hnd && hnd.detected ) Console.Printf("\cfDon't blame me. Shouldn't have tried running this with Brutal Doom.\c-");
-				else Console.Printf("\cfIf you didn't trigger it manually, it's best if you take a screenshot and show it to Marisa.\c-");
+				if ( hnd && hnd.detected ) Console.Printf("\cfYou shouldn't have tried running this with Brutal Doom.\c-");
+				else Console.Printf("\cfYou should probably screenshot this error and show it to Marisa.\c-");
 				Console.Printf("\cfLoaded Version:\n \cj%s\c-",StringTable.Localize("$SWWM_SHORTVER"));
 				if ( tainted ) Console.Printf("\cfSavegame Version:\n \cj%s\c-",taintver);
 			}

@@ -1113,6 +1113,7 @@ Class SWWMUtility
 		double vfov = p.fov*.5;
 		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
 		let mo = p.camera;
+		if ( !mo ) return false;
 		Vector3 pp;
 		if ( !mo.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return false;
 		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
@@ -1129,6 +1130,7 @@ Class SWWMUtility
 		double vfov = p.fov*.5;
 		double hfov = atan(Screen.GetAspectRatio()*tan(vfov));
 		let mo = p.camera;
+		if ( !mo ) return false;
 		Vector3 pp;
 		if ( mo is 'PlayerPawn' ) pp = mo.Vec2OffsetZ(0,0,PlayerPawn(mo).player.viewz);
 		else pp = mo.Vec3Offset(0,0,mo.CameraHeight);

@@ -1859,13 +1859,14 @@ Class SWWMUtility
 	static bool, TextureID DefaceTexture( TextureID checkme )
 	{
 		String tn = TexMan.GetName(checkme);
-		if ( (tn ~== "MARBFAC2") )
+		// special case: alt texture names in Doom 2 In Spain Only
+		if ( (tn ~== "MARBFAC2") || (tn ~== "SP_MAR01") )
 			return true, TexMan.CheckForTexture("defaced_MARBFAC2",TexMan.Type_Any);
-		if ( (tn ~== "MARBFAC3") )
+		if ( (tn ~== "MARBFAC3") || (tn ~== "SP_MAR02"))
 			return true, TexMan.CheckForTexture("defaced_MARBFAC3",TexMan.Type_Any);
-		if ( (tn ~== "MARBFAC4") )
+		if ( (tn ~== "MARBFAC4") || (tn ~== "SP_MAR03") )
 			return true, TexMan.CheckForTexture("defaced_MARBFAC4",TexMan.Type_Any);
-		if ( (tn ~== "MARBFACE") )
+		if ( (tn ~== "MARBFACE") || (tn ~== "SP_MAR04") )
 			return true, TexMan.CheckForTexture("defaced_MARBFACE",TexMan.Type_Any);
 		if ( (tn ~== "ZZWOLF2") )
 			return true, TexMan.CheckForTexture("defaced_ZZWOLF2",TexMan.Type_Any);

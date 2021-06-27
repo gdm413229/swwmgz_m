@@ -21,9 +21,18 @@ Class SWWMTitleStuff : EventHandler
 		if ( level.maptime == 1 ) S_ChangeMusic("music/TRAUMATI.XM");
 	}
 
+	override void UiTick()
+	{
+		if ( gamestate != GS_LEVEL ) return;
+		// you're not supposed to be here
+		Menu.SetMenu('EndGameMenu');
+		let m = MessageBoxMenu(Menu.GetCurrentMenu());
+		if ( m ) m.HandleResult(true);
+		// special thanks to marrub for this absolute crime
+	}
+
 	override void RenderUnderlay( RenderEvent e )
 	{
-		if ( gamestate != GS_TITLELEVEL ) return;
 		if ( !tex[0] ) tex[0] = TexMan.CheckForTexture("graphics/UnSXLogo.png",TexMan.Type_Any);
 		if ( !tex[1] ) tex[1] = TexMan.CheckForTexture("graphics/SWWMGZLogo.png",TexMan.Type_Any);
 		if ( !tex[2] ) tex[2] = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_Any);

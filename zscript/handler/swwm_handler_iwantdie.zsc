@@ -50,6 +50,8 @@ extend Class SWWMHandler
 			if ( e.Thing.bISMONSTER && !(e.Thing is 'PlayerPawn') )
 			{
 				e.Thing.GiveInventory("HOLYCOWIMTOTALLYGOINGSOFASTOHFUCK",1);
+				// avoid if it has some sort of special handling
+				if ( e.Thing.special || e.Thing.tid || e.Thing.bDORMANT ) return;
 				// random chance to spawn doubles
 				if ( !e.Thing.FindInventory("DontDuplicate") && !Random[ExtraMissiles](0,2) )
 				{
@@ -70,6 +72,7 @@ extend Class SWWMHandler
 							else
 							{
 								x.angle = e.Thing.angle;
+								x.bAMBUSH = e.Thing.bAMBUSH;
 								x.GiveInventory("DontDuplicate",1);
 								break;
 							}

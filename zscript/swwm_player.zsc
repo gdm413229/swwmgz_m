@@ -423,7 +423,7 @@ Class Demolitionist : PlayerPawn
 		DualExplodiumGun(eg.SisterWeapon).chambered = true;
 		player.ReadyWeapon = player.PendingWeapon = eg;
 		// in hexdd, we start with the chaos sphere in our grasp
-		if ( SWWMUtility.IsDeathkings() && SWWMUtility.IsVanillaHexenMap() )
+		if ( SWWMUtility.IsDeathkings() && SWWMUtility.CheckMD5List("vanillahexen.list") )
 		{
 			let cs = Inventory(Spawn('SWWMChaosSphere'));
 			cs.AttachToOwner(self);

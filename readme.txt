@@ -127,7 +127,7 @@ Coming from Instant Action 3, of all places, here's this thing.
 Primary fire fires (duh).
 Secondary fire switches the ammo type for next reload on tap. Holding it and
 tapping the fire button will unload whatever ammo you have inside, in case you
-want to use it on the other slot 3 weapon.
+want to use it on the other shotgun weapon.
 Reload does what you'd expect it to do.
 This thing may be unwieldy, but boy does it let you use some fun ammo types.
 

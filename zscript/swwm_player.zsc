@@ -52,6 +52,7 @@ Class Demolitionist : PlayerPawn
 
 	transient int bumptic;
 	transient double lastbump;
+	transient CVar bumpstr;
 
 	Actor selflight;
 	Actor oldencroached;
@@ -684,7 +685,9 @@ Class Demolitionist : PlayerPawn
 		if ( lastbump <= 0. ) lastbump = 1.;
 		if ( lastbump != 1. )
 		{
-			player.fov *= lastbump;
+			if ( !bumpstr ) bumpstr = CVar.GetCVar('swwm_bumpstrength',player);
+			double str = bumpstr.GetFloat();
+			player.fov *= lastbump*str+1.-str;
 			lastbump = 1.;
 		}
 		// adjust fov from dashing

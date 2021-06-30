@@ -171,11 +171,121 @@ Class DemoPlushGesture : SWWMItemGesture
 }
 Class ManarokouGesture : SWWMItemGesture {}
 Class LithiumNovelGesture : SWWMItemGesture {}
-Class KirinCummiesGesture : SWWMItemGesture {}
-Class MilkBreadsGesture : SWWMItemGesture {}
-Class KirinMangaGesture : SWWMItemGesture {}
+Class KirinCummiesGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKLM 4;
+		XZW1 NO 3;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class MilkBreadsGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKLM 4;
+		XZW1 NO 3;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
+Class KirinMangaGesture : SWWMItemGesture
+{
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFG 3;
+		XZW1 HIJKLM 4;
+		XZW1 NO 3;
+		XZW1 P 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 QRST 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class KirinPlushGesture : SWWMItemGesture
 {
+	action void A_UsePlush()
+	{
+		if ( !Demolitionist(self) ) return;
+		let s = Demolitionist(self).mystats;
+		if ( !s ) return;
+		s.plushuses++;
+		SWWMUtility.AchievementProgress('swwm_progress_plush',s.plushuses,player);
+	}
+	action void A_PetPlush()
+	{
+		A_StartSound("demolitionist/petting",CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	action void A_KissPlush()
+	{
+		if ( swwm_mutevoice < 4 )
+			A_StartSound("demolitionist/smooch",CHAN_DEMOVOICE,CHANF_OVERLAP,.4);
+		SWWMHandler.DoFlash(self,Color(48,255,128,128),10);
+		SWWMHandler.DoFlash(self,Color(24,255,128,128),30);
+		int numpt = Random[ExploS](6,9);
+		for ( int i=0; i<numpt; i++ )
+		{
+			let s = Spawn("LoveHeartSparkle",Vec3Offset(FRandom[ExploS](-.8,.8)*radius,FRandom[ExploS](-.8,.8)*radius,FRandom[ExploS](.1,.9)*height));
+			s.angle = FRandom[ExploS](0,360);
+			s.pitch = FRandom[ExploS](-90,90);
+		}
+		if ( GiveBody(10,100) )
+		{
+			SWWMScoreObj.Spawn(10,Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Height/2),ST_Health);
+			SWWMHandler.DoFlash(self,Color(32,224,128,255),10);
+		}
+	}
+	action void A_Giggle( bool high = false )
+	{
+		if ( swwm_mutevoice < 4 )
+			A_StartSound(String.Format("voice/%s/%s",Demolitionist(self).myvoice.GetString(),high?"gigglehigh":"gigglelow"),CHAN_DEMOVOICE,CHANF_OVERLAP);
+	}
+	action void A_KirinGiggle()
+	{
+		A_StartSound("kirin/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+		// TODO smite enemies
+	}
+	action void A_HugPlush( bool sigh = false )
+	{
+		if ( sigh )
+		{
+			if ( swwm_mutevoice < 4 )
+				A_StartSound(String.Format("voice/%s/hug",Demolitionist(self).myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+			SWWMHandler.DoFlash(self,Color(64,255,128,128),10);
+			SWWMHandler.DoFlash(self,Color(32,255,128,128),80);
+			int numpt = Random[ExploS](6,9);
+			for ( int i=0; i<numpt; i++ )
+			{
+				let s = Spawn("LoveHeartSparkle",Vec3Offset(FRandom[ExploS](-.8,.8)*radius,FRandom[ExploS](-.8,.8)*radius,FRandom[ExploS](.1,.9)*height));
+				s.angle = FRandom[ExploS](0,360);
+				s.pitch = FRandom[ExploS](-90,90);
+			}
+			return;
+		}
+		if ( GiveBody(5,100) )
+		{
+			SWWMScoreObj.Spawn(5,Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Height/2),ST_Health);
+			SWWMHandler.DoFlash(self,Color(32,224,128,255),10);
+		}
+	}
+
 	override void MarkPrecacheSounds()
 	{
 		Super.MarkPrecacheSounds();
@@ -190,6 +300,28 @@ Class KirinPlushGesture : SWWMItemGesture
 		MarkSound("kirin/giggle9");
 		MarkSound("kirin/giggle10");
 		MarkSound("kirin/giggle11");
+	}
+	States
+	{
+	Fire:
+		XZW1 A 3 A_UsePlush();
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKL 5;
+		XZW1 M 5 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 N 4;
+		XZW1 O 2;
+		XZW1 P 2 A_PetPlush();
+		XZW1 Q 3 A_KissPlush();
+		XZW1 R 3 A_KirinGiggle();
+		XZW1 ST 5;
+		XZW1 UVW 6;
+		XZW1 X 5;
+		XZW1 Y 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 Z 4 A_Giggle();
+		XZW2 ABC 4;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
 	}
 }
 Class PsykkonovexxGesture : SWWMItemGesture {}

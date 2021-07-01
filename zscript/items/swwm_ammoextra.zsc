@@ -72,7 +72,7 @@ Class AmmoFabricator : Inventory abstract
 			let rep = GetReplacement(type2);
 			if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 			readonly<Weapon> weap = GetDefaultByType(type2);
-			if ( !Owner.player || !Owner.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+			if ( !Owner.player || !Owner.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon || !weap.CanPickup(Owner) ) continue;
 			let ready = weap.FindState("Ready");
 			if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 			validweapons.Push(type2);
@@ -341,7 +341,7 @@ Class HammerspaceEmbiggener : Inventory
 			let rep = GetReplacement(type2);
 			if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 			readonly<Weapon> weap = GetDefaultByType(type2);
-			if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+			if ( !other.player || !other.player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon || !weap.CanPickup(other) ) continue;
 			let ready = weap.FindState("Ready");
 			if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 			validweapons.Push(type2);

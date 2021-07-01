@@ -140,7 +140,7 @@ Class DemolitionistMenu : GenericMenu
 		oldloresiz = lorelib.ent.Size();
 		tradelib = SWWMTradeHistory.Find(players[consoleplayer]);
 		stats = SWWMStats.Find(players[consoleplayer]);
-		tmsg = "$SWWM_MAINCONTROLS";
+		tmsg = StringTable.Localize("$SWWM_MAINCONTROLS");
 		tmsgtic = gametic+70;
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
@@ -2890,7 +2890,7 @@ Class DemolitionistMenu : GenericMenu
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		// draw bottom messages
 		yy = 386;
-		if ( gametic < tmsgtic ) str = StringTable.Localize(tmsg);
+		if ( gametic < tmsgtic ) str = tmsg;
 		else str = CrimeTime();
 		xx = 4;
 		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);

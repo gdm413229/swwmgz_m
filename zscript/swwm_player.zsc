@@ -161,7 +161,7 @@ Class Demolitionist : PlayerPawn
 				let rep = GetReplacement(type2);
 				if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 				readonly<Weapon> weap = GetDefaultByType(type2);
-				if ( !player || !player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon ) continue;
+				if ( !player || !player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon || !weap.CanPickup(self) ) continue;
 				let ready = weap.FindState("Ready");
 				if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 				validweapons.Push(type2);
@@ -216,7 +216,7 @@ Class Demolitionist : PlayerPawn
 					let rep = GetReplacement(type2);
 					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
 					readonly<Weapon> weap = GetDefaultByType(type2);
-					if ( !player.weapons.LocateWeapon(type2) || (weap.bCheatNotWeapon && (giveall != ALL_YESYES)) ) continue;
+					if ( !player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon || !weap.CanPickup(self) ) continue;
 					let ready = weap.FindState("Ready");
 					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(pamo) )
@@ -299,7 +299,7 @@ Class Demolitionist : PlayerPawn
 					// iwad restrictions (vanilla doesn't care, but here they'll show in the inventory)
 					if ( !(gameinfo.gametype&GAME_HERETIC) && ((rep is 'SWWMKeyGreen') || (rep is 'SWWMKeyBlue') || (rep is 'SWWMKeyYellow')) )
 						continue;
-					if ( !(gameinfo.gametype&GAME_DOOMCHEX) && ((rep is 'SWWMRedCard') || (rep is 'SWWMBlueCard') || (rep is 'SWWMYellowCard')) )
+					if ( !(gameinfo.gametype&GAME_DOOM) && ((rep is 'SWWMRedCard') || (rep is 'SWWMBlueCard') || (rep is 'SWWMYellowCard')) )
 						continue;
 					let item = Inventory(Spawn(rep));
 					SWWMHandler.KeyTagFix(item);
@@ -328,7 +328,7 @@ Class Demolitionist : PlayerPawn
 					// Give the weapon only if it is set in a weapon slot.
 					if ( !player.weapons.LocateWeapon(type) ) continue;
 					readonly<Weapon> def = GetDefaultByType(type);
-					if ( (giveall == ALL_YESYES) || !def.bCheatNotWeapon )
+					if ( !def.bCheatNotWeapon && def.CanPickup(self) )
 						GiveInventory(type,1,true);
 				}
 			}
@@ -342,7 +342,7 @@ Class Demolitionist : PlayerPawn
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
 				// no fabricators before hexen
-				if ( !(gameinfo.gametype&GAME_Hexen) && (type is 'AmmoFabricator') ) continue;
+				if ( !(gameinfo.gametype&GAME_HEXEN) && (type is 'AmmoFabricator') ) continue;
 				// no barriers outside doom
 				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
 				// no gravity outside raven
@@ -352,11 +352,7 @@ Class Demolitionist : PlayerPawn
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
 				let def = GetDefaultByType (type);
 				if ( def.Icon.isValid() && !(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") && !(type is "MagAmmo") && !(type is "Armor") && !(type is "Key") )
-				{
-					// Do not give replaced items unless using "give everything"
-					if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )
-						GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
-				}
+					GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
 			}
 			if ( !giveall ) return;
 		}
@@ -368,9 +364,7 @@ Class Demolitionist : PlayerPawn
 				if ( !type ) continue;
 				let def = GetDefaultByType(type);
 				if ( !def.Icon.isValid() ) continue;
-				// Do not give replaced items unless using "give everything"
-				if ( (giveall == ALL_YESYES) || (GetReplacement(type) == type) )
-					GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
+				GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
 			}
 			if ( !giveall ) return;
 		}

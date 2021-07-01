@@ -42,30 +42,40 @@ Class GrilledCheeseSandwich : Inventory
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.GiveBody(1000,1000);
 		SWWMScoreObj.Spawn(1000,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-		if ( swwm_accdamage )
-			SWWMScoreObj.Spawn(600,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+		if ( Owner is 'Demolitionist' )
+		{
+			if ( swwm_accdamage )
+				SWWMScoreObj.Spawn(600,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+			else
+			{
+				SWWMScoreObj.Spawn(200,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+				SWWMScoreObj.Spawn(150,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+				SWWMScoreObj.Spawn(250,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+			}
+			let n = Owner.FindInventory("ArmorNugget");
+			if ( !n ) Owner.GiveInventory("ArmorNugget",GetDefaultByType("ArmorNugget").MaxAmount);
+			else n.Amount = n.MaxAmount;
+			let b = Owner.FindInventory("BlastSuit");
+			if ( !b ) Owner.GiveInventory("BlastSuit",GetDefaultByType("BlastSuit").MaxAmount);
+			else b.Amount = b.MaxAmount;
+			let w = Owner.FindInventory("WarArmor");
+			if ( !w ) Owner.GiveInventory("WarArmor",GetDefaultByType("WarArmor").MaxAmount);
+			else w.Amount = w.MaxAmount;
+			SWWMLoreLibrary.Add(Owner.player,"Nugget");
+			SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
+			SWWMLoreLibrary.Add(Owner.player,"WarArmor");
+			Demolitionist(Owner).lastbump *= 1.2;
+		}
 		else
 		{
 			SWWMScoreObj.Spawn(200,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
-			SWWMScoreObj.Spawn(150,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
-			SWWMScoreObj.Spawn(250,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);
+			let n = Owner.FindInventory("ArmorNugget");
+			if ( !n ) Owner.GiveInventory("ArmorNugget",GetDefaultByType("ArmorNugget").MaxAmount);
+			else n.Amount = n.MaxAmount;
+			SWWMLoreLibrary.Add(Owner.player,"Nugget");
 		}
-		let n = Owner.FindInventory("ArmorNugget");
-		if ( !n ) Owner.GiveInventory("ArmorNugget",GetDefaultByType("ArmorNugget").MaxAmount);
-		else n.Amount = n.MaxAmount;
-		let b = Owner.FindInventory("BlastSuit");
-		if ( !b ) Owner.GiveInventory("BlastSuit",GetDefaultByType("BlastSuit").MaxAmount);
-		else b.Amount = b.MaxAmount;
-		let w = Owner.FindInventory("WarArmor");
-		if ( !w ) Owner.GiveInventory("WarArmor",GetDefaultByType("WarArmor").MaxAmount);
-		else w.Amount = w.MaxAmount;
 		let f = Spawn("SWWMItemFog",Owner.Vec3Offset(0,0,Owner.Height/2));
 		f.bAMBUSH = true;
-		SWWMLoreLibrary.Add(Owner.player,"Nugget");
-		SWWMLoreLibrary.Add(Owner.player,"BlastSuit");
-		SWWMLoreLibrary.Add(Owner.player,"WarArmor");
-		if ( Owner is 'Demolitionist' )
-			Demolitionist(Owner).lastbump *= 1.2;
 		if ( !extrasafe ) return;
 		let s = Owner.FindInventory("GrilledCheeseSafeguard");
 		if ( !s ) Owner.GiveInventory("GrilledCheeseSafeguard",1);
@@ -335,7 +345,6 @@ Class GhostPower : PowerInvisibility
 		+INVENTORY.ADDITIVETIME;
 		+CANTSEEK;
 	}
-
 
 	override void InitEffect()
 	{
@@ -1152,6 +1161,7 @@ Class Ragekit : Inventory
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		if ( Owner.GiveBody(100,100) )
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
+		SWWMUtility.AchievementProgressInc('swwm_progress_rage',1,Owner.player);
 		if ( !(Owner is 'Demolitionist') )
 		{
 			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
@@ -1168,7 +1178,6 @@ Class Ragekit : Inventory
 			Demolitionist(Owner).lastbump *= .95;
 		}
 		else Owner.GiveInventory("RagekitPower",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_rage',1,Owner.player);
 		return true;
 	}
 	override void Travelled()
@@ -1247,7 +1256,7 @@ Class Omnisight : Inventory
 		// spread to all players
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
-			if ( !playeringame[i] || !players[i].mo || players[i].mo.FindInventory(GetClass()) ) continue;
+			if ( !playeringame[i] || !players[i].mo || !(players[i].mo is 'Demolitionist') || players[i].mo.FindInventory(GetClass()) ) continue;
 			let o = Inventory(Spawn(GetClass()));
 			o.ClearCounters();
 			o.AttachToOwner(players[i].mo);

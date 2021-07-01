@@ -172,6 +172,31 @@ Mixin Class SWWMAmmo
 		}
 	}
 
+	override bool CanPickup( Actor toucher )
+	{
+		// don't allow picking up ammo for weapons we can't pick up
+		// (future-proofing for player classes)
+		if ( !Super.CanPickup(toucher) ) return false;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			let w = (Class<Weapon>)(AllActorClasses[i]);
+			if ( !w ) continue;
+			if ( w is 'SWWMWeapon' )
+			{
+				let def = GetDefaultByType((Class<SWWMWeapon>)(w));
+				if ( !def.UsesAmmo(GetClass()) ) continue;
+				if ( !def.CanPickup(toucher) ) return false;
+			}
+			else
+			{
+				let def = GetDefaultByType(w);
+				if ( (def.AmmoType1 != GetClass()) && (def.AmmoType2 != GetClass()) ) continue;
+				if ( !def.CanPickup(toucher) ) return false;
+			}
+		}
+		return true;
+	}
+
 	default
 	{
 		+INVENTORY.IGNORESKILL;
@@ -234,6 +259,15 @@ Class MagAmmo : Inventory abstract
 			}
 		}
 		return Super.HandlePickup(item);
+	}
+
+	override bool CanPickup( Actor toucher )
+	{
+		// don't allow picking up ammo for weapons we can't pick up
+		// (future-proofing for player classes)
+		if ( !Super.CanPickup(toucher) ) return false;
+		let def = GetDefaultByType(ParentAmmo);
+		return def.CanPickup(toucher);
 	}
 
 	private Inventory DoDrop( Class<Inventory> type )

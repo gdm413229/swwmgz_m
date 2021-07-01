@@ -175,7 +175,6 @@ Mixin Class SWWMAmmo
 	override bool CanPickup( Actor toucher )
 	{
 		// don't allow picking up ammo for weapons we can't pick up
-		// (future-proofing for player classes)
 		if ( !Super.CanPickup(toucher) ) return false;
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
@@ -264,7 +263,6 @@ Class MagAmmo : Inventory abstract
 	override bool CanPickup( Actor toucher )
 	{
 		// don't allow picking up ammo for weapons we can't pick up
-		// (future-proofing for player classes)
 		if ( !Super.CanPickup(toucher) ) return false;
 		let def = GetDefaultByType(ParentAmmo);
 		return def.CanPickup(toucher);

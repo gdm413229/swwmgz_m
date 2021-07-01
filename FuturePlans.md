@@ -86,7 +86,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Ibuki companion add-on**
 * **Saya companion add-on**
 * **Kirin companion add-on *(Hexen-exclusive)***
-* **Ibuki, Saya and Kirin playerclasses *(that'll be interesting)***
 * **Original English Voice Acting:**
   - Demolitionist
   - Ibuki

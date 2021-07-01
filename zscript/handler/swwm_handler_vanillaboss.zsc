@@ -392,10 +392,13 @@ extend Class SWWMHandler
 		if ( !bbar_d ) bbar_d = TexMan.CheckForTexture("graphics/HUD/BossHealthBarDecay.png",TexMan.Type_Any);
 		Vector2 vpos = ((bar.ss.x-300)/2.,bar.ss.y-(bar.margin+35));
 		Screen.DrawTexture(bbar_f,false,vpos.x-2,vpos.y-2,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha);
-		int rw = int(clamp((ihealthr.GetValue()*300.)/hmax,0.,300.));
-		int dw = int(clamp((ihealth.GetValue()*300.)/hmax,0.,300.));
-		Screen.DrawTexture(bbar_d,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,dw);
-		Screen.DrawTexture(bbar_r,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,rw);
+		if ( hmax )
+		{
+			int rw = int(clamp((ihealthr.GetValue()*300.)/hmax,0.,300.));
+			int dw = int(clamp((ihealth.GetValue()*300.)/hmax,0.,300.));
+			Screen.DrawTexture(bbar_d,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,dw);
+			Screen.DrawTexture(bbar_r,false,vpos.x,vpos.y,DTA_VirtualWidthF,bar.ss.x,DTA_VirtualHeightF,bar.ss.y,DTA_KeepRatio,true,DTA_Alpha,bossalpha,DTA_WindowRight,rw);
+		}
 		Font barfnt = bar.LangFont(bar.mTewiFont);
 		Font dmgfnt = bar.mTewiFont.mFont;
 		if ( (cummdamage > 0) && (gametic < lastcummtic+150) )

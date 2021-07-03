@@ -860,6 +860,51 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 	}
 }
 
+Class OptionMenuItemTrapOption : OptionMenuItemCommand
+{
+	int cdown;
+
+	OptionMenuItemTrapOption Init( String label, Name command )
+	{
+		Super.Init(label,'exit');
+		mAction = command;
+		return self;
+	}
+
+	override int Draw( OptionMenuDescriptor desc, int y, int indent, bool selected )
+	{
+		drawLabel(indent,y,selected?OptionMenuSettings.mFontColorSelection:OptionMenuSettings.mFontColor);
+		String text = StringTable.Localize(OptionValues.GetText('OnOff',(cdown==0)));
+		if ( text.Length() == 0 ) text = "Unknown";
+		drawValue(indent,y,OptionMenuSettings.mFontColorValue,text);
+		return indent;
+	}
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		if ( (mkey == Menu.MKEY_Left) || (mkey == Menu.MKEY_Right) || (mkey == Menu.MKEY_Enter) )
+		{
+			Activate();
+			return true;
+		}
+		return Super.MenuEvent(mkey,fromcontroller);
+	}
+	override void Ticker()
+	{
+		Super.Ticker();
+		if ( cdown > 0 )
+		{
+			cdown--;
+			if ( cdown <= 0 ) Super.Activate();
+		}
+	}
+	override bool Activate()
+	{
+		Menu.MenuSound("bruh");
+		cdown = int(S_GetLength("bruh")*GameTicRate)+4;
+		return true;
+	}
+}
+
 // this is kind of a fucky
 // scalesliders kinda fuck up keyboard input if the step is not 1,
 // so I'll fix that for my super special use cases

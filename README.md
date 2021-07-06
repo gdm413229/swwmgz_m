@@ -132,7 +132,7 @@ on replaced item, may also come in bundles:
 ### Wallbuster (slot 4) ~ Replaces SSG, Ethereal Crossbow, Frost Shards
 ![](docimg/wallbuster.png)
 
-A ludicrously overkill weapon, courtesy of the always-overkill **Blackmann Arms**. Sporting 5 groups of 5 barrels, for a grand total of 25. Everything in front of you is pretty much dead. Cannot use dragon's breath, flechettes or golden shells.
+A ludicrously overkill weapon, courtesy of the always-overkill **Blackmann Arms**. Sporting a pentagonal array of 5-barrel cylinders, for a grand total of 25 barrels. Everything in front of you is pretty much dead. Cannot use dragon's breath, flechettes or golden shells.
 
 **Primary fire:** Shoot one barrel at a time.
 

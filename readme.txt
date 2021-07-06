@@ -306,8 +306,9 @@ very valuable.
 ----------
 
 This mod wouldn't have been possible if I had to create everything all by
-myself. Detailed credits are available in the credits.txt file. It's all there,
-really.
+myself (yeah, imagine me having to make SOUND EFFECTS and stuff, that'd be
+impossible). Detailed credits are available in the credits.txt file. It's all
+there, really.
 
 3.1. UnSX Team Is
 - - - - - - - - -

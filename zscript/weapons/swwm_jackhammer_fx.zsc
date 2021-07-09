@@ -94,6 +94,7 @@ Class PusherProjectile : Actor
 	double oldangle, oldpitch;
 	Actor lasthit;
 	int hittics;
+	bool bUsePickup;
 
 	Default
 	{
@@ -301,6 +302,8 @@ Class PusherProjectile : Actor
 	}
 	override void Touch( Actor toucher )
 	{
+		if ( toucher.player && swwm_usetopickup && !bUsePickup )
+			return;
 		// cannot pick up swapweapon unless explicitly pressing use
 		let pw = GetDefaultByType("PusherWeapon");
 		SWWMWeapon sw;
@@ -350,7 +353,9 @@ Class PusherProjectile : Actor
 				user.player.PendingWeapon = WP_NOCHANGE;
 			}
 		}
+		bUsePickup = true;
 		Touch(user);
+		bUsePickup = false;
 		return bDestroyed;
 	}
 	States

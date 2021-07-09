@@ -231,16 +231,26 @@ Class ExplodiumGun : SWWMWeapon
 
 	override Inventory CreateTossable( int amt )
 	{
+		// disallow dropping if weapon isn't ready for switching
+		if ( (Owner.player.ReadyWeapon == self) && (!(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH)) )
+			return null;
 		let copy = ExplodiumGun(Inventory.CreateTossable(1));
 		if ( !copy ) return null;
 		// destroy sister weapon if we're removing ourselves
 		if ( copy == self )
 		{
-			copy.preinit = true;	// need this in case we get picked up again out of order
+			preinit = true;	// need this in case we get picked up again out of order
 			if ( SisterWeapon )
 			{
 				SisterWeapon.SisterWeapon = null;
 				SisterWeapon.Destroy();
+			}
+			// reattach our glow if we became a pickup
+			if ( (PickupFlash is 'SWWMPickupFlash') && swwm_itemglows )
+			{
+				let p = Spawn(PickupFlash,Vec3Offset(0,0,16));
+				p.target = self;
+				p.SetStateLabel("Pickup");
 			}
 		}
 		else if ( SisterWeapon )

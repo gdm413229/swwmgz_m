@@ -248,7 +248,15 @@ extend Class SWWMHandler
 			d.bNOGRAVITY = e.Thing.bNOGRAVITY;
 		}
 		if ( e.Thing is 'Inventory' )
+		{
 			CopyFloatBob(e.Thing);
+			if ( (Inventory(e.Thing).PickupFlash is 'SWWMPickupFlash') && swwm_itemglows )
+			{
+				let p = Actor.Spawn(Inventory(e.Thing).PickupFlash,e.Thing.Vec3Offset(0,0,16));
+				p.target = e.Thing;
+				p.SetStateLabel("Pickup");
+			}
+		}
 		if ( swwm_doomfall && e.Thing.bISMONSTER )
 			e.Thing.bFALLDAMAGE = true;
 		if ( e.Thing is 'Key' )

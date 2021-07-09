@@ -1029,30 +1029,52 @@ Class SWWMPickupFlash : Actor
 		Super.PostBeginPlay();
 		frame = Args[0];
 	}
+	action void A_Sparkle()
+	{
+		// offset up
+		SetOrigin(Vec3Offset(0,0,16),false);
+		roll = FRandom[ExploS](0,360);
+		scale *= FRandom[ExploS](.9,1.1);
+		scale.x *= RandomPick[ExploS](-1,1);
+		scale.y *= RandomPick[ExploS](-1,1);
+		int numpt = Random[ExploS](8,10);
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
+			let s = Spawn("SWWMSmallSmoke",pos);
+			s.vel = pvel;
+			s.SetShade(Color(Args[1],Args[2],Args[3])*Random[ExploS](64,85));
+			s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
+			s.scale *= 3.;
+			s.alpha *= .5;
+		}
+	}
+	action void A_Shimmer()
+	{
+		if ( !target || Inventory(target).Owner )
+		{
+			Destroy();
+			return;
+		}
+		if ( target.bINVISIBLE )
+		{
+			bINVISIBLE = true;
+			return;
+		}
+		else if ( bINVISIBLE ) bINVISIBLE = false;
+		SetOrigin(target.Vec3Offset(0,0,16+target.GetBobOffset()),true);
+		A_SetScale(FRandom[ClientSparkles](.9,1.1)*(max(target.radius,target.height)/16.));
+		alpha = FRandom[ClientSparkles](.9,1.)*clamp((max(0,Distance3DSquared(players[consoleplayer].Camera)-40000.)/160000000.)**.25,0.,1.);
+	}
 	States
 	{
 	Spawn:
-		BLPF # 1 Bright NoDelay
-		{
-			// offset up
-			SetOrigin(Vec3Offset(0,0,16),false);
-			roll = FRandom[ExploS](0,360);
-			scale *= FRandom[ExploS](0.9,1.1);
-			scale.x *= RandomPick[ExploS](-1,1);
-			scale.y *= RandomPick[ExploS](-1,1);
-			int numpt = Random[ExploS](8,10);
-			for ( int i=0; i<numpt; i++ )
-			{
-				Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](.3,8);
-				let s = Spawn("SWWMSmallSmoke",pos);
-				s.vel = pvel;
-				s.SetShade(Color(Args[1],Args[2],Args[3])*Random[ExploS](64,85));
-				s.A_SetRenderStyle(s.alpha,STYLE_AddShaded);
-				s.scale *= 3.;
-				s.alpha *= .5;
-			}
-		}
+		BLPF # 0 Bright;
+		BLPF # 1 Bright A_Sparkle();
 		BLPF # 1 Bright A_FadeOut(.2);
+		Wait;
+	Pickup:
+		BLPS # 1 Bright A_Shimmer();
 		Wait;
 	}
 }

@@ -165,6 +165,22 @@ Class SWWMRespawnTimer : Actor
 	}
 }
 
+Mixin Class SWWMPickupGlow
+{
+	override Inventory CreateTossable( int amt )
+	{
+		let ret = Super.CreateTossable(amt);
+		// reattach our glow if we became a pickup
+		if ( (ret == self) && (PickupFlash is 'SWWMPickupFlash') && swwm_itemglows )
+		{
+			let p = Spawn(PickupFlash,Vec3Offset(0,0,16));
+			p.target = self;
+			p.SetStateLabel("Pickup");
+		}
+		return ret;
+	}
+}
+
 Mixin Class SWWMRespawn
 {
 	override void Hide()

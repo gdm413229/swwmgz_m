@@ -118,5 +118,5 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Satellite *(Total Destruction)*
   - [Heretic/Hexen] Safety Tether *(Original)*
   - Devastation Sigil *(SWWM)*
-  - Black Matter Armor *(SWWM)*
+  - Divine Sprite *(SWWM Platinum)*
   - Angel of Death *(Total Destruction, SWWM Platinum Ep2)*

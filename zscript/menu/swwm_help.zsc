@@ -50,7 +50,7 @@ Class SWWMHelpMenu : GenericMenu
 		case MKEY_PageDown:
 			if ( (curpage < NUM_HELP_PAGES-1) && ((prevpage == -1) || (alph >= 1.)) )
 			{
-				MenuSound("menu/choose");
+				MenuSound("menu/cursor");
 				prevpage = curpage;
 				curpage++;
 				pagedir = 1;
@@ -64,7 +64,7 @@ Class SWWMHelpMenu : GenericMenu
 		case MKEY_PageUp:
 			if ( (curpage > 0) && ((prevpage == -1) || (alph >= 1.)) )
 			{
-				MenuSound("menu/choose");
+				MenuSound("menu/cursor");
 				prevpage = curpage;
 				curpage--;
 				pagedir = -1;

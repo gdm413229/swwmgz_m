@@ -24,7 +24,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **More achievements:**
   - Piece of Candy *(Collect 1000 nuggets)*
   - Kaboom *(Kill 30 enemies with planted Explodium Mags)*
-  - Pacifist *(Finish a map without killing anything)*
+  - Pacifist *(Finish a map without dealing damage)*
   - Untouchable *(Finish a map without taking damage)*
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*

@@ -860,14 +860,13 @@ Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 	}
 }
 
-Class OptionMenuItemTrapOption : OptionMenuItemCommand
+Class OptionMenuItemTrapOption : OptionMenuItem
 {
 	int cdown;
 
 	OptionMenuItemTrapOption Init( String label, Name command )
 	{
-		Super.Init(label,'exit');
-		mAction = command;
+		Super.Init(label,command);
 		return self;
 	}
 
@@ -891,11 +890,13 @@ Class OptionMenuItemTrapOption : OptionMenuItemCommand
 	override void Ticker()
 	{
 		Super.Ticker();
-		if ( cdown > 0 )
-		{
-			cdown--;
-			if ( cdown <= 0 ) Super.Activate();
-		}
+		if ( cdown <= 0 ) return;
+		cdown--;
+		if ( cdown > 0 ) return;
+		// haha more crimes
+		Menu.SetMenu('QuitMenu');
+		let m = MessageBoxMenu(Menu.GetCurrentMenu());
+		if ( m ) m.HandleResult(true);
 	}
 	override bool Activate()
 	{

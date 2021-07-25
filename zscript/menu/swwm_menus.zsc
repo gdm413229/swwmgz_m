@@ -431,13 +431,9 @@ Class SWWMBigMenuHack : SWWMCleanMenu
 			isclean = true;
 		}
 		String str = "⌃ ⌃ ⌃";
-		int x = (w-markfont.StringWidth(str))/2;
-		int y = (h-280)/2;
-		if ( isclean )
-		{
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()/2);
-			y = (y-100)*CleanYFac_1+(Screen.GetHeight()/2);
-		}
+		double x = (w-markfont.StringWidth(str))/2;
+		double y = (h-280)/2;
+		if ( isclean ) SWWMUtility.AdjustClean_1(x,y);
 		if ( ofs > 0 )
 		{
 			if ( isclean ) Screen.DrawText(markfont,Font.CR_FIRE,x,y+30*CleanYFac_1,str,DTA_CleanNoMove_1,true);
@@ -537,8 +533,8 @@ Class ListMenuItemSWWMStaticTextM : ListMenuItem
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			double x = (320-fnt.StringWidth(text)*3)/2;
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
-			double y = (mYpos-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			double y = mYpos;
+			SWWMUtility.AdjustClean_1(x,y);
 			Screen.DrawText(fnt,mColor,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
 		else
@@ -573,9 +569,8 @@ class ListMenuItemSWWMLogo : ListMenuItem
 		if ( w == ListMenuDescriptor.CleanScale )
 		{
 			x = (320-vs.x)/2;
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 			double y = -48;
-			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			SWWMUtility.AdjustClean_1(x,y);
 			Screen.DrawTexture(mTexture,false,x,y,DTA_ScaleX,CleanXFac_1*scl,DTA_ScaleY,CleanYFac_1*scl);
 		}
 		else
@@ -733,8 +728,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			{
 				// due to specifics of how DTA_Clean works we can't combine with with DTA_ScaleX/Y
 				// so we have to set the scaling manually
-				xx = (xx-160)*CleanXFac_1+(Screen.GetWidth()*.5);
-				y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+				SWWMUtility.AdjustClean_1(xx,y);
 				for ( int i=0, pos=0; i<tlen; i++ )
 				{
 					int ch;
@@ -760,8 +754,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 		{
 			// due to specifics of how DTA_Clean works we can't combine with with DTA_ScaleX/Y
 			// so we have to set the scaling manually
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
-			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			SWWMUtility.AdjustClean_1(x,y);
 			Screen.DrawText(fnt,Font.CR_WHITE,x,y,text,DTA_ScaleX,3.*CleanXFac_1,DTA_ScaleY,3.*CleanYFac_1);
 		}
 		else Screen.DrawText(fnt,Font.CR_WHITE,x,y,text,DTA_VirtualWidth,w,DTA_VirtualHeight,h,DTA_FullscreenScale,FSMode_ScaleToFit43,DTA_ScaleX,3.,DTA_ScaleY,3.);
@@ -778,11 +771,10 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 			xofs *= CleanXFac_1;
 			yofs *= CleanYFac_1;
 			double x = (320-GetWidth())/2;
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
-			y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
+			SWWMUtility.AdjustClean_1(x,y);
 			Screen.DrawTexture(tex,true,x+xofs,y+yofs,DTA_CleanNoMove_1,true,DTA_CenterOffset,true,DTA_Rotate,15.*sin(8*Menu.MenuTime()));
 			x = (320+GetWidth())/2;
-			x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
+			SWWMUtility.AdjustClean_1x(x);
 			Screen.DrawTexture(tex,true,x-xofs,y+yofs,DTA_CleanNoMove_1,true,DTA_CenterOffset,true,DTA_Rotate,-15.*sin(8*Menu.MenuTime()));
 		}
 		else
@@ -795,7 +787,7 @@ class ListMenuItemSWWMTextItemM : ListMenuItemSelectable
 	}
 }
 
-// for compat with non-text episodes
+// for compat with non-text episodes (no longer used?)
 Class ListMenuItemSWWMPatchItemM : ListMenuItemSelectable
 {
 	TextureID mTexture;

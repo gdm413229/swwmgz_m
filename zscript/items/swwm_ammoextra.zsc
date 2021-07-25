@@ -522,7 +522,6 @@ Class HammerspaceEmbiggener : Inventory
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.ALWAYSPICKUP;
-		+COUNTITEM;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 8;
@@ -539,13 +538,7 @@ Class HammerspaceEmbiggener : Inventory
 
 // used when cheating or trading, this version does not give ammo and is meant
 // only for GiveInventory, so it shouldn't be spawned in the world
-Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener
-{
-	Default
-	{
-		-COUNTITEM;
-	}
-}
+Class TradedHammerspaceEmbiggener : HammerspaceEmbiggener {}
 
 // used to denote "merged" embiggeners, changes color based on amount
 //  green (2+)

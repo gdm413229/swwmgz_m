@@ -23,6 +23,15 @@ Class mkBlood : Actor
 		if ( target.bloodcolor ) b.SetShade(Color(target.bloodcolor.r/2,target.bloodcolor.g/2,target.bloodcolor.b/2));
 		else b.SetShade(Color(80,0,0));
 		b.CopyBloodColor(target);
+		int numpt = Random[Blood](2,4)+str*2;
+		double sstr = (2.5+str)/3.;
+		Vector3 vdir = (cos(b.angle)*cos(b.pitch),sin(b.angle)*cos(b.pitch),-sin(b.pitch));
+		for ( int i=0; i<numpt; i++ )
+		{
+			Vector3 ndir = (vdir+(FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5))).unit()*FRandom[Blood](.2,2.)*sstr;
+			for ( double j=1.; j>=.5; j-=.125 )
+				A_SpawnParticle(b.fillcolor,0,int(12*sstr),2.*str*FRandom[Blood](.6,1.4)*j,0,0,0,0,ndir.x*j,ndir.y*j,ndir.z*j,0,0,-.25,.75,-1,-.02*sstr*j);
+		}
 	}
 	override void Tick()
 	{
@@ -140,7 +149,7 @@ Class mkBloodDrop : Actor
 		Radius 2;
 		Height 2;
 		Mass 1;
-		RenderStyle "Shaded";
+		RenderStyle "Translucent";
 	}
 	// try to reduce overhead as much as possible with this
 	override void Tick()
@@ -216,6 +225,15 @@ Class mkBloodDrop : Actor
 			}
 			else newpos = level.Vec3Offset(newpos,vel);
 			newpos.z = clamp(newpos.z,floorz,ceilingz);
+			Vector3 ndiff = level.Vec3Diff(newpos,pos);
+			double ndist = ndiff.length();
+			ndiff /= ndist;
+			for ( int i=0; i<ndist; i++ )
+			{
+				if ( Random[Blood](0,2) ) continue;
+				Vector3 ppos = level.Vec3Offset(pos,ndiff*i)-pos;
+				A_SpawnParticle(fillcolor,0,10,10.*scale.x*FRandom[Blood](.6,1.4),0,ppos.x,ppos.y,ppos.z,vel.x*.1+FRandom[Blood](-.1,.1),vel.y*.1+FRandom[Blood](-.1,.1),vel.z*.1+FRandom[Blood](-.1,.1),0,0,-.5,.5*alpha,-1,-1.*scale.x);
+			}
 			SetOrigin(newpos,true);
 			if ( (d.HitType == TRACE_HitFloor) || (pos.z <= floorz) )
 			{
@@ -239,6 +257,16 @@ Class mkBloodDrop : Actor
 					// assume we dropped onto the previous spot
 					if ( master.tracer )
 					{
+						Vector3 floordir;
+						if ( d.Hit3DFloor ) floordir = -d.Hit3DFloor.model.ceilingplane.Normal;
+						else floordir = d.HitSector.floorplane.Normal;
+						int numpt = Random[Blood](2,4);
+						for ( int i=0; i<numpt; i++ )
+						{
+							Vector3 ndir = (floordir+(FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5))).unit()*FRandom[Blood](.5,8.);
+							for ( double j=1.; j>=.5; j-=.125 )
+								A_SpawnParticle(fillcolor,0,20,10.*scale.x*FRandom[Blood](.6,1.4)*j,0,0,0,0,ndir.x*j,ndir.y*j,ndir.z*j,0,0,-.25,.5*alpha,-1,-1.*scale.x*j);
+						}
 						Destroy();
 						return;
 					}
@@ -246,18 +274,29 @@ Class mkBloodDrop : Actor
 				}
 				bMISSILE = false;
 				dead = true;
+				Vector3 floordir;
 				if ( d.Hit3DFloor )
 				{
 					tracksector = d.Hit3DFloor.model;
 					trackplane = 1;
+					floordir = -d.Hit3DFloor.model.ceilingplane.Normal;
 				}
 				else
 				{
 					tracksector = d.HitSector;
 					trackplane = 0;
+					floordir = d.HitSector.floorplane.Normal;
 				}
 				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360));
+				A_SetRenderStyle(1.,STYLE_Shaded);
 				frame = Random[Blood](5,8);
+				int numpt = Random[Blood](4,8);
+				for ( int i=0; i<numpt; i++ )
+				{
+					Vector3 ndir = (floordir+(FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5))).unit()*FRandom[Blood](.5,8.);
+					for ( double j=1.; j>=.5; j-=.125 )
+						A_SpawnParticle(fillcolor,0,20,10.*scale.x*FRandom[Blood](.6,1.4)*j,0,0,0,0,ndir.x*j,ndir.y*j,ndir.z*j,0,0,-.25,.5*alpha,-1,-1.*scale.x*j);
+				}
 				vel *= 0;
 				return;
 			}
@@ -280,18 +319,29 @@ Class mkBloodDrop : Actor
 				bMISSILE = false;
 				dead = true;
 				onceiling = true;
+				Vector3 floordir;
 				if ( d.Hit3DFloor )
 				{
 					tracksector = d.Hit3DFloor.model;
 					trackplane = 0;
+					floordir = -d.Hit3DFloor.model.floorplane.Normal;
 				}
 				else
 				{
 					tracksector = d.HitSector;
 					trackplane = 1;
+					floordir = d.HitSector.ceilingplane.Normal;
 				}
 				SWWMUtility.SetToSlope(self,FRandom[Blood](0,360),true);
+				A_SetRenderStyle(1.,STYLE_Shaded);
 				frame = Random[Blood](5,8);
+				int numpt = Random[Blood](4,8);
+				for ( int i=0; i<numpt; i++ )
+				{
+					Vector3 ndir = (floordir+(FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5))).unit()*FRandom[Blood](.5,8.);
+					for ( double j=1.; j>=.5; j-=.125 )
+						A_SpawnParticle(fillcolor,0,20,10.*scale.x*FRandom[Blood](.6,1.4)*j,0,0,0,0,ndir.x*j,ndir.y*j,ndir.z*j,0,0,-.25,.5*alpha,-1,-1.*scale.x*j);
+				}
 				vel *= 0;
 				return;
 			}
@@ -308,6 +358,13 @@ Class mkBloodDrop : Actor
 				SetOrigin(d.HitLocation-walldir*8,true);
 				TraceBleedAngle(20,atan2(walldir.y,walldir.x),0);
 				A_StartSound("misc/blooddrop",volume:.1);
+				int numpt = Random[Blood](4,8);
+				for ( int i=0; i<numpt; i++ )
+				{
+					Vector3 ndir = (-(walldir.x,walldir.y,0)+(FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5),FRandom[Blood](-.5,.5))).unit()*FRandom[Blood](.5,8.);
+					for ( double j=1.; j>=.5; j-=.125 )
+						A_SpawnParticle(fillcolor,0,20,10.*scale.x*FRandom[Blood](.6,1.4)*j,0,0,0,0,ndir.x*j,ndir.y*j,ndir.z*j,0,0,-.25,.5*alpha,-1,-1.*scale.x*j);
+				}
 				Destroy();
 				return;
 			}
@@ -412,6 +469,7 @@ Class mkFlyingGib : Actor
 	bool bleeding;
 	double rollvel;
 	mkFlyingGib prevmeat, nextmeat;
+	Vector3 oldpos;
 
 	override void PostBeginPlay()
 	{
@@ -443,6 +501,7 @@ Class mkFlyingGib : Actor
 
 	override void Tick()
 	{
+		oldpos = pos;
 		Super.Tick();
 		if ( isFrozen() ) return;
 		if ( killme ) A_FadeOut(.01);
@@ -459,7 +518,17 @@ Class mkFlyingGib : Actor
 			vel.xy *= .98;
 			return;
 		}
-		if ( bleeding && !Random[Blood](0,2) )
+		if ( !bleeding ) return;
+		Vector3 ndiff = level.Vec3Diff(pos,oldpos);
+		double ndist = ndiff.length();
+		ndiff /= ndist;
+		for ( int i=0; i<ndist; i++ )
+		{
+			if ( Random[Blood](0,2) ) continue;
+			Vector3 ppos = level.Vec3Offset(oldpos,ndiff*i)-pos;
+			A_SpawnParticle(shadecol,0,40,20.*scale.x*FRandom[Blood](.6,1.4),0,ppos.x,ppos.y,ppos.z,vel.x*.1+FRandom[Blood](-1.,1.),vel.y*.1+FRandom[Blood](-1.,1.),vel.z*.1+FRandom[Blood](-1.,1.),0,0,-.25,.5*alpha,-1,-.5*scale.x);
+		}
+		if ( !Random[Blood](0,2) )
 		{
 			let s = Spawn("mkBloodSmoke",pos);
 			s.SetShade(shadecol);

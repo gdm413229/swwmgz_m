@@ -191,6 +191,7 @@ Class ExplodiumGun : SWWMWeapon
 
 	action void A_DropMag()
 	{
+		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);
@@ -658,6 +659,7 @@ Class DualExplodiumGun : SWWMWeapon
 
 	action void A_DropMag( int side = 1 )
 	{
+		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*side*y-10*z);

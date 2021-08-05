@@ -157,6 +157,7 @@ Class Sparkster : SWWMWeapon
 
 	action void A_DropMag( bool stacc = false )
 	{
+		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-10*z);

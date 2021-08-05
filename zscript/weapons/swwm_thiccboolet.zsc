@@ -790,6 +790,7 @@ Class SilverBullet : SWWMWeapon
 			if ( min(ma.Amount,invoker.clipcount-dropamt) > 0 ) ma.PlayPickupSound(self);
 		}
 		invoker.ClipCount = 0;
+		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),6*x-15*z);

@@ -34,7 +34,7 @@ Class SpreadgunTracer : LineTracer
 				// getgibhealth isn't clearscope, fuck
 				int gibh = (Results.HitActor.GibHealth!=int.min)?Results.HitActor.GibHealth:int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
 				// if gibbed, go through without dealing more damage
-				if ( Results.HitActor.health-amt <= -gibhealth ) return TRACE_Skip;
+				if ( Results.HitActor.health-amt <= -gibh ) return TRACE_Skip;
 				let ent = new("HitListEntry");
 				ent.hitactor = Results.HitActor;
 				ent.hitlocation = Results.HitPos;

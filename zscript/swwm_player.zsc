@@ -414,8 +414,7 @@ Class Demolitionist : PlayerPawn
 		dp.AttachToOwner(self);
 		let eg = ExplodiumGun(Spawn('ExplodiumGun'));
 		eg.AttachToOwner(self);
-		eg.chambered = true;
-		DualExplodiumGun(eg.SisterWeapon).chambered = true;
+		eg.firstselect = true;
 		player.ReadyWeapon = player.PendingWeapon = eg;
 		// in hexdd, we start with the chaos sphere in our grasp
 		if ( SWWMUtility.IsDeathkings() && SWWMUtility.CheckMD5List("vanillahexen.list") )

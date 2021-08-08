@@ -6,6 +6,8 @@ Class SWWMWeapon : Weapon abstract
 
 	bool wasused;
 	bool bUsePickup;
+	transient bool hastravelled;
+	transient int autoupsnd;
 	private int SWeaponFlags;
 
 	Class<Ammo> dropammotype;
@@ -333,7 +335,22 @@ Class SWWMWeapon : Weapon abstract
 	}
 	override void PlayUpSound( Actor origin )
 	{
+		if ( hastravelled ) return;
 		if ( UpSound ) origin.A_StartSound(UpSound,CHAN_WEAPON,CHANF_OVERLAP);
+	}
+	override void Travelled()
+	{
+		Super.Travelled();
+		hastravelled = true;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( Owner && autoupsnd && (level.maptime >= autoupsnd) )
+		{
+			autoupsnd = 0;
+			PlayUpSound(Owner);
+		}
 	}
 	action void A_SWWMFlash( StateLabel flashlabel = null )
 	{

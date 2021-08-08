@@ -6,6 +6,7 @@ Class ExplodiumGun : SWWMWeapon
 	int clipcount;
 	bool chambered;
 	bool preinit;
+	bool firstselect;
 	double casex, casey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
@@ -302,6 +303,12 @@ Class ExplodiumGun : SWWMWeapon
 		MarkSound("explodium/throwmag");
 	}
 
+	override void PlayUpSound( Actor origin )
+	{
+		if ( firstselect ) return;
+		Super.PlayUpSound(origin);
+	}
+
 	Default
 	{
 		//$Title Explodium Gun
@@ -329,13 +336,29 @@ Class ExplodiumGun : SWWMWeapon
 		XZW1 A -1;
 		Stop;
 	Select:
-		XZW2 B 2 A_FullRaise();
+		XZW2 B 2
+		{
+			A_FullRaise();
+			return A_JumpIf(invoker.firstselect,"FirstSelect");
+		}
 		XZW2 CDEFGH 2;
 		Goto Ready;
+	FirstSelect:
+		XZW2 B 1 A_JumpIf(level.maptime>8,1);
+		Wait;
+		XZW2 B 2
+		{
+			invoker.firstselect = false;
+			invoker.PlayUpSound(self);
+		}
+		XZW2 CDEFGH 2;
+		XZW2 A 2;
+		Goto Slide;
 	Ready:
 		XZW2 A 1
 		{
-			if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
+			if ( invoker.firstselect ) player.SetPSprite(PSP_WEAPON,ResolveState("FirstSelect"));
+			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
 			else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1|WRF_ALLOWRELOAD);
 		}
 		Wait;
@@ -763,7 +786,11 @@ Class DualExplodiumGun : SWWMWeapon
 	States
 	{
 	Select:
-		XZW2 B 2 A_FullRaise();
+		XZW2 B 2
+		{
+			A_FullRaise();
+			ExplodiumGun(invoker.SisterWeapon).firstselect = false;
+		}
 		XZW2 C 2;
 		XZW2 D 2 { player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftSelect")); }
 		XZW2 EFGHAA 2;
@@ -774,6 +801,7 @@ Class DualExplodiumGun : SWWMWeapon
 	Ready:
 		XZW2 A 1
 		{
+			ExplodiumGun(invoker.SisterWeapon).firstselect = false;
 			let sis = player.FindPSprite(PSP_WEAPON+1);
 			if ( !sis )
 			{

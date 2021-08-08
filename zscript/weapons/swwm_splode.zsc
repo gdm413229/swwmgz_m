@@ -335,13 +335,16 @@ Class ExplodiumGun : SWWMWeapon
 	Ready:
 		XZW2 A 1
 		{
-			if ( (invoker.clipcount <= 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
-			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
+			if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
 			else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1|WRF_ALLOWRELOAD);
 		}
 		Wait;
 	Fire:
-		XZW2 A 1 A_Schutt();
+		XZW2 A 1
+		{
+			A_Schutt();
+			return A_JumpIf((invoker.clipcount<=0)&&!invoker.chambered,"FireLast");
+		}
 		XZW2 I 1;
 		XZW2 J 1
 		{
@@ -351,6 +354,47 @@ Class ExplodiumGun : SWWMWeapon
 		}
 		XZW2 KLMNOP 1;
 		XZW2 Q 2;
+		Goto Ready;
+	FireLast:
+		XZW2 A 1;
+		XZWA K 1;
+		XZWA L 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZWA M 1;
+		XZWA N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWA OPQR 1;
+		XZWA S 2;
+		Goto ReloadLast;
+	ReloadLast:
+		XZW9 X 1 A_PlayerReload();
+		XZW9 Z 1;
+		XZWA XYZ 1;
+		XZWB ABC 1;
+		XZWB D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWB E 1 { invoker.clipcount = 0; }
+		XZWB F 1;
+		XZWB G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB HIJK 1;
+		XZWB L 1 A_DropMag();
+		XZWB MNOPQR 1;
+		XZWB S 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWB TUVWXYZ 1;
+		XZWC ABCD 1;
+		XZWC E 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); invoker.clipcount = invoker.default.clipcount; }
+		XZWC FGHI 1;
+		XZWC J 1
+		{
+			A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.clipcount--;
+			invoker.chambered = true;
+		}
+		XZWC K 1;
+		XZWC L 3;
+		XZWC MNOP 1;
 		Goto Ready;
 	Casing:
 		XZWA A 1
@@ -736,14 +780,12 @@ Class DualExplodiumGun : SWWMWeapon
 				player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReady"));
 				sis = player.FindPSprite(PSP_WEAPON+1);
 			}
-			if ( sis.CurState.InStateSequence(ResolveState("LeftReady")) )
+			if ( sis.CurState.InStateSequence(ResolveState("LeftReady")) || sis.CurState.InStateSequence(ResolveState("LeftWaitLast")) )
 			{
-				if ( (ExplodiumGun(invoker.SisterWeapon).clipcount <= 0) && !ExplodiumGun(invoker.SisterWeapon).chambered )
-					player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
-				else if ( (ExplodiumGun(invoker.SisterWeapon).clipcount > 0) && !ExplodiumGun(invoker.SisterWeapon).chambered )
+				if ( (ExplodiumGun(invoker.SisterWeapon).clipcount > 0) && !ExplodiumGun(invoker.SisterWeapon).chambered )
 					player.SetPSprite(PSP_WEAPON,ResolveState("PreSlide"));
 				else if ( (invoker.clipcount <= 0) && !invoker.chambered )
-					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
+					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReloadLast"));
 				else if ( (invoker.clipcount > 0) && !invoker.chambered )
 					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftPreSlide"));
 				else if ( (player.cmd.buttons&BT_RELOAD) && (ExplodiumGun(invoker.SisterWeapon).clipcount < ExplodiumGun(invoker.SisterWeapon).default.clipcount)
@@ -751,7 +793,8 @@ Class DualExplodiumGun : SWWMWeapon
 					player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
 				else if ( (player.cmd.buttons&BT_RELOAD) && (invoker.clipcount < invoker.default.clipcount) )
 					player.SetPSprite(PSP_WEAPON+1,ResolveState("LeftReload"));
-				else A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1);
+				else if ( !sis.CurState.InStateSequence(ResolveState("LeftWaitLast")) ) A_WeaponReady(WRF_ALLOWZOOM|WRF_ALLOWUSER1);
+				else A_WeaponReady();
 			}
 			else
 			{
@@ -770,7 +813,11 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		Wait;
 	Fire:
-		XZW2 A 1 A_Schutt();
+		XZW2 A 1
+		{
+			A_Schutt();
+			return A_JumpIf((ExplodiumGun(invoker.SisterWeapon).clipcount<=0)&&!ExplodiumGun(invoker.SisterWeapon).chambered,"FireLast");
+		}
 		XZW2 I 1;
 		XZW2 J 1
 		{
@@ -781,8 +828,70 @@ Class DualExplodiumGun : SWWMWeapon
 		XZW2 KLMNOP 1;
 		XZW2 Q 2;
 		Goto Ready;
+	FireLast:
+		XZW2 A 1;
+		XZWI K 1;
+		XZWI L 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZWI M 1;
+		XZWI N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWI OPQR 1;
+		XZWI S 2;
+		Goto WaitLast;
+	WaitLast:
+		XZWI V 1
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			return A_JumpIf(sis.CurState.InStateSequence(ResolveState("LeftReady"))||sis.CurState.InStateSequence(ResolveState("LeftWaitLast")),"ReloadLast");
+		}
+		Wait;
+	ReloadLast:
+		XZWI V 9
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftWaitLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLowerLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower"));
+		}
+		XZWI V 1 A_PlayerReload();
+		XZWI WXYZ 1;
+		XZWJ ABC 1;
+		XZWJ D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWJ E 1 { ExplodiumGun(invoker.SisterWeapon).clipcount = 0; }
+		XZWJ F 1;
+		XZWJ G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWJ HIJK 1;
+		XZWJ L 1 A_DropMag();
+		XZWJ MNOPQR 1;
+		XZWJ S 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWJ TUVWXYZ 1;
+		XZWK ABCD 1;
+		XZWK E 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); ExplodiumGun(invoker.SisterWeapon).clipcount = ExplodiumGun(invoker.SisterWeapon).default.clipcount; }
+		XZWK FGHI 1;
+		XZWK J 1
+		{
+			A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+			ExplodiumGun(invoker.SisterWeapon).clipcount--;
+			ExplodiumGun(invoker.SisterWeapon).chambered = true;
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftLowerLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise"));
+		}
+		XZWK K 1;
+		XZWK L 3;
+		XZWK MNOP 1;
+		Goto Ready;
 	LeftFire:
-		XZWB A 1 A_Schutt(-1);
+		XZWB A 1
+		{
+			A_Schutt(-1);
+			return A_JumpIf((invoker.clipcount<=0)&&!invoker.chambered,"LeftFireLast");
+		}
 		XZWB I 1;
 		XZWB J 1
 		{
@@ -792,6 +901,53 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZWB KLMNOP 1;
 		XZWB Q 2;
+		Goto LeftReady;
+	LeftFireLast:
+		XZWB A 1;
+		XZWK Q 1;
+		XZWK R 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZWK S 1;
+		XZWK T 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWK UVWX 1;
+		XZWK Y 2;
+		Goto LeftWaitLast;
+	LeftWaitLast:
+		XZWK Z 1;
+		Wait;
+	LeftReloadLast:
+		XZWK Z 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+		XZWK Z 1 A_PlayerReload();
+		XZWL ABCDEFG 1;
+		XZWL H 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWL I 1 { invoker.clipcount = 0; }
+		XZWL J 1;
+		XZWL K 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWL LMNO 1;
+		XZWL P 1 A_DropMag();
+		XZWL QRSTUV 1;
+		XZWL W 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWL XYZ 1;
+		XZWM ABCDEFGH 1;
+		XZWM I 1 { A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP); invoker.clipcount = invoker.default.clipcount; }
+		XZWM JKLM 1;
+		XZWM N 1
+		{
+			A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.clipcount--;
+			invoker.chambered = true;
+			let sis = player.FindPSprite(PSP_WEAPON);
+			if ( sis.CurState.InStateSequence(ResolveState("LowerLast")) )
+				player.SetPSPrite(PSP_WEAPON,ResolveState("RaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON,ResolveState("Raise"));
+		}
+		XZWM O 1;
+		XZWM P 3;
+		XZWM QRST 1;
 		Goto LeftReady;
 	Casing:
 		XZWA A 1
@@ -833,8 +989,33 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWG VUT 2;
 		XZWB A 1;
 		Goto LeftReady;
+	LowerLast:
+		XZWI V 2;
+		XZWM UVW 2;
+		XZWM Y -1;
+		Stop;
+	LeftLowerLast:
+		XZWK Z 2;
+		XZWN FGH 2;
+		XZWN J -1;
+		Stop;
+	RaiseLast:
+		XZWM Y 2;
+		XZWN WVU 2;
+		XZWI V 1;
+		Goto WaitLast;
+	LeftRaiseLast:
+		XZWN JHGF 2;
+		XZWK Z 1;
+		Goto LeftWaitLast;
 	Reload:
-		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
+		XZW2 A 9
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftWaitLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLowerLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower"));
+		}
 		XZW2 A 1
 		{
 			A_PlayerReload();
@@ -870,10 +1051,22 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZW4 STUV 1;
 		XZW2 A 0 A_JumpIf(!ExplodiumGun(invoker.SisterWeapon).chambered,"Slide");
-		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		XZW2 A 0
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftLowerLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise"));
+		}
 		Goto Ready;
 	PreSlide:
-		XZW2 A 9 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower")); }
+		XZW2 A 9
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftWaitLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLowerLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftLower"));
+		}
 	Slide:
 		XZW2 A 1;
 		XZW4 WXY 1;
@@ -887,10 +1080,22 @@ Class DualExplodiumGun : SWWMWeapon
 		XZW5 EFG 1;
 		XZW5 H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 IJKLM 1;
-		XZW2 A 0 { player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise")); }
+		XZW2 A 0
+		{
+			let sis = player.FindPSprite(PSP_WEAPON+1);
+			if ( sis.CurState.InStateSequence(ResolveState("LeftLowerLast")) )
+				player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON+1,ResolveState("LeftRaise"));
+		}
 		Goto Ready;
 	LeftReload:
-		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+		XZWB A 9
+		{
+			let sis = player.FindPSprite(PSP_WEAPON);
+			if ( sis.CurState.InStateSequence(ResolveState("WaitLast")) )
+				player.SetPSPrite(PSP_WEAPON,ResolveState("LowerLast"));
+			else player.SetPSPrite(PSP_WEAPON,ResolveState("Lower"));
+		}
 		XZWB A 1
 		{
 			A_PlayerReload();
@@ -926,10 +1131,22 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZWD STUV 1;
 		XZWB A 0 A_JumpIf(!invoker.chambered,"LeftSlide");
-		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		XZWB A 0
+		{
+			let sis = player.FindPSprite(PSP_WEAPON);
+			if ( sis.CurState.InStateSequence(ResolveState("LowerLast")) )
+				player.SetPSPrite(PSP_WEAPON,ResolveState("RaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON,ResolveState("Raise"));
+		}
 		Goto LeftReady;
 	LeftPreSlide:
-		XZWB A 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
+		XZWB A 9
+		{
+			let sis = player.FindPSprite(PSP_WEAPON);
+			if ( sis.CurState.InStateSequence(ResolveState("WaitLast")) )
+				player.SetPSPrite(PSP_WEAPON,ResolveState("LowerLast"));
+			else player.SetPSPrite(PSP_WEAPON,ResolveState("Lower"));
+		}
 	LeftSlide:
 		XZWB A 1;
 		XZWD WXY 1;
@@ -943,7 +1160,13 @@ Class DualExplodiumGun : SWWMWeapon
 		XZWE EFG 1;
 		XZWE H 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWE IJKLM 1;
-		XZWB A 0 { player.SetPSPrite(PSP_WEAPON,ResolveState("Raise")); }
+		XZWB A 0
+		{
+			let sis = player.FindPSprite(PSP_WEAPON);
+			if ( sis.CurState.InStateSequence(ResolveState("LowerLast")) )
+				player.SetPSPrite(PSP_WEAPON,ResolveState("RaiseLast"));
+			else player.SetPSPrite(PSP_WEAPON,ResolveState("Raise"));
+		}
 		Goto LeftReady;
 	Zoom:
 		XZW2 A 1

@@ -17,6 +17,7 @@
 
 **Very extra things for the future:**
 
- - Saya and Ibuki companion add-ons (potentially a Kirin companion too)
- - Possibly also playable versions of them, for coop
  - Modeled Monster/Decoration replacers for all IWADs done in the style of the mod (will be very time consuming)
+ - Another DLC weaponset
+ - Official DM map pack
+ - Official IWAD

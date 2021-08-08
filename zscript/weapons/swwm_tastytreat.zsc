@@ -363,14 +363,21 @@ Class CandyGun : SWWMWeapon
 		XZW1 AB -1;
 		Stop;
 	Select:
-		XZW2 B 2 A_FullRaise();
+		XZW2 B 2
+		{
+			A_FullRaise();
+			return A_JumpIf((invoker.clipcount<=0)&&!invoker.chambered,"SelectLast");
+		}
 		XZW2 CDEFGH 2;
 		Goto Ready;
+	SelectLast:
+		XZWE UVWXYZ 2;
+		XZWF A 2;
+		Goto ReadyLast;
 	Ready:
 		XZW2 A 1
 		{
-			if ( (invoker.clipcount <= 0) && !invoker.chambered && ((invoker.Ammo1.Amount > 0) || (CountInv("CandyGunBullets") > 0)) ) player.SetPSprite(PSP_WEAPON,ResolveState("Reload"));
-			else if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
+			if ( (invoker.clipcount > 0) && !invoker.chambered ) player.SetPSprite(PSP_WEAPON,ResolveState("Slide"));
 			else
 			{
 				int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
@@ -382,8 +389,24 @@ Class CandyGun : SWWMWeapon
 			}
 		}
 		Wait;
+	ReadyLast:
+		XZW9 X 1
+		{
+			if ( (invoker.Ammo1.Amount > 0) || (CountInv("CandyGunBullets") > 0) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) ) player.SetPSprite(PSP_WEAPON,ResolveState("ReloadLast"));
+			else
+			{
+				A_WeaponReady(WRF_NOPRIMARY|WRF_NOSECONDARY);
+				if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+					invoker.CheckAmmo(EitherFire,true);
+			}
+		}
+		Wait;
 	Fire:
-		XZW2 A 1 A_Schutt();
+		XZW2 A 1
+		{
+			A_Schutt();
+			return A_JumpIf((invoker.clipcount<=0)&&!invoker.chambered,"FireLast");
+		}
 		XZW2 I 1;
 		XZW2 J 1
 		{
@@ -393,6 +416,64 @@ Class CandyGun : SWWMWeapon
 		}
 		XZW2 KLMNOP 1;
 		XZW2 Q 2;
+		Goto Ready;
+	FireLast:
+		XZW2 A 1;
+		XZWC K 1;
+		XZWC L 1
+		{
+			int layer = PSP_WEAPON+1;
+			while ( player.FindPSprite(layer) ) layer++;
+			A_Overlay(layer,"Casing");
+		}
+		XZWC M 1;
+		XZWC N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWC OPQR 1;
+		XZWC S 2;
+		Goto ReadyLast;
+	ReloadLast:
+		XZW9 X 1 A_PlayerReload();
+		XZW9 Z 1;
+		XZWC XYZ 1;
+		XZWD ABC 1;
+		XZWD D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWD E 1 { invoker.clipcount = 0; }
+		XZWD F 1;
+		XZWD G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWD HIJK 1;
+		XZWD L 1 A_DropMag();
+		XZWD MNOPQR 1;
+		XZWD S 1 A_StartSound("explodium/magin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZWD TUVWXYZ 1;
+		XZWE ABCD 1;
+		XZWE E 1
+		{
+			A_StartSound("explodium/jamitin",CHAN_WEAPON,CHANF_OVERLAP);
+			if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
+				invoker.clipcount = invoker.default.clipcount;
+			else if ( invoker.Ammo1.Amount <= 0 )
+			{
+				MagAmmo sb = MagAmmo(FindInventory("CandyGunBullets"));
+				int takeamt = min(sb.Amount,sb.ClipSize);
+				invoker.clipcount = takeamt;
+				sb.Amount -= takeamt;
+			}
+			else
+			{
+				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+				invoker.clipcount = invoker.default.clipcount;
+			}
+		}
+		XZWE FGHI 1;
+		XZWE J 1
+		{
+			A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP);
+			invoker.clipcount--;
+			invoker.chambered = true;
+		}
+		XZWE K 1;
+		XZWE L 3;
+		XZWE MNOP 1;
 		Goto Ready;
 	Casing:
 		XZWC A 1
@@ -572,10 +653,20 @@ Class CandyGun : SWWMWeapon
 		XZW9 ABCDEFGHIJKLMNOPQRSTUVW 1;
 		Goto Ready;
 	Deselect:
-		XZW2 A 2 A_StartSound("explodium/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW2 A 2
+		{
+			A_StartSound("explodium/deselect",CHAN_WEAPON,CHANF_OVERLAP);
+			return A_JumpIf((invoker.clipcount<=0)&&!invoker.chambered,"DeselectLast");
+		}
 		XZWA TUVW 2;
 		XZW2 B 2;
 		XZW2 B -1 A_FullLower();
+		Stop;
+	DeselectLast:
+		XZW9 X 2;
+		XZWE QRST 2;
+		XZWE U 2;
+		XZWE U -1 A_FullLower();
 		Stop;
 	Flash:
 		XZWZ A 2

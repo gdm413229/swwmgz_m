@@ -60,10 +60,8 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Hexen] And Another One *(Defeat... yup, one more Heresiarch)*
   - [Hexen] The Last One *(Defeat the last Heresiarch)*
   - [Hexen] Didn't I Kick Your Ass Before? *(Defeat the Deathkings)*
-* **Official Sunder support *(when the WAD is complete)***
-* ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
+* **Mothgirl summon for Lämp easter egg**
 * **Replace all hitscan with *"light projectiles"***
-* **Customized cluster text stuff if that ever gets scriptified**
 * **Crouch sliding *(+ proper crouch dashing)***
 * **Expand third person animations**
   - 4-directional movement variants
@@ -75,33 +73,40 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Giggle
   - Shrug
   - Beckon
+* **Japanese localization???**
+* ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
+* **Customized cluster text stuff if that ever gets scriptified**
+* **Official Sunder support *(when the WAD is complete)***
+* **Photo Mode**
+  - Dedicated poses
+  - Stickers
+* **Monster/decoration replacements add-on:**
+  - Potentially standalone, usable with other mods
+  - Balanced for this mod
+  - Unique bosses
+  - Some extra enemy variants
+  - Coverage for all supported IWADs *(oof)*
 * **DLC Gameset:**
   - Tetris
   - Pong
   - Snake
-  - **[Doom]** Demo Land Adventure (platformer with shooty gameplay)
-  - **[Heretic]** Interstellar Demolitionist (a somewhat simple vertical SHMUP, kinda Touhou styled)
-  - **[Hexen]** Demolition Quest (a JRPG, kinda like early FF / BoF)
-* **Mothgirl summon for Lämp easter egg**
-* **Ibuki companion add-on**
-* **Saya companion add-on**
-* **Kirin companion add-on *(Hexen-exclusive)***
+  - **[Doom]** Demo Land Adventure *(platformer with shooty gameplay)*
+  - **[Heretic]** Interstellar Demolitionist *(a somewhat simple vertical SHMUP, kinda Touhou styled)*
+  - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Original English Voice Acting:**
   - Demolitionist
   - Ibuki
   - Saya
   - Kirin
-* **Japanese localization???**
-* **Monster/decoration replacements add-on**
-* **Photo Mode**
-  - Dedicated poses
-  - Stickers
-* **Hardcore Mode**
+* **Ibuki sub-mod *(Red Oni)***
+* **Saya sub-mod *(Red-Eyed Rampage)***
+* **Kirin sub-mod *(Red Star of Innocence)***
+* **Hardcore Mode sub-mod:**
   - Featuring Demolitionist on Maidbot frame
   - More complex game mechanics
   - Manual Hammerspace management
   - Manual reloading and weapon maintenance
-  - Alternate mobility options (no jetpack)
+  - Alternate mobility options *(no jetpack)*
   - Non-instant item usage
 * **DLC Weaponset 2:**
   - [1] Hand of Divine *(Total Madness)*
@@ -120,3 +125,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Devastation Sigil *(SWWM)*
   - Divine Sprite *(SWWM Platinum)*
   - Angel of Death *(Total Destruction, SWWM Platinum Ep2)*
+* **Official Campaign:**
+  - Retell the events of UnSX 2 *(but with the Demolitionist's participation)*
+  - Basically give SWWM GZ its own IWAD as a standalone game

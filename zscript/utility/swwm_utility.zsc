@@ -25,7 +25,7 @@ Class SWWMAchievement
 
 Struct SWWMProjectionData
 {
-	swwm_Matrix wtc;
+	swwm_GM_Matrix wtc;
 	int viewx, viewy, vieww, viewh;
 }
 
@@ -167,8 +167,8 @@ Class SWWMUtility
 		double fovratio = (aspect>=1.3)?1.333333:aspect;
 		double fovy = 2.*atan(tan(clamp(fov,5,170)/2.)/fovratio);
 		// world→clip matrix
-		swwm_Matrix view = swwm_Matrix.view(viewpos,angle,pitch,roll);
-		swwm_Matrix perp = swwm_Matrix.perspective(fovy,aspect,5,65535);
+		swwm_GM_Matrix view = swwm_GM_Matrix.view(viewpos,angle,pitch,roll);
+		swwm_GM_Matrix perp = swwm_GM_Matrix.perspective(fovy,aspect,5,65535);
 		d.wtc = perp.multiplyMatrix(view);
 		// screen coord data
 		int sblocks = CVar.FindCVar('screenblocks').GetInt();

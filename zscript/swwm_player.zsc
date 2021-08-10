@@ -1557,8 +1557,8 @@ Class Demolitionist : PlayerPawn
 			if ( player.centering || !swwm_fly6dof ) guideroll = clamp(deltaangle(roll,0),-3.,3.);
 			if ( swwm_fly6dof )
 			{
-				swwm_Quaternion orient = swwm_Quaternion.createFromAngles(angle,pitch,roll);
-				swwm_Quaternion angles = swwm_Quaternion.createFromAngles(guideangle,guidepitch,guideroll);
+				swwm_GM_Quaternion orient = swwm_GM_Quaternion.createFromAngles(angle,pitch,roll);
+				swwm_GM_Quaternion angles = swwm_GM_Quaternion.createFromAngles(guideangle,guidepitch,guideroll);
 				orient = orient.multiplyQuat(angles);
 				double npitch, nangle, nroll;
 				[nangle, npitch, nroll] = orient.toAngles();

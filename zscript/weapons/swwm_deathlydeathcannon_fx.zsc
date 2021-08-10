@@ -588,7 +588,7 @@ Class YnykronTracer : LineTracer
 		if ( Results.HitType == TRACE_HitActor )
 		{
 			if ( Results.HitActor == ignore ) return TRACE_Skip;
-			if ( Results.HitActor.bSHOOTABLE )
+			if ( Results.HitActor.bSHOOTABLE || (Results.HitActor is 'YnykronSingularityHitbox') )
 			{
 				let ent = new("HitListEntry");
 				ent.hitactor = Results.HitActor;
@@ -684,6 +684,23 @@ Class YnykronBeam : Actor
 		{
 			if ( YnykronShot(master) && (YnykronShot(master).hitlist.Find(t.HitList[i].hitactor) < YnykronShot(master).hitlist.Size()) )
 				continue;
+			if ( t.hitlist[i].hitactor is 'YnykronSingularityHitbox' )
+			{
+				// detonate it instantly
+				let s = YnykronSingularity(t.hitlist[i].hitactor.target);
+				s.specialf2 = s.critmass;
+				let b = Spawn("YnykronImpact",t.hitlist[i].hitlocation);
+				b.target = target;
+				b.master = master;
+				b.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x);
+				b.pitch = asin(-t.HitList[i].x.z);
+				if ( YnykronShot(master) )
+				{
+					YnykronShot(master).hitlist.Push(t.hitlist[i].hitactor);
+					YnykronShot(master).blastcount++;
+				}
+				continue;
+			}
 			int trad = int(max(t.hitlist[i].hitactor.radius,t.hitlist[i].hitactor.height));
 			if ( t.hitlist[i].hitactor && YnykronShot(master) )
 			{
@@ -1186,7 +1203,7 @@ Class YnykronAltTracer : LineTracer
 		if ( Results.HitType == TRACE_HitActor )
 		{
 			if ( Results.HitActor == ignore ) return TRACE_Skip;
-			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			if ( Results.HitActor.bSHOOTABLE || (Results.HitActor is 'YnykronSingularityHitbox') ) return TRACE_Stop;
 			return TRACE_Skip;
 		}
 		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
@@ -2230,6 +2247,34 @@ Class YnykronSingularityExplosion : Actor
 	}
 }
 
+Class YnykronSingularityHitbox : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOGRAVITY;
+		+NOCLIP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( !target || !target.InStateSequence(target.CurState,target.FindState("Spawn")) )
+		{
+			Destroy();
+			return;
+		}
+		A_SetSize(32.*target.scale.x,64.*target.scale.y);
+		SetOrigin(target.Vec3Offset(0,0,-height*.5),true);
+	}
+	override bool CanCollideWith( Actor other, bool passive )
+	{
+		return false;
+	}
+}
+
 Class YnykronSingularity : Actor
 {
 	const MAXBEAMS = 10;
@@ -2261,6 +2306,8 @@ Class YnykronSingularity : Actor
 		specialf2 = scale.x*scale.x*MION_CONST;
 		critmass = GOAL_MASS;
 		litetimer = level.maptime+Random[Ynykron](180,240);
+		let h = Spawn("YnykronSingularityHitbox",pos);
+		h.target = self;
 	}
 
 	// lightweight tick, we don't need anything else other than states
@@ -2394,9 +2441,11 @@ Class YnykronSingularity : Actor
 				if ( !a ) continue;
 				if ( a.bDORMANT || (a.Health <= 0) || (a == self) || !SWWMUtility.SphereIntersect(a,pos,20000.*scale.x) || !CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 					continue;
-				if ( (a is 'Inventory') && !a.bSPECIAL )	// must be a pickup
+				if ( (a is 'Inventory') && !a.bDROPPED )	// must be a dropped pickup
 					continue;
 				if ( a.player && (a.player.cheats&CF_NOCLIP2) )	// for safety
+					continue;
+				if ( (a is 'YnykronSingularity') && a.bNOBLOCKMAP )	// dead singularity, ignore
 					continue;
 				double capmass = a.mass;
 				// succ
@@ -2531,6 +2580,7 @@ Class YnykronSingularity : Actor
 	}
 	void A_SingularityBlast()
 	{
+		A_ChangeLinkFlags(true);	// unlink from blockmap
 		A_AlertMonsters();
 		SWWMUtility.DoExplosion(self,int.max,500000,800,400);
 		A_QuakeEx(8,8,8,100,0,65536,"",QF_RELATIVE|QF_SCALEDOWN,falloff:65536,rollIntensity:1.6);

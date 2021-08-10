@@ -35,6 +35,7 @@ extend Class SWWMHandler
 			if ( !b ) return;
 			mkGibber(a).gibbed = e.Thing;
 			mkGibber(a).delay = 40;
+			a.special1 = 1;
 			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
 			return;
 		}
@@ -44,6 +45,7 @@ extend Class SWWMHandler
 			if ( !b ) return;
 			mkGibber(a).gibbed = e.Thing;
 			mkGibber(a).delay = 60;
+			a.special1 = 1;
 			a.A_SetSize(e.Thing.default.radius,e.Thing.default.height);
 		}
 		else if ( gotgibbed )

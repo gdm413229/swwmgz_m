@@ -1369,9 +1369,10 @@ Class SWWMWaterSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,12.);
+			str = FRandom[ExploS](2.,12.);
 			dir *= str*.25;
-			A_SpawnParticle("40 60 FF",0,60,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+			dir.z += 1.;
+			A_SpawnParticle(SWWMUtility.LerpColor("40 60 FF","A0 C0 FF",FRandom[ExploS](0.,1.)),0,60,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.5,-1,-.02*str);
 		}
 	}
 }
@@ -1386,9 +1387,10 @@ Class SWWMWaterSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](3.,6.);
+			str = FRandom[ExploS](1.,6.);
 			dir *= str*.25;
-			A_SpawnParticle("40 60 FF",0,50,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+			dir.z += .35;
+			A_SpawnParticle(SWWMUtility.LerpColor("40 60 FF","A0 C0 FF",FRandom[ExploS](0.,1.)),0,50,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.5,-1,-.02*str);
 		}
 	}
 }
@@ -1403,9 +1405,10 @@ Class SWWMBloodSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,12.);
+			str = FRandom[ExploS](2.,12.);
 			dir *= str*.25;
-			A_SpawnParticle("80 00 00",0,60,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+			dir.z += 1.;
+			A_SpawnParticle(SWWMUtility.LerpColor("80 00 00","60 00 00",FRandom[ExploS](0.,1.)),0,60,str+.5,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.5,-1,-.02*str);
 		}
 	}
 }
@@ -1420,9 +1423,10 @@ Class SWWMBloodSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](3.,6.);
+			str = FRandom[ExploS](1.,6.);
 			dir *= str*.25;
-			A_SpawnParticle("80 00 00",0,50,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+			dir.z += .35;
+			A_SpawnParticle(SWWMUtility.LerpColor("80 00 00","60 00 00",FRandom[ExploS](0.,1.)),0,50,str+.5,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.5,-1,-.02*str);
 		}
 	}
 }
@@ -1437,9 +1441,10 @@ Class SWWMSludgeSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,8.);
+			str = FRandom[ExploS](2.,8.);
 			dir *= str*.25;
-			A_SpawnParticle("40 50 40",0,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .4;
+			A_SpawnParticle(SWWMUtility.LerpColor("40 50 40","30 30 30",FRandom[ExploS](0.,1.)),0,40,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1454,9 +1459,10 @@ Class SWWMSludgeSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](2.,4.);
+			str = FRandom[ExploS](1.,4.);
 			dir *= str*.25;
-			A_SpawnParticle("40 50 40",0,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .15;
+			A_SpawnParticle(SWWMUtility.LerpColor("40 50 40","30 30 30",FRandom[ExploS](0.,1.)),0,30,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1471,9 +1477,10 @@ Class SWWMMudSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,8.);
+			str = FRandom[ExploS](2.,8.);
 			dir *= str*.25;
-			A_SpawnParticle("50 40 20",0,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .4;
+			A_SpawnParticle(SWWMUtility.LerpColor("50 40 20","30 20 10",FRandom[ExploS](0.,1.)),0,40,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1488,9 +1495,10 @@ Class SWWMMudSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](2.,4.);
+			str = FRandom[ExploS](1.,4.);
 			dir *= str*.25;
-			A_SpawnParticle("50 40 20",0,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .15;
+			A_SpawnParticle(SWWMUtility.LerpColor("50 40 20","30 20 10",FRandom[ExploS](0.,1.)),0,30,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1505,9 +1513,10 @@ Class SWWMSlimeSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,8.);
+			str = FRandom[ExploS](2.,8.);
 			dir *= str*.25;
-			A_SpawnParticle("00 FF 00",SPF_FULLBRIGHT,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .4;
+			A_SpawnParticle(SWWMUtility.LerpColor("00 FF 00","00 80 00",FRandom[ExploS](0.,1.)),SPF_FULLBRIGHT,40,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1522,9 +1531,10 @@ Class SWWMSlimeSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](2.,4.);
+			str = FRandom[ExploS](1.,4.);
 			dir *= str*.25;
-			A_SpawnParticle("00 FF 00",SPF_FULLBRIGHT,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			dir.z += .15;
+			A_SpawnParticle(SWWMUtility.LerpColor("00 FF 00","00 80 00",FRandom[ExploS](0.,1.)),SPF_FULLBRIGHT,30,str+2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 	}
 }
@@ -1539,9 +1549,10 @@ Class SWWMLavaSplash : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-60);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](4.,12.);
-			dir *= str*.25;
-			A_SpawnParticle("FF C0 40",SPF_FULLBRIGHT,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			str = FRandom[ExploS](2.,12.);
+			dir *= str*.35;
+			dir.z += .6;
+			A_SpawnParticle(SWWMUtility.LerpColor("FF C0 40","FF 40 20",FRandom[ExploS](0.,1.)),SPF_FULLBRIGHT,40,str+1.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 		Spawn("SWWMSizzleSmoke",pos);
 	}
@@ -1557,9 +1568,10 @@ Class SWWMLavaSplash2 : SWWMBaseSplash
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](2.,6.);
-			dir *= str*.25;
-			A_SpawnParticle("FF C0 40",SPF_FULLBRIGHT,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+			str = FRandom[ExploS](1.,6.);
+			dir *= str*.35;
+			dir.z += .2;
+			A_SpawnParticle(SWWMUtility.LerpColor("FF C0 40","FF 40 20",FRandom[ExploS](0.,1.)),SPF_FULLBRIGHT,30,str+1.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.03*str,.8,-1,-.02*str);
 		}
 		Spawn("SWWMSizzleSmoke2",pos);
 	}
@@ -1570,18 +1582,18 @@ Class SWWMSizzleSmoke : SWWMBaseSplash
 	{
 		double ang, pt, str;
 		Vector3 dir;
-		for ( int i=0; i<8; i++ )
+		for ( int i=0; i<2; i++ )
 		{
 			ang = FRandom[ExploS](0,360);
 			pt = FRandom[ExploS](-90,-30);
 			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](2.,6.);
-			let s = Spawn("SWWMHalfSmoke",pos);
-			s.vel = dir*str;
-			s.SetShade(Color(1,1,1)*Random[ExploS](64,85));
-			s.scale *= 2.5;
-			s.alpha *= .4;
-			s.special1 = Random[ExploS](0,3);
+			str = FRandom[ExploS](.5,2.);
+			let s = Spawn("SWWMSmallSmoke",pos);
+			s.vel = dir*str+(0,0,.4);
+			s.SetShade(Color(1,1,1)*Random[ExploS](192,224));
+			s.scale *= 40.;
+			s.A_SetRenderStyle(s.alpha*.4,STYLE_AddShaded);
+			s.special1 = Random[ExploS](0,2);
 		}
 	}
 }
@@ -1591,18 +1603,15 @@ Class SWWMSizzleSmoke2 : SWWMBaseSplash
 	{
 		double ang, pt, str;
 		Vector3 dir;
-		for ( int i=0; i<3; i++ )
-		{
-			ang = FRandom[ExploS](0,360);
-			pt = FRandom[ExploS](-90,-30);
-			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
-			str = FRandom[ExploS](.5,1.5);
-			let s = Spawn("SWWMHalfSmoke",pos);
-			s.vel = dir*str;
-			s.SetShade(Color(1,1,1)*Random[ExploS](64,85));
-			s.scale *= 1.6;
-			s.alpha *= .4;
-			s.special1 = Random[ExploS](0,1);
-		}
+		ang = FRandom[ExploS](0,360);
+		pt = FRandom[ExploS](-90,-30);
+		dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+		str = FRandom[ExploS](.25,1.);
+		let s = Spawn("SWWMSmallSmoke",pos);
+		s.vel = dir*str+(0,0,.15);
+		s.SetShade(Color(1,1,1)*Random[ExploS](192,224));
+		s.scale *= 20.;
+		s.A_SetRenderStyle(s.alpha*.3,STYLE_AddShaded);
+		s.special1 = Random[ExploS](0,1);
 	}
 }

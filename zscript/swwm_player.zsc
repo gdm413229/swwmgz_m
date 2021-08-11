@@ -963,7 +963,7 @@ Class Demolitionist : PlayerPawn
 			if ( (lastvelz < -gruntspeed) && (swwm_mutevoice < 4) && (health > 0) )
 				A_StartSound(String.Format("voice/%s/grunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
 			if ( lastvelz < -1 )
-				A_Footstep(0,1,clamp(-lastvelz*0.05,0.0,1.0));
+				A_Footstep(0,1,clamp(-lastvelz*0.05,0.0,1.0),true);
 			// bounce off slopes
 			if ( pos.z <= floorz )
 			{
@@ -2582,29 +2582,38 @@ Class Demolitionist : PlayerPawn
 			SWWMHandler.AddOneliner("puzzsucc",2,10);
 		return true;
 	}
-	void A_Footstep( double yofs, int run = 0, double vol = .3 )
+	void A_Footstep( double yofs, int run = 0, double vol = .3, bool nosplash = false )
 	{
 		if ( run == 2 )
 		{
 			A_StartSound("demolitionist/run",CHAN_FOOTSTEP,CHANF_OVERLAP,vol);
-			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
-			b.A_CheckTerrain();
+			if ( !nosplash )
+			{
+				let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
+				b.A_CheckTerrain();
+			}
 			vel.xy += (RotateVector(NormalizedMove(),angle)/3600.)*TweakSpeed();
 			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:(200*vol));
 		}
 		else if ( run == 1 )
 		{
 			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.5);
-			let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
-			b.A_CheckTerrain();
+			if ( !nosplash )
+			{
+				let b = Spawn("InvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
+				b.A_CheckTerrain();
+			}
 			vel.xy += (RotateVector(NormalizedMove(),angle)/4800.)*TweakSpeed();
 			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:(100*vol));
 		}
 		else
 		{
 			A_StartSound("demolitionist/walk",CHAN_FOOTSTEP,CHANF_OVERLAP,vol*.2);
-			let b = Spawn("SmolInvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
-			b.A_CheckTerrain();
+			if ( !nosplash )
+			{
+				let b = Spawn("SmolInvisibleSplasher",level.Vec3Offset(pos,(RotateVector((0,yofs*.25*radius),angle),0)));
+				b.A_CheckTerrain();
+			}
 			vel.xy += (RotateVector(NormalizedMove(),angle)/6400.)*TweakSpeed();
 			if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:(50*vol));
 		}

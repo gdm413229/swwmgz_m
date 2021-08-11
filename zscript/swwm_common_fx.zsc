@@ -1337,3 +1337,272 @@ Class SWWMShadow : Actor
 		Stop;
 	}
 }
+
+// Terrain FX (cheap)
+Class SWWMBaseSplash : Actor
+{
+	default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+NOINTERACTION;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		FloatBobPhase 0;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}
+Class SWWMWaterSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,12.);
+			dir *= str*.25;
+			A_SpawnParticle("40 60 FF",0,60,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+		}
+	}
+}
+Class SWWMWaterSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](3.,6.);
+			dir *= str*.25;
+			A_SpawnParticle("40 60 FF",0,50,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+		}
+	}
+}
+Class SWWMBloodSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,12.);
+			dir *= str*.25;
+			A_SpawnParticle("80 00 00",0,60,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+		}
+	}
+}
+Class SWWMBloodSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](3.,6.);
+			dir *= str*.25;
+			A_SpawnParticle("80 00 00",0,50,str,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.5,-1,-.02*str);
+		}
+	}
+}
+Class SWWMSludgeSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,8.);
+			dir *= str*.25;
+			A_SpawnParticle("40 50 40",0,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMSludgeSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](2.,4.);
+			dir *= str*.25;
+			A_SpawnParticle("40 50 40",0,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMMudSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,8.);
+			dir *= str*.25;
+			A_SpawnParticle("50 40 20",0,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMMudSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](2.,4.);
+			dir *= str*.25;
+			A_SpawnParticle("50 40 20",0,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMSlimeSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,8.);
+			dir *= str*.25;
+			A_SpawnParticle("00 FF 00",SPF_FULLBRIGHT,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMSlimeSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](2.,4.);
+			dir *= str*.25;
+			A_SpawnParticle("00 FF 00",SPF_FULLBRIGHT,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+	}
+}
+Class SWWMLavaSplash : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<60; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-60);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](4.,12.);
+			dir *= str*.25;
+			A_SpawnParticle("FF C0 40",SPF_FULLBRIGHT,40,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+		Spawn("SWWMSizzleSmoke",pos);
+	}
+}
+Class SWWMLavaSplash2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<15; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](2.,6.);
+			dir *= str*.25;
+			A_SpawnParticle("FF C0 40",SPF_FULLBRIGHT,30,str*2.,0,0,0,0,dir.x,dir.y,dir.z,0,0,-.02*str,.8,-1,-.02*str);
+		}
+		Spawn("SWWMSizzleSmoke2",pos);
+	}
+}
+Class SWWMSizzleSmoke : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<8; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](2.,6.);
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = dir*str;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,85));
+			s.scale *= 2.5;
+			s.alpha *= .4;
+			s.special1 = Random[ExploS](0,3);
+		}
+	}
+}
+Class SWWMSizzleSmoke2 : SWWMBaseSplash
+{
+	override void PostBeginPlay()
+	{
+		double ang, pt, str;
+		Vector3 dir;
+		for ( int i=0; i<3; i++ )
+		{
+			ang = FRandom[ExploS](0,360);
+			pt = FRandom[ExploS](-90,-30);
+			dir = (cos(ang)*cos(pt),sin(ang)*cos(pt),-sin(pt));
+			str = FRandom[ExploS](.5,1.5);
+			let s = Spawn("SWWMHalfSmoke",pos);
+			s.vel = dir*str;
+			s.SetShade(Color(1,1,1)*Random[ExploS](64,85));
+			s.scale *= 1.6;
+			s.alpha *= .4;
+			s.special1 = Random[ExploS](0,1);
+		}
+	}
+}

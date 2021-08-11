@@ -639,6 +639,8 @@ Class mkGibber : Actor
 	color shadecol;
 	Class<Actor> gibtype;	// allow custom gib types (will be used for monster pack)
 
+	Property GibType: gibtype;
+
 	virtual void BurstGibs()
 	{
 		Actor a;
@@ -659,7 +661,7 @@ Class mkGibber : Actor
 		}
 		for ( int i=0; i<gibsize; i++ )
 		{
-			[dummy, a] = A_SpawnItemEx(gibtype?gibtype:"mkFlyingGib",FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](.1,.9)*height,flags:SXF_ABSOLUTEANGLE|SXF_USEBLOODCOLOR);
+			[dummy, a] = A_SpawnItemEx(gibtype,FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](-.5,.5)*radius,FRandom[Gibs](.1,.9)*height,flags:SXF_ABSOLUTEANGLE|SXF_USEBLOODCOLOR);
 			a.translation = translation;
 			a.CopyBloodColor(self);
 			a.scale *= scale.x;
@@ -728,6 +730,7 @@ Class mkGibber : Actor
 		+NOINTERACTION;
 		Radius 32;
 		Height 16;
+		mkGibber.GibType "mkFlyingGib";
 	}
 }
 

@@ -638,6 +638,7 @@ Class mkGibber : Actor
 	int delay;
 	color shadecol;
 	Class<Actor> gibtype;	// allow custom gib types (will be used for monster pack)
+	bool psnd;
 
 	Property GibType: gibtype;
 
@@ -715,7 +716,11 @@ Class mkGibber : Actor
 			delay--;
 			return;
 		}
-		A_StartSound("misc/gibber");
+		if ( !psnd )
+		{
+			A_StartSound("misc/gibber",CHAN_VOICE,CHANF_OVERLAP);
+			psnd = true;
+		}
 		BurstGibs();
 		if ( reactiontime <= 0 )
 			Destroy();

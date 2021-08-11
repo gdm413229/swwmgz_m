@@ -388,7 +388,7 @@ Class ExplodiumGun : SWWMWeapon
 			A_Overlay(layer,"Casing");
 		}
 		XZWA M 1;
-		XZWA N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWA N 1 A_StartSound("explodium/slidelock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWA OPQR 1;
 		XZWA S 2;
 		Goto ReloadLast;
@@ -396,8 +396,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW9 X 1 A_PlayerReload();
 		XZW9 Z 1;
 		XZWA XYZ 1;
-		XZWB ABC 1;
-		XZWB D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWB ABCD 1;
 		XZWB E 1 { invoker.clipcount = 0; }
 		XZWB F 1;
 		XZWB G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -438,8 +437,7 @@ Class ExplodiumGun : SWWMWeapon
 		XZW5 NO 2;
 		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 QRSTUVWXYZ 1;
-		XZW6 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW6 B 1;
+		XZW6 AB 1;
 		XZW6 C 1
 		{
 			A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -454,7 +452,11 @@ Class ExplodiumGun : SWWMWeapon
 		XZW6 EFGHIJKLMNOPRS 1;
 		XZW6 T 1 A_ThrowMag();
 		XZW6 UV 2;
-		XZW6 W 2 A_PlayerReload();
+		XZW6 W 2
+		{
+			A_PlayerReload();
+			A_StartSound("explodium/magget",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		XZW6 XY 2;
 		XZW6 Z 4;
 		Goto ReloadEnd;
@@ -467,7 +469,7 @@ Class ExplodiumGun : SWWMWeapon
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
-		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 A 1;
 		XZW3 B 1 { invoker.clipcount = 0; }
 		XZW3 C 1;
 		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -476,9 +478,7 @@ Class ExplodiumGun : SWWMWeapon
 		Goto ReloadEnd;
 	ReloadEmpty:
 		XZW2 A 1;
-		XZW3 JKLMNOP 1;
-		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
-		XZW3 RS 1;
+		XZW3 JKLMNOPQRS 1;
 		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 UVWX 1;
 		XZW3 Y 1 A_DropMag();
@@ -495,7 +495,7 @@ Class ExplodiumGun : SWWMWeapon
 	Slide:
 		XZW2 A 1;
 		XZW4 WXY 1;
-		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 BC 1;
 		XZW5 D 1 { invoker.chambered = true; invoker.clipcount--; }
 		XZW5 EFG 1;
@@ -866,7 +866,7 @@ Class DualExplodiumGun : SWWMWeapon
 			A_Overlay(layer,"Casing");
 		}
 		XZWI M 1;
-		XZWI N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWI N 1 A_StartSound("explodium/slidelock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWI OPQR 1;
 		XZWI S 2;
 		Goto WaitLast;
@@ -887,8 +887,7 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		XZWI V 1 A_PlayerReload();
 		XZWI WXYZ 1;
-		XZWJ ABC 1;
-		XZWJ D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWJ ABCD 1;
 		XZWJ E 1 { ExplodiumGun(invoker.SisterWeapon).clipcount = 0; }
 		XZWJ F 1;
 		XZWJ G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -940,7 +939,7 @@ Class DualExplodiumGun : SWWMWeapon
 			A_Overlay(layer,"Casing");
 		}
 		XZWK S 1;
-		XZWK T 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWK T 1 A_StartSound("explodium/slidelock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWK UVWX 1;
 		XZWK Y 2;
 		Goto LeftWaitLast;
@@ -950,8 +949,7 @@ Class DualExplodiumGun : SWWMWeapon
 	LeftReloadLast:
 		XZWK Z 9 { player.SetPSPrite(PSP_WEAPON,ResolveState("Lower")); }
 		XZWK Z 1 A_PlayerReload();
-		XZWL ABCDEFG 1;
-		XZWL H 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWL ABCDEFGH 1;
 		XZWL I 1 { invoker.clipcount = 0; }
 		XZWL J 1;
 		XZWL K 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1051,7 +1049,7 @@ Class DualExplodiumGun : SWWMWeapon
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
-		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 A 1;
 		XZW3 B 1 { ExplodiumGun(invoker.SisterWeapon).clipcount = 0; }
 		XZW3 C 1;
 		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1060,9 +1058,7 @@ Class DualExplodiumGun : SWWMWeapon
 		Goto ReloadEnd;
 	ReloadEmpty:
 		XZW2 A 1;
-		XZW3 JKLMNOP 1;
-		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
-		XZW3 RS 1;
+		XZW3 JKLMNOPQRS 1;
 		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 UVWX 1;
 		XZW3 Y 1 A_DropMag();
@@ -1098,7 +1094,7 @@ Class DualExplodiumGun : SWWMWeapon
 	Slide:
 		XZW2 A 1;
 		XZW4 WXY 1;
-		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 BC 1;
 		XZW5 D 1
 		{
@@ -1131,7 +1127,7 @@ Class DualExplodiumGun : SWWMWeapon
 			return ResolveState(null);
 		}
 		XZWB TUVWXYZ 1;
-		XZWC A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWC A 1;
 		XZWC B 1 { invoker.clipcount = 0; }
 		XZWC C 1;
 		XZWC D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -1140,9 +1136,7 @@ Class DualExplodiumGun : SWWMWeapon
 		Goto LeftReloadEnd;
 	LeftReloadEmpty:
 		XZWB A 1;
-		XZWC JKLMNOP 1;
-		XZWC Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
-		XZWC RS 1;
+		XZWC JKLMNOPQRS 1;
 		XZWC T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWC UVWX 1;
 		XZWC Y 1 A_DropMag(-1);
@@ -1178,7 +1172,7 @@ Class DualExplodiumGun : SWWMWeapon
 	LeftSlide:
 		XZWB A 1;
 		XZWD WXY 1;
-		XZWE A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWE A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWE BC 1;
 		XZWE D 1
 		{

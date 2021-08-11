@@ -427,7 +427,7 @@ Class CandyGun : SWWMWeapon
 			A_Overlay(layer,"Casing");
 		}
 		XZWC M 1;
-		XZWC N 1 A_StartSound("explodium/slideforward",CHAN_WEAPON,CHANF_OVERLAP,.6,pitch:1.5);
+		XZWC N 1 A_StartSound("explodium/slidelock",CHAN_WEAPON,CHANF_OVERLAP);
 		XZWC OPQR 1;
 		XZWC S 2;
 		Goto ReadyLast;
@@ -435,8 +435,7 @@ Class CandyGun : SWWMWeapon
 		XZW9 X 1 A_PlayerReload();
 		XZW9 Z 1;
 		XZWC XYZ 1;
-		XZWD ABC 1;
-		XZWD D 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZWD ABCD 1;
 		XZWD E 1 { invoker.clipcount = 0; }
 		XZWD F 1;
 		XZWD G 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -500,8 +499,7 @@ Class CandyGun : SWWMWeapon
 				player.SetPSprite(PSP_WEAPON,ResolveState("SpecialFire"));
 		}
 		XZW5 STUVWXYZ 1;
-		XZW6 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW6 B 1;
+		XZW6 AB 1;
 		XZW6 C 1
 		{
 			A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -516,7 +514,11 @@ Class CandyGun : SWWMWeapon
 		XZW6 EFGHIJKLMNOPRS 1;
 		XZW6 T 1 A_ThrowMag();
 		XZW6 UV 2;
-		XZW6 W 2 A_PlayerReload();
+		XZW6 W 2
+		{
+			A_PlayerReload();
+			A_StartSound("explodium/magget",CHAN_WEAPON,CHANF_OVERLAP);
+		}
 		XZW6 XY 2;
 		XZW6 Z 4;
 		Goto ReloadEnd;
@@ -560,7 +562,7 @@ Class CandyGun : SWWMWeapon
 			return ResolveState(null);
 		}
 		XZW2 TUVWXYZ 1;
-		XZW3 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW3 A 1;
 		XZW3 B 1 A_EmptyMag();
 		XZW3 C 1;
 		XZW3 D 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
@@ -569,9 +571,7 @@ Class CandyGun : SWWMWeapon
 		Goto ReloadEnd;
 	ReloadEmpty:
 		XZW2 A 1;
-		XZW3 JKLMNOP 1;
-		XZW3 Q 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
-		XZW3 RS 1;
+		XZW3 JKLMNOPQRS 1;
 		XZW3 T 1 A_StartSound("explodium/magout",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW3 UVWX 1;
 		XZW3 Y 1 A_DropMag();
@@ -605,7 +605,7 @@ Class CandyGun : SWWMWeapon
 	Slide:
 		XZW2 A 1;
 		XZW4 WXY 1;
-		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP,.3);
+		XZW5 A 1 A_StartSound("explodium/slideback",CHAN_WEAPON,CHANF_OVERLAP);
 		XZW5 BC 1;
 		XZW5 D 1 { invoker.chambered = true; invoker.clipcount--; }
 		XZW5 EFG 1;

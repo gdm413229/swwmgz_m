@@ -1,7 +1,3 @@
-**Finishing touches before release:**
-
- - Collectibles
-
 **Extra things after release:**
 
  - DLC weaponset

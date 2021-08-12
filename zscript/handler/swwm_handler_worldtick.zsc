@@ -146,20 +146,12 @@ extend Class SWWMHandler
 					lastorder = musplaying.baseorder;
 					lastloop = musplaying.loop;
 					S_ChangeMusic((startmus>0)?"music/nomusic.ogg":"music/solitary.ogg",force:true);
-					SetMusicVolume((startmus>0)?1.:musvol);
 				}
 				if ( startmus > 0 ) startmus--;
 				else if ( startmus == 0 )
 				{
 					startmus = -1;
 					S_ChangeMusic("music/solitary.ogg",force:true);
-					SetMusicVolume(.002);
-					musvol = .002;
-				}
-				else if ( musvol < 1. )
-				{
-					musvol = clamp(musvol+.002,0.,1.);
-					SetMusicVolume(musvol);
 				}
 			}
 			if ( (level.found_secrets < level.total_secrets) || (level.found_items < level.total_items) || (level.killed_monsters < level.total_monsters) )
@@ -168,7 +160,6 @@ extend Class SWWMHandler
 				{
 					restartmus = 25;
 					S_ChangeMusic("music/nomusic.ogg",force:true);
-					SetMusicVolume(1.);
 				}
 				S_StartSound("recordscratch",CHAN_VOICE,CHANF_UI|CHANF_NOPAUSE|CHANF_OVERLAP,1,ATTN_NONE);
 				mapclear = false;

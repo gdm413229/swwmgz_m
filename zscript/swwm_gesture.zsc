@@ -27,9 +27,7 @@ Class SWWMGesture : SWWMWeapon
 	Weapon formerweapon;
 	int whichgesture, nextgesture;
 	bool deaded, queued;
-	bool whichuse;
 	Class<SWWMItemGesture> whichweapon;
-	Array<bool> suse;
 	Array<Class<SWWMItemGesture> > sweapon;
 	int gonect;
 	HeadpatTracker pats;	// for headpat gesture, our current tracker
@@ -110,7 +108,7 @@ Class SWWMGesture : SWWMWeapon
 	}
 
 	// "special" gestures are run by switching to another "weapon"
-	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Class<SWWMItemGesture> a, bool used = false )
+	static SWWMGesture SetSpecialGesture( PlayerPawn mo, Class<SWWMItemGesture> a )
 	{
 		if ( !mo || !(mo is 'Demolitionist') ) return null;	// only Demo
 		if ( mo.Health <= 0 ) return null;	// dead
@@ -124,11 +122,10 @@ Class SWWMGesture : SWWMWeapon
 			// queue if unique
 			for ( int i=0; i<w.sweapon.Size(); i++ )
 			{
-				if ( (w.sweapon[i] != a) || (w.suse[i] != used) ) continue;
+				if ( w.sweapon[i] != a ) continue;
 				return null;
 			}
 			w.sweapon.Push(a);
-			w.suse.Push(used);
 			return null;
 		}
 		if ( !w )
@@ -140,7 +137,6 @@ Class SWWMGesture : SWWMWeapon
 		else w.formerweapon = mo.player.ReadyWeapon;
 		w.whichgesture = GS_Null;
 		w.whichweapon = a;
-		w.whichuse = used;
 		mo.player.PendingWeapon = w;
 		return w;
 	}
@@ -160,10 +156,8 @@ Class SWWMGesture : SWWMWeapon
 		{
 			invoker.whichgesture = GS_Null;
 			invoker.whichweapon = invoker.sweapon[0];
-			invoker.whichuse = invoker.suse[0];
 			// push back
 			invoker.sweapon.Delete(0);
-			invoker.suse.Delete(0);
 			player.SetPSprite(PSP_WEAPON,ResolveState("Ready"));
 			return;
 		}
@@ -411,8 +405,7 @@ Class SWWMGesture : SWWMWeapon
 				}
 				g.gest = invoker;
 				player.ReadyWeapon = g;
-				if ( invoker.whichuse ) player.SetPSPrite(PSP_WEAPON,g.FindState("AltFire"));
-				else player.SetPSPrite(PSP_WEAPON,g.FindState("Fire"));
+				player.SetPSPrite(PSP_WEAPON,g.FindState("Fire"));
 				return ResolveState(null);
 			}
 			switch ( invoker.whichgesture )
@@ -683,10 +676,8 @@ Class SWWMItemGesture : SWWMWeapon abstract
 		{
 			gest.whichgesture = GS_Null;
 			gest.whichweapon = gest.sweapon[0];
-			gest.whichuse = gest.suse[0];
 			// push back
 			gest.sweapon.Delete(0);
-			gest.suse.Delete(0);
 			// go back to the main gesture
 			player.ReadyWeapon = gest;
 			player.SetPSPrite(PSP_WEAPON,gest.ResolveState("Ready"));

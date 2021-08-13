@@ -403,7 +403,7 @@ Class SilverBullet : SWWMWeapon
 		{
 			SWWMUtility.DoKnockback(t.HitList[i].HitActor,t.HitList[i].x+(0,0,0.025),t.Hitlist[i].HitDamage*20.*FRandom[SilverBullet](.8,1.2));
 			int dmg = t.HitList[i].HitActor.DamageMobj(invoker,self,t.Hitlist[i].HitDamage,'shot',DMG_FOILINVUL|DMG_USEANGLE|DMG_THRUSTLESS,atan2(t.Results.HitVector.y,t.Results.HitVector.x));
-			if ( (t.HitList[i].HitActor.Health <= 0) && (t.HitList[i].HitActor.bIsMonster || t.HitList[i].HitActor.player) && t.HitList[i].HitActor.IsHostile(self) )
+			if ( t.HitList[i].HitActor && (t.HitList[i].HitActor.Health <= 0) && (t.HitList[i].HitActor.bIsMonster || t.HitList[i].HitActor.player) && t.HitList[i].HitActor.IsHostile(self) )
 			{
 				invoker.nkills++;
 				SWWMUtility.AchievementProgress('swwm_progress_conga',invoker.nkills,player);

@@ -351,8 +351,7 @@ Class SilverBullet : SWWMWeapon
 		}
 		if ( (Owner.player.ReadyWeapon == self) && Owner.player.onground )
 		{
-			if ( (!level.IsCrouchingAllowed() && (Owner.player.cmd.buttons&BT_CROUCH))
-				|| (level.IsCrouchingAllowed() && Owner.player.mo.CanCrouch() && (Owner.player.crouchfactor <= .5)) )
+			if ( Owner.player.cmd.buttons&BT_CROUCH )
 			{
 				if ( !proneme ) Owner.A_StartSound("silverbullet/crouch",CHAN_WEAPONEXTRA,CHANF_OVERLAP);
 				proneme = true;

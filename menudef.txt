@@ -66,6 +66,12 @@ OptionValue "SWWMFilterAchievements"
 	1, "$SWWM_FILTER_OBFUSCATE"
 	2, "$SWWM_FILTER_HIDE"
 }
+OptionValue "SWWMPistolStart"
+{
+	0, "$TXT_NO"
+	1, "$SWWM_PISTOLSTART_MAP"
+	2, "$SWWM_PISTOLSTART_CLUSTER"
+}
 OptionMenu "SWWMOptionMenu"
 {
 	Class "SWWMOptionMenu"
@@ -154,7 +160,7 @@ OptionMenu "SWWMOptionMenu"
 	TrapOption "$SWWM_ENGINE", "swwm_engine"
 	StaticText " "
 	StaticText "$SWWM_BTITLE", "Blue"
-	Option "$SWWM_PISTOLSTART", "swwm_pistolstart", "YesNo"
+	Option "$SWWM_PISTOLSTART", "swwm_pistolstart", "SWWMPistolStart"
 	Option "$SWWM_ENEMYDROPS", "swwm_enemydrops", "SWWMEnemyDropType"
 	Option "$SWWM_ONDEMANDAMMO", "swwm_ondemandammo", "YesNo"
 	Option "$SWWM_RESETSCORE", "swwm_resetscore", "YesNo"

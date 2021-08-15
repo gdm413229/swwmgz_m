@@ -121,7 +121,7 @@ extend Class SWWMHandler
 				c.Destroy();
 		}
 		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
-		if ( p.mo.FindInventory("InventoryWipeToken") || (swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB))) )
+		if ( p.mo.FindInventory("InventoryWipeToken") || (swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || ((swwm_pistolstart == 1) && !(level.clusterflags&LevelLocals.CLUSTER_HUB)))) )
 			SWWMUtility.WipeInventory(p.mo,swwm_resetscore);
 		// play the select sound of the current weapon if we travelled
 		if ( (p.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(p.ReadyWeapon).hastravelled )

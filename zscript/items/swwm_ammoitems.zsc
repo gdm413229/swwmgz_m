@@ -526,7 +526,7 @@ Class EvisceratorBundleSpawn : SWWMAmmoSpawner
 {
 	override void SpawnAmmo()
 	{
-		int bnd = Random[Bundle](3,4);
+		int bnd = Random[Bundle](2,3);
 		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("EvisceratorShell",Vec3Angle(12,i*(360/bnd)));
@@ -599,7 +599,7 @@ Class HellblazerMissileBundleSpawn : SWWMAmmoSpawner
 {
 	override void SpawnAmmo()
 	{
-		int bnd = Random[Bundle](2,4);
+		int bnd = Random[Bundle](2,3);
 		for ( int i=0; i<bnd; i++ )
 		{
 			let a = Spawn("HellblazerMissiles",Vec3Angle(8,i*(360/bnd)));

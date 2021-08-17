@@ -118,6 +118,7 @@ Class SpreadSlugTracer : SpreadgunTracer
 Class Spreadgun : SWWMWeapon
 {
 	bool fired;	// shell was used
+	transient bool wasfired; // for hammer priming
 	bool chambered;	// a shell is actually loaded
 	bool emptyup;	// next reload will keep the chamber empty
 	Class<Ammo> loadammo, nextammo;	// currently loaded shell, next shell to load
@@ -259,17 +260,17 @@ Class Spreadgun : SWWMWeapon
 			amidx = i;
 			break;
 		}
+		invoker.wasfired = false;
 		if ( invoker.emptyup )
 		{
 			if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState("LoadEmpty"));
 			else player.SetPSprite(PSP_WEAPON,invoker.FindState("LoadEmptyFired"));
 		}
 		else if ( !invoker.fired ) player.SetPSprite(PSP_WEAPON,invoker.FindState(primedstates[amidx]));
-		else player.SetPSprite(PSP_WEAPON,invoker.FindState(firedstates[amidx]));
-		if ( !invoker.emptyup && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		else
 		{
-			let amo = FindInventory(invoker.nextammo);
-			if ( amo && (amo.Amount > 0) ) amo.Amount--;
+			invoker.wasfired = true;
+			player.SetPSprite(PSP_WEAPON,invoker.FindState(firedstates[amidx]));
 		}
 		if ( invoker.emptyup ) A_Overlay(-9999,"LoadDummyEmpty");
 		else A_Overlay(-9999,"LoadDummy");
@@ -661,16 +662,21 @@ Class Spreadgun : SWWMWeapon
 	action void A_LoadShell()
 	{
 		A_StartSound("spreadgun/shellin",CHAN_WEAPON,CHANF_OVERLAP);
+		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		{
+			let amo = FindInventory(invoker.nextammo);
+			if ( amo && (amo.Amount > 0) ) amo.Amount--;
+		}
 		invoker.chambered = true;
+		invoker.fired = false;
 		invoker.loadammo = invoker.nextammo;
 	}
 
 	action void A_Prime()
 	{
-		if ( invoker.fired )
+		if ( invoker.fired || invoker.wasfired )
 		{
 			A_StartSound("spreadgun/hammer",CHAN_WEAPON,CHANF_OVERLAP);
-			invoker.fired = false;
 		}
 	}
 

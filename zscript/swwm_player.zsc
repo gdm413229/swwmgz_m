@@ -2518,6 +2518,7 @@ Class Demolitionist : PlayerPawn
 					nk.AttachToOwner(whom);
 					nk.Use(true);
 				}
+				Super.AddInventory(item);
 				return;
 			}
 		}
@@ -2548,7 +2549,7 @@ Class Demolitionist : PlayerPawn
 				let tkey = Inventory(Spawn(item.GetClass()));
 				SWWMHandler.KeyTagFix(tkey);
 				if ( tkey is 'SWWMKey' ) SWWMKey(tkey).propagated = true;	// no anim
-				if ( !tkey.CallTryPickup(self) ) tkey.Destroy();
+				if ( !tkey.CallTryPickup(players[i].mo) ) tkey.Destroy();
 				if ( players[i].mo is 'Demolitionist' ) Demolitionist(players[i].mo).key_reentrant = false;
 			}
 		}

@@ -11,7 +11,8 @@ extend Class SWWMHandler
 		{
 			if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 				return;
-			Menu.SetMenu('DemolitionistMenu');
+			if ( !(Menu.GetCurrentMenu() is 'DemolitionistMenu') )
+				Menu.SetMenu('DemolitionistMenu');
 		}
 		else if ( e.Name ~== "swwmzoomin" )
 		{

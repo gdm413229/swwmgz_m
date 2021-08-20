@@ -674,15 +674,16 @@ Class SilverBullet : SWWMWeapon
 				}
 			}
 			sst.pastwall = false;
-			sst.fullstop = false;
 			Vector3 norigin = origin;
 			double maxdist = 20000.;
-			while ( !sst.fullstop )
+			do
 			{
+				sst.fullstop = true;
 				sst.Trace(norigin,level.PointInSector(norigin.xy),x2,maxdist,TRACE_HitSky);
 				maxdist -= (sst.exitpoint-norigin).length();
 				norigin = sst.exitpoint;
 			}
+			while ( !sst.fullstop );
 			invoker.nkills = 0;
 			ProcessTraceHit(sst,origin,x2);
 		}

@@ -279,19 +279,16 @@ Class SWWMStatScreen : StatusScreen abstract
 					acceleratestage = 1;
 					playerready[i] = true;
 				}
-				if ( i == me )
+				if ( p.cmd.buttons&BT_RELOAD )
 				{
-					if ( p.cmd.buttons&BT_RELOAD )
-					{
-						PlaySound("menu/demoscroll");
-						whichtip = 0;
-					}
-					if ( p.cmd.buttons&BT_ZOOM )
-					{
-						PlaySound("menu/demoscroll");
-						whichart = 0;
-						arttex.SetNull();
-					}
+					PlaySound("menu/demoscroll");
+					whichtip = 0;
+				}
+				if ( p.cmd.buttons&BT_ZOOM )
+				{
+					PlaySound("menu/demoscroll");
+					whichart = 0;
+					arttex.SetNull();
 				}
 			}
 			p.oldbuttons = p.buttons;

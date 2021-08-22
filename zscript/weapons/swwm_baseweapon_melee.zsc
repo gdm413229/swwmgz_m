@@ -49,7 +49,7 @@ Class ParriedBuff : Inventory
 		{
 			newdamage = 20;
 			if ( special1&1 ) newdamage *= 2;
-			if ( special2 > 1 ) newdamage *= 8;
+			if ( special1 > 1 ) newdamage *= 8;
 		}
 	}
 }
@@ -106,6 +106,7 @@ Class ParryRing : Actor
 Class ParryField : Actor
 {
 	bool critsnd;
+	Array<Actor> justparried;
 
 	Default
 	{
@@ -136,7 +137,8 @@ Class ParryField : Actor
 		Actor a;
 		while ( a = Actor(ti.Next()) )
 		{
-			if ( !(SWWMUtility.ValidProjectile(a) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
+			if ( (justparried.Find(a) < justparried.Size()) || !(SWWMUtility.ValidProjectile(a) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
+			justparried.Push(a);
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			Vector3 hdir = dir;
@@ -166,7 +168,7 @@ Class ParryField : Actor
 			a.pitch = asin(-dir.z);
 			if ( raging )
 			{
-				buff.special1 = 2;
+				buff.special1 |= 2;
 				nspeed = min(100,nspeed*2.);
 				raging.DoHitFX();
 			}
@@ -190,7 +192,7 @@ Class ParryField : Actor
 					let r = Spawn("ParryRing",a.pos);
 					r.specialf1 = i*.04;
 				}
-				buff.special1++;
+				buff.special1 |= 1;
 				if ( !critsnd )
 				{
 					A_StartSound("misc/soulsparry",CHAN_ITEM,CHANF_OVERLAP,1.,.5);

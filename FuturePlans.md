@@ -29,10 +29,16 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Under Pressure *(Break a crusher)*
   - The Longest Journey *(Walk a total of 1000km)*
   - Mishe Trickery *(Successfully input a cheat code)*
+  - ...And a Dream *(Kill 10 enemies while having only 1 HP)*
+  - In a Hurry *(Beat a map with 0% kills, items and secrets)*
+  - Deadeye *(Land 7 consecutive Explodium Gun shots without missing)*
+  - Thorough Tenderizing *(Kill 100 enemies with the Pusher)*
   - [Doom] Graffiti Master *(Doodle mustaches on 20 demon faces)*
   - [Doom] Goodbye Franchise *(Rescue Commander Keen)*
   - [Doom] Taking out the Trash *(Kill all Nazis in the Doom 2 secret maps)*
   - [Doom] Environmental Disaster *(Destroy 1000 barrels)*
+  - [Doom] Cyberbullying *(Kill a Cyberdemon with its own rocket)*
+  - [Doom] Oh That's a Baseball *(Perfect parry a Lost Soul with the Silver Bullet)*
   - [Doom] Dynamic Duo *(Defeat the Bruiser Brothers)*
   - [Doom] Huge Guts *(Defeat the Tyrant of Babel)*
   - [Doom] All Brain *(Defeat the Spider Mastermind)*
@@ -43,12 +49,14 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Doom] Shot Until Dead *(Defeat the Last Tyrant)*
   - [Doom] Evil Eternal *(Defeat the Archangelus)*
   - [Doom] A Gazebo Most Insane *(Conquer the Sundered Realms)*
+  - [Heretic] What The Fuck? *(Punch a tornado???)*
   - [Heretic] Crazy Heads *(Defeat the Iron Liches)*
   - [Heretic] A Load of Bull *(Defeat the Maulotaur Servants)*
   - [Heretic] Abracadabra I Win *(Defeat D'Sparil)*
   - [Heretic] What's So Funny? *(Defeat the Iron Liches... again)*
   - [Heretic] Big Mooscles *(Defeat the Maulotaur Servants... again)*
   - [Hexen] Even Kirin is Upset *(Solve 20 "puzzles")*
+  - [Hexen] Extreme Kancho *(Break a stone spike)*
   - [Hexen] It Just Works *(Defeat the Death Wyvern)*
   - [Hexen] Magic Shmagic *(Defeat the Heresiarch)*
   - [Hexen] You Again? *(Defeat another Heresiarch)*

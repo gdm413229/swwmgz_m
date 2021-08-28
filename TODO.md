@@ -8,7 +8,9 @@
  - Extra localizations (including Japanese)
  - Mod trailer video (doubt I'd be able to, I might ask someone instead)
  - Rewrite the entire Demolitionist Menu code from the ground up to be more easily extensible and adapt to any window size
+ - Figure out what needs to be changed in player code to not desync in mp with prediction enabled
  - Hexen key and puzzle item models?
+ - DLC itemset
  - DLC gameset
 
 **Very extra things for the future:**

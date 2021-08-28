@@ -1458,9 +1458,38 @@ Class Demolitionist : PlayerPawn
 			let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 			if ( hnd ) hnd.tookdamage[PlayerNumber()] = true;
 		}
-		// check if we can break any active crushers
-		if ( (mod == 'Crush') && !inflictor && !source )
-			CheckBreakCrusher();
+		if ( mod == 'Crush' )
+		{
+			// check if we can break any active crushers
+			if ( !inflictor && !source ) CheckBreakCrusher();
+			// break a spike trap
+			else if ( source is 'ThrustFloor' )
+			{
+				let q = Spawn("BustedQuake",source.pos);
+				q.special1 = 4;
+				int numpt = Random[ExploS](30,40);
+				for ( int i=0; i<numpt; i++ )
+				{
+					let s = Spawn("SWWMChip",source.Vec3Angle(source.radius,FRandom[ExploS](0,360),1.+FRandom[ExploS](0,max(0.,source.height-source.floorclip))));
+					s.vel = ((0,0,1)+(FRandom[ExploS](-.6,.6),FRandom[ExploS](-.6,.6),FRandom[ExploS](-.6,.6))).unit()*FRandom[ExploS](2.,16.);
+					s.scale *= FRandom[ExploS](1.5,3.);
+					s.A_SetTranslation('StoneSpike');
+				}
+				numpt = Random[ExploS](12,16);
+				for ( int i=0; i<numpt; i++ )
+				{
+					let s = Spawn("SWWMHalfSmoke",source.Vec3Offset(0,0,1.+FRandom[ExploS](0,max(0.,source.height-source.floorclip))));
+					s.vel = ((0,0,1)+(FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.),FRandom[ExploS](-1.,1.))).unit()*FRandom[ExploS](-2,8.);
+					s.scale *= 2.5;
+					s.special1 = Random[ExploS](3,8);
+					s.SetShade(Color(5,4,3)*Random[ExploS](20,40));
+				}
+				Spawn("SWWMCrushedSpike",source.pos);
+				if ( source.master ) source.master.Destroy();
+				source.Destroy();
+				damage = 20;	// reduce so it's not instant kill
+			}
+		}
 		// no damage whatsoever
 		if ( scriptedinvul )
 			return 0;

@@ -1615,3 +1615,22 @@ Class SWWMSizzleSmoke2 : SWWMBaseSplash
 		s.special1 = Random[ExploS](0,1);
 	}
 }
+
+// Hexen thing
+Class SWWMCrushedSpike : Actor
+{
+	Default
+	{
+		Radius 20;
+		Height 16;
+		+SOLID;
+		+FLOORCLIP;
+		+NOTELEPORT;
+	}
+	States
+	{
+	Spawn:
+		TSPK X -1;
+		Stop;
+	}
+}

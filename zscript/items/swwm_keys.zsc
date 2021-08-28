@@ -249,6 +249,91 @@ Class SWWMYellowSkull : SWWMKey
 		Stop;
 	}
 }
+Class SWWMPurpleSkull : SWWMKey
+{
+	Default
+	{
+		Tag "$T_PURPLESKULL";
+		Species "PurpleSkull";
+		Inventory.PickupMessage "$T_PURPLESKULL";
+		Inventory.PickupFlash "SWWMPurplePickupFlash";
+		SWWMKey.GestureWeapon "SWWMPurpleSkullGesture";
+		Radius 10;
+		Height 25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+// Verdant Citadel fake keys
+Class SWWMFakeRedSkull : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+MOVEWITHSECTOR;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMFakeBlueSkull : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+MOVEWITHSECTOR;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMFakeYellowSkull : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+MOVEWITHSECTOR;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class SWWMFakePurpleSkull : Actor
+{
+	Default
+	{
+		Radius .1;
+		Height 0.;
+		+NOBLOCKMAP;
+		+MOVEWITHSECTOR;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
 
 Class SWWMKeyGreen : SWWMKey
 {

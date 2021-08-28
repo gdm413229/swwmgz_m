@@ -117,6 +117,12 @@ HardwareShader Texture "models/DoomYellowSkull.png"
 	Texture "masktex" "models/DoomSkull_mask.png"
 	Texture "envtex" "models/matcap/goldmap.png"
 }
+HardwareShader Texture "models/DoomPurpleSkull.png"
+{
+	Shader "shaders/glsl/Shinemask.fp"
+	Texture "masktex" "models/DoomSkull_mask.png"
+	Texture "envtex" "models/matcap/purpmap.png"
+}
 
 pointlight SWWMREDKEY
 {
@@ -156,6 +162,13 @@ pointlight SWWMSILVERKEY
 pointlight SWWMORANGEKEY
 {
 	color 1.0 0.6 0.0
+	size 40
+	attenuate 1
+	offset 0 16 0
+}
+pointlight SWWMPURPLEKEY
+{
+	color 1.0 0.0 1.0
 	size 40
 	attenuate 1
 	offset 0 16 0
@@ -215,6 +228,10 @@ object SWWMBlueSkull
 object SWWMYellowSkull
 {
     frame XZW1 { light SWWMYELLOWKEY }
+}
+object SWWMPurpleSkull
+{
+    frame XZW1 { light SWWMPURPLEKEY }
 }
 
 object SWWMKeyGreen

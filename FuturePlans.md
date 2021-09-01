@@ -2,15 +2,41 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 
 * **DLC Weaponset:**
   - [1] Itamex Reinforced Hammer *(UnSX 5)*
+    - HAHA DAB *(Gib 200 enemies with the Itamex Hammer)*
   - [2] Plasma Blaster *(SWWM)*
+    - Blastin' Plasma *(Kill an enemy at full health with a Plasma Blaster charged shot %d times)*
   - [3] Puntzer Beta *(SWWM Iridium)*
+    - High Noon *(Land 6 killing shots in a single Puntzer Beta reload)*
   - [4] Puntzer Gamma *(Ultra Suite 2)*
+    - You Gained Brouzouf *(Unload an entire mag in fuller auto with the Puntzer Gamma without missing a single shot)*
   - [5] Sheen HMG *(SWWM Platinum Ep2)*
+    - Dakka *(Fire the Sheen HMG for one minute straight)*
   - [6] Quadravol *(UnSX)*
+    - Gravely Roast *(Perform 50 bayonet combos with the Quadravol)*
   - [7] Blackfire Igniter *(UnSX 5, Ultra Suite 3)*
+    - Ice Ice Baby *(Impale 40 enemies with the Blackfire Igniter secondary)*
   - [8] Rail Carbine *("Tesla Beamer" in Ultra Suite 2 & 3)*
+    - John Romero's Curse *(Fry yourself by discharging an electric weapon in water)*
   - [9] Ray-Khom *(UnSX)*
+    - The Most Silent Takedown *(Kill 30 enemies with the Ray-Khom primary without alerting them)*
   - [0] Grand Lance *(SWWM Iridium)*
+    - Penetrator *(Strike through 20 enemies in a row with a single Grand Lance secondary)*
+* **DLC Weaponset 2:**
+  - [1] Hand of Divine *(Total Madness)*
+    - Facepunching Extraordinaire *(Kill 300 enemies with the Hand of Divine)*
+  - [6] Sparkster x3 *(UnSX 2)*
+    - A Fine Sparking *(Kill 50 enemies at once with a Sparkster Rifle combo shot)*
+  - [9] Mortal Rifle *(UnSX 2)*
+    - Railed Hard *(Shoot through 30 enemies with a single Mortal Rifle overpressure shot)*
+  - [0] Rafan-Kos *(UnSX 4)*
+    - Blasting Ropes *(Melt a grand total of 1000 enemies with the Rafan-Kos)*
+* **DLC Gameset:**
+  - Tetris
+  - Pong
+  - Snake
+  - **[Doom]** Demo Land Adventure *(platformer with shooty gameplay)*
+  - **[Heretic]** Interstellar Demolitionist *(a somewhat simple vertical SHMUP, kinda Touhou styled)*
+  - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **More collectibles (some of which were initially planned but didn't make it in time):**
   - [Doom] Moth Plushy *("She loves a good lämp")*
   - [Doom] AA-12 *("Ibuki's favorite shotgun. It's just a collectible model, so it doesn't actually shoot")*
@@ -21,6 +47,13 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Heretic] Manarock *("A delicacy for gods, but instantly deadly for mortals")*
   - [Heretic] Lithium - Volume One *("A work of art, one of the finest graphic novels")*
   - [Hexen] Psykkonovexx *("Some crazy-ass Anarukon instrument, sounds amazing though")*
+* **More items:**
+  - [Heretic/Hexen] Safety Tether *(Original)*
+    - Sneaky Retreat *(Use 10 Safety Tethers)*
+  - Devastation Sigil *(SWWM)*
+    - Deva Station *(Use 10 Devastation Sigils)*
+  - Divine Sprite *(SWWM Platinum)*
+    - Divine Delight *(Use 10 Divine Sprites)*
 * **More achievements:**
   - Piece of Candy *(Collect 1000 nuggets)*
   - Kaboom *(Kill 30 enemies with planted Explodium Mags)*
@@ -69,6 +102,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [Hexen] The Last One *(Defeat the last Heresiarch)*
   - [Hexen] Didn't I Kick Your Ass Before? *(Defeat the Deathkings)*
 * **Mothgirl summon for Lämp easter egg**
+  - Layers of White *(Summon the White Lady)*
 * **Replace all hitscan with *"light projectiles"***
 * **Crouch sliding *(+ proper crouch dashing)***
 * **Expand third person animations**
@@ -77,6 +111,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
 * **Additional gestures + gesture menu**
   - Clap
   - The Bird
+    - How Very Brutal *(Flip off 20 enemies)*
   - Thumbs Down
   - Giggle
   - Shrug
@@ -94,13 +129,6 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Unique bosses
   - Some extra enemy variants
   - Coverage for all supported IWADs *(oof)*
-* **DLC Gameset:**
-  - Tetris
-  - Pong
-  - Snake
-  - **[Doom]** Demo Land Adventure *(platformer with shooty gameplay)*
-  - **[Heretic]** Interstellar Demolitionist *(a somewhat simple vertical SHMUP, kinda Touhou styled)*
-  - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Original English Voice Acting:**
   - Demolitionist
   - Ibuki
@@ -116,23 +144,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - Manual reloading and weapon maintenance
   - Alternate mobility options *(no jetpack)*
   - Non-instant item usage
-* **DLC Weaponset 2:**
-  - [1] Hand of Divine *(Total Madness)*
-  - [2] Zipnic AP Mag *(UnSX)*
-  - [3] Little Jack *(UnSX 3)*
-  - [4] Little John *(UnSX 3)*
-  - [5] Microgravity Manipulator *(Ultra Suite)*
-  - [6] Skull Launcher *(Weirdweapons)*
-  - [7] Sparkster Carbine *(UnSX)*
-  - [8] Mirkal *(SWWM Platinum Ep1)*
-  - [9] Mortal Rifle *(UnSX)*
-  - [0] Rafan-Kos *(UnSX)*
-* **DLC Itemset:**
-  - Satellite *(Total Destruction)*
-  - [Heretic/Hexen] Safety Tether *(Original)*
-  - Devastation Sigil *(SWWM)*
-  - Divine Sprite *(SWWM Platinum)*
-  - Angel of Death *(Total Destruction, SWWM Platinum Ep2)*
 * **Official Campaign:**
   - Retell the events of UnSX 2 *(but with the Demolitionist's participation)*
   - Basically give SWWM GZ its own IWAD as a standalone game
+  - Some new weapons, some renovations

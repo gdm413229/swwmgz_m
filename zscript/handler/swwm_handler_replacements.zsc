@@ -693,10 +693,10 @@ extend Class SWWMHandler
 		else if ( e.Replacee is 'Mana2' ) e.Replacement = 'FabricatorTier2';
 		else if ( e.Replacee is 'Mana3' ) e.Replacement = 'FabricatorTier3';
 		else if ( e.Replacee is 'ArtiBoostMana' ) e.Replacement = 'FabricatorTier4';
-		else if ( (e.Replacee is 'Backpack') || (e.Replacee is 'BagOfHolding') || (e.Replacee is 'ArtiPork') ) e.Replacement = 'HammerspaceEmbiggener';
-		else if ( (e.Replacee is 'FWeaponPiece1') || (e.Replacee is 'FWeaponPiece2')
+		else if ( (e.Replacee is 'Backpack') || (e.Replacee is 'BagOfHolding')
+			|| (e.Replacee is 'FWeaponPiece1') || (e.Replacee is 'FWeaponPiece2')
 			|| (e.Replacee is 'CWeaponPiece1') || (e.Replacee is 'CWeaponPiece3')
-			|| (e.Replacee is 'MWeaponPiece2') || (e.Replacee is 'MWeaponPiece3') ) e.Replacement = 'SWWMNothing';
+			|| (e.Replacee is 'MWeaponPiece2') || (e.Replacee is 'MWeaponPiece3') ) e.Replacement = 'HammerspaceEmbiggener';
 		else if ( e.Replacee is 'ArmorBonus' ) e.Replacement = 'ArmorNuggetItem';
 		else if ( e.Replacee is 'HealthBonus' ) e.Replacement = 'HealthNuggetItem';
 		else if ( (e.Replacee is 'ArtiTimeBomb') || (e.Replacee is 'ArtiBlastRadius') || (e.Replacee is 'ArtiPoisonBag') || (e.Replacee is 'ArtiHealingRadius') ) e.Replacement = (nugflip=!nugflip)?'HealthNuggetBundleSpawn':'ArmorNuggetBundleSpawn';
@@ -704,18 +704,18 @@ extend Class SWWMHandler
 		else if ( (e.Replacee is 'Stimpack') || (e.Replacee is 'CrystalVial') ) e.Replacement = 'TetraHealthItem';
 		else if ( (e.Replacee is 'Medikit') || (e.Replacee is 'ArtiHealth') ) e.Replacement = 'CubeHealthItem';
 		else if ( (e.Replacee is 'Soulsphere') || (e.Replacee is 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';
-		else if ( (e.Replacee is 'Megasphere') || (e.Replacee is 'ArtiEgg') || (e.Replacee is 'ArtiBoostArmor') ) e.Replacement = 'GrilledCheeseSandwich';
+		else if ( (e.Replacee is 'Megasphere') || (e.Replacee is 'ArtiEgg') || (e.Replacee is 'ArtiBoostArmor') ) e.Replacement = (deathmatch||Random[Replacements](0,3)||SWWMUtility.ItemExists('DivineSprite',worldonly:true))?'GrilledCheeseSandwich':'DivineSprite';
 		else if ( (e.Replacee is 'Blursphere') || (e.Replacee is 'ArtiInvisibility') ) e.Replacement = (deathmatch||Random[Replacements](0,2)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'GhostArtifact':'Mykradvo';
 		else if ( e.Replacee is 'Radsuit' ) e.Replacement = 'EBarrier';
 		else if ( (e.Replacee is 'ArtiFly') ) e.Replacement = 'GravitySuppressor';
 		else if ( (e.Replacee is 'InvulnerabilitySphere') || (e.Replacee is 'ArtiInvulnerability') || (e.Replacee is 'ArtiInvulnerability2') ) e.Replacement = (deathmatch||Random[Replacements](0,3)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'FuckingInvinciball':'Mykradvo';
-		else if ( (e.Replacee is 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = (deathmatch||Random[Replacements](0,2)||SWWMUtility.ItemExists('Mykradvo',worldonly:true))?'Ragekit':'Mykradvo';
+		else if ( (e.Replacee is 'Berserk') || (e.Replacee == 'ArtiTomeOfPower') || (e.Replacee == 'ArtiSpeedBoots') ) e.Replacement = (deathmatch||Random[Replacements](0,2)||SWWMUtility.ItemExists('AngerySigil',worldonly:true))?'Ragekit':'AngerySigil';
 		else if ( (e.Replacee is 'AllMap') || (e.Replacee is 'SuperMap') ) e.Replacement = 'Omnisight';
 		else if ( (e.Replacee is 'Infrared') || (e.Replacee is 'ArtiTorch') ) e.Replacement = 'SWWMLamp';
 		else if ( (e.Replacee is 'GreenArmor') || (e.Replacee is 'SilverShield') || (e.Replacee is 'PlatinumHelm') || (e.Replacee is 'AmuletOfWarding') ) e.Replacement = 'BlastSuitItem';
 		else if ( (e.Replacee is 'BlueArmor') || (e.Replacee is 'EnchantedShield') || (e.Replacee is 'MeshArmor') || (e.Replacee is 'FalconShield') ) e.Replacement = 'WarArmorItem';
-		else if ( (e.Replacee is 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleportOther') ) e.Replacement = 'ChanceboxSpawner';
-		else if ( e.Replacee is 'ArtiTeleport' ) e.Replacement = (gameinfo.GameType&GAME_Hexen)?'ChanceboxSpawner':'SWWMNothing';
+		else if ( (e.Replacee is 'ArtiDarkServant') || (e.Replacee == 'ArtiTeleportOther') || (e.Replacee == 'ArtiPork') ) e.Replacement = 'ChanceboxSpawner';
+		else if ( e.Replacee is 'ArtiTeleport' ) e.Replacement = 'SafetyTether';
 		else
 		{
 			if ( profiling ) checkreplacement_ms += MSTime()-curms;

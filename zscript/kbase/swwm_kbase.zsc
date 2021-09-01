@@ -2332,8 +2332,8 @@ Class DemolitionistMenu : GenericMenu
 				if ( type is 'SWWMCollectible' ) continue;
 				// no barriers outside doom
 				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
-				// no gravity outside raven
-				if ( !(gameinfo.gametype&GAME_RAVEN) && (type is 'GravitySuppressor') ) continue;
+				// no gravity/tether outside raven
+				if ( !(gameinfo.gametype&GAME_RAVEN) && ((type is 'GravitySuppressor') || (type is 'SafetyTether')) ) continue;
 				// can't sell candygun spares
 				if ( sub && (type is 'CandyGunSpares') ) continue;
 				let cur = players[consoleplayer].mo.FindInventory(type);

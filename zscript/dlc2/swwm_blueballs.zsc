@@ -1,0 +1,41 @@
+// Tach-Engine & Nekuratek Sparkster x3 (from UnSX 2)
+// Slot 6, spawns shared with Hellblazer
+
+Class ModernSparkster : SWWMWeapon
+{
+	int clipcount, clipcount2;
+	bool chambered, chambered2;
+
+	Property ClipCount : clipcount;
+	Property ClipCount2 : clipcount2;
+
+	Default
+	{
+		//$Title Sparkster x3
+		//$Group Weapons
+		//$Sprite graphics/HUD/Icons/W_NewSparkster.png
+		//$Icon weapon
+		Tag "$T_NEWSPARKSTER";
+		Inventory.PickupMessage "$I_NEWSPARKSTER";
+		Obituary "$O_NEWSPARKSTER";
+		Inventory.Icon "graphics/HUD/Icons/W_NewSparkster.png";
+		Weapon.SlotNumber 6;
+		Weapon.SlotPriority 3.;
+		Weapon.SelectionOrder 625;
+		Weapon.AmmoType1 "SparksterBAmmo";
+		Weapon.AmmoGive1 1;
+		Weapon.AmmoType2 "SparksterRAmmo";
+		Weapon.AmmoGive2 1;
+		SWWMWeapon.DropAmmoType "RocketAmmo";
+		ModernSparkster.ClipCount 3;
+		ModernSparkster.ClipCount2 3;
+		Stamina 160000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

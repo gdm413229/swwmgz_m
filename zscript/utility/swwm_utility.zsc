@@ -1538,6 +1538,7 @@ Class SWWMUtility
 		if ( StringTable.Localize("$SWWM_SELLEXTRA_FEM") == "SWWM_SELLEXTRA_FEM" )
 			return false;
 		if ( i is 'DeepImpact' ) return true;
+		if ( i is 'FistGun' ) return true;
 		if ( i is 'ExplodiumGun' ) return true;
 		if ( i is 'Wallbuster' ) return true;
 		if ( i is 'HeavyMahSheenGun' ) return true;
@@ -1547,6 +1548,7 @@ Class SWWMUtility
 		if ( i is 'CandyGun' ) return true;
 		if ( i is 'RayKhom' ) return true;
 		if ( i is 'GrandLance' ) return true;
+		if ( i is 'RayKhom' ) return true;
 		if ( i is 'HealthNuggetItem' ) return true;
 		if ( i is 'ArmorNuggetItem' ) return true;
 		if ( i is 'WarArmor' ) return true;
@@ -1651,11 +1653,11 @@ Class SWWMUtility
 			return true;
 		if ( target is 'SWWMCollectible' )
 			return true;
-		if ( (target is 'Ynykron') || (target is 'GrandLance') )
+		if ( (target is 'Ynykron') || (target is 'GrandLance') || (target is 'RayKhom') )
 			return true;
-		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') )
+		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') || (target is 'UltimatePod') || (target is 'UltimateAmmo') )
 			return true;
-		if ( target is 'Mykradvo' )
+		if ( (target is 'Mykradvo') || (target is 'AngerySigil') || (target is 'DivineSprite') )
 			return true;
 		if ( target is 'PuzzleItem' )
 			return true;
@@ -1735,12 +1737,20 @@ Class SWWMUtility
 		if ( CheckNeedsItem(b) ) return b;
 		return Random[Replacements](weight,0)?a:b;
 	}
+	static private Class<Inventory> PickTrio( Class<Inventory> a, Class<Inventory> b, Class<Inventory> c, int weight1 = 1, int weight2 = 1 )
+	{
+		if ( CheckNeedsItem(a) ) return a;
+		if ( CheckNeedsItem(b) ) return b;
+		if ( CheckNeedsItem(c) ) return c;
+		return Random[Replacements](weight1,0)?a:Random[Replacements](weight2,0)?b:c;
+	}
 
 	static Class<Inventory> PickSWWMSlot1()
 	{
 		if ( CheckNeedsItem('ExplodiumGun',true) && Random[Replacements](0,1) ) return 'ExplodiumGun';
-		/*if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
-		return PickPair('PusherWeapon','ItamexHammer');*/
+		//if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
+		//return PickTrio('PusherWeapon','ItamexHammer','FistGun');
+		//return PickPair('PusherWeapon','ItamexHammer');
 		return 'PusherWeapon';
 	}
 	static Class<Inventory> PickSWWMSlot2()
@@ -1765,6 +1775,7 @@ Class SWWMUtility
 	}
 	static Class<Inventory> PickSWWMSlot6()
 	{
+		//return PickTrip('Hellblazer','Quadravol','ModernSparkster');
 		//return PickPair('Hellblazer','Quadravol');
 		return 'Hellblazer';
 	}
@@ -1780,23 +1791,23 @@ Class SWWMUtility
 	}
 	static Class<Inventory> PickSWWMSlot9()
 	{
+		//return PickTrio('CandyGun','RayKhom','MisterRifle');
 		//return PickPair('CandyGun','RayKhom');
 		return 'CandyGun';
 	}
 	static Class<Inventory> PickSWWMSlot0()
 	{
+		//return PickTrio('Ynykron','GrandLance','RafanKos');
 		//return PickPair('Ynykron','GrandLance');
 		return 'Ynykron';
 	}
 	static Class<Inventory> PickDoomSlot6()
 	{
-		//return PickPair(PickSWWMSlot7(),PickSWWMSlot8(),2);
-		return PickPair('Sparkster','SilverBullet',2);
+		return PickPair(PickSWWMSlot7(),PickSWWMSlot8(),2);
 	}
 	static Class<Inventory> PickDoomSlot7()
 	{
-		//return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
-		return PickPair('CandyGun','Ynykron',2);
+		return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
 	}
 	static Class<Inventory> PickHereticSlot3()	// also used for Doom 1
 	{

@@ -345,8 +345,8 @@ Class Demolitionist : PlayerPawn
 				if ( !(gameinfo.gametype&GAME_HEXEN) && (type is 'AmmoFabricator') ) continue;
 				// no barriers outside doom
 				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
-				// no gravity outside raven
-				if ( !(gameinfo.gametype&GAME_RAVEN) && (type is 'GravitySuppressor') ) continue;
+				// no gravity/tether outside raven
+				if ( !(gameinfo.gametype&GAME_RAVEN) && ((type is 'GravitySuppressor') || (type is 'SafetyTether')) ) continue;
 				// Don't give maxed items
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
@@ -878,10 +878,18 @@ Class Demolitionist : PlayerPawn
 				if ( healcooldown > 0 ) healcooldown--;
 				else
 				{
-					if ( health > 500 )
+					if ( health > 1000 )
+					{
+						let spr = DivineSpriteEffect(FindInventory("DivineSpriteEffect"));
+						if ( !spr || spr.bHealDone )
+							A_SetHealth(max(1000,health-10));
+						if ( health <= 1000 ) healcooldown = 40;
+					}
+					else if ( health > 500 )
 					{
 						if ( !FindInventory("GrilledCheeseSafeguard") && !(healtimer%5) )
 							A_SetHealth(health-1);
+						if ( health <= 500 ) healcooldown = 20;
 					}
 					else if ( health > 200 )
 					{

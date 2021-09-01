@@ -386,7 +386,7 @@ In some special cases you may find "Bulk" versions. These generally only pop up 
 
 Note: In multiplayer, these can be traded between players, but do note that the receiver will not get any extra ammo from it.
 
-### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
+### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might
 ![](docimg/fabricator.png)
 
 Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the **Ynykron Artifact**).
@@ -401,17 +401,36 @@ A floating lamp companion, may attract moths. The moths will disperse and attack
 
 Reveals the entire layout of the map and shows key locations in the HUD. Also allows you to highlight pickups through walls when holding the **Item Sense** button.
 
-### Mykradvo Artifact ~ May randomly replace Ghost Artifact, Ragekit or Invinciball
+### Mykradvo Artifact ~ May randomly replace Ghost Artifact or Invinciball
 ![](docimg/mykradvo.png)
 
 When used, bursts into plasma tendrils that will seek all hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
 
 Has a chance to spawn in place of other items, but only one may spawn per map.
 
+### Divine Sprite ~ May randomly replace Grilled Cheese Sandwich
+![](docimg/sprite.png)
+
+Rapidly boosts your health dramatically, for 30 seconds. Its effects will obviously fade afterwards. Your HUD can't exactly report your actual health, but it's assumed this goes way beyond the one thousand cap, somehow.
+
+Only one may spawn per map, use it wisely.
+
+### Devastation Sigil ~ May randomly replace Ragekit
+![](docimg/deva.png)
+
+20 seconds of absolute destructive potential for any damage you may deal, including to yourself (so be careful).
+
+Same spawn conditions as the other two.
+
+### Safety Tether ~ Replaces Chaos Device
+![](docimg/tether.png)
+
+On use, teleports you back to the start of the map. Basically acts exactly the same as a Chaos Device, although it also resets you to max health should you be under the weather. Additionally it also generates shockwaves on both ends, making your escape more dramatic.
+
 ## The Collectibles
 ![](docimg/chancebox.png)
 
-Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants and Chaos Devices (as the game generally doesn't have secret areas).
+Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants, Banishment Devices and Porkalators (as the game generally doesn't have secret areas).
 
 While some will drop very useful goodies, others may provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
 
@@ -444,6 +463,31 @@ A perfectly generic cube. It is exactly 128mm across each side, sports a pure gr
 ![](docimg/sayabean.png)
 
 Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
+
+### Mashiro Plush
+![](docimg/mothplushy.png)
+
+A cute plush doll of Saya's favorite moth girl. Apparently the Nukritas brothers give her one of these every time they piss her off, so she's got an entire pile in her bedroom. It appears that this one bears with it some sort of "contract", whatever that means.
+
+### AA-12 Model
+![](docimg/aa12.png)
+
+A simple model of Ibuki's favourite gun of all time. Obviously it doesn't shoot for real, but the attention to detail is notable. Has a pair of lollipops attached to the side with tape for some reason.
+
+### Hege Cactus
+![](docimg/hege.png)
+
+A small cactus grown in Finland. It's said that people who own it become thirstier than usual, perhaps due to the strength at which it absorbs moisture.
+
+### Hoagie
+![](docimg/hoagie.png)
+
+The sandwich of choice for demonkind, personally endorsed by King Akusei himself. This delicious treat has recently become a symbol of protest among the civilian population, who call for peaceful coexistence with humans.
+
+### Red Oni Milk
+![](docimg/milky.png)
+
+Fresh milk straight out of Ibuki herself. Due to the excess amount she produces daily, these little bottles end up being sold by the dozens.
 
 ### Demolitionist Plush (Heretic)
 ![](docimg/demoplush.png)

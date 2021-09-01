@@ -69,11 +69,14 @@ HardwareShader PostProcess scene
 	Uniform float timer
 	Uniform float xtrastr
 }
+
 HardwareShader PostProcess scene
 {
-	Name "RagekitAltShader"
-	Shader "shaders/pp/RagescreenAlt.fp" 330
-	Texture WarpTex "textures/ragewarp.png"
+	Name "DevastationShader"
+	Shader "shaders/pp/Devascreen.fp" 330
+	Texture BumpTex "textures/heattex.png"
+	Texture WarpTex1 "textures/devawarp1.png"
+	Texture WarpTex2 "textures/devawarp2.png"
 	Texture NoiseTex "textures/graynoise.png"
 	Uniform float timer
 	Uniform float xtrastr

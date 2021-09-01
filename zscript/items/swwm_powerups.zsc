@@ -2807,7 +2807,7 @@ Class Mykradvo : Inventory
 			s.pitch = pt;
 			s.ReactionTime += Random[ExploS](-2,2);
 		}
-		A_StartSound("mykradvo/smallarc",CHAN_WEAPON);
+		A_StartSound("mykradvo/smallarc",CHAN_WEAPON,attenuation:3.);
 		A_SetTics(Random[Mykradvo](10,50));
 	}
 
@@ -2877,8 +2877,8 @@ Class Mykradvo : Inventory
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "mykradvo/arc";
 		Inventory.PickupMessage "$T_MYKRADVO";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
+		Inventory.MaxAmount 3;
+		Inventory.InterHubAmount 3;
 		Inventory.PickupFlash "SWWMPurplePickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
@@ -2908,7 +2908,7 @@ Class MykradvoX : GhostArtifactX
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/mykradvoamb",CHAN_VOICE,CHANF_LOOP);
+		A_StartSound("powerup/mykradvoamb",CHAN_VOICE,CHANF_LOOP,attenuation:2.);
 	}
 	override void Tick()
 	{
@@ -3077,6 +3077,7 @@ Class AngeryPower : Powerup
 {
 	Actor l, snd;
 	int lasteffect;
+	transient int lastpulse;
 
 	Default
 	{
@@ -3094,6 +3095,7 @@ Class AngeryPower : Powerup
 		SWWMHandler.DoFlash(Owner,Color(64,224,0,255),30);
 		Owner.A_QuakeEx(8,8,8,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		lasteffect = int.min;
+		lastpulse = max(lastpulse,gametic+35);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= .95;
 		l = Spawn("AngeryLight",Owner.pos);
@@ -3130,6 +3132,7 @@ Class AngeryPower : Powerup
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_StartSound("powerup/devastationhit",CHAN_POWERUP);
 		lasteffect = level.maptime;
+		lastpulse = max(lastpulse,gametic+35);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= .9;
 	}
@@ -3199,8 +3202,8 @@ Class AngerySigil : Inventory
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/devastation";
 		Inventory.PickupMessage "$T_DEVASTATION";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
+		Inventory.MaxAmount 3;
+		Inventory.InterHubAmount 3;
 		Inventory.PickupFlash "SWWMPurplePickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
@@ -3231,7 +3234,7 @@ Class AngerySigilX : GhostArtifactX
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/devastationamb",CHAN_VOICE,CHANF_LOOP);
+		A_StartSound("powerup/devastationamb",CHAN_VOICE,CHANF_LOOP,attenuation:2.);
 	}
 	override void Tick()
 	{
@@ -3375,14 +3378,14 @@ Class DivineSpriteEffect : Inventory
 			Vector3 ppos = Owner.Vec3offset(0,0,Owner.height/2)+dir*dst;
 			A_SpawnParticle("White",SPF_FULLBRIGHT,30,scl,0,ppos.x,ppos.y,ppos.z,dir.x*.2,dir.y*.2,dir.z*.2,0,0,.05,alph,-1,-scl/30.);
 		}
-		if ( bHealDone )
+		if ( bHealDone || (Owner.Health <= 0) )
 		{
 			if ( Owner.Health <= 1000 ) DepleteOrDestroy();
 			return;
 		}
 		healcnt++;
 		healtim--;
-		if ( healtim <= 0 )
+		if ( (healtim <= 0) || (Owner.Health <= 0) )
 		{
 			Owner.A_StartSound("powerup/divineend",CHAN_ITEMEXTRA);
 			SWWMHandler.DoFlash(Owner,Color(80,255,255,255),40);
@@ -3398,12 +3401,14 @@ Class DivineSpriteEffect : Inventory
 			SWWMHandler.DoFlash(Owner,Color(40,255,255,255),20);
 			if ( Owner is 'Demolitionist' )
 				Demolitionist(Owner).lastbump *= 0.97;
+			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA);
 		}
-		else if ( !(healcnt%3) )
+		else if ( !(healcnt%5) )
 		{
-			Owner.GiveBody(100,10000);
+			Owner.GiveBody(500,10000);
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-			SWWMHandler.DoFlash(Owner,Color(10,255,255,255),5);
+			SWWMHandler.DoFlash(Owner,Color(10,255,255,255),10);
+			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA);
 		}
 	}
 }
@@ -3458,8 +3463,8 @@ Class DivineSprite : Inventory
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/divineuse";
 		Inventory.PickupMessage "$T_DIVINE";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
+		Inventory.MaxAmount 3;
+		Inventory.InterHubAmount 3;
 		Inventory.PickupFlash "SWWMPurplePickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
@@ -3488,7 +3493,7 @@ Class DivineSpriteX : GhostArtifactX
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/divineamb",CHAN_VOICE,CHANF_LOOP);
+		A_StartSound("powerup/divineamb",CHAN_VOICE,CHANF_LOOP,attenuation:2.);
 	}
 	override void Tick()
 	{

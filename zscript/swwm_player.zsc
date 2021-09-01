@@ -351,7 +351,7 @@ Class Demolitionist : PlayerPawn
 				let owned = FindInventory(type);
 				if ( owned && (owned.Amount >= owned.MaxAmount) ) continue;
 				let def = GetDefaultByType (type);
-				if ( def.Icon.isValid() && !(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") && !(type is "MagAmmo") && !(type is "Armor") && !(type is "Key") )
+				if ( def.Icon.isValid() && !(type is "PuzzleItem") && !(type is "Powerup") && !(type is "Ammo") && !(type is "MagAmmo") && !(type is "Armor") && !(type is "Key") && !(type is "DivineSpriteEffect") )
 					GiveInventory(type,(amount<=0)?def.MaxAmount:amount,true);
 			}
 			if ( !giveall ) return;

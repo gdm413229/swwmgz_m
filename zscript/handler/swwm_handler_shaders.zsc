@@ -13,7 +13,6 @@ extend Class SWWMHandler
 		Shader.SetEnabled(p,"GhostShader",false);
 		Shader.SetEnabled(p,"InvinciShader",false);
 		Shader.SetEnabled(p,"RagekitShader",false);
-		Shader.SetEnabled(p,"RagekitAltShader",false);
 		Shader.SetEnabled(p,"Glitch",false);
 		Shader.SetEnabled(p,"Grain",false);
 	}
@@ -24,31 +23,24 @@ extend Class SWWMHandler
 		let mo = p.mo;
 		if ( !mo ) return;
 		bool pc = (p.camera == mo);
+		let deva = AngeryPower(mo.FindInventory("AngeryPower"));
+		if ( pc && deva && swwm_shaders )
+		{
+			Shader.SetEnabled(p,"DevastationShader",true);
+			Shader.SetUniform1f(p,"DevastationShader","timer",(gametic+e.FracTic)/GameTicRate);
+			double xstrastr = 1.+max(0,deva.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"DevastationShader","xtrastr",xstrastr**2.);
+		}
+		else Shader.SetEnabled(p,"DevastationShader",false);
 		let rage = RagekitPower(mo.FindInventory("RagekitPower"));
 		if ( pc && rage && swwm_shaders )
 		{
-			if ( swwm_rageshader )
-			{
-				Shader.SetEnabled(p,"RagekitShader",false);
-				Shader.SetEnabled(p,"RagekitAltShader",true);
-				Shader.SetUniform1f(p,"RagekitAltShader","timer",(gametic+e.FracTic)/GameTicRate);
-				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
-				Shader.SetUniform1f(p,"RagekitAltShader","xtrastr",xstrastr**2.);
-			}
-			else
-			{
-				Shader.SetEnabled(p,"RagekitAltShader",false);
-				Shader.SetEnabled(p,"RagekitShader",true);
-				Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/GameTicRate);
-				double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
-				Shader.SetUniform1f(p,"RagekitShader","xtrastr",xstrastr**2.);
-			}
+			Shader.SetEnabled(p,"RagekitShader",true);
+			Shader.SetUniform1f(p,"RagekitShader","timer",(gametic+e.FracTic)/GameTicRate);
+			double xstrastr = 1.+max(0,rage.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"RagekitShader","xtrastr",xstrastr**2.);
 		}
-		else
-		{
-			Shader.SetEnabled(p,"RagekitShader",false);
-			Shader.SetEnabled(p,"RagekitAltShader",false);
-		}
+		else Shader.SetEnabled(p,"RagekitShader",false);
 		let ghost = GhostPower(mo.FindInventory("GhostPower"));
 		if ( pc && ghost && swwm_shaders ) Shader.SetEnabled(p,"GhostShader",true);
 		else Shader.SetEnabled(p,"GhostShader",false);

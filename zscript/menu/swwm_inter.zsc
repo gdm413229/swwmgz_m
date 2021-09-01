@@ -121,11 +121,11 @@ Class SWWMStatScreen : StatusScreen abstract
 			{
 				// skip DLC tips for now
 				if ( (i >= 59) && (i <= 68) ) continue;
-				if ( (i >= 130) && (i <= 139) ) continue;
+				if ( (i >= 133) && (i <= 139) ) continue;
 				ents.Push(i);
 			}
 			// account for skipped dlc tips (important, will crash otherwise)
-			maxtip -= 20;
+			maxtip -= 17;
 			if ( pdata.lasttip.Size() >= maxtip )
 			{
 				// exclude last one, start over

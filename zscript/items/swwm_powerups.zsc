@@ -3042,6 +3042,8 @@ Class SafetyTether : Inventory
 		}
 		SWWMHandler.DoFlash(Owner,Color(255,255,255,255),10);
 		SWWMHandler.DoFlash(Owner,Color(255,128,192,255),30);
+		if ( Owner.GiveBody(100,100) )
+			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 		SWWMUtility.AchievementProgressInc('swwm_progress_sneaky',1,Owner.player);
 		Amount--;
 		if ( Amount <= 0 ) DepleteOrDestroy();

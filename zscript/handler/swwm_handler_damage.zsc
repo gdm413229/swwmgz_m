@@ -326,7 +326,7 @@ extend Class SWWMHandler
 		}
 		SWWMCredits.Give(src.player,score);
 		if ( scr ) scr.score = score;	// update final score
-		if ( !deathmatch && (level.killed_monsters+1 == level.total_monsters) && !allkills )
+		if ( !deathmatch && !(gameinfo.gametype&GAME_Hexen) && (level.killed_monsters+1 == level.total_monsters) && !allkills )
 		{
 			allkills = true;
 			SWWMCredits.Give(src.player,1000);

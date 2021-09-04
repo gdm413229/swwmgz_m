@@ -2520,7 +2520,7 @@ Class Demolitionist : PlayerPawn
 		int score = 100;
 		// last secret (this is called before counting it up, so have to subtract)
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( !deathmatch && (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
+		if ( !deathmatch && !(gameinfo.gametype&GAME_Hexen) && (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
 		{
 			if ( hnd ) hnd.allsecrets = true;
 			score = 1000;

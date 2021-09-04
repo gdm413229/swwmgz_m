@@ -1664,6 +1664,18 @@ Class SWWMUtility
 		return false;
 	}
 
+	// used by the store
+	static bool IsVipItemClass( Class<Actor> target )
+	{
+		if ( (target is 'Ynykron') || (target is 'GrandLance') || (target is 'RayKhom') )
+			return true;
+		if ( (target is 'GoldShell') || (target is 'YnykronAmmo') || (target is 'GrandAmmo') || (target is 'GrandSpear') || (target is 'UltimatePod') || (target is 'UltimateAmmo') )
+			return true;
+		if ( (target is 'Mykradvo') || (target is 'AngerySigil') || (target is 'DivineSprite') )
+			return true;
+		return false;
+	}
+
 	static bool IsScoreItem( Actor target )
 	{
 		if ( target is 'Key' )

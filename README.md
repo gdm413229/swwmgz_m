@@ -276,10 +276,12 @@ Popularly known as the ***"Death Cannon"***. One of the four ultimate weapons co
 
 Unlike its previous incarnation in **SWWM Platinum**, this one doesn't have such an obscene pre-fire delay, so it's much easier to land a shot (not to mention also being far more lethal, thanks to the added chain reaction effect).
 
+Due to its rarity, you can't buy it from the store, so you gotta find one in the field.
+
 ### Crystal Box
 ![](docimg/ynykronammo.png)
 
-Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn in the world, so you'll have to get more ammo by finding additional weapon pickups or managing to afford one in the store, or trying your luck with a **Chancebox**.
+Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn in the world, and cannot be bought, so you'll have to get more ammo by finding additional weapon pickups or trying your luck with a **Chancebox**.
 
 ## The Pickups
 ![](docimg/demolitionist_items.png)
@@ -401,31 +403,31 @@ A floating lamp companion, may attract moths. The moths will disperse and attack
 
 Reveals the entire layout of the map and shows key locations in the HUD. Also allows you to highlight pickups through walls when holding the **Item Sense** button.
 
+### Safety Tether ~ Replaces Chaos Device
+![](docimg/tether.png)
+
+On use, teleports you back to the start of the map. Basically acts exactly the same as a Chaos Device, although it also resets you to max health should you be under the weather. Additionally it also generates shockwaves on both ends, making your escape more dramatic.
+
 ### Mykradvo Artifact ~ May randomly replace Ghost Artifact or Invinciball
 ![](docimg/mykradvo.png)
 
 When used, bursts into plasma tendrils that will seek all hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
 
-Has a chance to spawn in place of other items, but only one may spawn per map.
+Has a chance to spawn in place of other items, but only one may spawn per map. Cannot be bought due to its rarity.
 
 ### Divine Sprite ~ May randomly replace Grilled Cheese Sandwich
 ![](docimg/sprite.png)
 
 Rapidly boosts your health dramatically, for 30 seconds. Its effects will obviously fade afterwards. Your HUD can't exactly report your actual health, but it's assumed this goes way beyond the one thousand cap, somehow.
 
-Only one may spawn per map, use it wisely.
+Only one may spawn per map, and you can't buy these either. If you manage to fetch one, use it wisely.
 
 ### Devastation Sigil ~ May randomly replace Ragekit
 ![](docimg/deva.png)
 
 20 seconds of absolute destructive potential for any damage you may deal, including to yourself (so be careful).
 
-Same spawn conditions as the other two.
-
-### Safety Tether ~ Replaces Chaos Device
-![](docimg/tether.png)
-
-On use, teleports you back to the start of the map. Basically acts exactly the same as a Chaos Device, although it also resets you to max health should you be under the weather. Additionally it also generates shockwaves on both ends, making your escape more dramatic.
+Same conditions as the other two. Make sure you find the perfect chance to unleash this beast.
 
 ## The Collectibles
 ![](docimg/chancebox.png)

@@ -86,7 +86,7 @@ Class GrilledCheeseSandwich : Inventory
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( Owner.Health > 500 ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		DoTheThing();
 		return true;
 	}
@@ -115,7 +115,7 @@ Class GrilledCheeseSandwich : Inventory
 			if ( damageType == 'InstantDeath' )
 				SafeTeleport();	// get out of pits
 			newdamage = 0;
-			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 			DoTheThing(true);
 			Amount--;
 		}
@@ -135,7 +135,7 @@ Class GrilledCheeseSandwich : Inventory
 			safepos = lastsafepos[4];
 			safeangle = lastsafeangle[4];
 		}
-		Owner.Teleport(safepos,safeangle,TF_TELEFRAG|TF_FORCED|TF_USESPOTZ|TF_NOFOG);
+		Owner.Teleport(safepos,safeangle,0);
 	}
 	override void DoEffect()
 	{
@@ -360,7 +360,7 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.02;
@@ -484,7 +484,7 @@ Class GhostArtifact : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
 		if ( g )
 		{
@@ -598,7 +598,7 @@ Class GravityPower : Powerup
 			Owner.bNOGRAVITY = false;
 			if ( Owner.pos.z > Owner.floorz ) Owner.player.centering = true;
 		}
-		Owner.A_StartSound("powerup/gravityend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/gravityend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.02;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GRAVITYS"));
@@ -636,7 +636,7 @@ Class GravitySuppressor : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let g = GravityPower(Owner.FindInventory("GravityPower"));
 		if ( g )
 		{
@@ -804,7 +804,7 @@ Class InvinciballPower : Powerup
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.05;
@@ -846,7 +846,7 @@ Class InvinciballPower : Powerup
 			if ( level.maptime > lasteffect+5 )
 			{
 				SWWMHandler.DoFlash(Owner,Color(64,255,64,0),15);
-				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP);
+				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP,CHANF_OVERLAP);
 				lasteffect = level.maptime;
 				lastpulse = max(lastpulse,gametic+20);
 				if ( Owner is 'Demolitionist' )
@@ -881,7 +881,7 @@ Class FuckingInvinciball : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Owner.A_StartSound("misc/sundowner",CHAN_POWERUPEXTRA);
 		let i = InvinciballPower(Owner.FindInventory("InvinciballPower"));
 		if ( i )
@@ -1079,7 +1079,7 @@ Class RagekitPower : Powerup
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_AlertMonsters(2000);
@@ -1120,7 +1120,7 @@ Class RagekitPower : Powerup
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (swwm_mutevoice < 2) )
 			lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
-		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
+		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP,CHANF_OVERLAP);
 		lasteffect = level.maptime;
 		lastpulse = max(lastpulse,gametic+35);
 		Demolitionist(Owner).lastbump *= .9;
@@ -1250,7 +1250,7 @@ Class Omnisight : Inventory
 		{
 			if ( Owner.player == players[consoleplayer] )
 			{
-				Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
+				Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
@@ -1268,7 +1268,7 @@ Class Omnisight : Inventory
 			if ( i == consoleplayer )
 			{
 				Console.Printf(StringTable.Localize("$D_OMNISHARE"),Owner.player.GetUserName());
-				players[i].mo.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
+				players[i].mo.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
@@ -1843,7 +1843,7 @@ Class CompanionLamp : Actor
 		{
 			if ( SWWMLamp(master) && SWWMLamp(master).bActive )
 			{
-				A_StartSound("lamp/on",CHAN_ITEMEXTRA);
+				A_StartSound("lamp/on",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				return ResolveState("Active");
 			}
 			return ResolveState(null);
@@ -1855,7 +1855,7 @@ Class CompanionLamp : Actor
 			A_Moth();
 			if ( !SWWMLamp(master) || !SWWMLamp(master).bActive )
 			{
-				A_StartSound("lamp/off",CHAN_ITEMEXTRA);
+				A_StartSound("lamp/off",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				return ResolveState("Spawn");
 			}
 			return ResolveState(null);
@@ -2126,7 +2126,7 @@ Class BarrierPower : PowerIronFeet
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/barrierend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/barrierend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 0.95;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_BARRIER"));
@@ -2154,7 +2154,7 @@ Class EBarrier : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let b = BarrierPower(Owner.FindInventory("BarrierPower"));
 		if ( b )
 		{
@@ -2760,7 +2760,7 @@ Class Mykradvo : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Vector3 spawnpos = Owner.Vec3Angle(15,Owner.angle,Owner.Height*.7);
 		if ( !FindTargets(Owner) )
 		{
@@ -2807,7 +2807,7 @@ Class Mykradvo : Inventory
 			s.pitch = pt;
 			s.ReactionTime += Random[ExploS](-2,2);
 		}
-		A_StartSound("mykradvo/smallarc",CHAN_WEAPON,attenuation:3.);
+		A_StartSound("mykradvo/smallarc",CHAN_WEAPON,CHANF_OVERLAP,attenuation:3.);
 		A_SetTics(Random[Mykradvo](10,50));
 	}
 
@@ -2872,7 +2872,7 @@ Class Mykradvo : Inventory
 		//$Sprite graphics/HUD/Icons/I_Mykradvo.png
 		//$Icon powerup
 		Tag "$T_MYKRADVO";
-		Stamina 1200000;
+		Stamina -1200000;
 		Inventory.Icon "graphics/HUD/Icons/I_Mykradvo.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "mykradvo/arc";
@@ -2979,7 +2979,91 @@ Class SafetyTether : Inventory
 	Mixin SWWMOverlapPickupSound;
 	Mixin SWWMUseToPickup;
 	Mixin SWWMRespawn;
-	Mixin SWWMPickupGlow;
+
+	bool bPrimed, bFailed;
+	int primetim;
+	TextureID OnIcon[3];
+
+	override void Travelled()
+	{
+		Super.Travelled();
+		bPrimed = false;
+	}
+	override Inventory CreateTossable( int amt )
+	{
+		if ( bPrimed ) return null;	// can't drop while primed
+		let ret = Super.CreateTossable(amt);
+		// reattach our glow if we became a pickup
+		if ( (ret == self) && (PickupFlash is 'SWWMPickupFlash') && swwm_itemglows )
+		{
+			let p = Spawn(PickupFlash,Vec3Offset(0,0,16));
+			p.target = self;
+			p.SetStateLabel("Pickup");
+		}
+		return ret;
+	}
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( !bPrimed ) return;
+		Icon = ((primetim%4)>=2)?default.Icon:(primetim>=6)?(bFailed?OnIcon[1]:OnIcon[2]):OnIcon[0];
+		if ( !bFailed && (primetim == 20) ) Owner.A_StartSound("hahaha/hahaha",CHAN_POWERUP,CHANF_OVERLAP);
+		primetim++;
+		if ( (primetim <= 20) || (!bFailed && (primetim <= 50)) ) return;
+		primetim = 0;
+		bPrimed = false;
+		Icon = default.Icon;
+		if ( bFailed ) return;
+		Vector3 safepos;
+		double safeangle;
+		if ( deathmatch ) [safepos, safeangle] = level.PickDeathmatchStart();
+		else [safepos, safeangle] = level.PickPlayerStart(Owner.PlayerNumber());
+		Vector3 oldpos = Owner.pos;
+		if ( !Owner.Teleport(safepos,safeangle,0) )
+		{
+			if ( Owner is 'Demolitionist' )
+				Demolitionist(Owner).lastbump *= .95;
+			Owner.A_StartSound("powerup/tethererror",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+			if ( Owner.player == players[consoleplayer] ) Console.Printf(StringTable.Localize("$D_TETHERFAIL"));
+			return;
+		}
+		let s = Spawn("DemolitionistShockwave",oldpos);
+		s.target = Owner;
+		s.special1 = 120;
+		s = Spawn("DemolitionistShockwave",Owner.pos);
+		s.target = Owner;
+		s.special1 = 120;
+		if ( Owner.player == players[consoleplayer] )
+		{
+			Owner.A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP);
+			Owner.A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.7);
+			Owner.A_StartSound("demolitionist/hardland",CHAN_FOOTSTEP,CHANF_OVERLAP,pitch:.4);
+		}
+		SWWMHandler.DoFlash(Owner,Color(255,255,255,255),10);
+		SWWMHandler.DoFlash(Owner,Color(255,128,192,255),30);
+		SWWMUtility.AchievementProgressInc('swwm_progress_sneaky',1,Owner.player);
+		Amount--;
+		if ( Amount <= 0 ) DepleteOrDestroy();
+	}
+
+	override bool Use( bool pickup )
+	{
+		if ( pickup || bPrimed ) return false;
+		if ( !OnIcon[0] ) OnIcon[0] = TexMan.CheckForTexture("graphics/HUD/Icons/I_SafetyOn.png");
+		if ( !OnIcon[1] ) OnIcon[1] = TexMan.CheckForTexture("graphics/HUD/Icons/I_SafetyNo.png");
+		if ( !OnIcon[2] ) OnIcon[2] = TexMan.CheckForTexture("graphics/HUD/Icons/I_SafetyYes.png");
+		bPrimed = true;
+		primetim = 0;
+		Vector3 safepos;
+		if ( deathmatch ) safepos = level.PickDeathmatchStart();
+		else safepos = level.PickPlayerStart(Owner.PlayerNumber());
+		bFailed = (level.Vec3Diff(Owner.pos,safepos).length() < 400);
+		if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(bFailed?"powerup/tetherfail":"powerup/tetheruse",CHAN_ITEMEXTRA,CHANF_OVERLAP);
+		// don't consume on use, will happen later
+		Amount++;
+		return true;
+	}
 
 	Default
 	{
@@ -2988,10 +3072,10 @@ Class SafetyTether : Inventory
 		//$Sprite graphics/HUD/Icons/I_Safety.png
 		//$Icon powerup
 		Tag "$T_SAFETY";
-		Stamina 160000;
+		Stamina 240000;
 		Inventory.Icon "graphics/HUD/Icons/I_Safety.png";
 		Inventory.PickupSound "misc/p_pkup";
-		Inventory.UseSound "powerup/safety";
+		Inventory.UseSound "";
 		Inventory.PickupMessage "$T_SAFETY";
 		Inventory.MaxAmount 5;
 		Inventory.InterHubAmount 5;
@@ -3003,12 +3087,15 @@ Class SafetyTether : Inventory
 		+INVENTORY.BIGPOWERUP;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
+		Radius 5;
+		Height 23;
 	}
 	States
 	{
 	Spawn:
-		XZW1 A -1;
-		Stop;
+		XZW1 A 33;
+		XZW1 B 2;
+		Loop;
 	}
 }
 
@@ -3115,7 +3202,7 @@ Class AngeryPower : Powerup
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/devastationend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/devastationend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(128,224,0,255),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_AlertMonsters(2000);
@@ -3130,7 +3217,7 @@ Class AngeryPower : Powerup
 		Owner.A_AlertMonsters(swwm_uncapalert?0:5000);
 		SWWMHandler.DoFlash(Owner,Color(64,224,0,255),10);
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
-		Owner.A_StartSound("powerup/devastationhit",CHAN_POWERUP);
+		Owner.A_StartSound("powerup/devastationhit",CHAN_POWERUP,CHANF_OVERLAP);
 		lasteffect = level.maptime;
 		lastpulse = max(lastpulse,gametic+35);
 		if ( Owner is 'Demolitionist' )
@@ -3157,7 +3244,7 @@ Class AngerySigil : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMUtility.AchievementProgressInc('swwm_progress_deva',1,Owner.player);
 		let r = AngeryPower(Owner.FindInventory("AngeryPower"));
 		if ( r )
@@ -3197,7 +3284,7 @@ Class AngerySigil : Inventory
 		//$Sprite graphics/HUD/Icons/I_Devastation.png
 		//$Icon powerup
 		Tag "$T_DEVASTATION";
-		Stamina 1500000;
+		Stamina -1500000;
 		Inventory.Icon "graphics/HUD/Icons/I_Devastation.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/devastation";
@@ -3387,7 +3474,7 @@ Class DivineSpriteEffect : Inventory
 		healtim--;
 		if ( (healtim <= 0) || (Owner.Health <= 0) )
 		{
-			Owner.A_StartSound("powerup/divineend",CHAN_ITEMEXTRA);
+			Owner.A_StartSound("powerup/divineend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 			SWWMHandler.DoFlash(Owner,Color(80,255,255,255),40);
 			if ( Owner is 'Demolitionist' )
 				Demolitionist(Owner).lastbump *= 0.95;
@@ -3401,14 +3488,14 @@ Class DivineSpriteEffect : Inventory
 			SWWMHandler.DoFlash(Owner,Color(40,255,255,255),20);
 			if ( Owner is 'Demolitionist' )
 				Demolitionist(Owner).lastbump *= 0.97;
-			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA);
+			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		}
 		else if ( !(healcnt%5) )
 		{
 			Owner.GiveBody(500,10000);
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 			SWWMHandler.DoFlash(Owner,Color(10,255,255,255),10);
-			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA);
+			Owner.A_StartSound("powerup/divinehit",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		}
 	}
 }
@@ -3426,7 +3513,7 @@ Class DivineSprite : Inventory
 		if ( pickup && !deathmatch ) return false;
 		let p = Owner.FindInventory("DivineSpriteEffect");
 		if ( p ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Owner.GiveInventory("DivineSpriteEffect",1);
 		SWWMUtility.AchievementProgressInc('swwm_progress_divine',1,Owner.player);
 		return true;
@@ -3458,7 +3545,7 @@ Class DivineSprite : Inventory
 		//$Sprite graphics/HUD/Icons/I_Divine.png
 		//$Icon powerup
 		Tag "$T_DIVINE";
-		Stamina 3600000;
+		Stamina -3600000;
 		Inventory.Icon "graphics/HUD/Icons/I_Divine.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "powerup/divineuse";

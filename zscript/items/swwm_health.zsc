@@ -57,7 +57,7 @@ Class RefresherRegen : Powerup
 		if ( !Owner.GiveBody(int(Strength),500) ) return;
 		SWWMScoreObj.Spawn(int(Strength),Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 		SWWMHandler.DoFlash(Owner,Color(32,224,128,255),10);
-		Owner.A_StartSound("powerup/refresher",CHAN_ITEM,CHANF_LOCAL,.4);
+		Owner.A_StartSound("powerup/refresher",CHAN_ITEMEXTRA,CHANF_LOCAL|CHANF_OVERLAP,.4);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 0.99;
 	}

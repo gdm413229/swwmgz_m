@@ -480,8 +480,8 @@ Class EvisceratorProj : Actor
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_NoGravity();
-		A_SetScale(3.5);
-		SWWMUtility.DoExplosion(self,80,120000,200,80);
+		A_SetScale(3.);
+		SWWMUtility.DoExplosion(self,80,120000,150,80);
 		A_QuakeEx(6,6,6,20,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.7);
 		A_StartSound("eviscerator/shell",CHAN_WEAPON,attenuation:.5);
 		A_StartSound("eviscerator/shell",CHAN_VOICE,attenuation:.3);

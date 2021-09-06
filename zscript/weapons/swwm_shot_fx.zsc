@@ -265,7 +265,7 @@ Class DragonBreathArm : Actor
 			let p = Spawn("DragonBreathPuff",pos);
 			p.alpha *= .6+.4*(ReactionTime/20.);
 			p.scale *= 3.5-2.5*(ReactionTime/20.);
-			SWWMUtility.DoExplosion(self,4+(reactiontime/2),1000+200*reactiontime,120+5*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
+			SWWMUtility.DoExplosion(self,4+(reactiontime/2),1000+200*reactiontime,90+5*reactiontime,flags:DE_HOWL,ignoreme:bHITOWNER?null:target);
 			double spd = vel.length();
 			vel = (vel*.4+(FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2),FRandom[ExploS](-.2,.2))).unit()*spd;
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);

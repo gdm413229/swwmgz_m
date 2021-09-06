@@ -545,7 +545,7 @@ Class BiosparkBall : Actor
 	{
 		A_StopSound(CHAN_VOICE);
 		A_AlertMonsters(swwm_uncapalert?0:5000);
-		SWWMUtility.DoExplosion(self,60,20000,150,80,flags:DE_HOWL);
+		SWWMUtility.DoExplosion(self,50,20000,150,80,flags:DE_HOWL);
 		A_QuakeEx(6,6,6,16,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.8);
 		A_StartSound("biospark/hit",CHAN_ITEM,attenuation:.8);
 		A_StartSound("biospark/hit",CHAN_WEAPON,attenuation:.6);
@@ -598,7 +598,7 @@ Class BiosparkBall : Actor
 		if ( special1 > 30 ) return;
 		double factor = (30-special1)/30.;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,20*factor,0.,150*invfct,flags:DE_HOWL);
+		SWWMUtility.DoExplosion(self,15*factor,0.,150*invfct,flags:DE_HOWL);
 		SWWMUtility.DoExplosion(self,0,-5000*factor,300*invfct);
 		int numpt = int(Random[ExploS](16,32)*factor);
 		for ( int i=0; i<numpt; i++ )
@@ -709,7 +709,7 @@ Class BiosparkBeamImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:2000);
-		SWWMUtility.DoExplosion(self,50,20000,100,40,flags:DE_HOWL);
+		SWWMUtility.DoExplosion(self,40,20000,100,40,flags:DE_HOWL);
 		A_QuakeEx(3,3,3,12,0,800,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollIntensity:.4);
 		A_StartSound("biospark/beamhit",CHAN_ITEM,attenuation:1.1);
 		A_StartSound("biospark/beamhit",CHAN_WEAPON,attenuation:.8);
@@ -762,7 +762,7 @@ Class BiosparkBeamImpact : Actor
 		if ( special1 > 30 ) return;
 		double factor = (30-special1)/30.;
 		double invfct = 1.-factor;
-		SWWMUtility.DoExplosion(self,15*factor,0.,50*invfct,flags:DE_HOWL);
+		SWWMUtility.DoExplosion(self,10*factor,0.,50*invfct,flags:DE_HOWL);
 		SWWMUtility.DoExplosion(self,0.,-5000*factor,100*invfct);
 		int numpt = int(Random[ExploS](8,16)*factor);
 		for ( int i=0; i<numpt; i++ )

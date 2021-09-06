@@ -504,7 +504,7 @@ Class EvisceratorProj : Actor
 		}
 		int trail = 0;
 		if ( target && target.player ) trail = CVar.GetCVar('swwm_funtrails',target.player).GetInt();
-		for ( int i=0; i<40; i++ )
+		for ( int i=0; i<20; i++ )
 		{
 			p = EvisceratorChunk(Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs)));
 			p.bHITOWNER = true;

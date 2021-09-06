@@ -84,6 +84,17 @@ HardwareShader PostProcess scene
 
 HardwareShader PostProcess scene
 {
+	Name "DivineShader"
+	Shader "shaders/pp/Diviscreen.fp" 330
+	Texture BumpTex "textures/frosttex.png"
+	Texture WarpTex "textures/smoketex.png"
+	Texture NoiseTex "textures/graynoise.png"
+	Uniform float timer
+	Uniform float str
+}
+
+HardwareShader PostProcess scene
+{
 	Name "Glitch"
 	Shader "shaders/pp/Glitch.fp" 330
 	Uniform float Timer

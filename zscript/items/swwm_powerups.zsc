@@ -241,6 +241,15 @@ Class GrilledCheeseSandwich : Inventory
 	}
 }
 
+Mixin Class SWWMShadedPowerup
+{
+	override Color GetBlend()
+	{
+		if ( swwm_shaders ) return 0;
+		return Super.GetBlend();
+	}
+}
+
 Class GhostSnd : Actor
 {
 	Default
@@ -334,6 +343,8 @@ Class GhostTarget : Actor
 
 Class GhostPower : PowerInvisibility
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd;
 
 	Default
@@ -569,6 +580,8 @@ Class GravSnd : Actor
 
 Class GravityPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd;
 
 	Default
@@ -765,6 +778,8 @@ Class InvinciSnd : Actor
 
 Class InvinciballPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor l, snd;
 	int lasteffect;
 	transient int lastpulse;
@@ -1014,6 +1029,8 @@ Class RageSnd : Actor
 
 Class RagekitPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor l, snd;
 	int lasteffect;
 	transient int lastpulse, lastrage;
@@ -1071,7 +1088,7 @@ Class RagekitPower : Powerup
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 			lastpulse = max(lastpulse,gametic+10);
-			Demolitionist(Owner).lastbump *= .98;
+			Demolitionist(Owner).lastbump *= .995;
 		}
 	}
 
@@ -2071,6 +2088,8 @@ Class BarrierSnd : Actor
 
 Class BarrierPower : PowerIronFeet
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd, l;
 
 	Default
@@ -3164,6 +3183,8 @@ Class AngerySnd : Actor
 }
 Class AngeryPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor l, snd;
 	int lasteffect;
 	transient int lastpulse;
@@ -3392,7 +3413,7 @@ Class DivineSpriteSnd : Actor
 			return;
 		}
 		SetOrigin(target.pos,true);
-		double vol = clamp((target.Health-1000)/6000.,0.,1.);
+		double vol = clamp((DivineSpriteEffect(master).AlphInter.GetValue()-1000.)/9000.,0.,1.);
 		if ( players[consoleplayer].Camera == target )
 		{
 			A_SoundVolume(CHAN_VOICE,0.);
@@ -3407,9 +3428,8 @@ Class DivineSpriteSnd : Actor
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		double vol = target?clamp((target.Health-1000)/9000.,0.,1.):.1;
-		A_StartSound("powerup/divineact",CHAN_VOICE,CHANF_LOOP,.4*vol,1.5);
-		A_StartSound("powerup/divineact",CHAN_7,CHANF_LOOP,.8*vol,ATTN_NONE);
+		A_StartSound("powerup/divineact",CHAN_VOICE,CHANF_LOOP,.4,1.5);
+		A_StartSound("powerup/divineact",CHAN_7,CHANF_LOOP,.8,ATTN_NONE);
 	}
 	override void OnDestroy()
 	{
@@ -3424,6 +3444,7 @@ Class DivineSpriteEffect : Inventory
 	int healtim;
 	bool bHealDone;
 	Actor l, snd;
+	DynamicValueInterpolator AlphInter;
 
 	Property HealTimer : healtim;
 
@@ -3438,6 +3459,14 @@ Class DivineSpriteEffect : Inventory
 	clearscope bool isBlinking() const
 	{
 		return ( (healtim <= BLINKTHRESHOLD) && (healtim&8) );
+	}
+
+	override Color GetBlend()
+	{
+		if ( swwm_shaders ) return 0;
+		if ( !AlphInter ) AlphInter = DynamicValueInterpolator.Create(Owner.Health,.1,1,100);
+		double alph = clamp((AlphInter.GetValue()-1000.)/6000.,0.,1.);
+		return Color(int(64*alph),255,255,255);
 	}
 
 	override void Travelled()
@@ -3456,8 +3485,10 @@ Class DivineSpriteEffect : Inventory
 		snd.target = Owner;
 		snd.master = self;
 		int numpt = Random[ExploS](5,10);
-		double alph = clamp((Owner.Health-1000.)/6000.,0.,1.);
-		double scl = clamp((Owner.Health-1000.)/6000.,2.,4.);
+		if ( !AlphInter ) AlphInter = DynamicValueInterpolator.Create(Owner.Health,.1,1,100);
+		AlphInter.Update(Owner.Health);
+		double alph = clamp((AlphInter.GetValue()-1000.)/6000.,0.,1.);
+		double scl = clamp((AlphInter.GetValue()-1000.)/6000.,2.,4.);
 		for ( int i=0; i<numpt; i++ )
 		{
 			double ang = FRandom[ExploS](0,360);
@@ -3469,7 +3500,7 @@ Class DivineSpriteEffect : Inventory
 		}
 		if ( bHealDone || (Owner.Health <= 0) )
 		{
-			if ( Owner.Health <= 1000 ) DepleteOrDestroy();
+			if ( AlphInter.GetValue() <= 1000 ) DepleteOrDestroy();
 			return;
 		}
 		healcnt++;

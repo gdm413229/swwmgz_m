@@ -183,6 +183,15 @@ Class SWWMCellAmmoBig : SWWMAmmoSpawner
 
 	static Class<Actor> PickAmmo( bool notondemand = false )
 	{
+		if ( !Random[Replacements](0,3) )
+		{
+			//if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('GrandLance')) && SWWMUtility.CheckNeedsItem('GrandAmmo',true) && !SWWMUtility.ItemExists('GrandAmmo',worldonly:true) && !SWWMUtility.ItemExists('GrandLance',worldonly:true) )
+			//	return 'GrandAmmo';
+			//if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('RafanKos')) && SWWMUtility.CheckNeedsItem('UltimateAmmo',true) && !SWWMUtility.ItemExists('UltimateAmmo',worldonly:true) && !SWWMUtility.ItemExists('RafanKos',worldonly:true) )
+			//	return 'UltimateAmmo';
+			if ( (notondemand || SWWMUtility.ItemExists('Ynykron')) && SWWMUtility.CheckNeedsItem('YnykronAmmo',true) && !SWWMUtility.ItemExists('YnykronAmmo',worldonly:true) && !SWWMUtility.ItemExists('Ynykron',worldonly:true) )
+				return 'YnykronAmmo';
+		}
 		/*if ( Random[Replacements](0,1) )
 		{
 			if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('EMPCarbine')) ) return Random[Replacements](0,3)?'EMPCoreBundleSpawn':'EMPCore';

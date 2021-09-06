@@ -947,7 +947,17 @@ Class Chancebox : Actor
 			// no candidates? just burst into treats
 			if ( Random[Chancebox](0,1) )
 			{
-				let a = Spawn((!Random[Chancebox](0,2)&&SWWMUtility.ItemExists("Spreadgun"))?"GoldShell":(Random[Chancebox](0,1)&&SWWMUtility.ItemExists("Ynykron"))?"YnykronAmmo":"GrilledCheeseSandwich",pos);
+				Class<Inventory> vipammodrop = null;
+				if ( SWWMUtility.ItemExists("Ynykron") && Random[Chancebox](0,1) ) vipammodrop = "YnykronAmmo";
+				//if ( SWWMUtility.ItemExists("GrandLance") && Random[Chancebox](0,1) && !vipammodrop ) vipammodrop = "GrandAmmo";
+				//if ( SWWMUtility.ItemExists("RafanKos") && Random[Chancebox](0,1) && !vipammodrop ) vipammodrop = "UltimateAmmo";
+				if ( SWWMUtility.ItemExists("Spreadgun") && SWWMUtility.CheckNeedsItem("GoldShell",true) && !vipammodrop ) vipammodrop = "GoldShell";
+				Class<Inventory> vipitemdrop = null;
+				if ( SWWMUtility.CheckNeedsItem("Mykradvo",true) && !SWWMUtility.ItemExists("Mykradvo",worldonly:true) && Random[Chancebox](0,1) ) vipitemdrop = "Mykradvo";
+				if ( SWWMUtility.CheckNeedsItem("AngerySigil",true) && !SWWMUtility.ItemExists("AngerySigil",worldonly:true) && Random[Chancebox](0,1) && !vipitemdrop ) vipitemdrop = "AngerySigil";
+				if ( SWWMUtility.CheckNeedsItem("DivineSprite",true) && !SWWMUtility.ItemExists("DivineSprite",worldonly:true) && Random[Chancebox](0,1) && !vipitemdrop ) vipitemdrop = "DivineSprite";
+				if ( !vipitemdrop ) vipitemdrop = "GrilledCheeseSandwich";
+				let a = Spawn((!Random[Chancebox](0,2)&&vipammodrop)?vipammodrop:vipitemdrop,pos);
 				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);

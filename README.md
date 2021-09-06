@@ -276,12 +276,14 @@ Popularly known as the ***"Death Cannon"***. One of the four ultimate weapons co
 
 Unlike its previous incarnation in **SWWM Platinum**, this one doesn't have such an obscene pre-fire delay, so it's much easier to land a shot (not to mention also being far more lethal, thanks to the added chain reaction effect).
 
-Due to its rarity, you can't buy it from the store, so you gotta find one in the field.
+Due to its rarity, you can't buy it from the store, so you gotta find one (and only one) in the field.
 
-### Crystal Box
+### Crystal Box ~ Replaces Cell Pack, Greater Rune
 ![](docimg/ynykronammo.png)
 
-Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn in the world, and cannot be bought, so you'll have to get more ammo by finding additional weapon pickups or trying your luck with a **Chancebox**.
+Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light.
+
+These spawn VERY rarely and, like the weapon that uses them, you can't buy them either. It's also possible to find them in Chanceboxes, if you're lucky.
 
 ## The Pickups
 ![](docimg/demolitionist_items.png)

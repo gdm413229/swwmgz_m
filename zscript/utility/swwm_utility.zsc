@@ -1809,9 +1809,27 @@ Class SWWMUtility
 	}
 	static Class<Inventory> PickSWWMSlot0()
 	{
-		//return PickTrio('Ynykron','GrandLance','RafanKos');
-		//return PickPair('Ynykron','GrandLance');
-		return 'Ynykron';
+		/*if ( !CheckNeedsItem('Ynykron') )
+		{
+			if ( !CheckNeedsItem('GrandLance') )
+			{
+				if ( !CheckNeedsItem('RafanKos') )
+					return PickSWWMSlot9();
+				return 'RafanKos';
+			}
+			if ( !CheckNeedsItem('RafanKos') )
+				return 'GrandLance';
+			return PickPair('GrandLance','RafanKos');
+		}
+		return PickTrio('Ynykron','GrandLance','RafanKos');*/
+		/*if ( !CheckNeedsItem('Ynykron') )
+		{
+			if ( !CheckNeedsItem('GrandLance') )
+				return PickSWWMSlot9();
+			return 'GrandLance';
+		}
+		return PickPair('Ynykron','GrandLance');*/
+		return !CheckNeedsItem('Ynykron')?'CandyGun':'Ynykron';
 	}
 	static Class<Inventory> PickDoomSlot6()
 	{

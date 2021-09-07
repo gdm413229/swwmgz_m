@@ -60,7 +60,7 @@ extend Class SWWMHandler
 			Vector3 safepos;
 			double safeangle;
 			[safepos, safeangle] = level.PickPlayerStart(e.Args[0]);
-			players[e.Args[0]].mo.Teleport(safepos,safeangle,TF_TELEFRAG|TF_FORCED|TF_USESPOTZ);
+			players[e.Args[0]].mo.Teleport(safepos,safeangle,0);
 		}
 		else if ( e.Name ~== "swwmweaponcheat" )
 		{

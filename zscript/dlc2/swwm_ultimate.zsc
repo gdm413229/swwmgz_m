@@ -1,0 +1,39 @@
+// Nekuratek Rafan-Kos aka "The Ultimate Weapon" (from UnSX 4)
+// Slot 0, spawns shared with Ynykron Artifact
+
+Class RafanKos : SWWMWeapon
+{
+	int clipcount;
+	bool chambered;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		//$Title Rafan-Kos
+		//$Group Weapons
+		//$Sprite graphics/HUD/Icons/W_RafanKos.png
+		//$Icon weapon
+		Tag "$T_RAFANKOS";
+		Inventory.PickupMessage "$T_RAFANKOS";
+		Obituary "$O_RAFANKOS";
+		Inventory.Icon "graphics/HUD/Icons/W_RafanKos.png";
+		Weapon.SlotNumber 0;
+		Weapon.SlotPriority 3.;
+		Weapon.SelectionOrder 7975;
+		Weapon.AmmoType1 "UltimateAmmo";
+		Weapon.AmmoGive1 1;
+		SWWMWeapon.DropAmmoType "UltimateAmmo";
+		RafanKos.ClipCount 4;
+		Stamina -5000000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.EXPLOSIVE;
+		+WEAPON.BFG;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

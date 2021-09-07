@@ -723,13 +723,31 @@ Class ChanceboxSpawner : Actor
 			return;
 		}
 		int numbox = 0;
-		let ti = ThinkerIterator.Create("ChanceboxSpawner");
+		ThinkerIterator ti = ThinkerIterator.Create("Chancebox");
 		while ( ti.Next() ) numbox++;
-		ti = ThinkerIterator.Create("Chancebox");
-		while ( ti.Next() ) numbox++;
-		if ( numbox > 3 )
+		if ( numbox >= 3 )
 		{
-			// there's three boxes in the map already (plus ourselves)
+			// there's three boxes in the map already
+			Destroy();
+			return;
+		}
+		BlockLinesIterator bl = BlockLinesIterator.CreateFromPos(pos,32,32,CurSector);
+		double tbox[4];
+		// top, bottom, left, right
+		tbox[0] = pos.y+32;
+		tbox[1] = pos.y-32;
+		tbox[2] = pos.x-32;
+		tbox[3] = pos.x+32;
+		while ( bl.Next() )
+		{
+			Line l = bl.CurLine;
+			if ( !l ) continue;
+			if ( tbox[2] > l.bbox[3] ) continue;
+			if ( tbox[3] < l.bbox[2] ) continue;
+			if ( tbox[0] < l.bbox[1] ) continue;
+			if ( tbox[1] > l.bbox[0] ) continue;
+			if ( SWWMUtility.BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) != -1 ) continue;
+			// there isn't enough space to spawn a box here
 			Destroy();
 			return;
 		}
@@ -929,7 +947,15 @@ Class Chancebox : Actor
 			// no candidates? just burst into treats
 			if ( Random[Chancebox](0,1) )
 			{
-				let a = Spawn((!Random[Chancebox](0,2)&&SWWMUtility.ItemExists("Spreadgun"))?"GoldShell":(Random[Chancebox](0,1)&&SWWMUtility.ItemExists("Ynykron"))?"YnykronAmmo":"GrilledCheeseSandwich",pos);
+				Class<Inventory> vipammodrop = null;
+				if ( SWWMUtility.ItemExists("Ynykron") && Random[Chancebox](0,1) ) vipammodrop = "YnykronAmmo";
+				//if ( SWWMUtility.ItemExists("GrandLance") && Random[Chancebox](0,1) && !vipammodrop ) vipammodrop = "GrandAmmo";
+				//if ( SWWMUtility.ItemExists("RafanKos") && Random[Chancebox](0,1) && !vipammodrop ) vipammodrop = "UltimateAmmo";
+				if ( SWWMUtility.ItemExists("Spreadgun") && SWWMUtility.CheckNeedsItem("GoldShell",true) && !vipammodrop ) vipammodrop = "GoldShell";
+				Class<Inventory> vipitemdrop = null;
+				if ( SWWMUtility.CheckNeedsItem("Mykradvo",true) && !SWWMUtility.ItemExists("Mykradvo",worldonly:true) && Random[Chancebox](0,1) ) vipitemdrop = "Mykradvo";
+				if ( !vipitemdrop ) vipitemdrop = "GrilledCheeseSandwich";
+				let a = Spawn((!Random[Chancebox](0,2)&&vipammodrop)?vipammodrop:vipitemdrop,pos);
 				a.bDROPPED = false;
 				a.bNOGRAVITY = false;
 				a.vel.z = FRandom[Chancebox](2,4);

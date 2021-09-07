@@ -86,7 +86,7 @@ Class GrilledCheeseSandwich : Inventory
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( Owner.Health > 500 ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		DoTheThing();
 		return true;
 	}
@@ -115,7 +115,7 @@ Class GrilledCheeseSandwich : Inventory
 			if ( damageType == 'InstantDeath' )
 				SafeTeleport();	// get out of pits
 			newdamage = 0;
-			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			if ( (Owner.player == players[consoleplayer]) || bBigPowerup ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 			DoTheThing(true);
 			Amount--;
 		}
@@ -135,7 +135,7 @@ Class GrilledCheeseSandwich : Inventory
 			safepos = lastsafepos[4];
 			safeangle = lastsafeangle[4];
 		}
-		Owner.Teleport(safepos,safeangle,TF_TELEFRAG|TF_FORCED|TF_USESPOTZ|TF_NOFOG);
+		Owner.Teleport(safepos,safeangle,0);
 	}
 	override void DoEffect()
 	{
@@ -241,6 +241,15 @@ Class GrilledCheeseSandwich : Inventory
 	}
 }
 
+Mixin Class SWWMShadedPowerup
+{
+	override Color GetBlend()
+	{
+		if ( swwm_shaders ) return 0;
+		return Super.GetBlend();
+	}
+}
+
 Class GhostSnd : Actor
 {
 	Default
@@ -334,6 +343,8 @@ Class GhostTarget : Actor
 
 Class GhostPower : PowerInvisibility
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd;
 
 	Default
@@ -360,7 +371,7 @@ Class GhostPower : PowerInvisibility
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/ghostend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(96,224,192,255),20);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.02;
@@ -484,7 +495,7 @@ Class GhostArtifact : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let g = GhostPower(Owner.FindInventory("GhostPower"));
 		if ( g )
 		{
@@ -569,6 +580,8 @@ Class GravSnd : Actor
 
 Class GravityPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd;
 
 	Default
@@ -598,7 +611,7 @@ Class GravityPower : Powerup
 			Owner.bNOGRAVITY = false;
 			if ( Owner.pos.z > Owner.floorz ) Owner.player.centering = true;
 		}
-		Owner.A_StartSound("powerup/gravityend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/gravityend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.02;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_GRAVITYS"));
@@ -636,7 +649,7 @@ Class GravitySuppressor : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let g = GravityPower(Owner.FindInventory("GravityPower"));
 		if ( g )
 		{
@@ -765,6 +778,8 @@ Class InvinciSnd : Actor
 
 Class InvinciballPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor l, snd;
 	int lasteffect;
 	transient int lastpulse;
@@ -804,7 +819,7 @@ Class InvinciballPower : Powerup
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/invinciballend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(96,255,64,0),20);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.05;
@@ -846,7 +861,7 @@ Class InvinciballPower : Powerup
 			if ( level.maptime > lasteffect+5 )
 			{
 				SWWMHandler.DoFlash(Owner,Color(64,255,64,0),15);
-				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP);
+				Owner.A_StartSound("powerup/invinciballhit",CHAN_POWERUP,CHANF_OVERLAP);
 				lasteffect = level.maptime;
 				lastpulse = max(lastpulse,gametic+20);
 				if ( Owner is 'Demolitionist' )
@@ -881,7 +896,7 @@ Class FuckingInvinciball : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Owner.A_StartSound("misc/sundowner",CHAN_POWERUPEXTRA);
 		let i = InvinciballPower(Owner.FindInventory("InvinciballPower"));
 		if ( i )
@@ -1014,6 +1029,8 @@ Class RageSnd : Actor
 
 Class RagekitPower : Powerup
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor l, snd;
 	int lasteffect;
 	transient int lastpulse, lastrage;
@@ -1071,7 +1088,7 @@ Class RagekitPower : Powerup
 				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 			lastpulse = max(lastpulse,gametic+10);
-			Demolitionist(Owner).lastbump *= .98;
+			Demolitionist(Owner).lastbump *= .995;
 		}
 	}
 
@@ -1079,7 +1096,7 @@ Class RagekitPower : Powerup
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/ragekitend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		SWWMHandler.DoFlash(Owner,Color(128,255,0,0),30);
 		Owner.A_QuakeEx(4,4,4,20,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.A_AlertMonsters(2000);
@@ -1120,7 +1137,7 @@ Class RagekitPower : Powerup
 		Owner.A_QuakeEx(8,8,8,Random[Rage](3,8),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (swwm_mutevoice < 2) )
 			lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
-		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP);
+		Owner.A_StartSound("powerup/ragekithit",CHAN_POWERUP,CHANF_OVERLAP);
 		lasteffect = level.maptime;
 		lastpulse = max(lastpulse,gametic+35);
 		Demolitionist(Owner).lastbump *= .9;
@@ -1250,7 +1267,7 @@ Class Omnisight : Inventory
 		{
 			if ( Owner.player == players[consoleplayer] )
 			{
-				Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
+				Owner.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
@@ -1268,7 +1285,7 @@ Class Omnisight : Inventory
 			if ( i == consoleplayer )
 			{
 				Console.Printf(StringTable.Localize("$D_OMNISHARE"),Owner.player.GetUserName());
-				players[i].mo.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA);
+				players[i].mo.A_StartSound("powerup/omnisight",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				// automatically zoom out so the player can know how far this goes
 				CVar.FindCVar('swwm_mm_zoom').SetFloat(2.);
 			}
@@ -1843,7 +1860,7 @@ Class CompanionLamp : Actor
 		{
 			if ( SWWMLamp(master) && SWWMLamp(master).bActive )
 			{
-				A_StartSound("lamp/on",CHAN_ITEMEXTRA);
+				A_StartSound("lamp/on",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				return ResolveState("Active");
 			}
 			return ResolveState(null);
@@ -1855,7 +1872,7 @@ Class CompanionLamp : Actor
 			A_Moth();
 			if ( !SWWMLamp(master) || !SWWMLamp(master).bActive )
 			{
-				A_StartSound("lamp/off",CHAN_ITEMEXTRA);
+				A_StartSound("lamp/off",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 				return ResolveState("Spawn");
 			}
 			return ResolveState(null);
@@ -1970,7 +1987,7 @@ Class SWWMLamp : Inventory
 		bActive = false;
 		bActivated = false;
 	}
-	clearscope bool isBlinking()
+	clearscope bool isBlinking() const
 	{
 		return ( (Charge < 10) && (level.maptime&8) );
 	}
@@ -2071,6 +2088,8 @@ Class BarrierSnd : Actor
 
 Class BarrierPower : PowerIronFeet
 {
+	Mixin SWWMShadedPowerup;
+
 	Actor snd, l;
 
 	Default
@@ -2126,7 +2145,7 @@ Class BarrierPower : PowerIronFeet
 	{
 		Super.EndEffect();
 		if ( !Owner ) return;
-		Owner.A_StartSound("powerup/barrierend",CHAN_ITEMEXTRA);
+		Owner.A_StartSound("powerup/barrierend",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 0.95;
 		if ( (EffectTics <= 0) && Owner && Owner.CheckLocalView() ) Console.Printf(StringTable.Localize("$D_BARRIER"));
@@ -2151,10 +2170,12 @@ Class EBarrier : Inventory
 	Mixin SWWMRespawn;
 	Mixin SWWMPickupGlow;
 
+	int terrainwait;
+
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		let b = BarrierPower(Owner.FindInventory("BarrierPower"));
 		if ( b )
 		{
@@ -2184,6 +2205,52 @@ Class EBarrier : Inventory
 		tracer.angle = angle;
 		tracer.target = self;
 		tracer.FloatBobPhase = FloatBobPhase;
+	}
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		// check terrain for auto-use
+		let b = Powerup(Owner.FindInventory("BarrierPower"));
+		if ( b && (b.EffectTics > 5) )
+		{
+			terrainwait = 20;
+			return;
+		}
+		bool damageterrain = false;
+		// check any 3d floors first
+		for ( int i=0; i<Owner.CurSector.Get3DFloorCount(); i++ )
+		{
+			F3DFloor ff = Owner.CurSector.Get3DFloor(i);
+			if ( !(ff.flags&(F3DFloor.FF_EXISTS|F3DFloor.FF_SWIMMABLE)) ) continue;
+			if ( (ff.model.DamageAmount <= 0) || (ff.model.damageinterval <= 0) ) continue;
+			if ( ff.top.ZAtPoint(Owner.pos.xy) <= Owner.pos.z ) continue;
+			if ( ff.bottom.ZAtPoint(Owner.pos.xy) >= (Owner.pos.z+Owner.Height) ) continue;
+			damageterrain = true;
+			break;
+		}
+		if ( !damageterrain && (Owner.pos.z <= Owner.floorz) )
+		{
+			if ( (Owner.floorsector.damageamount > 0) && (Owner.floorsector.damageinterval > 0) ) damageterrain = true;
+			else
+			{
+				let t = Owner.GetFloorTerrain();
+				if ( t && (t.DamageAmount > 0) && (t.DamageTimeMask > 0) )
+					damageterrain = true;
+			}
+		}
+		if ( !damageterrain )
+		{
+			terrainwait = max(0,terrainwait-1);
+			return;
+		}
+		else terrainwait++;
+		if ( terrainwait <= 20 ) return;
+		terrainwait = 0;
+		bool shouldautouse = false;
+		if ( swwm_enforceautousebarrier == 1 ) shouldautouse = true;
+		else if ( swwm_enforceautousebarrier == -1 ) shouldautouse = false;
+		else shouldautouse = CVar.GetCVar('swwm_autousebarrier',Owner.player).GetBool();
+		if ( shouldautouse ) Owner.UseInventory(self);
 	}
 
 	Default
@@ -2760,7 +2827,7 @@ Class Mykradvo : Inventory
 	override bool Use( bool pickup )
 	{
 		if ( pickup && !deathmatch ) return false;
-		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Vector3 spawnpos = Owner.Vec3Angle(15,Owner.angle,Owner.Height*.7);
 		if ( !FindTargets(Owner) )
 		{
@@ -2807,7 +2874,7 @@ Class Mykradvo : Inventory
 			s.pitch = pt;
 			s.ReactionTime += Random[ExploS](-2,2);
 		}
-		A_StartSound("mykradvo/smallarc",CHAN_WEAPON);
+		A_StartSound("mykradvo/smallarc",CHAN_WEAPON,CHANF_OVERLAP,attenuation:3.);
 		A_SetTics(Random[Mykradvo](10,50));
 	}
 
@@ -2872,13 +2939,13 @@ Class Mykradvo : Inventory
 		//$Sprite graphics/HUD/Icons/I_Mykradvo.png
 		//$Icon powerup
 		Tag "$T_MYKRADVO";
-		Stamina 1200000;
+		Stamina -1200000;
 		Inventory.Icon "graphics/HUD/Icons/I_Mykradvo.png";
 		Inventory.PickupSound "misc/p_pkup";
 		Inventory.UseSound "mykradvo/arc";
 		Inventory.PickupMessage "$T_MYKRADVO";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
+		Inventory.MaxAmount 3;
+		Inventory.InterHubAmount 3;
 		Inventory.PickupFlash "SWWMPurplePickupFlash";
 		+INVENTORY.ALWAYSPICKUP;
 		+INVENTORY.AUTOACTIVATE;
@@ -2908,7 +2975,7 @@ Class MykradvoX : GhostArtifactX
 	override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		A_StartSound("powerup/mykradvoamb",CHAN_VOICE,CHANF_LOOP);
+		A_StartSound("powerup/mykradvoamb",CHAN_VOICE,CHANF_LOOP,attenuation:2.);
 	}
 	override void Tick()
 	{

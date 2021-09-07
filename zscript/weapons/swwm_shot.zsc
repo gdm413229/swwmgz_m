@@ -424,7 +424,7 @@ Class Spreadgun : SWWMWeapon
 			case 1:
 				sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 150.;
+				sst.penetration = 120.;
 				a = FRandom[Spreadgun](0,360);
 				s = FRandom[Spreadgun](0,.01);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -632,7 +632,7 @@ Class Spreadgun : SWWMWeapon
 					st.shootthroughlist.Clear();
 					st.waterhitlist.Clear();
 					st.Trace(origin,level.PointInSector(origin.xy),dir,8000.,TRACE_HitSky);
-					ProcessTraceHit(st,origin,dir,6,7000,bc:5);
+					ProcessTraceHit(st,origin,dir,4,7000,bc:5);
 				}
 				for ( int i=0; i<16; i++ )
 				{

@@ -132,6 +132,8 @@ extend Class SWWMHandler
 			if ( !SWWMWeapon(i) ) continue;
 			SWWMWeapon(i).hastravelled = false;
 		}
+		// cap health to 200
+		if ( p.Health > 200 ) p.Health = p.mo.Health = 200;
 	}
 
 	override void PlayerRespawned( PlayerEvent e )

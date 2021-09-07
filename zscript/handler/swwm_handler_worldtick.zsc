@@ -51,7 +51,7 @@ extend Class SWWMHandler
 			if ( players[i].itemcount > lastitemcount[i] )
 			{
 				int score = 10*(players[i].itemcount-lastitemcount[i]);
-				if ( !deathmatch && (level.total_items == level.found_items) && !allitems )
+				if ( !deathmatch && !(gameinfo.gametype&GAME_Hexen) && (level.total_items == level.found_items) && !allitems )
 				{
 					allitems = true;
 					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),500);
@@ -128,6 +128,8 @@ extend Class SWWMHandler
 	{
 		// not in DM
 		if ( deathmatch ) return;
+		// not in Hexen, due to its fully hub-based nature
+		if ( gameinfo.gametype&GAME_Hexen ) return;
 		if ( !mapclear && (restartmus > 0) )
 		{
 			restartmus--;

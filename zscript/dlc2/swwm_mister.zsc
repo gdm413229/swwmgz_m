@@ -1,0 +1,41 @@
+// Plutoni Inc. Mortal Rifle (from UnSX 2)
+// Slot 9, spawns shared with Candy Gun
+
+Class MisterRifle : SWWMWeapon
+{
+	int clipcount;
+	bool chambered, gchambered;
+
+	Property ClipCount : clipcount;
+
+	Default
+	{
+		//$Title Mortal Rifle
+		//$Group Weapons
+		//$Sprite graphics/HUD/Icons/W_MortalRifle.png
+		//$Icon weapon
+		Tag "$T_MORTALRIFLE";
+		Inventory.PickupMessage "$T_MORTALRIFLE";
+		Obituary "$O_MORTALRIFLE";
+		Inventory.Icon "graphics/HUD/Icons/W_MortalRifle.png";
+		Weapon.SlotNumber 9;
+		Weapon.SlotPriority 3.;
+		Weapon.SelectionOrder 725;
+		Weapon.AmmoType1 "MisterAmmo";
+		Weapon.AmmoGive1 1;
+		Weapon.AmmoType2 "MisterGAmmo";
+		Weapon.AmmoGive2 1;
+		SWWMWeapon.DropAmmoType "MisterAmmo";
+		MisterRifle.ClipCount 30;
+		Stamina 2100000;
+		+SWWMWEAPON.NOFIRSTGIVE;
+		+WEAPON.EXPLOSIVE;
+		+WEAPON.BFG;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

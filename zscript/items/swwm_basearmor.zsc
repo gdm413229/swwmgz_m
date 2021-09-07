@@ -97,7 +97,7 @@ Class SWWMArmor : Armor abstract
 		if ( (amount <= 0) || DamageTypeDefinition.IgnoreArmor(damageType) || (damage <= 0) )
 			return;
 		SWWMHandler.DoFlash(Owner,Color(int(clamp(damage*.15,1,16)),255,224,192),3);
-		Owner.A_StartSound("armor/hit",CHAN_BODY,CHANF_DEFAULT,clamp(damage*.03,0.,1.),2.5);
+		Owner.A_StartSound("armor/hit",CHAN_DAMAGE,CHANF_OVERLAP,clamp(damage*.03,0.,1.),2.5);
 		saved = HandleDamage(damage,damageType,flags);
 		int healed = max(0,saved-damage);
 		saved = min(saved,damage);
@@ -117,7 +117,7 @@ Class SWWMArmor : Armor abstract
 		else shouldautouse = CVar.GetCVar('swwm_autousearmor',Owner.player).GetBool();
 		if ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) && shouldautouse )
 		{
-			if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_DEFAULT,.6);
+			if ( GetDefaultByType(parent).UseSound ) Owner.A_StartSound(GetDefaultByType(parent).UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP,.6);
 			int tgive = 0;
 			while ( (amount <= (MaxAmount-default.Amount)) && (Owner.CountInv(parent) > 0) )
 			{
@@ -164,7 +164,7 @@ Class SWWMSpareArmor : Inventory abstract
 		let cur = Owner.FindInventory(giveme);
 		if ( !cur || (!pickup && (cur.Amount < cur.MaxAmount)) || (GetDefaultByType(giveme).Amount+cur.Amount <= cur.MaxAmount) )
 		{
-			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 			Owner.GiveInventory(giveme,GetDefaultByType(giveme).Amount);
 			SWWMHandler.ArmorFlash(Owner.PlayerNumber());
 			SWWMScoreObj.Spawn(GetDefaultByType(giveme).Amount,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Armor);

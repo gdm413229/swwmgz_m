@@ -128,7 +128,7 @@ Class SWWMHealth : Inventory abstract
 				let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 				if ( hnd ) hnd.tookdamage[Owner.PlayerNumber()] = true;
 			}
-			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
+			if ( ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 			int tgive = 0;
 			bool morethanonce = false;
 			while ( (Amount > 0) && (newdamage > 0) )

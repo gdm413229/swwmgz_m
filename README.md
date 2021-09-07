@@ -276,10 +276,14 @@ Popularly known as the ***"Death Cannon"***. One of the four ultimate weapons co
 
 Unlike its previous incarnation in **SWWM Platinum**, this one doesn't have such an obscene pre-fire delay, so it's much easier to land a shot (not to mention also being far more lethal, thanks to the added chain reaction effect).
 
-### Crystal Box
+Due to its rarity, you can't buy it from the store, so you gotta find one (and only one) in the field.
+
+### Crystal Box ~ Replaces Cell Pack, Greater Rune
 ![](docimg/ynykronammo.png)
 
-Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light. These don't spawn in the world, so you'll have to get more ammo by finding additional weapon pickups or managing to afford one in the store, or trying your luck with a **Chancebox**.
+Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light.
+
+These spawn VERY rarely and, like the weapon that uses them, you can't buy them either. It's also possible to find them in **Chanceboxes**, if you're lucky.
 
 ## The Pickups
 ![](docimg/demolitionist_items.png)
@@ -386,7 +390,7 @@ In some special cases you may find "Bulk" versions. These generally only pop up 
 
 Note: In multiplayer, these can be traded between players, but do note that the receiver will not get any extra ammo from it.
 
-### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might in Hexen
+### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might
 ![](docimg/fabricator.png)
 
 Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the **Ynykron Artifact**).
@@ -404,14 +408,14 @@ Reveals the entire layout of the map and shows key locations in the HUD. Also al
 ### Mykradvo Artifact ~ May randomly replace Ghost Artifact, Ragekit or Invinciball
 ![](docimg/mykradvo.png)
 
-When used, bursts into plasma tendrils that will seek all hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
+When used, bursts into plasma tendrils that will seek all visible hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
 
-Has a chance to spawn in place of other items, but only one may spawn per map.
+Has a chance to spawn in place of other items, but only one may spawn per map. Cannot be bought due to its rarity.
 
 ## The Collectibles
 ![](docimg/chancebox.png)
 
-Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants and Chaos Devices (as the game generally doesn't have secret areas).
+Every now and then you will find these strange ***"Lucky Chance Boxes"*** in secret areas, which you can open by pressing Use. In Hexen, they will also replace Dark Servants, Banishment Devices and Porkalators (as the game generally doesn't have secret areas).
 
 While some will drop very useful goodies, others may provide you instead with a randomly selected item from a pool of various *"collectibles"*. On pickup, these will give you a nice extra score based on their estimated market price. Some of these collectibles will only appear when you play specific IWADs (or those that go chronologically after them, e.g.: Heretic collectibles appearing in Hexen).
 

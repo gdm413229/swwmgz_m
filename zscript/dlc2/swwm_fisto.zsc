@@ -1,0 +1,28 @@
+// Unissix Crafts Hand Of Divine (from Total Madness, the reboot not the original)
+// Slot 1, spawns shared with Pusher
+
+Class FistGun : SWWMWeapon
+{
+	Default
+	{
+		//$Title Hand of Divine
+		//$Group Weapons
+		//$Sprite graphics/HUD/Icons/W_FistGun.png
+		//$Icon weapon
+		Tag "$T_FISTGUN";
+		Inventory.PickupMessage "$T_FISTGUN";
+		Obituary "$O_FISTGUN";
+		Inventory.Icon "graphics/HUD/Icons/W_FistGun.png";
+		Weapon.SlotNumber 1;
+		Weapon.SlotPriority 4.;
+		Weapon.SelectionOrder 1150;
+		Stamina 15000;
+		+WEAPON.MELEEWEAPON;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

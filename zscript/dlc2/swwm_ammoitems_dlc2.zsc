@@ -1,0 +1,306 @@
+// All DLC weapon ammo pickups
+
+Class SparksterBAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	Default
+	{
+		//$Title Sparkster Blue Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkBAmmo.png
+		//$Icon ammo
+		Tag "$T_SPARKBAMMO";
+		Inventory.PickupMessage "$T_SPARKBAMMO";
+		Stamina 16000;
+		Inventory.Icon "graphics/HUD/Icons/A_SparkBAmmo.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 8;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 24;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Accuracy 70;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SparksterRAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	Default
+	{
+		//$Title Sparkster Red Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkRAmmo.png
+		//$Icon ammo
+		Tag "$T_SPARKRAMMO";
+		Inventory.PickupMessage "$T_SPARKRAMMO";
+		Stamina 18000;
+		Inventory.Icon "graphics/HUD/Icons/A_SparkRAmmo.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 8;
+		Ammo.BackpackAmount 1;
+		Ammo.BackpackMaxAmount 24;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Accuracy 75;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class SparksterAmmoBundleSpawn : SWWMAmmoSpawner
+{
+	override void SpawnAmmo()
+	{
+		int bnd = Random[Bundle](2,3);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",Vec3Angle(6,i*(360/bnd)));
+			a.angle = i*(360/bnd);
+			SWWMUtility.TransferItemProp(self,a,true);
+		}
+	}
+}
+Class SparksterBigAmmoBundleSpawn : SWWMAmmoSpawner
+{
+	override void SpawnAmmo()
+	{
+		int bnd = Random[Bundle](3,6);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",Vec3Angle(8,i*(360/bnd)));
+			a.angle = i*(360/bnd);
+			SWWMUtility.TransferItemProp(self,a,true);
+		}
+		let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",pos);
+		a.angle = angle;
+		SWWMUtility.TransferItemProp(self,a,true);
+	}
+}
+
+Class MisterRound : MagAmmo
+{
+	Default
+	{
+		//$Title Mortal Rifle Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRRound.png
+		//$Icon ammo
+		Tag "$T_MRROUND";
+		Inventory.PickupMessage "$T_MRROUND";
+		Inventory.Icon "graphics/HUD/Icons/A_MRRound.png";
+		MagAmmo.ParentAmmo "MisterAmmo";
+		MagAmmo.ClipSize 30;
+		Inventory.MaxAmount 40;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class MisterRoundBundleSpawn : SWWMAmmoSpawner
+{
+	override void SpawnAmmo()
+	{
+		int bnd = Random[Bundle](5,10);
+		for ( int i=0; i<bnd; i++ )
+		{
+			let a = Spawn("MisterRound",Vec3Angle(6,i*(360/bnd)));
+			a.angle = i*(360/bnd);
+			SWWMUtility.TransferItemProp(self,a,true);
+		}
+	}
+}
+
+Class MisterAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	Default
+	{
+		//$Title Mortal Rifle Mag
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRAmmo.png
+		//$Icon ammo
+		Tag "$T_MRAMMO";
+		Inventory.PickupMessage "$T_MRAMMO";
+		Stamina 120000;
+		Inventory.Icon "graphics/HUD/Icons/A_MRAmmo.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 2;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 6;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Accuracy 90;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class MisterGAmmo : Ammo
+{
+	Mixin SWWMShellAmmo;
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	Default
+	{
+		//$Title Mortal Rifle Grenade
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRGrenade.png
+		//$Icon ammo
+		Tag "$T_MRGRENADE";
+		Stamina 90000;
+		Inventory.Icon "graphics/HUD/Icons/A_MRGrenade.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 3;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 9;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+		Accuracy 90;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+Class MisterGAmmo2 : MisterGAmmo
+{
+	Default
+	{
+		//$Title 2x Mortal Rifle Grenades
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRGrenade.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class MisterGAmmo3 : MisterGAmmo
+{
+	Default
+	{
+		//$Title 3x Mortal Rifle Grenades
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRGrenade.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
+
+Class UltimatePod : MagAmmo
+{
+	Default
+	{
+		//$Title Ultimate Pod
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_UltimatePod.png
+		//$Icon ammo
+		Tag "$T_ULTIMATEPOD";
+		Inventory.PickupMessage "$T_ULTIMATEPOD";
+		Inventory.Icon "graphics/HUD/Icons/A_UltimatePod.png";
+		MagAmmo.ParentAmmo "UltimateAmmo";
+		MagAmmo.ClipSize 4;
+		Inventory.MaxAmount 6;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}
+
+Class UltimateAmmo : Ammo
+{
+	Mixin SWWMAmmo;
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	Default
+	{
+		//$Title Ultimate Mag
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_UltimateAmmo.png
+		//$Icon ammo
+		Tag "$T_ULTIMATEAMMO";
+		Inventory.PickupMessage "$T_ULTIMATEAMMO";
+		Stamina -2000000;
+		Inventory.Icon "graphics/HUD/Icons/A_UltimateAmmo.png";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+		Ammo.BackpackAmount 0;
+		Ammo.BackpackMaxAmount 5;
+		Ammo.DropAmount 1;
+		+FLOATBOB;
+		FloatBobStrength 0.25;
+	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = min(Amount,1);
+	}
+	States
+	{
+	Spawn:
+		XZW1 A -1;
+		Stop;
+	}
+}

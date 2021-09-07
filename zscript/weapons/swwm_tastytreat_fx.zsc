@@ -253,7 +253,7 @@ Class CandyPop : Actor
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			SWWMUtility.DoExplosion(self,500,60000,250,60);
+			SWWMUtility.DoExplosion(self,500,60000,180,60);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
@@ -318,7 +318,7 @@ Class TinyCandyPop : CandyPop
 	Spawn:
 		BLPF B 3 NoDelay
 		{
-			SWWMUtility.DoExplosion(self,200,32000,100,20);
+			SWWMUtility.DoExplosion(self,200,32000,60,20);
 			Scale *= FRandom[ExploS](0.6,1.8);
 			Scale.x *= RandomPick[ExploS](-1,1);
 			Scale.y *= RandomPick[ExploS](-1,1);
@@ -801,7 +801,7 @@ Class CandyBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:9000);
-		SWWMUtility.DoExplosion(self,900,48000,250,80,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,900,48000,150,80,DE_EXTRAZTHRUST);
 		A_QuakeEx(6,6,6,15,0,300,"",QF_RELATIVE|QF_SCALEDOWN,falloff:200,rollintensity:0.2);
 		A_StartSound("candygun/hit",CHAN_VOICE,attenuation:.25);
 		A_StartSound("candygun/hit",CHAN_WEAPON,attenuation:.5);

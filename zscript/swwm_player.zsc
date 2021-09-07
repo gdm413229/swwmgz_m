@@ -173,7 +173,7 @@ Class Demolitionist : PlayerPawn
 				let type = (class<Ammo>)(AllActorClasses[i]);
 				if ( !type || (type.GetParentClass() != "Ammo") )
 					continue;
-				// Only give if it's for a valid weapon, unless using "give everything"
+				// Only give if it's for a valid weapon
 				bool isvalid = false;
 				for ( int j=0; j<validweapons.Size(); j++ )
 				{
@@ -189,7 +189,7 @@ Class Demolitionist : PlayerPawn
 						break;
 					}
 				}
-				if ( !isvalid && (giveall != ALL_YESYES) ) continue;
+				if ( !isvalid ) continue;
 				let ammoitem = FindInventory(type);
 				if ( !ammoitem )
 				{
@@ -207,19 +207,12 @@ Class Demolitionist : PlayerPawn
 				if ( !type || (type.GetParentClass() != "MagAmmo") )
 					continue;
 				let pamo = GetDefaultByType(type).ParentAmmo;
-				// Only give if it's for a valid weapon, unless using "give everything"
+				// Only give if it's for a valid weapon
 				bool isvalid = false;
-				for ( int j=0; j<AllActorClasses.Size(); j++ )
+				for ( int j=0; j<validweapons.Size(); j++ )
 				{
-					let type2 = (class<Weapon>)(AllActorClasses[j]);
-					if ( !type2 ) continue;
-					let rep = GetReplacement(type2);
-					if ( (rep != type2) && !(rep is "DehackedPickup") ) continue;
-					readonly<Weapon> weap = GetDefaultByType(type2);
-					if ( !player.weapons.LocateWeapon(type2) || weap.bCheatNotWeapon || !weap.CanPickup(self) ) continue;
-					let ready = weap.FindState("Ready");
-					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
-					if ( (type2 is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(pamo) )
+					readonly<Weapon> weap = GetDefaultByType(validweapons[j]);
+					if ( (validweapons[j] is 'SWWMWeapon') && SWWMWeapon(weap).UsesAmmo(pamo) )
 					{
 						isvalid = true;
 						break;
@@ -230,7 +223,7 @@ Class Demolitionist : PlayerPawn
 						break;
 					}
 				}
-				if ( !isvalid && (giveall != ALL_YESYES) ) continue;
+				if ( !isvalid ) continue;
 				let magitem = FindInventory(type);
 				if ( !magitem )
 				{
@@ -341,6 +334,9 @@ Class Demolitionist : PlayerPawn
 			{
 				let type = (class<Inventory>)(AllActorClasses[i]);
 				if ( !type ) continue;
+				let rep = GetReplacement(type);
+				// don't give replaced items
+				if ( rep != type ) continue;
 				// no fabricators before hexen
 				if ( !(gameinfo.gametype&GAME_HEXEN) && (type is 'AmmoFabricator') ) continue;
 				// no barriers outside doom
@@ -381,6 +377,7 @@ Class Demolitionist : PlayerPawn
 				SWWMCollectible(item).propagated = true;	// no score or anims
 				if ( !item.CallTryPickup(self) ) item.Destroy();
 			}
+			if ( !giveall ) return;
 		}
 		if ( giveall ) return;
 		let type = name;
@@ -882,6 +879,7 @@ Class Demolitionist : PlayerPawn
 					{
 						if ( !FindInventory("GrilledCheeseSafeguard") && !(healtimer%5) )
 							A_SetHealth(health-1);
+						if ( health <= 500 ) healcooldown = 20;
 					}
 					else if ( health > 200 )
 					{
@@ -2515,7 +2513,7 @@ Class Demolitionist : PlayerPawn
 		int score = 100;
 		// last secret (this is called before counting it up, so have to subtract)
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( !deathmatch && (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
+		if ( !deathmatch && !(gameinfo.gametype&GAME_Hexen) && (level.found_secrets == level.total_secrets-1) && (!hnd || !hnd.allsecrets) )
 		{
 			if ( hnd ) hnd.allsecrets = true;
 			score = 1000;

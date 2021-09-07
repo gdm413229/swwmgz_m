@@ -498,7 +498,7 @@ Class ExplodiumBulletImpact : Actor
 	{
 		Super.PostBeginPlay();
 		A_AlertMonsters(swwm_uncapalert?0:3000);
-		SWWMUtility.DoExplosion(self,20,80000,90,40,DE_EXTRAZTHRUST);
+		SWWMUtility.DoExplosion(self,20,40000,70,40,DE_EXTRAZTHRUST);
 		A_QuakeEx(4,4,4,10,0,250,"",QF_RELATIVE|QF_SCALEDOWN,falloff:150,rollintensity:0.2);
 		A_StartSound("explodium/hit",CHAN_VOICE,attenuation:.6);
 		A_StartSound("explodium/hit",CHAN_WEAPON,attenuation:.3);

@@ -283,7 +283,7 @@ Due to its rarity, you can't buy it from the store, so you gotta find one (and o
 
 Additional ammo charge for the **Ynykron Artifact**. Contains a rod of polarized **Puronokorokinylum** crystal, highly volatile when heated and stimulated with concentrated light.
 
-These spawn VERY rarely and, like the weapon that uses them, you can't buy them either. It's also possible to find them in Chanceboxes, if you're lucky.
+These spawn VERY rarely and, like the weapon that uses them, you can't buy them either. It's also possible to find them in **Chanceboxes**, if you're lucky.
 
 ## The Pickups
 ![](docimg/demolitionist_items.png)

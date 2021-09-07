@@ -4,7 +4,7 @@ This is just a bit of *"future planning"* for stuff that I ***might*** add after
   - [1] Itamex Reinforced Hammer *(UnSX 5)*
     - HAHA DAB *(Gib 200 enemies with the Itamex Hammer)*
   - [2] Plasma Blaster *(SWWM)*
-    - Blastin' Plasma *(Kill an enemy at full health with a Plasma Blaster charged shot %d times)*
+    - Blastin' Plasma *(Kill an enemy at full health with a Plasma Blaster charged shot 50 times)*
   - [3] Puntzer Beta *(SWWM Iridium)*
     - High Noon *(Land 6 killing shots in a single Puntzer Beta reload)*
   - [4] Puntzer Gamma *(Ultra Suite 2)*

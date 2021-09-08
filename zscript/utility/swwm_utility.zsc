@@ -46,6 +46,8 @@ Class SWWMUtility
 		while ( lmp != -1 )
 		{
 			dat = Wads.ReadLump(lmp);
+			// fucking Windows
+			dat.Replace("\r","");
 			list.Clear();
 			dat.Split(list,"\n");
 			for ( int i=0; i<list.Size(); i++ )
@@ -1518,6 +1520,8 @@ Class SWWMUtility
 		let lmp = Wads.FindLump(fname);
 		if ( lmp == -1 ) return false;
 		String dat = Wads.ReadLump(lmp);
+		// fucking Windows
+		dat.Replace("\r","");
 		Array<String> list;
 		list.Clear();
 		dat.Split(list,"\n");

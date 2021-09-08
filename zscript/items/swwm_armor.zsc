@@ -25,6 +25,13 @@ Class ArmorNuggetItem : SWWMSpareArmor
 		SWWMLoreLibrary.Add(other.player,"Nugget");
 		return Super.CreateCopy(other);
 	}
+
+	override void DoPickupSpecial( Actor toucher )
+	{
+		Super.DoPickupSpecial(toucher);
+		SWWMUtility.AchievementProgressInc('swwm_progress_candy',1,toucher.player);
+	}
+
 	Default
 	{
 		//$Title Armor Nugget

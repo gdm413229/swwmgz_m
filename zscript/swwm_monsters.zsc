@@ -51,6 +51,7 @@ Class SWWMHangingKeen : Actor
 	action void A_DropKeen()
 	{
 		Spawn("SWWMDroppedKeen",Vec3Offset(0,0,8));
+		SWWMUtility.MarkAchievement('swwm_achievement_keen',players[consoleplayer]);
 	}
 	override bool Used( Actor user )
 	{

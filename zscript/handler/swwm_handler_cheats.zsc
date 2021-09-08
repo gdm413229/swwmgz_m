@@ -423,6 +423,7 @@ extend Class SWWMHandler
 					StatusBar.AttachMessage(m,-1232);
 					CVar.FindCVar('swwm_oldcheat').SetBool(true);
 				}
+				SWWMUtility.MarkAchievement('swwm_achievement_cheat',players[consoleplayer]);
 				if ( SWWMUtility.CheatsDisabled(consoleplayer) )
 				{
 					kfail = true;

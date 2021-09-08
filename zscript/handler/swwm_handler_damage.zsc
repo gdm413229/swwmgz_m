@@ -8,6 +8,9 @@ extend Class SWWMHandler
 	int spreecount[MAXPLAYERS];
 	int lastkill[MAXPLAYERS];
 	int multilevel[MAXPLAYERS];
+	bool dealtdamage[MAXPLAYERS];
+	bool reallytookdamage[MAXPLAYERS];
+	int onehpspree[MAXPLAYERS];
 
 	// gibbing
 	private void DoGibThing( WorldEvent e )
@@ -91,6 +94,7 @@ extend Class SWWMHandler
 		if ( e.Thing.player )
 		{
 			tookdamage[e.Thing.PlayerNumber()] = true;
+			reallytookdamage[e.Thing.PlayerNumber()] = true;	// does not reset on revive
 			let s = SWWMStats.Find(e.Thing.player);
 			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
 			{
@@ -100,6 +104,7 @@ extend Class SWWMHandler
 		}
 		if ( e.DamageSource && e.DamageSource.player )
 		{
+			dealtdamage[e.DamageSource.PlayerNumber()] = true;
 			let s = SWWMStats.Find(e.DamageSource.player);
 			if ( s )	// deathmatch telefrag-on-spawn may cause this to be null
 			{
@@ -121,6 +126,9 @@ extend Class SWWMHandler
 					tk.special1 = 1;
 				else tk.special1 = -1;
 			}
+			// barrel destruction
+			if ( (e.Thing is 'ExplosiveBarrel') && (e.Thing.Health <= 0) )
+				SWWMUtility.AchievementProgressInc('swwm_progress_barrel',1,e.DamageSource.player);
 		}
 	}
 
@@ -176,6 +184,7 @@ extend Class SWWMHandler
 					lastcombat = AddOneliner("scorekill",1,15);
 			}
 		}
+		int pnum = src.PlayerNumber();
 		// achievement stuff
 		if ( e.Thing.IsHostile(src) )
 		{
@@ -191,17 +200,28 @@ extend Class SWWMHandler
 				SWWMUtility.AchievementProgressInc('swwm_progress_thicc',1,src.player);
 			else if ( (e.DamageType == 'Love') && !(e.Thing is 'WolfensteinSS') && (e.Thing.Species != 'WolfensteinSS') )
 				SWWMUtility.AchievementProgressInc('swwm_progress_love',1,src.player);
-			if ( e.Inflictor && e.Inflictor.FindInventory('ParriedBuff') )
+			Inventory buff = e.Inflictor?e.Inflictor.FindInventory('ParriedBuff'):null;
+			if ( buff )
+			{
 				SWWMUtility.AchievementProgressInc('swwm_progress_reflect',1,src.player);
+				if ( (e.Thing is 'Cyberdemon') && (e.Inflictor is 'Rocket') && (buff.tracer == e.Thing) )
+					SWWMUtility.MarkAchievement('swwm_achievement_cybully',src.player);
+			}
+			if ( (e.Inflictor is 'PusherWeapon') || (e.Inflictor is 'PusherProjectile') )
+				SWWMUtility.AchievementProgressInc('swwm_progress_tender',1,src.player);
 			Inventory tk;
 			if ( (tk = e.Thing.FindInventory("DeepImpactOnlyToken")) && (tk.special1 == 1) )
 				SWWMUtility.MarkAchievement('swwm_achievement_shame',src.player);
 			SWWMUtility.AchievementProgressInc('swwm_progress_mega',1,src.player);
+			if ( src.player.Health == 1 )
+			{
+				onehpspree[pnum]++;
+				SWWMUtility.AchievementProgress('swwm_progress_onehp',onehpspree[pnum],src.player);
+			}
 		}
 		// no credits unless it's a counted kill or marine (that isn't friendly) or another player in DM
 		if ( e.Thing.IsFriend(src) || (!e.Thing.default.bCountKill && !(e.Thing is 'ScriptedMarine') && !(deathmatch && e.Thing.player)) )
 			return;
-		int pnum = src.PlayerNumber();
 		if ( level.maptime < (lastkill[pnum]+5*GameTicRate) )
 			multilevel[pnum]++;
 		else multilevel[pnum] = 0;

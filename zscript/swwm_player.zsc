@@ -529,6 +529,7 @@ Class Demolitionist : PlayerPawn
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		lastbump *= .97;
 		int scr = (TexMan.GetName(d.HitTexture).Left(6)~=="ZZWOLF")?200:20;
+		if ( scr == 20 ) SWWMUtility.AchievementProgressInc('swwm_progress_doodle',1,player);
 		SWWMCredits.Give(player,scr);
 		if ( player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,d.HitLocation);
 		if ( d.HitType == TRACE_HitWall )
@@ -539,7 +540,40 @@ Class Demolitionist : PlayerPawn
 				else if ( d.Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) d.HitLine.sidedef[d.LineSide].SetTexture(2,replacewith);
 				else d.Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);
 			}
-			else d.HitLine.sidedef[d.LineSide].SetTexture(d.LinePart,replacewith);
+			else
+			{
+				// find connected sidedefs with the same texture
+				Array<Line> con;
+				con.Clear();
+				con.Push(d.HitLine);
+				Sector s = d.LineSide?d.HitLine.backsector:d.HitLine.frontsector;
+				int found = 0;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<s.Lines.Size(); i++ )
+					{
+						let l = s.Lines[i];
+						if ( !l.sidedef[d.LineSide] || (l.sidedef[d.LineSide].GetTexture(d.LinePart) != d.HitTexture) )
+							continue;
+						if ( con.Find(l) < con.Size() ) continue;
+						bool notmatched = true;
+						for ( int j=0; j<con.Size(); j++ )
+						{
+							if ( (l.v1 != con[j].v1) && (l.v2 != con[j].v2) && (l.v1 != con[j].v2) && (l.v2 != con[j].v1) )
+								continue;
+							notmatched = false;
+							break;
+						}
+						if ( notmatched ) continue;
+						con.Push(l);
+						found++;
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].sidedef[d.LineSide].SetTexture(d.LinePart,replacewith);
+			}
 		}
 		else if ( d.HitType == TRACE_HitCeiling )
 		{
@@ -548,7 +582,45 @@ Class Demolitionist : PlayerPawn
 				if ( d.Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) d.Hit3DFloor.model.SetTexture(1,replacewith);
 				else d.Hit3DFloor.model.SetTexture(0,replacewith);
 			}
-			else d.HitSector.SetTexture(1,replacewith);
+			else
+			{
+				// find connected sectors with the same ceiling texture (THIS IS VERY UGLY CODE)
+				Array<Sector> con;
+				con.Clear();
+				con.Push(d.HitSector);
+				int found;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<con.Size(); i++ )
+					{
+						Sector s = con[i];
+						for ( int j=0; j<s.Lines.Size(); j++ )
+						{
+							Line l = s.Lines[j];
+							// only check two-sided
+							if ( !l.sidedef[1] ) continue;
+							// don't check if there's a height difference
+							if ( (l.frontsector.ceilingplane.ZAtPoint(l.v1.p) != l.backsector.ceilingplane.ZAtPoint(l.v1.p))
+								|| (l.frontsector.ceilingplane.ZAtPoint(l.v2.p) != l.backsector.ceilingplane.ZAtPoint(l.v2.p)) )
+								continue;
+							if ( (l.frontsector.GetTexture(1) == d.HitTexture) && (con.Find(l.frontsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.frontsector);
+							}
+							if ( (l.backsector.GetTexture(1) == d.HitTexture) && (con.Find(l.backsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.backsector);
+							}
+						}
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].SetTexture(1,replacewith);
+			}
 		}
 		else if ( d.HitType == TRACE_HitFloor )
 		{
@@ -557,7 +629,45 @@ Class Demolitionist : PlayerPawn
 				if ( d.Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) d.Hit3DFloor.model.SetTexture(0,replacewith);
 				else d.Hit3DFloor.model.SetTexture(1,replacewith);
 			}
-			else d.HitSector.SetTexture(0,replacewith);
+			else
+			{
+				// find connected sectors with the same floor texture (THIS IS VERY UGLY CODE)
+				Array<Sector> con;
+				con.Clear();
+				con.Push(d.HitSector);
+				int found;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<con.Size(); i++ )
+					{
+						Sector s = con[i];
+						for ( int j=0; j<s.Lines.Size(); j++ )
+						{
+							Line l = s.Lines[j];
+							// only check two-sided
+							if ( !l.sidedef[1] ) continue;
+							// don't check if there's a height difference
+							if ( (l.frontsector.floorplane.ZAtPoint(l.v1.p) != l.backsector.floorplane.ZAtPoint(l.v1.p))
+								|| (l.frontsector.floorplane.ZAtPoint(l.v2.p) != l.backsector.floorplane.ZAtPoint(l.v2.p)) )
+								continue;
+							if ( (l.frontsector.GetTexture(0) == d.HitTexture) && (con.Find(l.frontsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.frontsector);
+							}
+							if ( (l.backsector.GetTexture(0) == d.HitTexture) && (con.Find(l.backsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.backsector);
+							}
+						}
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].SetTexture(0,replacewith);
+			}
 		}
 	}
 	void CheckItemUsePickup()
@@ -916,6 +1026,7 @@ Class Demolitionist : PlayerPawn
 			{
 				cairtime = 0;
 				mystats.grounddist += traveldist;
+				SWWMUtility.AchievementProgressIncDouble('swwm_progress_travel',traveldist/32000.,player);
 			}
 		}
 		else mystats.swimdist += traveldist;
@@ -1421,9 +1532,9 @@ Class Demolitionist : PlayerPawn
 	private void CheckBreakCrusher()
 	{
 		double gaph = (ceilingz-floorz);
-		if ( gaph > height*.6 ) return;
+		if ( gaph > height*.8 ) return;
 		// the smaller the gap, the more likely the crusher will snap
-		if ( Random[Demolitionist](0,3) && (FRandom[Demolitionist](0,gaph/height) > .1) ) return;
+		if ( Random[Demolitionist](0,2) && (FRandom[Demolitionist](0,gaph/height) > .2) ) return;
 		double diffh = 8.+(default.height-gaph);	// how much the crusher will have to "snap" after breaking
 		let ceil = ceilingsector;
 		let flor = floorsector;
@@ -1452,6 +1563,7 @@ Class Demolitionist : PlayerPawn
 			q.special1 = 10;
 			SWWMCrusherBroken.Create(flor,null,diffh);
 		}
+		SWWMUtility.MarkAchievement('swwm_achievement_crush',player);
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
@@ -1493,6 +1605,7 @@ Class Demolitionist : PlayerPawn
 				if ( source.master ) source.master.Destroy();
 				source.Destroy();
 				damage = 20;	// reduce so it's not instant kill
+				SWWMUtility.MarkAchievement('swwm_achievement_kancho',player);
 			}
 		}
 		// no damage whatsoever

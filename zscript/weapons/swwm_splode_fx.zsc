@@ -64,7 +64,11 @@ Class ExplodiumMagArm : Actor
 		{
 			Spawn("ExplodiumMagTrail",pos);
 			if ( !(ReactionTime%2) )
-				SWWMUtility.DoExplosion(self,2+reactiontime/2,3000+500*reactiontime,40+3*reactiontime,20);
+			{
+				int nhit, nkill;
+				[nhit, nkill] = SWWMUtility.DoExplosion(self,2+reactiontime/2,3000+500*reactiontime,40+3*reactiontime,20,DE_COUNTENEMIES);
+				if ( target && special1 ) SWWMUtility.AchievementProgressInc('swwm_progress_grenade',nkill,target.player);
+			}
 			Vector3 pvel = (FRandom[ExploS](-1,1),FRandom[ExploS](-1,1),FRandom[ExploS](-1,1)).unit()*FRandom[ExploS](1,5);
 			let s = Spawn("SWWMHalfSmoke",pos);
 			s.vel = pvel+vel*.2;
@@ -147,13 +151,16 @@ Class ExplodiumMagProj : Actor
 	}
 	void A_BlowUp()
 	{
+		bool isplanted = (self is 'ExplodiumMagAttach');
 		angle = atan2(cvel.y,cvel.x);
 		pitch = asin(-cvel.z);
 		bNOGRAVITY = true;
 		A_SetRenderStyle(1.,STYLE_Add);
 		Scale *= 2.+.2*special1;
 		A_AlertMonsters(swwm_uncapalert?0:6000);
-		SWWMUtility.DoExplosion(self,10+20*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST);
+		int nhit, nkill;
+		[nhit, nkill] = SWWMUtility.DoExplosion(self,10+20*special1,80000+8000*special1,90+10*special1,60,DE_EXTRAZTHRUST|DE_COUNTENEMIES);
+		if ( target && isplanted ) SWWMUtility.AchievementProgressInc('swwm_progress_grenade',nkill,target.player);
 		A_QuakeEx(9,9,9,30,0,400+80*special1,"",QF_RELATIVE|QF_SCALEDOWN,falloff:300,rollintensity:2.);
 		A_StartSound("explodium/maghit",CHAN_VOICE,attenuation:.35);
 		A_StartSound("explodium/maghit",CHAN_WEAPON,attenuation:.2);
@@ -191,6 +198,7 @@ Class ExplodiumMagProj : Actor
 		{
 			let s = Spawn("ExplodiumMagArm",pos);
 			s.target = target;
+			s.special1 = isplanted;
 		}
 		Spawn("ExploLight2",pos);
 		if ( swwm_omnibust ) BusterWall.ProjectileBust(self,20+15*special1,cvel);

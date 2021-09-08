@@ -138,10 +138,12 @@ Class ParryField : Actor
 		while ( a = Actor(ti.Next()) )
 		{
 			if ( (justparried.Find(a) < justparried.Size()) || !(SWWMUtility.ValidProjectile(a) || a.bSKULLFLY) || a.bTHRUACTORS || (level.Vec3Diff(a.pos,pos).length() > 80) ) continue;
+			if ( a is 'Whirlwind' ) SWWMUtility.MarkAchievement('swwm_achievement_tornado',master.player);
 			justparried.Push(a);
 			Vector3 vdir = a.vel;
 			Vector3 dir = level.Vec3Diff(master.Vec2OffsetZ(0,0,pos.z),a.pos).unit();
 			Vector3 hdir = dir;
+			Actor oldtarget = a.target;
 			if ( (a.target != master) && (a.bMISSILE || (a is 'HolySpirit')) )	// special wraithverge handling
 			{
 				// deflect directly to target
@@ -161,6 +163,7 @@ Class ParryField : Actor
 			{
 				buff = Inventory(Spawn("ParriedBuff"));
 				buff.AttachToOwner(a);
+				buff.tracer = oldtarget;
 			}
 			double mvel = a.vel.length();
 			double nspeed = min(100,mvel*FRandom[Parry](1.2,1.4)+20);
@@ -199,6 +202,8 @@ Class ParryField : Actor
 					if ( s ) s.pparries++;
 				}
 				critsnd = true;
+				if ( (a is 'LostSoul') && (master.player.ReadyWeapon is 'SilverBullet') )
+					SWWMUtility.MarkAchievement('swwm_achievement_baseball',master.player);
 			}
 			if ( s ) s.parries++;
 			SWWMUtility.AchievementProgressInc('swwm_progress_parry',1,master.player);

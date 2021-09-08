@@ -160,6 +160,28 @@ Class SWWMStatusBar : BaseStatusBar
 			koraxhack = false;
 			return true;
 		}
+		// check for puzzle solving lines (oh god why), and increment the achievement
+		if ( (msg == StringTable.Localize("$TXT_ACS_MAP04_9_ONEHA"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP04_11_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP05_6_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP08_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP09_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP10_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP28_6_ONENI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP30_6_ONENI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP34_1_ONENI"))
+			// deathkings
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_1_THREE"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_2_TWOMO"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_3_ONEMO"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_4_THEPU"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_10_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_11_TWOTH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP46_8_ONEFO"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_8_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_9_TWOTH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_10_THECR")) )
+			SWWMUtility.AchievementProgressInc('swwm_progress_puzzle',1,players[consoleplayer]);
 		if ( !fnt || (fnt == smallfont) )
 		{
 			midstr = msg;

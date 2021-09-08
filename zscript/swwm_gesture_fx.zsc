@@ -305,6 +305,7 @@ Class LoveHeart : Actor
 		if ( target && target.player )
 		{
 			int scr = (TexMan.GetName(HitTexture).Left(6)~=="ZZWOLF")?200:20;
+			if ( scr == 20 ) SWWMUtility.AchievementProgressInc('swwm_progress_doodle',1,player);
 			SWWMCredits.Give(target.player,scr);
 			if ( target.player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,pos);
 		}
@@ -316,7 +317,40 @@ Class LoveHeart : Actor
 				else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitLine.sidedef[LineSide].SetTexture(2,replacewith);
 				else Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);
 			}
-			else HitLine.sidedef[LineSide].SetTexture(LinePart,replacewith);
+			else
+			{
+				// find connected sidedefs with the same texture
+				Array<Line> con;
+				con.Clear();
+				con.Push(HitLine);
+				Sector s = LineSide?HitLine.backsector:HitLine.frontsector;
+				int found = 0;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<s.Lines.Size(); i++ )
+					{
+						let l = s.Lines[i];
+						if ( !l.sidedef[LineSide] || (l.sidedef[LineSide].GetTexture(LinePart) != HitTexture) )
+							continue;
+						if ( con.Find(l) < con.Size() ) continue;
+						bool notmatched = true;
+						for ( int j=0; j<con.Size(); j++ )
+						{
+							if ( (l.v1 != con[j].v1) && (l.v2 != con[j].v2) && (l.v1 != con[j].v2) && (l.v2 != con[j].v1) )
+								continue;
+							notmatched = false;
+							break;
+						}
+						if ( notmatched ) continue;
+						con.Push(l);
+						found++;
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].sidedef[LineSide].SetTexture(LinePart,replacewith);
+			}
 		}
 		else if ( HitSector && HitCeiling )
 		{
@@ -325,7 +359,45 @@ Class LoveHeart : Actor
 				if ( Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) Hit3DFloor.model.SetTexture(1,replacewith);
 				else Hit3DFloor.model.SetTexture(0,replacewith);
 			}
-			else HitSector.SetTexture(1,replacewith);
+			else
+			{
+				// find connected sectors with the same ceiling texture (THIS IS VERY UGLY CODE)
+				Array<Sector> con;
+				con.Clear();
+				con.Push(HitSector);
+				int found;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<con.Size(); i++ )
+					{
+						Sector s = con[i];
+						for ( int j=0; j<s.Lines.Size(); j++ )
+						{
+							Line l = s.Lines[j];
+							// only check two-sided
+							if ( !l.sidedef[1] ) continue;
+							// don't check if there's a height difference
+							if ( (l.frontsector.ceilingplane.ZAtPoint(l.v1.p) != l.backsector.ceilingplane.ZAtPoint(l.v1.p))
+								|| (l.frontsector.ceilingplane.ZAtPoint(l.v2.p) != l.backsector.ceilingplane.ZAtPoint(l.v2.p)) )
+								continue;
+							if ( (l.frontsector.GetTexture(1) == HitTexture) && (con.Find(l.frontsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.frontsector);
+							}
+							if ( (l.backsector.GetTexture(1) == HitTexture) && (con.Find(l.backsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.backsector);
+							}
+						}
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].SetTexture(1,replacewith);
+			}
 		}
 		else if ( HitSector && !HitCeiling )
 		{
@@ -334,7 +406,45 @@ Class LoveHeart : Actor
 				if ( Hit3DFloor.flags&F3DFloor.FF_INVERTSECTOR ) Hit3DFloor.model.SetTexture(0,replacewith);
 				else Hit3DFloor.model.SetTexture(1,replacewith);
 			}
-			else HitSector.SetTexture(0,replacewith);
+			else
+			{
+				// find connected sectors with the same floor texture (THIS IS VERY UGLY CODE)
+				Array<Sector> con;
+				con.Clear();
+				con.Push(HitSector);
+				int found;
+				do
+				{
+					found = 0;
+					for ( int i=0; i<con.Size(); i++ )
+					{
+						Sector s = con[i];
+						for ( int j=0; j<s.Lines.Size(); j++ )
+						{
+							Line l = s.Lines[j];
+							// only check two-sided
+							if ( !l.sidedef[1] ) continue;
+							// don't check if there's a height difference
+							if ( (l.frontsector.floorplane.ZAtPoint(l.v1.p) != l.backsector.floorplane.ZAtPoint(l.v1.p))
+								|| (l.frontsector.floorplane.ZAtPoint(l.v2.p) != l.backsector.floorplane.ZAtPoint(l.v2.p)) )
+								continue;
+							if ( (l.frontsector.GetTexture(0) == HitTexture) && (con.Find(l.frontsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.frontsector);
+							}
+							if ( (l.backsector.GetTexture(0) == HitTexture) && (con.Find(l.backsector) >= con.Size()) )
+							{
+								found++;
+								con.Push(l.backsector);
+							}
+						}
+					}
+				}
+				while ( found > 0 );
+				for ( int i=0; i<con.Size(); i++ )
+					con[i].SetTexture(0,replacewith);
+			}
 		}
 	}
 	action void A_HeartBurst()

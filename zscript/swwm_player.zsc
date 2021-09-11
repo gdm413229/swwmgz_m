@@ -994,13 +994,13 @@ Class Demolitionist : PlayerPawn
 					}
 					else if ( health > 500 )
 					{
-						if ( !FindInventory("GrilledCheeseSafeguard") && !(healtimer%5) )
+						if ( !FindInventory("GrilledCheeseSafeguard") && !(healtimer%3) )
 							A_SetHealth(health-1);
 						if ( health <= 500 ) healcooldown = 20;
 					}
 					else if ( health > 200 )
 					{
-						if ( !FindInventory("RefresherRegen") && !(healtimer%15) )
+						if ( !FindInventory("RefresherRegen") && !(healtimer%12) )
 							A_SetHealth(health-1);
 					}
 					healtimer++;
@@ -1179,7 +1179,15 @@ Class Demolitionist : PlayerPawn
 		dashcooldown = max(0,dashcooldown-1);
 		boostcooldown = max(0,boostcooldown-1);
 		if ( fuelcooldown <= 0 )
+		{
+			double oldfuel = dashfuel;
 			dashfuel = min(default.dashfuel,dashfuel+clamp(dashfuel*.025,.1,3.));
+			// stops
+			if ( (oldfuel < (default.dashfuel/24)) && (dashfuel >= default.dashfuel/24) )
+				fuelcooldown = 20;
+			else if ( (oldfuel < (default.dashfuel/12)) && (dashfuel >= default.dashfuel/12) )
+				fuelcooldown = 10;
+		}
 		if ( ((dashboost <= 0) || !(isdashing || (isboosting && player.cmd.buttons&BT_JUMP))) && IsActorPlayingSound(CHAN_JETPACK,"demolitionist/jet") )
 			A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 		PainChance = isdashing?0:255;

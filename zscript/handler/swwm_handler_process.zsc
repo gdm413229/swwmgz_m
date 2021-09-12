@@ -392,6 +392,15 @@ extend Class SWWMHandler
 					amt = GetDefaultByType(a).Amount;
 				}
 			}
+			if ( item is 'MagAmmo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<MagAmmo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
 			Inventory ritm = players[e.Args[1]].mo.FindInventory(item);
 			if ( ritm )
 			{
@@ -509,6 +518,15 @@ extend Class SWWMHandler
 				for ( int i=0; i<AllActorClasses.Size(); i++ )
 				{
 					let a = (Class<Ammo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
+			if ( i is 'MagAmmo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<MagAmmo>)(AllActorClasses[i]);
 					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
 					amt = GetDefaultByType(a).Amount;
 				}

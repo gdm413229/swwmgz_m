@@ -74,6 +74,8 @@ All the hard stuff *(some of these aren't guaranteed)*.
 * **Photo Mode**
   - Dedicated poses
   - Stickers
+* **Virtual Training Map**
+  - Featuring Maidbot as assistant
 
 ## Unspecified
 

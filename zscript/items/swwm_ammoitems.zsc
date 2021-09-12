@@ -2,21 +2,16 @@
 // Spreadgun / Wallbuster ammo
 // ============================================================================
 
-Class RedShell : Ammo
+Class RedShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x Red Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsNormal.png
 		//$Icon ammo
-		Tag "$T_REDSHELLS";
+		Tag "$T_REDSHELL";
+		SWWMAmmo.PickupTag "REDSHELL";
 		Stamina 500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsNormal.png";
 		Inventory.Amount 1;
@@ -62,21 +57,16 @@ Class RedShell4 : RedShell
 	}
 }
 
-Class GreenShell : Ammo
+Class GreenShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x Green Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsSlug.png
 		//$Icon ammo
-		Tag "$T_GREENSHELLS";
+		Tag "$T_GREENSHELL";
+		SWWMAmmo.PickupTag "GREENSHELL";
 		Stamina 800;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsSlug.png";
 		Inventory.Amount 1;
@@ -122,21 +112,16 @@ Class GreenShell4 : GreenShell
 	}
 }
 
-Class WhiteShell : Ammo
+Class WhiteShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x White Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsDragon.png
 		//$Icon ammo
-		Tag "$T_WHITESHELLS";
+		Tag "$T_WHITESHELL";
+		SWWMAmmo.PickupTag "WHITESHELL";
 		Stamina 1000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsDragon.png";
 		Inventory.Amount 1;
@@ -181,21 +166,16 @@ Class WhiteShell4 : WhiteShell
 	}
 }
 
-Class BlueShell : Ammo
+Class BlueShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x Blue Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsKinylum.png
 		//$Icon ammo
-		Tag "$T_BLUESHELLS";
+		Tag "$T_BLUESHELL";
+		SWWMAmmo.PickupTag "BLUESHELL";
 		Stamina 2500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsKinylum.png";
 		Inventory.Amount 1;
@@ -241,21 +221,16 @@ Class BlueShell4 : BlueShell
 	}
 }
 
-Class BlackShell : Ammo
+Class BlackShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x Black Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsFuck.png
 		//$Icon ammo
-		Tag "$T_BLACKSHELLS";
+		Tag "$T_BLACKSHELL";
+		SWWMAmmo.PickupTag "BLACKSHELL";
 		Stamina 4000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsFuck.png";
 		Inventory.Amount 1;
@@ -301,21 +276,16 @@ Class BlackShell4 : BlackShell
 	}
 }
 
-Class PurpleShell : Ammo
+Class PurpleShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x Purple Shells
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsBall.png
 		//$Icon ammo
-		Tag "$T_PURPLESHELLS";
+		Tag "$T_PURPLESHELL";
+		SWWMAmmo.PickupTag "PURPLESHELL";
 		Stamina 1500;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsBall.png";
 		Inventory.Amount 1;
@@ -395,14 +365,8 @@ Class GoldShellSparkle : Actor
 	}
 }
 
-Class GoldShell : Ammo
+Class GoldShell : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	action void A_GoldShellTrail()
 	{
 		if ( Random[Goldy](0,2) ) return;
@@ -415,7 +379,8 @@ Class GoldShell : Ammo
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_ShellsGold.png
 		//$Icon ammo
-		Tag "$T_GOLDSHELLS";
+		Tag "$T_GOLDSHELL";
+		SWWMAmmo.PickupTag "GOLDSHELL";
 		Stamina -1000000;
 		Inventory.Icon "graphics/HUD/Icons/A_ShellsGold.png";
 		Inventory.Amount 1;
@@ -465,20 +430,16 @@ Class GoldShell4 : GoldShell
 // Eviscerator ammo
 // ============================================================================
 
-Class EvisceratorShell : Ammo
+Class EvisceratorShell : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Eviscerator Shell
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_Eviscerator.png
 		//$Icon ammo
-		Tag "$T_EVISHELLS";
+		Tag "$T_EVISHELL";
+		SWWMAmmo.PickupTag "EVISHELL";
 		Inventory.PickupMessage "$T_EVISHELL";
 		Stamina 3000;
 		Inventory.Icon "graphics/HUD/Icons/A_Eviscerator.png";
@@ -488,6 +449,7 @@ Class EvisceratorShell : Ammo
 		Ammo.BackpackMaxAmount 60;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
+		+SWWMAMMO.USEPICKUPMSG;
 		FloatBobStrength 0.25;
 		Radius 8;
 		Height 22;
@@ -495,14 +457,40 @@ Class EvisceratorShell : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,4);
+		Ammo.ModifyDropAmount(dropamount);
+		Amount = min(Amount,3);
 	}
 	States
 	{
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	}
+}
+Class EvisceratorShell2 : EvisceratorShell
+{
+	Default
+	{
+		//$Title Eviscerator Dual Clip
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_Eviscerator.png
+		//$Icon ammo
+		Inventory.PickupMessage "$I_EVISHELLCLIP2";
+		Inventory.Amount 2;
+		Radius 16;
+	}
+}
+Class EvisceratorShell3 : EvisceratorShell
+{
+	Default
+	{
+		//$Title Eviscerator Triple Clip
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_Eviscerator.png
+		//$Icon ammo
+		Inventory.PickupMessage "$I_EVISHELLCLIP3";
+		Inventory.Amount 3;
+		Radius 16;
 	}
 }
 
@@ -514,7 +502,6 @@ Class EvisceratorSixPack : EvisceratorShell
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_Eviscerator.png
 		//$Icon ammo
-		Tag "$I_EVISHELLPAK";
 		Inventory.PickupMessage "$I_EVISHELLPAK";
 		Inventory.Amount 6;
 		Radius 20;
@@ -522,39 +509,20 @@ Class EvisceratorSixPack : EvisceratorShell
 	}
 }
 
-Class EvisceratorBundleSpawn : SWWMAmmoSpawner
-{
-	override void SpawnAmmo()
-	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("EvisceratorShell",Vec3Angle(12,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
-	}
-}
-
 // ============================================================================
 // Hellblazer ammo
 // ============================================================================
 
-Class HellblazerMissiles : Ammo
+Class HellblazerMissiles : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Hellblazer Missile
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerMissile.png
 		//$Icon ammo
-		Tag "$T_HELLMISSILES";
-		Inventory.PickupMessage "$T_HELLMISSILE";
+		Tag "$T_HELLMISSILE";
+		SWWMAmmo.PickupTag "HELLMISSILE";
 		Stamina 8000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerMissile.png";
 		Inventory.Amount 1;
@@ -570,7 +538,7 @@ Class HellblazerMissiles : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
+		Ammo.ModifyDropAmount(dropamount);
 		Amount = min(Amount,3);
 	}
 	States
@@ -578,6 +546,28 @@ Class HellblazerMissiles : Ammo
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	}
+}
+Class HellblazerMissiles2 : HellblazerMissiles
+{
+	Default
+	{
+		//$Title 2x Hellblazer Missile
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_HellblazerMissile.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class HellblazerMissiles3 : HellblazerMissiles
+{
+	Default
+	{
+		//$Title 3x Hellblazer Missile
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_HellblazerMissile.png
+		//$Icon ammo
+		Inventory.Amount 3;
 	}
 }
 Class HellblazerMissileMag : HellblazerMissiles
@@ -588,42 +578,24 @@ Class HellblazerMissileMag : HellblazerMissiles
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerMissile.png
 		//$Icon ammo
-		Tag "$T_HELLMISSILEMAG";
 		Inventory.PickupMessage "$T_HELLMISSILEMAG";
 		Inventory.Amount 6;
+		+SWWMAMMO.USEPICKUPMSG;
 		Radius 12;
 		Height 26;
 	}
 }
-Class HellblazerMissileBundleSpawn : SWWMAmmoSpawner
-{
-	override void SpawnAmmo()
-	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("HellblazerMissiles",Vec3Angle(8,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
-	}
-}
 
-Class HellblazerCrackshots : Ammo
+Class HellblazerCrackshots : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Hellblazer Crackshot
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerCrackshot.png
 		//$Icon ammo
-		Tag "$T_HELLCLUSTERS";
-		Inventory.PickupMessage "$T_HELLCLUSTER";
+		Tag "$T_HELLCLUSTER";
+		SWWMAmmo.PickupTag "HELLCLUSTER";
 		Stamina 15000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerCrackshot.png";
 		Inventory.Amount 1;
@@ -639,7 +611,7 @@ Class HellblazerCrackshots : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
+		Ammo.ModifyDropAmount(dropamount);
 		Amount = min(Amount,2);
 	}
 	States
@@ -647,6 +619,17 @@ Class HellblazerCrackshots : Ammo
 	Spawn:
 		XZW1 A -1;
 		Stop;
+	}
+}
+Class HellblazerCrackshots2 : HellblazerCrackshots
+{
+	Default
+	{
+		//$Title 2x Hellblazer Crackshots
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_HellblazerCrackshot.png
+		//$Icon ammo
+		Inventory.Amount 2;
 	}
 }
 Class HellblazerCrackshotMag : HellblazerCrackshots
@@ -657,42 +640,24 @@ Class HellblazerCrackshotMag : HellblazerCrackshots
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerCrackshot.png
 		//$Icon ammo
-		Tag "$T_HELLCLUSTERMAG";
 		Inventory.PickupMessage "$T_HELLCLUSTERMAG";
 		Inventory.Amount 3;
+		+SWWMAMMO.USEPICKUPMSG;
 		Radius 12;
 		Height 26;
 	}
 }
-Class HellblazerCrackshotBundleSpawn : SWWMAmmoSpawner
-{
-	override void SpawnAmmo()
-	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("HellblazerCrackshots",Vec3Angle(8,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
-	}
-}
 
-Class HellblazerRavagers : Ammo
+Class HellblazerRavagers : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Hellblazer Ravager
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerRavager.png
 		//$Icon ammo
-		Tag "$T_HELLBURNINATORS";
-		Inventory.PickupMessage "$T_HELLBURNINATOR";
+		Tag "$T_HELLBURNINATOR";
+		SWWMAmmo.PickupTag "HELLBURNINATOR";
 		Stamina 25000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerRavager.png";
 		Inventory.Amount 1;
@@ -708,7 +673,7 @@ Class HellblazerRavagers : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
+		Ammo.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
 	}
 	States
@@ -726,29 +691,24 @@ Class HellblazerRavagerMag : HellblazerRavagers
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerRavager.png
 		//$Icon ammo
-		Tag "$T_HELLBURNINATORMAG";
 		Inventory.PickupMessage "$T_HELLBURNINATORMAG";
 		Inventory.Amount 3;
+		+SWWMAMMO.USEPICKUPMSG;
 		Radius 12;
 		Height 26;
 	}
 }
 
-Class HellblazerWarheads : Ammo
+Class HellblazerWarheads : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Hellblazer Warhead
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerWarhead.png
 		//$Icon ammo
-		Tag "$T_HELLNUKES";
-		Inventory.PickupMessage "$T_HELLNUKE";
+		Tag "$T_HELLNUKE";
+		SWWMAmmo.PickupTag "HELLNUKE";
 		Stamina 40000;
 		Inventory.Icon "graphics/HUD/Icons/A_HellblazerWarhead.png";
 		Inventory.Amount 1;
@@ -764,7 +724,7 @@ Class HellblazerWarheads : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
+		Ammo.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
 	}
 	States
@@ -782,9 +742,9 @@ Class HellblazerWarheadMag : HellblazerWarheads
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_HellblazerWarhead.png
 		//$Icon ammo
-		Tag "$T_HELLNUKEMAG";
 		Inventory.PickupMessage "$T_HELLNUKEMAG";
 		Inventory.Amount 2;
+		+SWWMAMMO.USEPICKUPMSG;
 		Radius 12;
 		Height 26;
 	}
@@ -794,13 +754,8 @@ Class HellblazerWarheadMag : HellblazerWarheads
 // Sparkster ammo
 // ============================================================================
 
-Class SparkUnit : Ammo
+Class SparkUnit : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Spark Unit
@@ -808,7 +763,7 @@ Class SparkUnit : Ammo
 		//$Sprite graphics/HUD/Icons/A_Sparkster.png
 		//$Icon ammo
 		Tag "$T_SPARKUNIT";
-		Inventory.PickupMessage "$T_SPARKUNIT";
+		SWWMAmmo.PickupTag "SPARKUNIT";
 		Stamina 50000;
 		Inventory.Icon "graphics/HUD/Icons/A_Sparkster.png";
 		Inventory.Amount 1;
@@ -824,7 +779,7 @@ Class SparkUnit : Ammo
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
-		Super.ModifyDropAmount(dropamount);
+		Ammo.ModifyDropAmount(dropamount);
 		Amount = min(Amount,1);
 	}
 	States
@@ -834,32 +789,25 @@ Class SparkUnit : Ammo
 		Stop;
 	}
 }
-Class SparkUnitBundleSpawn : SWWMAmmoSpawner
+Class SparkUnit2 : SparkUnit
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("SparkUnit",Vec3Angle(8,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Spark Unit
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_Sparkster.png
+		//$Icon ammo
+		Inventory.Amount 2;
+		Radius 8;
 	}
 }
-
 
 // ============================================================================
 // Silver Bullet ammo
 // ============================================================================
 
-Class SilverBulletAmmo : Ammo
+Class SilverBulletAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Silver Bullet Mag (XSB)
@@ -867,7 +815,7 @@ Class SilverBulletAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_SilverBullet.png
 		//$Icon ammo
 		Tag "$T_XSBMAG";
-		Inventory.PickupMessage "$T_XSBMAG";
+		SWWMAmmo.PickupTag "XSBMAG";
 		Stamina 70000;
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet.png";
 		Inventory.Amount 1;
@@ -875,27 +823,12 @@ Class SilverBulletAmmo : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 8;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "SilverBullets";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 10;
 		Height 26;
 		Accuracy 75;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// attach our mag ammo if we have none
-		if ( Owner.FindInventory('SilverBullets') )
-		{
-			let ma = Inventory(Spawn('SilverBullets'));
-			ma.Amount = 0;
-			ma.AttachToOwner(Owner);
-		}
 	}
 	States
 	{
@@ -905,13 +838,8 @@ Class SilverBulletAmmo : Ammo
 	}
 }
 
-Class SilverBulletAmmo2 : Ammo
+Class SilverBulletAmmo2 : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Silver Bullet Mag (FCB)
@@ -919,7 +847,7 @@ Class SilverBulletAmmo2 : Ammo
 		//$Sprite graphics/HUD/Icons/A_SilverBullet2.png
 		//$Icon ammo
 		Tag "$T_FCBMAG";
-		Inventory.PickupMessage "$T_FCBMAG";
+		SWWMAmmo.PickupTag "FCBMAG";
 		Stamina 80000;
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBullet2.png";
 		Inventory.Amount 1;
@@ -927,27 +855,12 @@ Class SilverBulletAmmo2 : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "SilverBullets2";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 10;
 		Height 26;
 		Accuracy 80;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// attach our mag ammo if we have none
-		if ( Owner.FindInventory('SilverBullets2') )
-		{
-			let ma = Inventory(Spawn('SilverBullets2'));
-			ma.Amount = 0;
-			ma.AttachToOwner(Owner);
-		}
 	}
 	States
 	{
@@ -966,7 +879,7 @@ Class SilverBullets : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet.png
 		//$Icon ammo
 		Tag "$T_XSBBULLET";
-		Inventory.PickupMessage "$T_XSBBULLET";
+		MagAmmo.PickupTag "XSBBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet.png";
 		MagAmmo.ParentAmmo "SilverBulletAmmo";
 		MagAmmo.ClipSize 5;
@@ -983,6 +896,32 @@ Class SilverBullets : MagAmmo
 		Stop;
 	}
 }
+Class SilverBullets_2 : SilverBullets
+{
+	Default
+	{
+		//$Title 2x Silver Bullet Round (XSB)
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet.png
+		//$Icon ammo
+		Inventory.Amount 2;
+		Radius 6;
+		Height 24;
+	}
+}
+Class SilverBullets_3 : SilverBullets
+{
+	Default
+	{
+		//$Title 3x Silver Bullet Round (XSB)
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet.png
+		//$Icon ammo
+		Inventory.Amount 3;
+		Radius 6;
+		Height 24;
+	}
+}
 Class SilverBullets2 : MagAmmo
 {
 	Default
@@ -992,7 +931,7 @@ Class SilverBullets2 : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet2.png
 		//$Icon ammo
 		Tag "$T_FCBBULLET";
-		Inventory.PickupMessage "$T_FCBBULLET";
+		MagAmmo.PickupTag "FCBBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_SilverBulletBullet2.png";
 		MagAmmo.ParentAmmo "SilverBulletAmmo2";
 		MagAmmo.ClipSize 5;
@@ -1009,31 +948,30 @@ Class SilverBullets2 : MagAmmo
 		Stop;
 	}
 }
-
-Class SilverBulletsBundleSpawn : SWWMAmmoSpawner
+Class SilverBullets2_2 : SilverBullets2
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("SilverBullets",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Silver Bullet Round (FCB)
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet2.png
+		//$Icon ammo
+		Inventory.Amount 2;
+		Radius 6;
+		Height 24;
 	}
 }
-Class SilverBullets2BundleSpawn : SWWMAmmoSpawner
+Class SilverBullets2_3 : SilverBullets2
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("SilverBullets2",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 3x Silver Bullet Round (FCB)
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SilverBulletBullet2.png
+		//$Icon ammo
+		Inventory.Amount 3;
+		Radius 6;
+		Height 24;
 	}
 }
 
@@ -1041,13 +979,8 @@ Class SilverBullets2BundleSpawn : SWWMAmmoSpawner
 // Candygun ammo
 // ============================================================================
 
-Class CandyGunAmmo : Ammo
+Class CandyGunAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Candy Gun Mag
@@ -1055,7 +988,7 @@ Class CandyGunAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_CandyGun.png
 		//$Icon ammo
 		Tag "$T_CANDYMAG";
-		Inventory.PickupMessage "$T_CANDYMAG";
+		SWWMAmmo.PickupTag "CANDYMAG";
 		Stamina 100000;
 		Inventory.Icon "graphics/HUD/Icons/A_CandyGun.png";
 		Inventory.Amount 1;
@@ -1063,27 +996,12 @@ Class CandyGunAmmo : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 6;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "CandyGunBullets";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 6;
 		Height 24;
 		Accuracy 90;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
-	override void AttachToOwner( Actor other )
-	{
-		Super.AttachToOwner(other);
-		// attach our mag ammo if we have none
-		if ( Owner.FindInventory('CandyGunBullets') )
-		{
-			let ma = Inventory(Spawn('CandyGunBullets'));
-			ma.Amount = 0;
-			ma.AttachToOwner(Owner);
-		}
 	}
 	States
 	{
@@ -1102,7 +1020,7 @@ Class CandyGunBullets : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_CandyBullet.png
 		//$Icon ammo
 		Tag "$T_CANDYBULLET";
-		Inventory.PickupMessage "$T_CANDYBULLET";
+		MagAmmo.PickupTag "CANDYBULLET";
 		Inventory.Icon "graphics/HUD/Icons/A_CandyBullet.png";
 		MagAmmo.ParentAmmo "CandyGunAmmo";
 		MagAmmo.ClipSize 7;
@@ -1119,26 +1037,37 @@ Class CandyGunBullets : MagAmmo
 		Stop;
 	}
 }
-
-Class CandyGunBulletsBundleSpawn : SWWMAmmoSpawner
+Class CandyGunBullets2 : CandyGunBullets
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("CandyGunBullets",Vec3Angle(4,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Candy Gun Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_CandyBullet.png
+		//$Icon ammo
+		Inventory.Amount 2;
+		Radius 2.5;
+	}
+}
+Class CandyGunBullets3 : CandyGunBullets
+{
+	Default
+	{
+		//$Title 2x Candy Gun Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_CandyBullet.png
+		//$Icon ammo
+		Inventory.Amount 3;
+		Radius 3;
 	}
 }
 
-Class CandyGunSpares : Ammo
+Class CandyGunSpares : SWWMAmmo
 {
 	Default
 	{
 		Tag "$T_CANDYSPARE";
+		SWWMAmmo.PickupTag "CANDYSPARE";
 		Stamina 600000;
 		Inventory.Icon "graphics/HUD/Icons/W_CandyGun.png";
 		Inventory.Amount 1;
@@ -1171,13 +1100,8 @@ Class CandyGunSpares : Ammo
 // Ynykron ammo
 // ============================================================================
 
-Class YnykronAmmo : Ammo
+Class YnykronAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Ynykron Ammo
@@ -1185,7 +1109,7 @@ Class YnykronAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_Ynykron.png
 		//$Icon ammo
 		Tag "$T_YNYKRONAMMO";
-		Inventory.PickupMessage "$T_YNYKRONAMMO";
+		SWWMAmmo.PickupTag "YNYKRONAMMO";
 		Stamina -3000000;
 		Inventory.Icon "graphics/HUD/Icons/A_Ynykron.png";
 		Inventory.Amount 1;
@@ -1197,11 +1121,6 @@ Class YnykronAmmo : Ammo
 		FloatBobStrength 0.25;
 		Radius 8;
 		Height 24;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{

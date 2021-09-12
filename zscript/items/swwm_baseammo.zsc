@@ -1,6 +1,39 @@
 // Common code for ammo division
-Mixin Class SWWMAmmo
+Class SWWMAmmo : Ammo
 {
+	Mixin SWWMOverlapPickupSound;
+	Mixin SWWMUseToPickup;
+	Mixin SWWMRespawn;
+
+	String PickupTag;
+	Class<MagAmmo> MagAmmoType;
+	private int SAmmoFlags;
+
+	Property PickupTag : PickupTag;
+	Property MagAmmoType : MagAmmoType;
+
+	FlagDef UsePickupMsg : SAmmoFlags, 0;	// use the set pickup message rather than generating from pickup tag
+
+	override Class<Ammo> GetParentAmmo()
+	{
+		Class<Object> type = GetClass();
+		while ( (type.GetParentClass() != "SWWMAmmo") && type.GetParentClass() )
+			type = type.GetParentClass();
+		return (Class<Ammo>)(type);
+	}
+
+	override string PickupMessage()
+	{
+		if ( bUsePickupMsg ) return Super.PickupMessage();
+		String tagstr = "$T_"..PickupTag;
+		if ( Amount > 1 )
+		{
+			tagstr = tagstr.."S";
+			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
+		}
+		return StringTable.Localize(tagstr);
+	}
+
 	private Inventory DoDrop( Class<Inventory> type )
 	{
 		let copy = Inventory(Spawn(type,Owner.Pos,NO_REPLACE));
@@ -122,22 +155,7 @@ Mixin Class SWWMAmmo
 						ammotypes.Push((Class<Ammo>)(AllActorClasses[i]));
 				}
 				// sort from largest to smallest
-				for ( int i=0; i<ammotypes.Size(); i++ )
-				{
-					int j = 1;
-					while ( j < ammotypes.Size() )
-					{
-						int k = j;
-						while ( (k > 0) && CmpAmmo(ammotypes[k-1],ammotypes[k]) )
-						{
-							Class<Ammo> tmp = ammotypes[k];
-							ammotypes[k] = ammotypes[k-1];
-							ammotypes[k-1] = tmp;
-							k--;
-						}
-						j++;
-					}
-				}
+				qsort_ammotypes(ammotypes,0,ammotypes.Size()-1);
 				// drop spares
 				Inventory last;
 				while ( excess > 0 )
@@ -196,6 +214,31 @@ Mixin Class SWWMAmmo
 		return true;
 	}
 
+	override void AttachToOwner( Actor other )
+	{
+		Super.AttachToOwner(other);
+		// attach our mag ammo if we have none
+		if ( MagAmmoType && !Owner.FindInventory(MagAmmoType) )
+		{
+			let ma = Inventory(Spawn(MagAmmoType));
+			ma.Amount = 0;
+			ma.AttachToOwner(Owner);
+		}
+	}
+
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		int maxdrop = 1;
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			if ( !(AllActorClasses[i] is GetParentAmmo()) ) continue;
+			let def = GetDefaultByType((Class<Ammo>)(AllActorClasses[i]));
+			maxdrop = max(maxdrop,def.amount);
+		}
+		Amount = Random[ShellDrop](1,clamp(dropamount,1,maxdrop));
+	}
+
 	default
 	{
 		+INVENTORY.IGNORESKILL;
@@ -214,9 +257,11 @@ Class MagAmmo : Inventory abstract
 	Ammo pamo;
 	int ClipSize;
 	int countdown;
+	String PickupTag;
 
 	Property ParentAmmo : ParentAmmo;
 	Property ClipSize : ClipSize;
+	Property PickupTag : PickupTag;
 
 	default
 	{
@@ -224,6 +269,59 @@ Class MagAmmo : Inventory abstract
 		Inventory.PickupSound "misc/bullet_pkup";
 		Inventory.Amount 1;
 		Inventory.PickupFlash "SWWMPickupFlash";
+	}
+
+	virtual Class<MagAmmo> GetParentMagAmmo()
+	{
+		Class<Object> type = GetClass();
+		while ( (type.GetParentClass() != "MagAmmo") && type.GetParentClass() )
+			type = type.GetParentClass();
+		return (Class<MagAmmo>)(type);
+	}
+
+	private bool CmpAmmo( Class<MagAmmo> a, Class<MagAmmo> b )
+	{
+		let amta = GetDefaultByType(a).Amount;
+		let amtb = GetDefaultByType(b).Amount;
+		return (amta < amtb);
+	}
+
+	private int partition_ammotypes( Array<Class<MagAmmo> > a, int l, int h )
+	{
+		Class<MagAmmo> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpAmmo(pv,a[j]) )
+			{
+				i++;
+				Class<MagAmmo> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Class<MagAmmo> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_ammotypes( Array<Class<MagAmmo> > a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_ammotypes(a,l,h);
+		qsort_ammotypes(a,l,p-1);
+		qsort_ammotypes(a,p+1,h);
+	}
+
+	override string PickupMessage()
+	{
+		String tagstr = "$T_"..PickupTag;
+		if ( Amount > 1 )
+		{
+			tagstr = tagstr.."S";
+			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
+		}
+		return StringTable.Localize(tagstr);
 	}
 
 	override bool HandlePickup( Inventory item )
@@ -257,7 +355,78 @@ Class MagAmmo : Inventory abstract
 				return true;
 			}
 		}
-		return Super.HandlePickup(item);
+		// drop excess mag ammo
+		if ( (item is 'MagAmmo') && (MagAmmo(item).GetParentMagAmmo() == GetClass()) )
+		{
+			int excess = Amount+item.Amount;
+			if ( excess > MaxAmount ) excess -= MaxAmount;
+			if ( excess < item.Amount )
+			{
+				// enumerate all subclasses
+				Array<Class<MagAmmo> > ammotypes;
+				ammotypes.Clear();
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					if ( AllActorClasses[i] is GetParentMagAmmo() )
+						ammotypes.Push((Class<MagAmmo>)(AllActorClasses[i]));
+				}
+				// sort from largest to smallest
+				qsort_ammotypes(ammotypes,0,ammotypes.Size()-1);
+				// drop spares
+				Inventory last;
+				while ( excess > 0 )
+				{
+					for ( int i=0; i<ammotypes.Size(); i++ )
+					{
+						let def = GetDefaultByType(ammotypes[i]);
+						if ( excess >= def.Amount )
+						{
+							double ang = FRandom[Junk](0,360);
+							last = DoDrop(ammotypes[i]);
+							last.SetOrigin(item.pos,false);
+							last.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](2,5);
+							excess -= def.Amount;
+							break;
+						}
+					}
+				}
+			}
+			if ( Amount < MaxAmount )
+			{
+				int receiving = item.Amount;
+				int oldamt = Amount;
+				if ( (Amount > 0) && ((Amount+item.Amount) < 0) ) Amount = int.max;
+				else Amount += item.Amount;
+				if ( Amount > MaxAmount && !sv_unlimited_pickup ) Amount = MaxAmount;
+				item.bPickupGood = true;
+				// autoswitch if needed (checks parent ammo type)
+				if ( (oldamt == 0) && Owner && Owner.player )
+					PlayerPawn(Owner).CheckWeaponSwitch(ParentAmmo);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	override Inventory CreateCopy( Actor other )
+	{
+		Inventory copy;
+		int amount = Amount;
+		let type = GetParentMagAmmo();
+		if ( (GetClass() != type) && type )
+		{
+			if ( !GoAway() ) Destroy();
+			copy = Inventory(Spawn(type));
+			copy.Amount = amount;
+			copy.BecomeItem();
+		}
+		else
+		{
+			copy = Super.CreateCopy(other);
+			copy.Amount = amount;
+		}
+		if ( copy.Amount > copy.MaxAmount ) copy.Amount = copy.MaxAmount;
+		return copy;
 	}
 
 	override bool CanPickup( Actor toucher )
@@ -363,6 +532,16 @@ Class MagAmmo : Inventory abstract
 			return null;
 		// cap
 		amt = min(amount,amt);
+		// enumerate all subclasses
+		Array<Class<MagAmmo> > ammotypes;
+		ammotypes.Clear();
+		for ( int i=0; i<AllActorClasses.Size(); i++ )
+		{
+			if ( AllActorClasses[i] is GetParentMagAmmo() )
+				ammotypes.Push((Class<MagAmmo>)(AllActorClasses[i]));
+		}
+		// sort from largest to smallest
+		qsort_ammotypes(ammotypes,0,ammotypes.Size()-1);
 		// perform subdivision
 		Inventory last = null;
 		let pammo = GetDefaultByType(ParentAmmo);
@@ -376,10 +555,18 @@ Class MagAmmo : Inventory abstract
 				Amount -= ClipSize;
 				continue;
 			}
-			// drop individual bullets
-			last = DoDrop(GetClass());
-			amt--;
-			Amount--;
+			// drop bullets otherwise
+			for ( int i=0; i<ammotypes.Size(); i++ )
+			{
+				let def = GetDefaultByType(ammotypes[i]);
+				if ( amt >= def.Amount )
+				{
+					last = DoDrop(ammotypes[i]);
+					amt -= def.Amount;
+					Amount -= def.Amount;
+					break;
+				}
+			}
 		}
 		return last;
 	}
@@ -391,29 +578,7 @@ Class MagAmmo : Inventory abstract
 	}
 }
 
-// Common code for grouped shell handling and per-amount pickup messages
-Mixin Class SWWMShellAmmo
-{
-	override string PickupMessage()
-	{
-		String tagstr = "$T_"..GetParentAmmo().GetClassName();
-		tagstr.MakeUpper();
-		if ( Amount > 1 )
-		{
-			tagstr = tagstr.."S";
-			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
-		}
-		return StringTable.Localize(tagstr);
-	}
-
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = Random[ShellDrop](1,clamp(dropamount,1,4));
-	}
-}
-
-// Ref class for ammo spawners, used by both on-demand replacers and bundles
+// Ref class for ammo spawners, used by on-demand replacers
 Class SWWMAmmoSpawner : Actor abstract
 {
 	virtual void SpawnAmmo() {}

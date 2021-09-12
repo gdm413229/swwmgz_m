@@ -1,13 +1,7 @@
 // All DLC weapon ammo pickups
 
-Class SMW05Ammo : Ammo
+Class SMW05Ammo : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title 1x SMW.05 Bullets
@@ -15,6 +9,7 @@ Class SMW05Ammo : Ammo
 		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
 		//$Icon ammo
 		Tag "$T_SMW05BULLET";
+		SWWMAmmo.PickupTag "SMW05BULLET";
 		Stamina 300;
 		Inventory.Icon "graphics/HUD/Icons/A_SMW05Ammo.png";
 		Inventory.Amount 1;
@@ -26,6 +21,11 @@ Class SMW05Ammo : Ammo
 		FloatBobStrength 0.25;
 		Accuracy 20;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = Random[ShellDrop](1,clamp(dropamount,1,3));
+	}
 	States
 	{
 	Spawn:
@@ -33,21 +33,28 @@ Class SMW05Ammo : Ammo
 		Stop;
 	}
 }
-
-Class SMW05BundleSpawn : SWWMAmmoSpawner
+Class SMW05Ammo2 : SMW05Ammo
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("SMW05Ammo",Vec3Angle(4,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 1x SMW.05 Bullets
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
+		//$Icon ammo
+		Inventory.Amount 2;
 	}
 }
-
+Class SMW05Ammo3 : SMW05Ammo
+{
+	Default
+	{
+		//$Title 1x SMW.05 Bullets
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
 Class SMW05SmallAmmo : SMW05Ammo
 {
 	Default
@@ -59,7 +66,6 @@ Class SMW05SmallAmmo : SMW05Ammo
 		Inventory.Amount 6;
 	}
 }
-
 Class SMW05BigAmmo : SMW05Ammo
 {
 	Default
@@ -72,32 +78,16 @@ Class SMW05BigAmmo : SMW05Ammo
 	}
 }
 
-Class SheenAmmo : Ammo
+Class SheenAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
-	override string PickupMessage()
-	{
-		String tagstr = "$T_SHEENBULLET";
-		tagstr.MakeUpper();
-		if ( Amount > 1 )
-		{
-			tagstr = tagstr.."S";
-			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
-		}
-		return StringTable.Localize(tagstr);
-	}
-
 	Default
 	{
 		//$Title 1x Sheen Bullets
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SheenAmmo.png
 		//$Icon ammo
-		Tag "$T_SHEENBULLETS";
+		Tag "$T_SHEENBULLET";
+		SWWMAmmo.PickupTag "SHEENBULLET";
 		Stamina 400;
 		Inventory.Icon "graphics/HUD/Icons/A_SheenAmmo.png";
 		Inventory.Amount 1;
@@ -109,6 +99,11 @@ Class SheenAmmo : Ammo
 		FloatBobStrength 0.25;
 		Accuracy 35;
 	}
+	override void ModifyDropAmount( int dropamount )
+	{
+		Super.ModifyDropAmount(dropamount);
+		Amount = Random[ShellDrop](1,clamp(dropamount,1,3));
+	}
 	States
 	{
 	Spawn:
@@ -116,7 +111,28 @@ Class SheenAmmo : Ammo
 		Stop;
 	}
 }
-
+Class SheenAmmo2 : SheenAmmo
+{
+	Default
+	{
+		//$Title 2x Sheen Bullets
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SheenAmmo.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class SheenAmmo3 : SheenAmmo
+{
+	Default
+	{
+		//$Title 3x Sheen Bullets
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SheenAmmo.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
 Class SheenTinyAmmo : SheenAmmo
 {
 	Default
@@ -128,7 +144,6 @@ Class SheenTinyAmmo : SheenAmmo
 		Inventory.Amount 10;
 	}
 }
-
 Class SheenSmallAmmo : SheenAmmo
 {
 	Default
@@ -140,7 +155,6 @@ Class SheenSmallAmmo : SheenAmmo
 		Inventory.Amount 50;
 	}
 }
-
 Class SheenBigAmmo : SheenAmmo
 {
 	Default
@@ -153,13 +167,8 @@ Class SheenBigAmmo : SheenAmmo
 	}
 }
 
-Class QuadravolAmmo : Ammo
+Class QuadravolAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Quadravol Ammo
@@ -167,7 +176,7 @@ Class QuadravolAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_QuadAmmo.png
 		//$Icon ammo
 		Tag "$T_QUADAMMO";
-		Inventory.PickupMessage "$T_QUADAMMO";
+		SWWMAmmo.PickupTag "QUADAMMO";
 		Stamina 10000;
 		Inventory.Icon "graphics/HUD/Icons/A_QuadAmmo.png";
 		Inventory.Amount 1;
@@ -179,11 +188,6 @@ Class QuadravolAmmo : Ammo
 		FloatBobStrength 0.25;
 		Accuracy 45;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -191,28 +195,20 @@ Class QuadravolAmmo : Ammo
 		Stop;
 	}
 }
-
-Class QuadravolAmmoBundleSpawn : SWWMAmmoSpawner
+Class QuadravolAmmo2 : QuadravolAmmo
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("QuadravolAmmo",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Quadravol Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_QuadAmmo.png
+		//$Icon ammo
+		Inventory.Amount 2;
 	}
 }
 
-Class DarkCanister : Ammo
+Class DarkCanister : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Dark Canister
@@ -220,7 +216,7 @@ Class DarkCanister : Ammo
 		//$Sprite graphics/HUD/Icons/A_DarkAmmo.png
 		//$Icon ammo
 		Tag "$T_DARKAMMO";
-		Inventory.PickupMessage "$T_DARKAMMO";
+		SWWMAmmo.PickupTag "DARKAMMO";
 		Stamina 20000;
 		Inventory.Icon "graphics/HUD/Icons/A_DarkAmmo.png";
 		Inventory.Amount 1;
@@ -232,11 +228,6 @@ Class DarkCanister : Ammo
 		FloatBobStrength 0.25;
 		Accuracy 60;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -245,12 +236,8 @@ Class DarkCanister : Ammo
 	}
 }
 
-Class EMPCore : Ammo
+Class EMPCore : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-
 	Default
 	{
 		//$Title EMP Core
@@ -258,7 +245,7 @@ Class EMPCore : Ammo
 		//$Sprite graphics/HUD/Icons/A_EMPCore.png
 		//$Icon ammo
 		Tag "$T_EMPCORE";
-		Inventory.PickupMessage "$T_EMPCORE";
+		SWWMAmmo.PickupTag "EMPCORE";
 		Stamina 60000;
 		Inventory.Icon "graphics/HUD/Icons/A_EMPCore.png";
 		Inventory.Amount 1;
@@ -270,11 +257,6 @@ Class EMPCore : Ammo
 		FloatBobStrength 0.25;
 		Accuracy 80;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -282,18 +264,15 @@ Class EMPCore : Ammo
 		Stop;
 	}
 }
-
-Class EMPCoreBundleSpawn : SWWMAmmoSpawner
+Class EMPCore2 : EMPCore
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<3; i++ )
-		{
-			let a = Spawn("EMPCore",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x EMP Core
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_EMPCore.png
+		//$Icon ammo
+		Inventory.Amount 2;
 	}
 }
 
@@ -306,7 +285,7 @@ Class RayBolt : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_RayBolt.png
 		//$Icon ammo
 		Tag "$T_RAYBOLT";
-		Inventory.PickupMessage "$T_RAYBOLT";
+		MagAmmo.PickupTag "RAYBOLT";
 		Inventory.Icon "graphics/HUD/Icons/A_RayBolt.png";
 		MagAmmo.ParentAmmo "RayAmmo";
 		MagAmmo.ClipSize 10;
@@ -321,28 +300,31 @@ Class RayBolt : MagAmmo
 		Stop;
 	}
 }
-
-Class RayBoltBundleSpawn : SWWMAmmoSpawner
+Class RayBolt2 : RayBolt
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,5);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("RayBolt",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Ray-Khom Bolt
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_RayBolt.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class RayBolt5 : RayBolt
+{
+	Default
+	{
+		//$Title 5x Ray-Khom Bolt
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_RayBolt.png
+		//$Icon ammo
+		Inventory.Amount 5;
 	}
 }
 
-Class RayAmmo : Ammo
+Class RayAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Ray-Khom Mag
@@ -350,7 +332,7 @@ Class RayAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_RayAmmo.png
 		//$Icon ammo
 		Tag "$T_RAYAMMO";
-		Inventory.PickupMessage "$T_RAYAMMO";
+		SWWMAmmo.PickupTag "RAYAMMO";
 		Stamina 150000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
 		Inventory.Amount 1;
@@ -358,14 +340,10 @@ Class RayAmmo : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 9;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "RayBolt";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 90;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -375,13 +353,8 @@ Class RayAmmo : Ammo
 	}
 }
 
-Class RayBattery : Ammo
+Class RayBattery : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Ray-Khom Battery
@@ -389,7 +362,7 @@ Class RayBattery : Ammo
 		//$Sprite graphics/HUD/Icons/A_RayBattery.png
 		//$Icon ammo
 		Tag "$T_RAYBATTERY";
-		Inventory.PickupMessage "$T_RAYBATTERY";
+		SWWMAmmo.PickupTag "RAYBATTERY";
 		Stamina 320000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayBattery.png";
 		Inventory.Amount 1;
@@ -401,11 +374,6 @@ Class RayBattery : Ammo
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 90;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -424,7 +392,7 @@ Class GrandSpear : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_GrandSpear.png
 		//$Icon ammo
 		Tag "$T_GRANDSPEAR";
-		Inventory.PickupMessage "$T_GRANDSPEAR";
+		MagAmmo.PickupTag "GRANDSPEAR";
 		Inventory.Icon "graphics/HUD/Icons/A_GrandSpear.png";
 		MagAmmo.ParentAmmo "GrandAmmo";
 		MagAmmo.ClipSize 5;
@@ -440,13 +408,8 @@ Class GrandSpear : MagAmmo
 	}
 }
 
-Class GrandAmmo : Ammo
+Class GrandAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Grand Lance Mag
@@ -454,7 +417,7 @@ Class GrandAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_GrandAmmo.png
 		//$Icon ammo
 		Tag "$T_GRANDAMMO";
-		Inventory.PickupMessage "$T_GRANDAMMO";
+		SWWMAmmo.PickupTag "GRANDAMMO";
 		Stamina -1200000;
 		Inventory.Icon "graphics/HUD/Icons/A_GrandAmmo.png";
 		Inventory.Amount 1;
@@ -462,13 +425,9 @@ Class GrandAmmo : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 4;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "GrandSpear";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{

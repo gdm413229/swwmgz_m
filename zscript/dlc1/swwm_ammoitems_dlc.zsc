@@ -14,8 +14,8 @@ Class SMW05Ammo : SWWMAmmo
 		Inventory.Icon "graphics/HUD/Icons/A_SMW05Ammo.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 60;
-		Ammo.BackpackAmount 3;
-		Ammo.BackpackMaxAmount 150;
+		Ammo.BackpackAmount 6;
+		Ammo.BackpackMaxAmount 90;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -32,7 +32,7 @@ Class SMW05Ammo2 : SMW05Ammo
 {
 	Default
 	{
-		//$Title 1x SMW.05 Bullets
+		//$Title 2x SMW.05 Bullets
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
 		//$Icon ammo
@@ -43,7 +43,7 @@ Class SMW05Ammo3 : SMW05Ammo
 {
 	Default
 	{
-		//$Title 1x SMW.05 Bullets
+		//$Title 3x SMW.05 Bullets
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
 		//$Icon ammo
@@ -65,11 +65,11 @@ Class SMW05BigAmmo : SMW05Ammo
 {
 	Default
 	{
-		//$Title 30x SMW.05 Bullets
+		//$Title 20x SMW.05 Bullets
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SMW05Ammo.png
 		//$Icon ammo
-		Inventory.Amount 30;
+		Inventory.Amount 20;
 	}
 }
 
@@ -86,8 +86,8 @@ Class SheenAmmo : SWWMAmmo
 		Stamina 400;
 		Inventory.Icon "graphics/HUD/Icons/A_SheenAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 600;
-		Ammo.BackpackAmount 50;
+		Inventory.MaxAmount 300;
+		Ammo.BackpackAmount 60;
 		Ammo.BackpackMaxAmount 1200;
 		Ammo.DropAmount 3;
 		+FLOATBOB;
@@ -170,9 +170,9 @@ Class QuadravolAmmo : SWWMAmmo
 		Stamina 10000;
 		Inventory.Icon "graphics/HUD/Icons/A_QuadAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 4;
-		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 12;
+		Inventory.MaxAmount 5;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 15;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -196,6 +196,17 @@ Class QuadravolAmmo2 : QuadravolAmmo
 		Inventory.Amount 2;
 	}
 }
+Class QuadravolAmmo3 : QuadravolAmmo
+{
+	Default
+	{
+		//$Title 3x Quadravol Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_QuadAmmo.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
 
 Class DarkCanister : SWWMAmmo
 {
@@ -210,9 +221,9 @@ Class DarkCanister : SWWMAmmo
 		Stamina 20000;
 		Inventory.Icon "graphics/HUD/Icons/A_DarkAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 3;
+		Inventory.MaxAmount 6;
 		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 6;
+		Ammo.BackpackMaxAmount 12;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -326,9 +337,9 @@ Class RayAmmo : SWWMAmmo
 		Stamina 150000;
 		Inventory.Icon "graphics/HUD/Icons/A_RayAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 5;
+		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 9;
+		Ammo.BackpackMaxAmount 5;
 		Ammo.DropAmount 1;
 		SWWMAmmo.MagAmmoType "RayBolt";
 		+FLOATBOB;
@@ -413,7 +424,7 @@ Class GrandAmmo : SWWMAmmo
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 4;
+		Ammo.BackpackMaxAmount 3;
 		Ammo.DropAmount 1;
 		SWWMAmmo.MagAmmoType "GrandSpear";
 		+FLOATBOB;

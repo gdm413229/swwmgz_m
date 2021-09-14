@@ -658,7 +658,11 @@ extend Class SWWMHandler
 			if ( swwm_ondemandammo ) e.Replacement = 'SWWMClipAmmoBig';
 			else e.Replacement = SWWMClipAmmoBig.PickAmmo(true);
 		}
-		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') ) e.Replacement = 'SWWMNothing';
+		else if ( (e.Replacee is 'Clip') || (e.Replacee is 'GoldWandAmmo') )
+		{
+			if ( swwm_ondemandammo ) e.Replacement = 'SWWMClipAmmoSmall';
+			else e.Replacement = SWWMClipAmmoSmall.PickAmmo(true);
+		}
 		else if ( e.Replacee is 'BlasterHefty' )
 		{
 			if ( swwm_ondemandammo ) e.Replacement = 'SWWMBlastAmmoBig';
@@ -699,7 +703,7 @@ extend Class SWWMHandler
 			|| (e.Replacee is 'MWeaponPiece2') || (e.Replacee is 'MWeaponPiece3') ) e.Replacement = 'HammerspaceEmbiggener';
 		else if ( e.Replacee is 'ArmorBonus' ) e.Replacement = 'ArmorNuggetItem';
 		else if ( e.Replacee is 'HealthBonus' ) e.Replacement = 'HealthNuggetItem';
-		else if ( (e.Replacee is 'ArtiTimeBomb') || (e.Replacee is 'ArtiBlastRadius') || (e.Replacee is 'ArtiPoisonBag') || (e.Replacee is 'ArtiHealingRadius') ) e.Replacement = (nugflip=!nugflip)?'HealthNuggetBundleSpawn':'ArmorNuggetBundleSpawn';
+		else if ( (e.Replacee is 'ArtiTimeBomb') || (e.Replacee is 'ArtiBlastRadius') || (e.Replacee is 'ArtiPoisonBag') || (e.Replacee is 'ArtiHealingRadius') ) e.Replacement = (nugflip=!nugflip)?'HealthNugget':'ArmorNugget';
 		else if ( (e.Replacee is 'Stimpack') || (e.Replacee is 'CrystalVial') ) e.Replacement = 'TetraHealthItem';
 		else if ( (e.Replacee is 'Medikit') || (e.Replacee is 'ArtiHealth') ) e.Replacement = 'CubeHealthItem';
 		else if ( (e.Replacee is 'Soulsphere') || (e.Replacee is 'ArtiSuperHealth') ) e.Replacement = 'RefresherItem';

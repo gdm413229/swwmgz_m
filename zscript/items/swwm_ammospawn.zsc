@@ -18,7 +18,7 @@ Class SWWMShellAmmoSmall : SWWMAmmoSpawner
 	{
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
 			return Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05Ammo3';*/
-		switch( Random[Replacements](0,8) )
+		switch( Random[Replacements](0,9) )
 		{
 		case 0:
 		case 1:
@@ -32,7 +32,7 @@ Class SWWMShellAmmoSmall : SWWMAmmoSpawner
 		case 7:
 			return 'PurpleShell';
 		}
-		// case 8
+		// case 8-9
 		return 'BlueShell';
 	}
 }
@@ -42,42 +42,52 @@ Class SWWMShellAmmoBig : SWWMAmmoSpawner
 
 	static Class<Actor> PickAmmo( bool notondemand = false )
 	{
-		// shell types (sorted by rarity)
-		static const Class<Actor> redpool[] = {'RedShell','RedShell2'};
-		static const Class<Actor> greenpool[] = {'GreenShell','GreenShell2'};
-		static const Class<Actor> purplepool[] = {'PurpleShell','PurpleShell2'};
-		static const Class<Actor> bluepool[] = {'BlueShell','BlueShell2'};
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
 			return Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BigAmmo';*/
-		switch( Random[Replacements](0,20) )
+		switch( Random[Replacements](0,17) )
 		{
 		case 0:
 		case 1:
 		case 2:
 		case 3:
+			return 'RedShell';
 		case 4:
-			return redpool[Random[Replacements](0,1)];
 		case 5:
 		case 6:
 		case 7:
+			return 'GreenShell';
 		case 8:
 		case 9:
-			return greenpool[Random[Replacements](0,1)];
 		case 10:
+			return 'PurpleShell';
 		case 11:
 		case 12:
 		case 13:
-			return purplepool[Random[Replacements](0,1)];
+			return 'BlueShell';
 		case 14:
 		case 15:
-		case 16:
-			return bluepool[Random[Replacements](0,1)];
-		case 17:
-		case 18:
 			return 'WhiteShell';
 		}
-		// case 19-20
+		// case 16-17
 		return 'BlackShell';
+	}
+}
+Class SWWMClipAmmoSmall : SWWMAmmoSpawner
+{
+	Mixin SWWMOndemandAmmoSpawner;
+
+	static Class<Actor> PickAmmo( bool notondemand = false )
+	{
+		if ( !Random[Replacements](0,4) )
+		{
+			/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('HeavyMahsheenGun')) )
+				return Random[Replacements](0,2)?'SheenAmmo3':'SheenTinyAmmo';*/
+			if ( notondemand || SWWMUtility.ItemExists('Eviscerator') )
+				return 'EvisceratorShell';
+		}
+		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
+			return Random[Replacements](0,2)?'SMW05Ammo':'SMW05Ammo2';*/
+		return Random[Replacements](0,1)?'RedShell':'GreenShell';
 	}
 }
 Class SWWMClipAmmoBig : SWWMAmmoSpawner
@@ -136,7 +146,7 @@ Class SWWMRocketAmmoBig : SWWMAmmoSpawner
 			return Random[Replacements](0,2)?'SparksterRAmmo2':'SparksterRAmmo3';
 		}*/
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('Quadravol')) )
-			return Random[Replacements](0,2)?'QuadravolAmmo':'QuadravolAmmo2';*/
+			return Random[Replacements](0,4)?'QuadravolAmmo2':'QuadravolAmmo3';*/
 		switch ( Random[Replacements](0,11) )
 		{
 		case 0:
@@ -144,7 +154,7 @@ Class SWWMRocketAmmoBig : SWWMAmmoSpawner
 		case 2:
 		case 3:
 		case 4:
-			return Random[Replacements](0,4)?'HellblazerMissiles':Random[Replacements](0,2)?'HellblazerMissiles2':'HellblazerMissiles3';
+			return Random[Replacements](0,4)?'HellblazerMissiles':'HellblazerMissiles2';
 		case 5:
 		case 6:
 		case 7:

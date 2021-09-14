@@ -3555,6 +3555,8 @@ Class DivineSpriteEffect : Inventory
 			if ( Owner is 'Demolitionist' )
 				Demolitionist(Owner).lastbump *= 0.95;
 			bHealDone = true;
+			if ( (healtim <= 0) && Owner && Owner.CheckLocalView() )
+				Console.Printf(StringTable.Localize("$D_SPRITE"));
 		}
 		else if ( Owner.Health < 1000 )
 		{

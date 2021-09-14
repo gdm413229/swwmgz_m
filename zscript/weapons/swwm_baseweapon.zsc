@@ -231,7 +231,7 @@ Class SWWMWeapon : Weapon abstract
 		SisterWeapon = AddWeapon(SisterWeaponType);
 		if ( Owner.player )
 		{
-			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch )
+			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch && ReportHUDAmmo() )	// hey, as long as it works
 				Owner.player.PendingWeapon = self;
 			if ( Owner.player.mo == players[consoleplayer].camera )
 				StatusBar.ReceivedWeapon(self);

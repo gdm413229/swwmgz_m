@@ -42,7 +42,7 @@ Class CandyGun : SWWMWeapon
 		bool gotstuff = false, gotspares = false;
 		int oldamount = ownedWeapon.Ammo1.Amount;
 		gotstuff = AddExistingAmmo(ownedWeapon.Ammo1,AmmoGive1);
-		gotspares = AddExistingAmmo(ownedWeapon.Ammo2,AmmoGive2);
+		gotspares = AddExistingAmmo(ownedWeapon.Ammo2,1);	// always give one of ourselves, always
 		let Owner = ownedWeapon.Owner;
 		if ( gotstuff && Owner && Owner.player && (oldamount == 0) )
 			PlayerPawn(Owner).CheckWeaponSwitch(ownedWeapon.Ammo1.GetClass());
@@ -347,7 +347,7 @@ Class CandyGun : SWWMWeapon
 		Weapon.AmmoType1 "CandyGunAmmo";
 		Weapon.AmmoType2 "CandyGunSpares";
 		Weapon.AmmoGive1 1;
-		Weapon.AmmoGive2 1;
+		Weapon.AmmoGive2 0;
 		Weapon.AmmoUse2 0;
 		SWWMWeapon.DropAmmoType "CandyGunAmmo";
 		CandyGun.ClipCount 7;

@@ -704,7 +704,6 @@ Class Spreadgun : SWWMWeapon
 	override void AttachToOwner( Actor other )
 	{
 		static const Class<Ammo> types[] = {"RedShell","GreenShell","WhiteShell","BlueShell","BlackShell","PurpleShell","GoldShell"};
-		Super.AttachToOwner(other);
 		if ( !initialized )
 		{
 			initialized = true;
@@ -717,9 +716,11 @@ Class Spreadgun : SWWMWeapon
 			Ammo a = Ammo(other.FindInventory(types[i]));
 			if ( !a ) continue;
 			nextammo = types[i];
+			Super.AttachToOwner(other);
 			return;
 		}
 		nextammo = AmmoType1;
+		Super.AttachToOwner(other);
 	}
 
 	action void A_SwitchAmmoType( bool rev = false )

@@ -1,5 +1,22 @@
 // WorldLoaded/WorldUnloaded events
 
+Class RampancyLogonDummy : Actor
+{
+	States
+	{
+	Spawn:
+		TNT1 A 7;
+		TNT1 AAAAAAAAAAAAAAAA 1
+		{
+			for ( int i=0; i<16; i++ )
+				A_Log("Remote login failed.");
+		}
+		TNT1 A 7;
+		TNT1 A 1 A_Log("\cgWARNING:\cj 256 failed remote login attempts have been reported in the last second.\c-");
+		Stop;
+	}
+}
+
 extend Class SWWMHandler
 {
 	// list contains a sector that belongs to each portal group
@@ -215,6 +232,24 @@ extend Class SWWMHandler
 		if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
 			 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
 			level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
+		// rampancy boss brain fix (repeatedly triggering "map clear")
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a, brain;
+		bool haseye = false;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( a.GetClassName() == "Robot_BossEye" )
+				haseye = true;
+			if ( a.GetClassName() == "Robot_BossBrain" )
+				brain = a;
+		}
+		if ( haseye && brain )
+		{
+			brain.bCOUNTKILL = true;
+			level.total_monsters++;
+			// while we're at it
+			Actor.Spawn("RampancyLogonDummy");
+		}
 		// setup cached lockdefs data
 		let cli = SWWMCachedLockInfo.GetInstance();
 		if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
@@ -327,7 +362,7 @@ extend Class SWWMHandler
 		// spawn loot
 		if ( !deathmatch ) Chancebox.SpawnChanceboxes();
 		// list map keys
-		let ti = ThinkerIterator.Create("Key");
+		ti = ThinkerIterator.Create("Key");
 		Key k;
 		while ( k = Key(ti.Next()) )
 		{

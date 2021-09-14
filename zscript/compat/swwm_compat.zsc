@@ -238,6 +238,19 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 					SetThingEdNum(i,4206991);	// hans grosse
 			}
 			break;
+		// Doom 2 Redux MAP20
+		case 'C9FFFD855FCF9BD6BC3ABCCA5DC2240A':
+			// move boss brain so the player telefrags it (lets the mod know this is a death exit)
+			SetThingXY(497,3296,-96);
+			AddThing(2035,(3360,-96,0),315);	// put a barrel in the hole that was left
+			break;
+		// Doom 2 Redux MAP31
+		case '4A8EAAB2B29CB438ED6EE972D3EEE951':
+			// contribute to Aximal's illusion by putting a single WolfSS facing away from the player start
+			// we can re-use thing 0, which is a shotgunner corpse
+			SetThingEdNum(0,4206992);
+			SetThingAngle(0,0);
+			break;
 		// Kinsie's Test Map
 		case '0EADB2F82732A968B8513E4DC6138439':
 		case 'D70250F93C6B6072DA39D9672B37F236':
@@ -245,6 +258,9 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			// add collectibles
 			for ( int i=0; i<20; i++ )
 				AddThing(4206900+i,(1472+64*i,640,0));
+			// add some chance boxes
+			for ( int i=0; i<3; i++ )
+				AddThing(4206920,(3616,1824-64*i,0),180);
 			break;
 		}
 		switch ( checksum )

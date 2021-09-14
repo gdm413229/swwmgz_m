@@ -34,9 +34,7 @@ Class SWWMMonster : Actor abstract
 		if ( whomst is 'Inventory' ) whomst = Inventory(whomst).Owner;
 		if ( whomst )
 		{
-			if ( whomst.bMISSILE || (flags&DMG_INFLICTOR_IS_PUFF) )
-				guesspos = level.Vec3Diff(pos,whomst.pos);
-			else guesspos = level.Vec3Diff(pos,whomst.Vec3Offset(0,0,whomst.Height/2));
+			guesspos = level.Vec3Diff(pos,whomst.Vec3Offset(0,0,whomst.Height/2));
 			guesspos.x = clamp(guesspos.x,-radius,radius);
 			guesspos.y = clamp(guesspos.y,-radius,radius);
 			guesspos.z = clamp(guesspos.z,0,height);
@@ -325,7 +323,6 @@ Class SWWMBossBrain : BossBrain
 			else if ( (a.Health > 0) && (a.bBossSpawned || a.bCOUNTKILL) )
 				a.DamageMobj(self,self,a.Health,'EndMii',DMG_FORCED|DMG_THRUSTLESS);
 		}
-
 	}
 
 	Default

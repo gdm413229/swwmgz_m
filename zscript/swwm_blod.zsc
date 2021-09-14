@@ -613,7 +613,7 @@ Class mkFlyingGib : Actor
 			A_Bleed();
 			A_StartSound("misc/gibhit",CHAN_BODY,CHANF_OVERLAP);
 			// oops we got squished
-			if ( floorz >= ceilingz ) ExplodeMissile(null,null);
+			if ( floorz+height >= ceilingz ) ExplodeMissile(null,null);
 		}
 		Goto Spawn;
 	Death:

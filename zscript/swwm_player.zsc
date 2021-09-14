@@ -536,6 +536,7 @@ Class Demolitionist : PlayerPawn
 		{
 			if ( d.Hit3DFloor )
 			{
+				// TODO connected textures for upper/lower
 				if ( d.Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) d.HitLine.sidedef[d.LineSide].SetTexture(0,replacewith);
 				else if ( d.Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) d.HitLine.sidedef[d.LineSide].SetTexture(2,replacewith);
 				else d.Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);

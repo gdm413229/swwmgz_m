@@ -43,7 +43,7 @@ extend Class SWWMHandler
 		MAP_EVMAP30	// eviternity
 	};
 
-	private int WhichVanillaBossMap()
+	private clearscope int WhichVanillaBossMap() const
 	{
 		String mapsum = level.GetChecksum();
 		if ( (mapsum ~== "94500F4B006B316FE03AC46865AEABF8")
@@ -319,6 +319,7 @@ extend Class SWWMHandler
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_ARCHANGELUS";
 				e.Thing.GiveInventory('EndgameBossMarker',1);
+				doextramsg = true;
 			}
 		}
 	}

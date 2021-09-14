@@ -1,5 +1,15 @@
 This is just a bit of *"future planning"* for stuff that I ***might*** add later on.
 
+## 1.1.x update *(A Needed Change)*:
+
+Sometime after the 1.1 release, I REALLY need to do this, it's starting to become very problematic to maintain the Demolitionist Menu as-is.
+
+* **Demolitionist Menu Refactor:**
+  - Non 16:10 ratio support
+  - Smooth scrolling, better mouse input
+  - Much cleaner code, easier maintenance and extension
+  - Modular design, add-on tab support
+
 ## 1.2 update *(The Second Batch)*:
 
 More weapons, because we need 'em.
@@ -53,11 +63,6 @@ All the hard stuff *(some of these aren't guaranteed)*.
   - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Mothgirl summon for Lämp easter egg**
   - Layers of White *(Summon the White Lady)*
-* **Demolitionist Menu Refactor:**
-  - Non 16:10 ratio support
-  - Smooth scrolling
-  - Much cleaner code
-  - Modular design
 * **Replace all hitscan with *"light projectiles"***
 * **Crouch sliding *(+ proper crouch dashing)***
 * **Expand third person animations**

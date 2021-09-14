@@ -21,11 +21,6 @@ Class SMW05Ammo : SWWMAmmo
 		FloatBobStrength 0.25;
 		Accuracy 20;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = Random[ShellDrop](1,clamp(dropamount,1,3));
-	}
 	States
 	{
 	Spawn:
@@ -94,15 +89,10 @@ Class SheenAmmo : SWWMAmmo
 		Inventory.MaxAmount 600;
 		Ammo.BackpackAmount 50;
 		Ammo.BackpackMaxAmount 1200;
-		Ammo.DropAmount 10;
+		Ammo.DropAmount 3;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 35;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = Random[ShellDrop](1,clamp(dropamount,1,3));
 	}
 	States
 	{

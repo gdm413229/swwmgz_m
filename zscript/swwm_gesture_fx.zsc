@@ -236,10 +236,10 @@ Class LoveHeart : Actor
 			double fl, cl;
 			if ( BlockingLine.sidedef[1] )
 			{
-				fl = min(BlockingLine.frontsector.floorplane.ZAtPoint(pos.xy),BlockingLine.backsector.floorplane.ZAtPoint(pos.xy));
-				cl = max(BlockingLine.frontsector.ceilingplane.ZAtPoint(pos.xy),BlockingLine.backsector.ceilingplane.ZAtPoint(pos.xy));
-				if ( max(floorz,pos.z) < fl ) LinePart = 0;
-				else if ( min(ceilingz,pos.z+height) > cl ) LinePart = 2;
+				fl = max(BlockingLine.frontsector.floorplane.ZAtPoint(pos.xy),BlockingLine.backsector.floorplane.ZAtPoint(pos.xy));
+				cl = min(BlockingLine.frontsector.ceilingplane.ZAtPoint(pos.xy),BlockingLine.backsector.ceilingplane.ZAtPoint(pos.xy));
+				if ( max(floorz,pos.z) < fl ) LinePart = 2;
+				else if ( min(ceilingz,pos.z+height) > cl ) LinePart = 0;
 				else LinePart = 1;
 			}
 			else
@@ -313,6 +313,7 @@ Class LoveHeart : Actor
 		{
 			if ( Hit3DFloor )
 			{
+				// TODO connected textures for upper/lower
 				if ( Hit3DFloor.flags&F3DFloor.FF_UPPERTEXTURE ) HitLine.sidedef[LineSide].SetTexture(0,replacewith);
 				else if ( Hit3DFloor.flags&F3DFloor.FF_LOWERTEXTURE ) HitLine.sidedef[LineSide].SetTexture(2,replacewith);
 				else Hit3DFloor.master.sidedef[0].SetTexture(1,replacewith);

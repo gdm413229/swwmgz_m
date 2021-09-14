@@ -1538,11 +1538,11 @@ Class SWWMUtility
 	// shorthand for some of these checks (these are generally used by the mission briefing system)
 	static bool IsKnownMap()
 	{
-		if ( (gameinfo.gametype&GAME_DOOM) && (IsKnownCustomWAD() || CheckMD5List("vanilladoom.list")) )
+		if ( (gameinfo.gametype&GAME_DOOM) && (IsKnownCustomWAD() || CheckMD5List("vanilladoom.lst")) )
 			return true;
-		if ( (gameinfo.gametype&GAME_HERETIC) && CheckMD5List("vanillaheretic.list") )
+		if ( (gameinfo.gametype&GAME_HERETIC) && CheckMD5List("vanillaheretic.lst") )
 			return true;
-		if ( (gameinfo.gametype&GAME_HEXEN) && CheckMD5List("vanillahexen.list") )
+		if ( (gameinfo.gametype&GAME_HEXEN) && CheckMD5List("vanillahexen.lst") )
 			return true;
 		return false;
 	}
@@ -1600,7 +1600,7 @@ Class SWWMUtility
 	static bool CheckMD5List( String fname )
 	{
 		String csum = level.GetChecksum();
-		let lmp = Wads.FindLump(fname);
+		let lmp = Wads.CheckNumForFullName(fname);
 		if ( lmp == -1 ) return false;
 		String dat = Wads.ReadLump(lmp);
 		// fucking Windows

@@ -56,7 +56,8 @@ Class SWWMStatusBar : BaseStatusBar
 	String midstr;
 	int midtic, midtype;
 
-	bool koraxhack;
+	bool koraxhack, mainframehack;
+	int puzzlecnt, realpuzzlecnt;
 
 	double minimapzoom, oldminimapzoom;
 	// minimap constants
@@ -118,6 +119,7 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override bool ProcessMidPrint( Font fnt, String msg, bool bold )
 	{
+		SWWMDirectMessage m, m2;
 		// check for Korax lines, add them to chat (and reply to some of them)
 		bool koraxline = false;
 		if ( msg == StringTable.Localize("$TXT_ACS_MAP02_9_GREET") )
@@ -126,11 +128,75 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",0,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAGREETA";
+			m.seqcnt = 3;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGREETC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETD";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGREETE";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETF";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP13_11_MYSER") )
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",1,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYABLOODA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYABLOODB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYABLOODC";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYABLOODD";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP22_27_YOUHA") )
 			koraxline = true;
@@ -138,6 +204,24 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",2,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAGAMEA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAGAMEB";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGAMEC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP27_8_WORSH") )
 			koraxline = true;
@@ -145,6 +229,33 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",3,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m.seqname = "KIRINWORSHIPA";
+			m.seqcnt = 1;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "KIRINWORSHIPB";
+			m2.seqcnt = 1;
+			m2.delay = 40;
+			m2.enddelay = 10;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "KIRINWORSHIPC";
+			m2.seqcnt = 1;
+			m2.delay = 10;
+			m2.enddelay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "KIRINWORSHIPD";
+			m2.seqcnt = 2;
+			m2.delay = 10;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP35_12_AREYO") )
 			koraxline = true;
@@ -152,6 +263,46 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",4,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAMASTERSA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			m.enddelay = 60;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAMASTERSB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAMASTERSC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAMASTERSD";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAMASTERSE";
+			m2.seqcnt = 1;
+			m2.delay = 40;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAMASTERSF";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		if ( koraxline )
 		{
@@ -160,28 +311,247 @@ Class SWWMStatusBar : BaseStatusBar
 			koraxhack = false;
 			return true;
 		}
+		bool ispuzzle = false;
+		let s = SWWMStats.Find(players[consoleplayer]);
+		if ( s )
+		{
+			puzzlecnt = s.puzzlecnt;
+			realpuzzlecnt = s.realpuzzlecnt;
+		}
 		// check for puzzle solving lines (oh god why), and increment the achievement
-		if ( (msg == StringTable.Localize("$TXT_ACS_MAP04_9_ONEHA"))
+		if ( ((level.mapname ~== "MAP04") || (level.mapname ~== "MAP05"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP04_9_ONEHA"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP04_11_ONETH"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP05_6_ONETH"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP08_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP05_6_ONETH"))) )
+		{
+			if ( puzzlecnt >= 4 ) puzzlecnt = 0;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( ((level.mapname ~== "MAP08") || (level.mapname ~== "MAP09") || (level.mapname ~== "MAP10"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP08_6_ONESI"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP09_6_ONESI"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP10_6_ONESI"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP28_6_ONENI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP10_6_ONESI"))) )
+		{
+			if ( (puzzlecnt < 4) || (puzzlecnt >= 10) ) puzzlecnt = 4;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( ((level.mapname ~== "MAP28") || (level.mapname ~== "MAP30") || (level.mapname ~== "MAP34"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP28_6_ONENI"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP30_6_ONENI"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP34_1_ONENI"))
-			// deathkings
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_1_THREE"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP34_1_ONENI"))) )
+		{
+			if ( (puzzlecnt < 10) || (puzzlecnt >= 19) ) puzzlecnt = 10;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		// deathkings
+		else if ( ((level.mapname ~== "MAP44") || (level.mapname ~== "MAP46"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP44_1_THREE"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_2_TWOMO"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_3_ONEMO"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_4_THEPU"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_10_ONETH"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_11_TWOTH"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP46_8_ONEFO"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_8_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP46_8_ONEFO"))) )
+		{
+			if ( (puzzlecnt < 19) || (puzzlecnt >= 30) ) puzzlecnt = 19;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( (level.mapname ~== "MAP51")
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP51_8_ONETH"))
 			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_9_TWOTH"))
-			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_10_THECR")) )
-			SWWMUtility.AchievementProgressInc('swwm_progress_puzzle',1,players[consoleplayer]);
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_10_THECR"))) )
+		{
+			if ( (puzzlecnt < 30) || (puzzlecnt >= 34) ) puzzlecnt = 30;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		if ( ispuzzle )
+		{
+			EventHandler.SendNetworkEvent("swwmstorepuzzlecnt",consoleplayer,puzzlecnt,realpuzzlecnt);
+			int tpuz = SWWMUtility.IsDeathkings()?15:19;
+			if ( realpuzzlecnt >= tpuz ) SWWMUtility.MarkAchievement('swwm_achievement_puzzle',players[consoleplayer]);
+			if ( !swwm_nomapmsg )
+			{
+				switch ( puzzlecnt )
+				{
+				case 1:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEA";
+					m.seqcnt = 2;
+					m.delay = 90;
+					AttachMessage(m,-1232);
+					break;
+				case 2:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEB";
+					m.seqcnt = 1;
+					m.delay = 80;
+					AttachMessage(m,-1232);
+					break;
+				case 3:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEC";
+					m.seqcnt = 2;
+					m.delay = 70;
+					AttachMessage(m,-1232);
+					break;
+				case 5:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLED";
+					m.seqcnt = 2;
+					m.delay = 70;
+					AttachMessage(m,-1232);
+					break;
+				case 8:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEE";
+					m.seqcnt = 2;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					break;
+				case 11:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEF";
+					m.seqcnt = 3;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEG";
+					m2.seqcnt = 1;
+					m.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLEH";
+					m2.seqcnt = 1;
+					m.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEI";
+					m2.seqcnt = 2;
+					m.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				case 20:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEJ";
+					m.seqcnt = 2;
+					m.delay = 80;
+					AttachMessage(m,-1232);
+					break;
+				case 30:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEK";
+					m.seqcnt = 1;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEL";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLEM";
+					m2.seqcnt = 1;
+					m2.delay = 10;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEN";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEO";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEP";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEQ";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				case 31:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLER";
+					m.seqcnt = 3;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLES";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLET";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEU";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				}
+			}
+		}
+		// rampancy fun stuff
+		bool mainframeline = false;
+		if ( (msg == StringTable.Localize("$AISPAWN_TEXT1"))
+			|| (msg == StringTable.Localize("$AISPAWN_TEXT2"))
+			|| (msg == StringTable.Localize("$AISEE_TEXT"))
+			|| (msg == StringTable.Localize("$AIACTIVE_TEXT1"))
+			|| (msg == StringTable.Localize("$AIACTIVE_TEXT2"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT1"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT2"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT3"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT4"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT5"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT6"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT7")) )
+			mainframeline = true;
+		if ( mainframeline )
+		{
+			mainframehack = true;
+			Console.Printf(msg);
+			mainframehack = false;
+			return true;
+		}
 		if ( !fnt || (fnt == smallfont) )
 		{
 			midstr = msg;
@@ -211,6 +581,12 @@ Class SWWMStatusBar : BaseStatusBar
 			// treat as chat message
 			printlevel = PRINT_CHAT;
 			outline = "\cmKorax\c-: "..outline;
+		}
+		if ( mainframehack )
+		{
+			// same here, hi yholl
+			printlevel = PRINT_CHAT;
+			outline = "\cmAI Mainframe\c-: "..outline;
 		}
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline
@@ -1686,7 +2062,8 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,((level.sucktime>0)&&(sec>=(level.sucktime*3600)))?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( am_showtotaltime )
+			// don't show total time if it's equal to map time
+			if ( am_showtotaltime && (level.totaltime != level.maptime) )
 			{
 				sec = Thinker.Tics2Seconds(level.totaltime);
 				str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);

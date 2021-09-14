@@ -623,6 +623,15 @@ extend Class SWWMHandler
 			if ( e.Args[0] != consoleplayer ) return;
 			checklist.Clear();
 		}
+		else if ( e.Name ~== "swwmstorepuzzlecnt" )
+		{
+			let s = SWWMStats.Find(players[e.Args[0]]);
+			if ( s )
+			{
+				s.puzzlecnt = e.Args[1];
+				s.realpuzzlecnt = e.Args[2];
+			}
+		}
 		// cheats go here
 		else CheatEvent(e);
 	}

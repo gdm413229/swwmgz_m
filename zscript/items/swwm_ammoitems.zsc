@@ -18,7 +18,7 @@ Class RedShell : SWWMAmmo
 		Inventory.MaxAmount 30;
 		Ammo.BackpackAmount 2;
 		Ammo.BackpackMaxAmount 80;
-		Ammo.DropAmount 2;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -73,7 +73,7 @@ Class GreenShell : SWWMAmmo
 		Inventory.MaxAmount 25;
 		Ammo.BackpackAmount 2;
 		Ammo.BackpackMaxAmount 60;
-		Ammo.DropAmount 2;
+		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Radius 4;
@@ -609,11 +609,6 @@ Class HellblazerCrackshots : SWWMAmmo
 		Height 22;
 		Accuracy 75;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Ammo.ModifyDropAmount(dropamount);
-		Amount = min(Amount,2);
-	}
 	States
 	{
 	Spawn:
@@ -671,11 +666,6 @@ Class HellblazerRavagers : SWWMAmmo
 		Height 22;
 		Accuracy 80;
 	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Ammo.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
-	}
 	States
 	{
 	Spawn:
@@ -721,11 +711,6 @@ Class HellblazerWarheads : SWWMAmmo
 		Radius 6;
 		Height 22;
 		Accuracy 85;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Ammo.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -776,11 +761,6 @@ Class SparkUnit : SWWMAmmo
 		Radius 6;
 		Height 22;
 		Accuracy 70;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Ammo.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{

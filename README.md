@@ -531,7 +531,7 @@ The most adorable and huggable plush doll of the cutest and sweetest emperor. Th
 ### Psykkonovexx (Hexen)
 ![](docimg/psykkonovexx.png)
 
-One of the many instruments named after the Nine Kings of Kurenai. The Psykkonovexx could be described as something resembling an *"electric bagpipe"*, and it's a staple of modern Anarukon music composition.
+One of the many instruments named after the Nine Kings of Kurenai. The Psykkonovexx could be described as something resembling an *"electric bagpipe"*, and is a staple of modern Anarukon music composition.
 
 ## The HUD
 ![](docimg/hudsample.png)

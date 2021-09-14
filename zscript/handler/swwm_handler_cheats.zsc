@@ -76,6 +76,7 @@ extend Class SWWMHandler
 				if ( !w || (w == 'SWWMWeapon') ) continue;
 				let def = GetDefaultByType(w);
 				if ( def.bCHEATNOTWEAPON ) continue;
+				if ( w is 'Ynykron' ) continue;	// traditionally not given, it's a separate cheat
 				let ow = players[e.Args[0]].mo.FindInventory(w);
 				if ( ow && (ow.Amount >= ow.MaxAmount) ) continue;
 				if ( ow ) ow.Amount = ow.MaxAmount;
@@ -148,7 +149,7 @@ extend Class SWWMHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("misc/ammo_pkup",CHAN_VOICE,CHANF_UI);
 			}
-			players[e.Args[0]].mo.GiveInventory("HammerspaceEmbiggener",8,true);
+			players[e.Args[0]].mo.GiveInventory("TradedHammerspaceEmbiggener",8,true);
 			for ( Inventory i=players[e.Args[0]].mo.inv; i; i=i.inv )
 			{
 				if ( !(i is 'Ammo') ) continue;
@@ -179,8 +180,27 @@ extend Class SWWMHandler
 				S_StartSound("menu/buyinv",CHAN_ITEM,CHANF_UI);
 				S_StartSound("fabricator/use",CHAN_VOICE,CHANF_UI);
 			}
-			players[e.Args[0]].mo.CheatGive("all",0);
 			players[e.Args[0]].health = players[e.Args[0]].mo.health = 1000;
+			players[e.Args[0]].mo.GiveInventory("TradedHammerspaceEmbiggener",8,true);
+			for ( Inventory i=players[e.Args[0]].mo.inv; i; i=i.inv )
+			{
+				if ( !(i is 'Ammo') ) continue;
+				i.Amount = i.MaxAmount;
+			}
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let w = (Class<SWWMWeapon>)(AllActorClasses[i]);
+				if ( !w || (w == 'SWWMWeapon') ) continue;
+				let def = GetDefaultByType(w);
+				if ( def.bCHEATNOTWEAPON ) continue;
+				if ( w is 'Ynykron' ) continue;	// traditionally not given, it's a separate cheat
+				let ow = players[e.Args[0]].mo.FindInventory(w);
+				if ( ow && (ow.Amount >= ow.MaxAmount) ) continue;
+				if ( ow ) ow.Amount = ow.MaxAmount;
+				else players[e.Args[0]].mo.GiveInventory(w,def.MaxAmount);
+			}
+			players[e.Args[0]].mo.CheatGive("armor",0);
+			players[e.Args[0]].mo.CheatGive("artifacts",0);
 		}
 		else if ( e.Name ~== "swwmflagcheat" )
 		{
@@ -417,9 +437,15 @@ extend Class SWWMHandler
 				if ( kstr != cht[i].Left(kstr.length()) ) continue;
 				matchany = true;
 				if ( kstr != cht[i] ) continue;
-				if ( (i > 5) && !swwm_oldcheat )
+				if ( (i > 5) && !swwm_nomapmsg && !swwm_oldcheat )
 				{
-					let m = new("SWWMSecretZanavethMessage").Init();
+					let m = new("SWWMDirectMessage").Init("\chZanaveth\c-","\chZanaveth Nekuraku III\c-","Znv");
+					m.seqname = "ZNVTXT";
+					m.seqcnt = 5;
+					m.znvspecial = true;
+					m.delay = 80;
+					m.enddelay = 90;
+					m.pausedelay = 40;
 					StatusBar.AttachMessage(m,-1232);
 					CVar.FindCVar('swwm_oldcheat').SetBool(true);
 				}
@@ -458,7 +484,7 @@ extend Class SWWMHandler
 			else
 			{
 				kcode++;
-				if ( kcode > 4 ) return true; // eat keypresses from this point
+				if ( kcode >= 4 ) return true; // eat keypresses from this point
 			}
 		}
 		return false;

@@ -114,12 +114,6 @@ Class SWWMOneLiner : HUDMessageBase
 	}
 }
 
-Class LastLine
-{
-	String type;
-	int lineno;
-}
-
 // Screen flashes from DT
 Class GenericFlash : HUDMessageBase
 {
@@ -251,39 +245,47 @@ Class SWWMSewerCount : HUDMessageBase
 	}
 }
 
-// Secret dialogue
-Class SWWMSecretZanavethMessage : HUDMessageBase
+// Used sparingly for some events
+Class SWWMDirectMessage : HUDMessageBase
 {
 	TextureID MessageBox, BG, Avatar, Blink[2], Talk[5], Noiz[4];
-	transient Font fnt;
+	transient Font fnt, jpfnt;
 	transient BrokenLines l;
-	int seqnum, delay, charcnt, blinktics, talktics, talkframe;
+	String seqname, chrname, chrfullname;
+	bool znvspecial;	// seqnum 2 string replacement
+	int seqnum, seqcnt, delay, charcnt, blinktics, talktics, talkframe;
+	int enddelay, pausedelay;
 	int rss;
 	int fadein, fadeout;
 	Vector2 ss, hs, origin;
+	SWWMDirectMessage nextmsg;	// for chaining messages together from different characters
+	bool nextdirect;		// skips directly to next message without delays or fades
 
 	private int GetRandom()
 	{
 		return (rss = (rss<<1)*35447+(rss/87));
 	}
 
-	SWWMSecretZanavethMessage Init()
+	virtual SWWMDirectMessage Init( String chrn, String chrfn, String texn )
 	{
-		MessageBox = TexMan.CheckForTexture("graphics/HUD/ZnvMessageBox.png",TexMan.Type_Any);
-		BG = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarBG.png",TexMan.Type_Any);
-		Avatar = TexMan.CheckForTexture("graphics/HUD/ZnvAvatar.png",TexMan.Type_Any);
+		MessageBox = TexMan.CheckForTexture("graphics/HUD/DM/DirectMessageBox.png",TexMan.Type_Any);
+		BG = TexMan.CheckForTexture("graphics/HUD/DM/"..texn.."AvatarBG.png",TexMan.Type_Any);
+		Avatar = TexMan.CheckForTexture("graphics/HUD/DM/"..texn.."Avatar.png",TexMan.Type_Any);
 		for ( int i=0; i<2; i++ )
-			Blink[i] = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarBlink"..i..".png",TexMan.Type_Any);
+			Blink[i] = TexMan.CheckForTexture("graphics/HUD/DM/"..texn.."AvatarBlink"..i..".png",TexMan.Type_Any);
 		for ( int i=0; i<5; i++ )
-			Talk[i] = TexMan.CheckForTexture("graphics/HUD/ZnvAvatarTalk"..i..".png",TexMan.Type_Any);
+			Talk[i] = TexMan.CheckForTexture("graphics/HUD/DM/"..texn.."AvatarTalk"..i..".png",TexMan.Type_Any);
 		for ( int i=0; i<4; i++ )
-			Noiz[i] = TexMan.CheckForTexture("graphics/HUD/ZnvStatic"..i..".png",TexMan.Type_Any);
+			Noiz[i] = TexMan.CheckForTexture("graphics/HUD/DM/DirectMessageStatic"..i..".png",TexMan.Type_Any);
+		chrname = chrn;
+		chrfullname = chrfn;
 		seqnum = -1;
-		delay = 80;
 		charcnt = 0;
 		blinktics = 30;
 		talktics = 0;
 		talkframe = -1;
+		enddelay = 40;
+		pausedelay = 30;
 		rss = 1232;
 		return self;
 	}
@@ -291,20 +293,20 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 	private void SetText()
 	{
 		String txt;
-		if ( seqnum == 2 )
+		if ( (seqnum == 2) && znvspecial )
 		{
 			// replace with number of years since 2010
 			int nyears = SystemTime.Format("%Y",SystemTime.Now()).ToInt()-2010;
-			txt = String.Format(StringTable.Localize("$SWWM_ZNVTXT"..seqnum),nyears);
+			txt = String.Format(StringTable.Localize("$SWWM_"..seqname..seqnum),nyears);
 		}
-		else txt = StringTable.Localize("$SWWM_ZNVTXT"..seqnum);
+		else txt = StringTable.Localize("$SWWM_"..seqname..seqnum);
 		l = fnt.BreakLines(txt,220);
 		// append to the player's chat log
 		let bar = SWWMStatusBar(StatusBar);
 		if ( bar )
 		{
 			let l = new("MsgLine");
-			l.str = "\chZanaveth\c-: "..txt;
+			l.str = chrname..": "..txt;
 			l.tic = level.totaltime;
 			l.rep = 1;
 			l.type = PRINT_CHAT;
@@ -315,6 +317,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 	private void DrawText()
 	{
 		if ( !fnt ) fnt = Font.GetFont('TewiShaded');
+		if ( !jpfnt ) jpfnt = Font.GetFont('MPlusShaded');
 		if ( !l ) SetText();
 		int cur = charcnt;
 		Vector2 pos = origin+(47,2);
@@ -322,7 +325,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		{
 			if ( cur <= 0 ) break;
 			String part = l.StringAt(i).Left(cur);
-			Screen.DrawText(fnt,Font.CR_WHITE,pos.x,pos.y,part,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText((language~=="jp")?jpfnt:fnt,Font.CR_WHITE,pos.x,pos.y,part,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			pos.y += 13;
 			cur -= l.StringAt(i).Length();
 		}
@@ -343,7 +346,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		}
 		Screen.DrawTexture(BG,false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		Screen.DrawTexture(Avatar,false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		if ( (seqnum > 0) && (seqnum < 6) )
+		if ( (seqnum > 0) && (seqnum < (seqcnt+1)) )
 		{
 			if ( blinkframe >= 0 ) Screen.DrawTexture(Blink[blinkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			if ( talkframe >= 0 ) Screen.DrawTexture(Talk[talkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -382,7 +385,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		{
 			seqnum++;
 			charcnt = 0;
-			if ( seqnum > 5 ) S_StartSound("misc/chat",CHAN_VOICE,CHANF_UI,1.,0.);
+			if ( (seqnum > seqcnt) && !nextdirect ) S_StartSound("misc/chat",CHAN_VOICE,CHANF_UI,1.,0.);
 			else SetText();
 			return;
 		}
@@ -406,7 +409,11 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 		int idx = punctuation.IndexOf(ch);
 		if ( idx >= 0 ) delay += (idx*2)+1;
 		charcnt++;
-		if ( charcnt >= TotalLength() ) delay += (seqnum==5)?90:40;
+		// utf-8 skipping (naive but works, as we don't have to EXPECT invalid sequences in the input)
+		if ( ch.ByteAt(0)&0xE0 == 0xC0 ) charcnt++;
+		else if ( ch.ByteAt(0)&0xF0 == 0xE0 ) charcnt += 2;
+		else if ( ch.ByteAt(0)&0xF8 == 0xF0 ) charcnt += 3;
+		if ( charcnt >= TotalLength() ) delay += (seqnum==seqcnt)?enddelay:pausedelay;
 	}
 
 	override bool Tick()
@@ -416,6 +423,7 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 			delay--;
 			if ( delay <= 0 )
 			{
+				Console.Printf(StringTable.Localize("$SWWM_INCOMINGMSG"),chrfullname);
 				S_StartSound("misc/chat",CHAN_VOICE,CHANF_UI,1.,0.);
 				seqnum++;
 			}
@@ -433,7 +441,11 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 			talktics--;
 		}
 		else talkframe = -1;
-		if ( seqnum > 6 ) return true;
+		if ( seqnum > (seqcnt+1) )
+		{
+			if ( nextmsg ) StatusBar.AttachMessage(nextmsg,-1232);
+			return true;
+		}
 		if ( seqnum == 0 )
 		{
 			fadein++;
@@ -444,8 +456,14 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 			}
 			return false;
 		}
-		if ( seqnum == 6 )
+		if ( seqnum == (seqcnt+1) )
 		{
+			if ( nextmsg && nextdirect )
+			{
+				nextmsg.seqnum = 1;
+				StatusBar.AttachMessage(nextmsg,-1232);
+				return true;
+			}
 			fadeout++;
 			if ( fadeout > 30 ) seqnum++;
 			return false;
@@ -461,17 +479,17 @@ Class SWWMSecretZanavethMessage : HUDMessageBase
 
 	override void Draw( int bottom, int visibility )
 	{
-		if ( (seqnum < 0) || (seqnum > 6) ) return;
+		if ( (seqnum < 0) || (seqnum > (seqcnt+1)) ) return;
 		double alph = 1.;
 		if ( seqnum == 0 ) alph = fadein/15.;
-		else if ( seqnum == 6 ) alph = 1.-fadeout/30.;
+		else if ( seqnum == (seqcnt+1) ) alph = 1.-fadeout/30.;
 		if ( swwm_hudscale <= 0 ) hs = StatusBar.GetHUDScale();
 		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
 		ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		origin = (int(ss.x-270)/2,swwm_hudmargin+60);
+		origin = (int(ss.x-270)/2,swwm_hudmargin+70);
 		Screen.DrawTexture(MessageBox,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
-		if ( (seqnum < 1) || (seqnum > 5) ) return;
+		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;
 		DrawAvatar();
 		DrawText();
 	}

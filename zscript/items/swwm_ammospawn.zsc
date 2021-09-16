@@ -1,11 +1,44 @@
 // on-demand ammo spawners
 Mixin Class SWWMOndemandAmmoSpawner
 {
+	Actor dropper;
+	bool enemydrop;
+	int dropamount;
+
+	override void ModifyDropAmount( int amt )
+	{
+		dropamount = amt;
+	}
+
+	override bool SpecialDropAction( Actor dropper )
+	{
+		self.dropper = dropper;
+		enemydrop = true;
+		return false;
+	}
+
 	override void SpawnAmmo()
 	{
 		let ac = PickAmmo();
 		if ( !ac ) return;
 		let a = Spawn(ac,pos);
+		if ( enemydrop )
+		{
+			a.bDropped = true;
+			a.bNoGravity = false;
+			if ( !(level.compatflags&COMPATF_NOTOSSDROPS) )
+				a.TossItem();
+			if ( a is 'Inventory' )
+			{
+				let i = Inventory(a);
+				i.bTossed = true;
+				if ( i.SpecialDropAction(dropper) )
+				{
+					i.Destroy();
+					return;
+				}
+			}
+		}
 		SWWMUtility.TransferItemProp(self,a);
 	}
 }

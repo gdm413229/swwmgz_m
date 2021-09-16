@@ -579,7 +579,7 @@ Class MagAmmo : Inventory abstract
 }
 
 // Ref class for ammo spawners, used by on-demand replacers
-Class SWWMAmmoSpawner : Actor abstract
+Class SWWMAmmoSpawner : Inventory abstract
 {
 	virtual void SpawnAmmo() {}
 
@@ -590,6 +590,16 @@ Class SWWMAmmoSpawner : Actor abstract
 		Destroy();
 	}
 
+	override bool CanPickup( Actor toucher )
+	{
+		return false;
+	}
+
+	override bool TryPickup( in out Actor toucher )
+	{
+		return false;
+	}
+
 	default
 	{
 		+NOGRAVITY;
@@ -597,5 +607,6 @@ Class SWWMAmmoSpawner : Actor abstract
 		+NOINTERACTION;
 		+NOTELEPORT;
 		+DONTSPLASH;
+		-SPECIAL;
 	}
 }

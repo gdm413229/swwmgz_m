@@ -9,9 +9,10 @@ Class SWWMWeapon : Weapon abstract
 	transient bool hastravelled;
 	transient int autoupsnd;
 	private int SWeaponFlags;
-
+	String tooltip;
 	Class<Ammo> dropammotype;
 
+	Property Tooltip : tooltip;
 	Property DropAmmoType : dropammotype;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
@@ -346,11 +347,17 @@ Class SWWMWeapon : Weapon abstract
 	override void Tick()
 	{
 		Super.Tick();
-		if ( Owner && autoupsnd && (level.maptime >= autoupsnd) )
+		if ( !Owner ) return;
+		if ( autoupsnd && (level.maptime >= autoupsnd) )
 		{
 			autoupsnd = 0;
 			PlayUpSound(Owner);
 		}
+		if ( !Owner.player || (Owner.player.ReadyWeapon != self) || !(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH) )
+			return;
+		let demo = Demolitionist(Owner);
+		if ( demo && demo.mystats && tooltip )
+			demo.mystats.SendTooltip(GetClass());
 	}
 	action void A_SWWMFlash( StateLabel flashlabel = null )
 	{

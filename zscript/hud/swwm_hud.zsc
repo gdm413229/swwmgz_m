@@ -119,6 +119,18 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override bool ProcessMidPrint( Font fnt, String msg, bool bold )
 	{
+		// hack lol
+		if ( msg.Left(15) ~== "swwmwpntooltip." )
+		{
+			String wname = msg.Mid(15);
+			Class<SWWMWeapon> w = wname;
+			if ( w )
+			{
+				let tt = new("SWWMWeaponTooltip").Init(w);
+				AttachMessage(tt,-2910);
+			}
+			return true;
+		}
 		SWWMDirectMessage m, m2;
 		// check for Korax lines, add them to chat (and reply to some of them)
 		bool koraxline = false;

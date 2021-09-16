@@ -161,8 +161,60 @@ Class SWWMUtility
 		cv.SetFloat(cval+inc);
 	}
 
+	// gets the names of all mod cvars
+	static clearscope void GetCVars( out Array<String> cvarlist )
+	{
+		cvarlist.Clear();
+		let lmp = Wads.CheckNumForFullname("cvarinfo.base");
+		if ( lmp == -1 ) ThrowAbortException("'cvarinfo.base' not found");
+		String dat = Wads.ReadLump(lmp);
+		Array<String> list, ln;
+		// fucking Windows
+		dat.Replace("\r","");
+		list.Clear();
+		dat.Split(list,"\n");
+		for ( int i=0; i<list.Size(); i++ )
+		{
+			if ( (list[i].Length() == 0) || (list[i].Left(2) == "//") || (list[i].Left(1) == "") )
+				continue;
+			int eq = list[i].IndexOf("=");
+			if ( eq == -1 ) continue;
+			list[i].Truncate(eq);
+			ln.Clear();
+			list[i].Split(ln," ",0);
+			for ( int j=0; j<ln.Size(); j++ )
+			{
+				if ( (ln[j].Left(5) != "swwm_") ) continue;
+				cvarlist.Push(ln[j]);
+			}
+		}
+	}
+
+	// sends
+	static clearscope void SendTooltip( Class<SWWMWeapon> which )
+	{
+		if ( !swwm_weapontooltips ) return;
+		CVar v = CVar.FindCVar('swwm_tooltipshown');
+		String tt = v.GetString();
+		Array<String> wpn;
+		tt.Split(wpn,",");
+		for ( int i=0; i<wpn.Size(); i++ )
+		{
+			if ( wpn[i] == which.GetClassName() ) return;
+		}
+		if ( tt == "" ) tt = which.GetClassName();
+		else tt = tt..","..which.GetClassName();
+		v.SetString(tt);
+		// this is kinda hacky but hey, as long as it works
+		Console.MidPrint(null,"swwmwpntooltip."..which.GetClassName());
+		v = CVar.FindCVar('swwm_tooltipnote');
+		if ( v.GetBool() ) return;
+		v.SetBool(true);
+		Console.Printf(StringTable.Localize("$SWWM_TTNOTE"));
+	}
+
 	// gutamatics caching
-	static void PrepareProjData( out SWWMProjectionData d, Vector3 viewpos, double angle, double pitch, double roll, double fov )
+	static clearscope void PrepareProjData( out SWWMProjectionData d, Vector3 viewpos, double angle, double pitch, double roll, double fov )
 	{
 		double aspect = Screen.GetAspectRatio();
 		// vertical fov
@@ -186,30 +238,30 @@ Class SWWMUtility
 		d.viewh = h;
 	}
 
-	static Vector3 ProjectPoint( SWWMProjectionData d, Vector3 worldpos )
+	static clearscope Vector3 ProjectPoint( SWWMProjectionData d, Vector3 worldpos )
 	{
 		return d.wtc.multiplyVector3(worldpos).asVector3();
 	}
 
-	static Vector2 NDCToViewport( SWWMProjectionData d, Vector3 ndc )
+	static clearscope Vector2 NDCToViewport( SWWMProjectionData d, Vector3 ndc )
 	{
 		return (d.viewx,d.viewy)+(((ndc.x+1)*d.vieww)/2,((-ndc.y+1)*d.viewh)/2);
 	}
 
 	// checks if a point is inside the viewport
-	static bool TestScreenBounds( SWWMProjectionData d, Vector2 vpos )
+	static clearscope bool TestScreenBounds( SWWMProjectionData d, Vector2 vpos )
 	{
 		return ((vpos.x == clamp(vpos.x,d.viewx,d.viewx+d.vieww))
 			&& (vpos.y == clamp(vpos.y,d.viewy,d.viewy+d.viewh)));
 	}
 
 	// less code duplication
-	static void AdjustClean_1( out double x, out double y )
+	static clearscope void AdjustClean_1( out double x, out double y )
 	{
 		x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 		y = (y-100)*CleanYFac_1+(Screen.GetHeight()*.5);
 	}
-	static void AdjustClean_1x( out double x )
+	static clearscope void AdjustClean_1x( out double x )
 	{
 		x = (x-160)*CleanXFac_1+(Screen.GetWidth()*.5);
 	}

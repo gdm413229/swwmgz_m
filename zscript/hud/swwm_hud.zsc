@@ -59,6 +59,8 @@ Class SWWMStatusBar : BaseStatusBar
 	bool koraxhack, mainframehack;
 	int puzzlecnt, realpuzzlecnt;
 
+	SWWMWeaponTooltip ctip;
+
 	double minimapzoom, oldminimapzoom;
 	// minimap constants
 	const CLIPDIST = 800;		// clip distance for minimap view, with rotation accounted
@@ -127,7 +129,19 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( w )
 			{
 				let tt = new("SWWMWeaponTooltip").Init(w);
-				AttachMessage(tt,-2910);
+				bool appended = false;
+				for ( SWWMWeaponTooltip t=ctip; t; t=t.next )
+				{
+					if ( t.next ) continue;
+					appended = true;
+					t.next = tt;
+					break;
+				}
+				if ( !appended )
+				{
+					ctip = tt;
+					AttachMessage(tt,-2910);
+				}
 			}
 			return true;
 		}

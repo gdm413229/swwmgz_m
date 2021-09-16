@@ -1,6 +1,5 @@
 // main mod cvars
 user string swwm_voicetype = "default";		// voice for your demolitionist
-//user color swwm_tagcolor = "40 FF 00";	// color of your model tags, not available due to engine dickery
 nosave float swwm_flashstrength = 1.0;		// strength of screen flashes
 nosave int swwm_hudmargin = 10;			// margin around fullscreen hud elements
 nosave int swwm_maxshown = 4;			// max messages to show normally
@@ -118,6 +117,8 @@ user bool swwm_autousebarrier = true;		// auto-use elemental coating when standi
 server int swwm_enforceautousebarrier = 0;	// enforced auto-use for coating
 nosave bool swwm_nomapmsg = false;		// disables special map dialogue messages
 nosave bool swwm_weapontooltips = true;		// shows a tooltip on weapon operation when first selected
+nosave string swwm_tooltipshown = "";		// which weapons have already had their tooltips displayed
+nosave noarchive bool swwm_tooltipnote = false;	// set if the note on how to disable tooltips was already displayed
 
 // minimap settings
 nosave bool swwm_mm_enable = true;		// show a minimap below the score counter

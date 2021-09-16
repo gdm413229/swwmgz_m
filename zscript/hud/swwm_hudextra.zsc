@@ -253,23 +253,26 @@ Class SWWMWeaponTooltip : HUDMessageBase
 	double tics, holdtics, fadeintics, fadeouttics;
 	transient Font tewifont, mplusfont, miniwifont, k6x8font;
 	transient BrokenLines l;
+	SWWMWeaponTooltip next;
 
 	SWWMWeaponTooltip Init( Class<SWWMWeapon> weapon )
 	{
 		let def = GetDefaultByType(weapon);
 		icon = def.Icon;
 		wpn = def.GetTag();
-		txt = def.tooltip;
-		holdtics = 90;
-		fadeintics = 20;
-		fadeouttics = 30;
+		txt = StringTable.Localize(def.tooltip);
+		holdtics = 120;
+		fadeintics = 5;
+		fadeouttics = 15;
 		tics = -10;
 		return self;
 	}
 
 	override bool Tick()
 	{
-		return (++tics > holdtics+fadeintics+fadeouttics);
+		bool clearme = (++tics > holdtics+fadeintics+fadeouttics);
+		if ( clearme && next ) StatusBar.AttachMessage(next,-2910);
+		return clearme;
 	}
 
 	override void Draw( int bottom, int visibility )
@@ -294,11 +297,9 @@ Class SWWMWeaponTooltip : HUDMessageBase
 		double alpha = (tics<fadeintics)?(tics/fadeintics):(tics<(fadeintics+holdtics))?1.:(1.-(tics-(fadeintics+holdtics))/fadeouttics);
 		int w, h;
 		[w, h] = TexMan.GetSize(icon);
-		Vector2 pos = (int(ss.x/2),int(ss.y/2)+8+h);
-		Screen.DrawTexture(icon,false,pos.x,pos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_CenterBottomOffset,true);
-		pos.y += 2;
+		int w2 = w;
+		Vector2 pos = (int(ss.x/2),int(ss.y/2)+h/2);
 		w = fnt.StringWidth(wpn);
-		Screen.DrawText(fnt,Font.CR_FIRE,pos.x-w/2,pos.y,wpn,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		if ( !l ) l = fnt2.BreakLines(txt,600);
 		int w1 = w;
 		w = 0;
@@ -307,8 +308,11 @@ Class SWWMWeaponTooltip : HUDMessageBase
 			let lw = fnt2.StringWidth(l.StringAt(i));
 			if ( lw > w ) w = lw;
 		}
-		// underline
-		int cw = int(ceil((max(w1,w)+8)/6.))*6;
+		int cw = int(ceil((max(max(w1,w2),w)+8)/6.))*6;
+		Screen.Dim("Black",.5*alpha,int((pos.x-(cw+4)/2)*hs.x),int((pos.y-(h+6))*hs.y),int((cw+4)*hs.x),int((8+h+4+fnt.GetHeight()+8+fnt2.GetHeight()*l.Count())*hs.y));
+		Screen.DrawTexture(icon,false,pos.x,pos.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_CenterBottomOffset,true);
+		pos.y += 4;
+		Screen.DrawText(fnt,Font.CR_FIRE,pos.x-w1/2,pos.y,wpn,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		for ( int i=0; i<cw; i+=6 )
 			Screen.DrawChar(fnt,Font.CR_FIRE,(pos.x-cw/2)+i,pos.y+6,0x5F,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 		pos.y += fnt.GetHeight()+8;

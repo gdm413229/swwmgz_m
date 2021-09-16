@@ -36,7 +36,6 @@ Class SWWMStats : Thinker
 	Array<MonsterKill> mstats;
 	Array<LevelStat> lstats;
 	Array<Class<Weapon> > alreadygot;
-	Array<Class<SWWMWeapon> > sawtooltip;
 	int favweapon;
 	// these two are used for mission updates
 	Array<int> clustervisit;
@@ -59,19 +58,6 @@ Class SWWMStats : Thinker
 		}
 		alreadygot.Push(which);
 		return false;
-	}
-
-	void SendTooltip( Class<SWWMWeapon> which )
-	{
-		if ( !swwm_weapontooltips ) return;
-		for ( int i=0; i<sawtooltip.Size(); i++ )
-		{
-			if ( sawtooltip[i] == which ) return;
-		}
-		sawtooltip.Push(which);
-		// this is kinda hacky but hey, as long as it works
-		if ( myplayer == players[consoleplayer] )
-			Console.MidPrint(null,"swwmwpntooltip."..which.GetClassName());
 	}
 
 	private Class<Weapon> WeaponFromInflictor( Actor inflictor, Name damagetype )

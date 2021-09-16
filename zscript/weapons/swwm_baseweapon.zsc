@@ -10,6 +10,7 @@ Class SWWMWeapon : Weapon abstract
 	transient int autoupsnd;
 	private int SWeaponFlags;
 	String tooltip;
+	bool tooltipsent;
 	Class<Ammo> dropammotype;
 
 	Property Tooltip : tooltip;
@@ -354,10 +355,14 @@ Class SWWMWeapon : Weapon abstract
 			PlayUpSound(Owner);
 		}
 		if ( !Owner.player || (Owner.player.ReadyWeapon != self) || !(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH) )
+		{
+			tooltipsent = false;
 			return;
-		let demo = Demolitionist(Owner);
-		if ( demo && demo.mystats && tooltip )
-			demo.mystats.SendTooltip(GetClass());
+		}
+		if ( tooltipsent ) return;
+		tooltipsent = true;
+		if ( Owner.player == players[consoleplayer] )
+			SWWMUtility.SendTooltip(GetClass());
 	}
 	action void A_SWWMFlash( StateLabel flashlabel = null )
 	{

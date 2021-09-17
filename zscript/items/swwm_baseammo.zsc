@@ -8,6 +8,7 @@ Class SWWMAmmo : Ammo
 	String PickupTag;
 	Class<MagAmmo> MagAmmoType;
 	private int SAmmoFlags;
+	transient bool bSinglePrint;	// used for pickup messages of mag manager
 
 	Property PickupTag : PickupTag;
 	Property MagAmmoType : MagAmmoType;
@@ -26,11 +27,12 @@ Class SWWMAmmo : Ammo
 	{
 		if ( bUsePickupMsg ) return Super.PickupMessage();
 		String tagstr = "$T_"..PickupTag;
-		if ( Amount > 1 )
+		if ( (Amount > 1) && !bSinglePrint )
 		{
 			tagstr = tagstr.."S";
 			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
 		}
+		bSinglePrint = false;
 		return StringTable.Localize(tagstr);
 	}
 
@@ -258,6 +260,7 @@ Class MagAmmo : Inventory abstract
 	int ClipSize;
 	int countdown;
 	String PickupTag;
+	transient bool bSinglePrint;	// used for pickup messages of mag manager
 
 	Property ParentAmmo : ParentAmmo;
 	Property ClipSize : ClipSize;
@@ -316,11 +319,12 @@ Class MagAmmo : Inventory abstract
 	override string PickupMessage()
 	{
 		String tagstr = "$T_"..PickupTag;
-		if ( Amount > 1 )
+		if ( (Amount > 1) && !bSinglePrint )
 		{
 			tagstr = tagstr.."S";
 			return String.Format("%d %s",Amount,StringTable.Localize(tagstr));
 		}
+		bSinglePrint = false;
 		return StringTable.Localize(tagstr);
 	}
 
@@ -520,7 +524,10 @@ Class MagAmmo : Inventory abstract
 			Amount -= ClipSize;
 			given = true;
 			if ( Owner.CheckLocalView() )
+			{
+				SWWMAmmo(pamo).bSinglePrint = true;
 				pamo.PrintPickupMessage(true,pamo.PickupMessage());
+			}
 		}
 		if ( given ) pamo.PlayPickupSound(Owner);
 		return given;

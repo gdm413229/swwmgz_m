@@ -232,17 +232,8 @@ Class SWWMItemSense : Thinker
 		let i = item;
 		if ( i is 'SWWMRespawnTimer' ) i = i.tracer;
 		if ( !i ) return;
-		// certain ammo types use the pickup message as it's amount-aware
-		if ( (i is 'RedShell') || (i is 'GreenShell')
-			|| (i is 'WhiteShell') || (i is 'BlueShell')
-			|| (i is 'BlackShell') || (i is 'PurpleShell')
-			|| (i is 'GoldShell') || (i is 'EvisceratorShell')
-			|| (i is 'HellblazerMissiles')
-			|| (i is 'HellblazerCrackshots')
-			|| (i is 'HellblazerRavagers')
-			|| (i is 'HellblazerWarheads')
-			|| (i is 'SMW05Ammo')
-			|| (i is 'SheenAmmo') )
+		// our ammo types use the pickup message, as it's amount-aware
+		if ( (i is 'SWWMAmmo') || (i is 'MagAmmo') )
 			tag = Inventory(i).PickupMessage();
 		else tag = i.GetTag();
 	}

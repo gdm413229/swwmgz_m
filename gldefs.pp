@@ -72,6 +72,29 @@ HardwareShader PostProcess scene
 
 HardwareShader PostProcess scene
 {
+	Name "DevastationShader"
+	Shader "shaders/pp/Devascreen.fp" 330
+	Texture BumpTex "textures/heattex.png"
+	Texture WarpTex1 "textures/devawarp1.png"
+	Texture WarpTex2 "textures/devawarp2.png"
+	Texture NoiseTex "textures/graynoise.png"
+	Uniform float timer
+	Uniform float xtrastr
+}
+
+HardwareShader PostProcess scene
+{
+	Name "DivineShader"
+	Shader "shaders/pp/Diviscreen.fp" 330
+	Texture BumpTex "textures/frosttex.png"
+	Texture WarpTex "textures/smoketex.png"
+	Texture NoiseTex "textures/graynoise.png"
+	Uniform float timer
+	Uniform float str
+}
+
+HardwareShader PostProcess scene
+{
 	Name "Glitch"
 	Shader "shaders/pp/Glitch.fp" 330
 	Uniform float Timer

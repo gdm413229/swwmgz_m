@@ -4,7 +4,6 @@
 Class ModernSparkster : SWWMWeapon
 {
 	int clipcount, clipcount2;
-	bool chambered, chambered2;
 
 	Property ClipCount : clipcount;
 	Property ClipCount2 : clipcount2;
@@ -18,6 +17,7 @@ Class ModernSparkster : SWWMWeapon
 		Tag "$T_NEWSPARKSTER";
 		Inventory.PickupMessage "$I_NEWSPARKSTER";
 		Obituary "$O_NEWSPARKSTER";
+		SWWMWeapon.Tooltip "$TT_NEWSPARKSTER";
 		Inventory.Icon "graphics/HUD/Icons/W_NewSparkster.png";
 		Weapon.SlotNumber 6;
 		Weapon.SlotPriority 3.;
@@ -27,8 +27,8 @@ Class ModernSparkster : SWWMWeapon
 		Weapon.AmmoType2 "SparksterRAmmo";
 		Weapon.AmmoGive2 1;
 		SWWMWeapon.DropAmmoType "RocketAmmo";
-		ModernSparkster.ClipCount 3;
-		ModernSparkster.ClipCount2 3;
+		ModernSparkster.ClipCount 4;
+		ModernSparkster.ClipCount2 4;
 		Stamina 160000;
 		+SWWMWEAPON.NOFIRSTGIVE;
 	}

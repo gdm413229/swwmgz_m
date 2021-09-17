@@ -98,6 +98,45 @@ HardwareShader Texture "models/extra/AnomRingies.png"
 	Shader "shaders/glsl/Mykradvo2.fp"
 	Texture "warptex" "textures/heattex.png"
 }
+HardwareShader Sprite "DVSPA0"
+{
+	Shader "shaders/glsl/Divine.fp"
+	Texture "snoisetex" "textures/softnoise.png"
+}
+HardwareShader Texture "models/DivineSprite.png"
+{
+	Shader "shaders/glsl/Shinemask.fp"
+	Texture "masktex" "models/DivineSprite_mask.png"
+	Texture "envtex" "models/matcap/pearlmap.png"
+}
+Brightmap Texture "models/DivineSprite.png"
+{
+	map "models/DivineSprite_mask.png"
+	DisableFullbright
+}
+HardwareShader Texture "models/DevaSigil.png"
+{
+	Shader "shaders/glsl/Shinemask.fp"
+	Texture "masktex" "models/DevaSigil_mask.png"
+	Texture "envtex" "models/matcap/dekamap.png"
+}
+Brightmap Texture "models/SafetyTether.png"
+{
+	map "models/SafetyTether_bright.png"
+	DisableFullbright
+}
+HardwareShader Texture "models/SafetyTether.png"
+{
+	Shader "shaders/glsl/Shinemask.fp"
+	Texture "masktex" "models/SafetyTether_mask.png"
+	Texture "envtex" "models/matcap/silvermap.png"
+}
+HardwareShader Texture "models/SafetyTether_off.png"
+{
+	Shader "shaders/glsl/Shinemask.fp"
+	Texture "masktex" "models/SafetyTether_mask.png"
+	Texture "envtex" "models/matcap/silvermap.png"
+}
 
 PointLight ARMORNUGGETLIGHT
 {
@@ -271,3 +310,39 @@ Object MykradvoX2
 	Frame "XZW1B" { light "MYKRADVOLIGHT3" }
 }
 
+PointLight DIVINESLIGHT
+{
+	Color 0.6 0.9 1.0
+	Size 90
+	Attenuate 1
+}
+
+Object DivineSpriteX
+{
+	Frame "DVSP" { light "DIVINESLIGHT" }
+}
+
+PointLight DEVASLIGHT
+{
+	Color 0.7 0.9 1.0
+	Size 90
+	Attenuate 1
+	Subtractive 1
+}
+
+Object AngerySigilX
+{
+	Frame "BLPS" { light "DEVASLIGHT" }
+}
+
+PointLight SAFETYLIGHT
+{
+	Color 0.2 1.0 0.3
+	Size 50
+	Attenuate 1
+}
+
+Object SafetyTether
+{
+	Frame "XZW1B" { light "SAFETYLIGHT" }
+}

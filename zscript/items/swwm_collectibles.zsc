@@ -190,68 +190,31 @@ Class SayaBean : SWWMCollectible
 }
 Class MothPlushy : SWWMCollectible
 {
+	bool activated;	// she knows where you are
+	bool present;	// she's here (TBD 1.5)
+	int gigglecnt, uses;
+
+	override void DoEffect()
+	{
+		Super.DoEffect();
+		if ( gigglecnt > 0 )
+		{
+			gigglecnt--;
+			if ( gigglecnt == 30 )
+				A_StartSound("mashiro/appear",CHAN_VOICE,CHANF_UI|CHANF_NOSTOP|CHANF_OVERLAP,1.,0.);
+			if ( gigglecnt == 0 )
+				Console.MidPrint(smallfont,StringTable.Localize("$D_MASHIRO"),true);
+		}
+	}
+
 	Default
 	{
 		Tag "$T_MOTHPLUSH";
 		Inventory.PickupMessage "$T_MOTHPLUSH";
-		SWWMCollectible.Availability AVAIL_None;
 		SWWMCollectible.GestureWeapon "MothPlushyGesture";
 		Stamina 7000;
-	}
-}
-Class AA12Model : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_AA12";
-		Inventory.PickupMessage "$T_AA12";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "AA12ModelGesture";
-		Stamina 10000;
-	}
-}
-Class CactusHege : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_HEGE";
-		Inventory.PickupMessage "$T_HEGE";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "CactusHegeGesture";
-		Stamina 3000;
-	}
-}
-Class TastyHoagie : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_HOAGIE";
-		Inventory.PickupMessage "$T_HOAGIE";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "TastyHoagieGesture";
-		Stamina 2000;
-	}
-}
-Class IbukiMilk : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_IBUKIMILK";
-		Inventory.PickupMessage "$T_IBUKIMILK";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "IbukiMilkGesture";
-		Stamina 800;
-	}
-}
-Class BRCAlbum : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_BRCALBUM";
-		Inventory.PickupMessage "$T_BRCALBUM";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "BRCAlbumGesture";
-		Stamina 4000;
+		Radius 12;
+		Height 32;
 	}
 }
 // Heretic
@@ -266,28 +229,6 @@ Class DemoPlush : SWWMCollectible
 		Stamina 6000;
 		Radius 12;
 		Height 36;
-	}
-}
-Class Manarokou : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_MANAROKOU";
-		Inventory.PickupMessage "$T_MANAROKOU";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "ManarokouGesture";
-		Stamina 9000;
-	}
-}
-Class LithiumNovel : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_LITHIUM";
-		Inventory.PickupMessage "$T_LITHIUM";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "LithiumNovelGesture";
-		Stamina 2000;
 	}
 }
 // Hexen
@@ -341,16 +282,5 @@ Class KirinPlush : SWWMCollectible
 		Stamina 8000;
 		Radius 14;
 		Height 37;
-	}
-}
-Class Psykkonovexx : SWWMCollectible
-{
-	Default
-	{
-		Tag "$T_PSYKKONOVEXX";
-		Inventory.PickupMessage "$T_PSYKKONOVEXX";
-		SWWMCollectible.Availability AVAIL_None;
-		SWWMCollectible.GestureWeapon "PsykkonovexxGesture";
-		Stamina 15000;
 	}
 }

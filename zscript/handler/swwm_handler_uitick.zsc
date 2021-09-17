@@ -1,0 +1,361 @@
+// misc. UI Tick stuff
+
+extend Class SWWMHandler
+{
+	ui bool didstartmsg;
+	bool doextramsg;
+	ui bool didextramsg;
+
+	private ui void MapstartUITick()
+	{
+		if ( !didextramsg && doextramsg )
+		{
+			if ( !swwm_nomapmsg )
+			{
+				// angry about phase two
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYAEVIB";
+				msg.seqcnt = 2;
+				msg.delay = 20;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			didextramsg = true;
+		}
+		if ( didstartmsg ) return;
+		if ( swwm_nomapmsg )
+		{
+			didstartmsg = true;
+			return;
+		}
+		int whichboss = WhichVanillaBossMap();
+		if ( bossmap == MAP_DE1M8 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAPHOBOS";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_DE2M8 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYADEIMOS";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_DE3M8 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYADIS";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_DE4M8 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYATHY";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_DMAP07 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYADIMPLE";
+			msg.seqcnt = 5;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_DMAP30 )
+		{
+			// rampancy check
+			bool rampancy = false;
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				if ( AllActorClasses[i].GetClassName() != "Robot_BossBrain" ) continue;
+				rampancy = true;
+				break;
+			}
+			if ( rampancy )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYARAMPANCY";
+				msg.seqcnt = 4;
+				msg.delay = 250;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			else
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYAIOS";
+				msg.seqcnt = 5;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+		}
+		else if ( bossmap == MAP_DLVL08 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cvCytho\c-",StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
+			msg.seqname = "CYTHONERVE";
+			msg.seqcnt = 5;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_EVMAP30 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAEVIA";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_HE1M8_HE4M8 )
+		{
+			if ( level.mapname ~== "E1M8" )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYAMAW";
+				msg.seqcnt = 5;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			else
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYAHEADS";
+				msg.seqcnt = 6;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+		}
+		else if ( bossmap == MAP_HE2M8_HE5M8 )
+		{
+			if ( level.mapname ~== "E2M8" )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYAMASTERS";
+				msg.seqcnt = 5;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			else
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYABULLS";
+				msg.seqcnt = 5;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+		}
+		else if ( bossmap == MAP_HE3M8 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYADSPARIL";
+			msg.seqcnt = 5;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_HMAP38 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYACLERICA";
+			msg.seqcnt = 2;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+			let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			msg2.seqname = "SAYACLERICB";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2.seqname = "SAYACLERICC";
+			msg2.seqcnt = 2;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+		}
+		else if ( bossmap == MAP_HMAP36 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAFIGHTER";
+			msg.seqcnt = 2;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_HMAP37 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAMAGE";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_HMAP12 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAHYPO";
+			msg.seqcnt = 4;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_HMAP40 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYAKORAXA";
+			msg.seqcnt = 1;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+			let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			msg2.seqname = "SAYAKORAXB";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			msg2.seqname = "SAYAKORAXC";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2.seqname = "SAYAKORAXD";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			msg2.seqname = "SAYAKORAXE";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+		}
+		else if ( (bossmap == MAP_HMAP23_HMAP27_HMAP48_HMAP55) && (level.mapname ~== "MAP48") )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYACONSTABLEA";
+			msg.seqcnt = 2;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+			let msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			msg2.seqname = "SAYACONSTABLEB";
+			msg2.seqcnt = 1;
+			msg2.delay = 30;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2.seqname = "SAYACONSTABLEC";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+			msg = msg2;
+			msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			msg2.seqname = "SAYACONSTABLED";
+			msg2.seqcnt = 1;
+			msg2.delay = 20;
+			msg.nextmsg = msg2;
+			msg.nextdirect = true;
+		}
+		else if ( bossmap == MAP_HMAP60 )
+		{
+			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg.seqname = "SAYADEATHKINGS";
+			msg.seqcnt = 1;
+			msg.delay = 40;
+			StatusBar.AttachMessage(msg,-1232);
+		}
+		else if ( bossmap == MAP_NONE )	// gotta get checksums here
+		{
+			String csum = level.GetChecksum();
+			// SIGIL E5M8
+			if ( (csum ~== "3D72FD17F36D2D43FD9A21E6E57EE357")
+				 || (csum ~== "09B30C9DA9D73D3D5A709502FBB947AA")
+				 || (csum ~== "6EAD80DA1F30B4B3546FA294EEF9F87C") )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cvCytho\c-",StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
+				msg.seqname = "CYTHOSIGIL";
+				msg.seqcnt = 4;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			// Deathkings
+			// Blight
+			else if ( csum ~== "E3EFB0156A20ADF2DF00915A0EA85DF5" )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYABLIGHTA";
+				msg.seqcnt = 1;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+				let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+				msg2.seqname = "SAYABLIGHTB";
+				msg2.seqcnt = 1;
+				msg2.delay = 5;
+				msg2.enddelay = 15;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+				msg = msg2;
+				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2.seqname = "SAYABLIGHTC";
+				msg2.seqcnt = 2;
+				msg2.delay = 20;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+			}
+			// Nave
+			else if ( csum ~== "E2B5D1400279335811C1C1C0B437D9C8" )
+			{
+				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg.seqname = "SAYANAVEA";
+				msg.seqcnt = 2;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+				let msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+				msg2.seqname = "SAYANAVEB";
+				msg2.seqcnt = 1;
+				msg2.delay = 20;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+				msg = msg2;
+				msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+				msg2.seqname = "SAYANAVEC";
+				msg2.seqcnt = 1;
+				msg2.delay = 5;
+				msg2.enddelay = 30;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+				msg = msg2;
+				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2.seqname = "SAYANAVED";
+				msg2.seqcnt = 1;
+				msg2.delay = 20;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+				msg = msg2;
+				msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+				msg2.seqname = "SAYANAVEE";
+				msg2.seqcnt = 1;
+				msg2.delay = 30;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+				msg = msg2;
+				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2.seqname = "SAYANAVEF";
+				msg2.seqcnt = 1;
+				msg2.delay = 40;
+				msg.nextmsg = msg2;
+				msg.nextdirect = true;
+			}
+		}
+		didstartmsg = true;
+	}
+}

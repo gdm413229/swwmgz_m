@@ -405,12 +405,31 @@ A floating lamp companion, may attract moths. The moths will disperse and attack
 
 Reveals the entire layout of the map and shows key locations in the HUD. Also allows you to highlight pickups through walls when holding the **Item Sense** button.
 
-### Mykradvo Artifact ~ May randomly replace Ghost Artifact, Ragekit or Invinciball
+### Safety Tether ~ Replaces Chaos Device
+![](docimg/tether.png)
+
+On use, teleports you back to the start of the map. Basically acts exactly the same as a Chaos Device, although it also resets you to max health should you be under the weather. Additionally it also generates shockwaves on both ends, making your escape more dramatic.
+
+### Mykradvo Artifact ~ May randomly replace Ghost Artifact or Invinciball
 ![](docimg/mykradvo.png)
 
 When used, bursts into plasma tendrils that will seek all visible hostiles within 100m and fry them good. If there are no hostiles around, the artifact will simply not ignite.
 
 Has a chance to spawn in place of other items, but only one may spawn per map. Cannot be bought due to its rarity.
+
+### Divine Sprite ~ May randomly replace Grilled Cheese Sandwich
+![](docimg/sprite.png)
+
+Rapidly boosts your health dramatically, for 50 seconds. Its effects will obviously fade afterwards. Your HUD can't exactly report your actual health, but it's assumed this goes way beyond the one thousand cap, somehow.
+
+Only one may spawn per map, and you can't buy these either. If you manage to fetch one, use it wisely.
+
+### Devastation Sigil ~ May randomly replace Ragekit
+![](docimg/deva.png)
+
+50 seconds of absolute destructive potential for any damage you may deal, including to yourself (so be careful).
+
+Same conditions as the other two. Make sure you find the perfect chance to unleash this beast.
 
 ## The Collectibles
 ![](docimg/chancebox.png)
@@ -448,6 +467,11 @@ A perfectly generic cube. It is exactly 128mm across each side, sports a pure gr
 ![](docimg/sayabean.png)
 
 Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet another of Nukritas 2xx's little handcrafted dolls. May or may not be really haunted.
+
+### Mashiro Plush
+![](docimg/mothplushy.png)
+
+A cute plush doll of Saya's favorite moth girl. Apparently the Nukritas brothers give her one of these every time they piss her off, so she's got an entire pile in her bedroom. It appears that this one bears with it some sort of "contract", whatever that means.
 
 ### Demolitionist Plush (Heretic)
 ![](docimg/demoplush.png)

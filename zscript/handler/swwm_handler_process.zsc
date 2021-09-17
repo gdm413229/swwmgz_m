@@ -392,6 +392,15 @@ extend Class SWWMHandler
 					amt = GetDefaultByType(a).Amount;
 				}
 			}
+			if ( item is 'MagAmmo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<MagAmmo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
 			Inventory ritm = players[e.Args[1]].mo.FindInventory(item);
 			if ( ritm )
 			{
@@ -513,6 +522,15 @@ extend Class SWWMHandler
 					amt = GetDefaultByType(a).Amount;
 				}
 			}
+			if ( i is 'MagAmmo' )
+			{
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let a = (Class<MagAmmo>)(AllActorClasses[i]);
+					if ( !a || (a.GetParentClass() != item) || (GetDefaultByType(a).Amount < amt) ) continue;
+					amt = GetDefaultByType(a).Amount;
+				}
+			}
 			if ( amt > i.Amount ) amt = i.Amount;
 			let drop = players[e.Args[0]].mo.DropInventory(i,amt);
 			// add some random velocity so multiple drops don't get bunched together
@@ -604,6 +622,15 @@ extend Class SWWMHandler
 		{
 			if ( e.Args[0] != consoleplayer ) return;
 			checklist.Clear();
+		}
+		else if ( e.Name ~== "swwmstorepuzzlecnt" )
+		{
+			let s = SWWMStats.Find(players[e.Args[0]]);
+			if ( s )
+			{
+				s.puzzlecnt = e.Args[1];
+				s.realpuzzlecnt = e.Args[2];
+			}
 		}
 		// cheats go here
 		else CheatEvent(e);

@@ -10,6 +10,7 @@ Class ExplodiumGun : SWWMWeapon
 	double casex, casey;
 	transient ui TextureID WeaponBox;
 	transient ui Font TewiFont;
+	int deadeyecnt;
 
 	Property ClipCount : ClipCount;
 
@@ -111,12 +112,17 @@ Class ExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
+			if ( d.HitActor.IsHostile(self) )
+			{
+				invoker.deadeyecnt++;
+				SWWMUtility.AchievementProgress('swwm_progress_deadeye',invoker.deadeyecnt,player);
+			}
 			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 20;
 			SWWMUtility.DoKnockback(d.HitActor,d.HitDir,48000);
 			dmg = d.HitActor.DamageMobj(invoker,self,dmg,'Explodium',DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
-			if ( d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
+			if ( !d.HitActor || d.HitActor.bNOBLOOD || d.HitActor.bDORMANT || d.HitActor.bINVULNERABLE )
 			{
 				let p = Spawn("SWWMBulletImpact",d.HitLocation);
 				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
@@ -134,6 +140,7 @@ Class ExplodiumGun : SWWMWeapon
 		}
 		else if ( d.HitType != TRACE_HitNone )
 		{
+			invoker.deadeyecnt = 0;
 			Vector3 hitnormal = -d.HitDir;
 			if ( d.HitType == TRACE_HitFloor )
 			{
@@ -160,6 +167,7 @@ Class ExplodiumGun : SWWMWeapon
 			b.target = self;
 			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
+		else invoker.deadeyecnt = 0;
 		for ( int i=0; i<6; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);
@@ -172,6 +180,7 @@ Class ExplodiumGun : SWWMWeapon
 
 	action void A_ThrowMag()
 	{
+		invoker.deadeyecnt = 0;
 		let weap = Weapon(invoker);
 		if ( !weap ) return;
 		Vector3 x, y, z, x2, y2, z2;
@@ -192,6 +201,7 @@ Class ExplodiumGun : SWWMWeapon
 
 	action void A_DropMag()
 	{
+		invoker.deadeyecnt = 0;
 		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -318,6 +328,7 @@ Class ExplodiumGun : SWWMWeapon
 		Tag "$T_EXPLODIUM";
 		Inventory.PickupMessage "$T_EXPLODIUM";
 		Obituary "$O_EXPLODIUM";
+		SWWMWeapon.Tooltip "$TT_EXPLODIUM";
 		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun.png";
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
@@ -338,6 +349,7 @@ Class ExplodiumGun : SWWMWeapon
 	Select:
 		XZW2 B 2
 		{
+			invoker.deadeyecnt = 0;
 			A_FullRaise();
 			return A_JumpIf(invoker.firstselect,"FirstSelect");
 		}
@@ -665,6 +677,11 @@ Class DualExplodiumGun : SWWMWeapon
 		SWWMBulletTrail.DoTrail(self,origin,dir,10000,2);
 		if ( d.HitType == TRACE_HitActor )
 		{
+			if ( d.HitActor.IsHostile(self) )
+			{
+				ExplodiumGun(invoker.SisterWeapon).deadeyecnt++;
+				SWWMUtility.AchievementProgress('swwm_progress_deadeye',ExplodiumGun(invoker.SisterWeapon).deadeyecnt,player);
+			}
 			int dmg = 15;
 			// might as well apply explosion on top
 			if ( dmg >= d.HitActor.Health ) dmg += 20;
@@ -688,6 +705,7 @@ Class DualExplodiumGun : SWWMWeapon
 		}
 		else if ( d.HitType != TRACE_HitNone )
 		{
+			ExplodiumGun(invoker.SisterWeapon).deadeyecnt = 0;
 			Vector3 hitnormal = -d.HitDir;
 			if ( d.HitType == TRACE_HitFloor )
 			{
@@ -714,6 +732,7 @@ Class DualExplodiumGun : SWWMWeapon
 			b.target = self;
 			if ( swwm_omnibust ) BusterWall.BustLinetrace(d,50,self,d.HitDir,d.HitLocation.z);
 		}
+		else ExplodiumGun(invoker.SisterWeapon).deadeyecnt = 0;
 		for ( int i=0; i<6; i++ )
 		{
 			let s = Spawn("SWWMSmoke",origin);
@@ -726,6 +745,7 @@ Class DualExplodiumGun : SWWMWeapon
 
 	action void A_DropMag( int side = 1 )
 	{
+		ExplodiumGun(invoker.SisterWeapon).deadeyecnt = 0;
 		if ( swwm_nomagdrop ) return;
 		Vector3 x, y, z;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
@@ -772,6 +792,7 @@ Class DualExplodiumGun : SWWMWeapon
 	{
 		Tag "$T_EXPLODIUM2";
 		Obituary "$O_EXPLODIUM";
+		SWWMWeapon.Tooltip "$TT_EXPLODIUM2";
 		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun2.png";
 		Weapon.UpSound "explodium/select";
 		Weapon.SisterWeapon "ExplodiumGun";
@@ -788,6 +809,7 @@ Class DualExplodiumGun : SWWMWeapon
 	Select:
 		XZW2 B 2
 		{
+			ExplodiumGun(invoker.SisterWeapon).deadeyecnt = 0;
 			A_FullRaise();
 			ExplodiumGun(invoker.SisterWeapon).firstselect = false;
 		}

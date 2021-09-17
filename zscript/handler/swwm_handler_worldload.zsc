@@ -1,5 +1,22 @@
 // WorldLoaded/WorldUnloaded events
 
+Class RampancyLogonDummy : Actor
+{
+	States
+	{
+	Spawn:
+		TNT1 A 7;
+		TNT1 AAAAAAAAAAAAAAAA 1
+		{
+			for ( int i=0; i<16; i++ )
+				A_Log("Remote login failed.");
+		}
+		TNT1 A 7;
+		TNT1 A 1 A_Log("\cgWARNING:\cj 256 failed remote login attempts have been reported in the last second.\c-");
+		Stop;
+	}
+}
+
 extend Class SWWMHandler
 {
 	// list contains a sector that belongs to each portal group
@@ -57,6 +74,26 @@ extend Class SWWMHandler
 				s.AddLevelStats();
 				s.lastcluster = level.cluster;
 			}
+			// nazi cleanup
+			let ti = ThinkerIterator.Create("Actor");
+			Actor a;
+			bool hasnazis = false;
+			bool livenazis = false;
+			while ( a = Actor(ti.Next()) )
+			{
+				// yes, the dogs don't count (they're just dogs)
+				if ( !(a is 'SWWMGuard') && !(a is 'SWWMSS') && !(a is 'SWWMHans') )
+					continue;
+				hasnazis = true;
+				if ( a.Health > 0 ) livenazis = true;
+			}
+			if ( hasnazis && !livenazis )
+			{
+				if ( level.levelnum == 31 ) s.nazicleanup |= 1;
+				else if ( level.levelnum == 32 ) s.nazicleanup |= 2;
+			}
+			if ( s.nazicleanup == 3 )
+				SWWMUtility.MarkAchievement('swwm_achievement_trash',s.myplayer);
 		}
 		// reset score on dead players (death exit™)
 		for ( int i=0; i<MAXPLAYERS; i++ )
@@ -91,15 +128,29 @@ extend Class SWWMHandler
 			}
 			if ( !collected ) SWWMUtility.MarkAchievement('swwm_achievement_cliffyb',players[consoleplayer]);
 		}
+		// these can't be done on hexen
+		if ( gameinfo.GameType&GAME_Hexen ) return;
 		// beat the par time?
 		if ( level.partime && (Thinker.Tics2Seconds(level.maptime) <= level.partime) )
 			SWWMUtility.AchievementProgressInc('swwm_progress_par',1,players[consoleplayer]);
+		// blaze it?
+		if ( Thinker.Tics2Seconds(level.maptime) == 260 )
+			SWWMUtility.MarkAchievement('swwm_achievement_blaze',players[consoleplayer]);
 		// one standing?
 		if ( (level.total_monsters-level.killed_monsters) == 1 )
 			SWWMUtility.MarkAchievement('swwm_achievement_onestanding',players[consoleplayer]);
 		// nice?
 		if ( players[consoleplayer].Health == 69 )
 			SWWMUtility.MarkAchievement('swwm_achievement_nice',players[consoleplayer]);
+		// peaceful/untouchable?
+		if ( !dealtdamage[consoleplayer] )
+			SWWMUtility.MarkAchievement('swwm_achievement_peace',players[consoleplayer]);
+		if ( !reallytookdamage[consoleplayer] )
+			SWWMUtility.MarkAchievement('swwm_achievement_untouchable',players[consoleplayer]);
+		// in a hurry?
+		if ( ((level.total_monsters > 0) || (level.total_items > 0) || (level.total_secrets > 0))
+			&& (level.killed_monsters == 0) && (level.found_items == 0) && (level.found_secrets == 0) )
+			SWWMUtility.MarkAchievement('swwm_achievement_hurry',players[consoleplayer]);
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )
@@ -181,6 +232,24 @@ extend Class SWWMHandler
 		if ( (level.GetChecksum() ~== "F286BABF0D152259CD6B996E8920CA70")
 			 || (level.GetChecksum() ~== "A52BD2038CF814101AAB7D9C78F9ACE2") )
 			level.ExecuteSpecial(ACS_Execute,null,null,false,-Int('DVACATION_UNFUCK'));
+		// rampancy boss brain fix (repeatedly triggering "map clear")
+		let ti = ThinkerIterator.Create("Actor");
+		Actor a, brain;
+		bool haseye = false;
+		while ( a = Actor(ti.Next()) )
+		{
+			if ( a.GetClassName() == "Robot_BossEye" )
+				haseye = true;
+			if ( a.GetClassName() == "Robot_BossBrain" )
+				brain = a;
+		}
+		if ( haseye && brain )
+		{
+			brain.bCOUNTKILL = true;
+			level.total_monsters++;
+			// while we're at it
+			Actor.Spawn("RampancyLogonDummy");
+		}
 		// setup cached lockdefs data
 		let cli = SWWMCachedLockInfo.GetInstance();
 		if ( cli.ent.Size() == 0 ) SetupLockdefsCache(cli);
@@ -226,42 +295,48 @@ extend Class SWWMHandler
 			if ( !SWWMUtility.IsExitLine(l) )
 				continue;
 			if ( skipme.Find(l) < skipme.Size() ) continue;
-			Vector3 lpos = SWWMUtility.UseLinePos(l);
+			skipme.Push(l);
 			// look for connected lines
-			int xcnt = 1;
+			Array<Line> con;
+			con.Clear();
+			con.Push(l);
+			int found;
 			if ( l.frontsector )
 			{
-				for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
+				do
 				{
-					let l2 = l.frontsector.Lines[j];
-					if ( (l2 == l) || (l2.special != l.special) ) continue;
-					// needs to have a point in common with this one or any of the added lines
-					if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+					found = 0;
+					for ( int j=0; j<l.frontsector.Lines.Size(); j++ )
 					{
+						let l2 = l.frontsector.Lines[j];
+						if ( (l2.special != l.special) || (con.Find(l2) < con.Size()) ) continue;
+						// needs to have a point in common with this one or any of the added lines
 						bool nomatches = true;
-						for ( int k=0; k<skipme.Size(); k++ )
+						for ( int k=0; k<con.Size(); k++ )
 						{
-							if ( (l2.v1 != skipme[k].v1) && (l2.v2 != skipme[k].v2) && (l2.v1 != skipme[k].v2) && (l2.v2 != skipme[k].v1) )
+							if ( (l2.v1 != con[k].v1) && (l2.v2 != con[k].v2) && (l2.v1 != con[k].v2) && (l2.v2 != con[k].v1) )
 								continue;
 							nomatches = false;
 							break;
 						}
 						if ( nomatches ) continue;
+						skipme.Push(l2);
+						con.Push(l2);
+						found++;
 					}
-					skipme.Push(l2);
-					xcnt++;
-					lpos += SWWMUtility.UseLinePos(l2);
 				}
+				while ( found > 0 );
 			}
 			if ( l.backsector )
 			{
-				for ( int j=0; j<l.backsector.Lines.Size(); j++ )
+				do
 				{
-					let l2 = l.backsector.Lines[j];
-					if ( (l2 == l) || (l2.special != l.special) ) continue;
-					// needs to have a point in common with this one or any of the added lines
-					if ( (l2.v1 != l.v1) && (l2.v2 != l.v2) && (l2.v1 != l.v2) && (l2.v2 != l.v1) )
+					found = 0;
+					for ( int j=0; j<l.backsector.Lines.Size(); j++ )
 					{
+						let l2 = l.backsector.Lines[j];
+						if ( (l2.special != l.special) || (con.Find(l2) < con.Size()) ) continue;
+						// needs to have a point in common with this one or any of the added lines
 						bool nomatches = true;
 						for ( int k=0; k<skipme.Size(); k++ )
 						{
@@ -271,19 +346,23 @@ extend Class SWWMHandler
 							break;
 						}
 						if ( nomatches ) continue;
+						skipme.Push(l2);
+						con.Push(l2);
+						found++;
 					}
-					skipme.Push(l2);
-					xcnt++;
-					lpos += SWWMUtility.UseLinePos(l2);
 				}
+				while ( found > 0 );
 			}
-			lpos /= xcnt;
+			Vector3 lpos = (0,0,0);
+			for ( int i=0; i<con.Size(); i++ )
+				lpos += SWWMUtility.UseLinePos(con[i]);
+			lpos /= con.Size();
 			SWWMInterest.Spawn(lpos,theline:l);
 		}
 		// spawn loot
 		if ( !deathmatch ) Chancebox.SpawnChanceboxes();
 		// list map keys
-		let ti = ThinkerIterator.Create("Key");
+		ti = ThinkerIterator.Create("Key");
 		Key k;
 		while ( k = Key(ti.Next()) )
 		{

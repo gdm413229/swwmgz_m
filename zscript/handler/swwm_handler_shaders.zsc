@@ -13,6 +13,8 @@ extend Class SWWMHandler
 		Shader.SetEnabled(p,"GhostShader",false);
 		Shader.SetEnabled(p,"InvinciShader",false);
 		Shader.SetEnabled(p,"RagekitShader",false);
+		Shader.SetEnabled(p,"DevastationShader",false);
+		Shader.SetEnabled(p,"DivineShader",false);
 		Shader.SetEnabled(p,"Glitch",false);
 		Shader.SetEnabled(p,"Grain",false);
 	}
@@ -27,6 +29,24 @@ extend Class SWWMHandler
 			if ( !swwm_shaders ) ClearAllShaders(p,true);
 			return;
 		}
+		let divi = DivineSpriteEffect(mo.FindInventory("DivineSpriteEffect"));
+		if ( divi )
+		{
+			Shader.SetEnabled(p,"DivineShader",true);
+			Shader.SetUniform1f(p,"DivineShader","timer",(gametic+e.FracTic)/GameTicRate);
+			double str = clamp((divi.AlphInter.GetValue()-1000.)/6000.,0.,1.)**2.;
+			Shader.SetUniform1f(p,"DivineShader","str",str);
+		}
+		else Shader.SetEnabled(p,"DevastationShader",false);
+		let deva = AngeryPower(mo.FindInventory("AngeryPower"));
+		if ( deva )
+		{
+			Shader.SetEnabled(p,"DevastationShader",true);
+			Shader.SetUniform1f(p,"DevastationShader","timer",(gametic+e.FracTic)/GameTicRate);
+			double xstrastr = 1.+max(0,deva.lastpulse-(gametic+e.Fractic))/35.;
+			Shader.SetUniform1f(p,"DevastationShader","xtrastr",xstrastr**2.);
+		}
+		else Shader.SetEnabled(p,"DevastationShader",false);
 		let rage = RagekitPower(mo.FindInventory("RagekitPower"));
 		if ( rage )
 		{

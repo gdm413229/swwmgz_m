@@ -1,6 +1,5 @@
 // main mod cvars
 user string swwm_voicetype = "default";		// voice for your demolitionist
-//user color swwm_tagcolor = "40 FF 00";	// color of your model tags, not available due to engine dickery
 nosave float swwm_flashstrength = 1.0;		// strength of screen flashes
 nosave int swwm_hudmargin = 10;			// margin around fullscreen hud elements
 nosave int swwm_maxshown = 4;			// max messages to show normally
@@ -53,7 +52,7 @@ nosave int swwm_scrscale = 2;			// score scaling (0 = use GZDoom scaling)
 nosave int swwm_numscale = 3;			// damnum scaling (0 = use GZDoom scaling)
 nosave int swwm_poiscale = 1;			// point of interest scaling (0 = use GZDoom scaling)
 nosave int swwm_detscale = 2;			// item sense scaling (0 = use GZDoom scaling)
-server bool swwm_blood = false;			// custom blood/gibbing
+server bool swwm_blood = true;			// custom blood/gibbing
 server int swwm_maxblood = 400;			// max blood effects at any time
 server int swwm_maxgibs = 100;			// max gibs at any time
 server int swwm_maxcasings = 200;		// max casings and spent mags at any time
@@ -69,7 +68,7 @@ server bool swwm_notrack = false;		// disables all combat tracking (useful to sp
 server bool swwm_ynykronalert = false;		// caps ynykron alert (so it doesn't wake everyone up)
 nosave bool swwm_menupause = true;		// pause the game when demolitionist menu is open
 nosave noarchive bool swwm_debugblast = false;	// debug visual aid for DoExplosion
-nosave bool swwm_funtags = false;		// replace vanilla monster names with silly ones
+nosave bool swwm_funtags = true;		// replace vanilla monster names with silly ones
 server bool swwm_omnibust = false;		// add wallbusting effect to all weapons
 server bool swwm_superfuel = false;		// enable unlimited fuel
 server bool swwm_partytime = false;		// killed enemies burst into confetti
@@ -87,10 +86,10 @@ nosave bool swwm_camhud = false;		// keep full hud visible when operating camera
 server bool swwm_uncapalert = false;		// all noise alerts have infinite range
 nosave int swwm_damagetarget = 1;		// conditional healthbar hiding (1 - hide until damage is first taken, 2 - hide if at full health)
 server int swwm_strictuntouchable = 0;		// untouchable bonus ends... (1 - even if your armor absorbed all the damage, 2 - if you get hit by anything PERIOD)
-server bool swwm_silencemap = false;		// silences the map when all kills/items/secrets are achieved
+server bool swwm_silencemap = true;		// silences the map when all kills/items/secrets are achieved
 nosave int swwm_shadowdist = 2000;		// max distance beyond which blob shadows are no longer rendered, helps performance
 server bool swwm_swapweapons = true;		// [DLC1] allows carrying only one weapon in each slot (excluding starter melee)
-nosave int swwm_forcestats = 0;			// always shows level stats on the HUD, not just when the automap is open (2 - also show map name, otherwise only stats)
+nosave int swwm_forcestats = 1;			// always shows level stats on the HUD, not just when the automap is open (2 - also show map name, otherwise only stats)
 user int swwm_funtrails = 0;			// recolors trails of eviscerator chunks and sheen bullets
 server int swwm_pistolstart = 0;		// enforces pistol start for all maps (excluding hubs) [2 - only between clusters]
 nosave int swwm_numcolor_scr = 5;		// font color for score numbers (default: gold)
@@ -99,8 +98,8 @@ nosave int swwm_numcolor_dmg = 6;		// font color for damage numbers (default: re
 nosave int swwm_numcolor_hp = 7;		// font color for health numbers (default: blue)
 nosave int swwm_numcolor_ap = 3;		// font color for armor numbers (default: green)
 server int swwm_drlaskill = 3;			// [DRLA Monsters] skill setting for monster spawns
-nosave bool swwm_itemsparkles = false;		// visual aid for low visibility items
-nosave bool swwm_itemglows = false;		// distant items glow
+nosave bool swwm_itemsparkles = true;		// visual aid for low visibility items
+nosave bool swwm_itemglows = true;		// distant items glow
 server bool swwm_singlefirst = false;		// single weapons are selected before dual ones, has to be a server cvar due to limitations
 nosave bool swwm_uniqstats = false;		// only list stats from the same map once, rather than for each single visit
 nosave int swwm_filterachievements = 1;		// filter for achievements at 0%: 0 - no filter, 1 - obscure text, 2 - don't show
@@ -108,14 +107,18 @@ nosave noarchive bool swwm_debugview = false;	// debug visual aid for various th
 nosave noarchive bool swwm_oldcheat = false;	// set to true if you used a SWWM Platinum cheat, so the easter egg only appears once per session
 server bool swwm_selflight = true;		// player emits light
 server bool swwm_usetopickup = false;		// allow item pickup only by pressing use
-server bool swwm_meleepickup = false;		// allow picking up items through melee
+server bool swwm_meleepickup = true;		// allow picking up items through melee
 nosave bool swwm_buttsfx = true;		// buttslam homerun SFX
 nosave int swwm_sewercount = 0;			// I'm sorry Civvie
-server bool swwm_ondemandammo = false;		// don't spawn ammo for unavailable weapons
+server bool swwm_ondemandammo = true;		// don't spawn ammo for unavailable weapons
 user float swwm_bumpstrength = 1.0;		// intensity of fov bumping
 server bool swwm_nomagdrop = true;		// does not drop spent magazines (the "environmentally conscious" option)
 user bool swwm_autousebarrier = true;		// auto-use elemental coating when standing on damaging floors
 server int swwm_enforceautousebarrier = 0;	// enforced auto-use for coating
+nosave bool swwm_nomapmsg = false;		// disables special map dialogue messages
+nosave bool swwm_weapontooltips = true;		// shows a tooltip on weapon operation when first selected
+nosave string swwm_tooltipshown = "";		// which weapons have already had their tooltips displayed
+nosave noarchive bool swwm_tooltipnote = false;	// set if the note on how to disable tooltips was already displayed
 
 // minimap settings
 nosave bool swwm_mm_enable = true;		// show a minimap below the score counter

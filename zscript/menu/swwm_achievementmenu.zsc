@@ -11,17 +11,32 @@ Class SWWMAchievementMenu : GenericMenu
 	int mSelected;
 	int mBaseY;	// Y position achievement boxes are being drawn at
 			// needed to tune mouse selection
+	int completed, incomplete, total;
 
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
 		mTitle = StringTable.Localize("$SWWM_ATITLE");
 		mSelected = 0;
+		SWWMUtility.LoadAchievements(mItems,false);	// gotta load it unfiltered first
+		total = mItems.Size();
 		SWWMUtility.LoadAchievements(mItems,true);
 		ShouldObscure = (swwm_filterachievements==1);
 		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/HiddenAchievement.png",TexMan.Type_Any);
 		SelectBox = TexMan.CheckForTexture("graphics/Achievements/SelectAchievement.png",TexMan.Type_Any);
 		BaseBox = TexMan.CheckForTexture("graphics/Achievements/NoAchievement.png",TexMan.Type_Any);
+	}
+
+	override void Ticker()
+	{
+		// recalculate counters
+		completed = 0;
+		incomplete = 0;
+		for ( int i=0; i<mItems.Size(); i++ )
+		{
+			if ( !!mItems[i].state.GetInt() ) completed++;
+			else if ( mItems[i].progress && mItems[i].progress.GetInt() ) incomplete++;
+		}
 	}
 
 	int DrawCaption()
@@ -60,6 +75,48 @@ Class SWWMAchievementMenu : GenericMenu
 			xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
 			Screen.DrawText(newsmallfont,completed?Font.CR_GREEN:Font.CR_DARKGRAY,xx,yy,str,DTA_CleanNoMove_1,true);
 		}
+	}
+
+	void DrawFooter( int y )
+	{
+		int xx;
+		int yy = y;
+		String str;
+		if ( completed == total )
+		{
+			str = StringTable.Localize("$SWWM_AC_COMPLETE1");
+			xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
+			Screen.DrawText(newsmallfont,Font.CR_FIRE,xx,yy,str,DTA_CleanNoMove_1,true,DTA_ColorOverlay,Color(int(64+64*sin(MSTime()/3.6)),255,255,255));
+			yy += newsmallfont.GetHeight()*CleanYFac_1;
+			// spanish hotfix needed
+			int gnd = players[consoleplayer].GetGender();
+			str = String.Format(StringTable.Localize("$SWWM_AC_COMPLETE2"),(gnd==1)?"a":"");
+			xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
+			Screen.DrawText(newsmallfont,Font.CR_FIRE,xx,yy,str,DTA_CleanNoMove_1,true,DTA_ColorOverlay,Color(int(64+64*sin(MSTime()/3.6)),255,255,255));
+			return;
+		}
+		String str1 = StringTable.Localize("$SWWM_AC_UNLOCKED");
+		String str2 = StringTable.Localize("$SWWM_AC_INCOMPLETE");
+		String str3 = StringTable.Localize("$SWWM_AC_UNDISCOVERED");
+		int maxw = max(newsmallfont.StringWidth(str1),max(newsmallfont.StringWidth(str2),newsmallfont.StringWidth(str3)))+newsmallfont.StringWidth("000");
+		xx = (Screen.GetWidth()-maxw*CleanXFac_1)/2;
+		Screen.DrawText(newsmallfont,Font.CR_GREEN,xx,yy,str1,DTA_CleanNoMove_1,true);
+		yy += newsmallfont.GetHeight()*CleanYFac_1;
+		Screen.DrawText(newsmallfont,Font.CR_DARKGRAY,xx,yy,str2,DTA_CleanNoMove_1,true);
+		yy += newsmallfont.GetHeight()*CleanYFac_1;
+		Screen.DrawText(newsmallfont,Font.CR_DARKGRAY,xx,yy,str3,DTA_CleanNoMove_1,true);
+		yy = y;
+		str = String.Format("%d",completed);
+		xx = (Screen.GetWidth()+maxw*CleanXFac_1)/2-newsmallfont.StringWidth(str)*CleanXFac_1;
+		Screen.DrawText(newsmallfont,Font.CR_WHITE,xx,yy,str,DTA_CleanNoMove_1,true);
+		yy += newsmallfont.GetHeight()*CleanYFac_1;
+		str = String.Format("%d",incomplete);
+		xx = (Screen.GetWidth()+maxw*CleanXFac_1)/2-newsmallfont.StringWidth(str)*CleanXFac_1;
+		Screen.DrawText(newsmallfont,Font.CR_BLACK,xx,yy,str,DTA_CleanNoMove_1,true);
+		yy += newsmallfont.GetHeight()*CleanYFac_1;
+		str = String.Format("%d",total-(completed+incomplete));
+		xx = (Screen.GetWidth()+maxw*CleanXFac_1)/2-newsmallfont.StringWidth(str)*CleanXFac_1;
+		Screen.DrawText(newsmallfont,Font.CR_BLACK,xx,yy,str,DTA_CleanNoMove_1,true);
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
@@ -148,5 +205,7 @@ Class SWWMAchievementMenu : GenericMenu
 			xx += 40*CleanXFac_1;
 			i++;
 		}
+		yy += 48*CleanYFac_1;
+		DrawFooter(yy);
 	}
 }

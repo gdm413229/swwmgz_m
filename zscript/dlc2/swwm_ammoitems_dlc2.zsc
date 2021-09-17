@@ -1,35 +1,25 @@
 // All DLC weapon ammo pickups
 
-Class SparksterBAmmo : Ammo
+Class SparksterBAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Sparkster Blue Ammo
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SparkBAmmo.png
 		//$Icon ammo
-		Tag "$T_SPARKBAMMO";
-		Inventory.PickupMessage "$T_SPARKBAMMO";
+		Tag "$T_SPARKBCELL";
+		SWWMAmmo.PickupTag "SPARKBCELL";
 		Stamina 16000;
 		Inventory.Icon "graphics/HUD/Icons/A_SparkBAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
-		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 24;
+		Inventory.MaxAmount 6;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 16;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 70;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -38,37 +28,49 @@ Class SparksterBAmmo : Ammo
 		Stop;
 	}
 }
-
-Class SparksterRAmmo : Ammo
+Class SparksterBAmmo2 : SparksterBAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
+	Default
+	{
+		//$Title 2x Sparkster Blue Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkBAmmo.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class SparksterBAmmo3 : SparksterBAmmo
+{
+	Default
+	{
+		//$Title 3x Sparkster Blue Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkBAmmo.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
 
+Class SparksterRAmmo : SWWMAmmo
+{
 	Default
 	{
 		//$Title Sparkster Red Ammo
 		//$Group Ammo
 		//$Sprite graphics/HUD/Icons/A_SparkRAmmo.png
 		//$Icon ammo
-		Tag "$T_SPARKRAMMO";
-		Inventory.PickupMessage "$T_SPARKRAMMO";
+		Tag "$T_SPARKRCELL";
+		SWWMAmmo.PickupTag "SPARKRCELL";
 		Stamina 18000;
 		Inventory.Icon "graphics/HUD/Icons/A_SparkRAmmo.png";
 		Inventory.Amount 1;
-		Inventory.MaxAmount 8;
-		Ammo.BackpackAmount 1;
-		Ammo.BackpackMaxAmount 24;
+		Inventory.MaxAmount 6;
+		Ammo.BackpackAmount 2;
+		Ammo.BackpackMaxAmount 16;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 75;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -77,34 +79,26 @@ Class SparksterRAmmo : Ammo
 		Stop;
 	}
 }
-
-Class SparksterAmmoBundleSpawn : SWWMAmmoSpawner
+Class SparksterRAmmo2 : SparksterRAmmo
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](2,3);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Sparkster Red Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkRAmmo.png
+		//$Icon ammo
+		Inventory.Amount 2;
 	}
 }
-Class SparksterBigAmmoBundleSpawn : SWWMAmmoSpawner
+Class SparksterRAmmo3 : SparksterRAmmo
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](3,6);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",Vec3Angle(8,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
-		let a = Spawn(Random[Bundle](0,2)?"SparksterBAmmo":"SparksterRAmmo",pos);
-		a.angle = angle;
-		SWWMUtility.TransferItemProp(self,a,true);
+		//$Title 3x Sparkster Red Ammo
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_SparkRAmmo.png
+		//$Icon ammo
+		Inventory.Amount 3;
 	}
 }
 
@@ -117,7 +111,7 @@ Class MisterRound : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_MRRound.png
 		//$Icon ammo
 		Tag "$T_MRROUND";
-		Inventory.PickupMessage "$T_MRROUND";
+		MagAmmo.PickupTag "MRROUND";
 		Inventory.Icon "graphics/HUD/Icons/A_MRRound.png";
 		MagAmmo.ParentAmmo "MisterAmmo";
 		MagAmmo.ClipSize 30;
@@ -132,28 +126,53 @@ Class MisterRound : MagAmmo
 		Stop;
 	}
 }
-
-Class MisterRoundBundleSpawn : SWWMAmmoSpawner
+Class MisterRound2 : MisterRound
 {
-	override void SpawnAmmo()
+	Default
 	{
-		int bnd = Random[Bundle](5,10);
-		for ( int i=0; i<bnd; i++ )
-		{
-			let a = Spawn("MisterRound",Vec3Angle(6,i*(360/bnd)));
-			a.angle = i*(360/bnd);
-			SWWMUtility.TransferItemProp(self,a,true);
-		}
+		//$Title 2x Mortal Rifle Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRRound.png
+		//$Icon ammo
+		Inventory.Amount 2;
+	}
+}
+Class MisterRound3 : MisterRound
+{
+	Default
+	{
+		//$Title 3x Mortal Rifle Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRRound.png
+		//$Icon ammo
+		Inventory.Amount 3;
+	}
+}
+Class MisterRound5 : MisterRound
+{
+	Default
+	{
+		//$Title 5x Mortal Rifle Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRRound.png
+		//$Icon ammo
+		Inventory.Amount 5;
+	}
+}
+Class MisterRound10 : MisterRound
+{
+	Default
+	{
+		//$Title 10x Mortal Rifle Round
+		//$Group Ammo
+		//$Sprite graphics/HUD/Icons/A_MRRound.png
+		//$Icon ammo
+		Inventory.Amount 10;
 	}
 }
 
-Class MisterAmmo : Ammo
+Class MisterAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Mortal Rifle Mag
@@ -161,7 +180,7 @@ Class MisterAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_MRAmmo.png
 		//$Icon ammo
 		Tag "$T_MRAMMO";
-		Inventory.PickupMessage "$T_MRAMMO";
+		SWWMAmmo.PickupTag "MRAMMO";
 		Stamina 120000;
 		Inventory.Icon "graphics/HUD/Icons/A_MRAmmo.png";
 		Inventory.Amount 1;
@@ -169,14 +188,10 @@ Class MisterAmmo : Ammo
 		Ammo.BackpackAmount 0;
 		Ammo.BackpackMaxAmount 6;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "MisterRound";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
 		Accuracy 90;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{
@@ -186,14 +201,8 @@ Class MisterAmmo : Ammo
 	}
 }
 
-Class MisterGAmmo : Ammo
+Class MisterGAmmo : SWWMAmmo
 {
-	Mixin SWWMShellAmmo;
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Mortal Rifle Grenade
@@ -201,12 +210,13 @@ Class MisterGAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_MRGrenade.png
 		//$Icon ammo
 		Tag "$T_MRGRENADE";
+		SWWMAmmo.PickupTag "MRGRENADE";
 		Stamina 90000;
 		Inventory.Icon "graphics/HUD/Icons/A_MRGrenade.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 3;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 9;
+		Ammo.BackpackMaxAmount 6;
 		Ammo.DropAmount 1;
 		+FLOATBOB;
 		FloatBobStrength 0.25;
@@ -251,7 +261,7 @@ Class UltimatePod : MagAmmo
 		//$Sprite graphics/HUD/Icons/A_UltimatePod.png
 		//$Icon ammo
 		Tag "$T_ULTIMATEPOD";
-		Inventory.PickupMessage "$T_ULTIMATEPOD";
+		MagAmmo.PickupTag "ULTIMATEPOD";
 		Inventory.Icon "graphics/HUD/Icons/A_UltimatePod.png";
 		MagAmmo.ParentAmmo "UltimateAmmo";
 		MagAmmo.ClipSize 4;
@@ -267,13 +277,8 @@ Class UltimatePod : MagAmmo
 	}
 }
 
-Class UltimateAmmo : Ammo
+Class UltimateAmmo : SWWMAmmo
 {
-	Mixin SWWMAmmo;
-	Mixin SWWMOverlapPickupSound;
-	Mixin SWWMUseToPickup;
-	Mixin SWWMRespawn;
-
 	Default
 	{
 		//$Title Ultimate Mag
@@ -281,21 +286,17 @@ Class UltimateAmmo : Ammo
 		//$Sprite graphics/HUD/Icons/A_UltimateAmmo.png
 		//$Icon ammo
 		Tag "$T_ULTIMATEAMMO";
-		Inventory.PickupMessage "$T_ULTIMATEAMMO";
+		SWWMAmmo.PickupTag "ULTIMATEAMMO";
 		Stamina -2000000;
 		Inventory.Icon "graphics/HUD/Icons/A_UltimateAmmo.png";
 		Inventory.Amount 1;
 		Inventory.MaxAmount 1;
 		Ammo.BackpackAmount 0;
-		Ammo.BackpackMaxAmount 5;
+		Ammo.BackpackMaxAmount 3;
 		Ammo.DropAmount 1;
+		SWWMAmmo.MagAmmoType "UltimatePod";
 		+FLOATBOB;
 		FloatBobStrength 0.25;
-	}
-	override void ModifyDropAmount( int dropamount )
-	{
-		Super.ModifyDropAmount(dropamount);
-		Amount = min(Amount,1);
 	}
 	States
 	{

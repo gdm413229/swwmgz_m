@@ -35,6 +35,9 @@ Index of contents:
     2.2.9. Lämp
     2.2.A. Omnisight
     2.2.B. Mykradvo Artifact
+    2.2.C. Devastation Sigil
+    2.2.D. Divine Sprite
+    2.2.E. Safety Tether
   2.3. Armors
   2.4. Health
   2.5. Others
@@ -271,6 +274,20 @@ in the minimap, and even highlights where keys and exits are. Quite handy.
 2.2.B. Mykradvo Artifact
 
 The Great Anomaly makes a return. Smite all those who dare try to attack you!
+
+2.2.C. Devastation Sigil
+
+A return of the olden "Complete Devastation" powerup of the early versions,
+with a shiny new look, and some real attitude.
+
+2.2.D. Divine Sprite
+
+The Soul Spark from Platinum also makes a return, now with far more power.
+
+2.2.E. Safety Tether
+
+Sometimes you really just need to warp away from some nasty spot. This exists
+for that very reason.
 
 2.3. Armors
 - - - - - -

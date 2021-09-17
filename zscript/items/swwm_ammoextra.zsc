@@ -85,8 +85,8 @@ Class AmmoFabricator : Inventory abstract
 			let a = (Class<Ammo>)(AllActorClasses[i]);
 			// skip over candy gun spares, they're "special ammo"
 			if ( a == 'CandyGunSpares' ) continue;
-			// only direct descendants of ammo with a set price below our max unit price
-			if ( !a || (a.GetParentClass() != 'Ammo') ) continue;
+			// only direct descendants of swwmammo with a set price below our max unit price
+			if ( !a || (a.GetParentClass() != 'SWWMAmmo') ) continue;
 			let def = GetDefaultByType(a);
 			if ( (def.Stamina <= 0) || (def.Stamina > maxunitprice) ) continue;
 			// only ammo for weapons that are valid (can be used)
@@ -350,7 +350,7 @@ Class HammerspaceEmbiggener : Inventory
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
 			let type = (class<Ammo>)(AllActorClasses[i]);
-			if ( !type || (type.GetParentClass() != 'Ammo') ) continue;
+			if ( !type || (type.GetParentClass() != 'SWWMAmmo') ) continue;
 			// check that it's for a valid weapon
 			bool isvalid = false;
 			for ( int j=0; j<validweapons.Size(); j++ )

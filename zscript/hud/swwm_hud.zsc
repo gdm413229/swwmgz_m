@@ -9,7 +9,7 @@ Class MsgLine
 Class SWWMStatusBar : BaseStatusBar
 {
 	TextureID StatusTex, WeaponTex, ScoreTex[3], InventoryTex, ChatTex[6],
-		HealthTex[5], FuelTex[2], DashTex, EnemyBTex, EnemyHTex[5],
+		HealthTex[6], FuelTex[2], DashTex, EnemyBTex, EnemyHTex[6],
 		GenericAmmoTex[3], MiniBox, AutoPage;
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
@@ -56,7 +56,10 @@ Class SWWMStatusBar : BaseStatusBar
 	String midstr;
 	int midtic, midtype;
 
-	bool koraxhack;
+	bool koraxhack, mainframehack;
+	int puzzlecnt, realpuzzlecnt;
+
+	SWWMWeaponTooltip ctip;
 
 	double minimapzoom, oldminimapzoom;
 	// minimap constants
@@ -118,6 +121,31 @@ Class SWWMStatusBar : BaseStatusBar
 
 	override bool ProcessMidPrint( Font fnt, String msg, bool bold )
 	{
+		// hack lol
+		if ( msg.Left(15) ~== "swwmwpntooltip." )
+		{
+			String wname = msg.Mid(15);
+			Class<SWWMWeapon> w = wname;
+			if ( w )
+			{
+				let tt = new("SWWMWeaponTooltip").Init(w);
+				bool appended = false;
+				for ( SWWMWeaponTooltip t=ctip; t; t=t.next )
+				{
+					if ( t.next ) continue;
+					appended = true;
+					t.next = tt;
+					break;
+				}
+				if ( !appended )
+				{
+					ctip = tt;
+					AttachMessage(tt,-2910);
+				}
+			}
+			return true;
+		}
+		SWWMDirectMessage m, m2;
 		// check for Korax lines, add them to chat (and reply to some of them)
 		bool koraxline = false;
 		if ( msg == StringTable.Localize("$TXT_ACS_MAP02_9_GREET") )
@@ -126,11 +154,75 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",0,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAGREETA";
+			m.seqcnt = 3;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGREETC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETD";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGREETE";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAGREETF";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP13_11_MYSER") )
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",1,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYABLOODA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYABLOODB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYABLOODC";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYABLOODD";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP22_27_YOUHA") )
 			koraxline = true;
@@ -138,6 +230,24 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",2,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAGAMEA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAGAMEB";
+			m2.seqcnt = 1;
+			m2.delay = 30;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAGAMEC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP27_8_WORSH") )
 			koraxline = true;
@@ -145,6 +255,33 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",3,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m.seqname = "KIRINWORSHIPA";
+			m.seqcnt = 1;
+			m.delay = 120;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "KIRINWORSHIPB";
+			m2.seqcnt = 1;
+			m2.delay = 40;
+			m2.enddelay = 10;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "KIRINWORSHIPC";
+			m2.seqcnt = 1;
+			m2.delay = 10;
+			m2.enddelay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "KIRINWORSHIPD";
+			m2.seqcnt = 2;
+			m2.delay = 10;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		else if ( msg == StringTable.Localize("$TXT_ACS_MAP35_12_AREYO") )
 			koraxline = true;
@@ -152,12 +289,293 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmkoraxline",4,consoleplayer);
 			koraxline = true;
+			m = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m.seqname = "SAYAMASTERSA";
+			m.seqcnt = 2;
+			m.delay = 120;
+			m.enddelay = 60;
+			AttachMessage(m,-1232);
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAMASTERSB";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAMASTERSC";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			m2.seqname = "SAYAMASTERSD";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			m2.seqname = "SAYAMASTERSE";
+			m2.seqcnt = 1;
+			m2.delay = 40;
+			m.nextmsg = m2;
+			m.nextdirect = true;
+			m = m2;
+			m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			m2.seqname = "SAYAMASTERSF";
+			m2.seqcnt = 1;
+			m2.delay = 20;
+			m.nextmsg = m2;
+			m.nextdirect = true;
 		}
 		if ( koraxline )
 		{
 			koraxhack = true;
 			Console.Printf(msg);
 			koraxhack = false;
+			return true;
+		}
+		bool ispuzzle = false;
+		let s = SWWMStats.Find(players[consoleplayer]);
+		if ( s )
+		{
+			puzzlecnt = s.puzzlecnt;
+			realpuzzlecnt = s.realpuzzlecnt;
+		}
+		// check for puzzle solving lines (oh god why), and increment the achievement
+		if ( ((level.mapname ~== "MAP04") || (level.mapname ~== "MAP05"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP04_9_ONEHA"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP04_11_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP05_6_ONETH"))) )
+		{
+			if ( puzzlecnt >= 4 ) puzzlecnt = 0;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( ((level.mapname ~== "MAP08") || (level.mapname ~== "MAP09") || (level.mapname ~== "MAP10"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP08_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP09_6_ONESI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP10_6_ONESI"))) )
+		{
+			if ( (puzzlecnt < 4) || (puzzlecnt >= 10) ) puzzlecnt = 4;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( ((level.mapname ~== "MAP28") || (level.mapname ~== "MAP30") || (level.mapname ~== "MAP34"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP28_6_ONENI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP30_6_ONENI"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP34_1_ONENI"))) )
+		{
+			if ( (puzzlecnt < 10) || (puzzlecnt >= 19) ) puzzlecnt = 10;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		// deathkings
+		else if ( ((level.mapname ~== "MAP44") || (level.mapname ~== "MAP46"))
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP44_1_THREE"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_2_TWOMO"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_3_ONEMO"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_4_THEPU"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_10_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP44_11_TWOTH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP46_8_ONEFO"))) )
+		{
+			if ( (puzzlecnt < 19) || (puzzlecnt >= 30) ) puzzlecnt = 19;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		else if ( (level.mapname ~== "MAP51")
+			&& ((msg == StringTable.Localize("$TXT_ACS_MAP51_8_ONETH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_9_TWOTH"))
+			|| (msg == StringTable.Localize("$TXT_ACS_MAP51_10_THECR"))) )
+		{
+			if ( (puzzlecnt < 30) || (puzzlecnt >= 34) ) puzzlecnt = 30;
+			puzzlecnt++;
+			realpuzzlecnt++;
+			ispuzzle = true;
+		}
+		if ( ispuzzle )
+		{
+			EventHandler.SendNetworkEvent("swwmstorepuzzlecnt",consoleplayer,puzzlecnt,realpuzzlecnt);
+			int tpuz = SWWMUtility.IsDeathkings()?15:19;
+			if ( realpuzzlecnt >= tpuz ) SWWMUtility.MarkAchievement('swwm_achievement_puzzle',players[consoleplayer]);
+			if ( !swwm_nomapmsg )
+			{
+				switch ( puzzlecnt )
+				{
+				case 1:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEA";
+					m.seqcnt = 2;
+					m.delay = 90;
+					AttachMessage(m,-1232);
+					break;
+				case 2:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEB";
+					m.seqcnt = 1;
+					m.delay = 80;
+					AttachMessage(m,-1232);
+					break;
+				case 3:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEC";
+					m.seqcnt = 2;
+					m.delay = 70;
+					AttachMessage(m,-1232);
+					break;
+				case 5:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLED";
+					m.seqcnt = 2;
+					m.delay = 70;
+					AttachMessage(m,-1232);
+					break;
+				case 8:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEE";
+					m.seqcnt = 2;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					break;
+				case 11:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEF";
+					m.seqcnt = 3;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEG";
+					m2.seqcnt = 1;
+					m.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLEH";
+					m2.seqcnt = 1;
+					m.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEI";
+					m2.seqcnt = 2;
+					m.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				case 20:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEJ";
+					m.seqcnt = 2;
+					m.delay = 80;
+					AttachMessage(m,-1232);
+					break;
+				case 30:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLEK";
+					m.seqcnt = 1;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEL";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLEM";
+					m2.seqcnt = 1;
+					m2.delay = 10;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEN";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEO";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEP";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+					m2.seqname = "KIRINPUZZLEQ";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				case 31:
+					m = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m.seqname = "KIRINPUZZLER";
+					m.seqcnt = 3;
+					m.delay = 60;
+					AttachMessage(m,-1232);
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLES";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+					m2.seqname = "KIRINPUZZLET";
+					m2.seqcnt = 1;
+					m2.delay = 30;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					m = m2;
+					m2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+					m2.seqname = "KIRINPUZZLEU";
+					m2.seqcnt = 1;
+					m2.delay = 20;
+					m.nextmsg = m2;
+					m.nextdirect = true;
+					break;
+				}
+			}
+		}
+		// rampancy fun stuff
+		bool mainframeline = false;
+		if ( (msg == StringTable.Localize("$AISPAWN_TEXT1"))
+			|| (msg == StringTable.Localize("$AISPAWN_TEXT2"))
+			|| (msg == StringTable.Localize("$AISEE_TEXT"))
+			|| (msg == StringTable.Localize("$AIACTIVE_TEXT1"))
+			|| (msg == StringTable.Localize("$AIACTIVE_TEXT2"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT1"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT2"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT3"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT4"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT5"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT6"))
+			|| (msg == StringTable.Localize("$AIPAIN_TEXT7")) )
+			mainframeline = true;
+		if ( mainframeline )
+		{
+			mainframehack = true;
+			Console.Printf(msg);
+			mainframehack = false;
 			return true;
 		}
 		if ( !fnt || (fnt == smallfont) )
@@ -189,6 +607,12 @@ Class SWWMStatusBar : BaseStatusBar
 			// treat as chat message
 			printlevel = PRINT_CHAT;
 			outline = "\cmKorax\c-: "..outline;
+		}
+		if ( mainframehack )
+		{
+			// same here, hi yholl
+			printlevel = PRINT_CHAT;
+			outline = "\cmAI Mainframe\c-: "..outline;
 		}
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline
@@ -686,6 +1110,7 @@ Class SWWMStatusBar : BaseStatusBar
 		HealthTex[2] = TexMan.CheckForTexture("graphics/HUD/HealthBar2.png",TexMan.Type_Any);
 		HealthTex[3] = TexMan.CheckForTexture("graphics/HUD/HealthBar3.png",TexMan.Type_Any);
 		HealthTex[4] = TexMan.CheckForTexture("graphics/HUD/HealthBarS.png",TexMan.Type_Any);
+		HealthTex[5] = TexMan.CheckForTexture("graphics/HUD/HealthBarD.png",TexMan.Type_Any);
 		ScoreTex[0] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxL.png",TexMan.Type_Any);
 		ScoreTex[1] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxM.png",TexMan.Type_Any);
 		ScoreTex[2] = TexMan.CheckForTexture("graphics/HUD/ScoreBoxR.png",TexMan.Type_Any);
@@ -703,6 +1128,7 @@ Class SWWMStatusBar : BaseStatusBar
 		EnemyHTex[2] = TexMan.CheckForTexture("graphics/HUD/EnemyBar2.png",TexMan.Type_Any);
 		EnemyHTex[3] = TexMan.CheckForTexture("graphics/HUD/EnemyBar3.png",TexMan.Type_Any);
 		EnemyHTex[4] = TexMan.CheckForTexture("graphics/HUD/EnemyBarS.png",TexMan.Type_Any);
+		EnemyHTex[5] = TexMan.CheckForTexture("graphics/HUD/EnemyBarD.png",TexMan.Type_Any);
 		GenericAmmoTex[0] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxL.png",TexMan.Type_Any);
 		GenericAmmoTex[1] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxM.png",TexMan.Type_Any);
 		GenericAmmoTex[2] = TexMan.CheckForTexture("graphics/HUD/GenericAmmoBoxR.png",TexMan.Type_Any);
@@ -852,28 +1278,35 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( swwm_targettags || targ.myplayer && (tag != "") )
 				Screen.DrawText(fnt,col,(barpos.x+barsiz.x/2.-(fnt.StringWidth(tag)*hsb.x)/2.)/hsb.x,(barpos.y-fnt.GetHeight()*hsb.y)/hsb.y,tag,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			Screen.DrawTexture(EnemyBTex,false,barpos.x/hsb.x,barpos.y/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
-			double ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*10);
+			double ht = clamp(targ.intp.GetValue(),0,targ.maxhealth*100);
 			double hw = (min(ht,targ.maxhealth)*50.)/targ.maxhealth;
 			if ( targ.mytarget && (targ.mytarget.bInvulnerable || (targ.myplayer && (targ.myplayer.cheats&(CF_GODMODE|CF_GODMODE2))) || targ.mytarget.FindInventory("InvinciballPower")) )
 			{
 				Screen.DrawTexture(EnemyHTex[4],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
-				continue;
 			}
-			Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
-			if ( ht > targ.maxhealth )
+			else
 			{
-				hw = (min(ht-targ.maxhealth,targ.maxhealth)*50.)/targ.maxhealth;
-				Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				Screen.DrawTexture(EnemyHTex[0],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				if ( ht > targ.maxhealth )
+				{
+					hw = (min(ht-targ.maxhealth,targ.maxhealth)*50.)/targ.maxhealth;
+					Screen.DrawTexture(EnemyHTex[1],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				}
+				if ( ht > targ.maxhealth*2 )
+				{
+					hw = (min(ht-targ.maxhealth*2,targ.maxhealth*3)*50.)/(targ.maxhealth*3);
+					Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				}
+				if ( ht > targ.maxhealth*5 )
+				{
+					hw = (min(ht-targ.maxhealth*5,targ.maxhealth*5)*50.)/(targ.maxhealth*5);
+					Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				}
 			}
-			if ( ht > targ.maxhealth*2 )
+			if ( targ.mytarget && targ.mytarget.FindInventory("DivineSpriteEffect") )
 			{
-				hw = (min(ht-targ.maxhealth*2,targ.maxhealth*3)*50.)/(targ.maxhealth*3);
-				Screen.DrawTexture(EnemyHTex[2],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
-			}
-			if ( ht > targ.maxhealth*5 )
-			{
-				hw = (min(ht-targ.maxhealth*5,targ.maxhealth*5)*50.)/(targ.maxhealth*5);
-				Screen.DrawTexture(EnemyHTex[3],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_WindowRightF,hw,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
+				double falph = clamp((ht-targ.maxhealth*10)/(targ.maxhealth*60.),0.,1.);
+				Screen.DrawTexture(EnemyHTex[5],false,(barpos.x+2*hsb.x)/hsb.x,(barpos.y+2*hsb.y)/hsb.y,DTA_VirtualWidthF,ssb.x,DTA_VirtualHeightF,ssb.y,DTA_KeepRatio,true,DTA_Alpha,alph*falph,DTA_LegacyRenderStyle,STYLE_Add,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
 			}
 		}
 		// floating kill scores and others
@@ -1655,7 +2088,8 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,((level.sucktime>0)&&(sec>=(level.sucktime*3600)))?Font.CR_RED:(sec<=level.partime)?Font.CR_GOLD:Font.CR_WHITE,xx-fnt.StringWidth(str),yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				yy += fnt.GetHeight();
 			}
-			if ( am_showtotaltime )
+			// don't show total time if it's equal to map time
+			if ( am_showtotaltime && (level.totaltime != level.maptime) )
 			{
 				sec = Thinker.Tics2Seconds(level.totaltime);
 				str = String.Format("\cxTT \c-%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
@@ -1773,6 +2207,14 @@ Class SWWMStatusBar : BaseStatusBar
 			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,SWWMLamp(i).isBlinking()?alpha*.5:alpha);
 			return true;
 		}
+		if ( (i is 'DivineSpriteEffect') && aspowerup )
+		{
+			Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,DivineSpriteEffect(i).isBlinking()?alpha*.5:alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
+			String nstr = String.Format("%ds",DivineSpriteEffect(i).healtim/GameTicRate);
+			int len = mTewiFont.mFont.StringWidth(nstr);
+			Screen.DrawText(mTewiFont.mFont,Font.CR_FIRE,(xx+30)-len,(yy+30)-11,nstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,DivineSpriteEffect(i).isBlinking()?alpha*.5:alpha);
+			return true;
+		}
 		Screen.DrawTexture(i.Icon,false,dx,dy,DTA_VirtualWidthF,dw,DTA_VirtualHeightF,dh,DTA_KeepRatio,true,DTA_Alpha,alpha,DTA_TopOffset,0,DTA_LeftOffset,0);
 		if ( (i.Amount > 1) || forceamt )
 		{
@@ -1805,6 +2247,12 @@ Class SWWMStatusBar : BaseStatusBar
 		for ( Inventory i=CPlayer.mo.Inv; i; i=i.Inv )
 		{
 			if ( (i is 'SWWMLamp') && SWWMLamp(i).bActivated )
+			{
+				DrawInvIcon(i,xx,yy,aspowerup:true);
+				yy -= 34;
+				continue;
+			}
+			if ( (i is 'DivineSpriteEffect') && !DivineSpriteEffect(i).bHealDone )
 			{
 				DrawInvIcon(i,xx,yy,aspowerup:true);
 				yy -= 34;
@@ -1946,33 +2394,51 @@ Class SWWMStatusBar : BaseStatusBar
 		Screen.DrawTexture(FuelTex[swwm_superfuel],false,margin+2,ss.y-(margin+24),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,fw);
 		double ht = clamp(HealthInter.GetValue(),0,10000);
 		double hw = min(ht,100);
-		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
-		{
-			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
-			Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+15),String.Format("%03d",Random[HudStuff](0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-			return;
-		}
-		Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
-		if ( ht > 100 )
-		{
-			hw = min(ht-100,100);
-			Screen.DrawTexture(HealthTex[1],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
-		}
-		if ( ht > 200 )
-		{
-			hw = min(ht-200,300)/3.;
-			Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
-		}
-		if ( ht > 500 )
-		{
-			hw = min(ht-500,500)/5.;
-			Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
-		}
 		int hcolor = Font.CR_RED;
 		if ( ht > 500 ) hcolor = Font.CR_GOLD;
 		else if ( ht > 200 ) hcolor = Font.CR_PURPLE;
 		else if ( ht > 100 ) hcolor = Font.CR_CYAN;
-		Screen.DrawText(mTewiFont.mFont,hcolor,margin+108,ss.y-(margin+15),String.Format("%3d",clamp(ht,0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		if ( isInvulnerable() || CPlayer.mo.FindInventory("InvinciballPower") )
+		{
+			Screen.DrawTexture(HealthTex[4],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
+			hcolor = Font.CR_WHITE;
+		}
+		else
+		{
+			Screen.DrawTexture(HealthTex[0],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
+			if ( ht > 100 )
+			{
+				hw = min(ht-100,100);
+				Screen.DrawTexture(HealthTex[1],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
+			}
+			if ( ht > 200 )
+			{
+				hw = min(ht-200,300)/3.;
+				Screen.DrawTexture(HealthTex[2],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
+			}
+			if ( ht > 500 )
+			{
+				hw = min(ht-500,500)/5.;
+				Screen.DrawTexture(HealthTex[3],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_WindowRightF,hw);
+			}
+		}
+		if ( CPlayer.mo.FindInventory("DivineSpriteEffect") )
+		{
+			double falph = clamp((ht-1000)/6000.,0.,1.);
+			Screen.DrawTexture(HealthTex[5],false,margin+2,ss.y-(margin+14),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,falph,DTA_LegacyRenderStyle,STYLE_Add);
+			String tst;
+			double alph = .1;
+			int trl = 9;
+			for ( double alph = .1; alph <= 1.; alph += .1 )
+			{
+				tst = "AAA";
+				SWWMUtility.ObscureText(tst,(gametic-trl)/3);
+				trl--;
+				Screen.DrawText(mTewiFont.mFont,Font.CR_WHITE,margin+108,ss.y-(margin+15),tst,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,falph*alph,DTA_LegacyRenderStyle,STYLE_Add);
+			}
+			Screen.DrawText(mTewiFont.mFont,hcolor,margin+108,ss.y-(margin+15),String.Format("%3d",clamp(ht,0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,1.-falph);
+		}
+		else Screen.DrawText(mTewiFont.mFont,hcolor,margin+108,ss.y-(margin+15),String.Format("%3d",clamp(ht,0,999)),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 
 	private void DrawPickups()

@@ -1090,8 +1090,10 @@ Class DemolitionistMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1136,8 +1138,10 @@ Class DemolitionistMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1165,8 +1169,10 @@ Class DemolitionistMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1211,8 +1217,10 @@ Class DemolitionistMenu : GenericMenu
 					for ( int i=0; i<invlist.Size(); i++ )
 					{
 						if ( !invlist[i] ) continue;
-						if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 						else str = invlist[i].GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1320,10 +1328,10 @@ Class DemolitionistMenu : GenericMenu
 						if ( sub )
 						{
 							int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
-							if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+							if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
 							else str = def.GetTag();
 						}
-						else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+						else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
 						else str = def.GetTag();
 						len = fnt.StringWidth(str);
 						if ( len > longest ) longest = len;
@@ -1366,7 +1374,13 @@ Class DemolitionistMenu : GenericMenu
 				{
 					if ( !storelist[i] ) continue;
 					let def = GetDefaultByType(storelist[i]);
-					if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					if ( sub )
+					{
+						int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
+						else str = def.GetTag();
+					}
+					else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
 					else str = def.GetTag();
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
@@ -1632,7 +1646,7 @@ Class DemolitionistMenu : GenericMenu
 				for ( int i=0; i<invlist.Size(); i++ )
 				{
 					if ( !invlist[i] ) continue;
-					if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
+					if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
 					else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 					else str = invlist[i].GetTag();
 					len = fnt.StringWidth(str);
@@ -1688,10 +1702,10 @@ Class DemolitionistMenu : GenericMenu
 					if ( sub )
 					{
 						int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
-						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
 						else str = def.GetTag();
 					}
-					else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
 					else str = def.GetTag();
 					len = fnt.StringWidth(str);
 					if ( len > longest ) longest = len;
@@ -2332,8 +2346,8 @@ Class DemolitionistMenu : GenericMenu
 				if ( type is 'SWWMCollectible' ) continue;
 				// no barriers outside doom
 				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
-				// no gravity outside raven
-				if ( !(gameinfo.gametype&GAME_RAVEN) && (type is 'GravitySuppressor') ) continue;
+				// no gravity/tether outside raven
+				if ( !(gameinfo.gametype&GAME_RAVEN) && ((type is 'GravitySuppressor') || (type is 'SafetyTether')) ) continue;
 				// can't sell candygun spares
 				if ( sub && (type is 'CandyGunSpares') ) continue;
 				let cur = players[consoleplayer].mo.FindInventory(type);
@@ -2374,7 +2388,7 @@ Class DemolitionistMenu : GenericMenu
 					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 				}
 				// ignore child ammos
-				if ( (type is 'Ammo') && (type.GetParentClass() != 'Ammo') ) continue;
+				if ( (type is 'Ammo') && (type.GetParentClass() != 'SWWMAmmo') ) continue;
 				if ( inv.Stamina == 0 ) continue;
 				// items with negative stamina can only be sold
 				if ( (inv.Stamina < 0) && !sub ) continue;
@@ -3187,8 +3201,10 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=0; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -3199,8 +3215,10 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=ofs; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
@@ -3246,8 +3264,10 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=0; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				len = fnt.StringWidth(str);
 				if ( len > longest ) longest = len;
@@ -3258,8 +3278,10 @@ Class DemolitionistMenu : GenericMenu
 			for ( int i=ofs; i<invlist.Size(); i++ )
 			{
 				if ( !invlist[i] ) continue;
-				if ( invlist[i] is 'Ammo' ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,invlist[i].GetTag());
-				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
 				else str = invlist[i].GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( invlist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
@@ -3456,10 +3478,10 @@ Class DemolitionistMenu : GenericMenu
 				if ( sub )
 				{
 					int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
-					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
 					else str = def.GetTag();
 				}
-				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
 				else str = def.GetTag();
 				int clscol = Font.CR_WHITE;
 				if ( storelist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItemClass(storelist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;

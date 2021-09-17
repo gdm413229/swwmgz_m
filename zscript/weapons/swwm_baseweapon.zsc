@@ -9,9 +9,12 @@ Class SWWMWeapon : Weapon abstract
 	transient bool hastravelled;
 	transient int autoupsnd;
 	private int SWeaponFlags;
-
+	String tooltip;
+	bool tooltipsent;
 	Class<Ammo> dropammotype;
+	int dropamount;
 
+	Property Tooltip : tooltip;
 	Property DropAmmoType : dropammotype;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)
@@ -231,7 +234,7 @@ Class SWWMWeapon : Weapon abstract
 		SisterWeapon = AddWeapon(SisterWeaponType);
 		if ( Owner.player )
 		{
-			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch )
+			if ( !Owner.player.GetNeverSwitch() && !bNo_Auto_Switch && ReportHUDAmmo() )	// hey, as long as it works
 				Owner.player.PendingWeapon = self;
 			if ( Owner.player.mo == players[consoleplayer].camera )
 				StatusBar.ReceivedWeapon(self);
@@ -346,11 +349,21 @@ Class SWWMWeapon : Weapon abstract
 	override void Tick()
 	{
 		Super.Tick();
-		if ( Owner && autoupsnd && (level.maptime >= autoupsnd) )
+		if ( !Owner ) return;
+		if ( autoupsnd && (level.maptime >= autoupsnd) )
 		{
 			autoupsnd = 0;
 			PlayUpSound(Owner);
 		}
+		if ( !Owner.player || (Owner.player.ReadyWeapon != self) || !(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH) )
+		{
+			tooltipsent = false;
+			return;
+		}
+		if ( tooltipsent ) return;
+		tooltipsent = true;
+		if ( Owner.player == players[consoleplayer] )
+			SWWMUtility.SendTooltip(GetClass());
 	}
 	action void A_SWWMFlash( StateLabel flashlabel = null )
 	{
@@ -383,6 +396,7 @@ Class SWWMWeapon : Weapon abstract
 	}
 	override void ModifyDropAmount( int dropamount )
 	{
+		self.dropamount = dropamount;
 		Super.ModifyDropAmount(dropamount);
 		if ( (AmmoGive1 <= 0) && (default.AmmoGive1 > 0) )
 			AmmoGive1 = 1;
@@ -400,17 +414,20 @@ Class SWWMWeapon : Weapon abstract
 				return false;	// drop us
 			// drop our corresponding ammo
 			if ( !DropAmmoType ) return true;
-			let a = Inventory(Spawn(DropAmmoType,pos,ALLOW_REPLACE));
+			let a = Spawn(DropAmmoType,pos,ALLOW_REPLACE);
 			if ( !a ) return true;
 			a.bDROPPED = true;
 			a.bNOGRAVITY = false;
 			if ( !(level.compatflags&COMPATF_NOTOSSDROPS) )
 				a.TossItem();
-			if ( a is 'Ammo' )
-				a.ModifyDropAmount(Ammo(a).DropAmount);
-			a.bTOSSED = true;
-			if ( a.SpecialDropAction(dropper) )
-				a.Destroy();
+			if ( a is 'Inventory' )
+			{
+				let i = Inventory(a);
+				i.ModifyDropAmount(dropamount);
+				i.bTOSSED = true;
+				if ( i.SpecialDropAction(dropper) )
+					i.Destroy();
+			}
 			return true;
 		}
 		// no weapon drops from enemies

@@ -139,26 +139,48 @@ Class SWWMStaticHandler : StaticEventHandler
 
 	override void ConsoleProcess( ConsoleEvent e )
 	{
-		static const Name mmvars[] =
-		{
-			'swwm_mm_backcolor', 'swwm_mm_cdwallcolor',
-			'swwm_mm_efwallcolor', 'swwm_mm_fdwallcolor',
-			'swwm_mm_gridcolor', 'swwm_mm_interlevelcolor',
-			'swwm_mm_intralevelcolor', 'swwm_mm_lockedcolor',
-			'swwm_mm_notseencolor', 'swwm_mm_portalcolor',
-			'swwm_mm_secretsectorcolor', 'swwm_mm_secretwallcolor',
-			'swwm_mm_specialwallcolor', 'swwm_mm_thingcolor',
-			'swwm_mm_thingcolor_citem', 'swwm_mm_thingcolor_friend',
-			'swwm_mm_thingcolor_item', 'swwm_mm_thingcolor_monster',
-			'swwm_mm_thingcolor_ncmonster', 'swwm_mm_thingcolor_shootable',
-			'swwm_mm_thingcolor_vipitem', 'swwm_mm_tswallcolor',
-			'swwm_mm_unexploredsecretcolor', 'swwm_mm_wallcolor',
-			'swwm_mm_xhaircolor', 'swwm_mm_yourcolor'
-		};
 		if ( e.Name ~== "swwmresetmmcolors" )
 		{
-			for ( int i=0; i<mmvars.Size(); i++ )
-				CVar.FindCVar(mmvars[i]).ResetToDefault();
+			Array<String> cvarlist;
+			SWWMUtility.GetCVars(cvarlist);
+			for ( int i=0; i<cvarlist.Size(); i++ )
+			{
+				if ( (cvarlist[i].Left(8) != "swwm_mm_")
+					|| (cvarlist[i].IndexOf("color") == -1)
+					|| (cvarlist[i] == "swwm_mm_colorset") )
+					continue;
+				CVar.FindCVar(cvarlist[i]).ResetToDefault();
+			}
+		}
+		else if ( e.Name ~== "swwmresetcvars" )
+		{
+			Array<String> cvarlist;
+			SWWMUtility.GetCVars(cvarlist);
+			for ( int i=0; i<cvarlist.Size(); i++ )
+			{
+				// don't reset these
+				if ( (cvarlist[i] == "swwm_playtime")
+					|| (cvarlist[i].Left(17) == "swwm_achievement_")
+					|| (cvarlist[i].Left(14) == "swwm_progress_") )
+					continue;
+				CVar.FindCVar(cvarlist[i]).ResetToDefault();
+			}
+		}
+		else if ( e.Name ~== "swwmresettooltips" )
+		{
+			CVar.FindCVar('swwm_tooltipshown').ResetToDefault();
+			CVar.FindCVar('swwm_tooltipnote').ResetToDefault();
+		}
+		else if ( e.Name ~== "swwmlistcvars" )
+		{
+			// debug
+			Array<String> cvarlist;
+			SWWMUtility.GetCVars(cvarlist);
+			for ( int i=0; i<cvarlist.Size(); i++ )
+			{
+				let cv = CVar.FindCVar(cvarlist[i]);
+				Console.Printf(cvarlist[i].." = "..cv.GetString());
+			}
 		}
 		else if ( e.Name ~== "swwmgetplaytime" )
 		{

@@ -367,7 +367,6 @@ Class Hellblazer : SWWMWeapon
 
 	override void AttachToOwner( Actor other )
 	{
-		Super.AttachToOwner(other);
 		if ( !loadammo )
 		{
 			// 3 hellblazer missiles loaded
@@ -378,6 +377,7 @@ Class Hellblazer : SWWMWeapon
 				magstate[i] = (i>2);
 		}
 		nextammo = loadammo;
+		Super.AttachToOwner(other);
 	}
 
 	clearscope int LoadedCapacity() const
@@ -652,6 +652,7 @@ Class Hellblazer : SWWMWeapon
 		Tag "$T_HELLBLAZER";
 		Inventory.PickupMessage "$I_HELLBLAZER";
 		Obituary "$O_HELLBLAZER";
+		SWWMWeapon.Tooltip "$TT_HELLBLAZER";
 		Inventory.Icon "graphics/HUD/Icons/W_Hellblazer.png";
 		Weapon.SlotNumber 6;
 		Weapon.SelectionOrder 700;

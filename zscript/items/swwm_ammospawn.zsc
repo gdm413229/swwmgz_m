@@ -1,11 +1,44 @@
 // on-demand ammo spawners
 Mixin Class SWWMOndemandAmmoSpawner
 {
+	Actor dropper;
+	bool enemydrop;
+	int dropamount;
+
+	override void ModifyDropAmount( int amt )
+	{
+		dropamount = amt;
+	}
+
+	override bool SpecialDropAction( Actor dropper )
+	{
+		self.dropper = dropper;
+		enemydrop = true;
+		return false;
+	}
+
 	override void SpawnAmmo()
 	{
 		let ac = PickAmmo();
 		if ( !ac ) return;
 		let a = Spawn(ac,pos);
+		if ( enemydrop )
+		{
+			a.bDropped = true;
+			a.bNoGravity = false;
+			if ( !(level.compatflags&COMPATF_NOTOSSDROPS) )
+				a.TossItem();
+			if ( a is 'Inventory' )
+			{
+				let i = Inventory(a);
+				i.bTossed = true;
+				if ( i.SpecialDropAction(dropper) )
+				{
+					i.Destroy();
+					return;
+				}
+			}
+		}
 		SWWMUtility.TransferItemProp(self,a);
 	}
 }
@@ -17,8 +50,8 @@ Class SWWMShellAmmoSmall : SWWMAmmoSpawner
 	static Class<Actor> PickAmmo( bool notondemand = false )
 	{
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
-			return Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BundleSpawn';*/
-		switch( Random[Replacements](0,8) )
+			return Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05Ammo3';*/
+		switch( Random[Replacements](0,9) )
 		{
 		case 0:
 		case 1:
@@ -32,7 +65,7 @@ Class SWWMShellAmmoSmall : SWWMAmmoSpawner
 		case 7:
 			return 'PurpleShell';
 		}
-		// case 8
+		// case 8-9
 		return 'BlueShell';
 	}
 }
@@ -42,42 +75,52 @@ Class SWWMShellAmmoBig : SWWMAmmoSpawner
 
 	static Class<Actor> PickAmmo( bool notondemand = false )
 	{
-		// shell types (sorted by rarity)
-		static const Class<Actor> redpool[] = {'RedShell','RedShell2'};
-		static const Class<Actor> greenpool[] = {'GreenShell','GreenShell2'};
-		static const Class<Actor> purplepool[] = {'PurpleShell','PurpleShell2'};
-		static const Class<Actor> bluepool[] = {'BlueShell','BlueShell2'};
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
 			return Random[Replacements](0,2)?'SMW05SmallAmmo':'SMW05BigAmmo';*/
-		switch( Random[Replacements](0,20) )
+		switch( Random[Replacements](0,17) )
 		{
 		case 0:
 		case 1:
 		case 2:
 		case 3:
+			return 'RedShell';
 		case 4:
-			return redpool[Random[Replacements](0,1)];
 		case 5:
 		case 6:
 		case 7:
+			return 'GreenShell';
 		case 8:
 		case 9:
-			return greenpool[Random[Replacements](0,1)];
 		case 10:
+			return 'PurpleShell';
 		case 11:
 		case 12:
 		case 13:
-			return purplepool[Random[Replacements](0,1)];
+			return 'BlueShell';
 		case 14:
 		case 15:
-		case 16:
-			return bluepool[Random[Replacements](0,1)];
-		case 17:
-		case 18:
 			return 'WhiteShell';
 		}
-		// case 19-20
+		// case 16-17
 		return 'BlackShell';
+	}
+}
+Class SWWMClipAmmoSmall : SWWMAmmoSpawner
+{
+	Mixin SWWMOndemandAmmoSpawner;
+
+	static Class<Actor> PickAmmo( bool notondemand = false )
+	{
+		if ( !Random[Replacements](0,4) )
+		{
+			/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('HeavyMahsheenGun')) )
+				return Random[Replacements](0,2)?'SheenAmmo3':'SheenTinyAmmo';*/
+			if ( notondemand || SWWMUtility.ItemExists('Eviscerator') )
+				return 'EvisceratorShell';
+		}
+		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('PuntzerBeta') || SWWMUtility.ItemExists('PuntzerGamma')) )
+			return Random[Replacements](0,2)?'SMW05Ammo':'SMW05Ammo2';*/
+		return Random[Replacements](0,1)?'RedShell':'GreenShell';
 	}
 }
 Class SWWMClipAmmoBig : SWWMAmmoSpawner
@@ -88,7 +131,7 @@ Class SWWMClipAmmoBig : SWWMAmmoSpawner
 	{
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('HeavyMahsheenGun')) )
 			return Random[Replacements](0,2)?'SheenSmallAmmo':'SheenBigAmmo';*/
-		return Random[Replacements](0,5)?'EvisceratorShell':'EvisceratorBundleSpawn';
+		return Random[Replacements](0,5)?'EvisceratorShell':Random[Replacements](0,2)?'EvisceratorShell2':'EvisceratorShell3';
 	}
 }
 Class SWWMBlastAmmoSmall : SWWMAmmoSpawner
@@ -110,7 +153,7 @@ Class SWWMBlastAmmoBig : SWWMAmmoSpawner
 	{
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('HeavyMahsheenGun')) )
 			return Random[Replacements](0,2)?'SheenBigAmmo':'SheenSmallAmmo';*/
-		return Random[Replacements](0,2)?'EvisceratorShell':'EvisceratorBundleSpawn';
+		return Random[Replacements](0,2)?'EvisceratorShell':Random[Replacements](0,1)?'EvisceratorShell2':'EvisceratorShell3';
 	}
 }
 Class SWWMRocketAmmoSmall : SWWMAmmoSpawner
@@ -131,9 +174,12 @@ Class SWWMRocketAmmoBig : SWWMAmmoSpawner
 	static Class<Actor> PickAmmo( bool notondemand = false )
 	{
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('ModernSparkster')) )
-			return Random[Replacements](0,2)?'SparksterAmmoBundleSpawn':'SparksterBigAmmoBundleSpawn';*/
+		{
+			if ( Random[Replacements](0,1) ) return Random[Replacements](0,2)?'SparksterBAmmo2':'SparksterBAmmo3';
+			return Random[Replacements](0,2)?'SparksterRAmmo2':'SparksterRAmmo3';
+		}*/
 		/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('Quadravol')) )
-			return Random[Replacements](0,2)?'QuadravolAmmo':'QuadravolAmmoBundleSpawn';*/
+			return Random[Replacements](0,4)?'QuadravolAmmo2':'QuadravolAmmo3';*/
 		switch ( Random[Replacements](0,11) )
 		{
 		case 0:
@@ -141,12 +187,12 @@ Class SWWMRocketAmmoBig : SWWMAmmoSpawner
 		case 2:
 		case 3:
 		case 4:
-			return Random[Replacements](0,4)?'HellblazerMissiles':'HellblazerMissileBundleSpawn';
+			return Random[Replacements](0,4)?'HellblazerMissiles':'HellblazerMissiles2';
 		case 5:
 		case 6:
 		case 7:
 		case 8:
-			return Random[Replacements](0,7)?'HellblazerCrackshots':'HellblazerCrackshotBundleSpawn';
+			return Random[Replacements](0,7)?'HellblazerCrackshots':'HellblazerCrackshots2';
 		case 9:
 		case 10:
 			return 'HellblazerRavagers';
@@ -167,7 +213,7 @@ Class SWWMCellAmmoSmall : SWWMAmmoSpawner
 			if ( !Random[Replacements](0,3) )
 			{
 				/*if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('MisterRifle')) ) return 'MisterGAmmo';*/
-				/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('RayKhom')) ) return 'RayBolt';*/
+				/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('RayKhom')) ) return 'RayBolt2';*/
 				if ( notondemand || SWWMUtility.ItemExists('CandyGun') ) return 'CandyGunBullets';
 			}
 			/*if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('EMPCarbine')) ) return 'EMPCore';*/
@@ -194,17 +240,17 @@ Class SWWMCellAmmoBig : SWWMAmmoSpawner
 		}
 		/*if ( Random[Replacements](0,1) )
 		{
-			if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('EMPCarbine')) ) return Random[Replacements](0,3)?'EMPCoreBundleSpawn':'EMPCore';
-			if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('MisterRifle')) ) return Random[Replacements](0,2)?'MisterRoundBundleSpawn':'MisterAmmo';
-			if ( notondemand || SWWMUtility.ItemExists('RayKhom') ) return Random[Replacements](0,2)?'RayBoltBundleSpawn':'RayAmmo';
+			if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('EMPCarbine')) ) return Random[Replacements](0,3)?'EMPCore2':'EMPCore';
+			if ( Random[Replacements](0,1) && (notondemand || SWWMUtility.ItemExists('MisterRifle')) ) return Random[Replacements](0,2)?'MisterRound5':'MisterAmmo';
+			if ( notondemand || SWWMUtility.ItemExists('RayKhom') ) return Random[Replacements](0,2)?'RayBolt5':'RayAmmo';
 		}*/
 		if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('SilverBullet')) )
 		{
-			if ( Random[Replacements](0,3) ) return Random[Replacements](0,2)?'SilverBulletsBundleSpawn':'SilverBullets2BundleSpawn';
+			if ( Random[Replacements](0,3) ) return Random[Replacements](0,2)?'SilverBullets_2':'SilverBullets2_2';
 			return Random[Replacements](0,2)?'SilverBulletAmmo':'SilverBulletAmmo2';
 		}
-		if ( notondemand || SWWMUtility.ItemExists('CandyGun') ) return Random[Replacements](0,3)?'CandyGunBulletsBundleSpawn':'CandyGunAmmo';
+		if ( notondemand || SWWMUtility.ItemExists('CandyGun') ) return Random[Replacements](0,3)?'CandyGunBullets3':'CandyGunAmmo';
 		/*if ( !Random[Replacements](0,2) && (notondemand || SWWMUtility.ItemExists('BlackfireIgniter')) ) return 'DarkCanister';*/
-		return Random[Replacements](0,3)?'SparkUnit':'SparkUnitBundleSpawn';
+		return Random[Replacements](0,3)?'SparkUnit':'SparkUnit2';
 	}
 }

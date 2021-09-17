@@ -1,8 +1,8 @@
 This is just a bit of *"future planning"* for stuff that I ***might*** add later on.
 
-## 1.1.x update *(A Needed Change)*:
+## 1.2 update *(A Needed Change)*:
 
-Sometime after the 1.1 release, I REALLY need to do this, it's starting to become very problematic to maintain the Demolitionist Menu as-is.
+I REALLY need to do this, it's starting to become very problematic to maintain the Demolitionist Menu as-is.
 
 * **Demolitionist Menu Refactor:**
   - Non 16:10 ratio support
@@ -10,7 +10,7 @@ Sometime after the 1.1 release, I REALLY need to do this, it's starting to becom
   - Much cleaner code, easier maintenance and extension
   - Modular design, add-on tab support
 
-## 1.2 update *(The Second Batch)*:
+## 1.3 update *(The Second Batch)*:
 
 More weapons, because we need 'em.
 
@@ -36,7 +36,7 @@ More weapons, because we need 'em.
   - [0] Grand Lance *(SWWM Iridium)*
     - Penetrator *(Strike through 20 enemies in a row with a single Grand Lance secondary)*
 
-## 1.3 update *(Arsenal Appendix)*:
+## 1.4 update *(Arsenal Appendix)*:
 
 A couple extra weapons, not enough for a full batch, but still worthy additions.
 
@@ -50,7 +50,7 @@ A couple extra weapons, not enough for a full batch, but still worthy additions.
   - [0] Rafan-Kos *(UnSX 4)*
     - Blasting Ropes *(Melt a grand total of 1000 enemies with the Rafan-Kos)*
 
-## 1.4 update *(The Final Stage)*:
+## 1.5 update *(The Final Stage)*:
 
 All the hard stuff *(some of these aren't guaranteed)*.
 

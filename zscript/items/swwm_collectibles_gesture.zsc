@@ -145,12 +145,37 @@ Class SayaBeanGesture : SWWMItemGesture
 		Stop;
 	}
 }
-Class MothPlushyGesture : SWWMItemGesture {}
-Class AA12ModelGesture : SWWMItemGesture {}
-Class CactusHegeGesture : SWWMItemGesture {}
-Class TastyHoagieGesture : SWWMItemGesture {}
-Class IbukiMilkGesture : SWWMItemGesture {}
-Class BRCAlbumGesture : SWWMItemGesture {}
+Class MothPlushyGesture : SWWMItemGesture
+{
+	action void A_MothCheck()
+	{
+		let realmoth = MothPlushy(FindInventory("MothPlushy"));
+		if ( !realmoth || realmoth.activated ) return;
+		realmoth.uses = min(10,realmoth.uses+1);
+		if ( (realmoth.uses > 1) && !Random[Gesture](0,12-realmoth.uses) )
+		{
+			realmoth.activated = true;
+			realmoth.gigglecnt = 90;
+		}
+	}
+	States
+	{
+	Fire:
+		XZW1 A 3;
+		XZW1 B 3 A_StartSound("demolitionist/handsup",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 CDEFGH 3;
+		XZW1 IJKLM 3;
+		XZW1 NO 4;
+		XZW1 P 4 A_MothCheck();
+		XZW1 QRSTUV 4;
+		XZW1 W 3;
+		XZW1 X 3 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW1 YZ 3;
+		XZW2 ABCD 3;
+		XZW1 A -1 A_FinishGesture();
+		Stop;
+	}
+}
 Class DemoPlushGesture : SWWMItemGesture
 {
 	States
@@ -169,8 +194,6 @@ Class DemoPlushGesture : SWWMItemGesture
 		Stop;
 	}
 }
-Class ManarokouGesture : SWWMItemGesture {}
-Class LithiumNovelGesture : SWWMItemGesture {}
 Class KirinCummiesGesture : SWWMItemGesture
 {
 	States
@@ -323,4 +346,3 @@ Class KirinPlushGesture : SWWMItemGesture
 		Stop;
 	}
 }
-Class PsykkonovexxGesture : SWWMItemGesture {}

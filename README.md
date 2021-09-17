@@ -473,40 +473,10 @@ Eats your snacks and calls you a horny. Emits a giggle when you squeeze it. Yet 
 
 A cute plush doll of Saya's favorite moth girl. Apparently the Nukritas brothers give her one of these every time they piss her off, so she's got an entire pile in her bedroom. It appears that this one bears with it some sort of "contract", whatever that means.
 
-### AA-12 Model
-![](docimg/aa12.png)
-
-A simple model of Ibuki's favourite gun of all time. Obviously it doesn't shoot for real, but the attention to detail is notable. Has a pair of lollipops attached to the side with tape for some reason.
-
-### Hege Cactus
-![](docimg/hege.png)
-
-A small cactus grown in Finland. It's said that people who own it become thirstier than usual, perhaps due to the strength at which it absorbs moisture.
-
-### Hoagie
-![](docimg/hoagie.png)
-
-The sandwich of choice for demonkind, personally endorsed by King Akusei himself. This delicious treat has recently become a symbol of protest among the civilian population, who call for peaceful coexistence with humans.
-
-### Red Oni Milk
-![](docimg/milky.png)
-
-Fresh milk straight out of Ibuki herself. Due to the excess amount she produces daily, these little bottles end up being sold by the dozens.
-
 ### Demolitionist Plush (Heretic)
 ![](docimg/demoplush.png)
 
 A soft and squishy plush doll of you! This became very popular after the events of Doom, with the Demolitionist having defeated the demons and saved Earth. Fully articulated, face and tags glow in the dark.
-
-### Manarock (Heretic)
-![](docimg/manarokou.png)
-
-A delicious fruit from the realm of gods. Considered quite a delicacy, but also well-known for the fact its outer shell is deadly to mortals, as it contains an extremely potent neurotoxin. The fruit has to be peeled very carefully before consumption.
-
-### Lithium - Volume One (Heretic)
-![](docimg/lithium.png)
-
-A graphic novel of mysterious origin that appeared one day in stores. No one knows who made it. It appears to narrate the events of a catastrophic demonic invasion in a very very far future. Some theorize that this could have been delivered from another multiverse as a sort of *"apocalypse log"*.
 
 ### Toot Froot™ Peach Juice (Hexen)
 ![](docimg/tootfroot.png)
@@ -527,11 +497,6 @@ A single-volume manga by Saya Miyamoto "based on true events" about a young girl
 ![](docimg/kirinplush.png)
 
 The most adorable and huggable plush doll of the cutest and sweetest emperor. This was not only also handcrafted by Nukritas 2xx, but also imbued with Kirin's magic, his blessing making anyone feel warm and fuzzy when holding it close to their heart. Like the Saya plush, also emits a cute giggle when squeezed.
-
-### Psykkonovexx (Hexen)
-![](docimg/psykkonovexx.png)
-
-One of the many instruments named after the Nine Kings of Kurenai. The Psykkonovexx could be described as something resembling an *"electric bagpipe"*, and is a staple of modern Anarukon music composition.
 
 ## The HUD
 ![](docimg/hudsample.png)

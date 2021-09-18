@@ -1,0 +1,232 @@
+// kbase private functions
+
+extend Class DemolitionistMenu
+{
+	// initialize the crime clock
+	private void SetClock()
+	{
+		if ( gameinfo.gametype&GAME_Heretic )
+		{
+			// April 10th 2171, 17:34 JST
+			// Epoch: 6351554040
+			c_year = 2171;
+			c_month = 3;
+			c_day = 9;
+			c_hour = 17;
+			c_minute = 34;
+			c_tz = "JST";
+		}
+		else if ( gameinfo.gametype&GAME_Hexen )
+		{
+			// May 25th 2171, 16:41 JST
+			// Epoch: 6355438860
+			c_year = 2171;
+			c_month = 4;
+			c_day = 24;
+			c_hour = 16;
+			c_minute = 41;
+			c_tz = "JST";
+			if ( SWWMUtility.IsDeathkings() )
+			{
+				// deathkings happen the day after
+				c_day = 25;
+				c_hour = 10;
+				c_minute = 28;
+			}
+		}
+		else if ( SWWMUtility.IsEviternity() )
+		{
+			// June 10th 2150, 20:09 +09
+			// (June 10th 2150, 20:09 JST)
+			// Epoch: 5694145740
+			c_year = 2150;
+			c_month = 5;
+			c_day = 9;
+			c_hour = 20;
+			c_minute = 9;
+			c_tz = "+09";
+		}
+		else	// Doom
+		{
+			// June 6th 2148, 18:37 EDT
+			// (June 7th 2148, 07:37 JST)
+			// Epoch: 5630769420
+			c_year = 2148;
+			c_month = 5;
+			c_day = 5;
+			c_hour = 18;
+			c_minute = 37;
+			c_tz = "EDT";
+			if ( SWWMUtility.IsKnownMap() && (level.cluster == 11) )
+			{
+				// NRFTL just happens the next day after
+				c_day = 6;
+				c_hour = 15;
+				c_minute = 48;
+			}
+		}
+		clockstr = CrimeTime();
+	}
+
+	// please don't look at this
+	private String CrimeTime()
+	{
+		// we have to do things this way because dates in this mod go beyond 32-bit unix time
+		static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+		bool leap_year;
+		int y = c_year, m = c_month, d = c_day, h = c_hour, mn = c_minute;
+		int addtime = level.totaltime/GameTicRate;
+		while ( addtime > 0 )
+		{
+			leap_year = (!(y%4) && ((y%100) || !(y%400)));
+			if ( addtime >= 86400 )
+			{
+				addtime -= 86400;
+				d++;
+				int md = days_in_month[m];
+				if ( leap_year && (m == 1) ) md++;
+				if ( d >= md )
+				{
+					d = 0;
+					m++;
+					if ( m > 11 )
+					{
+						m = 0;
+						y++;
+					}
+				}
+			}
+			else if ( addtime >= 3600 )
+			{
+				addtime -= 3600;
+				h++;
+				if ( h > 23 )
+				{
+					h = 0;
+					d++;
+					int md = days_in_month[m];
+					if ( leap_year && (m == 1) ) md++;
+					if ( d >= md )
+					{
+						d = 0;
+						m++;
+						if ( m > 11 )
+						{
+							m = 0;
+							y++;
+						}
+					}
+				}
+			}
+			else if ( addtime >= 60 )
+			{
+				addtime -= 60;
+				mn++;
+				if ( mn > 59 )
+				{
+					mn = 0;
+					h++;
+					if ( h > 23 )
+					{
+						h = 0;
+						d++;
+						int md = days_in_month[m];
+						if ( leap_year && (m == 1) ) md++;
+						if ( d >= md )
+						{
+							d = 0;
+							m++;
+							if ( m > 11 )
+							{
+								m = 0;
+								y++;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				// we finished counting
+				addtime = 0;
+			}
+		}
+		return String.Format("%04d-%02d-%02d %02d:%02d %s",y,m+1,d+1,h,mn,c_tz);
+	}
+
+	// ui->play transaction checks
+	private void CheckTransactions()
+	{
+		for ( int i=0; i<checklist.Size(); i++ )
+		{
+			bool deleteme = false;
+			for ( int j=0; j<hnd.checklist.Size(); j++ )
+			{
+				if ( hnd.checklist[j].uid != checklist[i].uid ) continue;
+				if ( checklist[i].type == MenuTransaction.TT_ITEMUSE )
+				{
+					// check if use succeeded
+					if ( checklist[i].result || hnd.checklist[j].result )
+					{
+						// only play use sound if game isn't frozen
+						if ( !multiplayer && (menuactive == Menu.On) )
+						{
+							// if it's a weapon, play the select sound
+							// if it's a collectible or key, play the "hands up" sound
+							let w = (Class<Weapon>)(hnd.checklist[j].used);
+							if ( w )
+							{
+								// play if actually switching
+								if ( hnd.checklist[j].result )
+								{
+									String snd = GetDefaultByType(w).UpSound;
+									MenuSound(snd);
+								}
+							}
+							else if ( (hnd.checklist[j].used is 'SWWMCollectible') || (hnd.checklist[j].used is 'SWWMKey') )
+								MenuSound("demolitionist/handsup");
+							else
+							{
+								String snd = GetDefaultByType(hnd.checklist[j].used).UseSound;
+								MenuSound(snd);
+							}
+						}
+					}
+					else
+					{
+						tmsg = StringTable.Localize("$SWWM_INVFAIL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMDROP )
+				{
+					// check if drop succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_INVNDROP");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMSEND )
+				{
+					// check if trade succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_TRADEFULL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+					else MenuSound("menu/demosel");
+				}
+				EventHandler.SendNetworkEvent("swwmcleartransaction",checklist[i].uid,consoleplayer);
+				deleteme = true;
+				break;
+			}
+			if ( !deleteme ) continue;
+			checklist.Delete(i);
+			i--;
+		}
+	}
+}

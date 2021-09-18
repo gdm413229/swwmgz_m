@@ -1,0 +1,3728 @@
+// internal "knowledge base" and more
+Class MenuTransaction
+{
+	enum ETransactionType
+	{
+		TT_ITEMUSE,
+		TT_ITEMDROP,
+		TT_ITEMSEND
+	};
+
+	int uid, type;
+	Class<Inventory> used;
+	bool result, usedup;
+}
+
+// FIXME this whole thing needs to be refactored eventually
+Class DemolitionistMenu : GenericMenu
+{
+	enum EDemoTab
+	{
+		TAB_MISSION = 0,
+		TAB_STATS,
+		TAB_INVENTORY,
+		TAB_KEYS,
+		TAB_LIBRARY,
+		TAB_STORE,
+		TAB_TRADING,
+		TAB_CHAT,
+		TAB_SECRET,
+		TAB_HELP
+	};
+
+	enum EStatsTab
+	{
+		STAT_MAIN = 0,
+		STAT_KILLS,
+		STAT_LEVEL,
+		STAT_ACHIEVEMENT,
+	};
+
+	TextureID MainWindow, TabSeparator, WindowSeparator, WindowSeparatorH,
+		FancyBg, Drawing[3], LoreSeparator, LoreSeparatorW, AchievementUnknown;
+	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	Array<int> tabs;
+	int curtab, oldtab;
+	// for scrolling
+	bool sub;
+	int sel0, sel1, sel2;
+	int ofs0, ofs1, ofs2;	// usually equal to above, except when using mouse input
+	int drag;	// when dragging with the mouse, which scroller to affect (1 = ofs0 and so on)
+	// mission
+	String missionstr;
+	Array<String> missionbacklog;
+	// stats
+	SWWMStats stats;
+	Array<String> statlist;
+	Array<MonsterKill> sorted_mstats; // sorted by killcount
+	Array<LevelStat> filtered_lstats; // filtered if necessary + entry for current map
+	LevelStat curlstat;
+	Array<SWWMAchievement> achievements;	// array created once, then sorted as needed
+	// inventory lists
+	Array<Inventory> invlist;
+	// lore stuff
+	SWWMLoreLibrary lorelib;
+	Array<SWWMLore> lorelist;
+	int oldloresiz;
+	// store stuff
+	Array<Class<Inventory> > storelist;
+	Array<int> storeunits;
+	// trading
+	SWWMTradeHistory tradelib;
+	Array<int> playerlist;
+	// chat history total line count (includes breaks)
+	int chatlines;
+	// temporary bottom messages, such as "not enough money"
+	String tmsg;
+	int tmsgtic;
+	// menu keybind
+	int ikey[2];
+	String mkey[2];
+	// for checks (duh)
+	Array<MenuTransaction> checklist;
+	int lasttuid;
+	SWWMHandler hnd;
+	// seeeeecret
+	int kcode;
+	// crimey clock stuff
+	int c_year, c_month, c_day, c_hour, c_minute;
+	String c_tz;
+	// mouse stuff
+	Vector2 curmouse;
+	bool isrclick;
+	// somehow Drawer can be called while closing prematurely, which is big bollocks
+	bool isclosing;
+	// to save on calls
+	bool nrftl, eviternity, hexdd;
+
+	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
+	Font LangFont( Font req )
+	{
+		if ( language ~== "jp" ) return (req==MiniwiFont)?k6x8Font:MPlusFont;
+		return req;
+	}
+
+	int GenTUID()
+	{
+		return lasttuid++;
+	}
+
+	override void Init( Menu parent )
+	{
+		Super.Init(parent);
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
+		{
+			// can't open this menu outside of the game or if dead
+			// also can't if you're not the Demolitionist
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
+			isclosing = true;
+			return;
+		}
+		TewiFont = Font.GetFont('TewiShaded');
+		MPlusFont = Font.GetFont('MPlusShaded');
+		MiniwiFont = Font.GetFont('MiniwiShaded');
+		k6x8Font = Font.GetFont('k6x8Shaded');
+		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_MiscPatch);
+		MainWindow = TexMan.CheckForTexture("graphics/KBase/MainWindow.png",TexMan.Type_MiscPatch);
+		TabSeparator = TexMan.CheckForTexture("graphics/KBase/TabSeparator.png",TexMan.Type_MiscPatch);
+		WindowSeparator = TexMan.CheckForTexture("graphics/KBase/WindowSeparator.png",TexMan.Type_MiscPatch);
+		WindowSeparatorH = TexMan.CheckForTexture("graphics/KBase/WindowSeparatorH.png",TexMan.Type_MiscPatch);
+		Drawing[0] = TexMan.CheckForTexture("graphics/KBase/Drawing_Saya.png",TexMan.Type_MiscPatch);
+		Drawing[1] = TexMan.CheckForTexture("graphics/KBase/Drawing_Ibuki.png",TexMan.Type_MiscPatch);
+		Drawing[2] = TexMan.CheckForTexture("graphics/KBase/Drawing_Kirin.png",TexMan.Type_MiscPatch);
+		LoreSeparator = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparator.png",TexMan.Type_MiscPatch);
+		LoreSeparatorW = TexMan.CheckForTexture("graphics/KBase/LibraryTabSeparatorJP.png",TexMan.Type_MiscPatch);
+		MenuSound("menu/demoopen");
+		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("event swwmdemomenu");
+		mkey[0] = Bindings.NameKeys(ikey[0],0);
+		mkey[1] = Bindings.NameKeys(ikey[1],0);
+		lorelib = SWWMLoreLibrary.Find(players[consoleplayer]);
+		oldloresiz = lorelib.ent.Size();
+		tradelib = SWWMTradeHistory.Find(players[consoleplayer]);
+		stats = SWWMStats.Find(players[consoleplayer]);
+		tmsg = StringTable.Localize("$SWWM_MAINCONTROLS");
+		tmsgtic = gametic+70;
+		lasttuid = Random[TUID]();
+		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		// mission text
+		nrftl = false;
+		eviternity = false;
+		hexdd = false;
+		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
+		{
+			int clus = level.cluster;
+			if ( clus == 11 ) nrftl = true;
+			eviternity = SWWMUtility.IsEviternity();
+			if ( eviternity )
+			{
+				// we have to do some heavy lifting here because episodes don't match clusters
+				if ( level.levelnum <= 5 ) clus = 1;
+				else if ( level.levelnum <= 10 ) clus = 2;
+				else if ( level.levelnum <= 15 ) clus = 3;
+				else if ( level.levelnum <= 20 ) clus = 4;
+				else if ( level.levelnum <= 25 ) clus = 5;
+				else if ( level.levelnum <= 30 ) clus = 6;
+				else if ( level.levelnum <= 31 ) clus = 7;
+				else if ( level.levelnum <= 32 ) clus = 8;
+				missionstr = String.Format("$SWWM_MISSION_EVITERNITY%d",clus);
+			}
+			// naive method to guess if this is sigil
+			else if ( (clus == 5) && (level.mapname.Left(2) == "E5") )
+				missionstr = String.Format("$SWWM_MISSION_SIGIL");
+			else missionstr = String.Format("$SWWM_MISSION_DOOM%d",clus);
+			int csiz = stats.clustervisit.Size();
+			if ( (csiz > 0) && stats.secretdone[csiz-1] )
+			{
+				String tmpstr = missionstr.."_SECRET";
+				if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+					missionstr = tmpstr;
+			}
+			// if we came from the doom 1 episodes, use the alt mission string for Doom 2
+			bool fromdoomone = false;
+			for ( int i=0; i<csiz; i++ )
+			{
+				// also include sigil
+				if ( !eviternity && (stats.clustervisit[i] >= 5) && (stats.clustervisit[i] != 25) ) continue;
+				fromdoomone = true;
+				break;
+			}
+			if ( !eviternity && (clus == 5) && fromdoomone )
+				missionstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == clus) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format(eviternity?"$SWWM_MISSION_EVITERNITY%d":"$SWWM_MISSION_DOOM%d",stats.clustervisit[i]);
+				if ( !eviternity && (stats.clustervisit[i] == 5) && fromdoomone )
+					xstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
+				if ( stats.secretdone[i] )
+				{
+					String tmpstr = xstr.."_SECRET";
+					if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+						xstr = tmpstr;
+				}
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
+		}
+		else if ( (gameinfo.gametype&GAME_Heretic) && SWWMUtility.IsKnownMap() )
+		{
+			missionstr = String.Format("$SWWM_MISSION_HERETIC%d",level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_HERETIC%d",stats.clustervisit[i]);
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
+		}
+		else if ( (gameinfo.gametype&GAME_Hexen) && SWWMUtility.IsKnownMap() )
+		{
+			// detect deathkings
+			hexdd = SWWMUtility.IsDeathkings();
+			String gstr = hexdd?"HEXDD":"HEXEN";
+			missionstr = String.Format("$SWWM_MISSION_%s%d",gstr,level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_%s%d",gstr,stats.clustervisit[i]);
+				if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+					continue;
+				missionbacklog.Push(xstr);
+			}
+		}
+		else missionstr = "$SWWM_MISSION_NONE";
+		if ( gameinfo.gametype&GAME_Heretic )
+		{
+			// April 10th 2171, 17:34 JST
+			// Epoch: 6351554040
+			c_year = 2171;
+			c_month = 3;
+			c_day = 9;
+			c_hour = 17;
+			c_minute = 34;
+			c_tz = "JST";
+		}
+		else if ( gameinfo.gametype&GAME_Hexen )
+		{
+			// May 25th 2171, 16:41 JST
+			// Epoch: 6355438860
+			c_year = 2171;
+			c_month = 4;
+			c_day = 24;
+			c_hour = 16;
+			c_minute = 41;
+			c_tz = "JST";
+			if ( hexdd )
+			{
+				// deathkings happen the day after
+				c_day = 25;
+				c_hour = 10;
+				c_minute = 28;
+			}
+		}
+		else if ( eviternity )
+		{
+			// June 10th 2150, 20:09 +09
+			// (June 10th 2150, 20:09 JST)
+			// Epoch: 5694145740
+			c_year = 2150;
+			c_month = 5;
+			c_day = 9;
+			c_hour = 20;
+			c_minute = 9;
+			c_tz = "+09";
+		}
+		else	// Doom
+		{
+			// June 6th 2148, 18:37 EDT
+			// (June 7th 2148, 07:37 JST)
+			// Epoch: 5630769420
+			c_year = 2148;
+			c_month = 5;
+			c_day = 5;
+			c_hour = 18;
+			c_minute = 37;
+			c_tz = "EDT";
+			if ( nrftl )
+			{
+				// NRFTL just happens the next day after
+				c_day = 6;
+				c_hour = 15;
+				c_minute = 48;
+			}
+		}
+		if ( (missionstr != "$SWWM_MISSION_NONE") || (missionbacklog.Size() > 0) )
+			tabs.Push(TAB_MISSION);
+		tabs.Push(TAB_STATS);
+		tabs.Push(TAB_INVENTORY);
+		if ( !deathmatch )
+		{
+			tabs.Push(TAB_KEYS);
+			tabs.Push(TAB_LIBRARY);
+		}
+		if ( !deathmatch && (G_SkillPropertyInt(SKILLP_ACSReturn) < 4) ) tabs.Push(TAB_STORE);
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || (i == consoleplayer) ) continue;
+			if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+			tabs.Push(TAB_TRADING);
+			break;
+		}
+		let bar = SWWMStatusBar(StatusBar);
+		if ( bar && (bar.FullHistory.Size() > 0) )
+			tabs.Push(TAB_CHAT);
+		int lasttab = swwm_lasttab;
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			if ( tabs[i] != lasttab ) continue;
+			curtab = i;
+			break;
+		}
+		if ( tabs[curtab] == TAB_LIBRARY ) sel1 = swwm_lastloretab;
+		else if ( tabs[curtab] == TAB_STATS ) sel1 = swwm_laststattab;
+		// load achievements
+		SWWMUtility.LoadAchievements(achievements,true);
+		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/HiddenAchievement.png",TexMan.Type_Any);
+	}
+
+	// please don't look at this
+	private String CrimeTime()
+	{
+		// we have to do things this way because dates in this mod go beyond 32-bit unix time
+		static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+		bool leap_year;
+		int y = c_year, m = c_month, d = c_day, h = c_hour, mn = c_minute;
+		int addtime = level.totaltime/GameTicRate;
+		while ( addtime > 0 )
+		{
+			leap_year = (!(y%4) && ((y%100) || !(y%400)));
+			if ( addtime >= 86400 )
+			{
+				addtime -= 86400;
+				d++;
+				int md = days_in_month[m];
+				if ( leap_year && (m == 1) ) md++;
+				if ( d >= md )
+				{
+					d = 0;
+					m++;
+					if ( m > 11 )
+					{
+						m = 0;
+						y++;
+					}
+				}
+			}
+			else if ( addtime >= 3600 )
+			{
+				addtime -= 3600;
+				h++;
+				if ( h > 23 )
+				{
+					h = 0;
+					d++;
+					int md = days_in_month[m];
+					if ( leap_year && (m == 1) ) md++;
+					if ( d >= md )
+					{
+						d = 0;
+						m++;
+						if ( m > 11 )
+						{
+							m = 0;
+							y++;
+						}
+					}
+				}
+			}
+			else if ( addtime >= 60 )
+			{
+				addtime -= 60;
+				mn++;
+				if ( mn > 59 )
+				{
+					mn = 0;
+					h++;
+					if ( h > 23 )
+					{
+						h = 0;
+						d++;
+						int md = days_in_month[m];
+						if ( leap_year && (m == 1) ) md++;
+						if ( d >= md )
+						{
+							d = 0;
+							m++;
+							if ( m > 11 )
+							{
+								m = 0;
+								y++;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				// we finished counting
+				addtime = 0;
+			}
+		}
+		return String.Format("%04d-%02d-%02d %02d:%02d %s",y,m+1,d+1,h,mn,c_tz);
+	}
+
+	override bool MenuEvent( int mkey, bool fromcontroller )
+	{
+		Font fnt = LangFont(TewiFont);
+		switch ( kcode )
+		{
+		case 0:
+		case 1:
+			if ( mkey == MKEY_UP ) kcode++;
+			else kcode = 0;
+			break;
+		case 2:
+		case 3:
+			if ( mkey == MKEY_DOWN ) kcode++;
+			else kcode = 0;
+			break;
+		case 4:
+		case 6:
+			if ( mkey == MKEY_LEFT ) kcode++;
+			else kcode = 0;
+			break;
+		case 5:
+		case 7:
+			if ( mkey == MKEY_RIGHT ) kcode++;
+			else kcode = 0;
+			break;
+		case 10:
+			if ( mkey == MKEY_ENTER )
+			{
+				MenuSound("misc/secret");
+				if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);
+				tabs.Push(TAB_SECRET);
+				curtab = tabs.Size()-1;
+				sel0 = sel1 = sel2 = 0;
+				ofs0 = ofs1 = ofs2 = 0;
+				sub = false;
+			}
+		default:
+			kcode = 0;
+			break;
+		}
+		int maxtab = multiplayer?TAB_CHAT:TAB_STORE;
+		switch ( mkey )
+		{
+		case MKEY_BACK:
+			MenuSound("menu/democlose");
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
+			Close();
+			return true;
+		case MKEY_PAGEUP:
+			MenuSound("menu/demotab");
+			if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);	// hide this tab
+			if ( curtab <= 0 ) curtab = (tabs.Size()-1);
+			else curtab--;
+			CVar.FindCVar('swwm_lasttab').SetInt(tabs[curtab]);
+			sel0 = sel1 = sel2 = 0;
+			ofs0 = ofs1 = ofs2 = 0;
+			sub = false;
+			invlist.Clear();
+			lorelist.Clear();
+			storelist.Clear();
+			storeunits.Clear();
+			playerlist.Clear();
+			return true;
+		case MKEY_PAGEDOWN:
+			MenuSound("menu/demotab");
+			if ( tabs[curtab] >= TAB_SECRET ) tabs.Delete(curtab);	// hide this tab
+			if ( curtab < (tabs.Size()-1) ) curtab++;
+			else curtab = 0;
+			CVar.FindCVar('swwm_lasttab').SetInt(tabs[curtab]);
+			sel0 = sel1 = sel2 = 0;
+			ofs0 = ofs1 = ofs2 = 0;
+			sub = false;
+			invlist.Clear();
+			lorelist.Clear();
+			storelist.Clear();
+			storeunits.Clear();
+			playerlist.Clear();
+			return true;
+		case MKEY_DOWN:
+			if ( tabs[curtab] == TAB_HELP )
+			{
+				String kstr;
+				if ( self.mkey[1] != "" ) kstr = self.mkey[0].."/"..self.mkey[1];
+				else kstr = self.mkey[0];
+				String str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
+				{
+					MenuSound("menu/demoscroll");
+					sel0++;
+				}
+			}
+			else if ( tabs[curtab] == TAB_MISSION )
+			{
+				String str;
+				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+				else str = StringTable.Localize(missionbacklog[sel1-1]);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
+				{
+					MenuSound("menu/demoscroll");
+					ofs0 = ++sel0;
+				}
+			}
+			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+			}
+			else if ( (tabs[curtab] == TAB_LIBRARY) && (lorelist.Size() > 1) )
+			{
+				if ( sub )
+				{
+					String str = StringTable.Localize(lorelist[sel0].text);
+					int ofs = (language~=="jp")?212:132;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
+					if ( (l.Count() > 28) && (sel2 < l.Count()-28) )
+					{
+						MenuSound("menu/demoscroll");
+						ofs2 = ++sel2;
+					}
+				}
+				else
+				{
+					MenuSound("menu/demoscroll");
+					if ( sel0 >= lorelist.Size()-1 ) ofs0 = sel0 = 0;
+					else
+					{
+						sel0++;
+						// update ofs so selection stays on-screen
+						int ofs = max(ofs0-26,0);
+						if ( sel0 < ofs ) ofs0 = sel0+26;
+						else if ( sel0 > ofs+26 ) ofs0 = sel0;
+					}
+				}
+			}
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS)) && (invlist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = ++sel0;
+				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = 0;
+			}
+			else if ( ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) && (invlist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs1 = ++sel1;
+				if ( sel1 >= invlist.Size() ) ofs1 = sel1 = 0;
+			}
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = ++sel0;
+				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = 0;
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( !sub && (playerlist.Size() > 1) )
+				{
+					// scroll through player list
+					MenuSound("menu/demoscroll");
+					ofs0 = ++sel0;
+					if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = 0;
+				}
+				else if ( sub && (sel0 == -1) && (sel1 < tradelib.ent.Size()-28) )
+				{
+					// scroll through trading history
+					MenuSound("menu/demoscroll");
+					ofs1 = ++sel1;
+				}
+			}
+			else if ( tabs[curtab] == TAB_STATS )
+			{
+				int cnt = 0, num = 22;
+				if ( sel1 == STAT_MAIN )
+					cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS )
+					cnt = sorted_mstats.Size();
+				else if ( sel1 == STAT_LEVEL )
+					cnt = filtered_lstats.Size();
+				else if ( sel1 == STAT_ACHIEVEMENT )
+				{
+					cnt = achievements.Size();
+					num = 7;
+				}
+				if ( (cnt > num) && (sel0 < cnt-num) )
+				{
+					MenuSound("menu/demoscroll");
+					ofs0 = ++sel0;
+				}
+			}
+			return true;
+		case MKEY_UP:
+			if ( (tabs[curtab] == TAB_HELP) && (sel0 > 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+			}
+			else if ( (tabs[curtab] == TAB_MISSION) && (sel0 > 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+			}
+			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = ++sel0;
+			}
+			else if ( (tabs[curtab] == TAB_LIBRARY) && (lorelist.Size() > 1) )
+			{
+				if ( sub )
+				{
+					if ( sel2 > 0 )
+					{
+						MenuSound("menu/demoscroll");
+						ofs2 = --sel2;
+					}
+				}
+				else
+				{
+					MenuSound("menu/demoscroll");
+					if ( sel0 <= 0 ) ofs0 = sel0 = lorelist.Size()-1;
+					else
+					{
+						sel0--;
+						// update ofs so selection stays on-screen
+						int ofs = max(ofs0-26,0);
+						if ( sel0 < ofs ) ofs0 = sel0+26;
+						else if ( sel0 > ofs+26 ) ofs0 = sel0;
+					}
+				}
+			}
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS)) && (invlist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+				if ( sel0 < 0 ) ofs0 = sel0 = invlist.Size()-1;
+			}
+			else if ( ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) && (invlist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs1 = --sel1;
+				if ( sel1 < 0 ) ofs1 = sel1 = invlist.Size()-1;
+			}
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 1) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+				if ( sel0 < 0 ) ofs0 = sel0 = storelist.Size()-1;
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( !sub && (playerlist.Size() > 1) )
+				{
+					// scroll through player list
+					MenuSound("menu/demoscroll");
+					ofs0 = --sel0;
+					if ( sel0 < 0 ) ofs0 = sel0 = playerlist.Size()-1;
+				}
+				else if ( sub && (sel0 == -1) && (sel1 > 0) )
+				{
+					// scroll through trading history
+					MenuSound("menu/demoscroll");
+					ofs1 = --sel1;
+				}
+			}
+			else if ( (tabs[curtab] == TAB_STATS) && (sel0 > 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = --sel0;
+			}
+			return true;
+		case MKEY_RIGHT:
+			if ( (tabs[curtab] == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			{
+				if ( sel1 < missionbacklog.Size() )
+				{
+					sel0 = 0;
+					sel1++;
+					MenuSound("menu/demoscroll");
+				}
+			}
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS)) && (invlist.Size() > 21) )
+			{
+				int oldsel = sel0;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= invlist.Size() ) ofs0 = sel0 = invlist.Size()-1;
+				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
+			}
+			else if ( ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) && (invlist.Size() > 21) )
+			{
+				int oldsel = sel1;
+				ofs1 = sel1 += 22;
+				if ( sel1 >= invlist.Size() ) ofs1 = sel1 = invlist.Size()-1;
+				if ( sel1 != oldsel ) MenuSound("menu/demoscroll");
+			}
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 21) )
+			{
+				int oldsel = sel0;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= storelist.Size() ) ofs0 = sel0 = storelist.Size()-1;
+				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
+			}
+			else if ( tabs[curtab] == TAB_LIBRARY )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				sub = false;
+				ofs1 = ++sel1;
+				if ( sel1 > LORE_LORE ) ofs1 = sel1 = LORE_ITEM;
+				CVar.FindCVar('swwm_lastloretab').SetInt(sel1);
+			}
+			else if ( (tabs[curtab] == TAB_TRADING) && !sub && (playerlist.Size() > 21) )	// lol is this ever going to happen
+			{
+				int oldsel = sel0;
+				ofs0 = sel0 += 22;
+				if ( sel0 >= playerlist.Size() ) ofs0 = sel0 = playerlist.Size()-1;
+				if ( sel0 != oldsel ) MenuSound("menu/demoscroll");
+			}
+			else if ( tabs[curtab] == TAB_STATS )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				ofs1 = ++sel1;
+				if ( ofs1 > STAT_ACHIEVEMENT ) ofs1 = sel1 = STAT_MAIN;
+				CVar.FindCVar('swwm_laststattab').SetInt(sel1);
+			}
+			return true;
+		case MKEY_LEFT:
+			if ( (tabs[curtab] == TAB_MISSION) && (missionbacklog.Size() > 0) )
+			{
+				if ( sel1 > 0 )
+				{
+					sel0 = 0;
+					sel1--;
+					MenuSound("menu/demoscroll");
+				}
+			}
+			else if ( ((tabs[curtab] == TAB_INVENTORY) || (tabs[curtab] == TAB_KEYS)) && (invlist.Size() > 21) && (sel0-22 >= 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 -= 22;
+			}
+			else if ( ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) && (invlist.Size() > 21) && (sel1-22 >= 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs1 = sel1 -= 22;
+			}
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 21) && (sel0-22 >= 0) )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 -= 22;
+			}
+			else if ( tabs[curtab] == TAB_LIBRARY )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				sub = false;
+				ofs1 = --sel1;
+				if ( sel1 < LORE_ITEM ) ofs1 = sel1 = LORE_LORE;
+				CVar.FindCVar('swwm_lastloretab').SetInt(sel1);
+			}
+			else if ( (tabs[curtab] == TAB_TRADING) && !sub && (playerlist.Size() > 21) && (sel0-22 >= 0) ) // lol is this ever going to happen
+			{
+				ofs0 = sel0 -= 22;
+				MenuSound("menu/demoscroll");
+			}
+			else if ( tabs[curtab] == TAB_STATS )
+			{
+				MenuSound("menu/demoscroll");
+				ofs0 = sel0 = 0;
+				ofs1 = --sel1;
+				if ( ofs1 < STAT_MAIN ) ofs1 = sel1 = STAT_ACHIEVEMENT;
+				CVar.FindCVar('swwm_laststattab').SetInt(sel1);
+			}
+			return true;
+		case MKEY_ENTER:
+			if ( (tabs[curtab] == TAB_INVENTORY) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
+			{
+				// can't use this
+				if ( (invlist[sel0] is 'Ammo') || (invlist[sel0] is 'MagAmmo') || (invlist[sel0] is 'SWWMCollectible')
+					 || (invlist[sel0] is 'HammerspaceEmbiggener') )
+					return true;
+				let t = new("MenuTransaction");
+				t.uid = GenTUID();
+				t.type = MenuTransaction.TT_ITEMUSE;
+				t.result = false;
+				// don't check weapons, always assume check succeeded
+				if ( invlist[sel0] is 'Weapon' ) t.result = true;
+				checklist.Push(t);
+				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
+			}
+			else if ( (tabs[curtab] == TAB_KEYS) && (invlist.Size() > 0) && (sel0 < invlist.Size()) )
+			{
+				// can't use this
+				if ( !(invlist[sel0] is 'SWWMKey') && !(invlist[sel0] is 'SWWMCollectible') )
+					return true;
+				let t = new("MenuTransaction");
+				t.uid = GenTUID();
+				t.type = MenuTransaction.TT_ITEMUSE;
+				t.result = true;	// always true
+				checklist.Push(t);
+				EventHandler.SendNetworkEvent(String.Format("swwmuseitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
+			}
+			else if ( (tabs[curtab] == TAB_STORE) && (storelist.Size() > 0) && (sel0 < storelist.Size()) )
+			{
+				let itm = GetDefaultByType(storelist[sel0]);
+				let amt = storeunits[sel0];
+				int price = int(abs(itm.Stamina)*(1.+.75*(amt-1)));
+				let cur = players[consoleplayer].mo.FindInventory(storelist[sel0]);
+				if ( sub )
+				{
+					if ( !cur ) return true;
+					if ( storelist[sel0] is 'Weapon' )
+					{
+						let w = Weapon(itm);
+						// subtract price of given ammo, as we're only selling the weapon itself
+						if ( w.AmmoType1 && (w.AmmoGive1 > 0) )
+						{
+							let am1 = GetDefaultByType(w.AmmoType1);
+							if ( am1.Stamina > 0 ) price -= int(am1.Stamina*(1.+.75*(w.AmmoGive1-1)));
+						}
+						// candygun is a special case for secondary ammo
+						if ( w.AmmoType2 && (w.AmmoGive2 > 0) && (storelist[sel0] is 'CandyGun') )
+						{
+							let am2 = GetDefaultByType(w.AmmoType2);
+							if ( am2.Stamina > 0 ) price -= int(am2.Stamina*(1.+.75*(w.AmmoGive2-1)));
+						}
+					}
+					// sell at half price
+					if ( sub ) price /= 2;
+					EventHandler.SendNetworkEvent(String.Format("swwmstoretake.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
+					MenuSound("menu/buyinv");
+					return true;
+				}
+				if ( !SWWMCredits.CanTake(players[consoleplayer],price) )
+				{
+					MenuSound("menu/noinvuse");
+					tmsg = StringTable.Localize("$SWWM_STOREMUNS");
+					tmsgtic = gametic+70;
+					return true;
+				}
+				int camt, max;
+				if ( cur )
+				{
+					camt = cur.Amount;
+					max = cur.MaxAmount;
+				}
+				else
+				{
+					camt = 0;
+					max = itm.MaxAmount;
+				}
+				if ( camt >= max )
+				{
+					MenuSound("menu/noinvuse");
+					tmsg = StringTable.Localize("$SWWM_STOREFULL");
+					tmsgtic = gametic+70;
+					return true;
+				}
+				EventHandler.SendNetworkEvent(String.Format("swwmstoregive.%s",storelist[sel0].GetClassName()),consoleplayer,price,amt);
+				MenuSound("menu/buyinv");
+			}
+			else if ( tabs[curtab] == TAB_LIBRARY )
+			{
+				if ( sub )
+				{
+					MenuSound("menu/democlose");
+					sub = false;
+				}
+				else if ( (lorelist.Size() > 0) && (sel0 < lorelist.Size()) )
+				{
+					// mark as read
+					if ( !lorelist[sel0].read )
+						EventHandler.SendNetworkEvent(String.Format("swwmmarkloreread.%s",lorelist[sel0].tag),consoleplayer);
+					MenuSound("menu/demosel");
+					sub = true;
+					ofs2 = sel2 = 0;
+				}
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( !sub && (playerlist.Size() > 0) )
+				{
+					// pick a player
+					MenuSound("menu/demosel");
+					sub = true;
+					ofs1 = sel1 = 0;
+				}
+				else if ( sub && (sel0 != -1) && (invlist.Size() > 0) )
+				{
+					// cannot trade these
+					if ( ((invlist[sel1].bUNDROPPABLE || invlist[sel1].bUNTOSSABLE) && !(invlist[sel1] is 'HammerspaceEmbiggener'))
+						|| ((invlist[sel1] is 'CandyGunSpares') && !players[playerlist[sel0]].mo.FindInventory('CandyGun')) )
+					{
+						MenuSound("menu/noinvuse");
+						tmsg = StringTable.Localize("$SWWM_TRADEFAIL");
+						tmsgtic = gametic+70;
+						return true;
+					}
+					// trade item
+					let t = new("MenuTransaction");
+					t.uid = GenTUID();
+					t.type = MenuTransaction.TT_ITEMSEND;
+					t.result = false;
+					checklist.Push(t);
+					EventHandler.SendNetworkEvent(String.Format("swwmtrade.%s",invlist[sel1].GetClassName()),consoleplayer,playerlist[sel0],t.uid);
+				}
+			}
+			return true;
+		case MKEY_CLEAR:
+			if ( (tabs[curtab] == TAB_INVENTORY) && (invlist.Size() > 0) )
+			{
+				let t = new("MenuTransaction");
+				t.uid = GenTUID();
+				t.type = MenuTransaction.TT_ITEMDROP;
+				t.result = false;
+				checklist.Push(t);
+				EventHandler.SendNetworkEvent(String.Format("swwmdropitem.%s",invlist[sel0].GetClassName()),consoleplayer,t.uid);
+			}
+			else if ( (tabs[curtab] == TAB_LIBRARY) && sub )
+			{
+				MenuSound("menu/democlose");
+				sub = false;
+			}
+			else if ( tabs[curtab] == TAB_STORE )
+			{
+				sub = !sub;
+				MenuSound(sub?"menu/demosel":"menu/democlose");
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( !sub )
+				{
+					// open trading history
+					MenuSound("menu/demosel");
+					sub = true;
+					ofs0 = sel0 = -1;
+					ofs1 = sel1 = 0;
+				}
+				else if ( sub )
+				{
+					// go back
+					MenuSound("menu/democlose");
+					sub = false;
+					ofs0 = sel0 = 0;
+				}
+			}
+			return true;
+		}
+		return Super.MenuEvent(mkey,fromcontroller);
+	}
+
+	private int rnd( double num )
+	{
+		return int(num+((num<0)?-.5:.5));
+	}
+
+	override bool MouseEvent( int type, int mx, int my )
+	{
+		bool res = Super.MouseEvent(type,mx,my);
+		Font fnt = LangFont(TewiFont);
+		String str;
+		double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		Vector2 mpos = (mx/hs,my/hs)-origin;
+		int xx, yy, len;
+		if ( type == MOUSE_Click )
+		{
+			if ( (mpos.x < 0) || (mpos.x >= 641) || (mpos.y < 0) || (mpos.y >= 386) ) return res;	// outside clickable area, ignore
+			else if ( mpos.y < 14 )
+			{
+				if ( isrclick ) return res;
+				// check which tab we're clicking
+				static const string tabnames[] =
+				{
+					"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
+					"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
+					"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+				};
+				xx = 0;
+				for ( int i=0; i<tabs.Size(); i++ )
+				{
+					len = fnt.StringWidth(tabnames[tabs[i]])+6;
+					if ( (mpos.x >= xx) && (mpos.x < xx+len) )
+					{
+						if ( curtab == i ) break;
+						MenuSound("menu/demotab");
+						if ( tabs[curtab] >= TAB_SECRET )
+						{
+							tabs.Delete(curtab);
+							if ( curtab < i ) i--;	// account for shortening
+						}
+						curtab = i;
+						CVar.FindCVar('swwm_lasttab').SetInt(tabs[curtab]);
+						sel0 = sel1 = sel2 = 0;
+						ofs0 = ofs1 = ofs2 = 0;
+						sub = false;
+						invlist.Clear();
+						lorelist.Clear();
+						storelist.Clear();
+						storeunits.Clear();
+						playerlist.Clear();
+						break;
+					}
+					xx += len;
+				}
+			}
+			else if ( tabs[curtab] == TAB_MISSION )
+			{
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 )
+				{
+					int csiz = missionbacklog.Size();
+					if ( csiz <= 0 ) return res;
+					if ( isrclick && (sel1 < csiz) )
+					{
+						sel0 = 0;
+						sel1++;
+						MenuSound("menu/demoscroll");
+					}
+					else if ( !isrclick && (sel1 > 0) )
+					{
+						sel0 = 0;
+						sel1--;
+						MenuSound("menu/demoscroll");
+					}
+					return res;
+				}
+				if ( !isrclick )
+				{
+					String str;
+					if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+					else str = StringTable.Localize(missionbacklog[sel1-1]);
+					BrokenLines l = fnt.BreakLines(str,629);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+					drag = 1;
+				}
+			}
+			else if ( tabs[curtab] == TAB_INVENTORY )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( invlist.Size() <= 0 ) return res;	// clicked nothing
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					xx = 9;
+					yy = 23;
+					int cols = 1;
+					for ( int i=ofs; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							// drop on right click in inventory tab
+							if ( (tabs[curtab] == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
+							else if ( !isrclick ) MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+24;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+					return res;
+				}
+				if ( !isrclick )
+				{
+					// check that scrollbar is present
+					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+			}
+			else if ( (tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1) )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( invlist.Size() <= 0 ) return res;	// clicked nothing
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					int ofs = int(max(0,(ofs1/22)-(maxcol-1))*22);
+					xx = 9;
+					yy = 23;
+					int cols = 1;
+					for ( int i=ofs; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel1 != i ) MenuSound("menu/demoscroll");
+							sel1 = i;
+							ofs1 = (sel1/22)*22;
+							// drop on right click in inventory tab
+							if ( (tabs[curtab] == TAB_INVENTORY) && isrclick ) MenuEvent(MKEY_CLEAR,false);
+							else if ( !isrclick ) MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+24;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+					return res;
+				}
+				if ( !isrclick )
+				{
+					// check that scrollbar is present
+					if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+							str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+						else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+							str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+						else str = invlist[i].GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+			}
+			else if ( (tabs[curtab] == TAB_KEYS) && !isrclick )
+			{
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( invlist.Size() <= 0 ) return res;	// clicked nothing
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						str = invlist[i].GetTag();
+						if ( invlist[i] is 'SWWMCollectible' )
+							str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					xx = 9;
+					yy = 23;
+					int cols = 1;
+					for ( int i=ofs; i<invlist.Size(); i++ )
+					{
+						if ( !invlist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							// try to use it if it has any special behaviour
+							MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+24;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+					return res;
+				}
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !invlist[i] ) continue;
+					str = invlist[i].GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+24);
+				totalcol = int(ceil(invlist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+				drag = 1;
+			}
+			else if ( tabs[curtab] == TAB_STORE )
+			{
+				if ( isrclick )
+				{
+					MenuEvent(MKEY_CLEAR,false);
+					return res;
+				}
+				// check what item we clicked
+				if ( mpos.y < 377 )
+				{
+					if ( storelist.Size() <= 0 ) return res;	// clicked nothing
+					xx = 9;
+					yy = 23;
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<storelist.Size(); i++ )
+					{
+						if ( !storelist[i] ) continue;
+						let def = GetDefaultByType(storelist[i]);
+						if ( sub )
+						{
+							int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+							if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
+							else str = def.GetTag();
+						}
+						else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
+						else str = def.GetTag();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+96);
+					totalcol = int(ceil(storelist.Size()/22.));
+					// gotta check both the tag and the price for clicking
+					int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+					int cols = 1;
+					for ( int i=ofs; i<storelist.Size(); i++ )
+					{
+						if ( !storelist[i] ) continue;
+						// check boundary
+						if ( (mpos.x >= xx) && (mpos.x < xx+longest+80) && (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel0 != i ) MenuSound("menu/demoscroll");
+							sel0 = i;
+							ofs0 = (sel0/22)*22;
+							MenuEvent(MKEY_ENTER,false);
+							return res;
+						}
+						yy += 16;
+						if ( yy >= 370 )
+						{
+							xx += longest+96;
+							yy = 23;
+							cols++;
+							if ( cols > maxcol ) break;
+						}
+					}
+					return res;
+				}
+				// check that scrollbar is present
+				if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
+				xx = 9;
+				yy = 23;
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<storelist.Size(); i++ )
+				{
+					if ( !storelist[i] ) continue;
+					let def = GetDefaultByType(storelist[i]);
+					if ( sub )
+					{
+						int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
+						else str = def.GetTag();
+					}
+					else if ( storeunits[i] > 1 ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+					else str = def.GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+96);
+				totalcol = int(ceil(storelist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+				drag = 1;
+			}
+			else if ( (tabs[curtab] == TAB_LIBRARY) && !isrclick )
+			{
+				double midp = (language~=="jp")?206:126;
+				if ( mpos.x < midp )
+				{
+					if ( mpos.y < 28 )
+					{
+						// switch category
+						if ( mpos.x < midp/2. ) MenuEvent(MKEY_LEFT,false);
+						else MenuEvent(MKEY_RIGHT,false);
+					}
+					else
+					{
+						// check what item we clicked
+						int xx = 3;
+						int yy = 32;
+						int ofs = max(0,ofs0-26);
+						for ( int i=ofs; i<lorelist.Size(); i++ )
+						{
+							if ( yy > 370 ) break;
+							// check boundary
+							if ( (mpos.y >= yy) && (mpos.y < yy+14) )
+							{
+								if ( sel0 != i ) MenuSound("menu/demoscroll");
+								if ( (sel0 != i) || !sub )
+								{
+									sel0 = i;
+									sub = false;
+									MenuEvent(MKEY_Enter,false);
+								}
+								return res;
+							}
+							yy += 13;
+						}
+					}
+				}
+				else if ( mpos.x < midp+8 )
+				{
+					// check that scrollbar is present
+					if ( lorelist.Size() <= 27 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = lorelist.Size()-27;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step ) step += 26;
+					if ( step != ofs0 ) MenuSound("menu/demoscroll");
+					ofs0 = step;
+					drag = 1;
+				}
+				else if ( sub && (mpos.x >= 632) )
+				{
+					// check that scrollbar is present
+					str = StringTable.Localize(lorelist[sel0].text);
+					int ofs = (language~=="jp")?212:132;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel2 ) MenuSound("menu/demoscroll");
+					ofs2 = sel2 = step;
+					drag = 3;
+				}
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( isrclick )
+				{
+					MenuEvent(MKEY_CLEAR,false);
+					return res;
+				}
+				if ( !sub )
+				{
+					// check what item we clicked
+					if ( mpos.y < 377 )
+					{
+						if ( playerlist.Size() <= 0 ) return res;	// clicked nothing
+						int longest = 0, len;
+						int maxcol, totalcol;
+						for ( int i=0; i<playerlist.Size(); i++ )
+						{
+							str = players[playerlist[i]].GetUserName();
+							len = fnt.StringWidth(str);
+							if ( len > longest ) longest = len;
+						}
+						maxcol = 622/(longest+24);
+						totalcol = int(ceil(playerlist.Size()/22.));
+						int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+						xx = 9;
+						yy = 23;
+						int cols = 1;
+						for ( int i=ofs; i<playerlist.Size(); i++ )
+						{
+							str = players[playerlist[i]].GetUserName();
+							len = fnt.StringWidth(str);
+							// check text boundary
+							if ( (mpos.x >= xx) && (mpos.x < xx+len+1) && (mpos.y >= yy) && (mpos.y < yy+14) )
+							{
+								if ( sel0 != i ) MenuSound("menu/demoscroll");
+								ofs0 = sel0 = i;
+								MenuEvent(MKEY_Enter,false);
+								return res;
+							}
+							yy += 16;
+							if ( yy >= 370 )
+							{
+								xx += longest+24;
+								yy = 23;
+								cols++;
+								if ( cols > maxcol ) break;
+							}
+						}
+						return res;
+					}
+					// check that scrollbar is present (will it ever be???)
+					if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<playerlist.Size(); i++ )
+					{
+						str = players[playerlist[i]].GetUserName();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(playerlist.Size()/22.));
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+					drag = 1;
+				}
+				else if ( sel0 == -1 )
+				{
+					// are we clicking where the scrollbar should be?
+					if ( mpos.x < 632 ) return res;
+					if ( tradelib.ent.Size() <= 28 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = tradelib.ent.Size()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+					drag = 1;
+				}
+			}
+			else if ( (tabs[curtab] == TAB_CHAT) && !isrclick )
+			{
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				let bar = SWWMStatusBar(StatusBar);
+				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				// calculate offset
+				int szr = bar.FullHistory.Size()-1;
+				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
+			else if ( (tabs[curtab] == TAB_HELP) && !isrclick )
+			{
+				// are we clicking where the scrollbar should be?
+				String kstr;
+				if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
+				else kstr = mkey[0];
+				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
+			else if ( (tabs[curtab] == TAB_STATS) && !isrclick )
+			{
+				double midp = (language~=="jp")?206:126;
+				if ( mpos.x < midp )
+				{
+					// check what item we clicked
+					int xx = 9;
+					int yy = 23;
+					for ( int i=0; i<=STAT_ACHIEVEMENT; i++ )
+					{
+						// check boundary
+						if ( (mpos.y >= yy) && (mpos.y < yy+14) )
+						{
+							if ( sel1 != i )
+							{
+								MenuSound("menu/demoscroll");
+								ofs0 = sel0 = 0;
+								sel1 = i;
+								CVar.FindCVar('swwm_laststattab').SetInt(sel1);
+							}
+							return res;
+						}
+						yy += 16;
+					}
+					return res;
+				}
+				// are we clicking where the scrollbar should be?
+				if ( mpos.x < 632 ) return res;
+				int cnt = 0, num = 22;
+				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = filtered_lstats.Size();
+				else if ( sel1 == STAT_ACHIEVEMENT )
+				{
+					cnt = achievements.Size();
+					num = 7;
+				}
+				if ( cnt <= num ) return res;	// no scrollbar
+				// calculate offset
+				int szr = cnt-num;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+				drag = 1;
+			}
+		}
+		else if ( (type == MOUSE_Move) && drag )	// scroll dragging
+		{
+			if ( tabs[curtab] == TAB_MISSION )
+			{
+				String str;
+				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+				else str = StringTable.Localize(missionbacklog[sel1-1]);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+			else if ( (tabs[curtab] == TAB_INVENTORY) || ((tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1)) )
+			{
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !invlist[i] ) continue;
+					if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') ) str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+					else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) ) str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+					else str = invlist[i].GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+24);
+				totalcol = int(ceil(invlist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( tabs[curtab] == TAB_KEYS )
+			{
+				// check that scrollbar is present
+				if ( invlist.Size() <= 0 ) return res;	// definitely no scrollbar
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !invlist[i] ) continue;
+					str = invlist[i].GetTag();
+					if ( invlist[i] is 'SWWMCollectible' )
+						str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+24);
+				totalcol = int(ceil(invlist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( tabs[curtab] == TAB_STORE )
+			{
+				// check that scrollbar is present
+				if ( storelist.Size() <= 0 ) return res;	// definitely no scrollbar
+				xx = 9;
+				yy = 23;
+				int longest = 0, len;
+				int maxcol, totalcol;
+				for ( int i=0; i<storelist.Size(); i++ )
+				{
+					if ( !storelist[i] ) continue;
+					let def = GetDefaultByType(storelist[i]);
+					if ( sub )
+					{
+						int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+						if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
+						else str = def.GetTag();
+					}
+					else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
+					else str = def.GetTag();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+				}
+				maxcol = 622/(longest+96);
+				totalcol = int(ceil(storelist.Size()/22.));
+				if ( maxcol >= totalcol ) return res;	// no scrollbar
+				// calculate offset
+				int szr = totalcol-maxcol;
+				int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+				if ( step > 0 ) step += (maxcol-1);
+				if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+				ofs0 = step*22;
+			}
+			else if ( tabs[curtab] == TAB_LIBRARY )
+			{
+				if ( drag == 1 )
+				{
+					// check that scrollbar is present
+					if ( lorelist.Size() <= 27 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = lorelist.Size()-27;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step ) step += 26;
+					if ( step != ofs0 ) MenuSound("menu/demoscroll");
+					ofs0 = step;
+				}
+				else if ( drag == 3 )
+				{
+					// check that scrollbar is present
+					str = StringTable.Localize(lorelist[sel0].text);
+					int ofs = (language~=="jp")?212:132;
+					if ( lorelist.Size() > 26 ) ofs += 8;
+					BrokenLines l = fnt.BreakLines(str,635-ofs);
+					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
+					else return res;	// no scrollbar
+					// calculate offset
+					int szr = l.Count()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel2 ) MenuSound("menu/demoscroll");
+					ofs2 = sel2 = step;
+				}
+			}
+			else if ( tabs[curtab] == TAB_TRADING )
+			{
+				if ( !sub )
+				{
+					// check that scrollbar is present (will it ever be???)
+					if ( playerlist.Size() <= 0 ) return res;	// definitely no scrollbar
+					int longest = 0, len;
+					int maxcol, totalcol;
+					for ( int i=0; i<playerlist.Size(); i++ )
+					{
+						str = players[playerlist[i]].GetUserName();
+						len = fnt.StringWidth(str);
+						if ( len > longest ) longest = len;
+					}
+					maxcol = 622/(longest+24);
+					totalcol = int(ceil(invlist.Size()/22.));
+					if ( maxcol >= totalcol ) return res;	// no scrollbar
+					// calculate offset
+					int szr = totalcol-maxcol;
+					int step = clamp(rnd((mpos.x-5.)/(630./szr)),0,szr);
+					if ( step > 0 ) step += (maxcol-1);
+					if ( step != (ofs0/22) ) MenuSound("menu/demoscroll");
+					ofs0 = step*22;
+				}
+				else if ( sel0 == -1 )
+				{
+					if ( tradelib.ent.Size() <= 28 ) return res;	// no scrollbar
+					// calculate offset
+					int szr = tradelib.ent.Size()-28;
+					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+					if ( step != sel0 ) MenuSound("menu/demoscroll");
+					ofs0 = sel0 = step;
+				}
+			}
+			else if ( tabs[curtab] == TAB_CHAT )
+			{
+				let bar = SWWMStatusBar(StatusBar);
+				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				// calculate offset
+				int szr = bar.FullHistory.Size()-1;
+				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+			else if ( tabs[curtab] == TAB_HELP )
+			{
+				int k1, k2;
+				[k1, k2] = bindings.GetKeysForCommand("openmenu SWWMKnowledgeBaseMenu");
+				String kstr = bindings.NameKeys(k1,k2);
+				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+				BrokenLines l = fnt.BreakLines(str,629);
+				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				else return res;	// no scrollbar
+				// calculate offset
+				int szr = l.Count()-28;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+			else if ( tabs[curtab] == TAB_STATS )
+			{
+				int cnt = 0, num = 22;
+				if ( sel1 == STAT_MAIN ) cnt = statlist.Size();
+				else if ( sel1 == STAT_KILLS ) cnt = stats.mstats.Size();
+				else if ( sel1 == STAT_LEVEL ) cnt = filtered_lstats.Size();
+				else if ( sel1 == STAT_ACHIEVEMENT )
+				{
+					cnt = achievements.Size();
+					num = 7;
+				}
+				if ( cnt <= num ) return res;	// no scrollbar
+				// calculate offset
+				int szr = cnt-num;
+				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
+				if ( step != sel0 ) MenuSound("menu/demoscroll");
+				ofs0 = sel0 = step;
+			}
+		}
+		else if ( type == MOUSE_Release ) drag = 0;	// stop dragging any active scrolls
+		return res;
+	}
+
+	private bool CmpInventory( Inventory a, Inventory b )
+	{
+		int ta = 0, tb = 0;
+		if ( a is 'Weapon' ) ta = 2;
+		else if ( (a is 'BackpackItem') || (a is 'HammerspaceEmbiggener') ) ta = 3;
+		else if ( a is 'Ammo' ) ta = 4;
+		else if ( a is 'MagAmmo' ) ta = 5;
+		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || a.bBIGPOWERUP ) ta = -3;
+		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = -2;
+		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = -1;
+		else if ( a is 'PuzzleItem' ) ta = 1;
+		if ( b is 'Weapon' ) tb = 2;
+		else if ( (b is 'BackpackItem') || (b is 'HammerspaceEmbiggener') ) tb = 3;
+		else if ( b is 'Ammo' ) tb = 4;
+		else if ( b is 'MagAmmo' ) tb = 5;
+		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || b.bBIGPOWERUP ) tb = -3;
+		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = -2;
+		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = -1;
+		else if ( b is 'PuzzleItem' ) tb = 1;
+		if ( ta == tb )
+		{
+			if ( a is 'Weapon' )
+			{
+				bool dummy;
+				int slota, slotb;
+				[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(Weapon(a).GetClass());
+				if ( slota == 0 ) slota = 10;
+				[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(Weapon(b).GetClass());
+				if ( slotb == 0 ) slotb = 10;
+				if ( slota == slotb )
+					return (Weapon(a).SlotPriority <= Weapon(b).SlotPriority);
+				return slota > slotb;
+			}
+			else if ( a is 'Ammo' )
+			{
+				Class<Weapon> usesa, usesb;
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let w = (Class<Weapon>)(AllActorClasses[i]);
+					if ( !w ) continue;
+					let def = GetDefaultByType(w);
+					if ( w is 'SWWMWeapon' )
+					{
+						if ( SWWMWeapon(def).UsesAmmo(Ammo(a).GetClass()) )
+							usesa = w;
+						if ( SWWMWeapon(def).UsesAmmo(Ammo(b).GetClass()) )
+							usesb = w;
+					}
+					else
+					{
+						if ( (def.AmmoType1 == Ammo(a).GetClass()) || (def.AmmoType2 == Ammo(a).GetClass()) )
+							usesa = w;
+						if ( (def.AmmoType1 == Ammo(b).GetClass()) || (def.AmmoType2 == Ammo(b).GetClass()) )
+							usesb = w;
+					}
+					if ( usesa && usesb )
+						break;
+				}
+				if ( usesa && usesb )
+				{
+					bool dummy;
+					int slota, slotb;
+					[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(usesa);
+					if ( slota == 0 ) slota = 10;
+					[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(usesb);
+					if ( slotb == 0 ) slotb = 10;
+					if ( slota == slotb )
+					{
+						// sort by unit value
+						int vala = abs(a.default.Stamina);
+						int valb = abs(b.default.Stamina);
+						if ( vala == valb )
+						{
+							// sort alphabetically
+							return a.GetTag() > b.GetTag();
+						}
+						return vala > valb;
+					}
+					return slota > slotb;
+				}
+			}
+			else if ( a is 'MagAmmo' )
+			{
+				// oh boy this one gets complicated
+				Class<Ammo> pamoa, pamob;
+				pamoa = MagAmmo(a).ParentAmmo;
+				pamob = MagAmmo(b).ParentAmmo;
+				Class<Weapon> usesa, usesb;
+				for ( int i=0; i<AllActorClasses.Size(); i++ )
+				{
+					let w = (Class<Weapon>)(AllActorClasses[i]);
+					if ( !w ) continue;
+					let def = GetDefaultByType(w);
+					if ( w is 'SWWMWeapon' )
+					{
+						if ( SWWMWeapon(def).UsesAmmo(pamoa) )
+							usesa = w;
+						if ( SWWMWeapon(def).UsesAmmo(pamob) )
+							usesb = w;
+					}
+					else
+					{
+						if ( (def.AmmoType1 == pamoa) || (def.AmmoType2 == pamoa) )
+							usesa = w;
+						if ( (def.AmmoType1 == pamob) || (def.AmmoType2 == pamob) )
+							usesb = w;
+					}
+					if ( usesa && usesb )
+						break;
+				}
+				if ( usesa && usesb )
+				{
+					bool dummy;
+					int slota, slotb;
+					[dummy, slota] = players[consoleplayer].weapons.LocateWeapon(usesa);
+					if ( slota == 0 ) slota = 10;
+					[dummy, slotb] = players[consoleplayer].weapons.LocateWeapon(usesb);
+					if ( slotb == 0 ) slotb = 10;
+					if ( slota == slotb )
+					{
+						// sort by unit value
+						int vala = GetDefaultByType(pamoa).Stamina;
+						int valb = GetDefaultByType(pamob).Stamina;
+						if ( vala == valb )
+						{
+							// sort alphabetically
+							return a.GetTag() > b.GetTag();
+						}
+						return vala > valb;
+					}
+					return slota > slotb;
+				}
+			}
+			else
+			{
+				// sort by unit value
+				int vala = abs(a.default.Stamina);
+				int valb = abs(b.default.Stamina);
+				if ( vala == valb )
+				{
+					// sort alphabetically
+					return a.GetTag() > b.GetTag();
+				}
+				return vala > valb;
+			}
+		}
+		return ta > tb;
+	}
+
+	private bool CmpInventoryClass( Class<Inventory> a, Class<Inventory> b )
+	{
+		int ta = 0, tb = 0;
+		let da = GetDefaultByType(a);
+		let db = GetDefaultByType(b);
+		if ( a is 'Weapon' ) ta = 4;
+		else if ( a is 'HammerspaceEmbiggener' ) ta = 3;
+		else if ( a is 'Ammo' ) ta = 2;
+		else if ( a is 'MagAmmo' ) ta = 1;
+		else if ( (a is 'PowerupGiver') || (a is 'AmmoFabricator') || da.bBIGPOWERUP ) ta = 5;
+		else if ( (a is 'Health') || (a is 'HealthPickup') || (a is 'SWWMHealth') ) ta = 7;
+		else if ( (a is 'Armor') || (a is 'SWWMSpareArmor') ) ta = 6;
+		if ( b is 'Weapon' ) tb = 4;
+		else if ( b is 'HammerspaceEmbiggener' ) tb = 3;
+		else if ( b is 'Ammo' ) tb = 2;
+		else if ( b is 'MagAmmo' ) ta = 1;
+		else if ( (b is 'PowerupGiver') || (b is 'AmmoFabricator') || db.bBIGPOWERUP ) tb = 5;
+		else if ( (b is 'Health') || (b is 'HealthPickup') || (b is 'SWWMHealth') ) tb = 7;
+		else if ( (b is 'Armor') || (b is 'SWWMSpareArmor') ) tb = 6;
+		if ( ta == tb )
+		{
+			// sort by unit price
+			if ( abs(da.Stamina) == abs(db.Stamina) )
+			{
+				// sort alphabetically
+				return da.GetTag() > db.GetTag();
+			}
+			return abs(da.Stamina) > abs(db.Stamina);
+		}
+		return ta < tb;
+	}
+
+	private int partition_inventory( Array<Inventory> a, int l, int h )
+	{
+		Inventory pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpInventory(pv,a[j]) )
+			{
+				i++;
+				Inventory tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Inventory tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_inventory( Array<Inventory> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_inventory(a,l,h);
+		qsort_inventory(a,l,p-1);
+		qsort_inventory(a,p+1,h);
+	}
+
+	private int partition_store( Array<Class<Inventory> > a, Array<int> b, int l, int h )
+	{
+		Class<Inventory> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpInventoryClass(pv,a[j]) )
+			{
+				i++;
+				Class<Inventory> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+				int tmpi = b[j];
+				b[j] = b[i];
+				b[i] = tmpi;
+			}
+		}
+		Class<Inventory> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		int tmpi = b[h];
+		b[h] = b[i+1];
+		b[i+1] = tmpi;
+		return i+1;
+	}
+	private void qsort_store( Array<Class<Inventory> > a, Array<int> b, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_store(a,b,l,h);
+		qsort_store(a,b,l,p-1);
+		qsort_store(a,b,p+1,h);
+	}
+
+	private bool CmpMonsterKill( MonsterKill a, MonsterKill b )
+	{
+		if ( a.kills == b.kills )
+		{
+			// sort by name instead
+			String taga, tagb;
+			taga = GetDefaultByType(a.m).GetTag();
+			tagb = GetDefaultByType(b.m).GetTag();
+			// beautify if there's no tag
+			if ( taga == FallbackTag )
+			{
+				taga = a.m.GetClassName();
+				SWWMUtility.BeautifyClassName(taga);
+			}
+			if ( tagb == FallbackTag )
+			{
+				tagb = a.m.GetClassName();
+				SWWMUtility.BeautifyClassName(tagb);
+			}
+			return taga > tagb;
+		}
+		return a.kills < b.kills;
+	}
+
+	private int partition_mstats( Array<MonsterKill> a, int l, int h )
+	{
+		MonsterKill pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpMonsterKill(pv,a[j]) )
+			{
+				i++;
+				MonsterKill tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		MonsterKill tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_mstats( Array<MonsterKill> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_mstats(a,l,h);
+		qsort_mstats(a,l,p-1);
+		qsort_mstats(a,p+1,h);
+	}
+
+	private int partition_lore( Array<SWWMLore> a, int l, int h )
+	{
+		SWWMLore pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( StringTable.Localize(pv.tag) > StringTable.Localize(a[j].tag) )
+			{
+				i++;
+				SWWMLore tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		SWWMLore tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_lore( Array<SWWMLore> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_lore(a,l,h);
+		qsort_lore(a,l,p-1);
+		qsort_lore(a,p+1,h);
+	}
+
+	private bool CmpCollectible( Inventory a, Inventory b )
+	{
+		if ( a.Stamina == b.Stamina )
+		{
+			// alphabetic
+			return a.GetTag() > b.GetTag();
+		}
+		// descending value
+		return a.default.Stamina < b.default.Stamina;
+	}
+
+	private int partition_collectible( Array<Inventory> a, int l, int h )
+	{
+		Inventory pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpCollectible(pv,a[j]) )
+			{
+				i++;
+				Inventory tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Inventory tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_collectible( Array<Inventory> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_collectible(a,l,h);
+		qsort_collectible(a,l,p-1);
+		qsort_collectible(a,p+1,h);
+	}
+
+	private bool CmpAchievement( SWWMAchievement a, SWWMAchievement b )
+	{
+		bool adone = !!(a.state.GetInt()), bdone = !!(b.state.GetInt());
+		double afactor = adone?1.:0., bfactor = bdone?1.:0.;
+		if ( a.progress )
+		{
+			int cur = clamp(a.progress.GetInt(),0,a.maxval);
+			afactor = cur/double(a.maxval);
+		}
+		if ( b.progress )
+		{
+			int cur = clamp(b.progress.GetInt(),0,b.maxval);
+			bfactor = cur/double(b.maxval);
+		}
+		// sort by base index
+		if ( adone && bdone ) return a.baseindex > b.baseindex;
+		if ( !adone && !bdone )
+		{
+			// progress sort?
+			if ( afactor != bfactor )
+				return afactor < bfactor;
+			// sort by base index
+			return a.baseindex > b.baseindex;
+		}
+		// state sort
+		return bdone;
+	}
+
+	private int partition_achievements( Array<SWWMAchievement> a, int l, int h )
+	{
+		SWWMAchievement pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpAchievement(pv,a[j]) )
+			{
+				i++;
+				SWWMAchievement tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		SWWMAchievement tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_achievements( Array<SWWMAchievement> a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_achievements(a,l,h);
+		qsort_achievements(a,l,p-1);
+		qsort_achievements(a,p+1,h);
+	}
+
+	override void Ticker()
+	{
+		Super.Ticker();
+		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || isclosing )
+		{
+			// ded (or force close)
+			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
+			Close();
+			return;
+		}
+		if ( swwm_menupause ) menuactive = Menu.On;
+		else menuactive = Menu.OnNoPause;
+		// forcibly tick hud (mainly so interpolators can still update in the background)
+		if ( !multiplayer && (menuactive == Menu.On) )
+			StatusBar.Tick();
+		if ( tabs[curtab] == TAB_INVENTORY )
+		{
+			invlist.Clear();
+			// alphabetically sorted inventory
+			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
+			{
+				if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectible') && !(inv is 'MagAmmo') || (inv is 'SWWMCollectible') ) continue;
+				// no hidden weapons
+				if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
+				String tag = inv.GetTag();
+				bool greater = false;
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					String tag2 = invlist[i].GetTag();
+					if ( tag > tag2 ) continue;
+					greater = true;
+					invlist.Insert(i,inv);
+					break;
+				}
+				if ( greater ) continue;
+				invlist.Push(inv);
+			}
+			// re-sort by category
+			qsort_inventory(invlist,0,invlist.Size()-1);
+			// crop selection
+			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
+		}
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_KILLS) )
+		{
+			sorted_mstats.Copy(stats.mstats);
+			qsort_mstats(sorted_mstats,0,sorted_mstats.Size()-1);
+		}
+		else if ( tabs[curtab] == TAB_KEYS )
+		{
+			invlist.Clear();
+			if ( !deathmatch )
+			{
+				// keys sorted by their index
+				int n = Key.GetKeyTypeCount();
+				for ( int i=0; i<n; i++ )
+				{
+					let k = Key(players[consoleplayer].mo.FindInventory(Key.GetKeyType(i)));
+					if ( !k ) continue;
+					invlist.Push(k);
+				}
+				// because we can't call GetReplacement from ui, let's wrangle something real ugly here to clean up replaced keys
+				for ( int i=0; i<invlist.Size(); i++ )
+				{
+					if ( !(invlist[i] is 'SWWMKey') ) continue;
+					// remove the key this replaces
+					Class<Key> pc = invlist[i].Species;
+					if ( !pc ) continue;
+					for ( int j=0; j<invlist.Size(); j++ )
+					{
+						if ( invlist[j].GetClass() != pc ) continue;
+						invlist.Delete(j);
+						j--;
+						if ( i >= j ) i--;
+					}
+				}
+			}
+			// collectibles, sorted by name
+			Array<Inventory> cols;
+			for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
+			{
+				if ( inv is 'SWWMCollectible' )
+					cols.Push(inv);
+			}
+			qsort_collectible(cols,0,cols.Size()-1);
+			invlist.Append(cols);
+			// crop selection
+			if ( sel0 >= invlist.Size() ) sel0 = max(0,invlist.Size()-1);
+		}
+		else if ( tabs[curtab] == TAB_STORE )
+		{
+			Class<Inventory> lastsel = null;
+			if ( storelist.Size() > 0 ) lastsel = storelist[sel0];
+			storelist.Clear();
+			storeunits.Clear();
+			// price-sorted buyables/sellables
+			for ( int i=0; i<AllActorClasses.Size(); i++ )
+			{
+				let type = (Class<Inventory>)(AllActorClasses[i]);
+				if ( !type ) continue;
+				// no collectibles
+				if ( type is 'SWWMCollectible' ) continue;
+				// no barriers outside doom
+				if ( !(gameinfo.gametype&GAME_DOOM) && (type is 'EBarrier') ) continue;
+				// no gravity/tether outside raven
+				if ( !(gameinfo.gametype&GAME_RAVEN) && ((type is 'GravitySuppressor') || (type is 'SafetyTether')) ) continue;
+				// can't sell candygun spares
+				if ( sub && (type is 'CandyGunSpares') ) continue;
+				let cur = players[consoleplayer].mo.FindInventory(type);
+				// skip items we don't own or are depleted if selling
+				if ( sub && (!cur || (cur.Amount <= 0)) ) continue;
+				else if ( !sub )
+				{
+					// skip maxed items if buying
+					if ( cur && (cur.Amount >= cur.MaxAmount) ) continue;
+					// ignore ammo for weapons not owned if buying
+					bool notownedammo = false;
+					if ( type is 'Ammo' )
+					{
+						notownedammo = true;
+						let amo = (Class<Ammo>)(type);
+						for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.inv )
+						{
+							if ( !(inv is 'Weapon') ) continue;
+							if ( (Weapon(inv).AmmoType1 == amo) || (Weapon(inv).AmmoType2 == amo) )
+							{
+								notownedammo = false;
+								break;
+							}
+							if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).UsesAmmo(amo) )
+							{
+								notownedammo = false;
+								break;
+							}
+						}
+					}
+					if ( notownedammo ) continue;
+				}
+				let inv = GetDefaultByType(type);
+				// skip unimplemented weapons
+				if ( type is 'Weapon' )
+				{
+					let ready = inv.FindState("Ready");
+					if ( !ready || !ready.ValidateSpriteFrame() ) continue;
+				}
+				// ignore child ammos
+				if ( (type is 'Ammo') && (type.GetParentClass() != 'SWWMAmmo') ) continue;
+				if ( inv.Stamina == 0 ) continue;
+				// items with negative stamina can only be sold
+				if ( (inv.Stamina < 0) && !sub ) continue;
+				int amt = inv.Amount;
+				int price = int(abs(inv.Stamina)*(1.+.75*(amt-1)));
+				if ( type is 'Ammo' )
+				{
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;	// we can sell ALL our ammo
+					else maxamt = cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					// get the largest affordable child pickup amount (that we need, or we can sell)
+					for ( int j=0; j<AllActorClasses.Size(); j++ )
+					{
+						let type2 = (Class<Ammo>)(AllActorClasses[j]);
+						if ( !type2 || (type2.GetParentClass() != type) ) continue;
+						let inv2 = GetDefaultByType(type2);
+						int cprice = int(abs(inv.Stamina)*(1.+.75*(inv2.Amount-1)));
+						if ( (inv2.Amount > amt) && (inv2.Amount <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
+						{
+							price = cprice;
+							amt = inv2.Amount;
+						}
+					}
+				}
+				// nuggets can be bought/sold in bulk
+				else if ( type is 'HealthNuggetItem' )
+				{
+					let inv2 = GetDefaultByType(SWWMHealth(inv).giveme);
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;
+					else
+					{
+						maxamt = (inv2.MaxAmount-players[consoleplayer].Health);
+						maxamt += cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					}
+					for ( int j=5; j<=20; j+=5 )
+					{
+						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
+						if ( (j <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
+						{
+							price = cprice;
+							amt = j;
+						}
+					}
+				}
+				else if ( type is 'ArmorNuggetItem' )
+				{
+					let inv2 = GetDefaultByType(SWWMSpareArmor(inv).giveme);
+					let cur2 = players[consoleplayer].mo.FindInventory(SWWMSpareArmor(inv).giveme);
+					int maxamt;
+					if ( sub ) maxamt = cur.Amount;
+					else
+					{
+						maxamt = cur2?(cur2.MaxAmount-cur2.Amount):inv2.MaxAmount;
+						maxamt += cur?(cur.MaxAmount-cur.Amount):inv.MaxAmount;
+					}
+					for ( int j=5; j<=20; j+=5 )
+					{
+						int cprice = int(inv.Stamina*(1.+.75*(j-1)));
+						if ( (j <= maxamt) && (sub || SWWMCredits.CanTake(players[consoleplayer],cprice)) )
+						{
+							price = cprice;
+							amt = j;
+						}
+					}
+				}
+				// sort by unit price
+				bool greater = false;
+				for ( int j=0; j<storelist.Size(); j++ )
+				{
+					let inv2 = GetDefaultByType(storelist[j]);
+					if ( abs(inv.Stamina) > abs(inv2.Stamina) ) continue;
+					greater = true;
+					storelist.Insert(j,type);
+					storeunits.Insert(j,amt);
+					break;
+				}
+				if ( greater ) continue;
+				storelist.Push(type);
+				storeunits.Push(amt);
+			}
+			// re-sort by category
+			qsort_store(storelist,storeunits,0,storelist.Size()-1);
+			// shift back if the last selected item was removed
+			if ( lastsel && (storelist.Find(lastsel)) >= storelist.Size() )
+				sel0 = max(0,sel0-1);
+			// crop selection
+			if ( sel0 >= storelist.Size() ) sel0 = max(0,storelist.Size()-1);
+		}
+		else if ( tabs[curtab] == TAB_LIBRARY )
+		{
+			// remember last position/size
+			SWWMLore oldone = null;
+			int oldsiz = lorelist.Size();
+			if ( lorelist.Size() > 0 ) oldone = lorelist[sel0];
+			// lore lore lore
+			lorelist.Clear();
+			for ( int i=0; i<lorelib.ent.Size(); i++ )
+			{
+				if ( lorelib.ent[i].tab != sel1 ) continue;
+				lorelist.Push(lorelib.ent[i]);
+			}
+			// sort
+			qsort_lore(lorelist,0,lorelist.Size()-1);
+			// readjust
+			if ( oldone && (lorelist.Size() != oldsiz) )
+			{
+				int idx = lorelist.Find(oldone);
+				if ( (idx > 0) && (idx < lorelist.Size()) )
+					sel0 = idx;
+				// update ofs so selection stays on-screen
+				int ofs = max(ofs0-26,0);
+				if ( sel0 < ofs ) ofs0 = sel0+26;
+				else if ( sel0 > ofs+26 ) ofs0 = sel0;
+			}
+			// add "new entries" message
+			if ( lorelib.ent.Size() != oldloresiz )
+			{
+				tmsg = StringTable.Localize("$SWWM_NEWLORE");
+				tmsgtic = gametic+70;
+			}
+			oldloresiz = lorelib.ent.Size();
+		}
+		else if ( tabs[curtab] == TAB_TRADING )
+		{
+			// build player list
+			int oldnplayers = playerlist.Size();
+			playerlist.Clear();
+			for ( int i=0; i<MAXPLAYERS; i++ )
+			{
+				if ( !playeringame[i] || (i == consoleplayer) ) continue;
+				if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+				playerlist.Push(i);
+			}
+			if ( (playerlist.Size() != oldnplayers) && sub && (sel0 != -1) )
+			{
+				// go back, the player list changed
+				MenuSound("menu/democlose");
+				sub = false;
+				ofs0 = sel0 = 0;
+			}
+			// build inventory list if open
+			if ( sub && (sel0 != -1) )
+			{
+				invlist.Clear();
+				// alphabetically sorted inventory
+				for ( Inventory inv=players[consoleplayer].mo.Inv; inv; inv=inv.Inv )
+				{
+					if ( (inv.Amount <= 0) || !inv.SpawnState.ValidateSpriteFrame() || (inv is 'Key') || (inv is 'BasicArmor') || (inv is 'HexenArmor') || (inv is 'Powerup') || (inv is 'SWWMArmor') || (!(inv is 'Ammo') && !(inv is 'Weapon') && !inv.bINVBAR) && !(inv is 'HammerspaceEmbiggener') && !(inv is 'SWWMCollectible') && !(inv is 'MagAmmo') || (inv is 'SWWMCollectible') ) continue;
+					// no hidden weapons
+					if ( (inv is 'SWWMWeapon') && SWWMWeapon(inv).bHIDEINMENU ) continue;
+					String tag = inv.GetTag();
+					bool greater = false;
+					for ( int i=0; i<invlist.Size(); i++ )
+					{
+						String tag2 = invlist[i].GetTag();
+						if ( tag > tag2 ) continue;
+						greater = true;
+						invlist.Insert(i,inv);
+						break;
+					}
+					if ( greater ) continue;
+					invlist.Push(inv);
+				}
+				// re-sort by category
+				qsort_inventory(invlist,0,invlist.Size()-1);
+				// crop selection
+				if ( sel1 >= invlist.Size() ) sel1 = max(0,invlist.Size()-1);
+			}
+		}
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_MAIN) )
+		{
+			statlist.Clear();
+			// wish I could use macros for this
+			int thour = ((level.totaltime-stats.lastspawn)/(3600*GameTicRate));
+			int tmin = ((level.totaltime-stats.lastspawn)/(60*GameTicRate))%60;
+			int tsec = ((level.totaltime-stats.lastspawn)/GameTicRate)%60;
+			String str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATUPTIME"),thour,tmin,tsec);
+			statlist.Push(str);
+			if ( stats.grounddist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATONFOOT"),stats.grounddist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.airdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFLIGHT"),stats.airdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.swimdist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSWIM"),stats.swimdist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			if ( stats.teledist > 32000. ) str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATTELE"),stats.teledist/32000.,StringTable.Localize("$SWWM_UNIT_KILOMETER"));
+			else str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATTELE"),stats.teledist/32.,StringTable.Localize("$SWWM_UNIT_METER"));
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBOOST"),stats.boostcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDASH"),stats.dashcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSTOMP"),stats.stompcount);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATFUEL"),stats.fuelusage,StringTable.Localize("$SWWM_UNIT_LITER"));
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%g\cu%s\c-",StringTable.Localize("$SWWM_STATSPEED"),(stats.topspeed*3600.*GameTicRate)/32000.,StringTable.Localize("$SWWM_UNIT_KPH"));
+			statlist.Push(str);
+			thour = (stats.airtime/(3600*GameTicRate));
+			tmin = (stats.airtime/(60*GameTicRate))%60;
+			tsec = (stats.airtime/GameTicRate)%60;
+			str = String.Format("\cx%s\c-%02d\cu:\c-%02d\cu:\c-%02d",StringTable.Localize("$SWWM_STATAIRTIME"),thour,tmin,tsec);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATPARRY"),stats.parries);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATPPARRY"),stats.pparries);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATWPONCH"),stats.wponch);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUSTS"),stats.busts);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATBUTTS"),stats.buttslams);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATPATS"),stats.pats);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKISS"),stats.smooch);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATFRIENDS"),stats.befriend);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATITEMS"),stats.items);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSECRETS"),stats.secrets);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATKILLS"),stats.kills);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDEATHS"),stats.deaths);
+			statlist.Push(str);
+			if ( stats.hdamagedealt > 0 ) str = str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDDEALT"),stats.hdamagedealt,stats.damagedealt);
+			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDDEALT"),stats.damagedealt);
+			statlist.Push(str);
+			if ( stats.hdamagetaken > 0 ) str = String.Format("\cx%s\c-%d%09d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.hdamagetaken,stats.damagetaken);
+			else str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATDTAKEN"),stats.damagetaken);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTDEALT"),stats.topdealt);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATTTAKEN"),stats.toptaken);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATMKILL"),stats.mkill);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-%d",StringTable.Localize("$SWWM_STATSKILL"),stats.skill);
+			statlist.Push(str);
+			str = String.Format("\cx%s\c-",StringTable.Localize("$SWWM_STATFAVWEAP"));
+			if ( stats.favweapon == -1 ) str = str.."N/A";
+			else if ( stats.wstats[stats.favweapon].w == 'SWWMWeapon' ) str = str..StringTable.Localize("$SWWM_YOURSELF");
+			else if ( stats.wstats[stats.favweapon].w == 'SWWMGesture' ) str = str..StringTable.Localize("$SWWM_DOKIDOKI");
+			else if ( stats.wstats[stats.favweapon].w == 'SWWMItemGesture' ) str = str..StringTable.Localize("$T_FROGGY");
+			else if ( stats.wstats[stats.favweapon].w == 'Weapon' ) str = str..StringTable.Localize("$SWWM_GRAVKILL");
+			else if ( stats.wstats[stats.favweapon].w == 'DoomWeapon' ) str = str..StringTable.Localize("$SWWM_PARRYKILL");
+			else
+			{
+				let def = GetDefaultByType(stats.wstats[stats.favweapon].w);
+				str = str..def.GetTag();
+			}
+			statlist.Push(str);
+			if ( stats.hhiscore > 0 ) str = String.Format("\cx%s\cu¥\c-%d%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hhiscore,stats.hiscore);
+			else str = String.Format("\cx%s\cu¥\c-%09d",StringTable.Localize("$SWWM_STATHISCORE"),stats.hiscore);
+			statlist.Push(str);
+		}
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_LEVEL) )
+		{
+			filtered_lstats.Clear();
+			bool shouldfilter = swwm_uniqstats;
+			for ( int i=0; i<stats.lstats.Size(); i++ )
+			{
+				for ( int j=0; j<filtered_lstats.Size(); j++ )
+				{
+					if ( !shouldfilter || ((filtered_lstats[j].mapname != stats.lstats[i].mapname) && (filtered_lstats[j].mapname != level.mapname)) ) continue;
+					filtered_lstats.Delete(j);
+					j--;
+				}
+				filtered_lstats.Push(stats.lstats[i]);
+			}
+			if ( !curlstat ) curlstat = new("LevelStat");
+			curlstat.hub = !!(level.clusterflags&level.CLUSTER_HUB);
+			curlstat.levelname = level.levelname;
+			int iof = curlstat.levelname.IndexOf(" - by: ");
+			if ( iof != -1 ) curlstat.levelname.Truncate(iof);
+			curlstat.mapname = level.mapname;
+			curlstat.kcount = level.killed_monsters;
+			curlstat.ktotal = level.total_monsters;
+			curlstat.icount = level.found_items;
+			curlstat.itotal = level.total_items;
+			curlstat.scount = level.found_secrets;
+			curlstat.stotal = level.total_secrets;
+			curlstat.time = level.maptime;
+			curlstat.par = level.partime;
+			curlstat.suck = level.sucktime;
+			filtered_lstats.Push(curlstat);
+		}
+		else if ( (tabs[curtab] == TAB_STATS) && (sel1 == STAT_ACHIEVEMENT) )
+			qsort_achievements(achievements,0,achievements.Size()-1);
+		// ui->play transaction checks
+		for ( int i=0; i<checklist.Size(); i++ )
+		{
+			bool deleteme = false;
+			for ( int j=0; j<hnd.checklist.Size(); j++ )
+			{
+				if ( hnd.checklist[j].uid != checklist[i].uid ) continue;
+				if ( checklist[i].type == MenuTransaction.TT_ITEMUSE )
+				{
+					// check if use succeeded
+					if ( checklist[i].result || hnd.checklist[j].result )
+					{
+						// only play use sound if game isn't frozen
+						if ( !multiplayer && (menuactive == Menu.On) )
+						{
+							// if it's a weapon, play the select sound
+							// if it's a collectible or key, play the "hands up" sound
+							let w = (Class<Weapon>)(hnd.checklist[j].used);
+							if ( w )
+							{
+								// play if actually switching
+								if ( hnd.checklist[j].result )
+								{
+									String snd = GetDefaultByType(w).UpSound;
+									MenuSound(snd);
+								}
+							}
+							else if ( (hnd.checklist[j].used is 'SWWMCollectible') || (hnd.checklist[j].used is 'SWWMKey') )
+								MenuSound("demolitionist/handsup");
+							else
+							{
+								String snd = GetDefaultByType(hnd.checklist[j].used).UseSound;
+								MenuSound(snd);
+							}
+						}
+					}
+					else
+					{
+						tmsg = StringTable.Localize("$SWWM_INVFAIL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMDROP )
+				{
+					// check if drop succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_INVNDROP");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+				}
+				else if ( checklist[i].type == MenuTransaction.TT_ITEMSEND )
+				{
+					// check if trade succeeded
+					if ( !hnd.checklist[j].result )
+					{
+						tmsg = StringTable.Localize("$SWWM_TRADEFULL");
+						tmsgtic = gametic+70;
+						MenuSound("menu/noinvuse");
+					}
+					else MenuSound("menu/demosel");
+				}
+				EventHandler.SendNetworkEvent("swwmcleartransaction",checklist[i].uid,consoleplayer);
+				deleteme = true;
+				break;
+			}
+			if ( !deleteme ) continue;
+			checklist.Delete(i);
+			i--;
+		}
+	}
+
+	override bool OnUiEvent( UIEvent ev )
+	{
+		switch ( ev.type )
+		{
+		case UIEvent.Type_KeyDown:
+			if ( ev.keychar == UiEvent.Key_F1 )
+			{
+				if ( tabs[curtab] == TAB_HELP )
+				{
+					tabs.Delete(curtab);
+					curtab = oldtab;
+				}
+				else
+				{
+					if ( tabs[curtab] >= TAB_SECRET )
+					{
+						tabs.Delete(curtab);
+						curtab--;
+					}
+					oldtab = curtab;
+					tabs.Push(TAB_HELP);
+					curtab = tabs.Size()-1;
+				}
+				sel0 = sel1 = sel2 = 0;
+				ofs0 = ofs1 = ofs2 = 0;
+				sub = false;
+				invlist.Clear();
+				lorelist.Clear();
+				storelist.Clear();
+				storeunits.Clear();
+				MenuSound("menu/demotab");
+				return true;
+			}
+			switch ( kcode )
+			{
+			case 8:
+				if ( ev.keystring ~== "B" )
+					kcode++;
+				else kcode = 0;
+				break;
+			case 9:
+				if ( ev.keystring ~== "A" ) kcode++;
+				else kcode = 0;
+				break;
+			default:
+				kcode = 0;
+				break;
+			}
+			if( (ikey[0] && (ev.keystring == mkey[0])) || (ikey[1] && (ev.keystring == mkey[1])) )
+			{
+				MenuSound("menu/democlose");
+				EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
+				Close();
+				return true;
+			}
+			break;
+		case UIEvent.Type_WheelDown:
+			if ( (tabs[curtab] == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			{
+				// special handling, need to check which side is being scrolled
+				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+				Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+				Vector2 origin = (ss.x-640,ss.y-400)/2.;
+				Vector2 mpos = (curmouse/hs)-origin;
+				double midp = (language~=="jp")?206:126;
+				if ( ((lorelist.Size() > 27) && (mpos.x < midp+8)) || (mpos.x < midp) )
+				{
+					MenuSound("menu/democlose");
+					sub = false;
+				}
+			}
+			return MenuEvent(MKEY_DOWN,false);
+			break;
+		case UIEvent.Type_WheelUp:
+			if ( (tabs[curtab] == TAB_LIBRARY) && sub && (lorelist.Size() > 1) )
+			{
+				// special handling, need to check which side is being scrolled
+				double hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+				Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+				Vector2 origin = (ss.x-640,ss.y-400)/2.;
+				Vector2 mpos = (curmouse/hs)-origin;
+				double midp = (language~=="jp")?206:126;
+				if ( ((lorelist.Size() > 27) && (mpos.x < midp+8)) || (mpos.x < midp) )
+				{
+					MenuSound("menu/democlose");
+					sub = false;
+				}
+			}
+			return MenuEvent(MKEY_UP,false);
+			break;
+		case UIEvent.Type_LButtonDown:
+			isrclick = false;
+			// copy over what base menus do for L click
+			// but ignore back button, since we don't use it
+			bool lres = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( lres ) SetCapture(true);
+			return lres;
+			break;
+		case UIEvent.Type_RButtonDown:
+			isrclick = true;
+			// same as L click
+			bool rres = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( rres ) SetCapture(true);
+			return rres;
+			break;
+		case UIEvent.Type_LButtonUp:
+		case UIEvent.Type_RButtonUp:
+			// copy over what base menus do for release
+			// but ignore back button, since we don't use it
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				return MouseEvent(MOUSE_Release,ev.MouseX,ev.MouseY);
+			}
+			break;
+		case UIEvent.Type_MouseMove:
+			// store coords beforehand
+			curmouse = (ev.MouseX,ev.MouseY);
+			if ( mMouseCapture || (m_use_mouse == 1) )
+				return MouseEvent(MOUSE_Move,ev.MouseX,ev.MouseY);
+			break;
+		}
+		return false;
+	}
+
+	override void Drawer()
+	{
+		if ( isclosing ) return;
+		Font fnt = LangFont(TewiFont);
+		String str;
+		double hs;
+		if ( (Screen.GetWidth() < 640) || (Screen.GetHeight() < 400) ) hs = max(min(floor(Screen.GetWidth()/320.),floor(Screen.GetHeight()/200.)),1.)/2.;
+		else hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/400.)),1.);
+		Vector2 ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		Vector2 origin = (ss.x-640,ss.y-400)/2.;
+		if ( swwm_fuzz )
+			Screen.DrawTexture(FancyBg,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Add,DTA_Alpha,.5);
+		Screen.DrawTexture(MainWindow,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// draw tabs
+		double xx = 3, yy = 0;
+		static const string tabnames[] =
+		{
+			"$SWWM_MISSTAB", "$SWWM_STATTAB", "$SWWM_INVTAB", "$SWWM_KEYTAB",
+			"$SWWM_KBASETAB", "$SWWM_STORETAB", "$SWWM_TRADETAB", "$SWWM_CHATTAB",
+			"$SWWM_SECRETTAB", "$SWWM_HELPTAB"
+		};
+		static const string ltabnames[] =
+		{
+			"$SWWM_LORETAB0", "$SWWM_LORETAB1", "$SWWM_LORETAB2"
+		};
+		static const string stabnames[] =
+		{
+			"$SWWM_STATTAB0", "$SWWM_STATTAB1", "$SWWM_STATTAB2", "$SWWM_STATTAB3"
+		};
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			str = StringTable.Localize(tabnames[tabs[i]]);
+			Screen.DrawText(fnt,(curtab==i)?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += fnt.StringWidth(str)+2;
+			Screen.DrawTexture(TabSeparator,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += 4;
+		}
+		int muns1, muns2;
+		[muns1, muns2] = SWWMCredits.Get(players[consoleplayer]);
+		str = "\cg¥\c-";
+		if ( muns2 > 0 ) str.AppendFormat("%d",muns2);
+		str.AppendFormat("%09d",muns1);
+		xx = 637-TewiFont.StringWidth(str);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// draw bottom messages
+		yy = 386;
+		if ( gametic < tmsgtic ) str = tmsg;
+		else str = CrimeTime();
+		xx = 4;
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		str = "DemolitionOS v1.0";
+		xx = 637-fnt.StringWidth(str);
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// draw contents
+		if ( tabs[curtab] == TAB_MISSION )
+		{
+			String str;
+			if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
+			else str = StringTable.Localize(missionbacklog[sel1-1]);
+			BrokenLines l = fnt.BreakLines(str,629);
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+			xx = 6;
+			yy = 17;
+			int ofs = clamp(sel0,0,max(0,l.Count()-28));
+			for ( int i=ofs; i<l.Count(); i++ )
+			{
+				if ( yy >= 370 ) break;
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,sel1?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 13;
+			}
+			int csiz = missionbacklog.Size();
+			// scrollbar
+			if ( l.Count() > 28 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = l.Count()-28;
+				yy = floor(ofs*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				// page count
+				if ( csiz > 0 )
+				{
+					str = String.Format("%d \cf/\c- %d",sel1+1,csiz+1);
+					Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+629)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( csiz > 0 )
+			{
+				str = String.Format("%d \cf/\c- %d",sel1+1,csiz+1);
+				Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+637)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_STATS )
+		{
+			// categories
+			xx = 9;
+			yy = 23;
+			int twidth = (language~=="jp")?194:114;
+			for ( int i=0; i<=STAT_ACHIEVEMENT; i++ )
+			{
+				str = StringTable.Localize(stabnames[i]);
+				Screen.DrawText(fnt,(i==sel1)?Font.CR_FIRE:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 16;
+			}
+			xx += twidth+2;
+			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// stat contents
+			if ( sel1 == STAT_MAIN )
+			{
+				xx += 9;
+				yy = 23;
+				int cnt = statlist.Size();
+				if ( cnt <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				int ofs = clamp(sel0,0,max(0,cnt-22));
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = statlist[i];
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 16;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sel1 == STAT_KILLS )
+			{
+				xx += 9;
+				yy = 23;
+				int cnt = sorted_mstats.Size();
+				if ( cnt <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				int ofs = clamp(sel0,0,max(0,cnt-22));
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = GetDefaultByType(sorted_mstats[i].m).GetTag(FallbackTag);
+					// beautify if there's no tag
+					if ( str == FallbackTag )
+					{
+						str = sorted_mstats[i].m.GetClassName();
+						SWWMUtility.BeautifyClassName(str);
+					}
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					str = String.Format("%d",sorted_mstats[i].kills);
+					int len = fnt.StringWidth(str);
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+((cnt>22)?623:631)-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 16;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sel1 == STAT_LEVEL )
+			{
+				xx += 9;
+				yy = 23;
+				int cnt = filtered_lstats.Size();
+				if ( cnt <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOSTAT");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				int ofs = clamp(sel0,0,max(0,cnt-22));
+				let fnt2 = LangFont(MiniwiFont);
+				// calc lengths
+				int len[4], maxlen[4];
+				for ( int i=0; i<4; i++ ) maxlen[i] = 0;
+				for ( int i=0; i<cnt; i++ )
+				{
+					int sec = Thinker.Tics2Seconds(filtered_lstats[i].time);
+					str = String.Format("T %02d:%02d:%02d",sec/3600,(sec%3600)/60,sec%60);
+					len[0] = fnt2.StringWidth(str);
+					if ( len[0] > maxlen[0] ) maxlen[0] = len[0];
+					str = String.Format("S %d/%d",filtered_lstats[i].scount,filtered_lstats[i].stotal);
+					len[1] = fnt2.StringWidth(str);
+					if ( len[1] > maxlen[1] ) maxlen[1] = len[1];
+					str = String.Format("I %d/%d",filtered_lstats[i].icount,filtered_lstats[i].itotal);
+					len[2] = fnt2.StringWidth(str);
+					if ( len[2] > maxlen[2] ) maxlen[2] = len[2];
+					str = String.Format("K %d/%d",filtered_lstats[i].kcount,filtered_lstats[i].ktotal);
+					len[3] = fnt2.StringWidth(str);
+					if ( len[3] > maxlen[3] ) maxlen[3] = len[3];
+				}
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 370 ) break;
+					str = filtered_lstats[i].hub?filtered_lstats[i].levelname:String.Format("%s - %s",filtered_lstats[i].mapname.MakeUpper(),filtered_lstats[i].levelname);
+					if ( filtered_lstats[i] == curlstat ) str = "\cd▸\c- "..str;
+					bool smallname = fnt.StringWidth(str)>(620-(xx+maxlen[3]+maxlen[2]+maxlen[1]+maxlen[0]+24));
+					if ( smallname ) yy += 2;
+					Screen.DrawText(smallname?fnt2:fnt,Font.CR_FIRE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					if ( !smallname ) yy += 2;
+					int ox = ((cnt>22)?623:631);
+					int sec = Thinker.Tics2Seconds(filtered_lstats[i].time);
+					str = String.Format("%02d\cu:\c-%02d\cu:\c-%02d",sec/3600,(sec%3600)/60,sec%60);
+					Screen.DrawText(fnt2,((filtered_lstats[i].suck>0)&&(sec>=(filtered_lstats[i].suck*3600)))?Font.CR_RED:(sec<=filtered_lstats[i].par)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[0],origin.y+yy,"T",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[0]+8;
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].scount,filtered_lstats[i].stotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].scount>=filtered_lstats[i].stotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[1],origin.y+yy,"S",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[1]+8;
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].icount,filtered_lstats[i].itotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].icount>=filtered_lstats[i].itotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[2],origin.y+yy,"I",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					ox -= maxlen[2]+8;
+					str = String.Format("%d\cu/\c-%d",filtered_lstats[i].kcount,filtered_lstats[i].ktotal);
+					Screen.DrawText(fnt2,(filtered_lstats[i].kcount>=filtered_lstats[i].ktotal)?Font.CR_GOLD:Font.CR_WHITE,origin.x+ox-fnt2.StringWidth(str),origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawText(fnt2,Font.CR_FIRE,origin.x+ox-maxlen[3],origin.y+yy,"K",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 14;
+				}
+				// scrollbar
+				if ( cnt > 22 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-22;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sel1 == STAT_ACHIEVEMENT )
+			{
+				xx += 12;
+				yy = 26;
+				int cnt = achievements.Size();
+				int ofs = clamp(sel0,0,max(0,cnt-7));
+				let fnt2 = LangFont(MiniwiFont);
+				int barsz = (language~=="jp")?400:480;
+				int txtsz = (language~=="jp")?360:440;
+				bool obscure = (swwm_filterachievements==1);
+				for ( int i=ofs; i<cnt; i++ )
+				{
+					if ( yy >= 360 ) break;
+					let a = achievements[i];
+					bool completed = !!a.state.GetInt();
+					bool hasprogress = (a.progress && a.progress.GetInt());
+					Screen.DrawTexture(AchievementUnknown,false,origin.x+xx+1,origin.y+yy+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_FillColor,(!completed&&!hasprogress&&obscure)?Color(8,8,8):Color(16,16,16));
+					Screen.DrawTexture((!completed&&!hasprogress&&obscure)?AchievementUnknown:a.icon,false,origin.x+xx,origin.y+yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Desaturate,(!completed)*255,DTA_ColorOverlay,completed?Color(0,0,0,0):(hasprogress||!obscure)?Color(96,0,0,0):Color(192,0,0,0));
+					// progress bar
+					if ( a.progress && (!obscure || hasprogress) )
+					{
+						int val = a.progress.GetInt();
+						val = clamp(val,0,a.maxval);
+						if ( completed ) str = SWWMUtility.BlockBar(a.maxval,a.maxval,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
+						else str = SWWMUtility.BlockBar(val,a.maxval,barsz,Font.CR_DARKGRAY,Font.CR_BLACK);
+						Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy+34,str,DTA_Spacing,-5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
+						else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(a.maxval));
+						int ox = (barsz-MiniwiFont.StringWidth(str))/2;
+						Screen.DrawText(MiniwiFont,completed?Font.CR_GREEN:Font.CR_WHITE,origin.x+xx+ox,origin.y+yy+37,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					}
+					else
+					{
+						str = SWWMUtility.BlockBar(completed,1,barsz,Font.CR_DARKGREEN,Font.CR_BLACK);
+						Screen.DrawText(TewiFont,Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy+34,str,DTA_Spacing,-5,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					}
+					// the text itself
+					str = a.hasformat?String.Format(StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT"),a.maxval):StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT");
+					if ( !completed && !hasprogress && obscure ) SWWMUtility.ObscureText(str,(gametic/3)+i*2);
+					BrokenLines l = fnt2.BreakLines(str,txtsz);
+					str = StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TAG");
+					if ( !completed && !hasprogress && obscure ) SWWMUtility.ObscureText(str,(gametic/3)+i*2+1);
+					int oy = (32-(14+(9*l.Count())))/2;
+					Screen.DrawText(fnt,completed?Font.CR_GREEN:Font.CR_DARKGRAY,origin.x+xx+36,origin.y+yy+oy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					for ( int j=0; j<l.Count(); j++ )
+						Screen.DrawText(fnt2,completed?Font.CR_WHITE:Font.CR_BLACK,origin.x+xx+40,origin.y+yy+oy+14+j*9,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					yy += 50;
+				}
+				// scrollbar
+				if ( cnt > 7 )
+				{
+					Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					xx = 634;
+					int szr = cnt-7;
+					yy = floor(ofs*(353./szr))+17;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+		}
+		else if ( tabs[curtab] == TAB_INVENTORY )
+		{
+			if ( invlist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOINV");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			xx = 9;
+			yy = 23;
+			int longest, len;
+			int maxcol, totalcol, cols = 1;
+			// first pass, calculate longest item name
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				else str = invlist[i].GetTag();
+				len = fnt.StringWidth(str);
+				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+24);
+			totalcol = int(ceil(invlist.Size()/22.));
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			for ( int i=ofs; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				else str = invlist[i].GetTag();
+				int clscol = Font.CR_WHITE;
+				if ( invlist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
+				else if ( invlist[i] is 'MagAmmo' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPTan'):Font.CR_TAN;
+				else if ( (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_DARKBROWN;
+				else if ( invlist[i] is 'Ammo' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPBrown'):Font.CR_BROWN;
+				else if ( (invlist[i] is 'PowerupGiver') || (invlist[i] is 'AmmoFabricator') || invlist[i].bBIGPOWERUP ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPPurple'):Font.CR_PURPLE;
+				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
+				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
+				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 370 )
+				{
+					xx += longest+24;
+					yy = 23;
+					cols++;
+					if ( cols > maxcol ) break;
+				}
+			}
+			if ( maxcol < totalcol )
+			{
+				// draw scrollbar
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( (tabs[curtab] == TAB_TRADING) && sub && (sel0 != -1) )
+		{
+			if ( invlist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOINV");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			xx = 9;
+			yy = 23;
+			int longest, len;
+			int maxcol, totalcol, cols = 1;
+			// first pass, calculate longest item name
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				else str = invlist[i].GetTag();
+				len = fnt.StringWidth(str);
+				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+24);
+			totalcol = int(ceil(invlist.Size()/22.));
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			for ( int i=ofs; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				if ( (invlist[i] is 'Ammo') || (invlist[i] is 'MagAmmo') )
+					str = String.Format("(%d/%d) %s",invlist[i].Amount,invlist[i].MaxAmount,SWWMUtility.GetAmmoTag(invlist[i]));
+				else if ( (invlist[i].Amount > 1) || (!(invlist[i] is 'PuzzleItem') && !(invlist[i] is 'Weapon') && (invlist[i].MaxAmount > 1)) )
+					str = String.Format("%dx %s",invlist[i].Amount,invlist[i].GetTag());
+				else str = invlist[i].GetTag();
+				int clscol = Font.CR_WHITE;
+				if ( invlist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
+				else if ( invlist[i] is 'MagAmmo' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPTan'):Font.CR_TAN;
+				else if ( (invlist[i] is 'BackpackItem') || (invlist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_DARKBROWN;
+				else if ( invlist[i] is 'Ammo' ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPBrown'):Font.CR_BROWN;
+				else if ( (invlist[i] is 'PowerupGiver') || (invlist[i] is 'AmmoFabricator') || invlist[i].bBIGPOWERUP ) clscol = SWWMUtility.IsVIPItem(invlist[i])?Font.FindFontColor('VIPPurple'):Font.CR_PURPLE;
+				else if ( (invlist[i] is 'Health') || (invlist[i] is 'HealthPickup') || (invlist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
+				else if ( (invlist[i] is 'Armor') || (invlist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
+				else if ( invlist[i] is 'PuzzleItem' ) clscol = Font.CR_LIGHTBLUE;
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel1)?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 370 )
+				{
+					xx += longest+24;
+					yy = 23;
+					cols++;
+					if ( cols > maxcol ) break;
+				}
+			}
+			if ( maxcol < totalcol )
+			{
+				// draw scrollbar
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_KEYS )
+		{
+			if ( invlist.Size() <= 0 )
+			{
+				str = StringTable.Localize("$SWWM_NOKEYS");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			xx = 9;
+			yy = 23;
+			int longest = 0, len;
+			int maxcol, totalcol, cols = 1;
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				str = invlist[i].GetTag();
+				if ( invlist[i] is 'SWWMCollectible' )
+					str.AppendFormat(" (¥%d)",invlist[i].default.Stamina);
+				len = fnt.StringWidth(str);
+				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+24);
+			totalcol = int(ceil(invlist.Size()/22.));
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			for ( int i=0; i<invlist.Size(); i++ )
+			{
+				if ( !invlist[i] ) continue;
+				str = invlist[i].GetTag();
+				if ( invlist[i] is 'SWWMCollectible' )
+					str.AppendFormat(" \cj(\cg¥\cf%d\cj)\c-",invlist[i].default.Stamina);
+				Screen.DrawText(fnt,(invlist[i] is 'SWWMCollectible')?Font.CR_PURPLE:Font.CR_UNTRANSLATED,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 370 )
+				{
+					xx += longest+24;
+					yy = 23;
+					cols++;
+					if ( cols > maxcol ) break;
+				}
+			}
+			if ( maxcol < totalcol )
+			{
+				// draw scrollbar
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_LIBRARY )
+		{
+			xx = 3;
+			yy = 14;
+			// draw the category
+			int twidth = (language~=="jp")?200:120;
+			str = StringTable.Localize(ltabnames[sel1]);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,"<",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx+twidth-6,origin.y+yy,">",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+(twidth-fnt.StringWidth(str))/2,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			// draw "unread" indicators on sides
+			int ltab = sel1-1;
+			if ( ltab < 0 ) ltab = 2;
+			int rtab = sel1+1;
+			if ( rtab > 2 ) rtab = 0;
+			bool lunread = false, runread = false;
+			for ( int i=0; i<lorelib.ent.Size(); i++ )
+			{
+				if ( lorelib.ent[i].tab == ltab ) lunread |= !lorelib.ent[i].read;
+				if ( lorelib.ent[i].tab == rtab ) runread |= !lorelib.ent[i].read;
+			}
+			if ( lunread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+6,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			if ( runread ) Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+twidth-12,origin.y+yy,"‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			Screen.DrawTexture((language~=="jp")?LoreSeparatorW:LoreSeparator,false,origin.x,origin.y+27,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			yy += 18;
+			// draw the current entries
+			int ofs = max(0,ofs0-26);
+			for ( int i=ofs; i<lorelist.Size(); i++ )
+			{
+				if ( yy > 370 ) break;
+				str = StringTable.Localize(lorelist[i].tag);
+				int len = fnt.StringWidth(str);
+				Screen.DrawText(fnt,(i==sel0)?Font.CR_FIRE:Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				if ( !lorelist[i].read )
+					Screen.DrawText(TewiFont,Font.CR_GOLD,origin.x+xx+len,origin.y+yy," ‼",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 13;
+			}
+			xx += twidth+2;
+			Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += 3;
+			// scrollbar
+			if ( lorelist.Size() > 27 )
+			{
+				int szr = lorelist.Size()-27;
+				yy = floor((ofs)*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx += 5;
+				Screen.DrawTexture(WindowSeparator,false,origin.x+xx,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx += 3;
+			}
+			xx += 4;
+			// draw the entry text (if open)
+			if ( !sub )
+			{
+				str = StringTable.Localize("$SWWM_LOREUNSEL");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+xx+int((634-xx)-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			str = StringTable.Localize(lorelist[sel0].text);
+			BrokenLines l = fnt.BreakLines(str,int(635-xx));
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+			yy = 17;
+			ofs = clamp(sel2,0,max(0,l.Count()-28));
+			for ( int i=ofs; i<l.Count(); i++ )
+			{
+				if ( yy > 370 ) break;
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 13;
+			}
+			// scrollbar
+			if ( l.Count() > 28 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = l.Count()-28;
+				yy = floor(ofs*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_STORE )
+		{
+			if ( storelist.Size() <= 0 )
+			{
+				str = StringTable.Localize(sub?"$SWWM_NOSTORESELL":"$SWWM_NOSTORE");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			// draw all the stuff in the store
+			xx = 9;
+			yy = 23;
+			int longest = 0, len;
+			int maxcol, totalcol;
+			for ( int i=0; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				if ( sub )
+				{
+					int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,def.GetTag());
+					else str = def.GetTag();
+				}
+				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],def.GetTag());
+				else str = def.GetTag();
+				len = fnt.StringWidth(str);
+				if ( len > longest ) longest = len;
+			}
+			maxcol = 622/(longest+96);
+			totalcol = int(ceil(storelist.Size()/22.));
+			int ofs = int(max(0,(ofs0/22)-(maxcol-1))*22);
+			int cols = 1;
+			for ( int i=ofs; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				if ( sub )
+				{
+					int amt = (storelist[i] is 'CandyGun')?(players[consoleplayer].mo.CountInv("CandyGunSpares")+1):players[consoleplayer].mo.CountInv(storelist[i]);
+					if ( (amt > 1) || (storelist[i] is 'Ammo') ) str = String.Format("(%d/%d) %s",storeunits[i],amt,SWWMUtility.GetAmmoTagClass(storelist[i]));
+					else str = def.GetTag();
+				}
+				else if ( (storeunits[i] > 1) || (storelist[i] is 'Ammo') ) str = String.Format("%dx %s",storeunits[i],SWWMUtility.GetAmmoTagClass(storelist[i]));
+				else str = def.GetTag();
+				int clscol = Font.CR_WHITE;
+				if ( storelist[i] is 'Weapon' ) clscol = SWWMUtility.IsVIPItemClass(storelist[i])?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
+				else if ( storelist[i] is 'MagAmmo' ) clscol = SWWMUtility.IsVIPItemClass(storelist[i])?Font.FindFontColor('VIPTan'):Font.CR_TAN;
+				else if ( (storelist[i] is 'BackpackItem') || (storelist[i] is 'HammerspaceEmbiggener') ) clscol = Font.CR_DARKBROWN;
+				else if ( storelist[i] is 'Ammo' ) clscol = SWWMUtility.IsVIPItemClass(storelist[i])?Font.FindFontColor('VIPBrown'):Font.CR_BROWN;
+				else if ( (storelist[i] is 'PowerupGiver') || (storelist[i] is 'AmmoFabricator') || def.bBIGPOWERUP ) clscol = SWWMUtility.IsVIPItemClass(storelist[i])?Font.FindFontColor('VIPPurple'):Font.CR_PURPLE;
+				else if ( (storelist[i] is 'Health') || (storelist[i] is 'HealthPickup') || (storelist[i] is 'SWWMHealth') ) clscol = Font.CR_RED;
+				else if ( (storelist[i] is 'Armor') || (storelist[i] is 'SWWMSpareArmor') ) clscol = Font.CR_GREEN;
+				Screen.DrawText(fnt,clscol,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 370 )
+				{
+					xx += longest+96;
+					yy = 23;
+					cols++;
+					if ( cols > maxcol ) break;
+				}
+			}
+			xx = 9;
+			yy = 23;
+			cols = 1;
+			for ( int i=ofs; i<storelist.Size(); i++ )
+			{
+				if ( !storelist[i] ) continue;
+				let def = GetDefaultByType(storelist[i]);
+				int price = int(abs(def.Stamina)*(1.+.75*(storeunits[i]-1)));
+				if ( sub && (storelist[i] is 'Weapon') )
+				{
+					let w = Weapon(def);
+					// subtract price of given ammo, as we're only selling the weapon itself
+					if ( w.AmmoType1 && (w.AmmoGive1 > 0) )
+					{
+						let am1 = GetDefaultByType(w.AmmoType1);
+						if ( am1.Stamina > 0 ) price -= int(am1.Stamina*(1.+.75*(w.AmmoGive1-1)));
+					}
+					// candygun is a special case for secondary ammo
+					if ( w.AmmoType2 && (w.AmmoGive2 > 0) && (storelist[i] is 'CandyGun') )
+					{
+						let am2 = GetDefaultByType(w.AmmoType2);
+						if ( am2.Stamina > 0 ) price -= int(am2.Stamina*(1.+.75*(w.AmmoGive2-1)));
+					}
+				}
+				// sell at half price
+				if ( sub ) price /= 2;
+				str = String.Format("¥%d",price);
+				len = TewiFont.StringWidth(str);
+				int clscol = Font.CR_FIRE;
+				if ( sub ) clscol = Font.CR_GREEN;
+				else if ( (price > muns1) && (muns2 <= 0) ) clscol = Font.CR_BLACK;
+				Screen.DrawText(TewiFont,clscol,origin.x+xx+longest+80-len,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+				yy += 16;
+				if ( yy >= 370 )
+				{
+					xx += longest+96;
+					yy = 23;
+					cols++;
+					if ( cols > maxcol ) break;
+				}
+			}
+			if ( maxcol < totalcol )
+			{
+				// draw scrollbar
+				int szr = totalcol-maxcol;
+				xx = floor((ofs/22.)*(630./szr))+2.;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_TRADING )
+		{
+			if ( !sub )
+			{
+				if ( playerlist.Size() <= 0 )
+				{
+					str = StringTable.Localize("$SWWM_NOTRADE");
+					Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					return;
+				}
+				xx = 9;
+				yy = 23;
+				int longest = 0, len;
+				int ofs = int(floor(max(0,sel0-44)/22.)*22);
+				int cols = 1;
+				for ( int i=ofs; i<playerlist.Size(); i++ )
+				{
+					str = players[playerlist[i]].GetUserName();
+					len = fnt.StringWidth(str);
+					if ( len > longest ) longest = len;
+					Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,(i!=sel0)?Color(96,0,0,0):Color(0,0,0,0));
+					yy += 16;
+					if ( yy >= 370 )
+					{
+						xx += longest+24;
+						yy = 23;
+						longest = 0;
+						cols++;
+						if ( cols > 3 ) break;
+					}
+				}
+				if ( playerlist.Size() > 65 )
+				{
+					// draw scrollbar
+					int szr = (playerlist.Size()/22)-2;
+					xx = floor((ofs/22)*(630./szr))+2;
+					Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+373,"▬",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					Screen.DrawTexture(WindowSeparatorH,false,origin.x,origin.y+377,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+			}
+			else if ( sub )
+			{
+				if ( sel0 == -1 )
+				{
+					if ( tradelib.ent.Size() <= 0 )
+					{
+						str = StringTable.Localize("$SWWM_NOTRADEHIST");
+						Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						return;
+					}
+					xx = 6;
+					yy = 17;
+					int ofs = clamp(sel1,0,max(0,tradelib.ent.Size()-28));
+					for ( int i=ofs; i<tradelib.ent.Size(); i++ )
+					{
+						if ( yy >= 370 ) break;
+						let ent = tradelib.ent[tradelib.ent.Size()-(i+1)];
+						int thour = (ent.timestamp/(3600*GameTicRate));
+						int tmin = (ent.timestamp/(60*GameTicRate))%60;
+						int tsec = (ent.timestamp/GameTicRate)%60;
+						str = String.Format("\cu[\cc%02d\cu:\cc%02d\cu:\cc%02d\cu]\c- ",thour,tmin,tsec);
+						str.AppendFormat("\cd%s %s\cd: \cj%dx \cf%s\c-",ent.type?StringTable.Localize("$SWWM_TRADEFROM"):StringTable.Localize("$SWWM_TRADETO"),ent.other,ent.amt,GetDefaultByType(ent.what).GetTag());
+						Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						yy += 13;
+					}
+					// scrollbar
+					if ( tradelib.ent.Size() > 28 )
+					{
+						Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+						xx = 634;
+						int szr = tradelib.ent.Size()-28;
+						yy = floor(ofs*(353./szr))+17;
+						Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					}
+				}
+			}
+		}
+		else if ( tabs[curtab] == TAB_CHAT )
+		{
+			let bar = SWWMStatusBar(StatusBar);
+			if ( !bar || (bar.FullHistory.Size() <= 0) )
+			{
+				str = StringTable.Localize("$SWWM_NOCHAT");
+				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				return;
+			}
+			int margin = TewiFont.StringWidth("[00:00:00] ");
+			int ofs = bar.FullHistory.Size()-(1+sel0);
+			xx = 3;
+			yy = 379;
+			for ( int i=ofs; i>=0; i-- )
+			{
+				int col = (bar.FullHistory[i].type==PRINT_TEAMCHAT)?msg4color:msg3color;
+				int thour = (bar.FullHistory[i].tic/(3600*GameTicRate));
+				int tmin = (bar.FullHistory[i].tic/(60*GameTicRate))%60;
+				int tsec = (bar.FullHistory[i].tic/GameTicRate)%60;
+				str = String.Format("\cu[\c-%02d\cu:\c-%02d\cu:\c-%02d\cu]\c- ",thour,tmin,tsec);
+				BrokenLines l = fnt.BreakLines(bar.FullHistory[i].str,626-margin);
+				double by = yy-13*l.Count();
+				if ( by < 17 ) break;
+				Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+by,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				for ( int j=0; j<l.Count(); j++ )
+					Screen.DrawText(fnt,col,origin.x+xx+margin,origin.y+by+j*13,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy = by;
+			}
+			// scrollbar
+			if ( bar.FullHistory.Size() > 1 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = bar.FullHistory.Size()-1;
+				yy = floor((szr-sel0)*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_SECRET )
+		{
+			if ( gameinfo.gametype&GAME_Hexen )
+			{
+				Screen.DrawTexture(Drawing[2],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_KIRINPOEM");
+				BrokenLines l = fnt.BreakLines(str,300);
+				int mxlen = 0;
+				for ( int i=0; i<l.Count(); i++ )
+				{
+					if ( l.StringWidth(i) > mxlen ) mxlen = l.StringWidth(i);
+					xx = (i<l.Count()-1)?350:(350+mxlen-l.StringWidth(i));
+					Screen.DrawText(fnt,Font.CR_GOLD,origin.x+xx,origin.y+43+i*14,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				}
+				str = StringTable.Localize("$SWWM_FROMKIRIN");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+			else if ( gameinfo.gametype&GAME_Heretic )
+			{
+				Screen.DrawTexture(Drawing[1],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_CUTIECLUB");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+			else
+			{
+				Screen.DrawTexture(Drawing[0],false,origin.x+20,origin.y+40,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				str = StringTable.Localize("$SWWM_TODEMO");
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+		else if ( tabs[curtab] == TAB_HELP )
+		{
+			// help tab
+			String kstr;
+			if ( mkey[1] != "" ) kstr = mkey[0].."/"..mkey[1];
+			else kstr = mkey[0];
+			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+			BrokenLines l = fnt.BreakLines(str,629);
+			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+			xx = 6;
+			yy = 17;
+			int ofs = clamp(sel0,0,max(0,l.Count()-28));
+			for ( int i=ofs; i<l.Count(); i++ )
+			{
+				if ( yy >= 370 ) break;
+				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				yy += 13;
+			}
+			// scrollbar
+			if ( l.Count() > 28 )
+			{
+				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				xx = 634;
+				int szr = l.Count()-28;
+				yy = floor(ofs*(353./szr))+17;
+				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			}
+		}
+	}
+}

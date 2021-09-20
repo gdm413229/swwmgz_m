@@ -6,7 +6,8 @@ Class SWWMAchievementMenu : GenericMenu
 	// so put everything in here
 	TextureID AchievementUnknown, SelectBox, BaseBox;
 	bool ShouldObscure;
-	Array<SWWMAchievement> mItems;
+	SWWMStaticHandler hnd;
+	Array<SWWMAchievementInfo> mItems;
 	String mTitle;
 	int mSelected;
 	int mBaseY;	// Y position achievement boxes are being drawn at
@@ -18,9 +19,31 @@ Class SWWMAchievementMenu : GenericMenu
 		Super.Init(parent);
 		mTitle = StringTable.Localize("$SWWM_ATITLE");
 		mSelected = 0;
-		SWWMUtility.LoadAchievements(mItems,false);	// gotta load it unfiltered first
+		hnd = SWWMStaticHandler(StaticEventHandler.Find("SWWMStaticHandler"));
+		if ( !hnd ) ThrowAbortException("SWWMStaticHandler not found???");
+		mItems.Copy(hnd.achievementinfo);
 		total = mItems.Size();
-		SWWMUtility.LoadAchievements(mItems,true);
+		bool dohide = (swwm_filterachievements==2);
+		for ( int i=0; i<mItems.Size(); i++ )
+		{
+			String key = mItems[i].basename;
+			// cache state/progress
+			mItems[i].state = hnd.achievementstate.At(key).ToInt();
+			if ( mItems[i].maxval )
+			{
+				mItems[i].val = hnd.achievementprogress.At(key).ToInt();
+			}
+			// check if we need to hide it
+			if ( (key == "everything") && !mItems[i].state )
+			{
+				mItems.Delete(i);
+				i--;
+				continue;
+			}
+			if ( !dohide || mItems[i].state || (mItems[i].maxval && mItems[i].val) ) continue;
+			mItems.Delete(i);
+			i--;
+		}
 		ShouldObscure = (swwm_filterachievements==1);
 		AchievementUnknown = TexMan.CheckForTexture("graphics/Achievements/HiddenAchievement.png",TexMan.Type_Any);
 		SelectBox = TexMan.CheckForTexture("graphics/Achievements/SelectAchievement.png",TexMan.Type_Any);
@@ -34,8 +57,8 @@ Class SWWMAchievementMenu : GenericMenu
 		incomplete = 0;
 		for ( int i=0; i<mItems.Size(); i++ )
 		{
-			if ( !!mItems[i].state.GetInt() ) completed++;
-			else if ( mItems[i].progress && mItems[i].progress.GetInt() ) incomplete++;
+			if ( !!(hnd.achievementstate.At(mItems[i].basename).ToInt()) ) completed++;
+			else if ( mItems[i].maxval && mItems[i].val ) incomplete++;
 		}
 	}
 
@@ -52,23 +75,23 @@ Class SWWMAchievementMenu : GenericMenu
 	{
 		// detailed achievement information
 		let a = mItems[mSelected];
-		bool completed = !!a.state.GetInt();
-		bool hasprogress = (a.progress && a.progress.GetInt());
+		bool completed = !!a.state;
+		bool hasprogress = (a.maxval && a.val);
 		String str = StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TAG");
 		if ( !completed && !hasprogress && ShouldObscure ) SWWMUtility.ObscureText(str,gametic/3);
 		int xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
 		int yy = y;
-		if ( !a.progress || (ShouldObscure && !hasprogress) ) yy += ((newsmallfont.GetHeight()+2)*CleanYFac_1)/2;
+		if ( !a.maxval || (ShouldObscure && !hasprogress) ) yy += ((newsmallfont.GetHeight()+2)*CleanYFac_1)/2;
 		Screen.DrawText(newsmallfont,completed?Font.CR_GREEN:Font.CR_DARKGRAY,xx,yy,str,DTA_CleanNoMove_1,true);
 		yy += (newsmallfont.GetHeight()+2)*CleanYFac_1;
 		str = a.hasformat?String.Format(StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT"),a.maxval):StringTable.Localize("$SWWM_ACHIEVEMENT_"..a.basename.."_TXT");
 		if ( !completed && !hasprogress && ShouldObscure ) SWWMUtility.ObscureText(str,(gametic/3)+1);
 		xx = (Screen.GetWidth()-newsmallfont.StringWidth(str)*CleanXFac_1)/2;
 		Screen.DrawText(newsmallfont,completed?Font.CR_WHITE:Font.CR_BLACK,xx,yy,str,DTA_CleanNoMove_1,true);
-		if ( a.progress && (!ShouldObscure || hasprogress) )
+		if ( a.maxval && (!ShouldObscure || hasprogress) )
 		{
 			yy += (newsmallfont.GetHeight()+2)*CleanYFac_1;
-			int val = a.progress.GetInt();
+			int val = a.val;
 			val = clamp(val,0,a.maxval);
 			if ( completed ) str = String.Format("%s / %s",SWWMUtility.ThousandsNum(a.maxval),SWWMUtility.ThousandsNum(a.maxval));
 			else str = String.Format("%s / %s",SWWMUtility.ThousandsNum(val),SWWMUtility.ThousandsNum(a.maxval));
@@ -146,28 +169,25 @@ Class SWWMAchievementMenu : GenericMenu
 	override bool MouseEvent( int type, int mx, int my )
 	{
 		bool res = Super.MouseEvent(type,mx,my);
-		if ( type == MOUSE_Click )
+		int xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+		int yy = mBaseY;
+		for ( int i=0; i<mItems.Size(); i++ )
 		{
-			int xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
-			int yy = mBaseY;
-			for ( int i=0; i<mItems.Size(); i++ )
+			int left = xx+4*CleanXFac_1;
+			int top = yy+4*CleanXFac_1;
+			int right = left+32*CleanXFac_1;
+			int bottom = top+32*CleanXFac_1;
+			if ( (mx >= left) && (mx < right) && (my >= top) && (my < bottom) )
 			{
-				int left = xx+4*CleanXFac_1;
-				int top = yy+4*CleanXFac_1;
-				int right = left+32*CleanXFac_1;
-				int bottom = top+32*CleanXFac_1;
-				if ( (mx >= left) && (mx < right) && (my >= top) && (my < bottom) )
-				{
-					if ( i != mSelected ) MenuSound("menu/cursor");
-					mSelected = i;
-					return res;
-				}
-				xx += 40*CleanXFac_1;
-				if ( !((i+1)%12) )
-				{
-					xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
-					yy += 40*CleanYFac_1;
-				}
+				if ( i != mSelected ) MenuSound("menu/cursor");
+				mSelected = i;
+				return res;
+			}
+			xx += 40*CleanXFac_1;
+			if ( !((i+1)%12) )
+			{
+				xx = (Screen.GetWidth()-480*CleanXFac_1)/2;
+				yy += 40*CleanYFac_1;
 			}
 		}
 		return res;
@@ -185,12 +205,11 @@ Class SWWMAchievementMenu : GenericMenu
 		for ( i=0; i<mItems.Size(); i++ )
 		{
 			let a = mItems[i];
-			bool completed = !!a.state.GetInt();
-			bool hasprogress = (a.progress && a.progress.GetInt());
+			bool completed = !!a.state;
+			bool hasprogress = (a.maxval && a.val);
 			Screen.DrawTexture(BaseBox,false,xx+5*CleanXFac_1,yy+5*CleanYFac_1,DTA_CleanNoMove_1,true,DTA_FillColor,(!completed&&!hasprogress&&ShouldObscure)?Color(8,8,8):Color(16,16,16));
 			Screen.DrawTexture((!completed&&!hasprogress&&ShouldObscure)?AchievementUnknown:a.icon,false,xx+4*CleanXFac_1,yy+4*CleanYFac_1,DTA_CleanNoMove_1,true,DTA_Desaturate,(!completed)*255,DTA_ColorOverlay,completed?Color(0,0,0,0):(hasprogress||!ShouldObscure)?Color(96,0,0,0):Color(192,0,0,0));
-			if ( mSelected == i )
-				Screen.DrawTexture(SelectBox,false,xx,yy,DTA_CleanNoMove_1,true);
+			if ( mSelected == i ) Screen.DrawTexture(SelectBox,false,xx,yy,DTA_CleanNoMove_1,true);
 			xx += 40*CleanXFac_1;
 			if ( !((i+1)%12) )
 			{

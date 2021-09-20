@@ -115,7 +115,7 @@ Class ExplodiumGun : SWWMWeapon
 			if ( d.HitActor.IsHostile(self) )
 			{
 				invoker.deadeyecnt++;
-				SWWMUtility.AchievementProgress('swwm_progress_deadeye',invoker.deadeyecnt,player);
+				SWWMUtility.AchievementProgress("deadeye",invoker.deadeyecnt,player);
 			}
 			int dmg = 15;
 			// might as well apply explosion on top
@@ -680,7 +680,7 @@ Class DualExplodiumGun : SWWMWeapon
 			if ( d.HitActor.IsHostile(self) )
 			{
 				ExplodiumGun(invoker.SisterWeapon).deadeyecnt++;
-				SWWMUtility.AchievementProgress('swwm_progress_deadeye',ExplodiumGun(invoker.SisterWeapon).deadeyecnt,player);
+				SWWMUtility.AchievementProgress("deadeye",ExplodiumGun(invoker.SisterWeapon).deadeyecnt,player);
 			}
 			int dmg = 15;
 			// might as well apply explosion on top

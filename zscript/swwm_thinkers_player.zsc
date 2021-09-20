@@ -226,10 +226,10 @@ Class SWWMCredits : Thinker
 		}
 		SWWMLoreLibrary.Add(p,"ScoreSystem");
 		if ( cheat ) return;
-		int curamt = swwm_progress_dosh;
+		int curamt = SWWMUtility.GetAchievementProgress("dosh");
 		if ( (hamount > 0) || (curamt+amount < curamt) || (curamt+amount >= 1000000000) )
-			SWWMUtility.AchievementProgress('swwm_progress_dosh',1000000000,p);
-		else SWWMUtility.AchievementProgress('swwm_progress_dosh',curamt+amount,p);
+			SWWMUtility.AchievementProgress("dosh",1000000000,p);
+		else SWWMUtility.AchievementProgress("dosh",curamt+amount,p);
 	}
 
 	static clearscope bool CanTake( PlayerInfo p, int amount, int hamount = 0 )

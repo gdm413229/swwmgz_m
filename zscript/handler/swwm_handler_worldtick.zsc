@@ -56,7 +56,7 @@ extend Class SWWMHandler
 					allitems = true;
 					Console.Printf(StringTable.Localize("$SWWM_LASTITEM"),players[i].GetUserName(),500);
 					score += 490;
-					SWWMUtility.AchievementProgressInc('swwm_progress_allitems',1,players[i]);
+					SWWMUtility.AchievementProgressInc("allitems",1,players[i]);
 				}
 				SWWMCredits.Give(players[i],score);
 				SWWMScoreObj.Spawn(score,players[i].mo.Vec3Offset(0,0,players[i].mo.Height/2));
@@ -215,7 +215,7 @@ extend Class SWWMHandler
 			if ( s.deaths > 0 )
 				return;
 		}
-		SWWMUtility.MarkAchievement('swwm_achievement_wantdie',players[consoleplayer]);
+		SWWMUtility.MarkAchievement("wantdie",players[consoleplayer]);
 	}
 
 	// "simple" tracking (used by the minimap)

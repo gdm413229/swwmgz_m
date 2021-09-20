@@ -54,22 +54,6 @@ Class SWWMStaticHandler : StaticEventHandler
 				Demolitionist(players[i].mo).CheckUnderwaterAmb(true);
 			}
 		}
-		if ( players[consoleplayer].mo )
-		{
-			// recheck progress on some per-session achievements
-			if ( swwm_achievement_allcoll <= 0 )
-			{
-				int nc = 0;
-				for ( Inventory i=players[consoleplayer].mo.inv; i; i=i.inv ) if ( i is 'SWWMCollectible' ) nc++;
-				CVar.FindCVar('swwm_progress_allcoll').SetInt(nc);
-			}
-			if ( swwm_achievement_plush <= 0 )
-			{
-				let s = SWWMStats.Find(players[consoleplayer]);
-				if ( s ) CVar.FindCVar('swwm_progress_plush').SetInt(s.plushuses);
-				else CVar.FindCVar('swwm_progress_plush').SetInt(0);
-			}
-		}
 		SWWMHandler.ClearAllShaders(players[consoleplayer]);
 		// force a reset of the minimap zoom in case it's set beyond safe levels
 		double mmz = swwm_mm_zoom;
@@ -94,6 +78,12 @@ Class SWWMStaticHandler : StaticEventHandler
 			tainted = true;
 			taintver = svd.ver;
 		}
+	}
+
+	override void OnUnregister()
+	{
+		// save achievements on exit
+		SaveAchievements();
 	}
 
 	override void OnRegister()
@@ -124,6 +114,9 @@ Class SWWMStaticHandler : StaticEventHandler
 		let cv = CVar.FindCVar('swwm_voicetype');
 		if ( types.Find(cv.GetString()) >= types.Size() )
 			cv.SetString("default");
+		// load up the achievements
+		if ( swwm_achievementstate == "" ) MigrateAchievements();
+		else LoadAchievements();
 		// warning for unsupported
 		if ( Wads.FindLump("swwmgamesupported.txt") != -1 ) return;
 		Console.Printf(
@@ -160,8 +153,8 @@ Class SWWMStaticHandler : StaticEventHandler
 			{
 				// don't reset these
 				if ( (cvarlist[i] == "swwm_playtime")
-					|| (cvarlist[i].Left(17) == "swwm_achievement_")
-					|| (cvarlist[i].Left(14) == "swwm_progress_") )
+					|| (cvarlist[i] == "swwm_achievementstate")
+					|| (cvarlist[i] == "swwm_achievementprogress") )
 					continue;
 				CVar.FindCVar(cvarlist[i]).ResetToDefault();
 			}
@@ -211,26 +204,23 @@ Class SWWMStaticHandler : StaticEventHandler
 		}
 		else if ( e.Name ~== "swwmresetachievements" )
 		{
-			if ( achievements.Size() <= 0 )
-				SWWMUtility.LoadAchievements(achievements);
-			for ( int i=0; i<achievements.Size(); i++ )
+			for ( int i=0; i<achievementinfo.Size(); i++ )
 			{
-				achievements[i].state.SetInt(0);
-				if ( achievements[i].progress )
-					achievements[i].progress.SetInt(0);
+				achievementstate.Insert(achievementinfo[i].basename,"0");
+				if ( achievementinfo[i].maxval )
+					achievementprogress.Insert(achievementinfo[i].basename,"0");
 			}
 		}
 		else if ( e.Name ~== "swwmdumpachievements" )
 		{
-			if ( achievements.Size() <= 0 )
-				SWWMUtility.LoadAchievements(achievements);
-			for ( int i=0; i<achievements.Size(); i++ )
-				Console.Printf("swwm_achievement_"..achievements[i].basename.."="..achievements[i].state.GetString());
-			for ( int i=0; i<achievements.Size(); i++ )
-			{
-				if ( !achievements[i].progress ) continue;
-				Console.Printf("swwm_progress_"..achievements[i].basename.."="..achievements[i].progress.GetString());
-			}
+			Console.Printf("---STATE---");
+			let di = DictionaryIterator.Create(achievementstate);
+			while ( di.Next() )
+				Console.Printf("%s = %s",di.Key(),di.Value());
+			Console.Printf("---PROGRESS---");
+			di = DictionaryIterator.Create(achievementprogress);
+			while ( di.Next() )
+				Console.Printf("%s = %s",di.Key(),di.Value());
 		}
 		else if ( e.Name ~== "swwmgetversion" )
 		{

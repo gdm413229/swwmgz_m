@@ -70,7 +70,7 @@ Class SWWMGesture : SWWMWeapon
 			// check if we can see it
 			if ( !SWWMUtility.InPlayerFOV(Owner.player,a) ) continue;
 			// someone's dying
-			SWWMUtility.MarkAchievement('swwm_achievement_wave',Owner.player);
+			SWWMUtility.MarkAchievement("wave",Owner.player);
 			break;
 		}
 	}
@@ -252,7 +252,7 @@ Class SWWMGesture : SWWMWeapon
 					let s = Demolitionist(self).mystats;
 					if ( s ) s.befriend++;
 					if ( SWWMUtility.IdentifyingCaco(t) || SWWMUtility.IdentifyingDrug(t) || SWWMUtility.IdentifyingDoubleBoi(t) )
-					SWWMUtility.AchievementProgressInc('swwm_progress_friend',1,player);
+					SWWMUtility.AchievementProgressInc("friend",1,player);
 				}
 				t.bFRIENDLY = true;
 				if ( deathmatch )

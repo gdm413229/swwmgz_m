@@ -1,32 +1,43 @@
 // achievement tracking
 
+Class SWWMAchievementInfo
+{
+	int baseindex;		// sorting order in the list
+	String basename;	// base name for identifying achievement
+	TextureID icon;		// our icon
+	int maxval;		// maximum value (0: no progress, -1: special scripting needed)
+	bool hasformat;		// achievement description text must be formatted to add maxval
+	int state, val;		// set by other scripts, used to avoid excessive dictionary lookups
+}
+
 extend Class SWWMStaticHandler
 {
 	ui int lastachievementnotify;	// prevent overlap
-	Array<SWWMAchievement> achievements;
+	Dictionary achievementstate, achievementprogress;
+	Array<SWWMAchievementInfo> achievementinfo;	// specific info on achievements
 
-	private ui bool CheckAchievement( SWWMAchievement a )
+	private ui bool CheckAchievement( SWWMAchievementInfo a )
 	{
-		int val = a.state.GetInt();
+		int val = achievementstate.At(a.basename).ToInt();
 		// manually check progress
-		if ( a.progress )
+		if ( a.maxval )
 		{
-			int prog = a.progress.GetInt();
+			int prog = achievementprogress.At(a.basename).ToInt();
 			// special cases
 			if ( val && (prog < a.maxval) )
 			{
-				a.state.SetInt(0);
+				achievementstate.Insert(a.basename,"0");
 				val = 0;
 			}
 			else if ( !val && (prog >= a.maxval) )
 			{
-				a.state.SetInt(1);
+				achievementstate.Insert(a.basename,"1");
 				val = 1;
 			}
 		}
 		if ( (val == 1) && (gametic > lastachievementnotify) )
 		{
-			a.state.SetInt(2);
+			achievementstate.Insert(a.basename,"2");
 			EventHandler.SendNetworkEvent("swwmachievement."..a.basename,consoleplayer);
 			let notif = new("SWWMAchievementNotification").Init(a.basename,a.icon,a.hasformat?a.maxval:0);
 			StatusBar.AttachMessage(notif,-3478);
@@ -39,38 +50,267 @@ extend Class SWWMStaticHandler
 	{
 		// don't check constantly, and don't check during level transitions
 		if ( unloading || (maptime < 105) || (maptime%35) ) return;
-		// first load
-		if ( achievements.Size() <= 0 ) SWWMUtility.LoadAchievements(achievements);
 		bool alldone = true;
 		int ev = -1;
-		for ( int i=0; i<achievements.Size(); i++ )
+		for ( int i=0; i<achievementinfo.Size(); i++ )
 		{
 			// this one is updated outside the loop
-			if ( achievements[i].basename == "everything" )
+			if ( achievementinfo[i].basename == "everything" )
 			{
 				ev = i;
 				continue;
 			}
-			if ( !CheckAchievement(achievements[i]) )
+			if ( !CheckAchievement(achievementinfo[i]) )
 				alldone = false;
 		}
 		if ( ev == -1 ) return;	// should not happen, though
-		int val = achievements[ev].state.GetInt();
+		int val = achievementstate.At("everything").ToInt();
 		// not done!
 		if ( !alldone )
 		{
-			if ( val != 0 ) achievements[ev].state.SetInt(0);
+			if ( val != 0 ) achievementstate.Insert("everything","0");
 			return;
 		}
 		// all done!
-		if ( val == 0 ) achievements[ev].state.SetInt(1);
+		if ( val == 0 ) achievementstate.Insert("everything","1");
 		else if ( (val == 1) && (gametic > lastachievementnotify) )
 		{
-			achievements[ev].state.SetInt(2);
-			EventHandler.SendNetworkEvent("swwmachievement."..achievements[ev].basename,consoleplayer);
-			let notif = new("SWWMAchievementNotification").Init(achievements[ev].basename,achievements[ev].icon);
+			achievementstate.Insert("everything","2");
+			EventHandler.SendNetworkEvent("swwmachievement."..achievementinfo[ev].basename,consoleplayer);
+			let notif = new("SWWMAchievementNotification").Init(achievementinfo[ev].basename,achievementinfo[ev].icon);
 			StatusBar.AttachMessage(notif,-3478);
 			lastachievementnotify = gametic+200;
+		}
+	}
+
+	// parses achievements.lst file(s)
+	private void ParseAchievementList( out Array<SWWMAchievementInfo> achievements )
+	{
+		achievements.Clear();
+		let lmp = Wads.FindLump("achievements.lst");
+		if ( lmp == -1 ) ThrowAbortException("'achievements.lst' not found");
+		String dat;
+		Array<String> list, ln;
+		int bidx = 0;
+		while ( lmp != -1 )
+		{
+			dat = Wads.ReadLump(lmp);
+			// fucking Windows
+			dat.Replace("\r","");
+			list.Clear();
+			dat.Split(list,"\n");
+			for ( int i=0; i<list.Size(); i++ )
+			{
+				if ( (list[i].Length() == 0) || (list[i].Left(1) == "#") || (list[i].Left(1) == "") )
+					continue;
+				ln.Clear();
+				list[i].Split(ln,",",0);
+				// game filtering
+				if ( !(gameinfo.gametype&GAME_DOOM) && (ln[3] ~== "doom") ) continue;
+				else if ( !(gameinfo.gametype&GAME_HERETIC) && (ln[3] ~== "heretic") ) continue;
+				else if ( !(gameinfo.gametype&GAME_HEXEN) && (ln[3] ~== "hexen") ) continue;
+				else if ( !(gameinfo.gametype&GAME_RAVEN) && (ln[3] ~== "raven") ) continue;
+				else if ( !(gameinfo.gametype&(GAME_DOOM|GAME_HERETIC)) && (ln[3] ~== "nothexen") ) continue;
+				let ac = new("SWWMAchievementInfo");
+				ac.baseindex = bidx;
+				ac.basename = ln[0];
+				ac.icon = TexMan.CheckForTexture("graphics/Achievements/Achievement"..ac.basename..".png",TexMan.Type_Any);
+				// fallback icon if one is not found
+				if ( !ac.icon.IsValid() ) ac.icon = TexMan.CheckForTexture("graphics/Achievements/DefaultAchievement.png",TexMan.Type_Any);
+				ac.maxval = ln[1].ToInt();
+				// special case for maxval
+				if ( ac.maxval && (ac.basename == "allcoll") )
+				{
+					int nc = 0;
+					for ( int i=0; i<AllActorClasses.Size(); i++ )
+					{
+						let c = (Class<SWWMCollectible>)(AllActorClasses[i]);
+						if ( !c || (c == 'SWWMCollectible') ) continue;
+						let def = GetDefaultByType(c);
+						// check that we can collect it in this IWAD
+						if ( !def.ValidGame() ) continue;
+						nc++;
+					}
+					ac.maxval = nc;
+				}
+				ac.hasformat = (ln[2]~=="yes");
+				achievements.Push(ac);
+				bidx++;
+			}
+			lmp = Wads.FindLump("achievements.lst",lmp+1);
+		}
+	}
+
+	// load all achievement state and progress
+	private void LoadAchievements()
+	{
+		String statestr = swwm_achievementstate;
+		String progstr = swwm_achievementprogress;
+		// invalid length?
+		if ( (statestr.length()%2) || (progstr.length()%2) )
+		{
+			CreateAchievements();
+			return;
+		}
+		// decode
+		int cypher[] = {0xAD,0xEA,0xDB,0xED};
+		String nstr = "";
+		for ( int i=0; i<statestr.length(); i+=2 )
+		{
+			int b, c, a;
+			b = statestr.ByteAt(i);
+			c = statestr.ByteAt(i+1);
+			a = ((b-0x41)|((c-0x41)<<4))^cypher[(i/2)%4];
+			nstr.AppendCharacter(a);
+		}
+		statestr = nstr;
+		nstr = "";
+		for ( int i=0; i<progstr.length(); i+=2 )
+		{
+			int b, c, a;
+			b = progstr.ByteAt(i);
+			c = progstr.ByteAt(i+1);
+			a = ((b-0x41)|((c-0x41)<<4))^cypher[(i/2)%4];
+			nstr.AppendCharacter(a);
+		}
+		progstr = nstr;
+		// no key separator?
+		if ( (statestr.IndexOf(",") == -1) || (progstr.IndexOf(",") == -1) )
+		{
+			CreateAchievements();
+			return;
+		}
+		// create dictionaries
+		achievementstate = Dictionary.Create();
+		achievementprogress = Dictionary.Create();
+		Array<String> keys;
+		keys.Clear();
+		statestr.Split(keys,",");
+		for ( int i=0; i<keys.Size(); i++ )
+		{
+			int colon = keys[i].IndexOf(":");
+			// no value separator?
+			if ( colon == -1 )
+			{
+				CreateAchievements();
+				return;
+			}
+			achievementstate.Insert(keys[i].Left(colon),keys[i].Mid(colon+1));
+		}
+		keys.Clear();
+		progstr.Split(keys,",");
+		for ( int i=0; i<keys.Size(); i++ )
+		{
+			int colon = keys[i].IndexOf(":");
+			// no value separator?
+			if ( colon == -1 )
+			{
+				CreateAchievements();
+				return;
+			}
+			achievementprogress.Insert(keys[i].Left(colon),keys[i].Mid(colon+1));
+		}
+		// load achievement info and trim any bogus keys
+		ParseAchievementList(achievementinfo);
+		let di = DictionaryIterator.Create(achievementstate);
+		while ( di.Next() )
+		{
+			String key = di.Key();
+			bool deleteme = true;
+			for ( int i=0; i<achievementinfo.Size(); i++ )
+			{
+				if ( achievementinfo[i].basename != key ) continue;
+				deleteme = false;
+				break;
+			}
+		}
+		di = DictionaryIterator.Create(achievementprogress);
+		while ( di.Next() )
+		{
+			String key = di.Key();
+			bool deleteme = true;
+			for ( int i=0; i<achievementinfo.Size(); i++ )
+			{
+				if ( achievementinfo[i].basename != key ) continue;
+				if ( !achievementinfo[i].maxval ) continue;
+				deleteme = false;
+				break;
+			}
+		}
+	}
+
+	// save all achievement state and progress
+	private void SaveAchievements()
+	{
+		String statestr = achievementstate.ToString();
+		String progstr = achievementprogress.ToString();
+		// trim unneeded json stuff
+		statestr.Replace("{","");
+		statestr.Replace("}","");
+		statestr.Replace("\"","");
+		progstr.Replace("{","");
+		progstr.Replace("}","");
+		progstr.Replace("\"","");
+		// cheap encode
+		int cypher[] = {0xAD,0xEA,0xDB,0xED};
+		String nstr = "";
+		for ( int i=0; i<statestr.length(); i++ )
+		{
+			int a, b, c;
+			a = statestr.ByteAt(i)^cypher[i%4];
+			b = (a&0x0F)+0x41;
+			c = ((a&0xF0)>>4)+0x41;
+			nstr.AppendFormat("%c%c",b,c);
+		}
+		statestr = nstr;
+		nstr = "";
+		for ( int i=0; i<progstr.length(); i++ )
+		{
+			int a, b, c;
+			a = progstr.ByteAt(i)^cypher[i%4];
+			b = (a&0x0F)+0x41;
+			c = ((a&0xF0)>>4)+0x41;
+			nstr.AppendFormat("%c%c",b,c);
+		}
+		progstr = nstr;
+		let cv = CVar.FindCVar('swwm_achievementstate');
+		cv.SetString(statestr);
+		cv = CVar.FindCVar('swwm_achievementprogress');
+		cv.SetString(progstr);
+	}
+
+	// blank achievement creation, used if loading fails
+	private void CreateAchievements()
+	{
+		achievementstate = Dictionary.Create();
+		achievementprogress = Dictionary.Create();
+		ParseAchievementList(achievementinfo);
+		for ( int i=0; i<achievementinfo.Size(); i++ )
+		{
+			achievementstate.Insert(achievementinfo[i].basename,"0");
+			if ( !achievementinfo[i].maxval ) continue;
+			achievementprogress.Insert(achievementinfo[i].basename,"0");
+		}
+	}
+
+	// migrate from old individual CVars
+	private void MigrateAchievements()
+	{
+		achievementstate = Dictionary.Create();
+		achievementprogress = Dictionary.Create();
+		ParseAchievementList(achievementinfo);
+		CVar cv;
+		for ( int i=0; i<achievementinfo.Size(); i++ )
+		{
+			String val = "0";
+			cv = CVar.FindCVar("swwm_achievement_"..achievementinfo[i].basename);
+			if ( cv ) val = cv.GetString();
+			achievementstate.Insert(achievementinfo[i].basename,val);
+			if ( !achievementinfo[i].maxval ) continue;
+			val = "0";
+			cv = CVar.FindCVar("swwm_progress_"..achievementinfo[i].basename);
+			if ( cv ) val = cv.GetString();
+			achievementprogress.Insert(achievementinfo[i].basename,val);
 		}
 	}
 }

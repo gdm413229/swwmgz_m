@@ -451,7 +451,7 @@ Class Wallbuster : SWWMWeapon
 			if ( alertness > louds[which] ) alertness += louds[which]/4;
 			else alertness += louds[which];
 		}
-		if ( salts >= 25 ) SWWMUtility.MarkAchievement('swwm_achievement_salt',player);
+		if ( salts >= 25 ) SWWMUtility.MarkAchievement("salt",player);
 		if ( howmany < 3 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireOne"));
 		else if ( howmany < 15 ) player.SetPsprite(PSP_WEAPON,ResolveState("FireFive"));
 		else player.SetPsprite(PSP_WEAPON,ResolveState("FireTwentyFive"));

@@ -159,7 +159,7 @@ Class SWWMHandler : EventHandler
 		if ( (!w || !w.wallponch) && (!(e.Thing is 'Demolitionist') || !Demolitionist(e.Thing).hitactivate) ) return;
 		let s = SWWMStats.Find(e.Thing.player);
 		if ( s ) s.wponch++;
-		SWWMUtility.AchievementProgressInc('swwm_progress_slemg',1,e.Thing.player);
+		SWWMUtility.AchievementProgressInc("slemg",1,e.Thing.player);
 	}
 
 	// stuff for hud

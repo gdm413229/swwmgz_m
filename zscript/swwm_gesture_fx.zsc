@@ -305,7 +305,7 @@ Class LoveHeart : Actor
 		if ( target && target.player )
 		{
 			int scr = (TexMan.GetName(HitTexture).Left(6)~=="ZZWOLF")?200:20;
-			if ( scr == 20 ) SWWMUtility.AchievementProgressInc('swwm_progress_doodle',1,player);
+			if ( scr == 20 ) SWWMUtility.AchievementProgressInc("doodle",1,player);
 			SWWMCredits.Give(target.player,scr);
 			if ( target.player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,pos);
 		}
@@ -587,7 +587,7 @@ Class HeadpatTracker : Actor
 			patter.player.cheats |= CF_TOTALLYFROZEN;
 			Demolitionist(patter).scriptedinvul = true;
 			target.bDORMANT = true;
-			if ( SWWMUtility.IdentifyingDog(target) ) SWWMUtility.MarkAchievement('swwm_achievement_mbf',user.player);
+			if ( SWWMUtility.IdentifyingDog(target) ) SWWMUtility.MarkAchievement("mbf",user.player);
 			return true;
 		}
 		return false;

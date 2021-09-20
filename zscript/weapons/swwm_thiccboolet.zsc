@@ -405,8 +405,8 @@ Class SilverBullet : SWWMWeapon
 			if ( t.HitList[i].HitActor && (t.HitList[i].HitActor.Health <= 0) && (t.HitList[i].HitActor.bIsMonster || t.HitList[i].HitActor.player) && t.HitList[i].HitActor.IsHostile(self) )
 			{
 				invoker.nkills++;
-				SWWMUtility.AchievementProgress('swwm_progress_conga',invoker.nkills,player);
-				if ( t.Hitlist[i].pastwall ) SWWMUtility.AchievementProgressInc('swwm_progress_thruwall',1,player);
+				SWWMUtility.AchievementProgress("conga",invoker.nkills,player);
+				if ( t.Hitlist[i].pastwall ) SWWMUtility.AchievementProgressInc("thruwall",1,player);
 			}
 			if ( t.HitList[i].HitActor && !t.HitList[i].HitActor.bNOBLOOD && !t.HitList[i].HitActor.bDORMANT )
 			{

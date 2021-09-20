@@ -430,7 +430,7 @@ Class SWWMFlyTracker : Thinker
 		{
 			gracepd++;
 			if ( gracepd < 10 ) return;
-			if ( instigator ) SWWMUtility.AchievementProgress('swwm_progress_flight',int(maxdist),instigator.player);
+			if ( instigator ) SWWMUtility.AchievementProgress("flight",int(maxdist),instigator.player);
 			Destroy();
 			return;
 		}

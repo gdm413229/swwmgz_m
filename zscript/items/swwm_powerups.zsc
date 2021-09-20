@@ -38,7 +38,7 @@ Class GrilledCheeseSandwich : Inventory
 	}
 	void DoTheThing( bool extrasafe = false )
 	{
-		SWWMUtility.AchievementProgressInc('swwm_progress_gcsandwich',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("gcsandwich",1,Owner.player);
 		SWWMHandler.DoFlash(Owner,Color(64,255,255,64),10);
 		Owner.A_QuakeEx(9,9,9,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:1.);
 		Owner.GiveBody(1000,1000);
@@ -204,7 +204,7 @@ Class GrilledCheeseSandwich : Inventory
 	override void PostTeleport( Vector3 destpos, double destangle, int flags )
 	{
 		if ( !lastdropper ) return;
-		SWWMUtility.MarkAchievement('swwm_achievement_tele',lastdropper.player);
+		SWWMUtility.MarkAchievement("tele",lastdropper.player);
 	}
 
 	Default
@@ -504,7 +504,7 @@ Class GhostArtifact : Inventory
 				Demolitionist(Owner).lastbump *= 1.04;
 		}
 		else Owner.GiveInventory("GhostPower",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_ghost',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("ghost",1,Owner.player);
 		return true;
 	}
 
@@ -658,7 +658,7 @@ Class GravitySuppressor : Inventory
 				Demolitionist(Owner).lastbump *= 1.04;
 		}
 		else Owner.GiveInventory("GravityPower",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_gravity',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("gravity",1,Owner.player);
 		return true;
 	}
 	override void Travelled()
@@ -908,7 +908,7 @@ Class FuckingInvinciball : Inventory
 				Demolitionist(Owner).lastbump *= 1.1;
 		}
 		else Owner.GiveInventory("InvinciballPower",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_sunny',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("sunny",1,Owner.player);
 		return true;
 	}
 	override void Travelled()
@@ -1183,7 +1183,7 @@ Class Ragekit : Inventory
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 		if ( Owner.GiveBody(100,100) )
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-		SWWMUtility.AchievementProgressInc('swwm_progress_rage',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("rage",1,Owner.player);
 		if ( !(Owner is 'Demolitionist') )
 		{
 			SWWMHandler.DoFlash(Owner,Color(64,255,0,0),30);
@@ -1711,7 +1711,7 @@ Class CompanionLamp : Actor
 		m.lamp = self;
 		m.trail = m.pos;
 		moff.Push(m);
-		SWWMUtility.AchievementProgressInc('swwm_progress_moth',1,parent.player);
+		SWWMUtility.AchievementProgressInc("moth",1,parent.player);
 	}
 	override void PostBeginPlay()
 	{
@@ -2184,7 +2184,7 @@ Class EBarrier : Inventory
 				Demolitionist(Owner).lastbump *= 0.95;
 		}
 		else Owner.GiveInventory("BarrierPower",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_barrier',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("barrier",1,Owner.player);
 		return true;
 	}
 	override void Travelled()
@@ -2851,14 +2851,14 @@ Class Mykradvo : Inventory
 			return true;
 		}
 		if ( (targets.Size() == 1) && targets[0] && !targets[0].bBOSS )
-			SWWMUtility.MarkAchievement('swwm_achievement_anone',Owner.player);
+			SWWMUtility.MarkAchievement("anone",Owner.player);
 		let p = Spawn("MykradvoBurst",spawnpos);
 		p.target = Owner;
 		MykradvoBurst(p).targets.Move(targets);
 		targets.Clear();
 		if ( Owner is 'Demolitionist' )
 			Demolitionist(Owner).lastbump *= 1.2;
-		SWWMUtility.AchievementProgressInc('swwm_progress_anom',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("anom",1,Owner.player);
 		return true;
 	}
 
@@ -3111,7 +3111,7 @@ Class SafetyTether : Inventory
 		SWWMHandler.DoFlash(Owner,Color(255,128,192,255),30);
 		if ( Owner.GiveBody(100,100) )
 			SWWMScoreObj.Spawn(100,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
-		SWWMUtility.AchievementProgressInc('swwm_progress_sneaky',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("sneaky",1,Owner.player);
 		Amount--;
 		if ( Amount <= 0 ) DepleteOrDestroy();
 	}
@@ -3316,7 +3316,7 @@ Class AngerySigil : Inventory
 	{
 		if ( pickup && !deathmatch ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
-		SWWMUtility.AchievementProgressInc('swwm_progress_deva',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("deva",1,Owner.player);
 		let r = AngeryPower(Owner.FindInventory("AngeryPower"));
 		if ( r )
 		{
@@ -3593,7 +3593,7 @@ Class DivineSprite : Inventory
 		if ( p ) return false;
 		if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		Owner.GiveInventory("DivineSpriteEffect",1);
-		SWWMUtility.AchievementProgressInc('swwm_progress_divine',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("divine",1,Owner.player);
 		return true;
 	}
 	override void Travelled()

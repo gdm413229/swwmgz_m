@@ -93,7 +93,7 @@ extend Class SWWMHandler
 				else if ( level.levelnum == 32 ) s.nazicleanup |= 2;
 			}
 			if ( s.nazicleanup == 3 )
-				SWWMUtility.MarkAchievement('swwm_achievement_trash',s.myplayer);
+				SWWMUtility.MarkAchievement("trash",s.myplayer);
 		}
 		// reset score on dead players (death exit™)
 		for ( int i=0; i<MAXPLAYERS; i++ )
@@ -126,31 +126,31 @@ extend Class SWWMHandler
 				}
 				if ( collected ) break;
 			}
-			if ( !collected ) SWWMUtility.MarkAchievement('swwm_achievement_cliffyb',players[consoleplayer]);
+			if ( !collected ) SWWMUtility.MarkAchievement("cliffyb",players[consoleplayer]);
 		}
 		// these can't be done on hexen
 		if ( gameinfo.GameType&GAME_Hexen ) return;
 		// beat the par time?
 		if ( level.partime && (Thinker.Tics2Seconds(level.maptime) <= level.partime) )
-			SWWMUtility.AchievementProgressInc('swwm_progress_par',1,players[consoleplayer]);
+			SWWMUtility.AchievementProgressInc("par",1,players[consoleplayer]);
 		// blaze it?
 		if ( Thinker.Tics2Seconds(level.maptime) == 260 )
-			SWWMUtility.MarkAchievement('swwm_achievement_blaze',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("blaze",players[consoleplayer]);
 		// one standing?
 		if ( (level.total_monsters-level.killed_monsters) == 1 )
-			SWWMUtility.MarkAchievement('swwm_achievement_onestanding',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("onestanding",players[consoleplayer]);
 		// nice?
 		if ( players[consoleplayer].Health == 69 )
-			SWWMUtility.MarkAchievement('swwm_achievement_nice',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("nice",players[consoleplayer]);
 		// peaceful/untouchable?
 		if ( !dealtdamage[consoleplayer] )
-			SWWMUtility.MarkAchievement('swwm_achievement_peace',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("peace",players[consoleplayer]);
 		if ( !reallytookdamage[consoleplayer] )
-			SWWMUtility.MarkAchievement('swwm_achievement_untouchable',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("untouchable",players[consoleplayer]);
 		// in a hurry?
 		if ( ((level.total_monsters > 0) || (level.total_items > 0) || (level.total_secrets > 0))
 			&& (level.killed_monsters == 0) && (level.found_items == 0) && (level.found_secrets == 0) )
-			SWWMUtility.MarkAchievement('swwm_achievement_hurry',players[consoleplayer]);
+			SWWMUtility.MarkAchievement("hurry",players[consoleplayer]);
 	}
 
 	private void SetupLockdefsCache( SWWMCachedLockInfo cli )

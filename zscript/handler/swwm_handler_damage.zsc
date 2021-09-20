@@ -128,7 +128,7 @@ extend Class SWWMHandler
 			}
 			// barrel destruction
 			if ( (e.Thing is 'ExplosiveBarrel') && (e.Thing.Health <= 0) )
-				SWWMUtility.AchievementProgressInc('swwm_progress_barrel',1,e.DamageSource.player);
+				SWWMUtility.AchievementProgressInc("barrel",1,e.DamageSource.player);
 		}
 	}
 
@@ -189,34 +189,34 @@ extend Class SWWMHandler
 		if ( e.Thing.IsHostile(src) )
 		{
 			if ( e.Thing.bBOSS && ((e.DamageType == 'Dash') || (e.DamageType == 'Buttslam')) )
-				SWWMUtility.AchievementProgressInc('swwm_progress_bossdash',1,src.player);
+				SWWMUtility.AchievementProgressInc("bossdash",1,src.player);
 			if ( e.DamageType == 'Push' )
-				SWWMUtility.AchievementProgressInc('swwm_progress_sneeze',1,src.player);
+				SWWMUtility.AchievementProgressInc("sneeze",1,src.player);
 			else if ( e.DamageType == 'Buttslam' )
-				SWWMUtility.AchievementProgressInc('swwm_progress_butts',1,src.player);
+				SWWMUtility.AchievementProgressInc("butts",1,src.player);
 			else if ( e.DamageType == 'Jump' )
-				SWWMUtility.AchievementProgressInc('swwm_progress_stomp',1,src.player);
+				SWWMUtility.AchievementProgressInc("stomp",1,src.player);
 			else if ( e.DamageType == 'GroundPound' )
-				SWWMUtility.AchievementProgressInc('swwm_progress_thicc',1,src.player);
+				SWWMUtility.AchievementProgressInc("thicc",1,src.player);
 			else if ( (e.DamageType == 'Love') && !(e.Thing is 'WolfensteinSS') && (e.Thing.Species != 'WolfensteinSS') )
-				SWWMUtility.AchievementProgressInc('swwm_progress_love',1,src.player);
+				SWWMUtility.AchievementProgressInc("love",1,src.player);
 			Inventory buff = e.Inflictor?e.Inflictor.FindInventory('ParriedBuff'):null;
 			if ( buff )
 			{
-				SWWMUtility.AchievementProgressInc('swwm_progress_reflect',1,src.player);
+				SWWMUtility.AchievementProgressInc("reflect",1,src.player);
 				if ( (e.Thing is 'Cyberdemon') && (e.Inflictor is 'Rocket') && (buff.tracer == e.Thing) )
-					SWWMUtility.MarkAchievement('swwm_achievement_cybully',src.player);
+					SWWMUtility.MarkAchievement("cybully",src.player);
 			}
 			if ( (e.Inflictor is 'PusherWeapon') || (e.Inflictor is 'PusherProjectile') )
-				SWWMUtility.AchievementProgressInc('swwm_progress_tender',1,src.player);
+				SWWMUtility.AchievementProgressInc("tender",1,src.player);
 			Inventory tk;
 			if ( (tk = e.Thing.FindInventory("DeepImpactOnlyToken")) && (tk.special1 == 1) )
-				SWWMUtility.MarkAchievement('swwm_achievement_shame',src.player);
-			SWWMUtility.AchievementProgressInc('swwm_progress_mega',1,src.player);
+				SWWMUtility.MarkAchievement("shame",src.player);
+			SWWMUtility.AchievementProgressInc("mega",1,src.player);
 			if ( src.player.Health == 1 )
 			{
 				onehpspree[pnum]++;
-				SWWMUtility.AchievementProgress('swwm_progress_onehp',onehpspree[pnum],src.player);
+				SWWMUtility.AchievementProgress("onehp",onehpspree[pnum],src.player);
 			}
 		}
 		// no credits unless it's a counted kill or marine (that isn't friendly) or another player in DM
@@ -306,7 +306,7 @@ extend Class SWWMHandler
 				scr.xstr[ofs] = StringTable.Localize("$SWWM_OVERKILL");
 				scr.xcnt = ++ofs;
 			}
-			SWWMUtility.AchievementProgressInc('swwm_progress_gib',1,src.player);
+			SWWMUtility.AchievementProgressInc("gib",1,src.player);
 		}
 		score = int(score*(1.+.5*min(multilevel[pnum],16)));
 		if ( (multilevel[pnum] > 0) && scr )
@@ -352,7 +352,7 @@ extend Class SWWMHandler
 			SWWMCredits.Give(src.player,1000);
 			Console.Printf(StringTable.Localize("$SWWM_LASTMONSTER"),src.player.GetUserName(),1000);
 			SWWMScoreObj.Spawn(1000,src.Vec3Offset(0,0,src.Height/2));
-			SWWMUtility.AchievementProgressInc('swwm_progress_allkills',1,src.player);
+			SWWMUtility.AchievementProgressInc("allkills",1,src.player);
 		}
 	}
 

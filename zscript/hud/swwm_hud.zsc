@@ -404,7 +404,7 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			EventHandler.SendNetworkEvent("swwmstorepuzzlecnt",consoleplayer,puzzlecnt,realpuzzlecnt);
 			int tpuz = SWWMUtility.IsDeathkings()?15:19;
-			if ( realpuzzlecnt >= tpuz ) SWWMUtility.MarkAchievement('swwm_achievement_puzzle',players[consoleplayer]);
+			if ( realpuzzlecnt >= tpuz ) SWWMUtility.MarkAchievement("puzzle",players[consoleplayer]);
 			if ( !swwm_nomapmsg )
 			{
 				switch ( puzzlecnt )

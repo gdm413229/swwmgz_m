@@ -618,7 +618,7 @@ Class Spreadgun : SWWMWeapon
 					s.vel += vel*.5+x*FRandom[Spreadgun](1.,20.)+y*FRandom[Spreadgun](-2,2)+z*FRandom[Spreadgun](-2,2);
 				}
 				SWWMUtility.DoKnockback(self,-x,30000.);
-				SWWMUtility.AchievementProgressInc('swwm_progress_golden',1,player);
+				SWWMUtility.AchievementProgressInc("golden",1,player);
 				break;
 			default:
 				st = new("SpreadgunTracer");

@@ -60,8 +60,8 @@ Class SilverAirRip : Actor
 		if ( SilverBullet(master) )
 		{
 			Silverbullet(master).nkills += nkill;
-			SWWMUtility.AchievementProgress('swwm_progress_conga',Silverbullet(master).nkills,target.player);
-			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc('swwm_progress_thruwall',nkill,target.player);
+			SWWMUtility.AchievementProgress("conga",Silverbullet(master).nkills,target.player);
+			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc("thruwall",nkill,target.player);
 		}
 		Destroy();
 	}
@@ -112,8 +112,8 @@ Class SilverImpact : Actor
 		if ( SilverBullet(master) )
 		{
 			Silverbullet(master).nkills += nkill;
-			SWWMUtility.AchievementProgress('swwm_progress_conga',Silverbullet(master).nkills,target.player);
-			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc('swwm_progress_thruwall',nkill,target.player);
+			SWWMUtility.AchievementProgress("conga",Silverbullet(master).nkills,target.player);
+			if ( bAMBUSH ) SWWMUtility.AchievementProgressInc("thruwall",nkill,target.player);
 		}
 		A_AlertMonsters(swwm_uncapalert?0:2500);
 		A_QuakeEx(4,4,4,20,0,400,"",QF_RELATIVE|QF_SCALEDOWN,falloff:100,rollIntensity:.9);

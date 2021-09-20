@@ -9,6 +9,11 @@ I REALLY need to do this, it's starting to become very problematic to maintain t
   - Smooth scrolling, better mouse input
   - Much cleaner code, easier maintenance and extension
   - Modular design, add-on tab support
+* **Achievement CVar Compression:**
+  - Switch achievements to use a dictionary, rather than individual CVars
+  - Potentially more robust (maybe?)
+  - Harder to tamper with
+  - Can keep state in a local Dictionary object to avoid excess CVar access
 
 ## 1.3 update *(The Second Batch)*:
 

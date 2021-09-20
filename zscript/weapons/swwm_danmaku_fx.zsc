@@ -474,7 +474,7 @@ Class EvisceratorProj : Actor
 		if ( target && tracer && (tracer.bIsMonster||tracer.player) && tracer.IsHostile(target) )
 		{
 			double dist = level.Vec3Diff(pos,invoker.startpos).length();
-			SWWMUtility.AchievementProgress('swwm_progress_lead',int(dist),target.player);
+			SWWMUtility.AchievementProgress("lead",int(dist),target.player);
 		}
 		bForceXYBillboard = true;
 		A_SetRenderStyle(1.0,STYLE_Add);

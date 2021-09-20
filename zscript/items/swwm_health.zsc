@@ -74,7 +74,7 @@ Class HealthNuggetItem : SWWMHealth
 	override void DoPickupSpecial( Actor toucher )
 	{
 		Super.DoPickupSpecial(toucher);
-		SWWMUtility.AchievementProgressInc('swwm_progress_candy',1,toucher.player);
+		SWWMUtility.AchievementProgressInc("candy",1,toucher.player);
 	}
 	Default
 	{
@@ -179,7 +179,7 @@ Class RefresherItem : SWWMHealth
 	}
 	override void AutoUseExtra( bool recursive )
 	{
-		SWWMUtility.AchievementProgressInc('swwm_progress_refresh',1,Owner.player);
+		SWWMUtility.AchievementProgressInc("refresh",1,Owner.player);
 		// regen effect doesn't stack if we autoactivated recursively
 		if ( recursive ) return;
 		let p = Powerup(Owner.FindInventory("RefresherRegen"));

@@ -3,7 +3,7 @@ user string swwm_voicetype = "default";		// voice for your demolitionist
 nosave float swwm_flashstrength = 1.0;		// strength of screen flashes
 nosave int swwm_hudmargin = 10;			// margin around fullscreen hud elements
 nosave int swwm_maxshown = 4;			// max messages to show normally
-nosave int swwm_maxshownbig = 10;			// max messages to show when chatting
+nosave int swwm_maxshownbig = 10;		// max messages to show when chatting
 nosave int swwm_maxpickup = 5;			// total pickup messages visible
 nosave int swwm_mutevoice = 0;			// mute demolitionist voice
 						// 0 - none
@@ -24,7 +24,7 @@ user bool swwm_autouseammo = true;		// automatically use ammo fabricators when p
 server int swwm_enforceautousearmor = 0;	// 1: server enforces auto use, -1: server enforces no auto use, 0: server respects user setting
 server int swwm_enforceautousehealth = 0;	// likewise for health
 server int swwm_enforceautouseammo = 0;		// likewise for fabricators
-nosave bool swwm_targeter = true;			// show targeter healthbars
+nosave bool swwm_targeter = true;		// show targeter healthbars
 nosave bool swwm_targettags = true;		// show enemy tags above healthbars
 nosave bool swwm_healthnums = true;		// show damage/healing numbers
 nosave bool swwm_scorenums = true;		// show score numbers
@@ -158,4 +158,6 @@ nosave color swwm_mm_yourcolor = "80 ff 00";
 
 server noarchive bool swwm_iseriouslywanttoplaythiswithbd = false;	// self-explanatory
 
-nosave int swwm_playtime = 0;	// total playtime in seconds
+nosave int swwm_playtime = 0;			// total playtime in seconds
+nosave string swwm_achievementstate = "";	// stores dictionary with all achievement states
+nosave string swwm_achievementprogress = "";	// stores dictionary with all achievement progress

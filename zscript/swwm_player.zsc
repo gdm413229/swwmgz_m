@@ -462,13 +462,13 @@ Class Demolitionist : PlayerPawn
 			if ( !(player.cmd.buttons&BT_USER2) ) dashboost *= .1;
 		}
 		double fueluse = (dashfuel-max(0.,dashfuel-dashboost))/60.;
-		SWWMUtility.AchievementProgressIncDouble('swwm_progress_fuel',fueluse,player);
+		SWWMUtility.AchievementProgressIncDouble("fuel",fueluse,player);
 		mystats.fuelusage += fueluse;
 		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		dashcooldown = min(40,max(10,int(dashcooldown*1.4)));
 		fuelcooldown = max(30,fuelcooldown);
 		if ( (dashfuel <= 0.) && fullfuel )
-			SWWMUtility.AchievementProgressInc('swwm_progress_brake',1,player);
+			SWWMUtility.AchievementProgressInc("brake",1,player);
 		if ( (dashfuel <= 0.) || (dashboost <= 0.) )
 			SetStateLabel("DashEnd");
 	}
@@ -484,7 +484,7 @@ Class Demolitionist : PlayerPawn
 			last_boost = level.maptime+1;
 		}
 		double fueluse = (dashfuel-max(0.,dashfuel-dashboost))/60.;
-		SWWMUtility.AchievementProgressIncDouble('swwm_progress_fuel',fueluse,player);
+		SWWMUtility.AchievementProgressIncDouble("fuel",fueluse,player);
 		mystats.fuelusage += fueluse;
 		if ( !swwm_superfuel ) dashfuel = max(0.,dashfuel-dashboost);
 		if ( ((dashfuel <= 0.) || (dashboost <= 0.)) )
@@ -529,7 +529,7 @@ Class Demolitionist : PlayerPawn
 		A_StartSound("bestsound",CHAN_ITEMEXTRA,CHANF_OVERLAP);
 		lastbump *= .97;
 		int scr = (TexMan.GetName(d.HitTexture).Left(6)~=="ZZWOLF")?200:20;
-		if ( scr == 20 ) SWWMUtility.AchievementProgressInc('swwm_progress_doodle',1,player);
+		if ( scr == 20 ) SWWMUtility.AchievementProgressInc("doodle",1,player);
 		SWWMCredits.Give(player,scr);
 		if ( player == players[consoleplayer] ) SWWMScoreObj.Spawn(scr,d.HitLocation);
 		if ( d.HitType == TRACE_HitWall )
@@ -1027,7 +1027,7 @@ Class Demolitionist : PlayerPawn
 			{
 				cairtime = 0;
 				mystats.grounddist += traveldist;
-				SWWMUtility.AchievementProgressIncDouble('swwm_progress_travel',traveldist/32000.,player);
+				SWWMUtility.AchievementProgressIncDouble("travel",traveldist/32000.,player);
 			}
 		}
 		else mystats.swimdist += traveldist;
@@ -1035,7 +1035,7 @@ Class Demolitionist : PlayerPawn
 		if ( player.cmd.buttons&BT_USER3 ) SenseItems();
 		if ( vel.length() > mystats.topspeed ) mystats.topspeed = vel.length();
 		if ( vel.length() > ((3600*GameTicRate)/32000.) )
-			SWWMUtility.AchievementProgress('swwm_progress_sanic',int((vel.length()*3600*GameTicRate)/32000.),player);
+			SWWMUtility.AchievementProgress("sanic",int((vel.length()*3600*GameTicRate)/32000.),player);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		if ( player.onground && !bNoGravity && !lastground && (waterlevel < 2) )
 		{
@@ -1120,7 +1120,7 @@ Class Demolitionist : PlayerPawn
 				}
 				encroachtics++;
 				if ( !(encroachtics%GameTicRate) && !IsFriend(encroached) )
-					SWWMUtility.AchievementProgress('swwm_progress_step',encroachtics/GameTicRate,player);
+					SWWMUtility.AchievementProgress("step",encroachtics/GameTicRate,player);
 			}
 			else encroachtics = 0;
 			oldencroached = encroached;
@@ -1259,7 +1259,7 @@ Class Demolitionist : PlayerPawn
 				{
 					if ( bumped ) continue;
 					bumped = true;
-					SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
+					SWWMUtility.AchievementProgressInc("bonk",1,player);
 					A_QuakeEx(8,8,8,16,0,128,"",QF_RELATIVE|QF_SCALEDOWN);
 					vel *= .2;
 					vel -= dir*(10+(spd*30/mass));
@@ -1373,7 +1373,7 @@ Class Demolitionist : PlayerPawn
 					{
 						// headbump
 						bumped = true;
-						SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
+						SWWMUtility.AchievementProgressInc("bonk",1,player);
 						A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 						bumptic = gametic+int(20+spd/4.);
 						lastbump *= .8;
@@ -1470,7 +1470,7 @@ Class Demolitionist : PlayerPawn
 					}
 					// wallbump
 					bumped = true;
-					SWWMUtility.AchievementProgressInc('swwm_progress_bonk',1,player);
+					SWWMUtility.AchievementProgressInc("bonk",1,player);
 					A_StartSound("demolitionist/bump",CHAN_DAMAGE,CHANF_OVERLAP);
 					bumptic = gametic+int(25+spd/4.);
 					lastbump *= .8;
@@ -1572,7 +1572,7 @@ Class Demolitionist : PlayerPawn
 			q.special1 = 10;
 			SWWMCrusherBroken.Create(flor,null,diffh);
 		}
-		SWWMUtility.MarkAchievement('swwm_achievement_crush',player);
+		SWWMUtility.MarkAchievement("crush",player);
 	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
@@ -1614,7 +1614,7 @@ Class Demolitionist : PlayerPawn
 				if ( source.master ) source.master.Destroy();
 				source.Destroy();
 				damage = 20;	// reduce so it's not instant kill
-				SWWMUtility.MarkAchievement('swwm_achievement_kancho',player);
+				SWWMUtility.MarkAchievement("kancho",player);
 			}
 		}
 		// no damage whatsoever
@@ -1642,7 +1642,7 @@ Class Demolitionist : PlayerPawn
 		}
 		PainChance = oldpchance;
 		if ( (Health <= 0) && (source == self) && (flags&DMG_EXPLOSION) )
-			SWWMUtility.MarkAchievement('swwm_achievement_dime',player);
+			SWWMUtility.MarkAchievement("dime",player);
 		return realdmg;
 	}
 	override void CalcHeight()
@@ -2051,7 +2051,7 @@ Class Demolitionist : PlayerPawn
 					A_StartSound(walljump?"demolitionist/kick":"demolitionist/runstart",CHAN_FOOTSTEP,CHANF_OVERLAP);
 					if ( swwm_extraalert ) A_AlertMonsters(swwm_uncapalert?0:100);
 					last_kick = level.maptime+1;
-					SWWMUtility.AchievementProgressInc('swwm_progress_jump',1,player);
+					SWWMUtility.AchievementProgressInc("jump",1,player);
 				}
 			}
 			bOnMobj = false;
@@ -2088,7 +2088,7 @@ Class Demolitionist : PlayerPawn
 				{
 					if ( !bWalking && (level.maptime < (lastairtic+10)) )
 					{
-						SWWMUtility.AchievementProgressInc('swwm_progress_bune',1,player);
+						SWWMUtility.AchievementProgressInc("bune",1,player);
 						// bhop, z vel relative to vel size
 						if ( vel.z < 25. )	// don't ramp up too hard
 						{
@@ -2170,7 +2170,7 @@ Class Demolitionist : PlayerPawn
 				// reboot (if possible)
 				if ( !FindInventory("ReviveCooldown") && (((swwm_revivecooldown >= 0) && (G_SkillPropertyInt(SKILLP_ACSReturn) < 4)) || !hasrevived) )
 				{
-					if ( hasrevived ) SWWMUtility.MarkAchievement('swwm_achievement_sekiro',player);
+					if ( hasrevived ) SWWMUtility.MarkAchievement("sekiro",player);
 					hasrevived = true;
 					player.Resurrect();
 					player.damagecount = 0;
@@ -2647,7 +2647,7 @@ Class Demolitionist : PlayerPawn
 			if ( hnd ) hnd.allsecrets = true;
 			score = 1000;
 			Console.Printf(StringTable.Localize("$SWWM_LASTSECRET"),player.GetUserName(),score);
-			SWWMUtility.AchievementProgressInc('swwm_progress_allsecrets',1,player);
+			SWWMUtility.AchievementProgressInc("allsecrets",1,player);
 		}
 		else Console.Printf(StringTable.Localize("$SWWM_FINDSECRET"),player.GetUserName(),score);
 		if ( CheckLocalView() ) SWWMHandler.AddOneliner("findsecret",2,40);

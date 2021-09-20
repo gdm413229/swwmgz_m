@@ -433,7 +433,7 @@ Class YnykronImpact : Actor
 				if ( tracer.player )
 				{
 					if ( tracer == target )
-						SWWMUtility.MarkAchievement('swwm_achievement_oopsie',tracer.player);
+						SWWMUtility.MarkAchievement("oopsie",tracer.player);
 					PlayerGone.FeckOff(tracer);
 				}
 				if ( tracer.FindState("YnykronDeath",true) )
@@ -453,7 +453,7 @@ Class YnykronImpact : Actor
 				if ( (tracer.bIsMonster || tracer.player) && tracer.IsHostile(target) && YnykronShot(master) )
 					YnykronShot(master).enemykills++;
 				if ( target && tracer.FindInventory("EndgameBossMarker") )
-					SWWMUtility.MarkAchievement('swwm_achievement_ligma',target.player);
+					SWWMUtility.MarkAchievement("ligma",target.player);
 			}
 		}
 		if ( YnykronShot(master) )
@@ -1166,8 +1166,8 @@ Class YnykronShot : Actor
 		if ( target && enemykills )
 		{
 			if ( (enemykills == 1) && !hitboss )
-				SWWMUtility.MarkAchievement('swwm_achievement_oneguy',target.player);
-			SWWMUtility.AchievementProgress('swwm_progress_ezkill',enemykills,target.player);
+				SWWMUtility.MarkAchievement("oneguy",target.player);
+			SWWMUtility.AchievementProgress("ezkill",enemykills,target.player);
 			enemykills = 0;
 		}
 		if ( IsActorPlayingSound(CHAN_VOICE) )
@@ -2488,7 +2488,7 @@ Class YnykronSingularity : Actor
 						if ( a.player )
 						{
 							if ( a == target )
-								SWWMUtility.MarkAchievement('swwm_achievement_oopsie',a.player);
+								SWWMUtility.MarkAchievement("oopsie",a.player);
 							PlayerGone.FeckOff(a);
 						}
 						if ( a.FindState("YnykronAltDeath",true) )
@@ -2501,7 +2501,7 @@ Class YnykronSingularity : Actor
 							IDontFeelSoGood.DeletThis(a,true);	// ensures corpse is deleted too
 						}
 						if ( target && a.FindInventory("EndgameBossMarker") )
-							SWWMUtility.MarkAchievement('swwm_achievement_ligma',target.player);
+							SWWMUtility.MarkAchievement("ligma",target.player);
 					}
 					if ( !a || (a.Health <= 0) )
 						specialf2 += min(100.,capmass*.6); // partial absorption

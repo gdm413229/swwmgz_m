@@ -16,11 +16,15 @@ Class MenuTransaction
 Class DemolitionistMenu : GenericMenu
 {
 	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	TextureID FancyBg, FrameTex, VSepTex, HSepTex;
+	// for resolution scaling and such
+	double hs;
+	Vector2 ss, ws, origin;
 	// temporary bottom messages, such as "not enough money"
 	String tmsg;
 	int tmsgtic;
-	// bottom clock
-	String clockstr;
+	// other text
+	String clockstr, munstr;
 	// menu keybind
 	int ikey[2];
 	String mkey[2];
@@ -59,7 +63,19 @@ Class DemolitionistMenu : GenericMenu
 			isclosing = true;
 			return;
 		}
-		// TODO initialize base graphics here
+		FancyBg = TexMan.CheckForTexture("graphics/tempbg.png",TexMan.Type_MiscPatch);
+		FrameTex = TexMan.CheckForTexture("graphics/KBase/FrameTex.png",TexMan.Type_MiscPatch);
+		VSepTex = TexMan.CheckForTexture("graphics/KBase/VSepTex.png",TexMan.Type_MiscPatch);
+		HSepTex = TexMan.CheckForTexture("graphics/KBase/HSepTex.png",TexMan.Type_MiscPatch);
+		// note that we can assume 640x400 will always be the smallest resolution allowed by gzdoom, but we still need to handle widescreen
+		hs = max(min(floor(Screen.GetWidth()/640.),floor(Screen.GetHeight()/266.)),1.);
+		ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
+		ws.x = 640.;
+		double th = 640*(ss.y/ss.x);
+		if ( th >= 400. ) ws.y = 400.;
+		else if ( th >= 360. ) ws.y = 360.;
+		else ws.y = 266.;
+		origin = (int(ss.x-ws.x)/2,int(ss.y-ws.y)/2);
 		TewiFont = Font.GetFont('TewiShaded');
 		MPlusFont = Font.GetFont('MPlusShaded');
 		MiniwiFont = Font.GetFont('MiniwiShaded');
@@ -69,7 +85,7 @@ Class DemolitionistMenu : GenericMenu
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
 		mkey[1] = Bindings.NameKeys(ikey[1],0);
 		tmsg = StringTable.Localize("$SWWM_MAINCONTROLS");
-		tmsgtic = gametic+70;
+		tmsgtic = gametic+50;
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		SetClock();
@@ -81,6 +97,7 @@ Class DemolitionistMenu : GenericMenu
 		switch ( mkey )
 		{
 		case MKEY_BACK:
+			isclosing = true;
 			MenuSound("menu/democlose");
 			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			Close();
@@ -95,6 +112,7 @@ Class DemolitionistMenu : GenericMenu
 		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || isclosing )
 		{
 			// ded (or force close)
+			isclosing = true;
 			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			Close();
 			return;
@@ -107,6 +125,12 @@ Class DemolitionistMenu : GenericMenu
 		CheckTransactions();
 		// update time string
 		clockstr = CrimeTime();
+		// update money str
+		int muns1, muns2;
+		[muns1, muns2] = SWWMCredits.Get(players[consoleplayer]);
+		munstr = "\cg¥\c-";
+		if ( muns2 > 0 ) munstr.AppendFormat("%d",muns2);
+		munstr.AppendFormat("%09d",muns1);
 	}
 
 	override bool OnUiEvent( UIEvent ev )
@@ -126,11 +150,72 @@ Class DemolitionistMenu : GenericMenu
 		return Super.OnUiEvent(ev);
 	}
 
+	// fundamental drawing functions (good god these are hacky)
+	void DrawFrame( double x, double y, double w, double h, bool shadow = true )
+	{
+		x += origin.x;
+		y += origin.y;
+		Screen.DrawTexture(FrameTex,false,x,y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,0.,DTA_SrcY,0.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,1);
+		Screen.DrawTexture(FrameTex,false,x+1,y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcY,0.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,int(w-2),DTA_DestHeight,1);
+		Screen.DrawTexture(FrameTex,false,x,y+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,0.,DTA_SrcY,1.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,int(h-2));
+		Screen.DrawTexture(FrameTex,false,(x+w)-1,y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcY,0.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,1);
+		Screen.DrawTexture(FrameTex,false,x,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,0.,DTA_SrcY,2.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,1);
+		if ( shadow )
+		{
+			Screen.DrawTexture(FrameTex,false,(x+w)-1,y+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcY,1.,DTA_SrcWidth,2.,DTA_SrcHeight,1.,DTA_DestWidth,2,DTA_DestHeight,int(h-2));
+			Screen.DrawTexture(FrameTex,false,x+1,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcY,2.,DTA_SrcWidth,1.,DTA_SrcHeight,2.,DTA_DestWidth,int(w-2),DTA_DestHeight,2);
+			Screen.DrawTexture(FrameTex,false,(x+w)-1,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcY,2.,DTA_SrcWidth,2.,DTA_SrcHeight,2.,DTA_DestWidth,2,DTA_DestHeight,2);
+		}
+		else
+		{
+			Screen.DrawTexture(FrameTex,false,(x+w)-1,y+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcY,1.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,int(h-2));
+			Screen.DrawTexture(FrameTex,false,x+1,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcY,2.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,int(w-2),DTA_DestHeight,1);
+			Screen.DrawTexture(FrameTex,false,(x+w)-1,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcY,2.,DTA_SrcWidth,1.,DTA_SrcHeight,1.,DTA_DestWidth,1,DTA_DestHeight,1);
+		}
+	}
+
+	// these ones thankfully only need three drawtexture calls each
+	void DrawVSeparator( double x, double y, double h )
+	{
+		x += origin.x;
+		y += origin.y;
+	}
+	void DrawHSeparator( double x, double y, double w )
+	{
+		x += origin.x;
+		y += origin.y;
+		Screen.DrawTexture(HSepTex,false,x,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,0.,DTA_SrcWidth,1.,DTA_DestWidth,1);
+		Screen.DrawTexture(HSepTex,false,x+1,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcWidth,1.,DTA_DestWidth,int(ws.x-2));
+		Screen.DrawTexture(HSepTex,false,(x+w)-1,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcWidth,1.,DTA_DestWidth,1);
+	}
+
 	override void Drawer()
 	{
 		if ( isclosing ) return;
+		// draw the background and main frame
+		if ( swwm_fuzz ) Screen.DrawTexture(FancyBg,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Add,DTA_Alpha,.5,DTA_ClipBottom,int((origin.y+ws.y)*hs));
+		Screen.Dim("Black",.8,int(origin.x*hs),int(origin.y*hs),int(ws.x*hs),int(ws.y*hs));
+		DrawFrame(0,0,ws.x,ws.y,true);
+		// draw top and bottom separators
+		DrawHSeparator(0,14,ws.x);
+		DrawHSeparator(0,ws.y-14,ws.x);
 		Font fnt = LangFont(TewiFont);
-		String str = "NEW DEMOLITIONIST MENU IS UNDER CONSTRUCTION";
-		Screen.DrawText(fnt,Font.CR_RED,(Screen.GetWidth()-fnt.StringWidth(str)*CleanXFac_1)/2,(Screen.GetHeight()-fnt.GetHeight()*CleanYFac_1)/2,str,DTA_CleanNoMove_1,true);
+		double xx = 3, yy = 0;
+		String str;
+		// TODO draw tabs
+		// ...and everything else
+		xx = 637-TewiFont.StringWidth(munstr);
+		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,munstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		yy = ws.y-14;
+		if ( gametic < tmsgtic ) str = tmsg;
+		else str = clockstr;
+		xx = 4;
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		str = "DemolitionOS v1.0";
+		xx = 637-fnt.StringWidth(str);
+		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// placeholder
+		str = "NEW DEMOLITIONIST MENU IS UNDER CONSTRUCTION";
+		Screen.DrawText(fnt,Font.CR_RED,int(ss.x-fnt.StringWidth(str))/2,int(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 	}
 }

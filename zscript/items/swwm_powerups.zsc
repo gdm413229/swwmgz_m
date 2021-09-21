@@ -3500,7 +3500,6 @@ Class DivineSpriteEffect : Inventory
 	{
 		Inventory.Icon "graphics/HUD/Icons/I_Divine.png";
 		DivineSpriteEffect.HealTimer 1750;
-		Inventory.InterHubAmount 0;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 	}
@@ -3516,6 +3515,12 @@ Class DivineSpriteEffect : Inventory
 		if ( !AlphInter ) AlphInter = DynamicValueInterpolator.Create(Owner.Health,.1,1,100);
 		double alph = clamp((AlphInter.GetValue()-1000.)/6000.,0.,1.);
 		return Color(int(64*alph),255,255,255);
+	}
+
+	override void Travelled()
+	{
+		Super.Travelled();
+		bHealDone = true;
 	}
 
 	override void DoEffect()

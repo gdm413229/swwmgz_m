@@ -518,7 +518,7 @@ Class YnykronImpact : Actor
 			if ( t && YnykronShot(master) )
 			{
 				YnykronShot(master).hitlist.Push(t);
-				if ( t.bBOSS ) YnykronShot(master).hitboss = true;
+				if ( t.bBOSS || t.FindInventory("BossMarker") ) YnykronShot(master).hitboss = true;
 			}
 			// spawn blast that will propagate
 			let b = Spawn("YnykronDelayedImpact",t.pos);
@@ -705,7 +705,7 @@ Class YnykronBeam : Actor
 			if ( t.hitlist[i].hitactor && YnykronShot(master) )
 			{
 				YnykronShot(master).hitlist.Push(t.hitlist[i].hitactor);
-				if ( t.hitlist[i].hitactor.bBOSS ) YnykronShot(master).hitboss = true;
+				if ( t.hitlist[i].hitactor.bBOSS || t.hitlist[i].hitactor.FindInventory("BossMarker") ) YnykronShot(master).hitboss = true;
 			}
 			// spawn blast that will propagate
 			let b = Spawn("YnykronImpact",t.hitlist[i].hitlocation);
@@ -805,7 +805,7 @@ Class YnykronBeam : Actor
 				if ( it.hitlist[i].hitactor && YnykronShot(master) )
 				{
 					YnykronShot(master).hitlist.Push(it.hitlist[i].hitactor);
-					if ( it.hitlist[i].hitactor.bBOSS ) YnykronShot(master).hitboss = true;
+					if ( it.hitlist[i].hitactor.bBOSS || it.hitlist[i].hitactor.FindInventory("BossMarker") ) YnykronShot(master).hitboss = true;
 				}
 				// spawn blast that will propagate
 				let b = Spawn("YnykronImpact",it.hitlist[i].hitlocation);

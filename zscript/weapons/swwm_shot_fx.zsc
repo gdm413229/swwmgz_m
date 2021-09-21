@@ -1220,7 +1220,7 @@ Class TheBall : Actor
 		}
 		if ( crit )
 			SWWMUtility.DoExplosion(self,dmg/2,25000,150,80,ignoreme:target);
-		if ( crit && victim && (victim.Health <= 0) && victim.bBOSS && target )
+		if ( crit && victim && (victim.Health <= 0) && (victim.bBOSS || victim.FindInventory("BossMarker")) && target )
 			SWWMUtility.MarkAchievement('swwm_achievement_clonk',target.player);
 		// only rip shootables
 		if ( (slamforce > girth) && is_schutt )

@@ -24,7 +24,7 @@ Class AirBullet : FastProjectile
 	}
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
-		if ( target.bBOSS ) damage = int(damage*.4);
+		if ( target.bBOSS || target.FindInventory("BossMarker") ) damage = int(damage*.4);
 		if ( !bAMBUSH )
 		{
 			if ( target == lasthit ) return 0;

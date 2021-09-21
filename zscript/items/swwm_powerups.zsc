@@ -2345,7 +2345,7 @@ Class MykradvoTendril : Actor
 			{
 				if ( t.hitlist[i].hitactor.IsFriend(target) ) continue;
 				if ( (t.hitlist[i].hitactor == tracer) && bMISSILEMORE ) bMISSILEEVENMORE = true;	// we split
-				int dmg = t.hitlist[i].hitactor.bBOSS?(GetMissileDamage(0,0)*4):max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0));
+				int dmg = (t.hitlist[i].hitactor.bBOSS||t.hitlist[i].hitactor.FindInventory("BossMarker"))?(GetMissileDamage(0,0)*4):max(t.hitlist[i].hitactor.Health,GetMissileDamage(0,0));
 				SWWMUtility.DoKnockback(t.hitlist[i].hitactor,-t.hitlist[i].x+(0,0,.5),((t.hitlist[i].hitactor.Health-dmg)<=0)?60000:8000);
 				t.hitlist[i].hitactor.DamageMobj(self,target,dmg,'Plasma',DMG_THRUSTLESS);
 				if ( t.hitlist[i].hitactor && t.hitlist[i].hitactor.bISMONSTER && !Random[Mykradvo](0,3) )
@@ -2353,7 +2353,7 @@ Class MykradvoTendril : Actor
 			}
 		}
 		invoker.nextpos = level.Vec3Offset(pos,x*speed);
-		if ( !bSTANDSTILL && (!tracer || !tracer.bSHOOTABLE || (tracer.Health <= 0) || (tracer.bBOSS && !bMISSILEMORE)) )
+		if ( !bSTANDSTILL && (!tracer || !tracer.bSHOOTABLE || (tracer.Health <= 0) || ((tracer.bBOSS || tracer.FindInventory("BossMarker")) && !bMISSILEMORE)) )
 		{
 			ReactionTime--;
 			if ( ReactionTime <= 0 )
@@ -2396,7 +2396,7 @@ Class MykradvoTendril : Actor
 				r.pitch = asin(-sdir.z);
 				r.target = target;
 				r.tracer = tracer;
-				if ( tracer && tracer.bBOSS ) r.ReactionTime -= Random[ExploS](5,15);
+				if ( tracer && (tracer.bBOSS || tracer.FindInventory("BossMarker")) ) r.ReactionTime -= Random[ExploS](5,15);
 				else r.ReactionTime += Random[ExploS](0,20);
 			}
 			return;
@@ -2850,7 +2850,7 @@ Class Mykradvo : Inventory
 			Amount++;
 			return true;
 		}
-		if ( (targets.Size() == 1) && targets[0] && !targets[0].bBOSS )
+		if ( (targets.Size() == 1) && targets[0] && !targets[0].bBOSS && !targets[0].FindInventory("BossMarker") )
 			SWWMUtility.MarkAchievement('swwm_achievement_anone',Owner.player);
 		let p = Spawn("MykradvoBurst",spawnpos);
 		p.target = Owner;

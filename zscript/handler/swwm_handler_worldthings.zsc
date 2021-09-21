@@ -77,7 +77,7 @@ extend Class SWWMHandler
 	override void WorldThingDied( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
-		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000)) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
+		if ( e.Thing.default.bISMONSTER && ((e.Thing.default.bBOSS) || (e.Thing.GetSpawnHealth() >= 1000) || e.Thing.FindInventory("BossMarker")) && (alreadygold.Find(e.Thing) == alreadygold.Size()) )
 		{
 			// make sure we can't farm drops from revivable enemies
 			// (or cause some things to spam-spawn gold shells)

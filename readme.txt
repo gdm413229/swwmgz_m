@@ -196,7 +196,7 @@ Slot 9. Pistol (but very strong).
 A tasty treat of sweetness and DEATH. From the lost forever™ Weirdweapons pack.
 Primary fire does the thing.
 Secondary fire does also the same thing as its slot 2 counterpart.
-Holding primary fire after pressing secondary fire will switch to yeeting the
+Holding secondary and primary fire (in that order) will switch to yeeting the
 entire damn gun, for some absurd reason. It's very effective, though.
 Considering that you can dispose of it like that, you can hold some spares.
 

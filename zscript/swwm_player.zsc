@@ -896,7 +896,7 @@ Class Demolitionist : PlayerPawn
 			if ( player.onground && (player.jumptics < -18) )
 				player.jumptics = 0;
 		}
-		if ( player.playerstate != PST_DEAD )
+		if ( (player.playerstate != PST_DEAD) && !ReactionTime )
 		{
 			// quick grenade
 			if ( player.cmd.buttons&BT_USER4 )

@@ -85,6 +85,7 @@ Class CandyGun : SWWMWeapon
 
 	override void DrawWeapon( double TicFrac, double bx, double by, Vector2 hs, Vector2 ss )
 	{
+		if ( Amount <= 0 ) return;
 		if ( !WeaponBox ) WeaponBox = TexMan.CheckForTexture("graphics/HUD/CandygunDisplay.png",TexMan.Type_Any);
 		if ( !TewiFont ) TewiFont = Font.GetFont('TewiShaded');
 		Screen.DrawTexture(WeaponBox,false,bx-51,by-44,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
@@ -215,8 +216,12 @@ Class CandyGun : SWWMWeapon
 	{
 		let weap = Weapon(invoker);
 		if ( !weap ) return;
+		invoker.bNODEATHDESELECT = true;	// prevent any glitching that could happen if the sequence is interrupted
 		if ( !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) )
+		{
+			if ( weap.Ammo2.Amount <= 0 ) weap.Amount = 0;
 			weap.Ammo2.Amount = max(0,weap.Ammo2.Amount-1);
+		}
 		Vector3 x, y, z, x2, y2, z2;
 		[x, y, z] = swwm_CoordUtil.GetAxes(pitch,angle,roll);
 		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x-2*y-3*z);
@@ -287,6 +292,7 @@ Class CandyGun : SWWMWeapon
 	override bool CheckAmmo( int fireMode, bool autoSwitch, bool requireAmmo, int ammocount )
 	{
 		if ( sv_infiniteammo || Owner.FindInventory('PowerInfiniteAmmo',true) ) return true;
+		if ( Amount <= 0 ) return false;
 		if ( fireMode == PrimaryFire ) return (chambered || (clipcount > 0) || (Ammo1.Amount > 0) || (Owner.CountInv("CandyGunBullets") > 0));
 		if ( fireMode == AltFire ) return ((Ammo1.Amount > 0) || (Owner.CountInv("CandyGunBullets") > 0));
 		return Super.CheckAmmo(firemode,autoswitch,requireammo,ammocount);
@@ -294,6 +300,7 @@ Class CandyGun : SWWMWeapon
 
 	override bool ReportHUDAmmo()
 	{
+		if ( Amount <= 0 ) return false;
 		if ( chambered || (clipcount > 0) || (Owner.CountInv("CandyGunBullets") > 0) ) return true;
 		if ( Ammo1.Amount <= 0 ) return false;
 		return Super.ReportHUDAmmo();
@@ -388,9 +395,14 @@ Class CandyGun : SWWMWeapon
 				int flg = WRF_ALLOWZOOM|WRF_ALLOWUSER1;
 				if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) || (invoker.Ammo1.Amount > 0) || invoker.chambered ) flg |= WRF_ALLOWRELOAD;
 				if ( (invoker.Ammo1.Amount <= 0) && (CountInv("CandyGunBullets") <= 0) && !sv_infiniteammo && !FindInventory('PowerInfiniteAmmo',true) ) flg |= WRF_NOSECONDARY;
-				A_WeaponReady(flg);
-				if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
-					invoker.CheckAmmo(EitherFire,true);
+				if ( (flg&WRF_NOSECONDARY) && (player.cmd.buttons&BT_ATTACK) && (player.cmd.buttons&BT_ALTATTACK) )
+					player.SetPSprite(PSP_WEAPON,ResolveState("SpecialFirePre"));
+				else
+				{
+					A_WeaponReady(flg);
+					if ( player.cmd.buttons&(BT_ATTACK|BT_ALTATTACK) )
+						invoker.CheckAmmo(EitherFire,true);
+				}
 			}
 		}
 		Wait;
@@ -500,7 +512,7 @@ Class CandyGun : SWWMWeapon
 		XZW5 Q 1;
 		XZW5 R 1
 		{
-			if ( player.cmd.buttons&BT_ATTACK && ((((invoker.Ammo1.Amount > 0) || (CountInv("CandyGunBullets") > 0)) && (invoker.Ammo2.Amount > 0)) || sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true)) )
+			if ( player.cmd.buttons&BT_ATTACK )
 				player.SetPSprite(PSP_WEAPON,ResolveState("SpecialFire"));
 		}
 		XZW5 STUVWXYZ 1;
@@ -527,6 +539,12 @@ Class CandyGun : SWWMWeapon
 		XZW6 XY 2;
 		XZW6 Z 4;
 		Goto ReloadEnd;
+	SpecialFirePre:
+		XZW2 A 2 A_PlayerReload();
+		XZW5 NO 2;
+		XZW5 P 1 A_StartSound("explodium/magpin",CHAN_WEAPON,CHANF_OVERLAP);
+		XZW5 QR 1;
+		Goto SpecialFire+1;
 	SpecialFire:
 		#### # 1;
 		XZWA Z 1;
@@ -539,25 +557,42 @@ Class CandyGun : SWWMWeapon
 		XZWB EFGHIJKLMNOPQR 1;
 		XZWB S 1 A_ThrowGun();
 		XZWB TUVWXYZ 2;
-		XZW1 B 0
+		XZW1 B -1
 		{
-			invoker.PlayUpSound(self);
-			if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
-				invoker.clipcount = invoker.default.clipcount;
-			else if ( invoker.Ammo1.Amount <= 0 )
+			invoker.bNODEATHDESELECT = false;
+			if ( (invoker.Amount > 0) && (invoker.Ammo2.Amount >= 0) )
 			{
-				MagAmmo sb = MagAmmo(FindInventory("CandyGunBullets"));
-				int takeamt = min(sb.Amount,sb.ClipSize);
-				invoker.clipcount = takeamt;
-				sb.Amount -= takeamt;
+				if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
+					invoker.clipcount = invoker.default.clipcount;
+				else if ( invoker.Ammo1.Amount <= 0 )
+				{
+					MagAmmo sb = MagAmmo(FindInventory("CandyGunBullets"));
+					int takeamt = min(sb.Amount,sb.ClipSize);
+					invoker.clipcount = takeamt;
+					sb.Amount -= takeamt;
+				}
+				else
+				{
+					invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+					invoker.clipcount = invoker.default.clipcount;
+				}
 			}
-			else
+			if ( invoker.clipcount > 0 )
 			{
-				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
-				invoker.clipcount = invoker.default.clipcount;
+				invoker.PlayUpSound(self);
+				return ResolveState("Select");
 			}
+			let nw = player.mo.PickPrevWeapon();
+			if ( nw != invoker ) player.PendingWeapon = nw;
+			if ( invoker.Amount <= 0 )
+			{
+				RemoveInventory(invoker);
+				invoker.Destroy();
+			}
+			else A_FullLower();	// this works
+			return ResolveState(null);
 		}
-		Goto Select;
+		Stop;
 	Reload:
 		XZW2 A 1
 		{

@@ -254,7 +254,7 @@ Coming from an old unreleased weapon mini-mod, the **Candy Gun** is like an **Ex
 
 **Reload:** Does what you'd expect.
 
-Holding primary fire during the first few moments of alt fire will throw the weapon itself, armed and ready to explode if it hits anyone or anything. The blast area for this is pretty ridiculous. You can hold spare guns, by the way (up to four).
+Holding secondary fire and primary fire (in that order) will throw the weapon itself, armed and ready to explode if it hits anyone or anything. The blast area for this is pretty ridiculous. You can hold spare guns, by the way (up to four).
 
 ### Candy Gun Bullets ~ Replaces Cells, Runes
 ![](docimg/candybullet.png)

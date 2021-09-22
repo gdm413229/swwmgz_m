@@ -185,6 +185,7 @@ Class PusherWeapon : SWWMWeapon
 		{
 			// didn't hit anything, randomly slip off
 			player.SetPSprite(PSP_WEAPON,ResolveState("AltMiss"));
+			invoker.bNODEATHDESELECT = true;	// prevent any glitching that could happen if the sequence is interrupted
 			A_StopSound(CHAN_WEAPON);
 			A_StopSound(CHAN_WEAPONEXTRA);
 			A_StartSound("pusher/miss",CHAN_WEAPON,CHANF_OVERLAP);
@@ -357,18 +358,16 @@ Class PusherWeapon : SWWMWeapon
 		XZW3 QRSTUVW 1;
 		TNT1 A -1
 		{
-			if ( player.PendingWeapon != WP_NOCHANGE )
+			invoker.bNODEATHDESELECT = false;
+			let nw = player.mo.PickNextWeapon();
+			// gross hack (don't prioritize Deep Impact if we have something better than it)
+			if ( nw is 'DeepImpact' )
 			{
-				let nw = player.mo.PickNextWeapon();
-				// gross hack (don't prioritize Deep Impact if we have something better than it)
-				if ( nw is 'DeepImpact' )
-				{
-					player.ReadyWeapon = nw;
-					nw = player.mo.PickNextWeapon();
-					player.ReadyWeapon = invoker;
-				}
-				if ( nw != invoker ) player.PendingWeapon = nw;
+				player.ReadyWeapon = nw;
+				nw = player.mo.PickNextWeapon();
+				player.ReadyWeapon = invoker;
 			}
+			if ( nw != invoker ) player.PendingWeapon = nw;
 			RemoveInventory(invoker);
 			invoker.Destroy();
 		}

@@ -9,11 +9,18 @@ Class AmmoFabricator : Inventory abstract
 	Mixin SWWMRespawn;
 	Mixin SWWMPickupGlow;
 
-	int budget, pertype, maxunitprice;
+	int budget, pertype, maxunits, maxtypes, maxunitprice, txtcol;
+	int chancediv;
+
+	String pickupmsgextra;
 
 	Property Budget : budget;
 	Property PerType : pertype;
+	Property MaxUnits : maxunits;
+	Property MaxTypes : maxtypes;
 	Property MaxUnitPrice : maxunitprice;
+	Property ChanceFactor : chancediv;
+	Property TextColor : txtcol;
 
 	override Inventory CreateCopy( Actor other )
 	{
@@ -22,7 +29,7 @@ Class AmmoFabricator : Inventory abstract
 		return Super.CreateCopy(other);
 	}
 
-	private bool CmpFabAmmo( Class<Ammo> a, Class<Ammo> b )
+	private bool CmpFabAmmo( Class<SWWMAmmo> a, Class<SWWMAmmo> b )
 	{
 		let ia = Owner.FindInventory(a);
 		int cnta = ia?ia.Amount:0;
@@ -35,31 +42,71 @@ Class AmmoFabricator : Inventory abstract
 		return (facta >= factb);
 	}
 
-	private int partition_fabammo( Array<Class<Ammo> > a, int l, int h )
+	private int partition_fabammo( Array<Class<SWWMAmmo> > a, int l, int h )
 	{
-		Class<Ammo> pv = a[h];
+		Class<SWWMAmmo> pv = a[h];
 		int i = (l-1);
 		for ( int j=l; j<=(h-1); j++ )
 		{
 			if ( CmpFabAmmo(pv,a[j]) )
 			{
 				i++;
-				Class<Ammo> tmp = a[j];
+				Class<SWWMAmmo> tmp = a[j];
 				a[j] = a[i];
 				a[i] = tmp;
 			}
 		}
-		Class<Ammo> tmp = a[h];
+		Class<SWWMAmmo> tmp = a[h];
 		a[h] = a[i+1];
 		a[i+1] = tmp;
 		return i+1;
 	}
-	private void qsort_fabammo( Array<Class<Ammo> > a, int l, int h )
+	private void qsort_fabammo( Array<Class<SWWMAmmo> > a, int l, int h )
 	{
 		if ( l >= h ) return;
 		int p = partition_fabammo(a,l,h);
 		qsort_fabammo(a,l,p-1);
 		qsort_fabammo(a,p+1,h);
+	}
+
+	private bool CmpFabAmmo_chance( Class<SWWMAmmo> a, Class<SWWMAmmo> b )
+	{
+		int cha = GetDefaultByType(a).Accuracy;
+		int chb = GetDefaultByType(b).Accuracy;
+		return (cha >= chb);
+	}
+
+	private int partition_fabammo_chance( Array<Class<SWWMAmmo> > a, int l, int h )
+	{
+		Class<SWWMAmmo> pv = a[h];
+		int i = (l-1);
+		for ( int j=l; j<=(h-1); j++ )
+		{
+			if ( CmpFabAmmo_chance(pv,a[j]) )
+			{
+				i++;
+				Class<SWWMAmmo> tmp = a[j];
+				a[j] = a[i];
+				a[i] = tmp;
+			}
+		}
+		Class<SWWMAmmo> tmp = a[h];
+		a[h] = a[i+1];
+		a[i+1] = tmp;
+		return i+1;
+	}
+	private void qsort_fabammo_chance( Array<Class<SWWMAmmo> > a, int l, int h )
+	{
+		if ( l >= h ) return;
+		int p = partition_fabammo_chance(a,l,h);
+		qsort_fabammo_chance(a,l,p-1);
+		qsort_fabammo_chance(a,p+1,h);
+	}
+
+	override String PickupMessage()
+	{
+		if ( pickupmsgextra != "" ) return String.Format("\c%c%s\c-\n%s",0x61+txtcol,StringTable.Localize(pickupmsg),pickupmsgextra);
+		return pickupmsg;
 	}
 
 	bool FabricateAmmo()
@@ -78,11 +125,11 @@ Class AmmoFabricator : Inventory abstract
 			if ( !ready || !ready.ValidateSpriteFrame() ) continue;
 			validweapons.Push(type2);
 		}
-		Array<Class<Ammo> > available;
+		Array<Class<SWWMAmmo> > available;
 		// populate ammo production list
 		for ( int i=0; i<AllActorClasses.Size(); i++ )
 		{
-			let a = (Class<Ammo>)(AllActorClasses[i]);
+			let a = (Class<SWWMAmmo>)(AllActorClasses[i]);
 			// skip over candy gun spares, they're "special ammo"
 			if ( a == 'CandyGunSpares' ) continue;
 			// only direct descendants of swwmammo with a set price below our max unit price
@@ -106,21 +153,40 @@ Class AmmoFabricator : Inventory abstract
 				}
 			}
 			if ( !isvalid ) continue;
+			let f = Owner.FindInventory(a);
+			// don't include maxed out ammo
+			if ( f && (f.Amount >= f.MaxAmount) ) continue;
 			available.Push(a);
 		}
-		// sort by "need weight" (prioritize ammo that the player lacks over ammo that the player has plenty of
+		// sort by drop chance
+		qsort_fabammo_chance(available,0,available.Size()-1);
+		// discard some candidates based on their random drop chance (leaving AT LEAST one)
+		for ( int i=0; i<available.Size(); i++ )
+		{
+			if ( available.Size() == 1 ) break;
+			int chance = GetDefaultByType(available[i]).Accuracy;
+			if ( chancediv <= 0 ) chance = 0;
+			else chance /= chancediv;
+			if ( Random[DropChance](1,100) > chance ) continue;
+			available.Delete(i);
+			i--;
+		}
+		// sort by "need weight" (prioritize ammo that the player lacks over ammo that the player has plenty of)
 		qsort_fabammo(available,0,available.Size()-1);
+		// crop by "max types"
+		if ( available.Size() > maxtypes ) available.Resize(maxtypes);
 		// loop through until we fill the inventory or run out of budget
 		bool given = false;
 		int consumed = 0;
 		String fabstr = "";
 		bool comma = false;
 		int tpertype = pertype;
+		int ttotal = maxunits;
 		for ( int i=0; i<available.Size(); i++ )
 		{
 			int amt, lim;
 			int cnt = 0;
-			Ammo cur = Ammo(Owner.FindInventory(available[i]));
+			SWWMAmmo cur = SWWMAmmo(Owner.FindInventory(available[i]));
 			if ( cur )
 			{
 				amt = cur.Amount;
@@ -128,13 +194,14 @@ Class AmmoFabricator : Inventory abstract
 			}
 			else
 			{
-				cur = Ammo(Spawn(available[i]));
+				cur = SWWMAmmo(Spawn(available[i]));
 				amt = cur.Amount = 0;
 				lim = cur.MaxAmount;
 				cur.AttachToOwner(Owner);
 			}
 			// percentage based on DEFAULT max amount (capped at 1 minimum)
 			if ( pertype < 0 ) tpertype = max(1,-int(cur.default.MaxAmount*pertype*.01));
+			tpertype = min(tpertype,ttotal);
 			while ( (amt < lim) && (consumed+cur.default.Stamina < budget) && (cnt < tpertype) )
 			{
 				consumed += cur.default.Stamina;
@@ -144,68 +211,21 @@ Class AmmoFabricator : Inventory abstract
 			}
 			if ( cnt > 0 )
 			{
-				if ( comma ) fabstr.AppendFormat(", %dx %s",cnt,cur.GetTag());
-				else fabstr.AppendFormat("%dx %s",cnt,cur.GetTag());
+				String tstr = String.Format("%d %s",cnt,(cnt>1)?StringTable.Localize("$T_"..cur.PickupTag.."S"):StringTable.Localize("$T_"..cur.PickupTag));
+				if ( comma ) fabstr = fabstr..", "..tstr;
+				else fabstr = tstr;
 				comma = true;
 			}
+			ttotal -= cnt;
+			if ( ttotal <= 0 ) break;
 		}
-		if ( given ) PrintPickupMessage(true,fabstr);
+		if ( given ) pickupmsgextra = fabstr;
+		else pickupmsgextra = "";
 		return given;
-	}
-
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		if ( !Owner || !bAUTOACTIVATE ) return;
-		bool shouldautouse = false;
-		if ( swwm_enforceautouseammo == 1 ) shouldautouse = true;
-		else if ( swwm_enforceautouseammo == -1 ) shouldautouse = false;
-		else shouldautouse = CVar.GetCVar('swwm_autouseammo',Owner.player).GetBool();
-		if ( !shouldautouse ) return;
-		// fabricators of lower tiers, for priority checking
-		Array<AmmoFabricator> others;
-		for ( Inventory i=Owner.inv; i; i=i.inv )
-		{
-			if ( !(i is 'AmmoFabricator') || (i == self) || !i.bAUTOACTIVATE || (AmmoFabricator(i).maxunitprice >= maxunitprice) ) continue;
-			others.Push(AmmoFabricator(i));
-		}
-		// check if owner lacks ammo, autouse if we can afford its unit price
-		bool used = false;
-		Actor o = Owner;
-		for ( Inventory i=o.inv; i; i=i.inv )
-		{
-			if ( !(i is 'Ammo') || (i.Amount > (i.MaxAmount/3)) || (i.Stamina <= 0) || (i.Stamina > maxunitprice) ) continue;
-			// ignore if there's a cheaper fabricator than us that can afford it ("wait our turn", basically)
-			bool lowprio = false;
-			for ( int j=0; j<others.Size(); j++ )
-			{
-				if ( i.Stamina > others[j].maxunitprice ) continue;
-				lowprio = true;
-				break;
-			}
-			if ( lowprio ) continue;
-			// hit it
-			while ( (Amount > 0) && FabricateAmmo() )
-			{
-				used = true;
-				Amount--;
-			}
-			if ( Amount <= 0 )
-			{
-				DepleteOrDestroy();
-				break;
-			}
-		}
-		if ( used && (o.player == players[consoleplayer]) ) o.A_StartSound(UseSound,CHAN_ITEMEXTRA);
 	}
 
 	override bool Use( bool pickup )
 	{
-		bool shouldautouse = false;
-		if ( swwm_enforceautouseammo == 1 ) shouldautouse = true;
-		else if ( swwm_enforceautouseammo == -1 ) shouldautouse = false;
-		else shouldautouse = CVar.GetCVar('swwm_autouseammo',Owner.player).GetBool();
-		if ( pickup && !shouldautouse ) return false;
 		if ( FabricateAmmo() )
 		{
 			if ( pickup && ((Owner.player == players[consoleplayer]) || bBigPowerup) ) Owner.A_StartSound(UseSound,CHAN_ITEMEXTRA);
@@ -214,13 +234,19 @@ Class AmmoFabricator : Inventory abstract
 		return false;
 	}
 
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SetZ(floorz);	// gee whizz thanks Hexen
+	}
+
 	Default
 	{
-		+INVENTORY.INVBAR;
 		+INVENTORY.AUTOACTIVATE;
 		+FLOATBOB;
 		Inventory.UseSound "fabricator/use";
 		Inventory.PickupFlash "SWWMPickupFlash";
+		Inventory.MaxAmount 0;
 		FloatBobStrength 0.25;
 		Radius 10;
 		Height 24;
@@ -244,14 +270,15 @@ Class FabricatorTier1 : AmmoFabricator
 		//$Sprite graphics/HUD/Icons/I_Fabricator1.png
 		//$Icon ammo
 		Tag "$T_FABRICATOR1";
-		Stamina -2500;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator1.png";
 		Inventory.PickupMessage "$T_FABRICATOR1";
-		Inventory.MaxAmount 20;
-		Inventory.InterHubAmount 20;
 		AmmoFabricator.Budget 3000;
 		AmmoFabricator.PerType 1;
+		AmmoFabricator.MaxUnits 1;
+		AmmoFabricator.MaxTypes 1;
 		AmmoFabricator.MaxUnitPrice 2500;
+		AmmoFabricator.ChanceFactor 1;
+		AmmoFabricator.TextColor Font.CR_BLUE;
 	}
 }
 Class FabricatorTier2 : AmmoFabricator
@@ -265,14 +292,15 @@ Class FabricatorTier2 : AmmoFabricator
 		//$Sprite graphics/HUD/Icons/I_Fabricator2.png
 		//$Icon ammo
 		Tag "$T_FABRICATOR2";
-		Stamina -12000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator2.png";
 		Inventory.PickupMessage "$T_FABRICATOR2";
-		Inventory.MaxAmount 15;
-		Inventory.InterHubAmount 15;
-		AmmoFabricator.Budget 15000;
-		AmmoFabricator.PerType 2;
-		AmmoFabricator.MaxUnitPrice 12000;
+		AmmoFabricator.Budget 20000;
+		AmmoFabricator.PerType 1;
+		AmmoFabricator.MaxUnits 2;
+		AmmoFabricator.MaxTypes 2;
+		AmmoFabricator.MaxUnitPrice 18000;
+		AmmoFabricator.ChanceFactor 2;
+		AmmoFabricator.TextColor Font.CR_GREEN;
 	}
 }
 Class FabricatorTier3 : AmmoFabricator
@@ -286,18 +314,21 @@ Class FabricatorTier3 : AmmoFabricator
 		//$Sprite graphics/HUD/Icons/I_Fabricator3.png
 		//$Icon ammo
 		Tag "$T_FABRICATOR3";
-		Stamina -80000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator3.png";
 		Inventory.PickupMessage "$T_FABRICATOR3";
-		Inventory.MaxAmount 10;
-		Inventory.InterHubAmount 10;
 		AmmoFabricator.Budget 100000;
-		AmmoFabricator.PerType 4;
+		AmmoFabricator.PerType 2;
+		AmmoFabricator.MaxUnits 4;
+		AmmoFabricator.MaxTypes 3;
 		AmmoFabricator.MaxUnitPrice 80000;
+		AmmoFabricator.ChanceFactor 4;
+		AmmoFabricator.TextColor Font.CR_RED;
 	}
 }
 Class FabricatorTier4 : AmmoFabricator
 {
+	Mixin SWWMAutoUseFix;
+
 	Default
 	{
 		//$Title Fabricator (Super Rare)
@@ -305,15 +336,15 @@ Class FabricatorTier4 : AmmoFabricator
 		//$Sprite graphics/HUD/Icons/I_Fabricator4.png
 		//$Icon ammo
 		Tag "$T_FABRICATOR4";
-		Stamina -1000000;
 		Inventory.Icon "graphics/HUD/Icons/I_Fabricator4.png";
 		Inventory.PickupMessage "$T_FABRICATOR4";
-		Inventory.MaxAmount 5;
-		Inventory.InterHubAmount 5;
 		AmmoFabricator.Budget int.max;
 		AmmoFabricator.PerType -50;
+		AmmoFabricator.MaxUnits int.max;
+		AmmoFabricator.MaxTypes int.max;
 		AmmoFabricator.MaxUnitPrice 1000000;
-		-INVENTORY.AUTOACTIVATE;
+		AmmoFabricator.ChanceFactor 0;
+		AmmoFabricator.TextColor Font.CR_GOLD;
 	}
 }
 

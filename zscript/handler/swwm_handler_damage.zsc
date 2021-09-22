@@ -112,7 +112,7 @@ extend Class SWWMHandler
 				if ( e.Damage > s.topdealt ) s.topdealt = e.Damage;
 			}
 			SWWMFlyTracker.Track(e.Thing,e.DamageSource);
-			if ( e.Thing.bBOSS )
+			if ( e.Thing.bBOSS || e.Thing.FindInventory("BossMarker") )
 			{
 				let tk = e.Thing.FindInventory("DeepImpactOnlyToken");
 				if ( !tk )
@@ -141,7 +141,7 @@ extend Class SWWMHandler
 			{
 				if ( e.Thing.IsFriend(e.DamageSource) )
 					lastcombat = AddOneliner("friendhit",1,10);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.DamageSource.bBOSS?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.FindInventory("BossMarker"))?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("gethit",1,15);
 			}
 			highesttic = gametic;
@@ -180,7 +180,7 @@ extend Class SWWMHandler
 			{
 				if ( e.Thing.IsFriend(src) )
 					lastcombat = AddOneliner("friendkill",1,5);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,e.Thing.bBOSS?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.FindInventory("BossMarker"))?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("scorekill",1,15);
 			}
 		}
@@ -188,7 +188,7 @@ extend Class SWWMHandler
 		// achievement stuff
 		if ( e.Thing.IsHostile(src) )
 		{
-			if ( e.Thing.bBOSS && ((e.DamageType == 'Dash') || (e.DamageType == 'Buttslam')) )
+			if ( (e.Thing.bBOSS||e.Thing.FindInventory("BossMarker")) && ((e.DamageType == 'Dash') || (e.DamageType == 'Buttslam')) )
 				SWWMUtility.AchievementProgressInc("bossdash",1,src.player);
 			if ( e.DamageType == 'Push' )
 				SWWMUtility.AchievementProgressInc("sneeze",1,src.player);
@@ -334,7 +334,7 @@ extend Class SWWMHandler
 				scr.xcnt = ++ofs;
 			}
 		}
-		if ( e.Thing.bBOSS )
+		if ( e.Thing.bBOSS || e.Thing.FindInventory("BossMarker") )
 		{
 			score += 2000;
 			if ( scr )

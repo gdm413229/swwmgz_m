@@ -251,16 +251,91 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 			SetThingEdNum(0,4206992);
 			SetThingAngle(0,0);
 			break;
+		// Hexen MAP06
+		case '1B6DF1FD51FDC3D882009D287B5A28C6':
+		case '65EFFD49449AD3FD32A6EB347C6D923B':
+			// replace an Icon of the Defender with a Chancebox
+			SetThingEdNum(193,4206920);
+			SetThingSkills(193,SKILLS_ALL);
+			SetThingFlags(193,MTF_SINGLE|MTF_COOPERATIVE);
+			// replace a Mystic Ambit Incant with a Chancebox
+			SetThingEdNum(377,4206920);
+			SetThingSkills(193,SKILLS_ALL);
+			SetThingFlags(377,MTF_SINGLE|MTF_COOPERATIVE);
+			SetThingAngle(377,90);	// should face north
+			break;
+		case 'A3D86F121B41320BFD1EB747D9133EF2':
+			// replace an Icon of the Defender with a Chancebox
+			SetThingEdNum(193,4206921);
+			SetThingSkills(193,SKILLS_ALL);
+			SetThingFlags(193,MTF_SINGLE|MTF_COOPERATIVE);
+			// this version doesn't have a Mystic Ambit Incant placed
+			AddThing(4206921,(-32,-3072,-456),90,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			break;
+		// Hexen MAP11
+		case 'F8DFDCBAA677F83E2CD2409F5C00505F':
+		case 'CC90EAF7131A1CA59F8322735C92899C':
+		case 'B2A1B321E56494081085E51931EB3158':
+			// replace Mystic Urns with Chanceboxes
+			SetThingEdNum(62,4206920);
+			SetThingEdNum(63,4206920);
+			SetThingEdNum(64,4206920);
+			SetThingSkills(62,SKILLS_ALL);
+			SetThingSkills(63,SKILLS_ALL);
+			SetThingSkills(64,SKILLS_ALL);
+			SetThingFlags(62,MTF_SINGLE|MTF_COOPERATIVE);
+			SetThingFlags(63,MTF_SINGLE|MTF_COOPERATIVE);
+			SetThingFlags(64,MTF_SINGLE|MTF_COOPERATIVE);
+			SetThingAngle(62,0);
+			SetThingAngle(63,270);
+			SetThingAngle(64,180);
+			break;
+		// Hexen MAP31
+		case '4A4436544EBFA930AE3C4C8C2409FD6E':
+		case 'D48508B92843539B4464235C2B355CC3':
+		case 'BF9DFE95D9351AA3A65666185BFC921C':
+			// place 2 Chanceboxes at the final room
+			AddThing(4206920,(416,-352,0),180,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			AddThing(4206920,(544,-352,0),0,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			break;
+		// Hexen MAP26
+		case '339B4B50B615BE6E1D8454F6C605A97C':
+		case 'BFDC70A9D445EA5B9010ABB133253D6F':
+		case '2CF971EECD6B790782DB44B0E917B5B2':
+			// place 2 Chanceboxes in the central square
+			AddThing(4206920,(-224,416,-128),270,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			AddThing(4206920,(-224,-672,-128),90,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			break;
+		// Hexen MAP39
+		case '2639C89B8B7052E2CE4CB9CFC63F4C53':
+		case 'EC5A1B294CC7FB822A6C913F811797C4':
+		case 'FEA83EE6BCFC899F06CBE394DFBE6707':
+			// replace Porkalator with a Chancebox
+			SetThingEdNum(179,4206920);
+			SetThingSkills(179,SKILLS_ALL);
+			SetThingFlags(179,MTF_SINGLE|MTF_COOPERATIVE);
+			SetThingAngle(179,270);
+			// add two more Chanceboxes near it
+			AddThing(4206920,(-32,2848,128),270,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			AddThing(4206920,(160,2848,128),270,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			break;
+		// Hexen MAP40
+		case '2A6C4235B942467D25FD50D5B313E67A':
+		case '1C5DE5A921DEE405E98E7E09D9829387':
+		case 'EFAFE59092DE5E613562ACF52B86C37F':
+			// place a final Chancebox behind the player start
+			AddThing(4206920,(2912,256,-112),180,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
+			break;
 		// Kinsie's Test Map
 		case '0EADB2F82732A968B8513E4DC6138439':
 		case 'D70250F93C6B6072DA39D9672B37F236':
 		case '959A613006CC3AA912C4A22908B7566A':
 			// add collectibles
 			for ( int i=0; i<12; i++ )
-				AddThing(4206900+i,(1472+64*i,640,0));
+				AddThing(4206900+i,(1472+64*i,640,0),SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
 			// add some chance boxes
 			for ( int i=0; i<3; i++ )
-				AddThing(4206920,(3616,1824-64*i,0),180);
+				AddThing(4206920,(3616,1824-64*i,0),180,SKILLS_ALL,MTF_SINGLE|MTF_COOPERATIVE);
 			break;
 		}
 		switch ( checksum )

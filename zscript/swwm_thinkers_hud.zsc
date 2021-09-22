@@ -285,6 +285,8 @@ Class SWWMCombatTracker : Thinker
 	int mxdist, dbar;
 	bool bBOSS, bFRIENDLY;
 	bool firsthit;
+	bool bUpdateMorph;
+	String unmorphedtag;
 
 	void UpdateTag()
 	{
@@ -405,6 +407,12 @@ Class SWWMCombatTracker : Thinker
 			pos = level.Vec3Offset(mytarget.pos,(0,0,height));
 			prevpos = level.Vec3Offset(mytarget.prev,(0,0,height));
 		}
+		if ( bUpdateMorph && !(mytarget is 'MorphedMonster') )
+		{
+			// reset our tag
+			mytag = unmorphedtag;
+			bUpdateMorph = false;
+		}
 		tcnt++;
 		if ( (tcnt == 1) && !mytarget.player )
 		{
@@ -413,6 +421,21 @@ Class SWWMCombatTracker : Thinker
 			{
 				maxhealth = lasthealth;
 				intp.Reset(lasthealth);
+			}
+			// post-spawn morph check
+			if ( (mytarget is 'MorphedMonster') && MorphedMonster(mytarget).UnmorphedMe )
+			{
+				// look for a previous tracker that has the same target as us
+				for ( SWWMCombatTracker t=next; t; t=t.next )
+				{
+					if ( t.mytarget != mytarget ) continue;
+					// change its tag and destroy ourselves (such is life)
+					t.bUpdateMorph = true;
+					t.unmorphedtag = t.mytag;
+					t.mytag = String.Format("%s (%s)",mytag,t.unmorphedtag);
+					Destroy();
+					return;
+				}
 			}
 		}
 		if ( (tcnt == 6) && !mytarget.player )
@@ -547,7 +570,7 @@ Class SWWMSimpleTracker : Thinker
 		}
 		else if ( ismonster )
 		{
-			expired = target.bKILLED;
+			expired = target.bKILLED||target.bUnmorphed;
 			if ( !expired )
 			{
 				lastupdate += 35;

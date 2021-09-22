@@ -251,7 +251,7 @@ extend Class SWWMHandler
 				continue;
 			if ( !thesight && !(deathmatch && (a is 'Inventory') && !a.bDROPPED) && !(a.IsFriend(players[consoleplayer].mo) && !(a.player && (a.player.mo != a))) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 				continue;
-			if ( a.bKILLED || (a.Health <= 0) )
+			if ( a.bKILLED || (a.Health <= 0) || a.bUnmorphed )
 				continue;
 			if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
 				continue;
@@ -307,7 +307,7 @@ extend Class SWWMHandler
 						continue;
 					if ( !thesight && !(deathmatch && (a is 'Inventory') && !a.bDROPPED) && !a.IsFriend(players[consoleplayer].mo) && !players[consoleplayer].Camera.CheckSight(a,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) )
 						continue;
-					if ( a.bKILLED || (a.Health <= 0) )
+					if ( a.bKILLED || (a.Health <= 0) || a.bUnmorphed )
 						continue;
 					if ( (a is 'Inventory') && (!a.bSPECIAL || Inventory(a).Owner) )
 						continue;
@@ -353,7 +353,8 @@ extend Class SWWMHandler
 				if ( (trk.target.bKILLED || (trk.target.Health <= 0))
 					|| ((trk.target is 'Inventory') && (!trk.target.bSPECIAL || Inventory(trk.target).Owner))
 					|| ((trk.target is 'Chancebox') && (trk.target.CurState != trk.target.SpawnState))
-					|| (trk.target.default.bMISSILE && !trk.target.bMISSILE) )
+					|| (trk.target.default.bMISSILE && !trk.target.bMISSILE)
+					|| trk.target.bUnmorphed )
 					trk.Update();
 			}
 			// prune expired trackers

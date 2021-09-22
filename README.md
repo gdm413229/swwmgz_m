@@ -254,7 +254,7 @@ Coming from an old unreleased weapon mini-mod, the **Candy Gun** is like an **Ex
 
 **Reload:** Does what you'd expect.
 
-Holding primary fire during the first few moments of alt fire will throw the weapon itself, armed and ready to explode if it hits anyone or anything. The blast area for this is pretty ridiculous. You can hold spare guns, by the way (up to four).
+Holding secondary fire and primary fire (in that order) will throw the weapon itself, armed and ready to explode if it hits anyone or anything. The blast area for this is pretty ridiculous. You can hold spare guns, by the way (up to four).
 
 ### Candy Gun Bullets ~ Replaces Cells, Runes
 ![](docimg/candybullet.png)
@@ -393,7 +393,7 @@ Note: In multiplayer, these can be traded between players, but do note that the 
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might
 ![](docimg/fabricator.png)
 
-Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the **Ynykron Artifact**).
+Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for all weapons (excluding the **Ynykron Artifact**). Due to some unspecified reasons, they cannot be held in your inventory.
 
 ### Lamp ~ Replaces Lite-Amp, Torch
 ![](docimg/lamp.png)

@@ -1,6 +1,7 @@
 // vanilla boss stuff
 
 Class EndgameBossMarker : Inventory {}
+Class BossMarker : Inventory {}
 
 extend Class SWWMHandler
 {
@@ -116,6 +117,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_BRUISERS";
 		}
@@ -126,6 +128,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_CYBIE";
 		}
@@ -136,6 +139,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 6;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 			bosstag = "$BT_SPIDER";
@@ -147,6 +151,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_SPIDER2";
 		}
@@ -157,6 +162,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_DIMPLE";
 		}
@@ -168,6 +174,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 40;	// goodbye, instakills
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 			if ( e.Thing is 'BossEye' )
@@ -181,6 +188,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_CYBIE2";
 		}
@@ -191,6 +199,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_LICHES";
 		}
@@ -201,6 +210,7 @@ extend Class SWWMHandler
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 3;
 				if ( trk ) trk.bBOSS = true;
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 			bosstag = "$BT_MINOTAUR";
 		}
@@ -212,6 +222,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DSPARIL";
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 			else if ( e.Thing is 'Sorcerer2' )
@@ -223,6 +234,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DSPARIL2";
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 		}
@@ -234,6 +246,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_CLERIC";
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP36 )
@@ -244,6 +257,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_FIGHTER";
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP37 )
@@ -254,6 +268,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 2;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_MAGE";
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP12 )
@@ -264,6 +279,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 4;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DRAGON";
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP23_HMAP27_HMAP48_HMAP55 )
@@ -274,6 +290,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 8;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_HERESIARCH";
+				e.Thing.GiveInventory('BossMarker',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP40 )
@@ -284,6 +301,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 10;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_KORAX";
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 		}
@@ -296,6 +314,7 @@ extend Class SWWMHandler
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_DEATHKINGS";
 				initialized = true;	// healthbar shows from the start
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 		}
@@ -307,6 +326,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_ARCHANGELUS";
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 			else if ( e.Thing.GetClassName() == "ArchangelusB" )
@@ -318,6 +338,7 @@ extend Class SWWMHandler
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
 				if ( trk ) trk.bBOSS = true;
 				bosstag = "$BT_ARCHANGELUS";
+				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 				doextramsg = true;
 			}

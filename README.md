@@ -393,7 +393,7 @@ Note: In multiplayer, these can be traded between players, but do note that the 
 ### Universal Ammo Fabricator ~ Replaces Mana / Krater of Might
 ![](docimg/fabricator.png)
 
-Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for superweapons (excluding the **Ynykron Artifact**).
+Separated into four tiers, they work pretty much like the ammo cubes in **Doom Tournament**, except they try to *"balance"* the total ammo given. The max tier fabricator is the only one capable of producing ammo for all weapons (excluding the **Ynykron Artifact**). Due to some unspecified reasons, they cannot be held in your inventory.
 
 ### Lamp ~ Replaces Lite-Amp, Torch
 ![](docimg/lamp.png)

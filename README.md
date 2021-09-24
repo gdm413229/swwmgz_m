@@ -232,7 +232,7 @@ Note that going prone (crouching) will automatically disable the recoil compensa
 ### 1.150 XSB Bullets ~ Replaces Cells, Runes
 ![](docimg/xsbbullet.png)
 
-The 1.150 caliber **eXplosive Super Burst** bullets employ an **Explodium** shaped charge to be shot with enough energy to reach a relatively high velocity, allowing their massive bulk to penetrate several targets including walls. They are hard to come by, so spawns are scarce, and they won't even pop up in **Hammerspace Embiggeners**, only on higher tier **Fabricators**.
+The 1.150 caliber **eXplosive Super Burst** bullets employ an **Explodium** shaped charge to be shot with enough energy to reach a relatively high velocity, allowing their massive bulk to penetrate several targets including walls. They are hard to come by, so spawns are scarce, and they won't even pop up in **Hammerspace Embiggeners**, and in Hexen only on the highest tier **Fabricators**.
 
 In the world, they may pop up as spare bullets or full mags. Each five bullets picked up will be automatically converted to a full mag in your inventory.
 
@@ -259,7 +259,7 @@ Holding secondary fire and primary fire (in that order) will throw the weapon it
 ### Candy Gun Bullets ~ Replaces Cells, Runes
 ![](docimg/candybullet.png)
 
-The ammo for this beast. Mags don't pop up on **Embiggeners**, only on the highest tier **Fabricators**.
+The ammo for this beast. Mags don't pop up on **Embiggeners**, and in Hexen only on the highest tier **Fabricators**.
 
 In the world, you may find either spare bullets or full mags. Each seven bullets picked up will be automatically converted to a full mag in your inventory.
 

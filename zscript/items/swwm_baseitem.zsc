@@ -59,6 +59,8 @@ Mixin Class SWWMUseToPickup
 	// allow pickup by use
 	override bool Used( Actor user )
 	{
+		// can't pick up
+		if ( !bSPECIAL ) return false;
 		// no use through melee
 		if ( (user.player.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(user.player.ReadyWeapon).wallponch && !swwm_meleepickup )
 			return false;

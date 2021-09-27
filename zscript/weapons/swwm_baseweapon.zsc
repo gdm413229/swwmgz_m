@@ -45,7 +45,7 @@ Class SWWMWeapon : Weapon abstract
 	{
 		// cannot pick up swapweapon unless explicitly pressing use
 		SWWMWeapon sw;
-		if ( swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
+		if ( bSPECIAL && swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
 		{
 			if ( toucher.CheckLocalView() )
 			{
@@ -63,6 +63,8 @@ Class SWWMWeapon : Weapon abstract
 	// allow pickup by use + swap weapon support
 	override bool Used( Actor user )
 	{
+		// can't pick up
+		if ( !bSPECIAL ) return false;
 		// no use through melee
 		if ( (user.player.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(user.player.ReadyWeapon).wallponch && !swwm_meleepickup )
 			return false;

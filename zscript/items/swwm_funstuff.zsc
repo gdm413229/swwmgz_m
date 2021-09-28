@@ -719,6 +719,9 @@ Class ChanceboxSpawner : Actor
 		if ( deathmatch )
 		{
 			// not in DM
+			let b = Spawn("HealthNuggetItem",pos);
+			SWWMUtility.TransferItemProp(self,b);
+			ClearCounters();
 			Destroy();
 			return;
 		}
@@ -728,6 +731,9 @@ Class ChanceboxSpawner : Actor
 		if ( numbox >= 3 )
 		{
 			// there's three boxes in the map already
+			let b = Spawn("HealthNuggetItem",pos);
+			SWWMUtility.TransferItemProp(self,b);
+			ClearCounters();
 			Destroy();
 			return;
 		}
@@ -748,6 +754,9 @@ Class ChanceboxSpawner : Actor
 			if ( tbox[1] > l.bbox[0] ) continue;
 			if ( SWWMUtility.BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) != -1 ) continue;
 			// there isn't enough space to spawn a box here
+			let b = Spawn("HealthNuggetItem",pos);
+			SWWMUtility.TransferItemProp(self,b);
+			ClearCounters();
 			Destroy();
 			return;
 		}

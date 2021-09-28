@@ -152,15 +152,15 @@ Class SWWMDamageAccumulator : Thinker
 }
 
 // prevents floors/ceilings from ever moving again, as they're "broken crushers"
-//  optional "instant" parameter is used by wall busting, no crusher malfunction animation will play
 Class SWWMCrusherBroken : Thinker
 {
 	Sector fsec, csec;
 	double diffh;
 	int fphase, cphase;
 	int ftics, ctics;
+	SectorEffect fse, cse;	// pointers to zero-speed movers
 
-	static void Create( Sector f, Sector c, double diffh, bool instant = false )
+	static void Create( Sector f, Sector c, double diffh )
 	{
 		if ( !f && !c ) return;
 		let ti = ThinkerIterator.Create("SWWMCrusherBroken",STAT_USER);
@@ -168,15 +168,7 @@ Class SWWMCrusherBroken : Thinker
 		while ( cb = SWWMCrusherBroken(ti.Next()) )
 		{
 			if ( (cb.fsec == f) && (cb.csec == c) )
-			{
-				if ( instant )
-				{
-					// force it to be instant
-					if ( f ) cb.fphase = 3;
-					if ( c ) cb.cphase = 3;
-				}
 				return;	// we already have this
-			}
 			if ( cb.fsec && (cb.fsec == f) )
 			{
 				cb.Destroy();	// we override this one
@@ -195,10 +187,21 @@ Class SWWMCrusherBroken : Thinker
 		cb.diffh = diffh;
 		if ( f && f.floordata ) f.floordata.Destroy();
 		if ( c && c.ceilingdata ) c.ceilingdata.Destroy();
-		if ( instant )
+	}
+
+	static void Remove( Sector f, Sector c )
+	{
+		if ( !f && !c ) return;
+		let ti = ThinkerIterator.Create("SWWMCrusherBroken",STAT_USER);
+		SWWMCrusherBroken cb;
+		while ( cb = SWWMCrusherBroken(ti.Next()) )
 		{
-			if ( f ) cb.fphase = 3;
-			if ( c ) cb.cphase = 3;
+			if ( (cb.fsec == f) && (cb.csec == c) )
+				cb.Destroy();	// destroy entirely
+			else if ( f && (cb.fsec == f) )
+				cb.fsec = null;	// only clear the floor
+			else if ( c && (cb.csec == c) )
+				cb.csec = null;	// only clear the ceiling
 		}
 	}
 
@@ -228,10 +231,12 @@ Class SWWMCrusherBroken : Thinker
 				ftics--;
 				if ( ftics <= 0 ) fphase = 3;
 			}
-			else if ( (fphase >= 3) && fsec.floordata )
+			else if ( (fphase >= 3) && (!fse || (fsec.floordata != fse)) )
 			{
-				fsec.floordata.Destroy();
+				if ( fsec.floordata ) fsec.floordata.Destroy();
+				level.CreateFloor(fsec,Floor.floorLowerByValue,null,0.,1.);
 				fsec.StopSoundSequence(CHAN_WEAPON);
+				fse = fsec.floordata;
 			}
 		}
 		if ( csec )
@@ -258,10 +263,12 @@ Class SWWMCrusherBroken : Thinker
 				ctics--;
 				if ( ctics <= 0 ) cphase = 3;
 			}
-			else if ( (cphase >= 3) && csec.ceilingdata )
+			else if ( (cphase >= 3) && (!cse || (csec.ceilingdata != cse)) )
 			{
-				csec.ceilingdata.Destroy();
+				if ( csec.ceilingdata ) csec.ceilingdata.Destroy();
+				level.CreateCeiling(csec,Ceiling.ceilRaiseByValue,null,0.,0.,1.);
 				csec.StopSoundSequence(CHAN_VOICE);
+				cse = csec.ceilingdata;
 			}
 		}
 	}

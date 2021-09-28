@@ -227,6 +227,11 @@ Class BusterWall : Thinker
 		return Bust(faketracer.Results,accdamage,instigator,x,hitz);
 	}
 
+	private static bool BustPolyobj( swwm_PolyobjectHandle p, int accdamage, Actor instigator, Vector3 x, double hitz )
+	{
+		return false;
+	}
+
 	static bool Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
 	{
 		// we can't blow up 3D floors
@@ -235,6 +240,9 @@ Class BusterWall : Thinker
 		int hp;
 		if ( d.HitType == TRACE_HitWall )
 		{
+			// check if it's a polyobject line, if so, switch to the other bust method
+			swwm_PolyObjectHandle p;
+			if ( SWWMUtility.IsPolyLine(d.HitLine,p) ) return BustPolyobj(p,accdamage,instigator,x,hitz);
 			// no busting the goat
 			if ( IsIOSWall(d.HitLine) ) return false;
 			// onesided wall? no bust
@@ -286,6 +294,8 @@ Class BusterWall : Thinker
 			bust.bustdir = x;
 			mnew = true;
 		}
+		// multiply damage
+		if ( instigator ) accdamage = instigator.GetModifiedDamage('Wallbust',accdamage,false,instigator,instigator,0);
 		bust.delay = max(bust.delay,5+min(20,accdamage>>4));
 		bust.accdamage += accdamage;
 		bust.acchits.Push(accdamage);
@@ -353,6 +363,9 @@ Class BusterWall : Thinker
 			if ( s ) s.busts++;
 			SWWMUtility.AchievementProgressInc('swwm_progress_bustin',1,Instigator.player);
 		}
+		// call hit fx for devastation sigil (if any)
+		AngeryPower as = instigator?AngeryPower(instigator.FindInventory("AngeryPower")):null;
+		if ( as ) as.DoHitFX();
 		bust.busted = true;
 		bust.busttics = 0;
 		bust.bustmax = min(30,int(12+girthitude**.1));
@@ -374,39 +387,37 @@ Class BusterWall : Thinker
 			if ( !l.sidedef[1] ) continue;
 			int away = 0;
 			if ( l.sidedef[0].sector == hs ) away = 1;
-			// temporarily set filler texture so switches don't play a sound
-			TextureID oldtex[3][2];
-			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
-			{
-				oldtex[j][k] = l.sidedef[k].GetTexture(j);
-				l.sidedef[k].SetTexture(j,rubble);
-			}
 			l.Activate(instigator,away,SPAC_Use);
 			l.Activate(instigator,away,SPAC_Impact);
-			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
-				l.sidedef[k].SetTexture(j,oldtex[j][k]);
-			// clear any use/impact specials
-			if ( l.Activation&(SPAC_Use|SPAC_Impact) )
-				l.Activation &= ~(SPAC_Use|SPAC_Impact);
 		}
-		// stop movement permanently
-		SWWMCrusherBroken.Create(hp?null:hs,hp?hs:null,0.,true);
+		// if this is a broken crusher, we need to clear that now that we've busted it
+		SWWMCrusherBroken.Remove(hp?null:hs,hp?hs:null);
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);
 		if ( hp )
 		{
+			// remove any current movers
+			if ( hs.CeilingData ) hs.CeilingData.Destroy();
 			// blow up that ceiling
 			hs.MoveCeiling(abs(partheight),bust.cutheight,0,1,false);
 			bust.boundsmin = (a.x,a.y,thisheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,bust.cutheight)-(1,1,1);
+			// prevent any further ceiling movement
+			level.CreateCeiling(hs,Ceiling.ceilRaiseByValue,null,0.,0.,1.);
+			hs.StopSoundSequence(CHAN_VOICE);
 		}
 		else
 		{
+			// remove any current movers
+			if ( hs.FloorData ) hs.FloorData.Destroy();
 			// blow up that floor
 			hs.MoveFloor(abs(partheight),abs(bust.cutheight),0,-1,false,true);
 			bust.boundsmin = (a.x,a.y,bust.cutheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,thisheight)-(1,1,1);
+			// prevent any further floor movement
+			level.CreateFloor(hs,Floor.floorLowerByValue,null,0.,1.);
+			hs.StopSoundSequence(CHAN_WEAPON);
 		}
 		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
 		bust.SpawnDebris(true);

@@ -1741,6 +1741,12 @@ Class SWWMUtility
 		return false, checkme;
 	}
 
+	static bool IsPolyLine( Line l, out swwm_PolyobjectHandle p )
+	{
+		// TODO iterate through polyobjects and see if this line is connected to their start line
+		return false;
+	}
+
 	// full reset of inventory (excluding collectibles, and optionally resetting the score)
 	static play void WipeInventory( Actor mo, bool resetscore = false, bool allplayers = false )
 	{

@@ -3301,7 +3301,8 @@ Class AngeryPower : Powerup
 		// (2^31-1)/25 : guarantee that it caps rather than overflowing
 		if ( damage > 85899345 ) newdamage = int.max;
 		else newdamage = damage*25;
-		DoHitFX();
+		// don't play hit fx for wall busting, as it'll be done manually if the bust goes through
+		if ( damageType != 'Wallbust' ) DoHitFX();
 	}
 }
 Class AngerySigil : Inventory

@@ -145,6 +145,7 @@ Class SWWMStatScreen : StatusScreen abstract
 			whichtip = ents[Random[InterArt](0,ents.Size()-1)];
 			pdata.lasttip.Push(whichtip);
 		}
+		if ( swwm_nointertips ) return;
 		String tipstr = "\cd"..String.Format(StringTable.Localize("$SWWM_INTERTIP"),whichtip).."\c-\n"..StringTable.Localize(String.Format("$SWWM_INTERTIP%d",whichtip));
 		BrokenLines l = fnt.BreakLines(tipstr,400);
 		int lw = 0;

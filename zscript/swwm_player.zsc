@@ -1579,6 +1579,47 @@ Class Demolitionist : PlayerPawn
 		}
 		SWWMUtility.MarkAchievement('swwm_achievement_crush',player);
 	}
+	private void CheckBreakPolyobject( int dmg )
+	{
+		// see if there are any crushing polyobjects currently "encroaching" the player
+		Array<Line> touching;
+		BlockLinesIterator bl = BlockLinesIterator.Create(self,radius+8);
+		double tbox[4];
+		// top, bottom, left, right
+		tbox[0] = pos.y+(radius+8);
+		tbox[1] = pos.y-(radius+8);
+		tbox[2] = pos.x-(radius+8);
+		tbox[3] = pos.x+(radius+8);
+		while ( bl.Next() )
+		{
+			Line l = bl.CurLine;
+			if ( !l ) continue;
+			if ( tbox[2] > l.bbox[3] ) continue;
+			if ( tbox[3] < l.bbox[2] ) continue;
+			if ( tbox[0] < l.bbox[1] ) continue;
+			if ( tbox[1] > l.bbox[0] ) continue;
+			if ( SWWMUtility.BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) != -1 ) continue;
+			touching.Push(l);
+		}
+		let pi = swwm_PolyobjectIterator.Create();
+		swwm_PolyobjectHandle p;
+		while ( p = pi.Next() )
+		{
+			if ( (p.Type != swwm_PolyobjectHandle.POTYP_CRUSH) && (p.Type != swwm_PolyobjectHandle.POTYP_HURT) )
+				continue;
+			for ( int i=0; i<touching.Size(); i++ )
+			{
+				if ( p.Lines.Find(touching[i]) >= p.Lines.Size() ) continue;
+				Vector2 diragainst = pos.xy-p.GetPos();
+				double vsiz = diragainst.length();
+				if ( vsiz > 0 ) diragainst /= vsiz;
+				if ( BusterWall.BustPolyobj(p,max(dmg,(100-health)*5),self,(diragainst.x,diragainst.y,0)) )
+					SWWMUtility.MarkAchievement('swwm_achievement_crush',player);
+				if ( p.Mirror && BusterWall.BustPolyobj(p.Mirror,max(dmg,(100-health)*5),self,-(diragainst.x,diragainst.y,0)) )
+					SWWMUtility.MarkAchievement('swwm_achievement_crush',player);
+			}
+		}
+	}
 	override int DamageMobj( Actor inflictor, Actor source, int damage, Name mod, int flags, double angle )
 	{
 		// we still have to ENSURE ENTIRELY that this gets nullified (TELEFRAG_DAMAGE overrides damage factors somehow)
@@ -1592,7 +1633,12 @@ Class Demolitionist : PlayerPawn
 		if ( mod == 'Crush' )
 		{
 			// check if we can break any active crushers
-			if ( !inflictor && !source ) CheckBreakCrusher();
+			// (or polyobjects)
+			if ( !inflictor && !source )
+			{
+				CheckBreakCrusher();
+				CheckBreakPolyobject(damage);
+			}
 			// break a spike trap
 			else if ( source is 'ThrustFloor' )
 			{

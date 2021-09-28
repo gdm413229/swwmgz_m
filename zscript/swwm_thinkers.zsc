@@ -151,6 +151,22 @@ Class SWWMDamageAccumulator : Thinker
 	}
 }
 
+// ensures a polyobj stays out of bounds FOREVER
+Class SWWMBustedPolyobj : swwm_PolyobjectEffector
+{
+	Actor whomstdve;
+
+	override void PolyTick()
+	{
+		if ( Polyobject.GetPos() == (32000,32000) ) return;
+		double dist = (Polyobject.GetPos()-(32000,32000)).length();
+		Level.ExecuteSpecial(Polyobj_Stop,whomstdve,Polyobject.StartLine,Line.Front,Polyobject.PolyobjectNum);
+		if ( Polyobject.Mirror ) Level.ExecuteSpecial(Polyobj_Stop,whomstdve,Polyobject.Mirror.StartLine,Line.Front,Polyobject.Mirror.PolyobjectNum);
+		Level.ExecuteSpecial(Polyobj_MoveTo,whomstdve,Polyobject.StartLine,Line.Front,Polyobject.PolyobjectNum,int(dist*8),32000,32000);
+		if ( Polyobject.Mirror ) Level.ExecuteSpecial(Polyobj_Stop,whomstdve,Polyobject.Mirror.StartLine,Line.Front,Polyobject.Mirror.PolyobjectNum);
+	}
+}
+
 // prevents floors/ceilings from ever moving again, as they're "broken crushers"
 Class SWWMCrusherBroken : Thinker
 {

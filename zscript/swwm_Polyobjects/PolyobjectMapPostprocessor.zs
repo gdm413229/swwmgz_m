@@ -15,6 +15,12 @@ class swwm_PolyobjectHandlePostProcessor: LevelPostProcessor
     {
       // Ignore every thing that isn't a Polyobject StartSpot
       int ednum = GetThingEdNum(i);
+      // [MK] hotfix for this to recognize hexen polyobjects
+      if (gameinfo.gametype&GAME_Hexen)
+      {
+      	if (ednum == 3001) ednum = swwm_PolyobjectHandle.POTYP_NORMAL;
+      	else if (ednum == 3002) ednum = swwm_PolyobjectHandle.POTYP_CRUSH;
+      }
       if (ednum < swwm_PolyobjectHandle.POTYP_NORMAL || ednum > swwm_PolyobjectHandle.POTYP_HURT)
         continue;
 
@@ -79,6 +85,39 @@ class swwm_PolyobjectHandlePostProcessor: LevelPostProcessor
 
       // Store the line
       handle.StartLine = line;
+
+      // [MK] the library doesn't store ALL lines belonging to the polyobject, but we need them
+      handle.Lines.Push(line);
+
+      // [MK] collect all connected lines if this is Polyobj_StartLine
+      if ( line.Special != Polyobj_StartLine )
+        continue;
+
+      bool newlines;
+      do
+      {
+        newlines = false;
+        for (int j = 0; j < Level.Lines.Size(); j++)
+        {
+          Line linea = Level.Lines[j];
+          if (handle.Lines.Find(linea) < handle.Lines.Size())
+            continue;
+          bool nomatches = true;
+          for (int k = 0; k < handle.Lines.Size(); k++)
+          {
+            Line lineb = handle.Lines[k];
+            if ((linea.v1 != lineb.v1) && (linea.v1 != lineb.v2) && (linea.v2 != lineb.v1) && (linea.v2 != lineb.v2))
+              continue;
+            nomatches = false;
+            break;
+          }
+          if (nomatches)
+            continue;
+          newlines = true;
+          handle.Lines.Push(linea);
+        }
+      }
+      while (newlines);
     }
   }
 }

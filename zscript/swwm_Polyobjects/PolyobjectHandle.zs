@@ -16,6 +16,9 @@ class swwm_PolyobjectHandle: Thinker
   // Line defining the polyobject (Polyobj_StartLine, or one of Polyobj_ExplicitLine)
   Line StartLine;
 
+  // [MK] All lines belonging to the polyobject
+  Array<Line> Lines;
+
   // Initial angle of StartLine
   double StartAngle;
 

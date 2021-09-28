@@ -1741,10 +1741,60 @@ Class SWWMUtility
 		return false, checkme;
 	}
 
-	static bool IsPolyLine( Line l, out swwm_PolyobjectHandle p )
+	// iterate through polyobjects and see if this line is part of one (returning which, if any)
+	static bool IsPolyLine( Line l, out swwm_PolyobjectHandle o )
 	{
-		// TODO iterate through polyobjects and see if this line is connected to their start line
+		let pi = swwm_PolyobjectIterator.Create();
+		swwm_PolyobjectHandle p;
+		while ( p = pi.Next() )
+		{
+			if ( p.Lines.Find(l) >= p.Lines.Size() ) continue;
+			o = p;
+			return true;
+		}
+		o = null;
 		return false;
+	}
+
+	// checks if the specified world coordinate is inside the polyobject
+	// this check is very naive but it should handle most "normal" shapes
+	// (yeah, sorry if you somehow want to play this mod with lilith.pk3)
+	static bool PointInPolyobj( Vector2 p, swwm_PolyobjectHandle o )
+	{
+		// first pass, find which vertex out of all lines is closest
+		Vertex v = o.StartLine.v1;
+		double dist = (v.p-p).length();
+		for ( int i=0; i<o.Lines.Size(); i++ )
+		{
+			Line l = o.Lines[i];
+			double dist2 = (l.v1.p-p).length();
+			if ( dist2 < dist )
+			{
+				v = l.v1;
+				dist = dist2;
+			}
+			dist2 = (l.v2.p-p).length();
+			if ( dist2 < dist )
+			{
+				v = l.v2;
+				dist = dist2;
+			}
+		}
+		// second pass, find which two lines share that vertex
+		// (in theory there should only be two)
+		Line a = null, b = null;
+		for ( int i=0; i<o.Lines.Size(); i++ )
+		{
+			Line l = o.Lines[i];
+			if ( (l.v1 == v) || (l.v2 == v) )
+			{
+				if ( !a ) a = l;
+				else if ( !b ) b = l;
+				else break;
+			}
+		}
+		// is the point behind both lines?
+		return (PointOnLineSide(p,a) && PointOnLineSide(p,b));
 	}
 
 	// full reset of inventory (excluding collectibles, and optionally resetting the score)

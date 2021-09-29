@@ -477,7 +477,7 @@ Class HammerspaceEmbiggener : Inventory
 					i.MaxAmount = int(i.default.MaxAmount+Amount*factor);
 				}
 				int amount = Ammo(i).BackpackAmount*item.Amount;
-				if ( traded ) i.Amount = 0;
+				if ( traded ) amount = 0;
 				if ( (i.Amount > 0) && (i.Amount+amount < 0) )
 					i.Amount = int.max;
 				else i.Amount += amount;

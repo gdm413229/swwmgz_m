@@ -41,10 +41,16 @@ Class BustedQuake : Actor
 	}
 }
 
+Class BustPoint
+{
+	Vector2 pos;
+}
+
 // Bustin' makes me feel good
 Class BusterWall : Thinker
 {
 	Sector hitsector;
+	swwm_PolyobjectHandle hitpoly;
 	int accdamage;
 	Array<int> acchits;
 	int hitplane;
@@ -54,6 +60,7 @@ Class BusterWall : Thinker
 	double cutheight;
 	// cached
 	Vector3 boundsmin, boundsmax, step;
+	Array<BustPoint> polygrid;
 
 	override void Tick()
 	{
@@ -84,6 +91,11 @@ Class BusterWall : Thinker
 
 	private void SpawnDebris( bool initial = false )
 	{
+		if ( hitpoly )
+		{
+			SpawnDebrisPoly(initial);
+			return;
+		}
 		double x, y, z;
 		for ( z=boundsmin.z; z<boundsmax.z; z+=step.z )
 		for ( y=boundsmin.y; y<boundsmax.y; y+=step.y )
@@ -91,6 +103,42 @@ Class BusterWall : Thinker
 		{
 			Vector3 spot = (x,y,z);
 			if ( level.PointInSector(spot.xy) != hitsector ) continue;
+			spot += (FRandom[Wallbuster](-step.x,step.x),FRandom[Wallbuster](-step.y,step.y),FRandom[Wallbuster](-step.z,step.z));
+			if ( !level.IsPointInLevel(spot) ) continue;
+			if ( (initial || !(busttics%2)) && !Random[Wallbuster](0,1) )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](-2.,8.);
+				let s = Actor.Spawn("SWWMHalfSmoke",spot);
+				s.vel = pvel;
+				s.scale *= 2.5;
+				s.special1 = Random[Wallbuster](3,8);
+				s.SetShade(Color(1,1,1)*Random[Wallbuster](40,120));
+			}
+			if ( (!initial && (busttics%3)) || (busttics > (bustmax/2)) ) continue;
+			int numpt = Random[Wallbuster](-4,1);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.),FRandom[Wallbuster](-1.,1.))).unit()*FRandom[Wallbuster](9.,24.);
+				let s = Actor.Spawn("SWWMSpark",spot);
+				s.vel = pvel;
+			}
+			numpt = Random[Wallbuster](0,2);
+			for ( int i=0; i<numpt; i++ )
+			{
+				Vector3 pvel = (bustdir+(FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6),FRandom[Wallbuster](-.6,.6))).unit()*FRandom[Wallbuster](2.,16.);
+				let s = Actor.Spawn("SWWMChip",spot);
+				s.vel = pvel;
+				s.scale *= FRandom[Wallbuster](1.5,3.);
+				s.A_SetTranslation('Rubble');
+			}
+		}
+	}
+
+	private void SpawnDebrisPoly( bool initial = false )
+	{
+		for ( int i=0; i<polygrid.Size(); i++ ) for ( double z=boundsmin.z; z<boundsmax.z; z+=step.z )
+		{
+			Vector3 spot = (polygrid[i].pos.x,polygrid[i].pos.y,z);
 			spot += (FRandom[Wallbuster](-step.x,step.x),FRandom[Wallbuster](-step.y,step.y),FRandom[Wallbuster](-step.z,step.z));
 			if ( !level.IsPointInLevel(spot) ) continue;
 			if ( (initial || !(busttics%2)) && !Random[Wallbuster](0,1) )
@@ -227,6 +275,124 @@ Class BusterWall : Thinker
 		return Bust(faketracer.Results,accdamage,instigator,x,hitz);
 	}
 
+	static bool BustPolyobj( swwm_PolyobjectHandle p, int accdamage, Actor instigator, Vector3 x )
+	{
+		let ti = ThinkerIterator.Create("BusterWall",STAT_USER);
+		BusterWall iter, bust = null;
+		while ( iter = BusterWall(ti.Next()) )
+		{
+			if ( iter.hitpoly != p ) continue;
+			bust = iter;
+			break;
+		}
+		bool mnew = false;
+		if ( !bust )
+		{
+			bust = new("BusterWall");
+			bust.ChangeStatNum(STAT_USER);
+			bust.hitpoly = p;
+			bust.accdamage = 0;
+			bust.bustdir = x;
+			mnew = true;
+		}
+		// multiply damage
+		if ( instigator ) accdamage = instigator.GetModifiedDamage('Wallbust',accdamage,false,instigator,instigator,0);
+		bust.delay = max(bust.delay,5+min(20,accdamage>>4));
+		bust.accdamage += accdamage;
+		bust.acchits.Push(accdamage);
+		bust.bustdir = (bust.bustdir+x)*.5;
+		// skip if already busted
+		if ( bust.busted ) return true;
+		// not enough total damage
+		if ( bust.accdamage < 100 ) return false;
+		// estimate polyobject volume
+		Vector3 a = (32767,32767,32767), b = (-32768,-32768,-32768);
+		for ( int i=0; i<p.lines.Size(); i++ )
+		{
+			Line l = p.lines[i];
+			if ( l.v1.p.x < a.x ) a.x = l.v1.p.x;
+			if ( l.v2.p.x < a.x ) a.x = l.v2.p.x;
+			if ( l.v1.p.y < a.y ) a.y = l.v1.p.y;
+			if ( l.v2.p.y < a.y ) a.y = l.v2.p.y;
+			if ( l.v1.p.x > b.x ) b.x = l.v1.p.x;
+			if ( l.v2.p.x > b.x ) b.x = l.v2.p.x;
+			if ( l.v1.p.y > b.y ) b.y = l.v1.p.y;
+			if ( l.v2.p.y > b.y ) b.y = l.v2.p.y;
+			Sector s = level.PointInSector(l.v1.p);
+			double fz = s.floorplane.ZAtPoint(l.v1.p);
+			double cz = s.ceilingplane.ZAtPoint(l.v1.p);
+			if ( fz < a.z ) a.z = fz;
+			if ( cz > b.z ) b.z = cz;
+			s = level.PointInSector(l.v2.p);
+			fz = s.floorplane.ZAtPoint(l.v2.p);
+			cz = s.ceilingplane.ZAtPoint(l.v2.p);
+			if ( fz < a.z ) a.z = fz;
+			if ( cz > b.z ) b.z = cz;
+		}
+		double girthitude = (b.x-a.x)*(b.y-a.y)*(b.z-a.z);
+		// do a grid check to approximate "real" volume
+		double ystep = (b.y-a.y)/64.;
+		double xstep = (b.x-a.x)/64.;
+		int inspot = 0, allspot = 0;
+		for ( double y=a.y; y<=b.y; y+=ystep ) for ( double x=a.x; x<=b.x; x+=xstep )
+		{
+			allspot++;
+			if ( !SWWMUtility.PointInPolyobj((x,y),p) ) continue;
+			inspot++;
+		}
+		if ( allspot <= 0 ) return false;	// what the fuck?
+		girthitude = (girthitude*inspot)/allspot;
+		// too fucking huge
+		if ( (girthitude > 16777216) || (max(b.z-a.z,max(b.x-a.x,b.y-a.y)) > 1024) ) return false;
+		// not strong enough to bust
+		if ( bust.accdamage < girthitude/300. ) return false;
+		// report bust
+		if ( Instigator && Instigator.player )
+		{
+			let s = SWWMStats.Find(Instigator.player);
+			if ( s ) s.busts++;
+			SWWMUtility.AchievementProgressInc('swwm_progress_bustin',1,Instigator.player);
+		}
+		// call hit fx for devastation sigil (if any)
+		AngeryPower as = instigator?AngeryPower(instigator.FindInventory("AngeryPower")):null;
+		if ( as ) as.DoHitFX();
+		bust.busted = true;
+		bust.busttics = 0;
+		bust.bustmax = min(30,int(12+girthitude**.1));
+		// quakin'
+		let q = Actor.Spawn("BustedQuake",(p.LastPos.x,p.LastPos.y,(b.z+a.z)/2));
+		q.special1 = clamp(int(girthitude**.15),1,9);
+		// "precache" the grid for busting effects
+		bust.boundsmin = a;
+		bust.boundsmax = b;
+		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp((b.z-a.z)/4.,2.,32.));
+		for ( double y=a.y; y<=b.y; y+=bust.step.y ) for ( double x=a.x; x<=b.x; x+=bust.step.x )
+		{
+			if ( !SWWMUtility.PointInPolyobj((x,y),p) ) continue;
+			let g = new("BustPoint");
+			g.pos = (x,y);
+			bust.polygrid.Push(g);
+		}
+		// stop any polyobject movement
+		level.ExecuteSpecial(Polyobj_Stop,instigator,p.StartLine,Line.Front,p.PolyobjectNum);
+		if ( p.Mirror ) level.ExecuteSpecial(Polyobj_Stop,instigator,p.Mirror.StartLine,Line.Front,p.Mirror.PolyobjectNum);
+		// send it to the shadow realm (and ensure it stays there)
+		if ( !p.FindEffector("SWWMBustedPolyobj") )
+		{
+			let yeet = new("SWWMBustedPolyobj");
+			yeet.whomstdve = instigator;
+			p.AddEffector(yeet);
+		}
+		bust.SpawnDebris(true);
+		// damnums
+		Vector3 bcenter = (bust.boundsmin+bust.boundsmax)*.5;
+		if ( swwm_accdamage )
+			SWWMScoreObj.Spawn(-bust.accdamage,level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),ST_Damage);
+		else for ( int i=0; i<bust.acchits.Size(); i++ )
+			SWWMScoreObj.Spawn(-bust.acchits[i],level.Vec3Offset(bcenter,(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8))),ST_Damage);
+		return true;
+	}
+
 	static bool Bust( TraceResults d, int accdamage, Actor instigator, Vector3 x, double hitz )
 	{
 		// we can't blow up 3D floors
@@ -235,6 +401,9 @@ Class BusterWall : Thinker
 		int hp;
 		if ( d.HitType == TRACE_HitWall )
 		{
+			// check if it's a polyobject line, if so, switch to the other bust method
+			swwm_PolyObjectHandle p;
+			if ( SWWMUtility.IsPolyLine(d.HitLine,p) ) return BustPolyobj(p,accdamage,instigator,x);
 			// no busting the goat
 			if ( IsIOSWall(d.HitLine) ) return false;
 			// onesided wall? no bust
@@ -286,6 +455,8 @@ Class BusterWall : Thinker
 			bust.bustdir = x;
 			mnew = true;
 		}
+		// multiply damage
+		if ( instigator ) accdamage = instigator.GetModifiedDamage('Wallbust',accdamage,false,instigator,instigator,0);
 		bust.delay = max(bust.delay,5+min(20,accdamage>>4));
 		bust.accdamage += accdamage;
 		bust.acchits.Push(accdamage);
@@ -353,6 +524,9 @@ Class BusterWall : Thinker
 			if ( s ) s.busts++;
 			SWWMUtility.AchievementProgressInc("bustin",1,Instigator.player);
 		}
+		// call hit fx for devastation sigil (if any)
+		AngeryPower as = instigator?AngeryPower(instigator.FindInventory("AngeryPower")):null;
+		if ( as ) as.DoHitFX();
 		bust.busted = true;
 		bust.busttics = 0;
 		bust.bustmax = min(30,int(12+girthitude**.1));
@@ -374,39 +548,37 @@ Class BusterWall : Thinker
 			if ( !l.sidedef[1] ) continue;
 			int away = 0;
 			if ( l.sidedef[0].sector == hs ) away = 1;
-			// temporarily set filler texture so switches don't play a sound
-			TextureID oldtex[3][2];
-			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
-			{
-				oldtex[j][k] = l.sidedef[k].GetTexture(j);
-				l.sidedef[k].SetTexture(j,rubble);
-			}
 			l.Activate(instigator,away,SPAC_Use);
 			l.Activate(instigator,away,SPAC_Impact);
-			for ( int j=0; j<3; j++ ) for ( int k=0; k<2; k++ )
-				l.sidedef[k].SetTexture(j,oldtex[j][k]);
-			// clear any use/impact specials
-			if ( l.Activation&(SPAC_Use|SPAC_Impact) )
-				l.Activation &= ~(SPAC_Use|SPAC_Impact);
 		}
-		// stop movement permanently
-		SWWMCrusherBroken.Create(hp?null:hs,hp?hs:null,0.,true);
+		// if this is a broken crusher, we need to clear that now that we've busted it
+		SWWMCrusherBroken.Remove(hp?null:hs,hp?hs:null);
 		// quakin'
 		let q = Actor.Spawn("BustedQuake",(hs.centerspot.x,hs.centerspot.y,thisheight));
 		q.special1 = clamp(int(girthitude**.15),1,9);
 		if ( hp )
 		{
+			// remove any current movers
+			if ( hs.CeilingData ) hs.CeilingData.Destroy();
 			// blow up that ceiling
 			hs.MoveCeiling(abs(partheight),bust.cutheight,0,1,false);
 			bust.boundsmin = (a.x,a.y,thisheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,bust.cutheight)-(1,1,1);
+			// prevent any further ceiling movement
+			level.CreateCeiling(hs,Ceiling.ceilRaiseByValue,null,0.,0.,1.);
+			hs.StopSoundSequence(CHAN_VOICE);
 		}
 		else
 		{
+			// remove any current movers
+			if ( hs.FloorData ) hs.FloorData.Destroy();
 			// blow up that floor
 			hs.MoveFloor(abs(partheight),abs(bust.cutheight),0,-1,false,true);
 			bust.boundsmin = (a.x,a.y,bust.cutheight)+(1,1,1);
 			bust.boundsmax = (b.x,b.y,thisheight)-(1,1,1);
+			// prevent any further floor movement
+			level.CreateFloor(hs,Floor.floorLowerByValue,null,0.,1.);
+			hs.StopSoundSequence(CHAN_WEAPON);
 		}
 		bust.step = (clamp((b.x-a.x)/4.,2.,32.),clamp((b.y-a.y)/4.,2.,32.),clamp(partheight/4.,2.,32.));
 		bust.SpawnDebris(true);

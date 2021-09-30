@@ -121,6 +121,8 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 		case '30D1480A6D4F3A3153739D4CCF659C4E':
 			level.nextsecretmap = level.nextmap;	// so the handler can detect this
 			level.nextmap = "E5M1";
+			// remove a multiplayer-exclusive teleport because it's dumb as all fuck that it exists
+			SetThingEdNum(78,0);
 			break;
 		// Micro Slaughter Community Project MAP13 (beta) / MAP14 (v1)
 		case 'E45AA3BE411845AA0DEE7CA5DAAB65FE':

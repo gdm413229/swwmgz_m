@@ -722,6 +722,7 @@ Class YnykronBeam : Actor
 		{
 			// goodbye
 			nospread = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
@@ -819,6 +820,7 @@ Class YnykronBeam : Actor
 					YnykronShot(master).blastcount++;
 			}
 			nospread = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		if ( ((special1%256) < speed) && !Random[Ynykron](0,20) )
@@ -1646,6 +1648,7 @@ Class YnykronLightningArc : Actor
 			}
 			invoker.nextpos = t.Results.HitPos;
 			bAMBUSH = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		invoker.nextpos = level.Vec3Offset(pos,x*speed);
@@ -2729,6 +2732,7 @@ Class YnykronAltBeam : Actor
 		{
 			// goodbye
 			nospread = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
@@ -2756,6 +2760,7 @@ Class YnykronAltBeam : Actor
 			b.angle = atan2(norm.y,norm.x);
 			b.pitch = asin(-norm.z);
 			nospread = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		if ( special1 >= 25600 )

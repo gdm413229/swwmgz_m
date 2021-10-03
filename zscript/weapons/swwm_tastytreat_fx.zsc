@@ -136,6 +136,7 @@ Class CandyBeam : Actor
 			t.Results.HitPos = level.Vec3Offset(pos,x*speed);
 			normal *= 0;
 		}
+		if ( t.Results.HitType != TRACE_HitNone ) speed = t.Results.Distance;	// shortens in minimap
 		double a = FRandom[Candy](0,360), s = FRandom[Candy](0.,.8);
 		invoker.nextpos = level.Vec3Offset(t.Results.HitPos,normal);
 		invoker.nextdir = (dir+cos(a)*y*s+sin(a)*z*s).unit();

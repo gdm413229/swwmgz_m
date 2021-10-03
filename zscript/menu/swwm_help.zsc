@@ -187,6 +187,7 @@ Class SWWMHelpMenu : GenericMenu
 				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+320-maxlen/2,origin.y+133-lh/2+y,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 				y += h;
 			}
+			l.Destroy();
 			return;
 		}
 		txt = String.Format("(Unknown help page #%d)",page);

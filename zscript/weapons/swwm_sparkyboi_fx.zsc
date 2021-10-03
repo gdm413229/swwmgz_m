@@ -1165,6 +1165,7 @@ Class BiosparkBeam : Actor
 		if ( t.Results.HitType == TRACE_HasHitSky )
 		{
 			bAMBUSH = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		if ( t.Results.HitType != TRACE_HitNone )
@@ -1175,6 +1176,7 @@ Class BiosparkBeam : Actor
 			s.pitch = asin(-normal.z);
 			bAMBUSH = true;
 			if ( swwm_omnibust ) BusterWall.Bust(t.Results,GetMissileDamage(0,0),target,t.Results.HitVector,t.Results.HitPos.z);
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		double closest = double.infinity;
@@ -1506,9 +1508,11 @@ Class BiosparkArc : Actor
 			normal *= 0;
 		}
 		invoker.nextpos = level.Vec3Offset(t.Results.HitPos,normal);
+		if ( t.Results.HitType != TRACE_HitNone ) speed = t.Results.Distance;	// shortens in minimap
 		if ( t.Results.HitType == TRACE_HasHitSky )
 		{
 			bAMBUSH = true;
+			speed = t.Results.Distance;	// shortens in minimap
 			return;
 		}
 		double a = FRandom[Sparkster](0,360), s = FRandom[Sparkster](0.,.8);

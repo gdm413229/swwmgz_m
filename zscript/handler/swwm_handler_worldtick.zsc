@@ -18,6 +18,7 @@ extend Class SWWMHandler
 	String lastmus;
 	int lastorder;
 	bool lastloop;
+	transient ThinkerIterator cti;
 
 	private void LangRefresh()
 	{
@@ -94,9 +95,10 @@ extend Class SWWMHandler
 		}
 		bool enteredcombat = false;
 		// add new entries
-		let ti = ThinkerIterator.Create("Actor");
+		if ( !cti ) cti = ThinkerIterator.Create("Actor");
+		else cti.Reinit();
 		Actor a;
-		while ( a = Actor(ti.Next()) )
+		while ( a = Actor(cti.Next()) )
 		{
 			if ( !a.player && !a.bISMONSTER ) continue;
 			// ignore the dead
@@ -221,7 +223,7 @@ extend Class SWWMHandler
 	// "simple" tracking (used by the minimap)
 	private void SimpleTracking()
 	{
-		if ( !swwm_mm_enable )
+		if ( (gamestate != GS_LEVEL) || !swwm_mm_enable )
 		{
 			while ( strackers )
 			{
@@ -283,6 +285,7 @@ extend Class SWWMHandler
 				continue;
 			SWWMSimpleTracker.Track(a);
 		}
+		bt.Destroy();
 		if ( swwm_mm_portaloverlay && (psectors.Size() > 1) )
 		{
 			// oh boy here we go
@@ -291,6 +294,7 @@ extend Class SWWMHandler
 			{
 				if ( i == thisgroup ) continue;
 				Vector2 relpos = players[consoleplayer].Camera.pos.xy+SWWMUtility.PortalDisplacement(level.Sectors[psectors[thisgroup]],level.Sectors[psectors[i]]);
+				if ( bt ) bt.Destroy();
 				bt = BlockThingsIterator.CreateFromPos(relpos.x,relpos.y,players[consoleplayer].Camera.pos.z,players[consoleplayer].Camera.pos.z+players[consoleplayer].Camera.height,viewdist,false);
 				while ( bt.Next() )
 				{

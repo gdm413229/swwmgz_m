@@ -949,6 +949,7 @@ Class Demolitionist : PlayerPawn
 		PoisonPeriodReceived = 0;
 		PoisonDamageReceived = 0;
 		Super.Tick();
+		if ( gamestate != GS_LEVEL ) return;
 		if ( hasteleported )
 		{
 			// we just got teleported, don't count the travel distance

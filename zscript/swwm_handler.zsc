@@ -180,6 +180,7 @@ Class SWWMHandler : EventHandler
 				Screen.DrawText(newsmallfont,Font.CR_UNTRANSLATED,xx,yy,l.StringAt(i),DTA_Clean,true,DTA_Alpha,alph);
 				yy += newsmallfont.GetHeight();
 			}
+			l.Destroy();
 		}
 		// weapon underlays
 		if ( players[consoleplayer].ReadyWeapon is 'SWWMWeapon' )

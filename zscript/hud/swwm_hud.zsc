@@ -2490,6 +2490,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,msg0color,xx,yy+2,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy -= h;
 			}
+			l.Destroy();
 			yy -= 6;
 		}
 	}
@@ -2520,6 +2521,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,col,int(xx),yy+2,l.StringAt(i),DTA_VirtualWidthF,ss.x*ssp,DTA_VirtualHeightF,ss.y*ssp,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy += h;
 			}
+			l.Destroy();
 		}
 		if ( MainQueue.Size() <= 0 ) return;
 		int mstart = max(0,MainQueue.Size()-((chatopen>=gametic)?swwm_maxshownbig:swwm_maxshown));
@@ -2547,6 +2549,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Screen.DrawText(fnt,col,xx+4,yy,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 				yy += 13;
 			}
+			l.Destroy();
 		}
 		Screen.DrawTexture(ChatTex[smol?5:2],false,xx,yy,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,boxalph);
 	}

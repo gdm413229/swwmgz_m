@@ -111,6 +111,7 @@ Class SWWMOneLiner : HUDMessageBase
 			Screen.DrawText(fnt,Font.CR_FIRE,int((ss.x-len)/2.),(bottom/hs.y)-yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 			yy -= h;
 		}
+		l.Destroy();
 	}
 }
 
@@ -214,6 +215,7 @@ Class SWWMAchievementNotification : HUDMessageBase
 			Screen.DrawText(fnt2,Font.CR_WHITE,pos.x+44,pos.y+yy,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alpha);
 			yy += 9;
 		}
+		l.Destroy();
 	}
 }
 
@@ -379,6 +381,7 @@ Class SWWMDirectMessage : HUDMessageBase
 			txt = String.Format(StringTable.Localize("$SWWM_"..seqname..seqnum),nyears);
 		}
 		else txt = StringTable.Localize("$SWWM_"..seqname..seqnum);
+		if ( l ) l.Destroy();
 		l = fnt.BreakLines(txt,220);
 		// append to the player's chat log (if it's valid)
 		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;

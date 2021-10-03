@@ -516,12 +516,17 @@ Class DemolitionistMenu : GenericMenu
 				else kstr = self.mkey[0];
 				String str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				if ( l.Count() > 28 )
+				{
+					l.Destroy();
+					l = fnt.BreakLines(str,620);
+				}
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
 				{
 					MenuSound("menu/demoscroll");
 					sel0++;
 				}
+				l.Destroy();
 			}
 			else if ( tabs[curtab] == TAB_MISSION )
 			{
@@ -529,12 +534,17 @@ Class DemolitionistMenu : GenericMenu
 				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
 				else str = StringTable.Localize(missionbacklog[sel1-1]);
 				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+				if ( l.Count() > 28 )
+				{
+					l.Destroy();
+					l = fnt.BreakLines(str,620);
+				}
 				if ( (l.Count() > 28) && (sel0 < l.Count()-28) )
 				{
 					MenuSound("menu/demoscroll");
 					ofs0 = ++sel0;
 				}
+				l.Destroy();
 			}
 			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 > 0) )
 			{
@@ -549,12 +559,17 @@ Class DemolitionistMenu : GenericMenu
 					int ofs = (language~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
+					if ( l.Count() > 28 )
+					{
+						l.Destroy();
+						l = fnt.BreakLines(str,626-ofs);
+					}
 					if ( (l.Count() > 28) && (sel2 < l.Count()-28) )
 					{
 						MenuSound("menu/demoscroll");
 						ofs2 = ++sel2;
 					}
+					l.Destroy();
 				}
 				else
 				{
@@ -1069,10 +1084,19 @@ Class DemolitionistMenu : GenericMenu
 					if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
 					else str = StringTable.Localize(missionbacklog[sel1-1]);
 					BrokenLines l = fnt.BreakLines(str,629);
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
-					else return res;	// no scrollbar
+					if ( l.Count() > 28 )
+					{
+						l.Destroy();
+						l = fnt.BreakLines(str,620);
+					}
+					else
+					{
+						l.Destroy();
+						return res;	// no scrollbar
+					}
 					// calculate offset
 					int szr = l.Count()-28;
+					l.Destroy();
 					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 					if ( step != sel0 ) MenuSound("menu/demoscroll");
 					ofs0 = sel0 = step;
@@ -1451,10 +1475,19 @@ Class DemolitionistMenu : GenericMenu
 					int ofs = (language~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
-					else return res;	// no scrollbar
+					if ( l.Count() > 28 )
+					{
+						l.Destroy();
+						l = fnt.BreakLines(str,626-ofs);
+					}
+					else
+					{
+						l.Destroy();
+						return res;	// no scrollbar
+					}
 					// calculate offset
 					int szr = l.Count()-28;
+					l.Destroy();
 					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 					if ( step != sel2 ) MenuSound("menu/demoscroll");
 					ofs2 = sel2 = step;
@@ -1566,10 +1599,19 @@ Class DemolitionistMenu : GenericMenu
 				else kstr = mkey[0];
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
-				else return res;	// no scrollbar
+				if ( l.Count() > 28 )
+				{
+					l.Destroy();
+					l = fnt.BreakLines(str,620);
+				}
+				else
+				{
+					l.Destroy();
+					return res;	// no scrollbar
+				}
 				// calculate offset
 				int szr = l.Count()-28;
+				l.Destroy();
 				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -1629,10 +1671,19 @@ Class DemolitionistMenu : GenericMenu
 				if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
 				else str = StringTable.Localize(missionbacklog[sel1-1]);
 				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
-				else return res;	// no scrollbar
+				if ( l.Count() > 28 )
+				{
+					l.Destroy();
+					l = fnt.BreakLines(str,620);
+				}
+				else
+				{
+					l.Destroy();
+					return res;	// no scrollbar
+				}
 				// calculate offset
 				int szr = l.Count()-28;
+				l.Destroy();
 				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -1740,10 +1791,19 @@ Class DemolitionistMenu : GenericMenu
 					int ofs = (language~=="jp")?212:132;
 					if ( lorelist.Size() > 26 ) ofs += 8;
 					BrokenLines l = fnt.BreakLines(str,635-ofs);
-					if ( l.Count() > 28 ) l = fnt.BreakLines(str,626-ofs);
-					else return res;	// no scrollbar
+					if ( l.Count() > 28 )
+					{
+						l.Destroy();
+						l = fnt.BreakLines(str,626-ofs);
+					}
+					else
+					{
+						l.Destroy();
+						return res;	// no scrollbar
+					}
 					// calculate offset
 					int szr = l.Count()-28;
+					l.Destroy();
 					int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 					if ( step != sel2 ) MenuSound("menu/demoscroll");
 					ofs2 = sel2 = step;
@@ -1800,10 +1860,19 @@ Class DemolitionistMenu : GenericMenu
 				String kstr = bindings.NameKeys(k1,k2);
 				str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 				BrokenLines l = fnt.BreakLines(str,629);
-				if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
-				else return res;	// no scrollbar
+				if ( l.Count() > 28 )
+				{
+					l.Destroy();
+					l = fnt.BreakLines(str,620);
+				}
+				else
+				{
+					l.Destroy();
+					return res;	// no scrollbar
+				}
 				// calculate offset
 				int szr = l.Count()-28;
+				l.Destroy();
 				int step = clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -2942,7 +3011,11 @@ Class DemolitionistMenu : GenericMenu
 			if ( sel1 == 0 ) str = StringTable.Localize(missionstr);
 			else str = StringTable.Localize(missionbacklog[sel1-1]);
 			BrokenLines l = fnt.BreakLines(str,629);
-			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+			if ( l.Count() > 28 )
+			{
+				l.Destroy();
+				l = fnt.BreakLines(str,620);
+			}
 			xx = 6;
 			yy = 17;
 			int ofs = clamp(sel0,0,max(0,l.Count()-28));
@@ -2973,6 +3046,7 @@ Class DemolitionistMenu : GenericMenu
 				str = String.Format("%d \cf/\c- %d",sel1+1,csiz+1);
 				Screen.DrawText(MiniwiFont,Font.CR_FIRE,(origin.x+637)-MiniwiFont.StringWidth(str),origin.y+375,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
+			l.Destroy();
 		}
 		else if ( tabs[curtab] == TAB_STATS )
 		{
@@ -3172,6 +3246,7 @@ Class DemolitionistMenu : GenericMenu
 					Screen.DrawText(fnt,completed?Font.CR_GREEN:Font.CR_DARKGRAY,origin.x+xx+36,origin.y+yy+oy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 					for ( int j=0; j<l.Count(); j++ )
 						Screen.DrawText(fnt2,completed?Font.CR_WHITE:Font.CR_BLACK,origin.x+xx+40,origin.y+yy+oy+14+j*9,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+					l.Destroy();
 					yy += 50;
 				}
 				// scrollbar
@@ -3420,7 +3495,11 @@ Class DemolitionistMenu : GenericMenu
 			}
 			str = StringTable.Localize(lorelist[sel0].text);
 			BrokenLines l = fnt.BreakLines(str,int(635-xx));
-			if ( l.Count() > 28 ) l = fnt.BreakLines(str,int(626-xx));
+			if ( l.Count() > 28 )
+			{
+				l.Destroy();
+				l = fnt.BreakLines(str,int(626-xx));
+			}
 			yy = 17;
 			ofs = clamp(sel2,0,max(0,l.Count()-28));
 			for ( int i=ofs; i<l.Count(); i++ )
@@ -3438,6 +3517,7 @@ Class DemolitionistMenu : GenericMenu
 				yy = floor(ofs*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
+			l.Destroy();
 		}
 		else if ( tabs[curtab] == TAB_STORE )
 		{
@@ -3650,10 +3730,15 @@ Class DemolitionistMenu : GenericMenu
 				str = String.Format("\cu[\c-%02d\cu:\c-%02d\cu:\c-%02d\cu]\c- ",thour,tmin,tsec);
 				BrokenLines l = fnt.BreakLines(bar.FullHistory[i].str,626-margin);
 				double by = yy-13*l.Count();
-				if ( by < 17 ) break;
+				if ( by < 17 )
+				{
+					l.Destroy();
+					break;
+				}
 				Screen.DrawText(TewiFont,Font.CR_WHITE,origin.x+xx,origin.y+by,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				for ( int j=0; j<l.Count(); j++ )
 					Screen.DrawText(fnt,col,origin.x+xx+margin,origin.y+by+j*13,l.StringAt(j),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+				l.Destroy();
 				yy = by;
 			}
 			// scrollbar
@@ -3680,6 +3765,7 @@ Class DemolitionistMenu : GenericMenu
 					xx = (i<l.Count()-1)?350:(350+mxlen-l.StringWidth(i));
 					Screen.DrawText(fnt,Font.CR_GOLD,origin.x+xx,origin.y+43+i*14,l.StringAt(i),DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				}
+				l.Destroy();
 				str = StringTable.Localize("$SWWM_FROMKIRIN");
 				Screen.DrawText(fnt,Font.CR_WHITE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+350,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
@@ -3704,7 +3790,11 @@ Class DemolitionistMenu : GenericMenu
 			else kstr = mkey[0];
 			str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
 			BrokenLines l = fnt.BreakLines(str,629);
-			if ( l.Count() > 28 ) l = fnt.BreakLines(str,620);
+			if ( l.Count() > 28 )
+			{
+				l.Destroy();
+				l = fnt.BreakLines(str,620);
+			}
 			xx = 6;
 			yy = 17;
 			int ofs = clamp(sel0,0,max(0,l.Count()-28));
@@ -3723,6 +3813,7 @@ Class DemolitionistMenu : GenericMenu
 				yy = floor(ofs*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}
+			l.Destroy();
 		}
 	}
 }

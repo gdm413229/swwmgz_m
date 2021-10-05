@@ -39,6 +39,9 @@ Class DemolitionistMenu : GenericMenu
 	String c_tz;
 	// somehow Drawer can be called while closing prematurely, which is big bollocks
 	bool isclosing;
+	// the tabs
+	Array<DemolitionistMenuTab> tabs;
+	int curtab;
 
 	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
 	Font LangFont( Font req )

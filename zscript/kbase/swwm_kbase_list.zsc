@@ -1,0 +1,57 @@
+// Classes for item list elements
+
+// basic list item
+Class DemolitionistMenuListItem ui
+{
+	DemolitionistMenu master;
+	DemolitionistMenuList parent;
+
+	virtual void Ticker()
+	{
+	}
+
+	virtual void Drawer()
+	{
+	}
+}
+
+// basic list of text items with name and value
+// for stat tab
+Class DemolitionistMenuList ui
+{
+	DemolitionistMenu master;
+	DemolitionistMenuTab parent;
+
+	virtual void Ticker()
+	{
+	}
+
+	virtual void Drawer()
+	{
+	}
+}
+
+// inventory item list
+Class DemolitionistMenuInvList : DemolitionistMenuList
+{
+}
+
+// store item list (buy/sell
+Class DemolitionistMenuStoreList : DemolitionistMenuList
+{
+}
+
+// list of players
+Class DemolitionistMenuPlayerList : DemolitionistMenuList
+{
+}
+
+// list of achievements
+Class DemolitionistMenuAchievementList : DemolitionistMenuList
+{
+}
+
+// list of map stats
+Class DemolitionistMenuMapList : DemolitionistMenuList
+{
+}

@@ -9,12 +9,13 @@ Class SWWMWeapon : Weapon abstract
 	transient bool hastravelled;
 	transient int autoupsnd;
 	private int SWeaponFlags;
-	String tooltip;
+	String tooltip, getline;
 	bool tooltipsent;
 	Class<Ammo> dropammotype;
 	int dropamount;
 
 	Property Tooltip : tooltip;
+	Property GetLine : getline;
 	Property DropAmmoType : dropammotype;
 
 	FlagDef NoFirstGive : SWeaponFlags, 0;	// don't give ammo on first pickup (for weapons with a clip count)

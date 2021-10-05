@@ -7,9 +7,11 @@ Class SWWMCollectible : Inventory abstract
 	int avail;
 	bool propagated;
 	Class<SWWMItemGesture> gesture;
+	String getline;
 
 	Property Availability : avail;
 	Property GestureWeapon : gesture;
+	Property GetLine : getline;
 
 	// minimum gametype requirements
 	enum EAvailability
@@ -123,6 +125,7 @@ Class GenericCube : SWWMCollectible
 		Tag "$T_PERFECTLYGENERIC";
 		Inventory.PickupMessage "$T_PERFECTLYGENERIC";
 		SWWMCollectible.GestureWeapon "GenericCubeGesture";
+		SWWMCollectible.GetLine "cubeget";
 		Stamina 1000;
 	}
 }
@@ -133,6 +136,7 @@ Class AkariProject : SWWMCollectible
 		Tag "$T_AKARIPROJECT";
 		Inventory.PickupMessage "$T_AKARIPROJECT";
 		SWWMCollectible.GestureWeapon "AkariProjectGesture";
+		SWWMCollectible.GetLine "akariget";
 		Stamina 2000;
 		Radius 4;
 		Height 22;
@@ -145,6 +149,7 @@ Class LoveSignalsCD : SWWMCollectible
 		Tag "$T_LOVESIGNALS";
 		Inventory.PickupMessage "$T_LOVESIGNALS";
 		SWWMCollectible.GestureWeapon "LoveSignalsCDGesture";
+		SWWMCollectible.GetLine "signalsget";
 		Stamina 3000;
 		Radius 4;
 		Height 21;
@@ -157,6 +162,7 @@ Class NutatcoBar : SWWMCollectible
 		Tag "$T_NUTATCO";
 		Inventory.PickupMessage "$T_NUTATCO";
 		SWWMCollectible.GestureWeapon "NutatcoBarGesture";
+		SWWMCollectible.GetLine "nutatcoget";
 		Stamina 200;
 		Radius 3;
 		Height 22;
@@ -169,6 +175,7 @@ Class FrispyCorn : SWWMCollectible
 		Tag "$T_FRISPYCORN";
 		Inventory.PickupMessage "$T_FRISPYCORN";
 		SWWMCollectible.GestureWeapon "FrispyCornGesture";
+		SWWMCollectible.GetLine "frispyget";
 		Stamina 400;
 		Radius 5;
 		Height 23;
@@ -183,6 +190,7 @@ Class SayaBean : SWWMCollectible
 		Tag "$T_SAYABEAN";
 		Inventory.PickupMessage "$T_SAYABEAN";
 		SWWMCollectible.GestureWeapon "SayaBeanGesture";
+		SWWMCollectible.GetLine "sayaget";
 		Stamina 5000;
 		Radius 6;
 		Height 23;
@@ -212,6 +220,7 @@ Class MothPlushy : SWWMCollectible
 		Tag "$T_MOTHPLUSH";
 		Inventory.PickupMessage "$T_MOTHPLUSH";
 		SWWMCollectible.GestureWeapon "MothPlushyGesture";
+		SWWMCollectible.GetLine "mothget";
 		Stamina 7000;
 		Radius 12;
 		Height 32;
@@ -226,6 +235,7 @@ Class DemoPlush : SWWMCollectible
 		Inventory.PickupMessage "$T_DEMOPLUSH";
 		SWWMCollectible.Availability AVAIL_Heretic;
 		SWWMCollectible.GestureWeapon "DemoPlushGesture";
+		SWWMCollectible.GetLine "demoget";
 		Stamina 6000;
 		Radius 12;
 		Height 36;
@@ -240,6 +250,7 @@ Class KirinCummies : SWWMCollectible
 		Inventory.PickupMessage "$T_PEACH";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		SWWMCollectible.GestureWeapon "KirinCummiesGesture";
+		SWWMCollectible.GetLine "peachget";
 		Stamina 300;
 		Radius 3;
 		Height 21;
@@ -253,6 +264,7 @@ Class MilkBreads : SWWMCollectible
 		Inventory.PickupMessage "$T_MILKBREAD";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		SWWMCollectible.GestureWeapon "MilkBreadsGesture";
+		SWWMCollectible.GetLine "breadget";
 		Stamina 900;
 		Radius 4;
 		Height 21;
@@ -266,6 +278,7 @@ Class KirinManga : SWWMCollectible
 		Inventory.PickupMessage "$T_KIRINMANGA";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		SWWMCollectible.GestureWeapon "KirinMangaGesture";
+		SWWMCollectible.GetLine "mangaget";
 		Stamina 1600;
 		Radius 4;
 		Height 22;
@@ -279,6 +292,7 @@ Class KirinPlush : SWWMCollectible
 		Inventory.PickupMessage "$T_KIRINPLUSH";
 		SWWMCollectible.Availability AVAIL_Hexen;
 		SWWMCollectible.GestureWeapon "KirinPlushGesture";
+		SWWMCollectible.GetLine "kiringet";
 		Stamina 8000;
 		Radius 14;
 		Height 37;

@@ -13,7 +13,7 @@ extend Class SWWMHandler
 			if ( !swwm_nomapmsg )
 			{
 				// angry about phase two
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYAEVIB";
 				msg.seqcnt = 2;
 				msg.delay = 20;
@@ -30,7 +30,7 @@ extend Class SWWMHandler
 		int whichboss = WhichVanillaBossMap();
 		if ( bossmap == MAP_DE1M8 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAPHOBOS";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -38,7 +38,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_DE2M8 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYADEIMOS";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -46,7 +46,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_DE3M8 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYADIS";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -54,7 +54,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_DE4M8 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYATHY";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -62,7 +62,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_DMAP07 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYADIMPLE";
 			msg.seqcnt = 5;
 			msg.delay = 40;
@@ -80,7 +80,7 @@ extend Class SWWMHandler
 			}
 			if ( rampancy )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYARAMPANCY";
 				msg.seqcnt = 4;
 				msg.delay = 250;
@@ -88,7 +88,7 @@ extend Class SWWMHandler
 			}
 			else
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYAIOS";
 				msg.seqcnt = 5;
 				msg.delay = 40;
@@ -97,7 +97,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_DLVL08 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cvCytho\c-",StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_CYTHOSNAME"),StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
 			msg.seqname = "CYTHONERVE";
 			msg.seqcnt = 5;
 			msg.delay = 40;
@@ -105,7 +105,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_EVMAP30 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAEVIA";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -115,7 +115,7 @@ extend Class SWWMHandler
 		{
 			if ( level.mapname ~== "E1M8" )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYAMAW";
 				msg.seqcnt = 5;
 				msg.delay = 40;
@@ -123,7 +123,7 @@ extend Class SWWMHandler
 			}
 			else
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYAHEADS";
 				msg.seqcnt = 6;
 				msg.delay = 40;
@@ -134,7 +134,7 @@ extend Class SWWMHandler
 		{
 			if ( level.mapname ~== "E2M8" )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYAMASTERS";
 				msg.seqcnt = 5;
 				msg.delay = 40;
@@ -142,7 +142,7 @@ extend Class SWWMHandler
 			}
 			else
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYABULLS";
 				msg.seqcnt = 5;
 				msg.delay = 40;
@@ -151,7 +151,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HE3M8 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYADSPARIL";
 			msg.seqcnt = 5;
 			msg.delay = 40;
@@ -159,19 +159,19 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP38 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYACLERICA";
 			msg.seqcnt = 2;
 			msg.delay = 40;
 			StatusBar.AttachMessage(msg,-1232);
-			let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			let msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_KIRINSNAME"),StringTable.Localize("$SWWM_KIRINNAME"),"Kirin");
 			msg2.seqname = "SAYACLERICB";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg2.seqname = "SAYACLERICC";
 			msg2.seqcnt = 2;
 			msg2.delay = 20;
@@ -180,7 +180,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP36 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAFIGHTER";
 			msg.seqcnt = 2;
 			msg.delay = 40;
@@ -188,7 +188,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP37 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAMAGE";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -196,7 +196,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP12 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAHYPO";
 			msg.seqcnt = 4;
 			msg.delay = 40;
@@ -204,33 +204,33 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP40 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYAKORAXA";
 			msg.seqcnt = 1;
 			msg.delay = 40;
 			StatusBar.AttachMessage(msg,-1232);
-			let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			let msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_KIRINSNAME"),StringTable.Localize("$SWWM_KIRINNAME"),"Kirin");
 			msg2.seqname = "SAYAKORAXB";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_IBUKISNAME"),StringTable.Localize("$SWWM_IBUKINAME"),"Ibuki");
 			msg2.seqname = "SAYAKORAXC";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg2.seqname = "SAYAKORAXD";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_KIRINSNAME"),StringTable.Localize("$SWWM_KIRINNAME"),"Kirin");
 			msg2.seqname = "SAYAKORAXE";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
@@ -239,26 +239,26 @@ extend Class SWWMHandler
 		}
 		else if ( (bossmap == MAP_HMAP23_HMAP27_HMAP48_HMAP55) && (level.mapname ~== "MAP48") )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYACONSTABLEA";
 			msg.seqcnt = 2;
 			msg.delay = 40;
 			StatusBar.AttachMessage(msg,-1232);
-			let msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			let msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_IBUKISNAME"),StringTable.Localize("$SWWM_IBUKINAME"),"Ibuki");
 			msg2.seqname = "SAYACONSTABLEB";
 			msg2.seqcnt = 1;
 			msg2.delay = 30;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg2.seqname = "SAYACONSTABLEC";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
 			msg.nextmsg = msg2;
 			msg.nextdirect = true;
 			msg = msg2;
-			msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+			msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_IBUKISNAME"),StringTable.Localize("$SWWM_IBUKINAME"),"Ibuki");
 			msg2.seqname = "SAYACONSTABLED";
 			msg2.seqcnt = 1;
 			msg2.delay = 20;
@@ -267,7 +267,7 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_HMAP60 )
 		{
-			let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+			let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 			msg.seqname = "SAYADEATHKINGS";
 			msg.seqcnt = 1;
 			msg.delay = 40;
@@ -281,9 +281,30 @@ extend Class SWWMHandler
 				 || (csum ~== "09B30C9DA9D73D3D5A709502FBB947AA")
 				 || (csum ~== "6EAD80DA1F30B4B3546FA294EEF9F87C") )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cvCytho\c-",StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_CYTHOSNAME"),StringTable.Localize("$SWWM_CYTHONAME"),"Cytho");
 				msg.seqname = "CYTHOSIGIL";
 				msg.seqcnt = 4;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			// Doom 2 MAP11
+			else if ( (csum ~== "73D9E03CEE7BF1A97EFD2EAD86688EF8")
+				|| (csum ~== "F4F2A769609988837458772AAE99008C")
+				|| (csum ~== "DF6A001A6C42DB5CCA599EE5883B294A") )
+			{
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
+				msg.seqname = "SAYACIRCLE";
+				msg.seqcnt = 5;
+				msg.delay = 40;
+				StatusBar.AttachMessage(msg,-1232);
+			}
+			// Doom 2 MAP20
+			else if ( (csum ~== "8898F5EC9CBDCD98019A1BC1BF892A8A")
+				|| (csum ~== "CC53CFFCB30E873669AA2F09DA0D3566") )
+			{
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
+				msg.seqname = "SAYAGOTCHA";
+				msg.seqcnt = 5;
 				msg.delay = 40;
 				StatusBar.AttachMessage(msg,-1232);
 			}
@@ -291,12 +312,12 @@ extend Class SWWMHandler
 			// Blight
 			else if ( csum ~== "E3EFB0156A20ADF2DF00915A0EA85DF5" )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYABLIGHTA";
 				msg.seqcnt = 1;
 				msg.delay = 40;
 				StatusBar.AttachMessage(msg,-1232);
-				let msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+				let msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_KIRINSNAME"),StringTable.Localize("$SWWM_KIRINNAME"),"Kirin");
 				msg2.seqname = "SAYABLIGHTB";
 				msg2.seqcnt = 1;
 				msg2.delay = 5;
@@ -304,7 +325,7 @@ extend Class SWWMHandler
 				msg.nextmsg = msg2;
 				msg.nextdirect = true;
 				msg = msg2;
-				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg2.seqname = "SAYABLIGHTC";
 				msg2.seqcnt = 2;
 				msg2.delay = 20;
@@ -314,19 +335,19 @@ extend Class SWWMHandler
 			// Nave
 			else if ( csum ~== "E2B5D1400279335811C1C1C0B437D9C8" )
 			{
-				let msg = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				let msg = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg.seqname = "SAYANAVEA";
 				msg.seqcnt = 2;
 				msg.delay = 40;
 				StatusBar.AttachMessage(msg,-1232);
-				let msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+				let msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_IBUKISNAME"),StringTable.Localize("$SWWM_IBUKINAME"),"Ibuki");
 				msg2.seqname = "SAYANAVEB";
 				msg2.seqcnt = 1;
 				msg2.delay = 20;
 				msg.nextmsg = msg2;
 				msg.nextdirect = true;
 				msg = msg2;
-				msg2 = new("SWWMDirectMessage").Init("\cxKirin\c-","\cxKirin Xanai\c-","Kirin");
+				msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_KIRINSNAME"),StringTable.Localize("$SWWM_KIRINNAME"),"Kirin");
 				msg2.seqname = "SAYANAVEC";
 				msg2.seqcnt = 1;
 				msg2.delay = 5;
@@ -334,21 +355,21 @@ extend Class SWWMHandler
 				msg.nextmsg = msg2;
 				msg.nextdirect = true;
 				msg = msg2;
-				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg2.seqname = "SAYANAVED";
 				msg2.seqcnt = 1;
 				msg2.delay = 20;
 				msg.nextmsg = msg2;
 				msg.nextdirect = true;
 				msg = msg2;
-				msg2 = new("SWWMDirectMessage").Init("\crIbuki\c-","\crIbuki Miyamoto\c-","Ibuki");
+				msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_IBUKISNAME"),StringTable.Localize("$SWWM_IBUKINAME"),"Ibuki");
 				msg2.seqname = "SAYANAVEE";
 				msg2.seqcnt = 1;
 				msg2.delay = 30;
 				msg.nextmsg = msg2;
 				msg.nextdirect = true;
 				msg = msg2;
-				msg2 = new("SWWMDirectMessage").Init("\cgSaya\c-","\cgSaya Miyamoto\c-","Saya");
+				msg2 = new("SWWMDirectMessage").Init(StringTable.Localize("$SWWM_SAYASNAME"),StringTable.Localize("$SWWM_SAYANAME"),"Saya");
 				msg2.seqname = "SAYANAVEF";
 				msg2.seqcnt = 1;
 				msg2.delay = 40;

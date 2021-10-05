@@ -588,6 +588,8 @@ Class HeadpatTracker : Actor
 			Demolitionist(patter).scriptedinvul = true;
 			target.bDORMANT = true;
 			if ( SWWMUtility.IdentifyingDog(target) ) SWWMUtility.MarkAchievement("mbf",user.player);
+			if ( SWWMHDoomHandler.IsCuteGirl(target) || SWWMHDoomHandler.IsStaticSexyTime(target) ) SWWMHandler.AddOneliner("pethdoom",2,20);
+			else if ( SWWMHDoomHandler.IsSexyTime(target) ) SWWMHandler.AddOneliner("pethdoomfinish",2,40);
 			return true;
 		}
 		return false;

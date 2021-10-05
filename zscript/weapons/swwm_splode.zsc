@@ -80,6 +80,10 @@ Class ExplodiumGun : SWWMWeapon
 				// autoswitch if enabled
 				if ( !Owner.player.GetNeverSwitch() )
 					Owner.player.PendingWeapon = SisterWeapon;
+				// add the oneliner
+				let demo = Demolitionist(Owner);
+				if ( demo && demo.mystats && !demo.mystats.GotWeapon(SisterWeapon.GetClass()) && Owner.CheckLocalView() )
+					SWWMHandler.AddOneliner(SWWMWeapon(SisterWeapon).GetLine,2);
 				item.bPickupGood = true;
 			}
 			return true;
@@ -329,6 +333,7 @@ Class ExplodiumGun : SWWMWeapon
 		Inventory.PickupMessage "$T_EXPLODIUM";
 		Obituary "$O_EXPLODIUM";
 		SWWMWeapon.Tooltip "$TT_EXPLODIUM";
+		SWWMWeapon.GetLine "getexplodiumgun1";
 		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun.png";
 		Weapon.UpSound "explodium/select";
 		Weapon.SlotNumber 2;
@@ -793,6 +798,7 @@ Class DualExplodiumGun : SWWMWeapon
 		Tag "$T_EXPLODIUM2";
 		Obituary "$O_EXPLODIUM";
 		SWWMWeapon.Tooltip "$TT_EXPLODIUM2";
+		SWWMWeapon.GetLine "getexplodiumgun2";
 		Inventory.Icon "graphics/HUD/Icons/W_ExplodiumGun2.png";
 		Weapon.UpSound "explodium/select";
 		Weapon.SisterWeapon "ExplodiumGun";

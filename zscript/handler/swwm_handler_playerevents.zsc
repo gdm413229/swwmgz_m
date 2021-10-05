@@ -96,8 +96,15 @@ extend Class SWWMHandler
 			s.favweapon = -1;
 			for ( Inventory i=p.mo.Inv; i; i=i.inv )
 			{
-				if ( i is 'Weapon' )
-					s.GotWeapon(Weapon(i).GetClass());
+				if ( !(i is 'Weapon') ) continue;
+				// skip dual weapons if their sister weapon amount isn't 2
+				String cn = i.GetClassName();
+				if ( cn.Left(4) ~== "Dual" )
+				{
+					let ss = Weapon(i).SisterWeapon;
+					if ( !ss || (ss.Amount == 1) ) continue;
+				}
+				s.GotWeapon(Weapon(i).GetClass());
 			}
 		}
 		// reset some vars

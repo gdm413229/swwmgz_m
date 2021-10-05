@@ -65,7 +65,8 @@ extend Class SWWMHandler
 			return MAP_HE2M8_HE5M8;
 		if ( mapsum ~== "4719C2C71EF28F52310B889DD5A9778B" )
 			return MAP_HE3M8;
-		if ( mapsum ~== "291F24417FB3DD411339AE82EF9B3597" )
+		if ( (mapsum ~== "291F24417FB3DD411339AE82EF9B3597")
+			|| (mapsum ~== "FF8620A6B4EB60CCE737EBC1E6CC7A9F") )	// second sum is for Ultimate Doom 2
 			return MAP_DMAP07;
 		if ( mapsum ~== "5EECD88F4491F516D590CE4BBF45F532" )
 			return MAP_DMAP30;
@@ -354,6 +355,12 @@ extend Class SWWMHandler
 			if ( (!bossactors[i].target || !bossactors[i].CheckSight(bossactors[i].target,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
 				&& (!bossviewactor || (bossviewactor && !bossviewactor.target)) ) continue;
 			initialized = true;
+			// hacky
+			if ( bossmap == MAP_DMAP30 )
+			{
+				highesttic = gametic;
+				lastcombat = AddOneliner("romero",1,200);
+			}
 			break;
 		}
 	}

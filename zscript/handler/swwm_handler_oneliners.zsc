@@ -22,12 +22,28 @@ extend Class SWWMHandler
 		String voicetype = CVar.FindCVar('swwm_voicetype').GetString();
 		// suppress non-rage comments when ragekit is active, only screaming allowed
 		if ( players[consoleplayer].mo.FindInventory("RagekitPower") && (type != "ragekit") ) return 0;
-		int whichline;
+		// check first if it's a multiple option line type
 		String testme = String.Format("SWWM_SUBS_%s_N%s",voicetype.MakeUpper(),type.MakeUpper());
 		String locme = StringTable.Localize(testme,false);
-		int countem;
-		if ( testme == locme ) countem = 0;
-		else countem = locme.ToInt();
+		if ( testme == locme )
+		{
+			// it might be a single option line type
+			testme = String.Format("SWWM_SUBS_%s_%s",voicetype.MakeUpper(),type.MakeUpper());
+			locme = StringTable.Localize(testme,false);
+			if ( testme == locme ) return 0;	// nope, the voicepack doesn't have it
+			hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s",voicetype.MakeUpper(),type.MakeUpper());
+			hnd.onelinersnd = String.Format("voice/%s/%s",voicetype,type);
+			hnd.onelinertic = gametic+delay;
+			hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
+			if ( hnd.onelinerspan == 0 )
+			{
+				if ( developer >= 2 ) Console.Printf("No sound for voice line '%s'",type);
+				hnd.onelinerspan = 35;
+			}
+			hnd.onelinerlevel = level;
+			return hnd.onelinertic+hnd.onelinerspan;
+		}
+		int countem = locme.ToInt();
 		if ( countem == 0 ) return 0;	// voicepack doesn't have this
 		// check last line so we don't repeat
 		int last = 0, ent;
@@ -38,6 +54,7 @@ extend Class SWWMHandler
 			ent = i;
 			break;
 		}
+		int whichline;
 		if ( countem == 1 ) whichline = 1;
 		else if ( last > 0 )
 		{
@@ -57,6 +74,11 @@ extend Class SWWMHandler
 		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype,type,whichline);
 		hnd.onelinertic = gametic+delay;
 		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
+		if ( hnd.onelinerspan == 0 )
+		{
+			if ( developer >= 2 ) Console.Printf("No sound for voice line '%s%d'",type,whichline);
+			hnd.onelinerspan = 35;
+		}
 		hnd.onelinerlevel = level;
 		return hnd.onelinertic+hnd.onelinerspan;
 	}
@@ -67,7 +89,10 @@ extend Class SWWMHandler
 		if ( players[consoleplayer].health > 0 )
 		{
 			if ( onelinerlevel > swwm_mutevoice )
+			{
 				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
+				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICEAUX,CHANF_DEFAULT,1.,ATTN_NONE);
+			}
 			SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
 		}
 		onelinertic = 0;

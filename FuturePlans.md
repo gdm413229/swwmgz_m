@@ -14,6 +14,7 @@ I REALLY need to do this, it's starting to become very problematic to maintain t
   - Potentially more robust (maybe?)
   - Harder to tamper with
   - Can keep state in a local Dictionary object to avoid excess CVar access
+* **Original English Voice Acting**
 
 ## 1.3 update *(The Second Batch)*:
 
@@ -95,7 +96,6 @@ Things that I'm unsure whether or not they'll be made.
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Customized cluster text stuff if that ever gets scriptified**
 * **Official Sunder support *(when the WAD is complete)***
-* **Original English Voice Acting**
 
 ## Other Projects
 

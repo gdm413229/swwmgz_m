@@ -112,8 +112,8 @@ Class SWWMCreditsMenu : GenericMenu
 	TextureID bgtex;
 	TextureID logo;
 	String stitle, stitle2;
-	String sdev, sassets, smusic, sfanart, slocal, spatrons, sthanks;
-	Array<SWWMCreditsEntry> cdev, cassets, cmusic, cfanart, clocal, cpatrons, cthanks;
+	String sdev, sassets, smusic, svoice, sfanart, slocal, spatrons, sthanks;
+	Array<SWWMCreditsEntry> cdev, cassets, cmusic, cvoice, cfanart, clocal, cpatrons, cthanks;
 	String oldlang;
 	transient Font sfnt, bfnt;
 	Vector2 ss;
@@ -157,6 +157,7 @@ Class SWWMCreditsMenu : GenericMenu
 		sdev = StringTable.Localize("$SWWM_CLEAD");
 		sassets = StringTable.Localize("$SWWM_CASSETS");
 		smusic = StringTable.Localize("$SWWM_CMUSIC");
+		svoice = StringTable.Localize("$SWWM_CVOICE");
 		sfanart = StringTable.Localize("$SWWM_CFANART");
 		slocal = StringTable.Localize("$SWWM_CLOCAL");
 		spatrons = StringTable.Localize("$SWWM_CPATRON");
@@ -176,6 +177,7 @@ Class SWWMCreditsMenu : GenericMenu
 		cassets.Push(new("SWWMCreditsEntry").Init(sfnt,"Nash","WidePix"));
 		cmusic.Push(new("SWWMCreditsEntry").Init(sfnt,"Teque","Traumatic State\nDragony\nHidden Tune #242\nHypercardish 1.1"));
 		cmusic.Push(new("SWWMCreditsEntry").Init(sfnt,"BouncyTEM","Solitary Apprehension"));
+		cvoice.Push(new("SWWMCreditsEntry").Init(sfnt,"$SWWM_VOICENAME_DEFAULT","Vyolette"));
 		cfanart.Push(new("SWWMCreditsEntry").Init(sfnt,"Substance20 (@S20TBL)"));
 		cfanart.Push(new("SWWMCreditsEntry").Init(sfnt,"Captain J (@Jho7835)"));
 		cfanart.Push(new("SWWMCreditsEntry").Init(sfnt,"Redead-ITA"));
@@ -222,7 +224,7 @@ Class SWWMCreditsMenu : GenericMenu
 		spos = ss.y-logoh;
 		// calc total height
 		theight = logoh;
-		theight += 7*(SECTION_PAD+bfnt.GetHeight()*3);
+		theight += 8*(SECTION_PAD+bfnt.GetHeight()*3);
 		for ( int i=0; i<cdev.Size(); i++ )
 		{
 			theight += ENTRY_PAD;
@@ -237,6 +239,11 @@ Class SWWMCreditsMenu : GenericMenu
 		{
 			theight += ENTRY_PAD;
 			theight += cmusic[i].height;
+		}
+		for ( int i=0; i<cvoice.Size(); i++ )
+		{
+			theight += ENTRY_PAD;
+			theight += cvoice[i].height;
 		}
 		for ( int i=0; i<cfanart.Size(); i++ )
 		{
@@ -327,6 +334,14 @@ Class SWWMCreditsMenu : GenericMenu
 		{
 			yy += ENTRY_PAD;
 			yy += cmusic[i].Draw(ss,xx,yy);
+		}
+		// voices
+		yy += SECTION_PAD;
+		yy += DrawSection(xx,yy,svoice);
+		for ( int i=0; i<cvoice.Size(); i++ )
+		{
+			yy += ENTRY_PAD;
+			yy += cvoice[i].Draw(ss,xx,yy);
 		}
 		// fanart
 		yy += SECTION_PAD;

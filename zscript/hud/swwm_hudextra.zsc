@@ -577,3 +577,27 @@ Class SWWMDirectMessage : HUDMessageBase
 		DrawText();
 	}
 }
+
+// used to manually trigger dialogues through a hacky method in the hud
+// because zscript is fucking stupid with its handling of names, we can't
+// pass the dialogue name to arguments, so it'll have to be hardcoded
+Class SWWMDialogueTrigger : Actor
+{
+	default
+	{
+		+NOBLOCKMAP;
+		+NOGRAVITY;
+		+NOINTERACTION;
+		+DONTSPLASH;
+	}
+	override void Activate( Actor activator )
+	{
+		static const String dlglist[] =
+		{
+			"swwmultdoom2map20dlg"
+		};
+		Console.MidPrint(null,dlglist[args[0]]);
+		Destroy();
+	}
+	override void Tick() {}
+}

@@ -19,6 +19,7 @@ extend Class SWWMHandler
 	int lastorder;
 	bool lastloop;
 	transient ThinkerIterator cti;
+	bool tauntedboss;
 
 	private void LangRefresh()
 	{
@@ -97,7 +98,7 @@ extend Class SWWMHandler
 		// add new entries
 		if ( !cti ) cti = ThinkerIterator.Create("Actor");
 		else cti.Reinit();
-		Actor a;
+		Actor a, keyactor = null;
 		while ( a = Actor(cti.Next()) )
 		{
 			if ( !a.player && !a.bISMONSTER ) continue;
@@ -125,7 +126,18 @@ extend Class SWWMHandler
 				combatactors.Push(a);
 				combattics.Push(gametic);
 				enteredcombat = true;
+				if ( (a is 'Korax') || (a is 'Sorcerer1') || (a.GetClassName() == "ArchangelusA") )
+					keyactor = a;
 			}
+		}
+		// special combat start lines
+		if ( enteredcombat && keyactor && !tauntedboss )
+		{
+			if ( keyactor is 'Korax' ) lastcombat = AddOneliner("korax",1,40);
+			else if ( keyactor is 'Sorcerer1' ) lastcombat = AddOneliner("dsparil",1,100);
+			else if ( keyactor.GetClassName() == "ArchangelusA" ) lastcombat = AddOneliner("archangelus",1,350);
+			tauntedboss = true;
+			return;
 		}
 		// be smart, demo-chan, don't shout if you're invisible, or you'll make it worse
 		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) && !players[consoleplayer].mo.FindInventory("GhostPower") )

@@ -275,11 +275,6 @@ Class KirinPlushGesture : SWWMItemGesture
 			SWWMHandler.DoFlash(self,Color(32,224,128,255),10);
 		}
 	}
-	action void A_Giggle( bool high = false )
-	{
-		if ( swwm_mutevoice < 4 )
-			A_StartSound(String.Format("voice/%s/%s",Demolitionist(self).myvoice.GetString(),high?"gigglehigh":"gigglelow"),CHAN_DEMOVOICE,CHANF_OVERLAP);
-	}
 	action void A_KirinGiggle()
 	{
 		A_StartSound("kirin/giggle",CHAN_ITEMEXTRA,CHANF_OVERLAP);
@@ -340,7 +335,7 @@ Class KirinPlushGesture : SWWMItemGesture
 		XZW1 UVW 6;
 		XZW1 X 5;
 		XZW1 Y 4 A_StartSound("demolitionist/handsdown",CHAN_WEAPON,CHANF_OVERLAP);
-		XZW1 Z 4 A_Giggle();
+		XZW1 Z 4;
 		XZW2 ABC 4;
 		XZW1 A -1 A_FinishGesture();
 		Stop;

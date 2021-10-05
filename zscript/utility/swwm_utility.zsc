@@ -1534,8 +1534,15 @@ Class SWWMUtility
 		if ( gameinfo.gametype&GAME_DOOM )
 		{
 			if ( IsEviternity() ) return true;
+			if ( IsUltDoom2() ) return true;
 		}
 		return false;
+	}
+
+	// detect ultimate doom 2
+	static bool IsUltDoom2()
+	{
+		return CheckMD5List("ultdoom2.lst");
 	}
 
 	// detect eviternity (naive method)

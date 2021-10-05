@@ -146,6 +146,19 @@ Class SWWMLevelCompatibility : LevelPostProcessor
 				}
 			}
 			break;
+		// Ultimate Doom 2 MAP20 (dv2.9)
+		case 'CC53CFFCB30E873669AA2F09DA0D3566':
+			// add a "sector enter" action for reaching the exit room
+			// and make it trigger a dialogue
+			uint nt = AddThing(9998,(-9360,12768,12));
+			SetThingFlags(nt,MODES_ALL|MTF_STANDSTILL);	// trigger once
+			SetThingSpecial(nt,Thing_Activate);
+			int tiddy = level.FindUniqueTid(9999);
+			SetThingArgument(nt,0,tiddy);
+			nt = AddThing(4206930,(0,0,0));
+			SetThingID(nt,tiddy);
+			SetThingArgument(nt,0,0);
+			break;
 		// EQUINOX: various boss brain setups that could be cheesed with the Ynykron or silver bullet
 		// Equinox MAP04
 		case 'E66BCCFAD7AC40EFB21E2A19131E1522':

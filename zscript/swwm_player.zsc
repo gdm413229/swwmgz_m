@@ -1125,7 +1125,7 @@ Class Demolitionist : PlayerPawn
 					if ( !TestMobjLocation() ) SetOrigin(oldp,true);
 				}
 				encroachtics++;
-				if ( !(encroachtics%GameTicRate) && !IsFriend(encroached) )
+				if ( !(encroachtics%GameTicRate) && (encroached.bISMONSTER || encroached.player || (encroached is 'ScriptedMarine')) && !IsFriend(encroached) )
 					SWWMUtility.AchievementProgress("step",encroachtics/GameTicRate,player);
 			}
 			else encroachtics = 0;

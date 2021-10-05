@@ -325,7 +325,7 @@ class swwm_PolyobjectHandle: Thinker
     Level.ExecuteSpecial(Polyobj_Stop, activator, StartLine, Line.Front, PolyobjectNum);
     // Move the polyobject
     Level.ExecuteSpecial(Polyobj_OR_MoveTo, activator, StartLine, Line.Front, PolyobjectNum,
-                        Speed, dest.x, dest.y);
+                        Speed, int(dest.x), int(dest.y));
 
     // Polyobj_OR_MoveTo ignores the sound sequence set by the polyobject.
     // Play the sound sequence manually inside the sector containing the polyobject.

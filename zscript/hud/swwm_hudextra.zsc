@@ -373,6 +373,8 @@ Class SWWMDirectMessage : HUDMessageBase
 
 	private void SetText()
 	{
+		if ( !fnt ) fnt = Font.GetFont('TewiShaded');
+		if ( !jpfnt ) jpfnt = Font.GetFont('MPlusShaded');
 		String txt;
 		if ( (seqnum == 2) && znvspecial )
 		{
@@ -382,7 +384,8 @@ Class SWWMDirectMessage : HUDMessageBase
 		}
 		else txt = StringTable.Localize("$SWWM_"..seqname..seqnum);
 		if ( l ) l.Destroy();
-		l = fnt.BreakLines(txt,220);
+		let tfnt = (language~=="jp")?jpfnt:fnt;
+		l = tfnt.BreakLines(txt,220);
 		// append to the player's chat log (if it's valid)
 		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;
 		let bar = SWWMStatusBar(StatusBar);

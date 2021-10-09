@@ -882,6 +882,13 @@ Class Demolitionist : PlayerPawn
 				failcooldown = SWWMHandler.AddOneliner("usefail",2,20);
 				failcounter = max(4,failcounter-10);
 			}
+			else if ( (failcounter > 2) && Random[DemoLines](0,1) && (gametic > failcooldown) && (swwm_mutevoice < 4) )
+			{
+				A_StartSound(String.Format("voice/%s/usegrunt",myvoice.GetString()),CHAN_DEMOVOICE,CHANF_OVERLAP);
+				A_StartSound(String.Format("voice/%s/usegrunt",myvoice.GetString()),CHAN_DEMOVOICEAUX,CHANF_OVERLAP);
+				failcooldown = int(S_GetLength(String.Format("voice/%s/usegrunt",myvoice.GetString()))*GameTicRate);
+				failcounter = max(2,failcounter-1);
+			}
 		}
 		else if ( gametic > lastuse+50 ) failcounter = 0;
 		oldlagangle = lagangle;

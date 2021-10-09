@@ -1925,11 +1925,12 @@ Class SWWMUtility
 		}
 		if ( !needsmelee && needsgun )
 		{
-			bool needsexplo = CheckNeedsItem('ExplodiumGun',true);
-			bool needsblast = CheckNeedsItem('PlasmaBlast',true);
-			if ( needsexplo && !needsblast ) return 'ExplodiumGun';
-			if ( !needsexplo && needsblast ) return 'PlasmaBlast';
-			return Random[Replacements](0,1)?'ExplodiumGun':'PlasmaBlast';
+			//bool needsexplo = CheckNeedsItem('ExplodiumGun',true);
+			//bool needsblast = CheckNeedsItem('PlasmaBlast',true);
+			//if ( needsexplo && !needsblast ) return 'ExplodiumGun';
+			//if ( !needsexplo && needsblast ) return 'PlasmaBlast';
+			//return Random[Replacements](0,1)?'ExplodiumGun':'PlasmaBlast';
+			return 'ExplodiumGun';
 		}
 		if ( needsmelee && !needsgun )
 		{

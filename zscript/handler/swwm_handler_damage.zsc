@@ -141,7 +141,7 @@ extend Class SWWMHandler
 			{
 				if ( e.Thing.IsFriend(e.DamageSource) )
 					lastcombat = AddOneliner("friendhit",1,10);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.FindInventory("BossMarker"))?2:4) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+80)) && !Random[DemoLines](0,(e.DamageSource.bBOSS||e.DamageSource.FindInventory("BossMarker"))?1:3) && !SWWMHDoomHandler.IsCuteGirl(e.DamageSource) ) // [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("gethit",1,15);
 			}
 			highesttic = gametic;
@@ -180,7 +180,7 @@ extend Class SWWMHandler
 			{
 				if ( e.Thing.IsFriend(src) )
 					lastcombat = AddOneliner("friendkill",1,5);
-				else if ( (!lastcombat || (gametic > lastcombat+100)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.FindInventory("BossMarker"))?2:5) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
+				else if ( (!lastcombat || (gametic > lastcombat+80)) && !Random[DemoLines](0,(e.Thing.bBOSS||e.Thing.FindInventory("BossMarker"))?0:2) && !SWWMHDoomHandler.IsCuteGirl(e.Thing) )	// [HDoom] don't shout at the girls
 					lastcombat = AddOneliner("scorekill",1,15);
 			}
 		}

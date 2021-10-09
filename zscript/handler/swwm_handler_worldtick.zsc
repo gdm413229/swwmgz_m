@@ -99,6 +99,7 @@ extend Class SWWMHandler
 		if ( !cti ) cti = ThinkerIterator.Create("Actor");
 		else cti.Reinit();
 		Actor a, keyactor = null;
+		bool bossfound = false;
 		while ( a = Actor(cti.Next()) )
 		{
 			if ( !a.player && !a.bISMONSTER ) continue;
@@ -128,6 +129,8 @@ extend Class SWWMHandler
 				enteredcombat = true;
 				if ( (a is 'Korax') || (a is 'Sorcerer1') || (a.GetClassName() == "ArchangelusA") )
 					keyactor = a;
+				if ( a.bBOSS || a.FindInventory("BossMarker") )
+					bossfound = true;
 			}
 		}
 		// special combat start lines
@@ -140,7 +143,7 @@ extend Class SWWMHandler
 			return;
 		}
 		// be smart, demo-chan, don't shout if you're invisible, or you'll make it worse
-		if ( enteredcombat && (!highesttic || (gametic > highesttic+700)) && !players[consoleplayer].mo.FindInventory("GhostPower") )
+		if ( enteredcombat && ((bossfound && (!lastcombat || (gametic > lastcombat+120))) || (!bossfound && (!highesttic || (gametic > highesttic+700)))) && !players[consoleplayer].mo.FindInventory("GhostPower") )
 			lastcombat = AddOneliner("fightstart",1,10);
 	}
 

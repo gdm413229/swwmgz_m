@@ -106,7 +106,7 @@ Class SayaBeanGesture : SWWMItemGesture
 		let s = Demolitionist(self).mystats;
 		if ( !s ) return;
 		s.plushuses++;
-		SWWMUtility.AchievementProgress('swwm_progress_plush',s.plushuses,player);
+		SWWMUtility.AchievementProgress("plush",s.plushuses,player);
 	}
 	override void MarkPrecacheSounds()
 	{
@@ -250,7 +250,7 @@ Class KirinPlushGesture : SWWMItemGesture
 		let s = Demolitionist(self).mystats;
 		if ( !s ) return;
 		s.plushuses++;
-		SWWMUtility.AchievementProgress('swwm_progress_plush',s.plushuses,player);
+		SWWMUtility.AchievementProgress("plush",s.plushuses,player);
 	}
 	action void A_PetPlush()
 	{

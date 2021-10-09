@@ -1237,7 +1237,7 @@ Class SWWMStatusBar : BaseStatusBar
 				Vector2 vpos = SWWMUtility.NDCToViewport(projdata,ndc);
 				Font fnt = LangFont(mMiniwiFont);
 				int mtime = thesight?70:35;
-				double alph = clamp(((s.updated+mtime)-level.maptime)/35.,0.,1.);
+				double alph = clamp(((s.updated+mtime)-(level.maptime+fractic))/35.,0.,1.);
 				alph *= clamp(1.5-1.5*(tdir.length()/(thesight?1200.:800.)),0.,1.);
 				tag = s.tag;
 				Screen.DrawText(fnt,s.vipitem?Font.CR_PURPLE:s.scoreitem?Font.CR_GOLD:Font.CR_GREEN,(vpos.x-hsd.x*fnt.StringWidth(tag)/2.)/hsd.x,(vpos.y-hsd.y*fnt.GetHeight()/2.)/hsd.y,tag,DTA_VirtualWidthF,ssd.x,DTA_VirtualHeightF,ssd.y,DTA_KeepRatio,true,DTA_Alpha,alph,DTA_ClipTop,cliptop,DTA_ClipBottom,clipbottom,DTA_ClipLeft,clipleft,DTA_ClipRight,clipright);
@@ -1271,7 +1271,7 @@ Class SWWMStatusBar : BaseStatusBar
 			}
 			int mtime = 35;
 			if ( thesight && (targ.lasthealth > 0) ) mtime += 105;
-			double alph = clamp(((targ.updated+mtime)-level.maptime)/35.,0.,1.);
+			double alph = clamp(((targ.updated+mtime)-(level.maptime+fractic))/35.,0.,1.);
 			Vector2 barsiz = TexMan.GetScaledSize(EnemyBTex);
 			barsiz.x *= hsb.x;
 			barsiz.y *= hsb.y;
@@ -2458,7 +2458,7 @@ Class SWWMStatusBar : BaseStatusBar
 		// draw nametags below them
 		double yy;
 		double nalph = 0.;
-		int tagtime = (ntagtic+70)-level.totaltime;
+		double tagtime = (ntagtic+70)-(level.totaltime+fractic);
 		if ( (ntagstr != "") && (tagtime > 0) )
 		{
 			nalph = clamp(tagtime/20.,0.,1.);
@@ -2482,7 +2482,7 @@ Class SWWMStatusBar : BaseStatusBar
 		{
 			String cstr = PickupQueue[i].str;
 			if ( PickupQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",PickupQueue[i].rep);
-			int curtime = (PickupQueue[i].tic+35*swwm_pickduration)-level.totaltime;
+			double curtime = (PickupQueue[i].tic+GameTicRate*swwm_pickduration)-(level.totaltime+fractic);
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(cstr,int(ss.x*.75));
 			int maxlen = 0;
@@ -2514,7 +2514,7 @@ Class SWWMStatusBar : BaseStatusBar
 			double ssp = (midtype&1)?.5:1.;
 			double hsp = (midtype&1)?2.:1.;
 			int col = (midtype&2)?msgmidcolor2:msgmidcolor;
-			int curtime = (midtic+int(35*con_midtime))-level.totaltime;
+			double curtime = (midtic+int(GameTicRate*con_midtime))-(level.totaltime+fractic);
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(midstr,int(ss.x*ssp));
 			int h = fnt.GetHeight();
@@ -2548,9 +2548,9 @@ Class SWWMStatusBar : BaseStatusBar
 			else if ( MainQueue[i].type == PRINT_TEAMCHAT ) col = msg4color;
 			String cstr = MainQueue[i].str;
 			if ( MainQueue[i].rep > 1 ) cstr.AppendFormat(" (x%d)",MainQueue[i].rep);
-			int curtime = MainQueue[i].tic-level.totaltime;
-			if ( MainQueue[i].type < PRINT_CHAT ) curtime += 35*swwm_msgduration;
-			else curtime += 35*swwm_chatduration;
+			double curtime = MainQueue[i].tic-(level.totaltime+fractic);
+			if ( MainQueue[i].type < PRINT_CHAT ) curtime += GameTicRate*swwm_msgduration;
+			else curtime += GameTicRate*swwm_chatduration;
 			double alph = clamp(curtime/20.,0.,1.);
 			BrokenLines l = fnt.BreakLines(cstr,smol?211:361);
 			for ( int j=0; j<l.Count(); j++ )
@@ -2608,14 +2608,14 @@ Class SWWMStatusBar : BaseStatusBar
 		int len;
 		double xx, yy;
 		Font fnt;
-		int deadtimer = goner?goner.deadtimer:demo.deadtimer;
+		double deadtimer = (goner?goner.deadtimer:demo.deadtimer)+fractic;
 		if ( goner || (demo.player.viewheight <= 6) )
 		{
 			double dimalph = goner?1.:min(deadtimer/80.,1.);
 			Screen.Dim("Black",dimalph,0,0,Screen.GetWidth(),Screen.GetHeight());
 			if ( demo && (demo.revivefail > level.maptime) )
 			{
-				Screen.Dim("Red",clamp((demo.revivefail-level.maptime)/60.,0.,.2),0,0,Screen.GetWidth(),Screen.GetHeight());
+				Screen.Dim("Red",clamp((demo.revivefail-(level.maptime+fractic))/60.,0.,.2),0,0,Screen.GetWidth(),Screen.GetHeight());
 				str = StringTable.Localize("$SWWM_REFAIL");
 				fnt = LangFont(mTewiFont);
 				len = fnt.StringWidth(str);

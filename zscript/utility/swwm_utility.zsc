@@ -1904,8 +1904,39 @@ Class SWWMUtility
 		return Random[Replacements](weight1,0)?a:Random[Replacements](weight2,0)?b:c;
 	}
 
+	// boy, this one got complicated fast
 	static Class<Inventory> PickSWWMSlot1()
 	{
+		// so the player can recover it if they decided to drop it in a previous map, or they didn't start with it
+		if ( CheckNeedsItem('DeepImpact') ) return 'DeepImpact';
+		bool needsmelee = CheckNeedsItem('PusherWeapon')/*|CheckNeedsItem('ItamexHammer')|CheckNeedsItem('FistGun')*/;
+		bool needsgun = CheckNeedsItem('ExplodiumGun',true)/*|CheckNeedsItem('PlasmaBlast',true)*/;
+		if ( !needsmelee && !needsgun )
+		{
+			static const Class<Weapon> wpns[] =
+			{
+				'ExplodiumGun', 'PusherWeapon',
+				'PlasmaBlast', 'ItamexHammer',
+				'FistGun'
+			};
+			//return wpns[Random[Replacements](0,4)];
+			//return wpns[Random[Replacements](0,3)];
+			return wpns[Random[Replacements](0,1)];
+		}
+		if ( !needsmelee && needsgun )
+		{
+			bool needsexplo = CheckNeedsItem('ExplodiumGun',true);
+			bool needsblast = CheckNeedsItem('PlasmaBlast',true);
+			if ( needsexplo && !needsblast ) return 'ExplodiumGun';
+			if ( !needsexplo && needsblast ) return 'PlasmaBlast';
+			return Random[Replacements](0,1)?'ExplodiumGun':'PlasmaBlast';
+		}
+		if ( needsmelee && !needsgun )
+		{
+			//return PickTrio('PusherWeapon','ItamexHammer','FistGun');
+			//return PickPair('PusherWeapon','ItamexHammer');
+			return 'PusherWeapon';
+		}
 		if ( CheckNeedsItem('ExplodiumGun',true) && Random[Replacements](0,1) ) return 'ExplodiumGun';
 		//if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
 		//return PickTrio('PusherWeapon','ItamexHammer','FistGun');

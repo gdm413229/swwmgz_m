@@ -107,6 +107,27 @@ extend Class SWWMHandler
 				s.GotWeapon(Weapon(i).GetClass());
 			}
 		}
+		else if ( (s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB) )
+		{
+			// clear the "weapon got" lists for weapons we don't have anymore (unless we're in a hub)
+			// so the obtain lines play again
+			for ( int i=0; i<s.alreadygot.Size(); i++ )
+			{
+				// special case for dual weapons
+				String cn = s.alreadygot[i].GetClassName();
+				if ( (cn.Left(4) ~== "Dual") )
+				{
+					int ss = p.mo.CountInv(GetDefaultByType(s.alreadygot[i]).SisterWeaponType);
+					if ( ss == 2 ) continue;
+					s.alreadygot.Delete(i);
+					i--;
+					continue;
+				}
+				if ( p.mo.FindInventory(s.alreadygot[i]) ) continue;
+				s.alreadygot.Delete(i);
+				i--;
+			}
+		}
 		// reset some vars
 		multilevel[e.playernumber] = 0;
 		spreecount[e.playernumber] = 0;

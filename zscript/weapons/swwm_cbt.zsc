@@ -546,7 +546,7 @@ Class Wallbuster : SWWMWeapon
 				for ( int j=0; j<(8-howmany/5); j++ )
 				{
 					a = FRandom[Wallbuster](0,360);
-					s = FRandom[Wallbuster](0,.3);
+					s = FRandom[Wallbuster](0,.15);
 					let b = Spawn("SaltBeam",level.Vec3Offset(origin,y*cos(a)*s+z*sin(a)*s));
 					b.target = self;
 					b.angle = atan2(x2.y,x2.x);
@@ -576,7 +576,7 @@ Class Wallbuster : SWWMWeapon
 			case 3:
 				// lead ball
 				a = FRandom[Wallbuster](0,360);
-				s = FRandom[Wallbuster](0,.006);
+				s = FRandom[Wallbuster](0,.005);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
 				let p = Spawn("TheBall",origin);
 				p.target = self;
@@ -612,7 +612,7 @@ Class Wallbuster : SWWMWeapon
 				for ( int j=0; j<numshot; j++ )
 				{
 					a = FRandom[Wallbuster](0,360);
-					s = FRandom[Wallbuster](0,.1);
+					s = FRandom[Wallbuster](0,.06);
 					dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
 					st.hitlist.Clear();
 					st.shootthroughlist.Clear();

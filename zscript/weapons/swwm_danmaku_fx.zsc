@@ -148,7 +148,7 @@ Class EvisceratorChunk : Actor
 		Radius 2;
 		Height 4;
 		Speed 50;
-		DamageFunction int(clamp((vel.length()-8)*.2+max(0,1.-lifetime)*2.,0,15));
+		DamageFunction int(clamp((vel.length()-10)*.1,0,15)+(max(0,1-lifetime)**5)*10);
 		DamageType 'shot';
 		BounceFactor 1.0;
 		WallBounceFactor 1.0;
@@ -175,7 +175,7 @@ Class EvisceratorChunk : Actor
 		let t = Spawn("EvisceratorChunkGlow",pos);
 		t.target = self;
 		lifetime = 0;
-		lifespeed = FRandom[Eviscerator](0.01,0.02);
+		lifespeed = FRandom[Eviscerator](0.01,0.02)*clamp((vel.length()/75.)**2,1.,2.);
 		anglevel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1);
 		pitchvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1);
 		rollvel = FRandom[Eviscerator](50,100)*RandomPick[Eviscerator](-1,1);
@@ -281,7 +281,8 @@ Class EvisceratorChunk : Actor
 		vel = oldvel;
 		// re-do the bounce with our formula
 		Vector3 RealHitNormal = HitNormal;
-		HitNormal = (HitNormal+(FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1),FRandom[Eviscerator](-.1,.1))).unit();
+		double dfact = clamp((oldvel.length()/75.)**2.,.02,.6);
+		HitNormal = (HitNormal+(FRandom[Eviscerator](-dfact,dfact),FRandom[Eviscerator](-dfact,dfact),FRandom[Eviscerator](-dfact,dfact))).unit();
 		if ( (HitNormal dot RealHitNormal) < 0 ) HitNormal *= -.5;
 		vel = FRandom[Eviscerator](.8,.95)*((vel dot HitNormal)*HitNormal*(FRandom[Eviscerator](-1.8,-1.))+vel);
 		bHITOWNER = true;
@@ -454,7 +455,7 @@ Class EvisceratorProj : Actor
 		Radius 2;
 		Height 4;
 		Gravity 0.35;
-		Speed 50;
+		Speed 60;
 		PROJECTILE;
 		-NOGRAVITY;
 		+EXPLODEONWATER;
@@ -504,7 +505,7 @@ Class EvisceratorProj : Actor
 		}
 		int trail = 0;
 		if ( target && target.player ) trail = CVar.GetCVar('swwm_funtrails',target.player).GetInt();
-		for ( int i=0; i<20; i++ )
+		for ( int i=0; i<25; i++ )
 		{
 			p = EvisceratorChunk(Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs)));
 			p.bHITOWNER = true;

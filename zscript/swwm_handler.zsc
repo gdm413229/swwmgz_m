@@ -24,6 +24,7 @@ Class SWWMHandler : EventHandler
 	// for checkreplacement
 	bool hasdrlamonsters;
 	int iskdizd;
+	Array<String> bludtypes;
 
 	// profiling data
 	bool profiling;
@@ -52,6 +53,22 @@ Class SWWMHandler : EventHandler
 		}
 		if ( LevelInfo.MapExists("Z1M1") && (LevelInfo.MapChecksum("Z1M1") ~== "2B7744234ED2C162AD08A3255E979F65") )
 			iskdizd = true;
+		// read bludtype files if they can be found
+		for ( int lmp = Wads.FindLump("BLUDTYPE"); lmp != -1; lmp = Wads.FindLump("BLUDTYPE",lmp+1) )
+		{
+			String dat = Wads.ReadLump(lmp);
+			Array<String> list;
+			// fucking Windows
+			dat.Replace("\r","");
+			list.Clear();
+			dat.Split(list,"\n");
+			for ( int i=0; i<list.Size(); i++ )
+			{
+				if ( (list[i].Length() == 0) || (list[i].Left(2) == "//") || (list[i].Left(1) == "") )
+					continue;
+				bludtypes.Push(list[i]);
+			}
+		}
 	}
 
 	override void WorldTick()

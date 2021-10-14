@@ -69,11 +69,7 @@ All the hard stuff *(some of these aren't guaranteed)*.
   - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Mothgirl summon for Lämp easter egg**
   - Layers of White *(Summon the White Lady)*
-* **Replace all hitscan with *"light projectiles"***
-* **Crouch sliding *(+ proper crouch dashing)***
-* **Expand third person animations**
-  - 4-directional movement variants
-  - Height-dependent headpats (current animation was designed for dogs on same floor)
+* ***(Maybe)* Replace all hitscan with *"light projectiles"***
 * **Additional gestures + gesture menu**
   - Clap
   - The Bird
@@ -85,7 +81,7 @@ All the hard stuff *(some of these aren't guaranteed)*.
 * **Photo Mode**
   - Dedicated poses
   - Stickers
-* **Virtual Training Map**
+* ***(Maybe)* Virtual Training Map**
   - Featuring Maidbot as assistant
 
 ## Unspecified
@@ -107,25 +103,26 @@ Add-ons and other related stuff.
   - Unique bosses
   - Some extra enemy variants
   - Coverage for all supported WADs *(oof)*
-* **Ibuki side mod *(Red Oni):***
+* **[Doom]** **Ibuki side mod *(Red Oni):***
   - A more *"mundane"* arsenal
   - Featuring a very big girl with very big... Assets
   - Possibly will have its own DLC Weaponset too
   - Featuring a toggleable companion
-  - Nudity, in a Doom mod? Wow, never seen that one before
-  - This one's surprisingly meant to be more of a power trip than SWWM GZ
-* **Saya side mod *(Red-Eyed Rampage)***
+  - See, I got tired of playing modded Fallout 4 so...
+* **[Doom]** **Saya side mod *(Red-Eyed Rampage)***
   - The first mod where you play as a mere squishy person
-  - Spellcasting!
-  - A more interesting take on "infinite lives"
+  - Even more fun weapons, including one made by a god!
+  - Spellcards!
+  - A more interesting take on *"infinite lives"*
   - Featuring the Pancor Jackhammer *(lol)*
 * **[Hexen]** **Kirin side mod *(Red Star of Innocence)***
   - Finally, you get to play as the precious femboy emperor
+  - Anarukon firearms? Anarukon firearms
   - Designed entirely for Hexen's funky gameplay™
   - Watch as our boy complains about *"puzzles"*
   - Some unique touches to spice things up
   - Basically a lite version of what you could expect in **UNDEATH**
-* ***(Maybe)* Hardcore Mode sub-mod:**
+* ***(Maybe)* Hardcore Mode side mod:**
   - Featuring Demolitionist on Maidbot frame
   - More complex game mechanics
   - Manual Hammerspace management

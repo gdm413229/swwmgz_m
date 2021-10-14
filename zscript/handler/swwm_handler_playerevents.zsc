@@ -107,7 +107,7 @@ extend Class SWWMHandler
 				s.GotWeapon(Weapon(i).GetClass());
 			}
 		}
-		else if ( (s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB) )
+		else if ( (s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB) || (level.info.flags2&LEVEL2_RESETINVENTORY && !e.IsReturn) )
 		{
 			// clear the "weapon got" lists for weapons we don't have anymore (unless we're in a hub)
 			// so the obtain lines play again
@@ -137,7 +137,7 @@ extend Class SWWMHandler
 		if ( !swwm_notrack )
 			SWWMCombatTracker.Spawn(players[e.playernumber].mo);
 		// reset score (optional) if inventory should be cleared
-		if ( swwm_resetscore && level.removeitems && !e.IsReturn )
+		if ( swwm_resetscore && level.info.flags2&LEVEL2_RESETINVENTORY && !e.IsReturn )
 			c.credits = c.hcredits = 0;
 		// re-add any missing collectibles after a death exit (yes, this happens)
 		for ( int i=0; i<s.ownedcollectibles.Size(); i++ )

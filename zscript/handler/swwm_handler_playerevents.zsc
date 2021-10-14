@@ -100,7 +100,7 @@ extend Class SWWMHandler
 					s.GotWeapon(Weapon(i).GetClass());
 			}
 		}
-		else if ( (s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB) )
+		else if ( (s.lastcluster != level.cluster) || !(level.clusterflags&LevelLocals.CLUSTER_HUB) || (level.removeitems && !e.IsReturn) )
 		{
 			// clear the "weapon got" lists for weapons we don't have anymore (unless we're in a hub)
 			// so the obtain lines play again

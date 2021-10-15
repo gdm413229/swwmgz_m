@@ -1,0 +1,11 @@
+// shoppin'
+
+Class DemolitionistStoreTab : DemolitionistMenuTab
+{
+	override DemolitionistMenuTab Init( DemolitionistMenu master )
+	{
+		title = "$SWWM_STORETAB";
+		bHidden = (deathmatch||(G_SkillPropertyInt(SKILLP_ACSReturn)>=4));
+		return Super.Init(master);
+	}
+}

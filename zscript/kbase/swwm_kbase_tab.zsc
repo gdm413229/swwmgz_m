@@ -13,12 +13,38 @@ Class DemolitionistMenuTab ui abstract
 		return self;
 	}
 
+	// called for menu input (direction keys, enter, back)
+	virtual void MenuInput( int key )
+	{
+	}
+
+	// called for mouse input (left/right click, mouse wheel up/down, mouse drag/release)
+	virtual void MouseInput( Vector2 pos, int btn )
+	{
+	}
+
+	// called after this tab is selected
+	virtual void OnSelect()
+	{
+	}
+
+	// called before another tab is selected
+	virtual void OnDeselect()
+	{
+	}
+
+	// called every tic while selected
 	virtual void Ticker()
 	{
 	}
 
+	// called every frame while selected
 	virtual void Drawer()
 	{
+		// placeholder (so don't call super)
+		Font fnt = master.LargeFont;
+		String str = "NOT IMPLEMENTED";
+		Screen.DrawText(fnt,Font.CR_RED,int(master.ss.x-fnt.StringWidth(str))/2,int(master.ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,master.ss.x,DTA_VirtualHeightF,master.ss.y,DTA_KeepRatio,true);
 	}
 }
 
@@ -27,59 +53,4 @@ Class DemolitionistMenuTabCustom : DemolitionistMenuTab abstract
 {
 	// wow it's literally nothing
 	// just subclass from this in your add-ons
-}
-
-// the base tabs
-Class DemolitionistMissionTab : DemolitionistMenuTab
-{
-	Array<DemolitionistMenuTextBox> mtext;
-	int sel;
-
-	override DemolitionistMenuTab Init( DemolitionistMenu master )
-	{
-		title = "$SWWM_MISSTAB";
-		sel = 0;
-		// TODO initialize mission texts
-		return Super.Init(master);
-	}
-}
-
-Class DemolitionistStatsTab : DemolitionistMenuTab
-{
-	Array<DemolitionistMenuList> stats, kills;
-	Array<DemolitionistMenuMapList> mapstats;
-	Array<DemolitionistMenuAchievementList> achievements;
-	int section;
-}
-
-Class DemolitionistInventoryTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistKeychainTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistLibraryTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistStoreTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistTradeTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistChatTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistHelpTab : DemolitionistMenuTab
-{
-}
-
-Class DemolitionistSecretTab : DemolitionistMenuTab
-{
 }

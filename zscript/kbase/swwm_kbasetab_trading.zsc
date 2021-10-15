@@ -1,0 +1,18 @@
+// give 'em the stuff
+
+Class DemolitionistTradeTab : DemolitionistMenuTab
+{
+	override DemolitionistMenuTab Init( DemolitionistMenu master )
+	{
+		title = "$SWWM_TRADETAB";
+		bHidden = true;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || (i == consoleplayer) ) continue;
+			if ( deathmatch && (!teamplay || (players[i].GetTeam() != players[consoleplayer].GetTeam())) ) continue;
+			bHidden = false;
+			break;
+		}
+		return Super.Init(master);
+	}
+}

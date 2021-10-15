@@ -2,13 +2,83 @@
 Class DemolitionistMenuTextBox ui
 {
 	DemolitionistMenu master;
-	DemolitionistMenuTab parent;
+	String txt;
+	BrokenLines l;
+	int ofs;
+	int x, w;
+	bool scrollbar;
+	double smofs;
+	int maxofs;
+
+	// textbox initialization
+	virtual DemolitionistMenuTextBox Init( DemolitionistMenu master, String txt, int x = 0, int w = 0 )
+	{
+		self.master = master;
+		self.x = x;
+		if ( w == 0 ) self.w = 640-x;
+		else self.w = w;
+		self.txt = StringTable.Localize(txt);
+		ofs = 0;
+		// break lines
+		let fnt = master.LargeFont;
+		l = fnt.BreakLines(self.txt,self.w-12);
+		int h = l.Count()*13;
+		if ( h > (master.ws.y-34) )
+		{
+			l.Destroy();
+			l = fnt.BreakLines(self.txt,self.w-20);
+			scrollbar = true;
+			maxofs = int((l.Count()*13)-(master.ws.y-34));
+		}
+		return self;
+	}
+
+	// called when sending a scroll input
+	// returns true if the position actually changed
+	//  speed: how many pixels to move (either back or forward)
+	bool Scroll( int speed )
+	{
+		int oldofs = ofs;
+		ofs = clamp(ofs+speed,0,maxofs);
+		return (ofs != oldofs);
+	}
+
+	// called when clicking on our scrollbar
+	// returns true if the position actually changed
+	//  y: relative click position
+	bool SetOffset( double y )
+	{
+		int oldofs = ofs;
+		ofs = clamp(int(round((y-20.5)/((master.ws.y-41.)/maxofs))),0,maxofs);
+		return (ofs != oldofs);
+	}
 
 	virtual void Ticker()
 	{
+		// update smooth scroll
+		smofs = (smofs*.6)+(ofs*.4);
+		if ( abs(smofs-ofs) < (1./master.hs) ) smofs = ofs;
 	}
 
-	virtual void Drawer()
+	virtual void Drawer( bool dark = false )
 	{
+		double xx = x+6;
+		double yy = 17-smofs;
+		int miny = int((master.origin.y+17)*master.hs);
+		int maxy = int((master.origin.y+(master.ws.y-17))*master.hs);
+		let fnt = master.LargeFont;
+		for ( int i=0; i<l.Count(); i++, yy+=13 )
+		{
+			// to save time, we skip lines that aren't visible
+			if ( yy < 4 ) continue;
+			if ( yy >= master.ws.y-17 ) continue;
+			Screen.DrawText(master.LargeFont,Font.CR_WHITE,master.origin.x+xx,master.origin.y+yy,l.StringAt(i),DTA_VirtualWidthF,master.ss.x,DTA_VirtualHeightF,master.ss.y,DTA_KeepRatio,true,DTA_ColorOverlay,dark?Color(96,0,0,0):Color(0,0,0,0),DTA_ClipTop,miny,DTA_ClipBottom,maxy);
+		}
+		if ( !scrollbar ) return;
+		xx = x+(w-8);
+		master.DrawVSeparator(xx,14,master.ws.y-28);
+		xx += 2;
+		yy = floor(smofs*((master.ws.y-39)/maxofs))+13;
+		Screen.DrawText(master.TewiFont,Font.CR_FIRE,master.origin.x+xx,master.origin.y+yy,"▮",DTA_VirtualWidthF,master.ss.x,DTA_VirtualHeightF,master.ss.y,DTA_KeepRatio,true);
 	}
 }

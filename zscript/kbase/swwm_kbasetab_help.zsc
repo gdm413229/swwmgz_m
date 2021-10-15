@@ -1,0 +1,23 @@
+// I require assistance
+
+Class DemolitionistHelpTab : DemolitionistMenuTab
+{
+	Array<DemolitionistMenuTextBox> mtext;
+
+	override DemolitionistMenuTab Init( DemolitionistMenu master )
+	{
+		title = "$SWWM_HELPTAB";
+		bHidden = true;
+		return Super.Init(master);
+	}
+
+	override void OnSelect()
+	{
+		bHidden = false;
+	}
+
+	override void OnDeselect()
+	{
+		bHidden = true;
+	}
+}

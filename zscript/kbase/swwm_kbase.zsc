@@ -13,9 +13,30 @@ Class MenuTransaction
 	bool result, usedup;
 }
 
+enum EKMenuKey
+{
+	MK_DOWN,
+	MK_UP,
+	MK_LEFT,
+	MK_RIGHT,
+	MK_ENTER,
+	MK_BACK
+};
+
+enum EKMouseButton
+{
+	MB_LEFT,
+	MB_RIGHT,
+	MB_WHEELUP,
+	MB_WHEELDOWN,
+	MB_DRAG,
+	MB_RELEASE
+}
+
 Class DemolitionistMenu : GenericMenu
 {
-	transient Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	Font TewiFont, MPlusFont, MiniwiFont, k6x8Font;
+	Font LargeFont, SmallFont;
 	TextureID FancyBg, FrameTex, VSepTex, HSepTex;
 	// for resolution scaling and such
 	double hs;
@@ -37,32 +58,90 @@ Class DemolitionistMenu : GenericMenu
 	// crimey clock stuff
 	int c_year, c_month, c_day, c_hour, c_minute;
 	String c_tz;
+	// mouse stuff
+	Vector2 curmouse;
+	bool isrclick;
 	// somehow Drawer can be called while closing prematurely, which is big bollocks
 	bool isclosing;
 	// the tabs
 	Array<DemolitionistMenuTab> tabs;
 	int curtab;
-
-	// returns MPlus if we're playing in Japanese, otherwise returns the requested font
-	Font LangFont( Font req )
-	{
-		if ( language ~== "jp" ) return (req==MiniwiFont)?k6x8Font:MPlusFont;
-		return req;
-	}
+	int oldtab;	// used for returning from help tab
 
 	int GenTUID()
 	{
 		return lasttuid++;
 	}
 
+	// tab functions
+	int FindTabType( Class<DemolitionistMenuTab> t )
+	{
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			if ( !(tabs[i] is t) ) continue;
+			return i;
+		}
+		return -1;
+	}
+	int GetFirstTab()
+	{
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			if ( tabs[i].bHidden ) continue;
+			return i;
+		}
+		return -1;
+	}
+	int GetLastTab()
+	{
+		for ( int i=tabs.Size()-1; i>=0; i-- )
+		{
+			if ( tabs[i].bHidden ) continue;
+			return i;
+		}
+		return -1;
+	}
+	int GetNextTab()
+	{
+		int lst = GetLastTab();
+		if ( lst == -1 ) return -1;
+		if ( curtab >= lst ) return GetFirstTab();
+		for ( int i=curtab+1; i<tabs.Size(); i++ )
+		{
+			if ( tabs[i].bHidden ) continue;
+			return i;
+		}
+		return -1;
+	}
+	int GetPrevTab()
+	{
+		int fst = GetFirstTab();
+		if ( fst == -1 ) return -1;
+		if ( curtab <= fst ) return GetLastTab();
+		for ( int i=curtab-1; i>=0; i-- )
+		{
+			if ( tabs[i].bHidden ) continue;
+			return i;
+		}
+		return -1;
+	}
+
+	private void DoClose( bool PlaySound = false )
+	{
+		isclosing = true;
+		if ( PlaySound ) MenuSound("menu/democlose");
+		EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
+		for ( int i=0; i<tabs.Size(); i++ ) tabs[i].Destroy();
+		Close();
+	}
+
 	override void Init( Menu parent )
 	{
 		Super.Init(parent);
+		// can't open this menu outside of the game or if dead
+		// also can't if you're not the Demolitionist
 		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || !(players[consoleplayer].mo is 'Demolitionist') )
 		{
-			// can't open this menu outside of the game or if dead
-			// also can't if you're not the Demolitionist
-			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
 			isclosing = true;
 			return;
 		}
@@ -75,14 +154,25 @@ Class DemolitionistMenu : GenericMenu
 		ss = (Screen.GetWidth(),Screen.GetHeight())/hs;
 		ws.x = 640.;
 		double th = 640*(ss.y/ss.x);
-		if ( th >= 400. ) ws.y = 400.;
+		ws.y = clamp(round(th),266.,400.);
+		/*if ( th >= 400. ) ws.y = 400.;
 		else if ( th >= 360. ) ws.y = 360.;
-		else ws.y = 266.;
+		else ws.y = 266.;*/
 		origin = (int(ss.x-ws.x)/2,int(ss.y-ws.y)/2);
 		TewiFont = Font.GetFont('TewiShaded');
 		MPlusFont = Font.GetFont('MPlusShaded');
 		MiniwiFont = Font.GetFont('MiniwiShaded');
 		k6x8Font = Font.GetFont('k6x8Shaded');
+		if ( language ~== "jp" )
+		{
+			LargeFont = MPlusFont;
+			SmallFont = k6x8Font;
+		}
+		else
+		{
+			LargeFont = TewiFont;
+			SmallFont = MiniwiFont;
+		}
 		MenuSound("menu/demoopen");
 		[ikey[0], ikey[1]] = Bindings.GetKeysForCommand("event swwmdemomenu");
 		mkey[0] = Bindings.NameKeys(ikey[0],0);
@@ -92,18 +182,121 @@ Class DemolitionistMenu : GenericMenu
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
 		SetClock();
-		// TODO initialize tabs here
+		static const class<DemolitionistMenuTab> deftabs[] =
+		{
+			'DemolitionistMissionTab',
+			'DemolitionistStatsTab',
+			'DemolitionistInventoryTab',
+			'DemolitionistKeychainTab',
+			'DemolitionistLibraryTab',
+			'DemolitionistStoreTab',
+			'DemolitionistTradeTab',
+			'DemolitionistChatTab',
+			'DemolitionistHelpTab',
+			'DemolitionistSecretTab'
+		};
+		for ( int i=0; i<deftabs.Size()-2; i++ )
+			tabs.Push(DemolitionistMenuTab(new(deftabs[i])).Init(self));
+		// custom tabs go before the help and secret tabs
+		for ( int i=0; i<AllClasses.Size(); i++ )
+		{
+			let ct = (Class<DemolitionistMenuTabCustom>)(AllClasses[i]);
+			if ( !ct || (ct.GetParentClass() != 'DemolitionistMenuTabCustom') ) continue;
+			tabs.Push(DemolitionistMenuTab(new(ct)).Init(self));
+		}
+		for ( int i=deftabs.Size()-2; i<deftabs.Size(); i++ )
+			tabs.Push(DemolitionistMenuTab(new(deftabs[i])).Init(self));
+		Class<DemolitionistMenuTab> saved = swwm_lasttab;
+		if ( saved ) curtab = FindTabType(saved);
+		if ( curtab != -1 ) return;
+		curtab = GetFirstTab();
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
 	{
+		switch ( kcode )
+		{
+		case 0:
+		case 1:
+			if ( mkey == MKEY_UP ) kcode++;
+			else kcode = 0;
+			break;
+		case 2:
+		case 3:
+			if ( mkey == MKEY_DOWN ) kcode++;
+			else kcode = 0;
+			break;
+		case 4:
+		case 6:
+			if ( mkey == MKEY_LEFT ) kcode++;
+			else kcode = 0;
+			break;
+		case 5:
+		case 7:
+			if ( mkey == MKEY_RIGHT ) kcode++;
+			else kcode = 0;
+			break;
+		case 10:
+			if ( mkey == MKEY_ENTER )
+			{
+				MenuSound("misc/secret");
+				int secret = FindTabType('DemolitionistSecretTab');
+				if ( curtab != secret )
+				{
+					tabs[curtab].OnDeselect();
+					curtab = secret;
+					tabs[curtab].OnSelect();
+				}
+
+			}
+		default:
+			kcode = 0;
+			break;
+		}
 		switch ( mkey )
 		{
 		case MKEY_BACK:
-			isclosing = true;
-			MenuSound("menu/democlose");
-			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
-			Close();
+			DoClose(true);
+			return true;
+		case MKEY_PAGEDOWN:
+			int next = GetNextTab();
+			if ( next != curtab )
+			{
+				MenuSound("menu/demotab");
+				tabs[curtab].OnDeselect();
+				curtab = next;
+				tabs[curtab].OnSelect();
+				CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+			}
+			return true;
+		case MKEY_PAGEUP:
+			int prev = GetPrevTab();
+			if ( prev != curtab )
+			{
+				MenuSound("menu/demotab");
+				tabs[curtab].OnDeselect();
+				curtab = prev;
+				tabs[curtab].OnSelect();
+				CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+			}
+			return true;
+		case MKEY_DOWN:
+			tabs[curtab].MenuInput(MK_DOWN);
+			return true;
+		case MKEY_UP:
+			tabs[curtab].MenuInput(MK_UP);
+			return true;
+		case MKEY_LEFT:
+			tabs[curtab].MenuInput(MK_LEFT);
+			return true;
+		case MKEY_RIGHT:
+			tabs[curtab].MenuInput(MK_RIGHT);
+			return true;
+		case MKEY_ENTER:
+			tabs[curtab].MenuInput(MK_ENTER);
+			return true;
+		case MKEY_CLEAR:
+			tabs[curtab].MenuInput(MK_BACK);
 			return true;
 		}
 		return Super.MenuEvent(mkey,fromcontroller);
@@ -115,16 +308,17 @@ Class DemolitionistMenu : GenericMenu
 		if ( (gamestate != GS_LEVEL) || (players[consoleplayer].Health <= 0) || isclosing )
 		{
 			// ded (or force close)
-			isclosing = true;
-			EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
-			Close();
+			DoClose();
 			return;
 		}
 		if ( swwm_menupause ) menuactive = Menu.On;
 		else menuactive = Menu.OnNoPause;
 		// forcibly tick hud (mainly so interpolators can still update in the background)
 		if ( !multiplayer && (menuactive == Menu.On) )
-			StatusBar.Tick();
+		{
+			let bar = SWWMStatusBar(StatusBar);
+			if ( bar ) bar.TickInterpolators();
+		}
 		CheckTransactions();
 		// update time string
 		clockstr = CrimeTime();
@@ -134,6 +328,57 @@ Class DemolitionistMenu : GenericMenu
 		munstr = "\cg¥\c-";
 		if ( muns2 > 0 ) munstr.AppendFormat("%d",muns2);
 		munstr.AppendFormat("%09d",muns1);
+		if ( (tabs.Size() <= 0) || (curtab == -1) || !tabs[curtab] ) return;
+		tabs[curtab].Ticker();
+	}
+
+	override bool MouseEvent( int type, int mx, int my )
+	{
+		bool res = Super.MouseEvent(type,mx,my);
+		Vector2 mpos = (mx/hs,my/hs)-origin;
+		if ( type == MOUSE_Click )
+		{
+			// outside clickable area
+			if ( (mpos.x < 0) || (mpos.x > ws.x) || (mpos.y < 0) || (mpos.y > ws.y-14) ) return res;
+			else if ( mpos.y < 14 )
+			{
+				if ( isrclick ) return res;
+				// check which tab we're clicking
+				int xx = 0;
+				String str;
+				int len;
+				for ( int i=0; i<tabs.Size(); i++ )
+				{
+					if ( tabs[i].bHidden ) continue;
+					str = StringTable.Localize(tabs[i].title);
+					len = LargeFont.StringWidth(str)+6;
+					if ( (mpos.x >= xx) && (mpos.x < xx+len) )
+					{
+						if ( curtab == i ) break;
+						MenuSound("menu/demotab");
+						tabs[curtab].OnDeselect();
+						curtab = i;
+						tabs[curtab].OnSelect();
+						CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+						break;
+					}
+					xx += len;
+				}
+			}
+			else if ( (tabs.Size() <= 0) || (curtab == -1) || !tabs[curtab] ) return res;
+			tabs[curtab].MouseInput(mpos,isrclick?MB_RIGHT:MB_LEFT);
+		}
+		else if ( type == MOUSE_Move )
+		{
+			if ( (tabs.Size() <= 0) || (curtab == -1) || !tabs[curtab] ) return res;
+			tabs[curtab].MouseInput(mpos,MB_DRAG);
+		}
+		else if ( type == MOUSE_Release )
+		{
+			if ( (tabs.Size() <= 0) || (curtab == -1) || !tabs[curtab] ) return res;
+			tabs[curtab].MouseInput(mpos,MB_RELEASE);
+		}
+		return res;
 	}
 
 	override bool OnUiEvent( UIEvent ev )
@@ -141,16 +386,83 @@ Class DemolitionistMenu : GenericMenu
 		switch ( ev.type )
 		{
 		case UIEvent.Type_KeyDown:
+			if ( ev.keychar == UiEvent.Key_F1 )
+			{
+				int help = FindTabType('DemolitionistHelpTab');
+				if ( curtab == help )
+				{
+					tabs[curtab].OnDeselect();
+					curtab = oldtab;
+					tabs[curtab].OnSelect();
+				}
+				else
+				{
+					int secret = FindTabType('DemolitionistSecretTab');
+					if ( curtab == secret ) oldtab = GetLastTab();
+					else oldtab = curtab;
+					tabs[curtab].OnDeselect();
+					curtab = help;
+					tabs[curtab].OnSelect();
+				}
+				MenuSound("menu/demotab");
+				return true;
+			}
+			switch ( kcode )
+			{
+			case 8:
+				if ( ev.keystring ~== "B" )
+					kcode++;
+				else kcode = 0;
+				break;
+			case 9:
+				if ( ev.keystring ~== "A" ) kcode++;
+				else kcode = 0;
+				break;
+			default:
+				kcode = 0;
+				break;
+			}
 			if( (ikey[0] && (ev.keystring == mkey[0])) || (ikey[1] && (ev.keystring == mkey[1])) )
 			{
-				MenuSound("menu/democlose");
-				EventHandler.SendNetworkEvent("swwmclearalltransactions",consoleplayer);
-				Close();
+				DoClose(true);
 				return true;
 			}
 			break;
+		case UIEvent.Type_WheelDown:
+			tabs[curtab].MouseInput((curmouse/hs)-origin,MB_WHEELDOWN);
+			return true;
+		case UIEvent.Type_WheelUp:
+			tabs[curtab].MouseInput((curmouse/hs)-origin,MB_WHEELUP);
+			return true;
+		case UIEvent.Type_LButtonDown:
+		{
+			isrclick = false;
+			bool res = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( res ) SetCapture(true);
+			return res;
 		}
-		return Super.OnUiEvent(ev);
+		case UIEvent.Type_RButtonDown:
+		{
+			isrclick = true;
+			bool res = MouseEvent(MOUSE_Click,ev.MouseX,ev.MouseY);
+			if ( res ) SetCapture(true);
+			return res;
+		}
+		case UIEvent.Type_LButtonUp:
+		case UIEvent.Type_RButtonUp:
+			if ( mMouseCapture )
+			{
+				SetCapture(false);
+				return MouseEvent(MOUSE_Release,ev.MouseX,ev.MouseY);
+			}
+			break;
+		case UIEvent.Type_MouseMove:
+			curmouse = (ev.MouseX,ev.MouseY);
+			if ( mMouseCapture || (m_use_mouse == 1) )
+				return MouseEvent(MOUSE_Move,ev.MouseX,ev.MouseY);
+			break;
+		}
+		return false;
 	}
 
 	// fundamental drawing functions (good god these are hacky)
@@ -182,13 +494,16 @@ Class DemolitionistMenu : GenericMenu
 	{
 		x += origin.x;
 		y += origin.y;
+		Screen.DrawTexture(VSepTex,false,x-1,y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcY,0.,DTA_SrcHeight,1.,DTA_DestHeight,1);
+		Screen.DrawTexture(VSepTex,false,x-1,y+1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcY,1.,DTA_SrcHeight,1.,DTA_DestHeight,int(h-2));
+		Screen.DrawTexture(VSepTex,false,x-1,(y+h)-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcY,2.,DTA_SrcHeight,1.,DTA_DestHeight,1);
 	}
 	void DrawHSeparator( double x, double y, double w )
 	{
 		x += origin.x;
 		y += origin.y;
 		Screen.DrawTexture(HSepTex,false,x,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,0.,DTA_SrcWidth,1.,DTA_DestWidth,1);
-		Screen.DrawTexture(HSepTex,false,x+1,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcWidth,1.,DTA_DestWidth,int(ws.x-2));
+		Screen.DrawTexture(HSepTex,false,x+1,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,1.,DTA_SrcWidth,1.,DTA_DestWidth,int(w-2));
 		Screen.DrawTexture(HSepTex,false,(x+w)-1,y-1,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_SrcX,2.,DTA_SrcWidth,1.,DTA_DestWidth,1);
 	}
 
@@ -202,23 +517,32 @@ Class DemolitionistMenu : GenericMenu
 		// draw top and bottom separators
 		DrawHSeparator(0,14,ws.x);
 		DrawHSeparator(0,ws.y-14,ws.x);
-		Font fnt = LangFont(TewiFont);
 		double xx = 3, yy = 0;
 		String str;
-		// TODO draw tabs
-		// ...and everything else
+		// draw tab listing
+		for ( int i=0; i<tabs.Size(); i++ )
+		{
+			if ( tabs[i].bHidden ) continue;
+			str = StringTable.Localize(tabs[i].title);
+			Screen.DrawText(LargeFont,(curtab==i)?Font.CR_FIRE:Font.CR_DARKGRAY,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+			xx += LargeFont.StringWidth(str)+6;
+			DrawVSeparator(xx-3,0,14);
+		}
+		// draw money
 		xx = 637-TewiFont.StringWidth(munstr);
 		Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,munstr,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		yy = ws.y-14;
+		// draw clock / messages
 		if ( gametic < tmsgtic ) str = tmsg;
 		else str = clockstr;
 		xx = 4;
-		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		Screen.DrawText(LargeFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// draw os version
 		str = "DemolitionOS v1.0";
-		xx = 637-fnt.StringWidth(str);
-		Screen.DrawText(fnt,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
-		// placeholder
-		str = "NEW DEMOLITIONIST MENU IS UNDER CONSTRUCTION";
-		Screen.DrawText(fnt,Font.CR_RED,int(ss.x-fnt.StringWidth(str))/2,int(ss.y-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		xx = 637-LargeFont.StringWidth(str);
+		Screen.DrawText(LargeFont,Font.CR_WHITE,origin.x+xx,origin.y+yy,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
+		// draw tab contents
+		if ( (tabs.Size() <= 0) || (curtab == -1) || !tabs[curtab] ) return;
+		tabs[curtab].Drawer();
 	}
 }

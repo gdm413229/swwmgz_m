@@ -1,0 +1,243 @@
+// mission briefing tab
+
+Class DemolitionistMissionTab : DemolitionistMenuTab
+{
+	Array<DemolitionistMenuTextBox> mtext;
+	int sel;
+	bool drag;
+
+	override DemolitionistMenuTab Init( DemolitionistMenu master )
+	{
+		title = "$SWWM_MISSTAB";
+		sel = 0;
+		// saves time
+		bool nrftl = false;
+		bool eviternity = false;
+		bool hexdd = false;
+		String missionstr;
+		let stats = SWWMStats.Find(players[consoleplayer]);
+		if ( (gameinfo.gametype&GAME_Doom) && SWWMUtility.IsKnownMap() )
+		{
+			int clus = level.cluster;
+			if ( clus == 11 ) nrftl = true;
+			eviternity = SWWMUtility.IsEviternity();
+			if ( eviternity )
+			{
+				// we have to do some heavy lifting here because episodes don't match clusters
+				if ( level.levelnum <= 5 ) clus = 1;
+				else if ( level.levelnum <= 10 ) clus = 2;
+				else if ( level.levelnum <= 15 ) clus = 3;
+				else if ( level.levelnum <= 20 ) clus = 4;
+				else if ( level.levelnum <= 25 ) clus = 5;
+				else if ( level.levelnum <= 30 ) clus = 6;
+				else if ( level.levelnum <= 31 ) clus = 7;
+				else if ( level.levelnum <= 32 ) clus = 8;
+				missionstr = String.Format("$SWWM_MISSION_EVITERNITY%d",clus);
+			}
+			// naive method to guess if this is sigil
+			else if ( (clus == 5) && (level.mapname.Left(2) == "E5") )
+				missionstr = String.Format("$SWWM_MISSION_SIGIL");
+			else missionstr = String.Format("$SWWM_MISSION_DOOM%d",clus);
+			int csiz = stats.clustervisit.Size();
+			if ( (csiz > 0) && stats.secretdone[csiz-1] )
+			{
+				String tmpstr = missionstr.."_SECRET";
+				if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+					missionstr = tmpstr;
+			}
+			// if we came from the doom 1 episodes, use the alt mission string for Doom 2
+			bool fromdoomone = false;
+			for ( int i=0; i<csiz; i++ )
+			{
+				// also include sigil
+				if ( !eviternity && (stats.clustervisit[i] >= 5) && (stats.clustervisit[i] != 25) ) continue;
+				fromdoomone = true;
+				break;
+			}
+			if ( !eviternity && (clus == 5) && fromdoomone )
+				missionstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			mtext.Push(new("DemolitionistMenuTextBox").Init(master,missionstr));
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == clus) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format(eviternity?"$SWWM_MISSION_EVITERNITY%d":"$SWWM_MISSION_DOOM%d",stats.clustervisit[i]);
+				if ( !eviternity && (stats.clustervisit[i] == 5) && fromdoomone )
+					xstr = "$SWWM_MISSION_DOOM5_FROMDOOM1";
+				if ( stats.secretdone[i] )
+				{
+					String tmpstr = xstr.."_SECRET";
+					if ( !(StringTable.Localize(tmpstr) ~== tmpstr.Mid(1)) )
+						xstr = tmpstr;
+				}
+				if ( StringTable.Localize(xstr) ~== xstr.Mid(1) )
+					continue;
+				mtext.Push(new("DemolitionistMenuTextBox").Init(master,xstr));
+			}
+		}
+		else if ( (gameinfo.gametype&GAME_Heretic) && SWWMUtility.IsKnownMap() )
+		{
+			missionstr = String.Format("$SWWM_MISSION_HERETIC%d",level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			mtext.Push(new("DemolitionistMenuTextBox").Init(master,missionstr));
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_HERETIC%d",stats.clustervisit[i]);
+				if ( StringTable.Localize(xstr) ~== xstr.Mid(1) )
+					continue;
+				mtext.Push(new("DemolitionistMenuTextBox").Init(master,xstr));
+			}
+		}
+		else if ( (gameinfo.gametype&GAME_Hexen) && SWWMUtility.IsKnownMap() )
+		{
+			// detect deathkings
+			hexdd = SWWMUtility.IsDeathkings();
+			String gstr = hexdd?"HEXDD":"HEXEN";
+			missionstr = String.Format("$SWWM_MISSION_%s%d",gstr,level.cluster);
+			if ( StringTable.Localize(missionstr) ~== missionstr.Mid(1) )
+				missionstr = "$SWWM_MISSION_NONE";
+			mtext.Push(new("DemolitionistMenuTextBox").Init(master,missionstr));
+			int csiz = stats.clustervisit.Size();
+			bool firstskip = false;
+			for ( int i=csiz-1; i>=0; i-- )
+			{
+				if ( (stats.clustervisit[i] == level.cluster) && !firstskip )
+					continue;
+				firstskip = true;
+				String xstr = String.Format("$SWWM_MISSION_%s%d",gstr,stats.clustervisit[i]);
+				if ( StringTable.Localize(xstr) ~== xstr.Mid(1) )
+					continue;
+				mtext.Push(new("DemolitionistMenuTextBox").Init(master,xstr));
+			}
+		}
+		else
+		{
+			// no missions, hide ourselves
+			mtext.Push(new("DemolitionistMenuTextBox").Init(master,"$SWWM_MISSION_NONE"));
+			bHidden = true;
+		}
+		return Super.Init(master);
+	}
+
+	override void MenuInput( int key )
+	{
+		switch ( key )
+		{
+		case MK_DOWN:
+			if ( mtext[sel].Scroll(16) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MK_UP:
+			if ( mtext[sel].Scroll(-16) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MK_LEFT:
+			// cycle mission texts
+			if ( mtext.Size() > 1 )
+			{
+				master.MenuSound("menu/demoscroll");
+				sel--;
+				if ( sel < 0 ) sel = mtext.Size()-1;
+				mtext[sel].smofs = mtext[sel].ofs = 0;
+				drag = false;	// just in case
+			}
+			break;
+		case MK_RIGHT:
+			// cycle mission texts
+			if ( mtext.Size() > 1 )
+			{
+				master.MenuSound("menu/demoscroll");
+				sel++;
+				if ( sel >= mtext.Size() ) sel = 0;
+				mtext[sel].smofs = mtext[sel].ofs = 0;
+				drag = false;	// just in case
+			}
+			break;
+		}
+	}
+
+	override void MouseInput( Vector2 pos, int btn )
+	{
+		switch ( btn )
+		{
+		case MB_LEFT:
+			// see if we're clicking the scrollbar (if it exists)
+			if ( mtext[sel].scrollbar && (pos.x > (mtext[sel].x+(mtext[sel].w-8))) )
+			{
+				mtext[sel].SetOffset(pos.y);
+				master.MenuSound("menu/demoscroll");
+				drag = true;
+				break;
+			}
+			// cycle mission texts
+			if ( mtext.Size() > 1 )
+			{
+				master.MenuSound("menu/demoscroll");
+				sel--;
+				if ( sel < 0 ) sel = mtext.Size()-1;
+				mtext[sel].smofs = mtext[sel].ofs = 0;
+				drag = false;	// just in case
+			}
+			break;
+		case MB_RIGHT:
+			// cycle mission texts
+			if ( mtext.Size() > 1 )
+			{
+				master.MenuSound("menu/demoscroll");
+				sel++;
+				if ( sel >= mtext.Size() ) sel = 0;
+				mtext[sel].smofs = mtext[sel].ofs = 0;
+				drag = false;	// just in case
+			}
+			break;
+		case MB_WHEELUP:
+			if ( mtext[sel].Scroll(-8) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MB_WHEELDOWN:
+			if ( mtext[sel].Scroll(8) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MB_DRAG:
+			if ( drag ) mtext[sel].SetOffset(pos.y);
+			break;
+		case MB_RELEASE:
+			if ( drag ) master.MenuSound("menu/demoscroll");
+			drag = false;
+			break;
+		}
+	}
+
+	// stop smooth scrolling for current textbox
+	override void OnSelect()
+	{
+		mtext[sel].smofs = mtext[sel].ofs;
+	}
+	override void OnDeselect()
+	{
+		mtext[sel].smofs = mtext[sel].ofs;
+	}
+
+	override void Ticker()
+	{
+		// just tick the current textbox
+		mtext[sel].Ticker();
+	}
+
+	override void Drawer()
+	{
+		mtext[sel].Drawer(!!sel);
+		if ( mtext.Size() <= 1 ) return;
+		double xx = master.ws.x-(mtext[sel].scrollbar?11:3);
+		double yy = master.ws.y-25;
+		String str = String.Format("%d \cf/\c- %d",sel+1,mtext.Size());
+		Screen.DrawText(master.MiniwiFont,Font.CR_FIRE,(master.origin.x+xx)-master.MiniwiFont.StringWidth(str),master.origin.y+yy,str,DTA_VirtualWidthF,master.ss.x,DTA_VirtualHeightF,master.ss.y,DTA_KeepRatio,true);
+	}
+}
+

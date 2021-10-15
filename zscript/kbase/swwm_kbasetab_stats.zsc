@@ -1,0 +1,15 @@
+// stats stab
+
+Class DemolitionistStatsTab : DemolitionistMenuTab
+{
+	Array<DemolitionistMenuList> stats, kills;
+	Array<DemolitionistMenuMapList> mapstats;
+	Array<DemolitionistMenuAchievementList> achievements;
+	int section;
+
+	override DemolitionistMenuTab Init( DemolitionistMenu master )
+	{
+		title = "$SWWM_STATTAB";
+		return Super.Init(master);
+	}
+}

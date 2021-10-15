@@ -4,7 +4,6 @@
 Class DemolitionistMenuListItem ui
 {
 	DemolitionistMenu master;
-	DemolitionistMenuList parent;
 
 	virtual void Ticker()
 	{
@@ -20,7 +19,14 @@ Class DemolitionistMenuListItem ui
 Class DemolitionistMenuList ui
 {
 	DemolitionistMenu master;
-	DemolitionistMenuTab parent;
+
+	virtual void MenuInput( int key )
+	{
+	}
+
+	virtual void MouseInput( int x, int y, int btn, int type )
+	{
+	}
 
 	virtual void Ticker()
 	{

@@ -836,6 +836,17 @@ Class SWWMStatusBar : BaseStatusBar
 		qsort_playerscore(a,p+1,h);
 	}
 
+	// separated so they can be auto-ticked by the demolitionist menu
+	void TickInterpolators()
+	{
+		HealthInter.Update(CPlayer.health);
+		if ( !hnd ) hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		int s1, s2;
+		[s1, s2] = SWWMCredits.Get(CPlayer);
+		ScoreInter.Update(s1);
+		if ( ScoreInter.GetValue() >= ScoreInter.mCurrentValue ) ScoreInter2.Update(s2);
+	}
+
 	override void Tick()
 	{
 		Super.Tick();
@@ -858,12 +869,7 @@ Class SWWMStatusBar : BaseStatusBar
 			i--;
 		}
 		// update interpolators
-		HealthInter.Update(CPlayer.health);
-		if ( !hnd ) hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		int s1, s2;
-		[s1, s2] = SWWMCredits.Get(CPlayer);
-		ScoreInter.Update(s1);
-		if ( ScoreInter.GetValue() >= ScoreInter.mCurrentValue ) ScoreInter2.Update(s2);
+		TickInterpolators();
 		let d = Demolitionist(CPlayer.mo);
 		if ( d )
 		{

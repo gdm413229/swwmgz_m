@@ -183,7 +183,7 @@ Class DemolitionistMissionTab : DemolitionistMenuTab
 				master.MenuSound("menu/demoscroll");
 				sel--;
 				if ( sel < 0 ) sel = mtext.Size()-1;
-				mtext[sel].smofs = mtext[sel].ofs = 0;
+				mtext[sel].smofs = mtext[sel].ofs;
 				drag = false;	// just in case
 			}
 			break;
@@ -194,7 +194,7 @@ Class DemolitionistMissionTab : DemolitionistMenuTab
 				master.MenuSound("menu/demoscroll");
 				sel++;
 				if ( sel >= mtext.Size() ) sel = 0;
-				mtext[sel].smofs = mtext[sel].ofs = 0;
+				mtext[sel].smofs = mtext[sel].ofs;
 				drag = false;	// just in case
 			}
 			break;

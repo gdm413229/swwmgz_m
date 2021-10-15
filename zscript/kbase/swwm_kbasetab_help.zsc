@@ -2,22 +2,79 @@
 
 Class DemolitionistHelpTab : DemolitionistMenuTab
 {
-	Array<DemolitionistMenuTextBox> mtext;
+	DemolitionistMenuTextBox mtext;
+	bool drag;
 
 	override DemolitionistMenuTab Init( DemolitionistMenu master )
 	{
 		title = "$SWWM_HELPTAB";
 		bHidden = true;
+		String kstr;
+		if ( master.mkey[1] != "" ) kstr = master.mkey[0].."/"..master.mkey[1];
+		else kstr = master.mkey[0];
+		String str = String.Format(StringTable.Localize("$SWWM_HELPTXT"),kstr);
+		mtext = new("DemolitionistMenuTextBox").Init(master,str);
 		return Super.Init(master);
 	}
-
+	override void MenuInput( int key )
+	{
+		switch ( key )
+		{
+		case MK_DOWN:
+			if ( mtext.Scroll(16) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MK_UP:
+			if ( mtext.Scroll(-16) ) master.MenuSound("menu/demoscroll");
+			break;
+		}
+	}
+	override void MouseInput( Vector2 pos, int btn )
+	{
+		switch ( btn )
+		{
+		case MB_LEFT:
+			// see if we're clicking the scrollbar (if it exists)
+			if ( mtext.scrollbar && (pos.x > (mtext.x+(mtext.w-8))) )
+			{
+				mtext.SetOffset(pos.y);
+				master.MenuSound("menu/demoscroll");
+				drag = true;
+				break;
+			}
+			break;
+		case MB_WHEELUP:
+			if ( mtext.Scroll(-8) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MB_WHEELDOWN:
+			if ( mtext.Scroll(8) ) master.MenuSound("menu/demoscroll");
+			break;
+		case MB_DRAG:
+			if ( drag ) mtext.SetOffset(pos.y);
+			break;
+		case MB_RELEASE:
+			if ( drag ) master.MenuSound("menu/demoscroll");
+			drag = false;
+			break;
+		}
+	}
+	// stop smooth scrolling for current textbox
 	override void OnSelect()
 	{
 		bHidden = false;
+		mtext.smofs = mtext.ofs;
 	}
-
 	override void OnDeselect()
 	{
 		bHidden = true;
+		mtext.smofs = mtext.ofs;
+	}
+	// very simple
+	override void Ticker()
+	{
+		mtext.Ticker();
+	}
+	override void Drawer()
+	{
+		mtext.Drawer();
 	}
 }

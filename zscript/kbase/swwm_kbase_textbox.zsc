@@ -17,7 +17,8 @@ Class DemolitionistMenuTextBox ui
 		self.x = x;
 		if ( w == 0 ) self.w = 640-x;
 		else self.w = w;
-		self.txt = StringTable.Localize(txt);
+		if ( txt.Left(1) == "$" ) self.txt = StringTable.Localize(txt);
+		else self.txt = txt;
 		ofs = 0;
 		// break lines
 		let fnt = master.LargeFont;

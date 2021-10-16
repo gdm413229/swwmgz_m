@@ -265,6 +265,7 @@ extend Class SWWMHandler
 			SWWMInterest.Spawn(thekey:Key(e.Thing));
 		}
 		if ( indoomvacation == -1 ) indoomvacation = SWWMUtility.InDoomVacation();
+		if ( inultdoom2 == -1 ) inultdoom2 = SWWMUtility.IsUltDoom2();
 		if ( e.Thing.GetClass() == 'Pig' )
 			e.Thing.SetTag("$FN_PIG");	// missing in gzdoom
 		// eviternity stuff
@@ -366,6 +367,16 @@ extend Class SWWMHandler
 				HeadpatTracker(hp).hdoomangfix = 15;
 				HeadpatTracker(hp).dvacationarghack = true;
 			}
+		}
+		else if ( inultdoom2 && (e.Thing.GetClassName() == "WolfensteinSS") )
+		{
+			e.Thing.SetTag("$FN_ELITEZOMBIE");
+			//e.Thing.Obituary = "$OB_ELITEZOMBIE";
+			e.Thing.SeeSound = "grunt/sight";
+			e.Thing.AttackSound = "grunt/attack";
+			e.Thing.PainSound = "grunt/pain";
+			e.Thing.DeathSound = "grunt/death";
+			e.Thing.ActiveSound = "grunt/active";
 		}
 		if ( SWWMUtility.IdentifyingDog(e.Thing) || SWWMUtility.IdentifyingCaco(e.Thing)
 			|| SWWMUtility.IdentifyingDrug(e.Thing) || SWWMUtility.IdentifyingDoubleBoi(e.Thing) )

@@ -794,10 +794,53 @@ Class SWWMUtility
 		return false;
 	}
 
+	// try to be as thorough as possible in checking if DEHACKED has altered this actor
+	static clearscope bool CheckDehackery( Class<Actor> cls )
+	{
+		let def = GetDefaultByType(cls);
+		for ( State s=def.SpawnState; s; s=s.NextState )
+		{
+			if ( s.bDEHACKED ) return true;
+			// keep checking until we hit a loop, just in case
+			if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+		}
+		for ( State s=def.SeeState; s; s=s.NextState )
+		{
+			if ( s.bDEHACKED ) return true;
+			// keep checking until we hit a loop, just in case
+			if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+		}
+		for ( State s=def.MissileState; s; s=s.NextState )
+		{
+			if ( s.bDEHACKED ) return true;
+			// keep checking until we hit a loop, just in case
+			if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+		}
+		for ( State s=def.MeleeState; s; s=s.NextState )
+		{
+			if ( s.bDEHACKED ) return true;
+			// keep checking until we hit a loop, just in case
+			if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+		}
+		return false;
+	}
+
 	// because GetTag() returns the localized string, we need to do things the hard way
-	static clearscope String GetFunTag( Actor a, String defstr = "" )
+	static play String GetFunTag( Actor a, String defstr = "" )
 	{
 		if ( a is 'SWWMMonster' ) return SWWMMonster(a).GetFunTag(defstr);
+		// look up any fun tag services
+		let si = ServiceIterator.Find("FunTagService");
+		Service sv;
+		String res;
+		while ( sv = si.Next() )
+		{
+			res = sv.GetString("GetFunTag",objectArg:a);
+			if ( res == "" ) continue;
+			si.Destroy();
+			return res;
+		}
+		si.Destroy();
 		int ntags = 1;
 		String basetag = "";
 		switch ( a.GetClassName() )
@@ -870,16 +913,13 @@ Class SWWMUtility
 			basetag = "BOSSBRAIN";
 			break;
 		case 'WolfensteinSS':
-			// ensure it's not being replaced
-			let def = GetDefaultByType('WolfensteinSS');
-			bool dehackery = false;
-			for ( State s=def.SpawnState; s; s=s.NextState )
+			if ( IsUltDoom2() )
 			{
-				if ( s.bDEHACKED ) dehackery = true;
-				// keep checking until we hit a loop, just in case
-				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
+				basetag = "ELITEZOMBIE";
+				break;
 			}
-			if ( dehackery ) break;
+			// ensure it's not being replaced
+			if ( CheckDehackery('WolfensteinSS') ) break;
 		case 'SWWMSS':
 			basetag = "WOLFSS";
 			break;

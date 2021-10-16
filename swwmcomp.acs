@@ -16,6 +16,14 @@ SCRIPT "NERVE_EXITOPEN" ( void )
 	Ceiling_RaiseByValue(24,8,80);
 }
 
+SCRIPT "DIMPLE_EXITOPEN" ( void )
+{
+	while ( GetLevelInfo(LEVELINFO_KILLED_MONSTERS) < GetLevelInfo(LEVELINFO_TOTAL_MONSTERS) )
+		Delay(35);
+	Delay(35);
+	Floor_RaiseByValue(669,8,72);
+}
+
 SCRIPT "EQUINOX_BRAINCRUSH" ( int tag )
 {
 	ScriptCall("SWWMUtility","SpawnVanillaBossBrain",666);
@@ -25,8 +33,8 @@ SCRIPT "EQUINOX_BRAINCRUSH" ( int tag )
 SCRIPT "DVACATION_UNFUCK" ( void )
 {
 	Delay(1);
-	SetLineSpecial(2,226,StrArg("DVACATION_EXIT"));
-	SetLineSpecial(3,226,StrArg("DVACATION_BED"));
+	SetLineSpecial(2,ACS_ExecuteAlways,StrArg("DVACATION_EXIT"));
+	SetLineSpecial(3,ACS_ExecuteAlways,StrArg("DVACATION_BED"));
 }
 
 bool gotexit = false;

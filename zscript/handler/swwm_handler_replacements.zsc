@@ -573,15 +573,7 @@ extend Class SWWMHandler
 		else if ( e.Replacee is 'TeleportFog' ) e.Replacement = 'SWWMTeleportFog';
 		else if ( (e.Replacee is 'CommanderKeen') && (!e.Replacement || (e.Replacement == 'CommanderKeen')) )
 		{
-			let def = GetDefaultByType(e.Replacee);
-			bool dehackery = false;
-			for ( State s=def.SpawnState; s; s=s.NextState )
-			{
-				if ( s.bDEHACKED ) dehackery = true;
-				// keep checking until we hit a loop, just in case
-				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
-			}
-			if ( dehackery )
+			if ( SWWMUtility.CheckDehackery(e.Replacee) )
 			{
 				if ( profiling ) checkreplacement_ms += MSTime()-curms;
 				return;
@@ -590,15 +582,7 @@ extend Class SWWMHandler
 		}
 		else if ( (e.Replacee is 'BossBrain') && (!e.Replacement || (e.Replacement == 'BossBrain')) )
 		{
-			let def = GetDefaultByType(e.Replacee);
-			bool dehackery = false;
-			for ( State s=def.SpawnState; s; s=s.NextState )
-			{
-				if ( s.bDEHACKED ) dehackery = true;
-				// keep checking until we hit a loop, just in case
-				if ( s.NextState && (s.DistanceTo(s.NextState) <= 0) ) break;
-			}
-			if ( dehackery )
+			if ( SWWMUtility.CheckDehackery(e.Replacee) )
 			{
 				if ( profiling ) checkreplacement_ms += MSTime()-curms;
 				return;

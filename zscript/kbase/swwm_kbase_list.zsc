@@ -1,63 +1,222 @@
 // Classes for item list elements
 
+// basic list
+Class DemolitionistMenuList ui
+{
+	Array<DemolitionistMenuListItem> items;
+	int selected;
+
+	// functions to save time
+	int GetWidth()
+	{
+		int mw = 0;
+		for ( int i=0; i<items.Size(); i++ )
+		{
+			int cw = items[i].GetWidth();
+			if ( cw > mw ) mw = cw;
+		}
+		return mw;
+	}
+	int GetHeight()
+	{
+		int th = 0;
+		for ( int i=0; i<items.Size(); i++ )
+			th += items[i].GetHeight();
+		return th;
+	}
+}
+
 // basic list item
 Class DemolitionistMenuListItem ui
 {
 	DemolitionistMenu master;
+	String label;
+
+	DemolitionistMenuListItem Init( DemolitionistMenu master, String txt )
+	{
+		self.master = master;
+		label = (txt.Left(1)~=="$")?StringTable.Localize(txt):txt;
+		return self;
+	}
+
+	virtual int GetWidth()
+	{
+		return 0;
+	}
+
+	virtual int GetHeight()
+	{
+		return 0;
+	}
+
+	// checks if the mouse position is within bounds of the item
+	// (relative to item itself)
+	virtual bool CheckBounds( double x, double y )
+	{
+		return false;
+	}
 
 	virtual void Ticker()
 	{
 	}
 
-	virtual void Drawer()
+	virtual void Drawer( Vector2 pos, bool selected, int cliptop, int clipbottom, int clipleft, int clipright )
 	{
 	}
 }
 
-// basic list of text items with name and value
-// for stat tab
-Class DemolitionistMenuList ui
+// monster kill stat item
+Class DemolitionistMenuKillItem : DemolitionistMenuListItem
 {
-	DemolitionistMenu master;
+	MonsterKill s;
 
-	virtual void MenuInput( int key )
+	DemolitionistMenuKillItem Init( DemolitionistMenu master, MonsterKill s )
 	{
-	}
-
-	virtual void MouseInput( int x, int y, int btn, int type )
-	{
-	}
-
-	virtual void Ticker()
-	{
-	}
-
-	virtual void Drawer()
-	{
+		Super.Init(master,"");
+		self.s = s;
+		return self;
 	}
 }
 
-// inventory item list
-Class DemolitionistMenuInvList : DemolitionistMenuList
+// map stat item
+Class DemolitionistMenuMapStatItem : DemolitionistMenuListItem
 {
+	LevelStat s;
+
+	DemolitionistMenuMapStatItem Init( DemolitionistMenu master, LevelStat s )
+	{
+		Super.Init(master,"");
+		self.s = s;
+		return self;
+	}
 }
 
-// store item list (buy/sell
-Class DemolitionistMenuStoreList : DemolitionistMenuList
+// achievement item
+Class DemolitionistMenuAchievementItem : DemolitionistMenuListItem
 {
+	SWWMAchievementInfo a;
+
+	DemolitionistMenuAchievementItem Init( DemolitionistMenu master, SWWMAchievementInfo a )
+	{
+		Super.Init(master,"");
+		self.a = a;
+		return self;
+	}
 }
 
-// list of players
-Class DemolitionistMenuPlayerList : DemolitionistMenuList
+// inventory item
+Class DemolitionistMenuInvItem : DemolitionistMenuListItem
 {
+	Inventory inv;
+	int col;
+
+	DemolitionistMenuInvItem Init( DemolitionistMenu master, Inventory i )
+	{
+		Super.Init(master,"");
+		inv = i;
+		col = Font.CR_WHITE;
+		if ( i is 'Weapon' ) col = SWWMUtility.IsVIPItem(i)?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
+		else if ( i is 'MagAmmo' ) col = SWWMUtility.IsVIPItem(i)?Font.FindFontColor('VIPTan'):Font.CR_TAN;
+		else if ( (i is 'BackpackItem') || (i is 'HammerspaceEmbiggener') ) col = Font.CR_DARKBROWN;
+		else if ( i is 'Ammo' ) col = SWWMUtility.IsVIPItem(i)?Font.FindFontColor('VIPBrown'):Font.CR_BROWN;
+		else if ( (i is 'PowerupGiver') || (i is 'AmmoFabricator') || i.bBIGPOWERUP ) col = SWWMUtility.IsVIPItem(i)?Font.FindFontColor('VIPPurple'):Font.CR_PURPLE;
+		else if ( (i is 'Health') || (i is 'HealthPickup') || (i is 'SWWMHealth') ) col = Font.CR_RED;
+		else if ( (i is 'Armor') || (i is 'SWWMSpareArmor') ) col = Font.CR_GREEN;
+		else if ( i is 'PuzzleItem' ) col = Font.CR_LIGHTBLUE;
+		else if ( i is 'Key' ) col = Font.CR_UNTRANSLATED;
+		else if ( i is 'SWWMCollectible' ) col = Font.CR_PURPLE;
+		return self;
+	}
+
+	// how much of this item we can drop when right-clicking
+	int GetDropAmount()
+	{
+		return 0;
+	}
 }
 
-// list of achievements
-Class DemolitionistMenuAchievementList : DemolitionistMenuList
+// lore entry
+Class DemolitionistMenuLoreItem : DemolitionistMenuListItem
 {
+	SWWMLore ent;
+
+	DemolitionistMenuLoreItem Init( DemolitionistMenu master, SWWMLore e )
+	{
+		Super.Init(master,"");
+		ent = e;
+		return self;
+	}
+
+	// return true if this entry hasn't been read yet
+	// used for the "unread" indicators on the top bar
+	bool IsUnread()
+	{
+		return !ent.read;
+	}
+
+	// marks this entry as read
+	void MarkRead()
+	{
+		if ( ent.read ) return;
+		EventHandler.SendNetworkEvent(String.Format("swwmmarkloreread.%s",ent.tag),consoleplayer);
+	}
+
+	String GetText()
+	{
+		return StringTable.Localize(ent.text);
+	}
 }
 
-// list of map stats
-Class DemolitionistMenuMapList : DemolitionistMenuList
+// store item (buy/sell)
+Class DemolitionistMenuStoreItem : DemolitionistMenuListItem
 {
+	Class<Inventory> inv;
+	int col;
+	bool bSell;
+
+	DemolitionistMenuStoreItem Init( DemolitionistMenu master, Class<Inventory> i, bool bSell = false )
+	{
+		Super.Init(master,"");
+		inv = i;
+		col = Font.CR_WHITE;
+		let def = GetDefaultByType(i);
+		if ( i is 'Weapon' ) col = SWWMUtility.IsVIPItemClass(i)?Font.FindFontColor('VIPGold'):Font.CR_GOLD;
+		else if ( i is 'MagAmmo' ) col = SWWMUtility.IsVIPItemClass(i)?Font.FindFontColor('VIPTan'):Font.CR_TAN;
+		else if ( (i is 'BackpackItem') || (i is 'HammerspaceEmbiggener') ) col = Font.CR_DARKBROWN;
+		else if ( i is 'Ammo' ) col = SWWMUtility.IsVIPItemClass(i)?Font.FindFontColor('VIPBrown'):Font.CR_BROWN;
+		else if ( (i is 'PowerupGiver') || (i is 'AmmoFabricator') || def.bBIGPOWERUP ) col = SWWMUtility.IsVIPItemClass(i)?Font.FindFontColor('VIPPurple'):Font.CR_PURPLE;
+		else if ( (i is 'Health') || (i is 'HealthPickup') || (i is 'SWWMHealth') ) col = Font.CR_RED;
+		else if ( (i is 'Armor') || (i is 'SWWMSpareArmor') ) col = Font.CR_GREEN;
+		self.bSell = bSell;
+		return self;
+	}
+
+	int GetPrice()
+	{
+		return 0;
+	}
+
+	int GetUnits()
+	{
+		return 0;
+	}
+}
+
+// player item
+Class DemolitionistMenuPlayerItem : DemolitionistMenuListItem
+{
+	PlayerInfo p;
+
+	DemolitionistMenuPlayerItem Init( DemolitionistMenu master, PlayerInfo p )
+	{
+		Super.Init(master,p.GetUserName());
+		self.p = p;
+		return self;
+	}
+}
+
+// chat message item
+Class DemolitionistMenuChatItem : DemolitionistMenuListItem
+{
+
 }

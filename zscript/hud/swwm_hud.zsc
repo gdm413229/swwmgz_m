@@ -13,9 +13,7 @@ Class SWWMStatusBar : BaseStatusBar
 		GenericAmmoTex[3], MiniBox, AutoPage;
 	HUDFont mTewiFont, mMiniwiFont, mMPlusFont, mk6x8Font;
 
-	// "Full History" contains all messages since session start, nothing is flushed
-	// this can be accessed from a section of the knowledge base
-	Array<MsgLine> MainQueue, PickupQueue, FullHistory;
+	Array<MsgLine> MainQueue, PickupQueue;
 
 	// sorted arrays of various elements
 	Array<SWWMInterest> intpoints;
@@ -631,7 +629,7 @@ Class SWWMStatusBar : BaseStatusBar
 		m.rep = 1;
 		// append chat messages to full history
 		if ( (printlevel == PRINT_CHAT) || (printlevel == PRINT_TEAMCHAT) )
-			FullHistory.Push(m);
+			EventHandler.SendNetworkEvent("swwmstoremessage."..m.str,m.tic,m.type,consoleplayer);
 		// ignore during intermission
 		if ( gamestate != GS_LEVEL ) return false;
 		if ( (printlevel < PRINT_LOW) || (printlevel > PRINT_TEAMCHAT) ) return true;	// we couldn't care less about these

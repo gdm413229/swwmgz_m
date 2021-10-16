@@ -568,6 +568,11 @@ extend Class SWWMHandler
 				break;
 			}
 		}
+		else if ( e.Name.Left(17) ~== "swwmstoremessage." )
+		{
+			if ( consoleplayer != e.Args[2] ) return;
+			SWWMFullHistory.PushMessage(e.Name.Mid(17),e.Args[0],e.Args[1]);
+		}
 		else if ( e.Name.Left(16) ~== "swwmremoteliner." )
 		{
 			if ( consoleplayer == e.Args[0] ) return;

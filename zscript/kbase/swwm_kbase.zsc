@@ -53,6 +53,7 @@ Class DemolitionistMenu : GenericMenu
 	Array<MenuTransaction> checklist;
 	int lasttuid;
 	SWWMHandler hnd;
+	SWWMStaticHandler shnd;
 	// seeeeecret
 	int kcode;
 	// crimey clock stuff
@@ -181,6 +182,7 @@ Class DemolitionistMenu : GenericMenu
 		tmsgtic = gametic+50;
 		lasttuid = Random[TUID]();
 		hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		shnd = SWWMStaticHandler(StaticEventHandler.Find("SWWMStaticHandler"));
 		SetClock();
 		static const class<DemolitionistMenuTab> deftabs[] =
 		{
@@ -206,10 +208,18 @@ Class DemolitionistMenu : GenericMenu
 		}
 		for ( int i=deftabs.Size()-2; i<deftabs.Size(); i++ )
 			tabs.Push(DemolitionistMenuTab(new(deftabs[i])).Init(self));
-		Class<DemolitionistMenuTab> saved = swwm_lasttab;
-		if ( saved ) curtab = FindTabType(saved);
-		if ( curtab != -1 ) return;
-		curtab = GetFirstTab();
+		if ( shnd.menustate )
+		{
+			Class<DemolitionistMenuTab> saved = shnd.menustate.At("LastTab");
+			if ( saved ) curtab = FindTabType(saved);
+		}
+		else
+		{
+			shnd.menustate = Dictionary.Create();
+			curtab = -1;
+		}
+		if ( curtab == -1 ) curtab = GetFirstTab();
+		tabs[curtab].OnSelect();
 	}
 
 	override bool MenuEvent( int mkey, bool fromcontroller )
@@ -239,13 +249,14 @@ Class DemolitionistMenu : GenericMenu
 		case 10:
 			if ( mkey == MKEY_ENTER )
 			{
-				MenuSound("misc/secret");
 				int secret = FindTabType('DemolitionistSecretTab');
 				if ( curtab != secret )
 				{
+					MenuSound("misc/secret");
 					tabs[curtab].OnDeselect();
 					curtab = secret;
 					tabs[curtab].OnSelect();
+					shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 				}
 
 			}
@@ -266,7 +277,7 @@ Class DemolitionistMenu : GenericMenu
 				tabs[curtab].OnDeselect();
 				curtab = next;
 				tabs[curtab].OnSelect();
-				CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+				shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 			}
 			return true;
 		case MKEY_PAGEUP:
@@ -277,7 +288,7 @@ Class DemolitionistMenu : GenericMenu
 				tabs[curtab].OnDeselect();
 				curtab = prev;
 				tabs[curtab].OnSelect();
-				CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+				shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 			}
 			return true;
 		case MKEY_DOWN:
@@ -359,7 +370,7 @@ Class DemolitionistMenu : GenericMenu
 						tabs[curtab].OnDeselect();
 						curtab = i;
 						tabs[curtab].OnSelect();
-						CVar.FindCVar('swwm_lasttab').SetString(tabs[curtab].GetClassName());
+						shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 						break;
 					}
 					xx += len;
@@ -394,6 +405,7 @@ Class DemolitionistMenu : GenericMenu
 					tabs[curtab].OnDeselect();
 					curtab = oldtab;
 					tabs[curtab].OnSelect();
+					shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 				}
 				else
 				{
@@ -403,6 +415,7 @@ Class DemolitionistMenu : GenericMenu
 					tabs[curtab].OnDeselect();
 					curtab = help;
 					tabs[curtab].OnSelect();
+					shnd.menustate.Insert("LastTab",tabs[curtab].GetClassName());
 				}
 				MenuSound("menu/demotab");
 				return true;

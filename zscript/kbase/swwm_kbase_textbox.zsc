@@ -11,7 +11,7 @@ Class DemolitionistMenuTextBox ui
 	int maxofs;
 
 	// textbox initialization
-	virtual DemolitionistMenuTextBox Init( DemolitionistMenu master, String txt, int x = 0, int w = 0 )
+	DemolitionistMenuTextBox Init( DemolitionistMenu master, String txt, int x = 0, int w = 0 )
 	{
 		self.master = master;
 		self.x = x;
@@ -54,14 +54,14 @@ Class DemolitionistMenuTextBox ui
 		return (ofs != oldofs);
 	}
 
-	virtual void Ticker()
+	void Ticker()
 	{
 		// update smooth scroll
 		smofs = (smofs*.6)+(ofs*.4);
 		if ( abs(smofs-ofs) < (1./master.hs) ) smofs = ofs;
 	}
 
-	virtual void Drawer( bool dark = false )
+	void Drawer( bool dark = false )
 	{
 		double xx = x+6;
 		double yy = 17-smofs;

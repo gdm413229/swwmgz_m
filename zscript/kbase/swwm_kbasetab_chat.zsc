@@ -5,8 +5,7 @@ Class DemolitionistChatTab : DemolitionistMenuTab
 	override DemolitionistMenuTab Init( DemolitionistMenu master )
 	{
 		title = "$SWWM_CHATTAB";
-		let bar = SWWMStatusBar(StatusBar);
-		bHidden = (!bar||(bar.FullHistory.Size()<=0));
+		bHidden = !SWWMFullHistory.Get();
 		return Super.Init(master);
 	}
 }

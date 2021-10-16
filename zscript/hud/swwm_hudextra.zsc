@@ -398,16 +398,7 @@ Class SWWMDirectMessage : HUDMessageBase
 		l = tfnt.BreakLines(txt,220);
 		// append to the player's chat log (if it's valid)
 		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;
-		let bar = SWWMStatusBar(StatusBar);
-		if ( bar )
-		{
-			let l = new("MsgLine");
-			l.str = chrname..": "..txt;
-			l.tic = level.totaltime;
-			l.rep = 1;
-			l.type = PRINT_CHAT;
-			bar.FullHistory.Push(l);
-		}
+		EventHandler.SendNetworkEvent("swwmstoremessage."..chrname..": "..txt,level.totaltime,PRINT_CHAT,consoleplayer);
 	}
 
 	private void DrawText()

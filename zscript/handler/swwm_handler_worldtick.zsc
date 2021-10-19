@@ -19,7 +19,7 @@ extend Class SWWMHandler
 	int lastorder;
 	bool lastloop;
 	transient ThinkerIterator cti;
-	bool tauntedboss;
+	Actor tauntedboss;
 
 	private void LangRefresh()
 	{
@@ -127,20 +127,9 @@ extend Class SWWMHandler
 				combatactors.Push(a);
 				combattics.Push(gametic);
 				enteredcombat = true;
-				if ( (a is 'Korax') || (a is 'Sorcerer1') || (a.GetClassName() == "ArchangelusA") )
-					keyactor = a;
 				if ( a.bBOSS || a.FindInventory("BossMarker") )
 					bossfound = true;
 			}
-		}
-		// special combat start lines
-		if ( enteredcombat && keyactor && !tauntedboss )
-		{
-			if ( keyactor is 'Korax' ) lastcombat = AddOneliner("korax",1,40);
-			else if ( keyactor is 'Sorcerer1' ) lastcombat = AddOneliner("dsparil",1,100);
-			else if ( keyactor.GetClassName() == "ArchangelusA" ) lastcombat = AddOneliner("archangelus",1,350);
-			tauntedboss = true;
-			return;
 		}
 		// be smart, demo-chan, don't shout if you're invisible, or you'll make it worse
 		if ( enteredcombat && ((bossfound && (!lastcombat || (gametic > lastcombat+120))) || (!bossfound && (!highesttic || (gametic > highesttic+700)))) && !players[consoleplayer].mo.FindInventory("GhostPower") )

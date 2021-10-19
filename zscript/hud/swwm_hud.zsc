@@ -54,7 +54,7 @@ Class SWWMStatusBar : BaseStatusBar
 	String midstr;
 	int midtic, midtype;
 
-	bool koraxhack, mainframehack;
+	bool koraxhack, mainframehack, bosshack;
 	int puzzlecnt, realpuzzlecnt;
 
 	SWWMWeaponTooltip ctip;
@@ -586,6 +586,15 @@ Class SWWMStatusBar : BaseStatusBar
 			mainframehack = false;
 			return true;
 		}
+		if ( (msg == StringTable.Localize("$BOSSLINE_IOS"))
+			|| (msg == StringTable.Localize("$BOSSLINE_ARCHANGELUS"))
+			|| (msg == StringTable.Localize("$BOSSLINE_DSPARIL")) )
+		{
+			bosshack = true;
+			Console.Printf(msg);
+			bosshack = false;
+			return true;
+		}
 		if ( !fnt || (fnt == smallfont) )
 		{
 			midstr = msg;
@@ -616,11 +625,16 @@ Class SWWMStatusBar : BaseStatusBar
 			printlevel = PRINT_CHAT;
 			outline = "\cmKorax\c-: "..outline;
 		}
-		if ( mainframehack )
+		else if ( mainframehack )
 		{
 			// same here, hi yholl
 			printlevel = PRINT_CHAT;
 			outline = "\cmAI Mainframe\c-: "..outline;
+		}
+		else if ( bosshack )
+		{
+			// no need to attach name, these are done specifically for this
+			printlevel = PRINT_CHAT;
 		}
 		let m = new("MsgLine");
 		m.str = outline.Left(outline.Length()-1);	// strip newline

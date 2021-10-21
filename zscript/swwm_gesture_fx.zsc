@@ -572,6 +572,7 @@ Class HeadpatTracker : Actor
 		if ( user.player.crouchdir == -1 ) return false;	// need to be standing up
 		if ( !user.player.onground ) return false;	// need to be on solid ground
 		if ( dvacationarghack && (target.args[0] == 1) ) return false;	// can't pat at the moment
+		if ( !(user.player.WeaponState&WF_WEAPONSWITCHOK) || (user.player.WeaponState&WF_DISABLESWITCH) ) return false;	// weapon needs to be ready for switching
 		// check use range
 		Vector3 diff = level.Vec3Diff(user.Vec2OffsetZ(0,0,user.player.viewz),Vec3Offset(0,0,target.Height));
 		if ( abs(diff.z) > PlayerPawn(user.player.mo).UseRange ) return false;

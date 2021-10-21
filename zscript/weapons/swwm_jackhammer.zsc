@@ -293,7 +293,7 @@ Class PusherWeapon : SWWMWeapon
 			A_StartSound("pusher/motor",CHAN_WEAPONEXTRA,CHANF_LOOP,pitch:1.5);
 		}
 		XZW2 M 2;
-		XZW2 N 0 A_StartSound("pusher/drill",CHAN_WEAPON,CHANF_LOOP);
+		XZW2 N 0 A_StartSound("pusher/drill",CHAN_WEAPONEXTRA2,CHANF_LOOP);
 	Hold:
 		XZW2 N 1
 		{
@@ -321,7 +321,7 @@ Class PusherWeapon : SWWMWeapon
 			A_Recoil(.5*cos(pitch));
 			A_ClearRefire();
 			A_WeaponOffset(0,32);
-			A_StopSound(CHAN_WEAPON);
+			A_StopSound(CHAN_WEAPONEXTRA2);
 			A_StartSound("pusher/stop",CHAN_WEAPON,CHANF_OVERLAP);
 			A_StartSound("pusher/motorend",CHAN_WEAPONEXTRA,CHANF_DEFAULT,pitch:1.5);
 			return ResolveState(null);

@@ -104,13 +104,17 @@ extend Class SWWMHandler
 			let c = SWWMCredits.Find(players[i]);
 			if ( c ) c.credits = c.hcredits = 0;
 		}
-		// end of episode resets
-		if ( level.nextsecretmap.Left(6) == "enDSeQ" )
+		// end of episode resets and enforced pistol starts
+		LevelInfo nextlv = LevelInfo.FindLevelInfo(e.NextMap);
+		if ( (level.nextsecretmap.Left(6) == "enDSeQ")
+			|| (swwm_pistolstart && nextlv && (level.cluster != nextlv.cluster))
+			|| ((swwm_pistolstart == 1) && !(level.clusterflags&LevelLocals.CLUSTER_HUB)) )
 		{
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
 				if ( !playeringame[i] || !players[i].mo ) continue;
 				players[i].mo.GiveInventory("InventoryWipeToken",1);
+				// the playerpawn will know what to do with this in its PreTravelled()
 			}
 		}
 		// did we complete this map without collecting any of its keys? (doesn't work for hubs)

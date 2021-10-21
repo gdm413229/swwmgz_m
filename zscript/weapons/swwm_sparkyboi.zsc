@@ -177,7 +177,6 @@ Class Sparkster : SWWMWeapon
 
 	override void Travelled()
 	{
-		Super.Travelled();
 		if ( Owner.player && (Owner.player.Readyweapon == self) )
 		{
 			Owner.A_StartSound("biospark/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,doublestacc?.6:.4,4.);

@@ -6,8 +6,6 @@ Class SWWMWeapon : Weapon abstract
 
 	bool wasused;
 	bool bUsePickup;
-	transient bool hastravelled;
-	transient int autoupsnd;
 	private int SWeaponFlags;
 	String tooltip, getline;
 	bool tooltipsent;
@@ -244,19 +242,10 @@ Class SWWMWeapon : Weapon abstract
 		}
 		GivenAsMorphWeapon = false;
 	}
-	override void DetachFromOwner()
-	{
-		Owner.A_StopSound(CHAN_WEAPON);
-		Owner.A_StopSound(CHAN_WEAPONEXTRA);
-		Owner.A_StopSound(CHAN_WEAPONEXTRA2);
-		Owner.A_StopSound(CHAN_WEAPONEXTRA3);
-		Super.DetachFromOwner();
-	}
 	override void OwnerDied()
 	{
 		if ( Owner.player && (Owner.player.ReadyWeapon == self) )
 		{
-			Owner.A_StopSound(CHAN_WEAPON);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA2);
 			Owner.A_StopSound(CHAN_WEAPONEXTRA3);
@@ -341,23 +330,12 @@ Class SWWMWeapon : Weapon abstract
 	}
 	override void PlayUpSound( Actor origin )
 	{
-		if ( hastravelled ) return;
 		if ( UpSound ) origin.A_StartSound(UpSound,CHAN_WEAPON,CHANF_OVERLAP);
-	}
-	override void Travelled()
-	{
-		Super.Travelled();
-		hastravelled = true;
 	}
 	override void Tick()
 	{
 		Super.Tick();
 		if ( !Owner ) return;
-		if ( autoupsnd && (level.maptime >= autoupsnd) )
-		{
-			autoupsnd = 0;
-			PlayUpSound(Owner);
-		}
 		if ( !Owner.player || (Owner.player.ReadyWeapon != self) || !(Owner.player.WeaponState&WF_WEAPONSWITCHOK) || (Owner.player.WeaponState&WF_DISABLESWITCH) )
 		{
 			tooltipsent = false;

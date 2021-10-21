@@ -508,16 +508,17 @@ Class GhostArtifact : Inventory
 		return true;
 	}
 
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("GhostArtifactX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("GhostArtifactX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 
 	override void PostBeginPlay()
@@ -661,16 +662,17 @@ Class GravitySuppressor : Inventory
 		SWWMUtility.AchievementProgressInc("gravity",1,Owner.player);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("GravityX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("GravityX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{
@@ -911,16 +913,17 @@ Class FuckingInvinciball : Inventory
 		SWWMUtility.AchievementProgressInc("sunny",1,Owner.player);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("InvinciballX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("InvinciballX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{
@@ -1202,16 +1205,17 @@ Class Ragekit : Inventory
 		else Owner.GiveInventory("RagekitPower",1);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("RagekitX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("RagekitX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{
@@ -1275,6 +1279,10 @@ Class Omnisight : Inventory
 				Demolitionist(Owner).lastbump *= 1.1;
 			level.allmap = true;
 		}
+		// activate all interest markers
+		let ti = ThinkerIterator.Create("SWWMInterestMarker",STAT_MAPMARKER);
+		Actor a;
+		while ( a = Actor(ti.Next()) ) a.bDORMANT = false;
 		// spread to all players
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
@@ -1425,6 +1433,7 @@ Class LampMoth : Actor
 			}
 		}
 		if ( !lamp || (lamp.frame == 0) || (Distance3D(lamp) > 250) || !CheckSight(lamp,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) return false;
+		if ( target && (target.Health > 0) && CheckSight(target) ) return false;
 		return true;
 	}
 	void A_SmoothWander()
@@ -1551,7 +1560,8 @@ Class LampMoth : Actor
 	override void Tick()
 	{
 		Super.Tick();
-		if ( isFrozen() || isEntranced() )
+		if ( isFrozen() ) return;
+		if ( isEntranced() )
 		{
 			lifespan = 100;
 			return;
@@ -1955,6 +1965,11 @@ Class SWWMLamp : Inventory
 		if ( deathmatch ) return false;
 		return Super.ShouldSpawn();
 	}
+	override void PreTravelled()
+	{
+		// remove the lamp
+		if ( thelamp ) thelamp.Destroy();
+	}
 	override void DoEffect()
 	{
 		Super.DoEffect();
@@ -2187,16 +2202,18 @@ Class EBarrier : Inventory
 		SWWMUtility.AchievementProgressInc("barrier",1,Owner.player);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
 		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("EBarrierX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("EBarrierX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{
@@ -2891,6 +2908,15 @@ Class Mykradvo : Inventory
 		return Super.CanPickup(toucher);
 	}
 
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+		for ( int i=0; i<2; i++ )
+		{
+			if ( !ringa[i] ) continue;
+			ringa[i].Destroy();
+		}
+	}
 	override void Travelled()
 	{
 		Super.Travelled();
@@ -3330,16 +3356,18 @@ Class AngerySigil : Inventory
 		else Owner.GiveInventory("AngeryPower",1);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
 		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("AngerySigilX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("AngerySigilX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{
@@ -3602,16 +3630,17 @@ Class DivineSprite : Inventory
 		SWWMUtility.AchievementProgressInc("divine",1,Owner.player);
 		return true;
 	}
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("DivineSpriteX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("DivineSpriteX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{

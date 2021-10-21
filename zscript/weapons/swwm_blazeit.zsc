@@ -584,16 +584,17 @@ Class Hellblazer : SWWMWeapon
 		}
 	}
 
+	override void PreTravelled()
+	{
+		if ( tracer ) tracer.Destroy();
+	}
 	override void Travelled()
 	{
-		Super.Travelled();
-		if ( !tracer )
-		{
-			tracer = Spawn("HellblazerX",pos);
-			tracer.angle = angle;
-			tracer.target = self;
-			tracer.FloatBobPhase = FloatBobPhase;
-		}
+		if ( tracer ) return;
+		tracer = Spawn("HellblazerX",pos);
+		tracer.angle = angle;
+		tracer.target = self;
+		tracer.FloatBobPhase = FloatBobPhase;
 	}
 	override void PostBeginPlay()
 	{

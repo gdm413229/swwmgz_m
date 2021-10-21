@@ -515,7 +515,7 @@ Class Wallbuster : SWWMWeapon
 				// slug
 				if ( !sst ) sst = new("SpreadSlugTracer");
 				sst.ignoreme = self;
-				sst.penetration = 150.;
+				sst.penetration = 180.;
 				a = FRandom[Wallbuster](0,360);
 				s = FRandom[Wallbuster](0,.002);
 				dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
@@ -606,7 +606,7 @@ Class Wallbuster : SWWMWeapon
 				if ( !st ) st = new("SpreadgunTracer");
 				st.ignoreme = self;
 				// attempt to uniformize expected damage while reducing traces (mainly for performance)
-				int expecteddmg = 100;
+				int expecteddmg = 120;
 				int numshot = max(21-howmany,5);
 				int individualdmg = int(ceil(expecteddmg/double(numshot)));
 				for ( int j=0; j<numshot; j++ )

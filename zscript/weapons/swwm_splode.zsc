@@ -80,6 +80,10 @@ Class ExplodiumGun : SWWMWeapon
 				// autoswitch if enabled
 				if ( !Owner.player.GetNeverSwitch() )
 					Owner.player.PendingWeapon = SisterWeapon;
+				// add the oneliner
+				let demo = Demolitionist(Owner);
+				if ( demo && demo.mystats && !demo.mystats.GotWeapon(SisterWeapon.GetClass()) && Owner.CheckLocalView() )
+					SWWMHandler.AddOneliner("getweapon",2);
 				item.bPickupGood = true;
 			}
 			return true;

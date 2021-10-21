@@ -120,6 +120,18 @@ extend Class SWWMHandler
 			let t = new("UglyBoyGetsFuckedUp");
 			t.ChangeStatNum(Thinker.STAT_USER);
 		}
+		// Archangelus death
+		if ( e.Thing.GetClassName() == "ArchangelusB" )
+		{
+			// kill all other monsters
+			let ti = ThinkerIterator.Create("Actor");
+			Actor a;
+			while ( a = Actor(ti.Next()) )
+			{
+				if ( (a != e.Thing) && (a.Health > 0) && (a.bBossSpawned || a.bCOUNTKILL) )
+					a.DamageMobj(e.Thing,e.Thing,a.Health,'EndMii',DMG_FORCED|DMG_THRUSTLESS);
+			}
+		}
 		if ( swwm_partytime )
 		{
 			let pt = Actor.Spawn("PartyTime",e.Thing.pos);

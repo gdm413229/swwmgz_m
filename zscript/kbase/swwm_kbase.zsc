@@ -70,6 +70,8 @@ Class DemolitionistMenu : GenericMenu
 	// trading
 	SWWMTradeHistory tradelib;
 	Array<int> playerlist;
+	// chat history instance
+	SWWMFullHistory fullhistory;
 	// chat history total line count (includes breaks)
 	int chatlines;
 	// temporary bottom messages, such as "not enough money"
@@ -328,8 +330,8 @@ Class DemolitionistMenu : GenericMenu
 			break;
 		}
 		let bar = SWWMStatusBar(StatusBar);
-		if ( bar && (bar.FullHistory.Size() > 0) )
-			tabs.Push(TAB_CHAT);
+		fullhistory = SWWMFullHistory.Get();
+		if ( fullhistory ) tabs.Push(TAB_CHAT);
 		int lasttab = swwm_lasttab;
 		for ( int i=0; i<tabs.Size(); i++ )
 		{
@@ -651,7 +653,7 @@ Class DemolitionistMenu : GenericMenu
 				MenuSound("menu/demoscroll");
 				ofs0 = --sel0;
 			}
-			else if ( (tabs[curtab] == TAB_CHAT) && (StatusBar is 'SWWMStatusBar') && (sel0 < SWWMStatusBar(StatusBar).FullHistory.Size()-1) )
+			else if ( (tabs[curtab] == TAB_CHAT) && FullHistory && (sel0 < FullHistory.msg.Size()-1) )
 			{
 				MenuSound("menu/demoscroll");
 				ofs0 = ++sel0;
@@ -1583,9 +1585,9 @@ Class DemolitionistMenu : GenericMenu
 				// are we clicking where the scrollbar should be?
 				if ( mpos.x < 632 ) return res;
 				let bar = SWWMStatusBar(StatusBar);
-				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				if ( !FullHistory || (FullHistory.msg.Size() <= 1) ) return res;	// no scrollbar
 				// calculate offset
-				int szr = bar.FullHistory.Size()-1;
+				int szr = FullHistory.msg.Size()-1;
 				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -1846,9 +1848,9 @@ Class DemolitionistMenu : GenericMenu
 			else if ( tabs[curtab] == TAB_CHAT )
 			{
 				let bar = SWWMStatusBar(StatusBar);
-				if ( !bar || (bar.FullHistory.Size() <= 1) ) return res;	// no scrollbar
+				if ( !FullHistory || (FullHistory.msg.Size() <= 1) ) return res;	// no scrollbar
 				// calculate offset
-				int szr = bar.FullHistory.Size()-1;
+				int szr = FullHistory.msg.Size()-1;
 				int step = szr-clamp(rnd((mpos.y-24.)/(353./szr)),0,szr);
 				if ( step != sel0 ) MenuSound("menu/demoscroll");
 				ofs0 = sel0 = step;
@@ -3711,24 +3713,24 @@ Class DemolitionistMenu : GenericMenu
 		else if ( tabs[curtab] == TAB_CHAT )
 		{
 			let bar = SWWMStatusBar(StatusBar);
-			if ( !bar || (bar.FullHistory.Size() <= 0) )
+			if ( !FullHistory || (FullHistory.msg.Size() <= 0) )
 			{
 				str = StringTable.Localize("$SWWM_NOCHAT");
 				Screen.DrawText(fnt,Font.CR_FIRE,origin.x+(640-fnt.StringWidth(str))/2,origin.y+(400-fnt.GetHeight())/2,str,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				return;
 			}
 			int margin = TewiFont.StringWidth("[00:00:00] ");
-			int ofs = bar.FullHistory.Size()-(1+sel0);
+			int ofs = FullHistory.msg.Size()-(1+sel0);
 			xx = 3;
 			yy = 379;
 			for ( int i=ofs; i>=0; i-- )
 			{
-				int col = (bar.FullHistory[i].type==PRINT_TEAMCHAT)?msg4color:msg3color;
-				int thour = (bar.FullHistory[i].tic/(3600*GameTicRate));
-				int tmin = (bar.FullHistory[i].tic/(60*GameTicRate))%60;
-				int tsec = (bar.FullHistory[i].tic/GameTicRate)%60;
+				int col = (FullHistory.msg[i].type==PRINT_TEAMCHAT)?msg4color:msg3color;
+				int thour = (FullHistory.msg[i].tic/(3600*GameTicRate));
+				int tmin = (FullHistory.msg[i].tic/(60*GameTicRate))%60;
+				int tsec = (FullHistory.msg[i].tic/GameTicRate)%60;
 				str = String.Format("\cu[\c-%02d\cu:\c-%02d\cu:\c-%02d\cu]\c- ",thour,tmin,tsec);
-				BrokenLines l = fnt.BreakLines(bar.FullHistory[i].str,626-margin);
+				BrokenLines l = fnt.BreakLines(FullHistory.msg[i].str,626-margin);
 				double by = yy-13*l.Count();
 				if ( by < 17 )
 				{
@@ -3742,11 +3744,11 @@ Class DemolitionistMenu : GenericMenu
 				yy = by;
 			}
 			// scrollbar
-			if ( bar.FullHistory.Size() > 1 )
+			if ( FullHistory.msg.Size() > 1 )
 			{
 				Screen.DrawTexture(WindowSeparator,false,origin.x+631,origin.y+14,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 				xx = 634;
-				int szr = bar.FullHistory.Size()-1;
+				int szr = FullHistory.msg.Size()-1;
 				yy = floor((szr-sel0)*(353./szr))+17;
 				Screen.DrawText(TewiFont,Font.CR_FIRE,origin.x+xx,origin.y+yy,"▮",DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			}

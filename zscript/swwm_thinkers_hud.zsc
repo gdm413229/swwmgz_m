@@ -1,5 +1,33 @@
 // thinkers related to the hud
 
+// "Full History" contains all messages since session start, nothing is flushed
+// this can be accessed from a section of the knowledge base
+Class SWWMFullHistory : Thinker
+{
+	Array<MsgLine> msg;
+
+	static clearscope SWWMFullHistory Get()
+	{
+		let fh = SWWMFullHistory(ThinkerIterator.Create("SWWMFullHistory",STAT_STATIC).Next());
+		return fh;
+	}
+
+	static void PushMessage( String str, int tic, int type )
+	{
+		let fh = SWWMFullHistory(ThinkerIterator.Create("SWWMFullHistory",STAT_STATIC).Next());
+		if ( !fh )
+		{
+			fh = new("SWWMFullHistory");
+			fh.ChangeStatNum(STAT_STATIC);
+		}
+		MsgLine m = new("MsgLine");
+		m.str = str;
+		m.tic = tic;
+		m.type = type;
+		fh.msg.Push(m);
+	}
+}
+
 Enum EScoreObjType
 {
 	ST_Score,

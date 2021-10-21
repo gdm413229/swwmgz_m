@@ -3,6 +3,45 @@
 Class EndgameBossMarker : Inventory {}
 Class BossMarker : Inventory {}
 
+Class IconMessage : Inventory
+{
+	override void DoEffect()
+	{
+		if ( Owner.InStateSequence(Owner.CurState,Owner.SeeState) )
+		{
+			Console.MidPrint(smallfont,StringTable.Localize("$BOSSLINE_IOS"));
+			DepleteOrDestroy();
+			return;
+		}
+	}
+}
+
+Class ArchangelusMessage : Inventory
+{
+	override void DoEffect()
+	{
+		if ( Owner.InStateSequence(Owner.CurState,Owner.SeeState) )
+		{
+			Console.MidPrint(smallfont,StringTable.Localize("$BOSSLINE_ARCHANGELUS"));
+			DepleteOrDestroy();
+			return;
+		}
+	}
+}
+
+Class DSparilMessage : Inventory
+{
+	override void DoEffect()
+	{
+		if ( Owner.InStateSequence(Owner.CurState,Owner.SeeState) )
+		{
+			Console.MidPrint(smallfont,StringTable.Localize("$BOSSLINE_DSPARIL"));
+			DepleteOrDestroy();
+			return;
+		}
+	}
+}
+
 extend Class SWWMHandler
 {
 	String bosstag;
@@ -179,7 +218,10 @@ extend Class SWWMHandler
 				e.Thing.GiveInventory('EndgameBossMarker',1);
 			}
 			if ( e.Thing is 'BossEye' )
+			{
 				bossviewactor = e.Thing;
+				e.Thing.GiveInventory('IconMessage',1);
+			}
 			bosstag = "$BT_IOS";
 		}
 		else if ( bossmap == MAP_DLVL08 )
@@ -237,6 +279,7 @@ extend Class SWWMHandler
 				bosstag = "$BT_DSPARIL2";
 				e.Thing.GiveInventory('BossMarker',1);
 				e.Thing.GiveInventory('EndgameBossMarker',1);
+				e.Thing.GiveInventory('DSparilMessage',1);
 			}
 		}
 		else if ( bossmap == MAP_HMAP38 )
@@ -321,8 +364,19 @@ extend Class SWWMHandler
 		}
 		else if ( bossmap == MAP_EVMAP30 )
 		{
-			if ( e.Thing.GetClassName() == "ArchangelusA" )
+			if ( e.Thing.GetClassName() == "Archangelus" )
 			{
+				bossactors.Push(e.Thing);
+				bossviewactor = e.Thing;
+				bosstag = "$BT_ARCHANGELUS";
+				e.Thing.GiveInventory('ArchangelusMessage',1);
+			}
+			else if ( e.Thing.GetClassName() == "ArchangelusA" )
+			{
+				// first phase
+				bossactors.Clear();
+				bossviewactor = null;
+				initialized = false;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;
 				if ( trk ) trk.bBOSS = true;
@@ -334,6 +388,7 @@ extend Class SWWMHandler
 			{
 				// second phase
 				bossactors.Clear();
+				bossviewactor = null;
 				initialized = false;
 				bossactors.Push(e.Thing);
 				if ( upgrademe ) e.Thing.StartHealth = e.Thing.Health *= 5;

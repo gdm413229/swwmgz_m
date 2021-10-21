@@ -101,8 +101,10 @@ Class SWWMOneLiner : HUDMessageBase
 		}
 		int h = fnt.GetHeight();
 		int fh = h*l.Count();
-		double alph = clamp((curtime/20.)+1.,0.,1.);
-		alph *= clamp((lifespan-curtime)/10.,0.,1.);
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		double fcurtime = curtime-fractic;
+		double alph = clamp((fcurtime/20.)+1.,0.,1.);
+		alph *= clamp((lifespan-fcurtime)/10.,0.,1.);
 		Screen.Dim("Black",alph*.8,int((Screen.GetWidth()-(maxlen+12)*hs.x)/2.),int(bottom-(margin+2+fh)*hs.y),int((maxlen+12)*hs.x),int((fh+4)*hs.y));
 		int yy = margin+fh;
 		for ( int i=0; i<l.Count(); i++ )
@@ -140,7 +142,9 @@ Class GenericFlash : HUDMessageBase
 	{
 		if ( automapactive || (visibility != BaseStatusBar.HUDMSGLayer_UnderHUD) ) return;
 		if ( cam && (players[consoleplayer].camera != cam) ) return;
-		Screen.Dim(col,(col.a/255.)*alpha*swwm_flashstrength,0,0,Screen.GetWidth(),Screen.GetHeight());
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		double falpha = alpha-fractic*(1./duration);
+		Screen.Dim(col,(col.a/255.)*falpha*swwm_flashstrength,0,0,Screen.GetWidth(),Screen.GetHeight());
 	}
 }
 
@@ -199,7 +203,9 @@ Class SWWMAchievementNotification : HUDMessageBase
 		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		double alpha = (tics<fadeintics)?(tics/fadeintics):(tics<(fadeintics+holdtics))?1.:(1.-(tics-(fadeintics+holdtics))/fadeouttics);
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		double ftics = tics+fractic;
+		double alpha = (ftics<fadeintics)?(ftics/fadeintics):(ftics<(fadeintics+holdtics))?1.:(1.-(ftics-(fadeintics+holdtics))/fadeouttics);
 		Vector2 pos = (int(ss.x-256)/2,(ss.y-(margin+36))+int(margin+40)*(1.-alpha));
 		String loctag = StringTable.Localize(tag);
 		String loctxt = num?String.Format(StringTable.Localize(txt),num):StringTable.Localize(txt);
@@ -240,7 +246,9 @@ Class SWWMSewerCount : HUDMessageBase
 	override void Draw( int bottom, int visibility )
 	{
 		if ( tics > 100 ) return;
-		double alph = clamp(tics/20.,0.,1.);
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		double ftics = tics-fractic;
+		double alph = clamp(ftics/20.,0.,1.);
 		double x = (Screen.GetWidth()-(newsmallfont.StringWidth(str)*CleanXFac*2))/2;
 		double y = int(Screen.GetHeight()*.75)-(newsmallfont.GetHeight()*CleanYFac*2)/2;
 		Screen.DrawText(newsmallfont,Font.CR_GREEN,x,y,str,DTA_ScaleX,CleanXFac*2,DTA_ScaleY,CleanYFac*2,DTA_Alpha,alph);
@@ -296,7 +304,9 @@ Class SWWMWeaponTooltip : HUDMessageBase
 		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
 		Vector2 ss = (Screen.GetWidth()/hs.x,Screen.GetHeight()/hs.y);
-		double alpha = (tics<fadeintics)?(tics/fadeintics):(tics<(fadeintics+holdtics))?1.:(1.-(tics-(fadeintics+holdtics))/fadeouttics);
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		double ftics = tics+fractic;
+		double alpha = (ftics<fadeintics)?(ftics/fadeintics):(ftics<(fadeintics+holdtics))?1.:(1.-(ftics-(fadeintics+holdtics))/fadeouttics);
 		int w, h;
 		[w, h] = TexMan.GetSize(icon);
 		int w2 = w;
@@ -388,16 +398,7 @@ Class SWWMDirectMessage : HUDMessageBase
 		l = tfnt.BreakLines(txt,220);
 		// append to the player's chat log (if it's valid)
 		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;
-		let bar = SWWMStatusBar(StatusBar);
-		if ( bar )
-		{
-			let l = new("MsgLine");
-			l.str = chrname..": "..txt;
-			l.tic = level.totaltime;
-			l.rep = 1;
-			l.type = PRINT_CHAT;
-			bar.FullHistory.Push(l);
-		}
+		EventHandler.SendNetworkEvent("swwmstoremessage."..chrname..": "..txt,level.totaltime,PRINT_CHAT,consoleplayer);
 	}
 
 	private void DrawText()
@@ -417,7 +418,7 @@ Class SWWMDirectMessage : HUDMessageBase
 		}
 	}
 
-	private void DrawAvatar()
+	private void DrawAvatar( double fractic )
 	{
 		int blinkframe = -1;
 		switch ( blinktics )
@@ -437,7 +438,7 @@ Class SWWMDirectMessage : HUDMessageBase
 			if ( blinkframe >= 0 ) Screen.DrawTexture(Blink[blinkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 			if ( talkframe >= 0 ) Screen.DrawTexture(Talk[talkframe],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true);
 		}
-		Screen.DrawTexture(Noiz[(gametic/2)%4],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Multiply);
+		Screen.DrawTexture(Noiz[int(((gametic+fractic)/GameTicRate)*15)%4],false,origin.x+2,origin.y+2,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_LegacyRenderStyle,STYLE_Multiply);
 	}
 
 	private int TotalLength()
@@ -567,8 +568,9 @@ Class SWWMDirectMessage : HUDMessageBase
 	{
 		if ( (seqnum < 0) || (seqnum > (seqcnt+1)) ) return;
 		double alph = 1.;
-		if ( seqnum == 0 ) alph = fadein/15.;
-		else if ( seqnum == (seqcnt+1) ) alph = 1.-fadeout/30.;
+		double fractic = SWWMStatusBar(statusbar)?SWWMStatusBar(statusbar).fractic:0;
+		if ( seqnum == 0 ) alph = (fadein+fractic)/15.;
+		else if ( seqnum == (seqcnt+1) ) alph = 1.-(fadeout+fractic)/30.;
 		if ( swwm_hudscale <= 0 ) hs = StatusBar.GetHUDScale();
 		else hs.x = swwm_hudscale;
 		hs.y = hs.x;
@@ -576,7 +578,7 @@ Class SWWMDirectMessage : HUDMessageBase
 		origin = (int(ss.x-270)/2,swwm_hudmargin+70);
 		Screen.DrawTexture(MessageBox,false,origin.x,origin.y,DTA_VirtualWidthF,ss.x,DTA_VirtualHeightF,ss.y,DTA_KeepRatio,true,DTA_Alpha,alph);
 		if ( (seqnum < 1) || (seqnum > seqcnt) ) return;
-		DrawAvatar();
+		DrawAvatar(fractic);
 		DrawText();
 	}
 }

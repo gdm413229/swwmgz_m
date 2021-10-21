@@ -2745,10 +2745,11 @@ Class Demolitionist : PlayerPawn
 		}
 		Super.AddInventory(item);
 		if ( !player ) return;
-		if ( !bInDefaultInventory )
+		String cn = item.GetClassName();
+		if ( !bInDefaultInventory && (level.maptime > 0) && (!(item is 'SWWMWeapon') || !(cn.Left(4) ~== "Dual")) )	// dual weapons are ignored here, as they're handled separately
 		{
 			// add lore if any
-			SWWMLoreLibrary.Add(player,item.GetClassName());
+			SWWMLoreLibrary.Add(player,cn);
 			// weapon get oneliner
 			if ( (item is 'Weapon') && !(item is 'SWWMGesture') && !(item is 'SWWMItemGesture') && mystats && !mystats.GotWeapon(Weapon(item).GetClass()) && CheckLocalView() )
 				SWWMHandler.AddOneliner("getweapon",2);

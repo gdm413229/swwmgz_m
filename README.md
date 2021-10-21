@@ -113,9 +113,9 @@ Coming from the **Doom** modding side of things, this gun really packs a punch, 
 
 **Reload:** Unload the current shell and load a new one. Unspent shells are re-added to their respective ammo type pool (or dropped if you can't hold more).
 
-The **Spreadgun** uses 10 gauge ammunition, apparently just for the sake of making it feel more powerful due to the increased recoil.
+The **Spreadgun** uses 6 gauge ammunition, apparently just for the sake of making it feel more powerful due to the increased recoil.
 
-### 10Ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows
+### 6ga shells ~ Replaces Clip / Shells, Wand Crystal / Ethereal Arrows
 ![](docimg/shells.png)
 
 Available in the following types, with varying chances of appearing depending

@@ -512,6 +512,7 @@ Class Demolitionist : PlayerPawn
 			if ( !thesight && !CheckSight(i,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			SWWMItemSense.Spawn(self,i);
 		}
+		bt.Destroy();
 	}
 	void CheckDefaceTexture()
 	{
@@ -935,6 +936,7 @@ Class Demolitionist : PlayerPawn
 				t.A_SpawnParticle(pcol,SPF_FULLBRIGHT,30,2.,0,ppos.x,ppos.y,ppos.z,dir.x*.2,dir.y*.2,dir.z*.2,0,0,.05,alph,-1,-2./30.);
 			}
 		}
+		bt.Destroy();
 	}
 	override void CheckPoison()
 	{
@@ -2710,6 +2712,17 @@ Class Demolitionist : PlayerPawn
 		mystats.secrets++;
 		return true;
 	}
+	override void RemoveInventory( Inventory item )
+	{
+		// stop any looping sounds our current weapon had
+		if ( (item is 'SWWMWeapon') && player && (SWWMWeapon(item) == player.ReadyWeapon) )
+		{
+			A_StopSound(CHAN_WEAPONEXTRA);
+			A_StopSound(CHAN_WEAPONEXTRA2);
+			A_StopSound(CHAN_WEAPONEXTRA3);
+		}
+		Super.RemoveInventory(item);
+	}
 	override void AddInventory( Inventory item )
 	{
 		// hackaround for replaced keys
@@ -2916,6 +2929,14 @@ Class Demolitionist : PlayerPawn
 		// we need the crouch button state to be preserved for other functions
 		if ( wascrouching ) player.cmd.buttons |= BT_CROUCH;
 	}
+	override void PreTravelled()
+	{
+		// clean up attached actors
+		if ( selflight ) selflight.Destroy();
+		// inventory wipes
+		if ( FindInventory("InventoryWipeToken") )
+			SWWMUtility.WipeInventory(self,swwm_resetscore);
+	}
 	override void Travelled()
 	{
 		// reinitialize
@@ -2943,7 +2964,8 @@ Class Demolitionist : PlayerPawn
 		}
 		// re-add ourselves to the "suckable list" (otherwise the Ynykron Singularity won't hurt us)
 		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
-		if ( hnd ) hnd.SuckableActors.Push(self);
+		if ( hnd && (hnd.SuckableActors.Find(self) >= hnd.SuckableActors.Size()) )
+			hnd.SuckableActors.Push(self);
 		// re-attach shadow
 		if ( swwm_shadows <= 0 ) return;
 		let ti = ThinkerIterator.Create("SWWMShadow");
@@ -2954,6 +2976,7 @@ Class Demolitionist : PlayerPawn
 				return;	// shadow already attached
 		}
 		SWWMShadow.Track(self);
+		ti.Destroy();
 	}
 	override bool PreTeleport( Vector3 destpos, double destangle, int flags )
 	{

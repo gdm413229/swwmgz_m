@@ -76,7 +76,6 @@ Class Ynykron : SWWMWeapon
 
 	override void Travelled()
 	{
-		Super.Travelled();
 		if ( Owner.player && (Owner.player.Readyweapon == self) )
 		{
 			Owner.A_StartSound("ynykron/idle",CHAN_WEAPONEXTRA,CHANF_LOOP,.3,4.);

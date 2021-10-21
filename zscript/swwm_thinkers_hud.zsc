@@ -117,11 +117,28 @@ enum EInterestType
 	INT_Exit
 };
 
+Class SWWMInterestMarker : MapMarker
+{
+	Default
+	{
+		Scale 2.;
+		Args 0, 0, 1;
+		+DORMANT;
+	}
+	States
+	{
+	Spawn:
+		EIXT AB -1;
+		Stop;
+	}
+}
+
 Class SWWMInterest : Thinker
 {
 	int type;
 	Key trackedkey;
 	Line trackedline;
+	Actor marker;
 	Vector3 pos;
 	SWWMInterest prev, next;
 	String keytag;
@@ -139,8 +156,23 @@ Class SWWMInterest : Thinker
 		{
 			i.type = INT_Key;
 			i.keytag = thekey.GetTag();
+			i.marker = Actor.Spawn("SWWMInterestMarker",thekey.pos);
+			if ( thekey is 'SWWMKey' )
+			{
+				Class<Key> k = thekey.species;
+				let def = GetDefaultByType(k);
+				i.marker.picnum = def.SpawnState.GetSpriteTexture(0);
+			}
+			else i.marker.picnum = thekey.SpawnState.GetSpriteTexture(0);
+			i.marker.target = thekey;
 		}
-		else if ( theline ) i.type = INT_Exit;
+		else if ( theline )
+		{
+			i.type = INT_Exit;
+			i.marker = Actor.Spawn("SWWMInterestMarker",pos);
+			if ( theline.special == Exit_Secret )
+				i.marker.SetState(i.marker.SpawnState+1);
+		}
 		else
 		{
 			i.Destroy();
@@ -177,8 +209,16 @@ Class SWWMInterest : Thinker
 	override void Tick()
 	{
 		// update
-		if ( (type == INT_Key) && (!trackedkey || trackedkey.Owner) ) Destroy();
-		else if ( trackedkey ) pos = trackedkey.Vec3Offset(0,0,trackedkey.height/2);
+		if ( (type == INT_Key) && (!trackedkey || trackedkey.Owner) )
+		{
+			marker.Destroy();
+			Destroy();
+		}
+		else if ( trackedkey )
+		{
+			pos = trackedkey.Vec3Offset(0,0,trackedkey.height/2);
+			marker.SetOrigin(pos,true);
+		}
 	}
 }
 

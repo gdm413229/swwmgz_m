@@ -141,18 +141,6 @@ extend Class SWWMHandler
 			if ( !c.CallTryPickup(p.mo) )
 				c.Destroy();
 		}
-		// reset inventory (including unclearables) on forced pistol starts (must have visited at least one map, though)
-		if ( p.mo.FindInventory("InventoryWipeToken") || (swwm_pistolstart && (s.lstats.Size() > 0) && ((s.lastcluster != level.cluster) || ((swwm_pistolstart == 1) && !(level.clusterflags&LevelLocals.CLUSTER_HUB)))) )
-			SWWMUtility.WipeInventory(p.mo,swwm_resetscore);
-		// play the select sound of the current weapon if we travelled
-		if ( (p.ReadyWeapon is 'SWWMWeapon') && SWWMWeapon(p.ReadyWeapon).hastravelled )
-			SWWMWeapon(p.ReadyWeapon).autoupsnd = level.maptime+1;
-		// reset the travelled flag for all weapons
-		for ( Inventory i=p.mo.inv; i; i=i.inv )
-		{
-			if ( !SWWMWeapon(i) ) continue;
-			SWWMWeapon(i).hastravelled = false;
-		}
 		// cap health to 200
 		if ( p.Health > 200 ) p.Health = p.mo.Health = 200;
 	}

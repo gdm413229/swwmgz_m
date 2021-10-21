@@ -353,24 +353,6 @@ Class SWWMStaticHandler : StaticEventHandler
 
 	override void UiTick()
 	{
-		// HACK! Graf, please let us change this in a cleaner way
-		if ( menuDelegate.GetClass() == 'DoomMenuDelegate' )
-		{
-			menuDelegate.Destroy();
-			menuDelegate = new("SWWMMenuDelegate");
-		}
-		// Hey Graf how about you let us replace the class used for the
-		// "Read This!" menu in mapinfo/gameinfo or something so I
-		// don't have to do this hack here?
-		Menu cur = Menu.GetCurrentMenu();
-		if ( cur is 'ReadThisMenu' )
-		{
-			Menu oldpt = cur.mParentMenu;
-			cur.Close();
-			Menu.SetMenu('SWWMHelpMenu');
-			cur = Menu.GetCurrentMenu();
-			if ( cur ) cur.mParentMenu = oldpt;
-		}
 		// Fancy crash effect
 		if ( (gamestate == GS_LEVEL) || (gamestate == GS_TITLELEVEL) )
 		{

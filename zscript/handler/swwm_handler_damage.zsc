@@ -186,7 +186,7 @@ extend Class SWWMHandler
 		}
 		int pnum = src.PlayerNumber();
 		// achievement stuff
-		if ( e.Thing.IsHostile(src) )
+		if ( e.Thing.IsHostile(src) && (e.Thing.bISMONSTER || e.Thing.player) )
 		{
 			if ( (e.Thing.bBOSS||e.Thing.FindInventory("BossMarker")) && ((e.DamageType == 'Dash') || (e.DamageType == 'Buttslam')) )
 				SWWMUtility.AchievementProgressInc("bossdash",1,src.player);
@@ -217,6 +217,18 @@ extend Class SWWMHandler
 			{
 				onehpspree[pnum]++;
 				SWWMUtility.AchievementProgress("onehp",onehpspree[pnum],src.player);
+			}
+			// tasty treats
+			if ( swwm_demoslayer && (src.Health < 100) )
+			{
+				int amt = clamp(min(-e.Thing.Health,-e.Thing.GetGibHealth())/5,0,20);
+				for ( int i=0; i<amt; i++ )
+				{
+					let a = Actor.Spawn("HealthOrb",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
+					a.vel.z = FRandom[Junk](4,12);
+					double ang = FRandom[Junk](0,360);
+					a.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](4,6);
+				}
 			}
 		}
 		// no credits unless it's a counted kill or marine (that isn't friendly) or another player in DM

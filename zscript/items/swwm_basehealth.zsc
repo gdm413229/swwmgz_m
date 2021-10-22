@@ -138,6 +138,7 @@ Class SWWMHealth : Inventory abstract
 				newdamage = newdamage-GetDefaultByType(giveme).Amount;
 				if ( newdamage < 0 ) Owner.GiveBody(-newdamage,GetDefaultByType(giveme).MaxAmount);
 				newdamage = max(0,newdamage);
+				if ( !morethanonce ) SWWMHandler.HealthFlash(Owner.PlayerNumber());
 				AutoUseExtra(morethanonce);
 				morethanonce = true;
 				Amount--;

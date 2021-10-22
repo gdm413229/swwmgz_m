@@ -1,5 +1,127 @@
 // player effects
 
+// drop from monsters when using "Demoslayer" fun option
+// heals up to 100 HP when touched
+Class HealthOrb : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius 4;
+		Height 8;
+		Scale .5;
+		BounceFactor .75;
+		WallBounceFactor .75;
+		Gravity .5;
+		PROJECTILE;
+		+THRUACTORS;
+		-NOGRAVITY;
+		+NOTELEPORT;
+		+DONTSPLASH;
+		+BOUNCEONWALLS;
+		+BOUNCEONFLOORS;
+		+BOUNCEONCEILINGS;
+		+CANBOUNCEWATER;
+		+FORCEXYBILLBOARD;
+	}
+	override void Tick()
+	{
+		Vector3 oldp = pos;
+		Super.Tick();
+		if ( !isFrozen() )
+		{
+			let t = Spawn("HealthOrbTrail",pos);
+			t.scale *= abs(scale.x);
+			t.alpha *= alpha;
+			scale *= .995;
+			alpha = abs(scale.x)*2.;
+			if ( abs(scale.x) < .1 )
+			{
+				Destroy();
+				return;
+			}
+		}
+		int np = -1;
+		double mdist = 600.;
+		for ( int i=0; i<MAXPLAYERS; i++ )
+		{
+			if ( !playeringame[i] || (players[i].Health < 0) || !players[i].mo || !CheckSight(players[i].mo,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			double dist = Distance3D(players[i].mo);
+			if ( dist > mdist ) continue;
+			mdist = dist;
+			np = i;
+		}
+		if ( np == -1 ) return;
+		let mo = players[np].mo;
+		if ( SWWMUtility.BoxIntersect(self,mo,pad:8) )
+		{
+			int flg = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
+			if ( mo.CheckLocalView() ) flg |= CHANF_NOPAUSE;
+			mo.A_StartSound("misc/health_pkup",CHAN_ITEM,flg);
+			int hp = int(ceil(abs(scale.x*10)));
+			mo.GiveBody(hp,100);
+			SWWMHandler.HealthFlash(np);
+			SWWMScoreObj.Spawn(hp,mo.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+mo.Height/2),ST_Health);
+			Destroy();
+			return;
+		}
+		if ( isFrozen() ) return;
+		Vector3 dirto = level.Vec3Diff(pos,mo.Vec3Offset(0,0,mo.Height/2));
+		double distto = dirto.length();
+		dirto /= distto;
+		vel += dirto*((600.-distto)/400.)**2.;
+		vel.z += .2;
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SpriteOffset = (0,-4);
+		Scale.x *= RandomPick[Junk](-1,-1);
+		Scale.y *= RandomPick[Junk](-1,-1);
+	}
+	States
+	{
+	Spawn:
+		BLPF E -1 Bright;
+		Stop;
+	}
+}
+Class HealthOrbTrail : Actor
+{
+	Default
+	{
+		RenderStyle "Add";
+		Radius .1;
+		Height 0.;
+		Scale .25;
+		Alpha .5;
+		+FORCEXYBILLBOARD;
+		+NOGRAVITY;
+		+NOBLOCKMAP;
+		+DONTSPLASH;
+		+NOTELEPORT;
+		+NOINTERACTION;
+	}
+	override void Tick()
+	{
+		if ( isFrozen() ) return;
+		alpha *= .9;
+		scale *= 1.05;
+		if ( alpha < .05 ) Destroy();
+	}
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SpriteOffset = (0,-4);
+	}
+	States
+	{
+	Spawn:
+		BLPS E -1 Bright;
+		Stop;
+	}
+}
+
 Class DashTrail : Actor
 {
 	Default

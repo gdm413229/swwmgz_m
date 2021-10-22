@@ -221,13 +221,15 @@ extend Class SWWMHandler
 			// tasty treats
 			if ( swwm_demoslayer && (src.Health < 100) )
 			{
-				int amt = clamp(min(-e.Thing.Health,-e.Thing.GetGibHealth())/5,0,20);
+				int amt = clamp(e.Thing.SpawnHealth()/20,1,10);
+				if ( e.Thing.Health < (e.Thing.GetGibHealth()*2) ) amt *= 3;
+				else if ( e.Thing.Health < e.Thing.GetGibHealth() ) amt *= 2;
 				for ( int i=0; i<amt; i++ )
 				{
 					let a = Actor.Spawn("HealthOrb",e.Thing.Vec3Offset(0,0,e.Thing.Height/2));
-					a.vel.z = FRandom[Junk](4,12);
+					a.vel.z = FRandom[Junk](4,16);
 					double ang = FRandom[Junk](0,360);
-					a.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](4,6);
+					a.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](4,8);
 				}
 			}
 		}

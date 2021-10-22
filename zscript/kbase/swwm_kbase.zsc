@@ -2328,7 +2328,10 @@ Class DemolitionistMenu : GenericMenu
 		else menuactive = Menu.OnNoPause;
 		// forcibly tick hud (mainly so interpolators can still update in the background)
 		if ( !multiplayer && (menuactive == Menu.On) )
-			StatusBar.Tick();
+		{
+			let bar = SWWMStatusBar(StatusBar);
+			if ( bar ) bar.TickInterpolators();
+		}
 		if ( tabs[curtab] == TAB_INVENTORY )
 		{
 			invlist.Clear();

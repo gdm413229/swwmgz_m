@@ -12,7 +12,7 @@ Class HealthOrb : Actor
 		Scale .5;
 		BounceFactor .75;
 		WallBounceFactor .75;
-		Gravity .5;
+		Gravity .35;
 		PROJECTILE;
 		+THRUACTORS;
 		-NOGRAVITY;
@@ -42,10 +42,10 @@ Class HealthOrb : Actor
 			}
 		}
 		int np = -1;
-		double mdist = 600.;
+		double mdist = 1000.;
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
-			if ( !playeringame[i] || (players[i].Health < 0) || !players[i].mo || !CheckSight(players[i].mo,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
+			if ( !playeringame[i] || (players[i].Health <= 0) || !players[i].mo || !CheckSight(players[i].mo,SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY) ) continue;
 			double dist = Distance3D(players[i].mo);
 			if ( dist > mdist ) continue;
 			mdist = dist;
@@ -53,7 +53,7 @@ Class HealthOrb : Actor
 		}
 		if ( np == -1 ) return;
 		let mo = players[np].mo;
-		if ( SWWMUtility.BoxIntersect(self,mo,pad:8) )
+		if ( (GetAge() > 5) && SWWMUtility.BoxIntersect(self,mo,pad:8) )
 		{
 			int flg = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
 			if ( mo.CheckLocalView() ) flg |= CHANF_NOPAUSE;
@@ -69,8 +69,9 @@ Class HealthOrb : Actor
 		Vector3 dirto = level.Vec3Diff(pos,mo.Vec3Offset(0,0,mo.Height/2));
 		double distto = dirto.length();
 		dirto /= distto;
-		vel += dirto*((600.-distto)/400.)**2.;
-		vel.z += .2;
+		double fact = ((1000.-distto)/1000.)**2.;
+		vel *= 1.-.05*fact;
+		vel += (dirto+(0,0,.1))*fact*2.;
 	}
 	override void PostBeginPlay()
 	{

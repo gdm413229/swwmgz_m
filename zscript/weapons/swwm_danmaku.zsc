@@ -119,6 +119,7 @@ Class Eviscerator : SWWMWeapon
 		[x2, y2, z2] = swwm_CoordUtil.GetAxes(BulletSlope(),angle,roll);
 		origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+4*y-5*z);
 		int trail = CVar.GetCVar('swwm_funtrails',player).GetInt();
+		if ( trail == 8 ) trail = Random[Eviscerator](1,7);
 		for ( int i=0; i<25; i++ )
 		{
 			a = FRandom[Eviscerator](0,360);
@@ -131,8 +132,8 @@ Class Eviscerator : SWWMWeapon
 			p.vel = dir*p.speed*FRandom[Eviscerator](.9,1.1);
 			if ( invoker.extended ) p.vel *= 1.5;
 			if ( trail < 8 ) p.trailcolor = max(0,trail);
-			else if ( trail == 8 ) p.trailcolor = (i%6)+2;
-			else if ( trail == 9 )
+			else if ( trail == 9 ) p.trailcolor = (i%6)+2;
+			else if ( trail == 10 )
 			{
 				switch ( i%5 )
 				{

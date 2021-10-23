@@ -505,6 +505,7 @@ Class EvisceratorProj : Actor
 		}
 		int trail = 0;
 		if ( target && target.player ) trail = CVar.GetCVar('swwm_funtrails',target.player).GetInt();
+		if ( trail == 8 ) trail = Random[Eviscerator](0,7);
 		for ( int i=0; i<25; i++ )
 		{
 			p = EvisceratorChunk(Spawn("EvisceratorChunk",level.Vec3Offset(pos,spawnofs)));
@@ -517,8 +518,8 @@ Class EvisceratorProj : Actor
 			p.vel = (cos(p.angle)*cos(p.pitch),sin(p.angle)*cos(p.pitch),-sin(p.pitch))*(p.speed+FRandom[Eviscerator](-5,20));
 			p.target = target;
 			if ( trail < 8 ) p.trailcolor = max(0,trail);
-			else if ( trail == 8 ) p.trailcolor = (i%6)+2;
-			else if ( trail == 9 )
+			else if ( trail == 9 ) p.trailcolor = (i%6)+2;
+			else if ( trail == 10 )
 			{
 				switch ( i%5 )
 				{

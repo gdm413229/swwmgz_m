@@ -100,7 +100,7 @@ extend Class SWWMHandler
 		// reset score on dead players (death exit™)
 		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
-			if ( !playeringame[i] || (players[i].Health > 0) ) continue;
+			if ( !playeringame[i] || (players[i].playerstate != PST_DEAD) ) continue;
 			let c = SWWMCredits.Find(players[i]);
 			if ( c ) c.credits = c.hcredits = 0;
 		}
@@ -112,7 +112,7 @@ extend Class SWWMHandler
 		{
 			for ( int i=0; i<MAXPLAYERS; i++ )
 			{
-				if ( !playeringame[i] || !players[i].mo ) continue;
+				if ( !playeringame[i] || !players[i].mo || (players[i].playerstate == PST_DEAD) ) continue;
 				players[i].mo.GiveInventory("InventoryWipeToken",1);
 				// the playerpawn will know what to do with this in its PreTravelled()
 			}

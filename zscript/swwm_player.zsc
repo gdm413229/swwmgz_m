@@ -2949,7 +2949,7 @@ Class Demolitionist : PlayerPawn
 		// clean up attached actors
 		if ( selflight ) selflight.Destroy();
 		// inventory wipes
-		if ( FindInventory("InventoryWipeToken") )
+		if ( FindInventory("InventoryWipeToken") && (player.playerstate != PST_DEAD) )
 			SWWMUtility.WipeInventory(self,swwm_resetscore);
 	}
 	override void Travelled()

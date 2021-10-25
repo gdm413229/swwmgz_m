@@ -1,41 +1,52 @@
 HardwareShader Texture "graphics/HUD/HealthBarS.png"
 {
-	Shader "shaders/glsl/Fuzz_Gray.fp"
+	Shader "shaders/glsl/Fuzz.fp"
+	Define "GRAY_COLORS"
+	Define "BASE_RES" = "vec2(100.,12.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/HUD/EnemyBarS.png"
 {
-	Shader "shaders/glsl/Fuzz_GraySmall.fp"
+	Shader "shaders/glsl/Fuzz.fp"
+	Define "GRAY_COLORS"
+	Define "BASE_RES" = "vec2(50.,3.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/HUD/FuelBarS.png"
 {
-	Shader "shaders/glsl/Fuzz_GraySmall2.fp"
+	Shader "shaders/glsl/Fuzz.fp"
+	Define "GRAY_COLORS"
+	Define "BASE_RES" = "vec2(120.,3.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/HUD/HealthBarD.png"
 {
 	Shader "shaders/glsl/HealthBarD.fp"
+	Define "TEX_SIZE" = "vec2(120.,32.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/HUD/EnemyBarD.png"
 {
 	Shader "shaders/glsl/HealthBarD.fp"
+	Define "TEX_SIZE" = "vec2(70.,23.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/tempbg.png"
 {
 	Shader "shaders/glsl/Fuzz.fp"
+	Define "BASE_RES" = "vec2(640.,400.)"
 	Texture "noisetex" "textures/graynoise.png"
 }
 HardwareShader Texture "graphics/SWWMGZLogo.png"
 {
 	Shader "shaders/glsl/LogoAnimated.fp"
+	Define "TEX_SZ" = "vec2(2048.,1024.)"
 	Texture "LogoTex" "graphics/SWWMGZLogo_Layers.png"
 }
 HardwareShader Texture "graphics/M_SWWM.png"
 {
 	Shader "shaders/glsl/LogoAnimated.fp"
+	Define "TEX_SZ" = "vec2(256.,128.)"
 	Texture "LogoTex" "graphics/M_SWWM_Layers.png"
 }
 HardwareShader Sprite "MBRNB0"

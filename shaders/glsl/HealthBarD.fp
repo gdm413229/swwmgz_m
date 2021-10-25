@@ -8,7 +8,7 @@ void SetupMaterial( inout Material mat )
 		.008764, .002216, .000436, .000067, .000008
 	);
 	vec2 coord = vTexCoord.st;
-	vec2 bresl = textureSize(tex,0);
+	vec2 bresl = TEX_SIZE;
 	vec2 bof = 1./bresl;
 	bof *= .9+.4*texture(noisetex,vec2(fract(timer*.05))).x;
 	vec4 col = texture(tex,coord);

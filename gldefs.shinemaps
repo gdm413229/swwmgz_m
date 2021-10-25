@@ -52,12 +52,14 @@ HardwareShader Texture "models/matcap/leadmap.png"
 }
 HardwareShader Texture "models/matcap/barriermap.png"
 {
-	Shader "shaders/glsl/Shinemap_barrier.fp"
+	Shader "shaders/glsl/Shinemap.fp"
+	Define "BARRIER_MAP"
 	Texture "bartex" "models/barrierbar.png"
 }
 HardwareShader Texture "models/matcap/errormap.png"
 {
-	Shader "shaders/glsl/Shinemap_error.fp"
+	Shader "shaders/glsl/Shinemap.fp"
+	Define "AMBIENT_GLOW"
 }
 HardwareShader Texture "models/matcap/glassmap.png"
 {

@@ -1235,7 +1235,7 @@ Class Demolitionist : PlayerPawn
 			while ( (spd > 0) && bi.Next() )
 			{
 				a = bi.Thing;
-				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS || a.bCORPSE ) continue;
+				if ( !a || (a == self) || (!a.bSOLID && !a.bSHOOTABLE) || a.bTHRUACTORS || a.bCORPSE || !CanCollideWith(a,false) || !a.CanCollideWith(self,true) ) continue;
 				if ( !SWWMUtility.ExtrudeIntersect(self,a,dir*(spd+radius),8) ) continue;
 				if ( (a.pos.z <= a.floorz) && (a.height <= MaxStepHeight) ) continue;
 				Vector3 diff = level.Vec3Diff(pos,a.pos);

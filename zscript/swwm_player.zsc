@@ -75,6 +75,8 @@ Class Demolitionist : PlayerPawn
 
 	transient bool bWalking;
 
+	int airscreamtime;
+
 	Property DashFuel : dashfuel;
 
 	Default
@@ -1037,9 +1039,13 @@ Class Demolitionist : PlayerPawn
 				cairtime++;
 				if ( cairtime > mystats.airtime ) mystats.airtime = cairtime;
 				mystats.airdist += traveldist;
+				if ( (vel.z < -fallingscreamminspeed) && (vel.z > -fallingscreammaxspeed) && (player == players[consoleplayer]) )
+					SWWMHandler.AddOneliner("falling",2,30);
 			}
 			else
 			{
+				SWWMHandler.CancelOneliner("falling");
+				airscreamtime = 0;
 				cairtime = 0;
 				mystats.grounddist += traveldist;
 				SWWMUtility.AchievementProgressIncDouble("travel",traveldist/32000.,player);

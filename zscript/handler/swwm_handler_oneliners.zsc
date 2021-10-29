@@ -8,7 +8,7 @@ Class LastLine
 
 extend Class SWWMHandler
 {
-	transient String oneliner, onelinersnd;
+	transient String oneliner, onelinersnd, onelinertype;
 	transient int onelinertic, onelinerspan, onelinerlevel;
 	transient Array<LastLine> lastlines;
 
@@ -34,6 +34,7 @@ extend Class SWWMHandler
 			hnd.oneliner = String.Format("$SWWM_SUBS_%s_%s",voicetype.MakeUpper(),type.MakeUpper());
 			hnd.onelinersnd = String.Format("voice/%s/%s",voicetype,type);
 			hnd.onelinertic = gametic+delay;
+			hnd.onelinertype = type;
 			hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
 			if ( hnd.onelinerspan == 0 )
 			{
@@ -74,6 +75,7 @@ extend Class SWWMHandler
 		hnd.onelinersnd = String.Format("voice/%s/%s%d",voicetype,type,whichline);
 		hnd.onelinertic = gametic+delay;
 		hnd.onelinerspan = int(S_GetLength(hnd.onelinersnd)*GameTicRate);
+		hnd.onelinertype = type;
 		if ( hnd.onelinerspan == 0 )
 		{
 			if ( developer >= 2 ) Console.Printf("No sound for voice line '%s%d'",type,whichline);
@@ -81,6 +83,15 @@ extend Class SWWMHandler
 		}
 		hnd.onelinerlevel = level;
 		return hnd.onelinertic+hnd.onelinerspan;
+	}
+
+	static void CancelOneliner( String type )
+	{
+		let hnd = SWWMHandler(EventHandler.Find("SWWMHandler"));
+		if ( !hnd ) return;
+		if ( (hnd.onelinertype != type) || (hnd.onelinertic < gametic) ) return;
+		hnd.onelinertic = 0;
+		hnd.onelinerspan = 0;
 	}
 
 	private void OnelinerTick()

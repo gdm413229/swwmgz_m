@@ -6,7 +6,7 @@ Class DemolitionistMenuList ui
 	Array<DemolitionistMenuListItem> items;
 	int selected;
 
-	// functions to save time
+	// get the highest width among all items
 	int GetWidth()
 	{
 		int mw = 0;
@@ -17,12 +17,26 @@ Class DemolitionistMenuList ui
 		}
 		return mw;
 	}
+	// get the total height of all items combined
 	int GetHeight()
 	{
 		int th = 0;
 		for ( int i=0; i<items.Size(); i++ )
 			th += items[i].GetHeight();
 		return th;
+	}
+	// tick all items
+	void Ticker()
+	{
+		for ( int i=0; i<items.Size(); i++ )
+			items[i].Ticker();
+	}
+	// draw all items with a specific offset and clip region
+	void Drawer( Vector2 offset, int cliptop, int clipbottom, int clipleft, int clipright )
+	{
+		for ( int i=0; i<items.Size(); i++ )
+			items[i].Drawer((items[i].xpos,items[i].ypos)+offset,(i==selected),cliptop,clipbottom,clipleft,clipright);
+		// scrollbar drawing is handled by the tab, as the list itself is entirely unaware of its frame dimensions
 	}
 }
 
@@ -31,6 +45,7 @@ Class DemolitionistMenuListItem ui
 {
 	DemolitionistMenu master;
 	String label;
+	int xpos, ypos;
 
 	DemolitionistMenuListItem Init( DemolitionistMenu master, String txt )
 	{
@@ -50,8 +65,8 @@ Class DemolitionistMenuListItem ui
 	}
 
 	// checks if the mouse position is within bounds of the item
-	// (relative to item itself)
-	virtual bool CheckBounds( double x, double y )
+	// (relative to item itself, not offset coords)
+	virtual bool CheckBounds( int x, int y )
 	{
 		return false;
 	}

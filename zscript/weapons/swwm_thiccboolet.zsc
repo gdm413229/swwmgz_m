@@ -60,15 +60,11 @@ Class SilverBulletTracer : SpreadSlugTracer
 				ent.hitlocation = Results.HitPos;
 				ent.x = Results.HitVector;
 				ent.pastwall = pastwall;
+				ent.hitdamage = int(penetration);
 				if ( (Results.HitActor.Health >= int(penetration)) || Results.HitActor.bNODAMAGE )
-				{
-					ent.hitdamage = int(penetration);
 					penetration = 0;
-				}
 				else
 				{
-					int gibh = (Results.HitActor.GibHealth!=int.min)?Results.HitActor.GibHealth:-int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
-					ent.hitdamage = min(Results.HitActor.health-int(gibh*1.5),int(penetration));
 					int killdamage = min(Results.HitActor.health,int(penetration));
 					penetration = max(0,penetration-killdamage*.4);
 				}

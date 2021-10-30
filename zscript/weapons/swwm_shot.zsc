@@ -32,7 +32,7 @@ Class SpreadgunTracer : LineTracer
 			{
 				int amt = SWWMDamageAccumulator.GetAmount(Results.HitActor);
 				// getgibhealth isn't clearscope, fuck
-				int gibh = (Results.HitActor.GibHealth!=int.min)?Results.HitActor.GibHealth:-int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
+				int gibh = (Results.HitActor.GibHealth!=int.min)?-abs(Results.HitActor.GibHealth):-int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
 				// if gibbed, go through without dealing more damage
 				if ( Results.HitActor.health-amt <= gibh ) return TRACE_Skip;
 				let ent = new("HitListEntry");
@@ -95,7 +95,8 @@ Class SpreadSlugTracer : SpreadgunTracer
 				}
 				else
 				{
-					ent.hitdamage = min(Results.HitActor.health+int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor),int(penetration));
+					int gibh = (Results.HitActor.GibHealth!=int.min)?-abs(Results.HitActor.GibHealth):-int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
+					ent.hitdamage = min(Results.HitActor.health+abs(gibh),int(penetration));
 					penetration = max(0,penetration-ent.hitdamage);
 				}
 				hitlist.Push(ent);

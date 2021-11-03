@@ -1088,7 +1088,7 @@ Class RagekitPower : Powerup
 				SWWMScoreObj.Spawn(1,Owner.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+Owner.Height/2),ST_Health);
 			Owner.A_AlertMonsters(swwm_uncapalert?0:2000);
 			if ( (Owner.player == players[consoleplayer]) && (gametic > lastrage) && (swwm_mutevoice < 2) )
-				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+40;
+				lastrage = SWWMHandler.AddOneliner("ragekit",2,5)+20;
 			Owner.A_QuakeEx(2,2,2,Random[Rage](1,2),0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:.5);
 			lastpulse = max(lastpulse,gametic+10);
 			Demolitionist(Owner).lastbump *= .995;

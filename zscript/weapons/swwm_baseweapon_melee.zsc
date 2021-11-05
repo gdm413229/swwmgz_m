@@ -368,16 +368,6 @@ extend Class SWWMWeapon
 		if ( hits.Size() <= 0 ) return false;
 		bool blooded = false;
 		bool bloodless = false;
-		if ( raging )
-		{
-			invoker.bEXTREMEDEATH = true;
-			invoker.bNOEXTREMEDEATH = false;
-		}
-		else
-		{
-			invoker.bEXTREMEDEATH = false;
-			invoker.bNOEXTREMEDEATH = true;
-		}
 		int flg = DMG_USEANGLE|DMG_THRUSTLESS;
 		if ( raging ) flg |= DMG_FOILINVUL;
 		int quakin = raging?8:2;
@@ -414,8 +404,6 @@ extend Class SWWMWeapon
 			}
 		}
 		self.angle += clamp(diff/hits.Size(),-5.,5.);	// averaged reorient
-		invoker.bEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
-		invoker.bNOEXTREMEDEATH = invoker.default.bEXTREMEDEATH;
 		A_QuakeEx(quakin/2,quakin/2,quakin/2,3,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.06*quakin);
 		if ( raging )
 		{

@@ -106,20 +106,12 @@ Class LoveHeart : Actor
 
 	override int DoSpecialDamage( Actor target, int damage, Name damagetype )
 	{
+		bEXTREMEDEATH = false;
+		bNOEXTREMEDEATH = false;
 		SWWMStats s = null;
 		if ( Demolitionist(self.target) ) s = Demolitionist(self.target).mystats;
 		if ( s ) s.smooch++;
 		let raging = RagekitPower(self.target.FindInventory("RagekitPower"));
-		if ( raging )
-		{
-			bEXTREMEDEATH = true;
-			bNOEXTREMEDEATH = false;
-		}
-		else
-		{
-			bEXTREMEDEATH = false;
-			bNOEXTREMEDEATH = true;
-		}
 		if ( (target is 'WolfensteinSS') || (target.Species == 'WolfensteinSS') ) target.bFRIENDLY = false;
 		if ( target.IsFriend(self.target) || SWWMUtility.IdentifyingDog(target) )
 		{
@@ -163,7 +155,6 @@ Class LoveHeart : Actor
 		{
 			damage = int.max;
 			bEXTREMEDEATH = true;
-			bNOEXTREMEDEATH = false;
 		}
 		else if ( target is 'SWWMHangingKeen' )
 			damage = max(target.Health,damage);	// rescued by love :3
@@ -171,7 +162,6 @@ Class LoveHeart : Actor
 		{
 			// no cute demon girl can resist demo's charm
 			damage = max(target.Health,damage);
-			bEXTREMEDEATH = false;
 			bNOEXTREMEDEATH = true;
 		}
 		return damage;

@@ -1810,18 +1810,24 @@ Class SWWMUtility
 	}
 
 	// sets all carried ammo back to zero
+	// resets hammerspace capacity
 	static play void ResetAmmo( Actor mo )
 	{
 		PlayerInfo p = mo.player;
 		if ( !p || !p.mo ) return;
 		for ( Inventory i=p.mo.inv; i; i=i.inv )
 		{
-			if ( !(i is 'Ammo') ) continue;
-			i.Amount = 0;
+			if ( i is 'Ammo' )
+			{
+				i.Amount = 0;
+				i.MaxAmount = i.default.MaxAmount;
+			}
+			if ( i is 'HammerspaceEmbiggener' )
+				i.Amount = 0;
 		}
 	}
 
-	// removes all carried items that aren't weapons or ammo
+	// removes all usable items
 	static play void ResetItems( Actor mo )
 	{
 		PlayerInfo p = mo.player;
@@ -1830,7 +1836,7 @@ Class SWWMUtility
 		while ( last.inv )
 		{
 			let inv = last.inv;
-			if ( (inv is 'SWWMCollectible') || (inv is 'Weapon') || (inv is 'Ammo') || (inv is 'SWWMArmor') )
+			if ( !inv.bINVBAR )
 			{
 				last = inv;
 				continue;

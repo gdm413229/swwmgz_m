@@ -1,4 +1,5 @@
 // The Demolitionist
+
 Class Demolitionist : PlayerPawn
 {
 	int last_jump_held, last_boost, last_kick;
@@ -76,6 +77,15 @@ Class Demolitionist : PlayerPawn
 	transient bool bWalking;
 
 	int airscreamtime;
+
+	enum EInvWipe
+	{
+		WIPE_EPISODE = 1,
+		WIPE_CLUSTER = 2,
+		WIPE_MAP = 4
+	}
+
+	int invwipe;	// inventory wipe flags for next level
 
 	Property DashFuel : dashfuel;
 
@@ -2955,8 +2965,56 @@ Class Demolitionist : PlayerPawn
 		// clean up attached actors
 		if ( selflight ) selflight.Destroy();
 		// inventory wipes
-		if ( FindInventory("InventoryWipeToken") && (player.playerstate != PST_DEAD) )
-			SWWMUtility.WipeInventory(self,swwm_resetscore);
+		if ( invwipe && (player.playerstate != PST_DEAD) )
+		{
+			bool wiped = false;
+			bool resetammo = false;
+			bool resetitems = false;
+			bool resethealth = false;
+			if ( invwipe&WIPE_EPISODE )
+			{
+				SWWMUtility.WipeInventory(self,swwm_resetscore);
+				wiped = true;
+			}
+			if ( invwipe&WIPE_CLUSTER )
+			{
+				if ( (swwm_ps_fullreset == 2) && !wiped )
+				{
+					SWWMUtility.WipeInventory(self,swwm_resetscore);
+					wiped = true;
+				}
+				if ( (swwm_ps_resetammo == 2) && !wiped )
+				{
+					SWWMUtility.ResetAmmo(self);
+					resetammo = true;
+				}
+				if ( (swwm_ps_resetitems == 2) && !wiped )
+				{
+					SWWMUtility.ResetItems(self);
+					resetitems = true;
+				}
+				if ( (swwm_ps_resethealth == 2) && !wiped )
+				{
+					SWWMUtility.ResetHealth(self);
+					resethealth = true;
+				}
+			}
+			if ( invwipe&WIPE_MAP )
+			{
+				if ( (swwm_ps_fullreset == 1) && !wiped )
+				{
+					SWWMUtility.WipeInventory(self,swwm_resetscore);
+					wiped = true;
+				}
+				if ( (swwm_ps_resetammo == 1) && !wiped && !resetammo )
+					SWWMUtility.ResetAmmo(self);
+				if ( (swwm_ps_resetitems == 1) && !wiped && !resetitems )
+					SWWMUtility.ResetItems(self);
+				if ( (swwm_ps_resethealth == 1) && !wiped && !resethealth )
+					SWWMUtility.ResetHealth(self);
+			}
+		}
+		invwipe = 0;
 	}
 	override void Travelled()
 	{

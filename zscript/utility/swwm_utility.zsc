@@ -1809,6 +1809,50 @@ Class SWWMUtility
 		p.health = p.mo.Health = p.mo.SpawnHealth();
 	}
 
+	// sets all carried ammo back to zero
+	static play void ResetAmmo( Actor mo )
+	{
+		PlayerInfo p = mo.player;
+		if ( !p || !p.mo ) return;
+		for ( Inventory i=p.mo.inv; i; i=i.inv )
+		{
+			if ( !(i is 'Ammo') ) continue;
+			i.Amount = 0;
+		}
+	}
+
+	// removes all carried items that aren't weapons or ammo
+	static play void ResetItems( Actor mo )
+	{
+		PlayerInfo p = mo.player;
+		if ( !p || !p.mo ) return;
+		Actor last = p.mo;
+		while ( last.inv )
+		{
+			let inv = last.inv;
+			if ( (inv is 'SWWMCollectible') || (inv is 'Weapon') || (inv is 'Ammo') || (inv is 'SWWMArmor') )
+			{
+				last = inv;
+				continue;
+			}
+			inv.Destroy();
+			if ( !inv.bDestroyed ) last = inv;
+		}
+	}
+
+	// resets health and removes worn armor
+	static play void ResetHealth( Actor mo )
+	{
+		PlayerInfo p = mo.player;
+		if ( !p || !p.mo ) return;
+		p.health = p.mo.health = 100;
+		for ( Inventory i=p.mo.inv; i; i=i.inv )
+		{
+			if ( !(i is 'SWWMArmor') ) continue;
+			i.Amount = 0;
+		}
+	}
+
 	// WHACK
 	static play void EndLevelDie( Actor victim )
 	{
@@ -2160,16 +2204,5 @@ Class ShinemapDebugSphere : Actor
 		XZW1 S -1 A_SetRenderStyle(1.,STYLE_Normal);
 		XZW1 T -1 A_SetRenderStyle(1.,STYLE_Normal);
 		Loop;
-	}
-}
-
-// used to indicate that the next level resets inventory
-Class InventoryWipeToken : Inventory
-{
-	default
-	{
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
 	}
 }

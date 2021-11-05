@@ -106,16 +106,15 @@ extend Class SWWMHandler
 		}
 		// end of episode resets and enforced pistol starts
 		LevelInfo nextlv = LevelInfo.FindLevelInfo(e.NextMap);
-		if ( (level.nextsecretmap.Left(6) == "enDSeQ")
-			|| (swwm_pistolstart && nextlv && (level.cluster != nextlv.cluster))
-			|| ((swwm_pistolstart == 1) && !(level.clusterflags&LevelLocals.CLUSTER_HUB)) )
+		for ( int i=0; i<MAXPLAYERS; i++ )
 		{
-			for ( int i=0; i<MAXPLAYERS; i++ )
-			{
-				if ( !playeringame[i] || !players[i].mo || (players[i].playerstate == PST_DEAD) ) continue;
-				players[i].mo.GiveInventory("InventoryWipeToken",1);
-				// the playerpawn will know what to do with this in its PreTravelled()
-			}
+			if ( !playeringame[i] || !players[i].mo || (players[i].playerstate == PST_DEAD) ) continue;
+			let demo = Demolitionist(players[i].mo);
+			if ( !demo ) continue;
+			if ( level.nextsecretmap.Left(6) == "enDSeQ" ) demo.invwipe |= Demolitionist.WIPE_EPISODE;
+			if ( nextlv && (level.cluster!=nextlv.cluster) ) demo.invwipe |= (Demolitionist.WIPE_CLUSTER|Demolitionist.WIPE_MAP);
+			if ( !(level.clusterflags&LevelLocals.CLUSTER_HUB) ) demo.invwipe |= Demolitionist.WIPE_MAP;
+			// the playerpawn will know what to do with this in its PreTravelled()
 		}
 		// did we complete this map without collecting any of its keys? (doesn't work for hubs)
 		if ( (mapkeys.Size() > 0) && !(level.clusterflags&LevelLocals.CLUSTER_HUB) )

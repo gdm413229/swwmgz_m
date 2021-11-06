@@ -2702,6 +2702,9 @@ Class Demolitionist : PlayerPawn
 		if ( IsActorPlayingSound(CHAN_JETPACK,"demolitionist/jet") )
 			A_StartSound("demolitionist/jetstop",CHAN_JETPACK);
 		A_StopSound(CHAN_DEMOVOICE);
+		A_StopSound(CHAN_DEMOVOICEAUX);
+		A_StopSound(CHAN_DEMOVOICEAUX2);
+		A_StopSound(CHAN_DEMOVOICEAUX3);
 		if ( !myvoice ) myvoice = CVar.GetCVar('swwm_voicetype',player);
 		Sound snd = "demolitionist/death";
 		if ( special1 < 10 )

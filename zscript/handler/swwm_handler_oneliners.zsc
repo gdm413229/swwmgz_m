@@ -101,8 +101,11 @@ extend Class SWWMHandler
 		{
 			if ( onelinerlevel > swwm_mutevoice )
 			{
+				int loudlv = swwm_voiceamp;
 				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICE,CHANF_DEFAULT,1.,ATTN_NONE);
-				players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICEAUX,CHANF_DEFAULT,1.,ATTN_NONE);
+				if ( loudlv > 1 ) players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICEAUX,CHANF_DEFAULT,1.,ATTN_NONE);
+				if ( loudlv > 2 ) players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICEAUX2,CHANF_DEFAULT,1.,ATTN_NONE);
+				if ( loudlv > 3 ) players[consoleplayer].mo.A_StartSound(onelinersnd,CHAN_DEMOVOICEAUX3,CHANF_DEFAULT,1.,ATTN_NONE);
 			}
 			SendNetworkEvent("swwmremoteliner."..onelinersnd,consoleplayer,onelinerlevel);
 		}

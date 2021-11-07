@@ -2,8 +2,12 @@
 
 // drop from monsters when using "Demoslayer" fun option
 // heals up to 100 HP when touched
-Class HealthOrb : Actor
+Class SlayerOrb : Actor abstract
 {
+	Class<Actor> tclass;
+
+	Property TrailClass : tclass;
+
 	Default
 	{
 		RenderStyle "Add";
@@ -24,13 +28,16 @@ Class HealthOrb : Actor
 		+CANBOUNCEWATER;
 		+FORCEXYBILLBOARD;
 	}
+	virtual void PickedUp( int np, PlayerPawn mo )
+	{
+	}
 	override void Tick()
 	{
 		Vector3 oldp = pos;
 		Super.Tick();
 		if ( !isFrozen() )
 		{
-			let t = Spawn("HealthOrbTrail",pos);
+			let t = Spawn(tclass,pos);
 			t.scale *= abs(scale.x);
 			t.alpha *= alpha;
 			scale *= .995;
@@ -55,13 +62,7 @@ Class HealthOrb : Actor
 		let mo = players[np].mo;
 		if ( (GetAge() > 5) && SWWMUtility.BoxIntersect(self,mo,pad:8) )
 		{
-			int flg = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
-			if ( mo.CheckLocalView() ) flg |= CHANF_NOPAUSE;
-			mo.A_StartSound("misc/health_pkup",CHAN_ITEM,flg);
-			int hp = int(ceil(abs(scale.x*10)));
-			mo.GiveBody(hp,100);
-			SWWMHandler.HealthFlash(np);
-			SWWMScoreObj.Spawn(hp,mo.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+mo.Height/2),ST_Health);
+			PickedUp(np,mo);
 			Destroy();
 			return;
 		}
@@ -80,14 +81,65 @@ Class HealthOrb : Actor
 		Scale.x *= RandomPick[Junk](-1,-1);
 		Scale.y *= RandomPick[Junk](-1,-1);
 	}
+}
+Class HealthOrb : SlayerOrb
+{
+	Default
+	{
+		SlayerOrb.TrailClass "HealthOrbTrail";
+	}
+	override void PickedUp( int np, PlayerPawn mo )
+	{
+		int flg = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
+		if ( mo.CheckLocalView() ) flg |= CHANF_NOPAUSE;
+		mo.A_StartSound("misc/health_pkup",CHAN_ITEM,flg);
+		int hp = int(ceil(abs(scale.x*10)));
+		mo.GiveBody(hp,100);
+		SWWMHandler.HealthFlash(np);
+		SWWMScoreObj.Spawn(hp,mo.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+mo.Height/2),ST_Health);
+	}
 	States
 	{
 	Spawn:
 		BLPF E -1 Bright;
 		Stop;
+
 	}
 }
-Class HealthOrbTrail : Actor
+Class ArmorOrb : SlayerOrb
+{
+	Default
+	{
+		SlayerOrb.TrailClass "ArmorOrbTrail";
+	}
+	override void PickedUp( int np, PlayerPawn mo )
+	{
+		int flg = CHANF_OVERLAP|CHANF_MAYBE_LOCAL;
+		if ( mo.CheckLocalView() ) flg |= CHANF_NOPAUSE;
+		mo.A_StartSound("misc/armor_pkup",CHAN_ITEM,flg);
+		int hp = int(ceil(abs(scale.x*10)));
+		let n = mo.FindInventory("ArmorNugget");
+		if ( !n )
+		{
+			n = Inventory(Spawn("ArmorNugget"));
+			n.AttachToOwner(mo);
+			SWWMLoreLibrary.Add(mo.player,"Nugget");
+			n.Amount = 0;
+		}
+		if ( n.Amount < 100 ) n.Amount = min(n.Amount+hp,100);
+		SWWMHandler.ArmorFlash(np);
+		SWWMScoreObj.Spawn(hp,mo.Vec3Offset(FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8),FRandom[ScoreBits](-8,8)+mo.Height/2),ST_Armor);
+	}
+	States
+	{
+	Spawn:
+		BLPF D -1 Bright;
+		Stop;
+
+	}
+}
+
+Class SlayerOrbTrail : Actor abstract
 {
 	Default
 	{
@@ -115,10 +167,22 @@ Class HealthOrbTrail : Actor
 		Super.PostBeginPlay();
 		SpriteOffset = (0,-4);
 	}
+}
+Class HealthOrbTrail : SlayerOrbTrail
+{
 	States
 	{
 	Spawn:
 		BLPS E -1 Bright;
+		Stop;
+	}
+}
+Class ArmorOrbTrail : SlayerOrbTrail
+{
+	States
+	{
+	Spawn:
+		BLPS D -1 Bright;
 		Stop;
 	}
 }

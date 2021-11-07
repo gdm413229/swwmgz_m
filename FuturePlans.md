@@ -69,6 +69,8 @@ All the hard stuff *(some of these aren't guaranteed)*.
   - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Mothgirl summon for Lämp easter egg**
   - Layers of White *(Summon the White Lady)*
+  - Fluffy Moth *(Pet the White Lady 10 times)*
+  - Ara Ara *(Have the White Lady kill a total of 100 enemies)*
 * ***(Maybe)* Replace all hitscan with *"light projectiles"***
 * **Additional gestures + gesture menu**
   - Clap
@@ -92,6 +94,21 @@ Things that I'm unsure whether or not they'll be made.
 * ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Customized cluster text stuff if that ever gets scriptified**
 * **Official Sunder support *(when the WAD is complete)***
+* **Additional Achievements?:**
+  - Spicy Tennis *(Parry a thrown Explodium Mag)*
+  - Pachinko Code *(Find the Secret Menu)*
+  - Heavy Duty *(Kill a boss using only the Pusher primary fire)*
+  - Double Succ *(Merge two Ynykron singularities)*
+  - The Ultimate Combo *(Hit a Ynykron singularity with a Ynykron beam)*
+  - Master Sparked *(Kill a boss brain with the Rafan-kos)*
+  - Author Appeal *(Smooch a boss brain)*
+  - Strong Legs *(Survive a 100 meter fall or higher)*
+  - Power of Love *(Recover a total of 100 health by kissing the Kirin Plush)*
+  - Nut *(Get 100% kills in nuts.wad)*
+  - DOUBLE NUT *(Get 100% kills in nuts2.wad)*
+  - T R I P L E   N U T *(Get 100% kills in nuts3.wad)*
+  - Froggy Gang *(Summon the Froggy Chair)*
+  - Ribbit *(Kill 10 enemies with the Froggy Chair)*
 
 ## Other Projects
 

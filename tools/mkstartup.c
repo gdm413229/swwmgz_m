@@ -38,6 +38,8 @@ int main( void )
 	//   STARTUP.data.pal : 16 colors, RGB8 (48 bytes)
 	//   NOTCH.data       : 16x23, I8 (368 bytes)
 	//   NETNOTCH.data    : 4x16, I8 (64 bytes)
+	// the NOTCH and NETNOTCH files are optional and their processing will
+	// be skipped if not found
 	uint8_t pal[48] = {0};
 	uint8_t startup[4][38400] = {{0}};
 	uint8_t notch[184] = {0};
@@ -68,6 +70,7 @@ int main( void )
 	fwrite(&startup,1,153600,fout);
 	fclose(fout);
 	fin = fopen("NOTCH.data","rb");
+	if ( !fin ) goto nnotch;
 	fout = fopen("NOTCH.dat","wb");
 	// compose 4-bit linear notch image
 	for ( int i=0; i<184; i++ )
@@ -79,7 +82,9 @@ int main( void )
 	fclose(fin);
 	fwrite(&notch,1,184,fout);
 	fclose(fout);
+nnotch:
 	fin = fopen("NETNOTCH.data","rb");
+	if ( !fin ) return 0;
 	fout = fopen("NETNOTCH.dat","wb");
 	// compose 4-bit linear netnotch image
 	for ( int i=0; i<32; i++ )

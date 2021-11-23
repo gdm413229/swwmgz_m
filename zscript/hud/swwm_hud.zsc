@@ -2684,7 +2684,7 @@ Class SWWMStatusBar : BaseStatusBar
 			{
 				if ( sv_norespawn ) return (1.-dimalph);
 				alph = clamp((deadtimer-90)/60.,0.,1.);
-				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"),CPlayer.GetUserName());
+				str = String.Format(StringTable.Localize("$SWWM_URDEDMP"));
 				fnt = LangFont(mTewiFont);
 				len = fnt.StringWidth(str);
 				xx = int((ss.x-len)/2.);
@@ -2696,7 +2696,7 @@ Class SWWMStatusBar : BaseStatusBar
 				return (1.-dimalph);
 			}
 			alph = clamp((deadtimer-140)/60.,0.,1.);
-			str = String.Format(StringTable.Localize("$SWWM_URDED2"),CPlayer.GetUserName());
+			str = String.Format(StringTable.Localize("$SWWM_URDED2"));
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
 			xx = int((ss.x-len)/2.);
@@ -2705,7 +2705,7 @@ Class SWWMStatusBar : BaseStatusBar
 			if ( goner || !swwm_revive )
 				return (1.-dimalph);
 			alph = clamp((deadtimer-160)/60.,0.,1.);
-			str = String.Format(StringTable.Localize("$SWWM_URDED3"),CPlayer.GetUserName());
+			str = String.Format(StringTable.Localize("$SWWM_URDED3"));
 			fnt = LangFont(mTewiFont);
 			len = fnt.StringWidth(str);
 			xx = int((ss.x-len)/2.);

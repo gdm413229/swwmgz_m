@@ -898,7 +898,6 @@ Class SWWMUtility
 	// because GetTag() returns the localized string, we need to do things the hard way
 	static play String GetFunTag( Actor a, String defstr = "" )
 	{
-		if ( a is 'SWWMMonster' ) return SWWMMonster(a).GetFunTag(defstr);
 		// look up any fun tag services
 		let si = ServiceIterator.Find("FunTagService");
 		Service sv;
@@ -1229,9 +1228,12 @@ Class SWWMUtility
 			if ( (!(flags&DE_COUNTENEMIES) || hostile) && (!(flags&DE_COUNTSTEALTH) || inactive) ) nhit++;
 			int dmg = int(Damage*damagescale);
 			if ( dmg <= 0 ) continue;	// no harm
+			int oldhp = a.Health;
+			int basehp = a.GetSpawnHealth();
 			int ndmg = a.DamageMobj(Source,Instigator,dmg,(DamageType=='')?Source.DamageType:DamageType,DMG_EXPLOSION,atan2(-dir.y,-dir.x));
 			if ( a && !(flags&DE_NOBLEED) ) a.TraceBleed((ndmg>0)?ndmg:dmg,Source);
 			if ( (flags&DE_HOWL) && a && (a.Health > 0) && a.bISMONSTER && !Random[DoBlast](0,3) ) a.Howl();
+			if ( (flags&DE_COUNTFHKILLS) && (oldhp < basehp) ) continue;	// was not at full health
 			if ( (!a || (a.Health <= 0)) && (!(flags&DE_COUNTENEMIES) || hostile) && (!(flags&DE_COUNTSTEALTH) || inactive) ) nkill++;
 		}
 		// traverse portals (needed since BlockThingsIterator can't properly cross sector portals in both vertical directions)

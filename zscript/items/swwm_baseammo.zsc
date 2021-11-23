@@ -380,6 +380,17 @@ Class MagAmmo : Inventory abstract
 				Inventory last;
 				while ( excess > 0 )
 				{
+					// drop full mag if possible
+					if ( excess >= ClipSize )
+					{
+						double ang = FRandom[Junk](0,360);
+						last = DoDrop(ParentAmmo);
+						last.SetOrigin(item.pos,false);
+						last.vel.xy = (cos(ang),sin(ang))*FRandom[Junk](2,5);
+						excess -= ClipSize;
+						continue;
+					}
+					// drop bullets otherwise
 					for ( int i=0; i<ammotypes.Size(); i++ )
 					{
 						let def = GetDefaultByType(ammotypes[i]);

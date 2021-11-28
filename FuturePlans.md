@@ -60,6 +60,12 @@ A couple extra weapons, not enough for a full batch, but still worthy additions.
 
 All the hard stuff *(some of these aren't guaranteed)*.
 
+* **Font cleanup *(like in the Common Library)***
+  - Remove Japanese fonts, but keep fullwidth alphanumeric support
+  - Replace default fonts rather than have them separate
+    - TewiShadedOutline → BigFont/BigUpper
+    - TewiShaded → SmallFont
+    - MiniwiShaded → SmallFont2
 * **DLC Gameset:**
   - Tetris
   - Pong
@@ -69,7 +75,7 @@ All the hard stuff *(some of these aren't guaranteed)*.
   - **[Hexen]** Demolition Quest *(a JRPG, kinda like early FF / BoF)*
 * **Mothgirl summon for Lämp easter egg**
   - Layers of White *(Summon the White Lady)*
-  - Fluffy Moth *(Pet the White Lady 10 times)*
+  - Fluffy Moth *(Pet the White Lady 50 times)*
   - Ara Ara *(Have the White Lady kill a total of 100 enemies)*
 * ***(Maybe)* Replace all hitscan with *"light projectiles"***
 * **Additional gestures + gesture menu**
@@ -88,27 +94,31 @@ All the hard stuff *(some of these aren't guaranteed)*.
 
 ## Unspecified
 
-Things that I'm unsure whether or not they'll be made.
+Things that I'm unsure when will be added *(or if they can be added)*.
 
-* **Japanese localization???**
-* ***(Maybe)* Fake livestream chat overlay, with dynamic reactions to all sorts of stuff**
 * **Customized cluster text stuff if that ever gets scriptified**
 * **Official Sunder support *(when the WAD is complete)***
 * **Additional Achievements?:**
   - Spicy Tennis *(Parry a thrown Explodium Mag)*
   - Pachinko Code *(Find the Secret Menu)*
-  - Heavy Duty *(Kill a boss using only the Pusher primary fire)*
   - Double Succ *(Merge two Ynykron singularities)*
   - The Ultimate Combo *(Hit a Ynykron singularity with a Ynykron beam)*
   - Master Sparked *(Kill a boss brain with the Rafan-kos)*
   - Author Appeal *(Smooch a boss brain)*
-  - Strong Legs *(Survive a 100 meter fall or higher)*
-  - Power of Love *(Recover a total of 100 health by kissing the Kirin Plush)*
-  - Nut *(Get 100% kills in nuts.wad)*
-  - DOUBLE NUT *(Get 100% kills in nuts2.wad)*
-  - T R I P L E   N U T *(Get 100% kills in nuts3.wad)*
+  - Power of Love *(Recover a total of 500 health by kissing the Kirin Plush)*
   - Froggy Gang *(Summon the Froggy Chair)*
   - Ribbit *(Kill 10 enemies with the Froggy Chair)*
+* **Additional Score Bonuses?:**
+  - Double-Cheeked *(Buttslam kill, 1.5x)*
+  - Mixup *(Different weapon between kills, +200, add +50 with each switch)*
+  - Unseen *(Kill an enemy without a line of sight to yourself, +300)*
+  - Aerial *(Kill an enemy while in mid-air, +500)*
+  - YEET *(Kill a non-flying enemy while it's in the air, AFTER you sent it flying, +1000)*
+  - OVERWRITE *(Telefrag an enemy, overrides OVERKILL bonus, 4x)*
+  - Biteback *(Kill an enemy within 3 seconds of it dealing damage to you, +700)*
+  - Revenge *(Kill the enemy that killed you within 30 seconds of reviving, 3x)*
+  - Longshot *(Kill an enemy from over 2000 map units away, +600, add +100 for each extra 1000 map units)*
+  - Redirect *(Kill an enemy with another enemy's projectile, +900)*
 
 ## Other Projects
 
@@ -120,33 +130,27 @@ Add-ons and other related stuff.
   - Unique bosses
   - Some extra enemy variants
   - Coverage for all supported WADs *(oof)*
-* **[Doom]** **Ibuki side mod *(Red Oni):***
+* **[Doom, Heretic]** **Ibuki side mod *(Red Oni)*:**
   - A more *"mundane"* arsenal
   - Featuring a very big girl with very big... Assets
   - Possibly will have its own DLC Weaponset too
   - Featuring a toggleable companion
   - See, I got tired of playing modded Fallout 4 so...
-* **[Doom]** **Saya side mod *(Red-Eyed Rampage)***
+* **[Doom]** **Saya side mod *(Red-Eyed Rampage)*:**
   - The first mod where you play as a mere squishy person
   - Even more fun weapons, including one made by a god!
   - Spellcards!
   - A more interesting take on *"infinite lives"*
   - Featuring the Pancor Jackhammer *(lol)*
-* **[Hexen]** **Kirin side mod *(Red Star of Innocence)***
+* **[Hexen]** **Kirin side mod *(Red Star of Innocence)*:**
   - Finally, you get to play as the precious femboy emperor
   - Anarukon firearms? Anarukon firearms
   - Designed entirely for Hexen's funky gameplay™
   - Watch as our boy complains about *"puzzles"*
   - Some unique touches to spice things up
   - Basically a lite version of what you could expect in **UNDEATH**
-* ***(Maybe)* Hardcore Mode side mod:**
-  - Featuring Demolitionist on Maidbot frame
-  - More complex game mechanics
-  - Manual Hammerspace management
-  - Manual reloading and weapon maintenance
-  - Alternate mobility options *(no jetpack)*
-  - Non-instant item usage
-* **Official Campaign:**
+* **Official Game *(VOID - The Dark Alliance)*:**
   - Retell the events of UnSX 2 *(but with the Demolitionist's participation)*
   - Basically give SWWM GZ its own IWAD as a standalone game
   - Some new weapons, some renovations
+  - Lots of world exploration, more lore

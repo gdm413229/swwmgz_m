@@ -847,6 +847,41 @@ Class SilverBullet : SWWMWeapon
 		else player.SetPSPrite(PSP_WEAPON,invoker.fcbloaded?invoker.FindState("Ready2"):invoker.FindState("Ready"));
 	}
 
+	action void A_LoadMag()
+	{
+		MagAmmo sb = MagAmmo(FindInventory("SilverBullets"));
+		if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
+			invoker.clipcount = invoker.default.clipcount;
+		else if ( (invoker.Ammo1.Amount <= 0) || (sb.Amount >= sb.ClipSize) )
+		{
+			int takeamt = min(sb.Amount,sb.ClipSize);
+			invoker.clipcount = takeamt;
+			sb.Amount -= takeamt;
+		}
+		else
+		{
+			invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
+			invoker.clipcount = invoker.default.clipcount;
+		}
+	}
+	action void A_LoadMagAlt()
+	{
+		MagAmmo sb = MagAmmo(FindInventory("SilverBullets2"));
+		if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
+			invoker.clipcount = invoker.default.clipcount;
+		else if ( (invoker.Ammo2.Amount <= 0) || (sb.Amount >= sb.ClipSize) )
+		{
+			int takeamt = min(sb.Amount,sb.ClipSize);
+			invoker.clipcount = takeamt;
+			sb.Amount -= takeamt;
+		}
+		else
+		{
+			invoker.Ammo2.Amount = max(0,invoker.Ammo2.Amount-1);
+			invoker.clipcount = invoker.default.clipcount;
+		}
+	}
+
 	override bool PickupForAmmoSWWM( SWWMWeapon ownedWeapon )
 	{
 		bool good = Super.PickupForAmmoSWWM(ownedWeapon);
@@ -1368,20 +1403,7 @@ Class SilverBullet : SWWMWeapon
 		XZW5 D 2
 		{
 			invoker.fcbloaded = false;
-			if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
-				invoker.clipcount = invoker.default.clipcount;
-			else if ( invoker.Ammo1.Amount <= 0 )
-			{
-				MagAmmo sb = MagAmmo(FindInventory("SilverBullets"));
-				int takeamt = min(sb.Amount,sb.ClipSize);
-				invoker.clipcount = takeamt;
-				sb.Amount -= takeamt;
-			}
-			else
-			{
-				invoker.Ammo1.Amount = max(0,invoker.Ammo1.Amount-1);
-				invoker.clipcount = invoker.default.clipcount;
-			}
+			A_LoadMag();
 			A_SwitchAmmoType(true);
 			A_StartSound("silverbullet/magin",CHAN_WEAPON,CHANF_OVERLAP);
 		}
@@ -1394,20 +1416,7 @@ Class SilverBullet : SWWMWeapon
 		XZWB D 2
 		{
 			invoker.fcbloaded = true;
-			if ( sv_infiniteammo || FindInventory('PowerInfiniteAmmo',true) )
-				invoker.clipcount = invoker.default.clipcount;
-			else if ( invoker.Ammo2.Amount <= 0 )
-			{
-				MagAmmo sb = MagAmmo(FindInventory("SilverBullets2"));
-				int takeamt = min(sb.Amount,sb.ClipSize);
-				invoker.clipcount = takeamt;
-				sb.Amount -= takeamt;
-			}
-			else
-			{
-				invoker.Ammo2.Amount = max(0,invoker.Ammo2.Amount-1);
-				invoker.clipcount = invoker.default.clipcount;
-			}
+			A_LoadMagAlt();
 			A_SwitchAmmoType(true);
 			A_StartSound("silverbullet/magin",CHAN_WEAPON,CHANF_OVERLAP);
 		}

@@ -187,6 +187,19 @@ extend Class SWWMHandler
 			Console.Printf("%d suckable actors trimmed.",n);
 			return;
 		}
+		else if ( e.Name ~== "swwmcleareffects" )
+		{
+			if ( multiplayer && (e.player != Net_Arbitrator) )
+			{
+				if ( e.player == consoleplayer )
+					Console.Printf("Only the net arbitrator can call this event.");
+				return;
+			}
+			int n = casings_cnt+chips_cnt+blods_cnt+meats_cnt;
+			CleanQueues();
+			Console.Printf("%d effects cleared.",n);
+			return;
+		}
 		else if ( e.Name ~== "swwmdebugdumprng" )
 		{
 			if ( multiplayer && (e.player != Net_Arbitrator) )

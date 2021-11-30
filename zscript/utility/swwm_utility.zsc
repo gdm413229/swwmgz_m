@@ -1819,13 +1819,22 @@ Class SWWMUtility
 		if ( !p || !p.mo ) return;
 		for ( Inventory i=p.mo.inv; i; i=i.inv )
 		{
-			if ( i is 'Ammo' )
+			if ( (i is 'Ammo') || (i is 'MagAmmo') )
 			{
 				i.Amount = 0;
 				i.MaxAmount = i.default.MaxAmount;
 			}
 			if ( i is 'HammerspaceEmbiggener' )
 				i.Amount = 0;
+		}
+		// also gives back any ammo from carried weapons (provided they don't have NOFIRSTGIVE)
+		for ( Inventory i=p.mo.inv; i; i=i.inv )
+		{
+			if ( !(i is 'Weapon') ) continue;
+			let w = Weapon(i);
+			if ( (w is 'SWWMWeapon') && SWWMWeapon(w).bNOFIRSTGIVE ) continue;
+			if ( w.Ammo1 ) w.Ammo1.Amount = min(w.Ammo1.MaxAmount,w.Ammo1.Amount+w.AmmoGive1);
+			if ( w.Ammo2 && (w.Ammo2 != w.Ammo1) ) w.Ammo2.Amount = min(w.Ammo2.MaxAmount,w.Ammo2.Amount+w.AmmoGive2);
 		}
 	}
 

@@ -334,7 +334,7 @@ Class HellblazerMissile : Actor
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(4.5);
-		SWWMUtility.DoExplosion(self,200,320000,200,90);
+		SWWMUtility.DoExplosion(self,250,320000,200,90);
 		A_NoGravity();
 		A_QuakeEx(5,5,5,15,0,1500,"",QF_RELATIVE|QF_SCALEDOWN,falloff:500,rollIntensity:.8);
 		A_StopSound(CHAN_BODY);
@@ -431,7 +431,7 @@ Class HellblazerCrackshot : HellblazerMissile
 		A_SetRenderStyle(1.0,STYLE_Add);
 		A_SprayDecal("BigRocketBlast",50);
 		A_SetScale(3.);
-		SWWMUtility.DoExplosion(self,160,320000,160,60);
+		SWWMUtility.DoExplosion(self,200,320000,160,60);
 		A_NoGravity();
 		A_QuakeEx(4,4,4,12,0,1200,"",QF_RELATIVE|QF_SCALEDOWN,falloff:400,rollIntensity:.6);
 		A_StopSound(CHAN_BODY);

@@ -229,6 +229,9 @@ extend Class SWWMHandler
 	override void WorldThingDestroyed( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
+		// for gibber throttling
+		if ( e.Thing is 'mkBloodDrop' ) blods_realcnt--;
+		else if ( e.Thing is 'mkFlyingGib' ) meats_realcnt--;
 		if ( !e.Thing.default.bSHOOTABLE && !e.Thing.default.bMISSILE && !(e.Thing is 'Inventory') && !SWWMUtility.IsBeamProj(e.Thing) )
 		{
 			if ( profiling ) worldthingdestroyed_ms += MSTime()-curms;
@@ -248,6 +251,9 @@ extend Class SWWMHandler
 	override void WorldThingSpawned( WorldEvent e )
 	{
 		if ( profiling ) curms = MSTime();
+		// for gibber throttling
+		if ( e.Thing is 'mkBloodDrop' ) blods_realcnt++;
+		else if ( e.Thing is 'mkFlyingGib' ) meats_realcnt++;
 		if ( !e.Thing || SuppressMultiItem(e) )
 		{
 			if ( profiling ) worldthingspawned_ms += MSTime()-curms;

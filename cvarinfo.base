@@ -51,10 +51,10 @@ nosave int swwm_numscale = 3;			// damnum scaling (0 = use GZDoom scaling)
 nosave int swwm_poiscale = 1;			// point of interest scaling (0 = use GZDoom scaling)
 nosave int swwm_detscale = 2;			// item sense scaling (0 = use GZDoom scaling)
 server bool swwm_blood = true;			// custom blood/gibbing
-server int swwm_maxblood = 400;			// max blood effects at any time
+server int swwm_maxblood = 200;			// max blood effects at any time
 server int swwm_maxgibs = 100;			// max gibs at any time
-server int swwm_maxcasings = 200;		// max casings and spent mags at any time
-server int swwm_maxdebris = 500;		// max chunks of debris at any time
+server int swwm_maxcasings = 100;		// max casings and spent mags at any time
+server int swwm_maxdebris = 200;		// max chunks of debris at any time
 nosave bool swwm_fuzz = true;			// allows toggling the fuzz shader on the demolitionist menus, useful if you're streaming/recording since it destroys the encoding quality
 nosave bool swwm_cbtpause = true;		// wallbuster menu pauses the game
 nosave noarchive int swwm_cbtlast = 0;		// last selected ammo for the wallbuster
@@ -105,7 +105,7 @@ server bool swwm_singlefirst = false;		// single weapons are selected before dua
 nosave bool swwm_uniqstats = false;		// only list stats from the same map once, rather than for each single visit
 nosave int swwm_filterachievements = 1;		// filter for achievements at 0%: 0 - no filter, 1 - obscure text, 2 - don't show
 nosave noarchive bool swwm_debugview = false;	// debug visual aid for various things, such as actor collision, trajectories, relationships, etc.
-nosave noarchive bool swwm_oldcheat = false;	// set to true if you used a SWWM Platinum cheat, so the easter egg only appears once per session
+nosave bool swwm_oldcheat = false;		// set to true if you used a SWWM Platinum cheat, so the easter egg only appears once per iwad
 server bool swwm_selflight = true;		// player emits light
 server bool swwm_usetopickup = false;		// allow item pickup only by pressing use
 server bool swwm_meleepickup = true;		// allow picking up items through melee

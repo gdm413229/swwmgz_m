@@ -145,6 +145,8 @@ Class SWWMDamageAccumulator : Thinker
 		while ( a = SWWMDamageAccumulator(ti.Next()) )
 		{
 			if ( a.victim != victim ) continue;
+			if ( a.source && a.source.FindInventory("AngeryPower") )
+				return (a.total>85899345)?int.max:(a.total*25);
 			return a.total;
 		}
 		return 0;

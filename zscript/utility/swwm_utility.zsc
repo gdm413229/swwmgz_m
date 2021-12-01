@@ -1995,138 +1995,196 @@ Class SWWMUtility
 	}
 
 	// multi-weapon spawn stuff
-	static private Class<Inventory> PickPair( Class<Inventory> a, Class<Inventory> b, int weight = 1 )
+
+	static private Class<Weapon> PickPair( Class<Weapon> a, Class<Weapon> b )
 	{
-		if ( CheckNeedsItem(a) ) return a;
-		if ( CheckNeedsItem(b) ) return b;
-		return Random[Replacements](weight,0)?a:b;
+		if ( ItemExists(a,mapstart:true) ) return b;
+		return Random[Replacements](0,1)?a:b;
 	}
-	static private Class<Inventory> PickTrio( Class<Inventory> a, Class<Inventory> b, Class<Inventory> c, int weight1 = 1, int weight2 = 1 )
+	static private Class<Weapon> PickTrio( Class<Weapon> a, Class<Weapon> b, Class<Weapon> c )
 	{
-		if ( CheckNeedsItem(a) ) return a;
-		if ( CheckNeedsItem(b) ) return b;
-		if ( CheckNeedsItem(c) ) return c;
-		return Random[Replacements](weight1,0)?a:Random[Replacements](weight2,0)?b:c;
+		if ( ItemExists(a,mapstart:true) )
+		{
+			if ( ItemExists(b,mapstart:true) )
+				return c;
+			return Random[Replacements](0,1)?b:c;
+		}
+		if ( ItemExists(b,mapstart:true) )
+		{
+			if ( ItemExists(c,mapstart:true) )
+				return a;
+			return Random[Replacements](0,1)?a:c;
+		}
+		if ( ItemExists(c,mapstart:true) )
+			Random[Replacements](0,1)?a:b;
+		switch ( Random[Replacements](0,2) )
+		{
+		case 0:
+			return a;
+		case 1:
+			return b;
+		}
+		return c;
 	}
 
-	// boy, this one got complicated fast
-	static Class<Inventory> PickSWWMSlot1()
+	// melee weapons + extra slot 2 guns (50% chance)
+	static Class<Weapon> PickSWWMSlot1()
 	{
 		// so the player can recover it if they decided to drop it in a previous map, or they didn't start with it
 		if ( CheckNeedsItem('DeepImpact') ) return 'DeepImpact';
-		bool needsmelee = CheckNeedsItem('PusherWeapon')/*|CheckNeedsItem('ItamexHammer')|CheckNeedsItem('FistGun')*/;
-		bool needsgun = CheckNeedsItem('ExplodiumGun',true)/*|CheckNeedsItem('PlasmaBlast',true)*/;
-		if ( !needsmelee && !needsgun )
-		{
-			static const Class<Weapon> wpns[] =
-			{
-				'ExplodiumGun', 'PusherWeapon',
-				'PlasmaBlast', 'ItamexHammer',
-				'FistGun'
-			};
-			//return wpns[Random[Replacements](0,4)];
-			//return wpns[Random[Replacements](0,3)];
-			return wpns[Random[Replacements](0,1)];
-		}
-		if ( !needsmelee && needsgun )
-		{
-			//bool needsexplo = CheckNeedsItem('ExplodiumGun',true);
-			//bool needsblast = CheckNeedsItem('PlasmaBlast',true);
-			//if ( needsexplo && !needsblast ) return 'ExplodiumGun';
-			//if ( !needsexplo && needsblast ) return 'PlasmaBlast';
-			//return Random[Replacements](0,1)?'ExplodiumGun':'PlasmaBlast';
-			return 'ExplodiumGun';
-		}
-		if ( needsmelee && !needsgun )
-		{
-			//return PickTrio('PusherWeapon','ItamexHammer','FistGun');
-			//return PickPair('PusherWeapon','ItamexHammer');
-			return 'PusherWeapon';
-		}
-		if ( CheckNeedsItem('ExplodiumGun',true) && Random[Replacements](0,1) ) return 'ExplodiumGun';
-		//if ( CheckNeedsItem('PlasmaBlast',true) && Random[Replacements](0,1) ) return 'PlasmaBlast';
+		bool hasmelee = (!CheckNeedsItem('PusherWeapon')/*||!CheckNeedsItem('ItamexHammer')||!CheckNeedsItem('FistGun')*/);
+		bool gunexists = ItemExists('ExplodiumGun',worldonly:true)/*||ItemExists('PlasmaBlast',worldonly:true)*/;
+		// if the player already has a melee weapon, 50% chance to spawn either slot 2 weapon as long as one doesn't exist in the map already
+		if ( hasmelee && !gunexists && Random[Replacements](0,1) )
+			return PickSWWMSlot2();
 		//return PickTrio('PusherWeapon','ItamexHammer','FistGun');
 		//return PickPair('PusherWeapon','ItamexHammer');
 		return 'PusherWeapon';
 	}
-	static Class<Inventory> PickSWWMSlot2()
+	// pistol spawn, pretty simple
+	static Class<Weapon> PickSWWMSlot2()
 	{
 		//return PickPair('ExplodiumGun','PlasmaBlast');
 		return 'ExplodiumGun';
 	}
-	static Class<Inventory> PickSWWMSlot3()
+	// shotgun spawn
+	static Class<Weapon> PickSWWMSlot3()
 	{
 		//return PickPair('Spreadgun','PuntzerBeta');
 		return 'Spreadgun';
 	}
-	static Class<Inventory> PickSWWMSlot4()
+	// super shotgun spawn
+	static Class<Weapon> PickSWWMSlot4()
 	{
 		//return PickPair('Wallbuster','PuntzerGamma');
 		return 'Wallbuster';
 	}
-	static Class<Inventory> PickSWWMSlot5()
+	// chaingun spawn
+	static Class<Weapon> PickSWWMSlot5()
 	{
 		//return PickPair('Eviscerator','HeavyMahSheenGun');
 		return 'Eviscerator';
 	}
-	static Class<Inventory> PickSWWMSlot6()
+	// rocket launcher spawn
+	static Class<Weapon> PickSWWMSlot6()
 	{
-		//return PickTrip('Hellblazer','Quadravol','ModernSparkster');
+		//return PickTrio('Hellblazer','Quadravol','ModernSparkster');
 		//return PickPair('Hellblazer','Quadravol');
 		return 'Hellblazer';
 	}
-	static Class<Inventory> PickSWWMSlot7()
+	// first plasma rifle spawn
+	static Class<Weapon> PickSWWMSlot7()
 	{
 		//return PickPair('Sparkster','BlackfireIgniter');
 		return 'Sparkster';
 	}
-	static Class<Inventory> PickSWWMSlot8()
+	// second plasma rifle spawn
+	static Class<Weapon> PickSWWMSlot8()
 	{
 		//return PickPair('SilverBullet','EMPCarbine');
 		return 'SilverBullet';
 	}
-	static Class<Inventory> PickSWWMSlot9()
+	// first bfg spawn
+	static Class<Weapon> PickSWWMSlot9()
 	{
 		//return PickTrio('CandyGun','RayKhom','MisterRifle');
 		//return PickPair('CandyGun','RayKhom');
 		return 'CandyGun';
 	}
-	static Class<Inventory> PickSWWMSlot0()
+	// second bfg spawn (each weapon can only exist once)
+	static Class<Weapon> PickSWWMSlot0( bool fallback = true )
 	{
-		/*if ( !CheckNeedsItem('Ynykron') )
+		/*if ( ItemExists('Ynykron',mapstart:true) )
 		{
-			if ( !CheckNeedsItem('GrandLance') )
+			if ( ItemExists('GrandLance',mapstart:true) )
 			{
-				if ( !CheckNeedsItem('RafanKos') )
-					return PickSWWMSlot9();
+				if ( ItemExists('RafanKos',null,true) )
+					return fallback?PickSWWMSlot9():null;
 				return 'RafanKos';
 			}
-			if ( !CheckNeedsItem('RafanKos') )
+			if ( ItemExists('RafanKos',mapstart:true) )
 				return 'GrandLance';
-			return PickPair('GrandLance','RafanKos');
+			return Random[Replacements](0,1)?'GrandLance':'RafanKos';
 		}
-		return PickTrio('Ynykron','GrandLance','RafanKos');*/
-		/*if ( !CheckNeedsItem('Ynykron') )
+		if ( ItemExists('GrandLance',mapstart:true) )
 		{
-			if ( !CheckNeedsItem('GrandLance') )
-				return PickSWWMSlot9();
+			if ( ItemExists('RafanKos',mapstart:true) )
+				return 'Ynykron';
+			return Random[Replacements](0,1)?'Ynykron':'RafanKos';
+		}
+		if ( ItemExists('RafanKos',mapstart:truee) )
+			return Random[Replacements](0,1)?'Ynykron':'GrandLance';
+		switch ( Random[Replacements](0,2) )
+		{
+		case 0:
+			return 'Ynykron';
+		case 1:
 			return 'GrandLance';
 		}
-		return PickPair('Ynykron','GrandLance');*/
-		return !CheckNeedsItem('Ynykron')?'CandyGun':'Ynykron';
+		return 'RafanKos';*/
+		/*if ( ItemExists('Ynykron',mapstart:true) )
+		{
+			if ( ItemExists('GrandLance',mapstart:true) )
+				return fallback?PickSWWMSlot9():null;
+			return 'GrandLance';
+		}
+		if ( ItemExists('GrandLance',mapstart:true) )
+			return 'Ynykron';
+		return Random[Replacements](0,1)?'Ynykron':'GrandLance';*/
+		if ( ItemExists('Ynykron',mapstart:true) ) return fallback?PickSWWMSlot9():null;
+		return 'Ynykron';
 	}
-	static Class<Inventory> PickDoomSlot6()
+	// either plasma rifle spawn
+	static Class<Weapon> PickDoomSlot6()
 	{
-		return PickPair(PickSWWMSlot7(),PickSWWMSlot8(),2);
+		bool hasslot7 = (!CheckNeedsItem('Sparkster')/*||!CheckNeedsItem('BlackfireIgniter')*/);
+		bool hasslot8 = (!CheckNeedsItem('SilverBullet')/*||!CheckNeedsItem('EMPCarbine')*/);
+		// if the player already has a slot 7 weapon...
+		if ( hasslot7 )
+		{
+			// ... and also has a slot 8 weapon, 33% chance of a slot 8 spawn
+			// otherwise, guaranteed slot 8 spawn
+			if ( hasslot8 && Random[Replacements](0,2) ) return PickSWWMSlot7();
+			else return PickSWWMSlot8();
+		}
+		// otherwise, always spawn a slot 7 weapon first
+		return PickSWWMSlot7();
+
 	}
-	static Class<Inventory> PickDoomSlot7()
+	// either bfg spawn
+	static Class<Weapon> PickDoomSlot7()
 	{
-		return PickPair(PickSWWMSlot9(),PickSWWMSlot0(),2);
+		bool hasslot9 = (!CheckNeedsItem('CandyGun')/*||!CheckNeedsItem('RayKhom')||!CheckNeedsItem('MortalRifle')*/);
+		bool hasslot0 = (!CheckNeedsItem('Ynykron')/*||!CheckNeedsItem('GrandLance')||!CheckNeedsItem('RafanKos')*/);
+		let rep = PickSWWMSlot0(false);
+		// if the player already has a slot 9 weapon (and a slot 0 weapon can still spawn)...
+		if ( hasslot9 && rep )
+		{
+			// ... and also has a slot 0 weapon already, 33% chance of a slot 0 spawn
+			// otherwise, guaranteed slot 0 spawn
+			if ( hasslot0 && Random[Replacements](0,2) ) return PickSWWMSlot9();
+			else return rep;
+		}
+		// otherwise, always spawn a slot 9 weapon first
+		return PickSWWMSlot9();
 	}
-	static Class<Inventory> PickHereticSlot3()	// also used for Doom 1
+	// either shotgun spawn (also used for Heretic)
+	static Class<Weapon> PickDoomSlot3()
 	{
-		if ( level.maptime ) return PickSWWMSlot3();	// always slot 3 after map start, prevents shotgun guys from dropping wallbusters
-		return PickPair(PickSWWMSlot3(),PickSWWMSlot4(),2);
+		// always slot 3 after map start, prevents shotgun guys from dropping wallbusters, which is weird af
+		if ( level.maptime ) return PickSWWMSlot3();
+		bool hasslot3 = (!CheckNeedsItem('Spreadgun')/*||!CheckNeedsItem('PuntzerBeta')*/);
+		bool hasslot4 = (!CheckNeedsItem('Wallbuster')/*||!CheckNeedsItem('PuntzerGamma')*/);
+		// if the player already has a slot 3 weapon...
+		if ( hasslot3 )
+		{
+			// ... and also has a slot 4 weapon, 33% chance of a slot 4 spawn
+			// otherwise, guaranteed slot 4 spawn
+			if ( hasslot4 && Random[Replacements](0,2) ) return PickSWWMSlot3();
+			return PickSWWMSlot4();
+		}
+		// otherwise, always spawn a slot 3 weapon first
+		return PickSWWMSlot3();
 	}
 	// what RandomSpawner does, basically (simplified for items)
 	static play void TransferItemProp( Actor a, Actor b, bool bundlehack = false )

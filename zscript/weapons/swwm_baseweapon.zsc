@@ -389,10 +389,6 @@ Class SWWMWeapon : Weapon abstract
 		if ( swwm_enemydrops > 0 ) return false;
 		else if ( swwm_enemydrops == 0 )
 		{
-			// first, check if no others exist in the map, just in
-			// case this weapon drop MAY be needed
-			if ( !SWWMUtility.ItemExists(GetClass(),self) )
-				return false;	// drop us
 			// drop our corresponding ammo
 			if ( !DropAmmoType ) return true;
 			let a = Spawn(DropAmmoType,pos,ALLOW_REPLACE);

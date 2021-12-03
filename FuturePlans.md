@@ -49,7 +49,7 @@ A couple extra weapons, not enough for a full batch, but still worthy additions.
 * **DLC Weaponset 2:**
   - [1] Hand of Divine *(Total Madness)*
     - Facepunching Extraordinaire *(Kill 300 enemies with the Hand of Divine)*
-  - [6] Sparkster x3 *(UnSX 2)*
+  - [7] Sparkster x3 *(UnSX 2)*
     - A Fine Sparking *(Kill 30 enemies at once with a Sparkster Rifle combo shot)*
   - [9] Mortal Rifle *(UnSX 2)*
     - Railed Hard *(Shoot through 16 enemies with a single Mortal Rifle overpressure shot)*

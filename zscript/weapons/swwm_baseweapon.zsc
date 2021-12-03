@@ -42,7 +42,7 @@ Class SWWMWeapon : Weapon abstract
 
 	override void Touch( Actor toucher )
 	{
-		// cannot pick up swapweapon unless explicitly pressing use
+		// show prompt to swap weapon, and prevent normal pickup
 		SWWMWeapon sw;
 		if ( bSPECIAL && swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
 		{
@@ -55,6 +55,7 @@ Class SWWMWeapon : Weapon abstract
 			}
 			return;
 		}
+		// explicit use-to pickup, function must be called from Used() virtual
 		if ( toucher.player && swwm_usetopickup && !bUsePickup )
 			return;
 		Super.Touch(toucher);

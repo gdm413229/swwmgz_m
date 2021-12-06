@@ -40,14 +40,25 @@ HardwareShader Texture "graphics/tempbg.png"
 HardwareShader Texture "graphics/SWWMGZLogo.png"
 {
 	Shader "shaders/glsl/LogoAnimated.fp"
-	Define "TEX_SZ" = "vec2(2048.,1024.)"
-	Texture "LogoTex" "graphics/SWWMGZLogo_Layers.png"
+	// what no 2d arrays does to a mf
+	Texture "Layer1" "graphics/SWWMGZLogo_Layer1.png"
+	Texture "Layer2" "graphics/SWWMGZLogo_Layer2.png"
+	Texture "Layer3" "graphics/SWWMGZLogo_Layer3.png"
+	Texture "Layer4" "graphics/SWWMGZLogo_Layer4.png"
+	Texture "Layer5" "graphics/SWWMGZLogo_Layer5.png"
+	Texture "Layer6" "graphics/SWWMGZLogo_Layer6.png"
 }
 HardwareShader Texture "graphics/M_SWWM.png"
 {
 	Shader "shaders/glsl/LogoAnimated.fp"
-	Define "TEX_SZ" = "vec2(256.,128.)"
-	Texture "LogoTex" "graphics/M_SWWM_Layers.png"
+	// what no 2d arrays does to a mf
+	Texture "Layer1" "graphics/M_SWWM_Layer1.png"
+	Texture "Layer2" "graphics/M_SWWM_Layer2.png"
+	Texture "Layer3" "graphics/M_SWWM_Layer3.png"
+	Texture "Layer4" "graphics/M_SWWM_Layer4.png"
+	Texture "Layer5" "graphics/M_SWWM_Layer5.png"
+	Texture "Layer6" "graphics/M_SWWM_Layer6.png"
+	Define "NO_BILINEAR"
 }
 HardwareShader Sprite "MBRNB0"
 {

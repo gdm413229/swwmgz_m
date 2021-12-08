@@ -207,17 +207,6 @@ Class SWWMAmmo : Ammo
 		return Super.HandlePickup(item);
 	}
 
-	override void DoEffect()
-	{
-		Super.DoEffect();
-		// drop excess ammo
-		if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo') )
-		{
-			int excess = Amount-MaxAmount;
-			if ( excess > 0 ) CreateTossable(excess);
-		}
-	}
-
 	override bool CanPickup( Actor toucher )
 	{
 		// don't allow picking up ammo for weapons we can't pick up
@@ -486,12 +475,6 @@ Class MagAmmo : Inventory abstract
 	override void DoEffect()
 	{
 		Super.DoEffect();
-		// drop excess ammo
-		if ( !sv_infiniteammo && !Owner.FindInventory('PowerInfiniteAmmo') )
-		{
-			int excess = Amount-MaxAmount;
-			if ( excess > 0 ) CreateTossable(excess);
-		}
 		if ( !pamo )
 		{
 			pamo = Ammo(Owner.FindInventory(ParentAmmo));

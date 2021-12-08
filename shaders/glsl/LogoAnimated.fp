@@ -5,36 +5,24 @@ const float pi = 3.14159265358979323846;
 
 vec2 warpcoord( in vec2 uv )
 {
-	vec2 offset = vec2(0,0);
+	vec2 offset;
 	offset.y = sin(pi*2.*(uv.x*8.+timer*.25))*.005;
 	offset.x = cos(pi*2.*(uv.y*4.+timer*.25))*.005;
-	return fract(uv+offset);
+	return uv+offset;
 }
 
 // based on gimp color to alpha, but simplified
 vec4 blacktoalpha( in vec4 src )
 {
 	vec4 dst = src;
-	float dist = 0., alpha = 0.;
-	float d, a;
+	float alpha = 0.;
+	float a;
 	a = clamp(dst.r,0.,1.);
-	if ( a > alpha )
-	{
-		alpha = a;
-		dist = d;
-	}
+	if ( a > alpha ) alpha = a;
 	a = clamp(dst.g,0.,1.);
-	if ( a > alpha )
-	{
-		alpha = a;
-		dist = d;
-	}
+	if ( a > alpha ) alpha = a;
 	a = clamp(dst.b,0.,1.);
-	if ( a > alpha )
-	{
-		alpha = a;
-		dist = d;
-	}
+	if ( a > alpha ) alpha = a;
 	if ( alpha > 0. )
 	{
 		float ainv = 1./alpha;
@@ -43,30 +31,49 @@ vec4 blacktoalpha( in vec4 src )
 	dst.a *= alpha;
 	return dst;
 }
+#ifdef NO_BILINEAR
+#define BilinearSample(x,y,z,w) texture(x,y)
+#else
+vec4 BilinearSample( in sampler2D tex, in vec2 pos, in vec2 size, in vec2 pxsize )
+{
+	vec2 f = fract(pos*size);
+	pos += (.5-f)*pxsize;
+	vec4 p0q0 = texture(tex,pos);
+	vec4 p1q0 = texture(tex,pos+vec2(pxsize.x,0));
+	vec4 p0q1 = texture(tex,pos+vec2(0,pxsize.y));
+	vec4 p1q1 = texture(tex,pos+vec2(pxsize.x,pxsize.y));
+	vec4 pInterp_q0 = mix(p0q0,p1q0,f.x);
+	vec4 pInterp_q1 = mix(p0q1,p1q1,f.x);
+	return mix(pInterp_q0,pInterp_q1,f.y);
+}
+#endif
 
 void SetupMaterial( inout Material mat )
 {
+	// store these to save some time
+	vec2 size = vec2(textureSize(Layer1,0));
+	vec2 pxsize = 1./size;
 	// y'all ready for this multilayered madness?
 	vec2 uv = vTexCoord.st;
-	// base blank layer, copy
-	vec4 base = texture(LogoTex,uv*vec2(.5,.25));
+	// base blank layer
+	vec4 base = vec4(0.,0.,0.,1.);
 	// first layer, blend
-	vec4 tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(0.,.25));
+	vec4 tmp = BilinearSample(Layer1,uv,size,pxsize);
 	base.rgb = mix(base.rgb,tmp.rgb,tmp.a);
 	// second layer, warp then add
-	tmp = texture(LogoTex,warpcoord(uv)*vec2(.5,.25)+vec2(0.,.5));
+	tmp = BilinearSample(Layer2,warpcoord(uv),size,pxsize);
 	base.rgb += tmp.rgb;
 	// third layer, multiply
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(0.,.75));
+	tmp = BilinearSample(Layer3,uv,size,pxsize);
 	base.rgb *= tmp.rgb;
 	// fourth layer, add
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(.5,0.));
+	tmp = BilinearSample(Layer4,uv,size,pxsize);
 	base.rgb += tmp.rgb;
 	// fifth layer, add
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(.5,.25));
+	tmp = BilinearSample(Layer5,uv,size,pxsize);
 	base.rgb += tmp.rgb;
-	// sixth layer, overlay (w/ alpha blend)
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(.5,.5));
+	// first layer again, overlay (w/ alpha blend)
+	tmp = BilinearSample(Layer1,uv,size,pxsize);
 	vec4 tmp2;
 	tmp2.r = overlay(base.r,tmp.r);
 	tmp2.g = overlay(base.g,tmp.g);
@@ -75,22 +82,13 @@ void SetupMaterial( inout Material mat )
 	// black to alpha
 	base = blacktoalpha(base);
 	// add alpha of first layer
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(0.,.25));
-	base.a += tmp.a;
+	base.a += BilinearSample(Layer1,uv,size,pxsize).a;
 	// clamp
-	base = clamp(base,0.,1.);
-	// seventh layer, alpha blend
-	tmp = texture(LogoTex,uv*vec2(.5,.25)+vec2(.5,.75));
+	base = clamp(base,vec4(0.),vec4(1.));
+	// sixth layer, alpha blend
+	tmp = BilinearSample(Layer6,uv,size,pxsize);
 	tmp2.a = tmp.a+base.a*(1-tmp.a);
 	tmp2.rgb = (tmp.rgb*tmp.a+base.rgb*base.a*(1-tmp.a))/tmp2.a;
-	if ( tmp2.a == 0. ) tmp2.rgb = vec3(0.);
-	// clamp borders
-	vec2 sz = TEX_SZ;
-	vec2 px = uv*sz;
-	if ( (px.x <= 1) || (px.x >= (sz.x-1)) || (px.y <= 1) || (px.y >= (sz.y-1)) )
-		tmp2 = vec4(0.);
 	// ding, logo's done
 	mat.Base = tmp2;
-	mat.Normal = ApplyNormalMap(vTexCoord.st);
 }
-

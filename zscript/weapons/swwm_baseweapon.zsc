@@ -41,7 +41,7 @@ Class SWWMWeapon : Weapon abstract
 
 	override void Touch( Actor toucher )
 	{
-		// cannot pick up swapweapon unless explicitly pressing use
+		// show prompt to swap weapon, and prevent normal pickup
 		SWWMWeapon sw;
 		if ( bSPECIAL && swwm_swapweapons && (sw = HasSwapWeapon(toucher)) )
 		{
@@ -54,6 +54,7 @@ Class SWWMWeapon : Weapon abstract
 			}
 			return;
 		}
+		// explicit use-to pickup, function must be called from Used() virtual
 		if ( toucher.player && swwm_usetopickup && !bUsePickup )
 			return;
 		Super.Touch(toucher);
@@ -388,10 +389,6 @@ Class SWWMWeapon : Weapon abstract
 		if ( swwm_enemydrops > 0 ) return false;
 		else if ( swwm_enemydrops == 0 )
 		{
-			// first, check if no others exist in the map, just in
-			// case this weapon drop MAY be needed
-			if ( !SWWMUtility.ItemExists(GetClass(),self) )
-				return false;	// drop us
 			// drop our corresponding ammo
 			if ( !DropAmmoType ) return true;
 			let a = Spawn(DropAmmoType,pos,ALLOW_REPLACE);

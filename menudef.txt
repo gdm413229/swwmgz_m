@@ -210,7 +210,10 @@ OptionMenu "SWWMOptionMenu"
 	StaticText " "
 	StaticText "$SWWM_MCTITLE", "Blue"
 	Option "$SWWM_LDSPOIL", "swwm_ldspoil", "YesNo"
-	Option "$SWWM_DRLASKILL", "swwm_drlaskill", "SWWMDRLASkill"
+	IfGame(Doom)
+	{
+		Option "$SWWM_DRLASKILL", "swwm_drlaskill", "SWWMDRLASkill"
+	}
 	StaticText " "
 	StaticText " "
 
